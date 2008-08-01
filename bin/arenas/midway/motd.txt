@@ -1,0 +1,27 @@
+Welcome to Tabahost MIDWAY Scenario
+
+Arena will be closed at 16GMT and opened at 17:30GMT
+
+This server is running at Europe
+
+BROADCAST CHANNEL (100) WILL BE DISABLED IN SCENARIO
+KILL MESSAGENS WON'T BE PRINTED, BUT LOGGED
+
+SCENARIO TOTAL TIME: 1h30'
+
+RED FULL VICTORY: BOTH FIELDS OPEN
+GOLD FULL VICTORY: BOTH FIELDS CLOSED
+
+PARTIAL VICTORY: POINT TABLE
+
+  - CLOSE ONE FIELD 75 pts;
+  - CLOSE BOTH 150 pts;
+  - CV SUNK 150 pts;
+  - PLANE DOWN 1 pt;
+
+Scorepages at www.tabajarahost.com after scenario
+
+type .help and .show to get info about arena.
+
+                -=Ø=-
+                                                franz-

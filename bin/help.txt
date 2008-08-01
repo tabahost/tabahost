@@ -1,0 +1,77 @@
+*********************************************************
+*************** HELP FILE FOR TH WARBIRDS ***************
+*********************************************************
+
+# = Commands not implemented yet
+
+.mov [f1..f21]         move to field fNN
+.plane [1..57]         set plane
+.fuel [30..100]        set fuel %
+.ord [1..6]            set ordinacy
+.conv [150...500]      set convergence
+.country [1..4]        change country
+.fly                   start flight
+.field [f1..f21]       get filed status
+.help                  get this help
+.ros                   roster - who is online
+.room                  show who are in your tower
+.show                  show arena setting
+.score                 get flight score
+.clear                 clear all statistic
+.invite [player]       invite player to join to squad
+.jsquad                join to the squad
+.name [squad_name]     assign name to the squad
+.slogan [squad_slogan] assign motto to the squad
+.remove [player]       remove player from the squad
+.withdraw              exit from squad
+.psq                   (sq leader) change membs permission
+.hls                   on|off hls mode
+
+*********************************************************
+********************* NEW FEATURES **********************
+*********************************************************
+
+.whoare [1..99]        who is in this channel
+.listavail [f1..f21]   list available planes
+.wings [0..4]          enable wings mode
+.pos                   send your position to country
+.time                  get current arena time
+.motd                  show Message Of The Day
+.nextarena             show next arena and when will change
+.maplist               list all arenas in mapcycle
+#.gunstat               on/off gunnery statistic
+.version               get server version
+.kill                  kill yourself if you are bored...
+.belt [1|2] [muntype]  set your gun belt configuration
+.thanks [upto 3 nicks] give 10% of your last flight score
+                       to given nicks
+
+.minen [distance] [azimut]
+                       fire minen to distance (feet)
+                       azimut(degree). Max range 6000 fts
+                       Available in JU52 and Li-2 only.
+
+.startfau [distance] [azimut] [0|1]
+                       start V-1 missle.Distance (feets)
+                       azimut (degree).
+                       0 - observer off
+                       1 - observer on
+
+.commandos             launch commandos to destroy enemy
+                       field. Distance to launch not more
+                       6000 ft and not less 3600 ft.
+
+.tanks f[field]        start a convoy to attack a field
+
+.tank                  start human tank (drive as hmack)
+
+.hmack                 start human ack.
+.hmack run             run hmack forward.
+.hmack stop            stop hmack.
+.hmack -N              turn left N degrees.
+.hmack +N              turn right N degrees.
+
+.remdron               remove any flying drone
+
+#.mapflags 0|1          switch off or on radar's circus (for superuser
+                        or squad's leaders).
