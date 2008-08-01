@@ -952,10 +952,13 @@ int ProcessDrone(client_t *drone)
 								x = drone->posxy[0] - arena->fields[drone->dronefield].buildings[i].posx;
 								y = drone->posxy[1] - arena->fields[drone->dronefield].buildings[i].posy;
 
-								if(x < 6000 && x > -6000 && y < 6000 && y > -6000)
+								if(x < 10000 && x > -10000 && y < 10000 && y > -10000)
 								{
-									ThrowBomb(FALSE, drone->posxy[0], drone->posxy[1], GetHeightAt(drone->posxy[0], drone->posxy[1]) + 50, arena->fields[drone->dronefield].buildings[i].posx, arena->fields[drone->dronefield].buildings[i].posy, 0, drone);
-//									ThrowBomb(TRUE, drone->posxy[0], drone->posxy[1], drone->posalt, arena->fields[drone->dronefield].buildings[i].posx, arena->fields[drone->dronefield].buildings[i].posy, 0, drone);
+									if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < 14000)
+									{
+										ThrowBomb(FALSE, drone->posxy[0], drone->posxy[1], GetHeightAt(drone->posxy[0], drone->posxy[1]) + 50, arena->fields[drone->dronefield].buildings[i].posx, arena->fields[drone->dronefield].buildings[i].posy, 0, drone);
+//										ThrowBomb(TRUE, drone->posxy[0], drone->posxy[1], drone->posalt, arena->fields[drone->dronefield].buildings[i].posx, arena->fields[drone->dronefield].buildings[i].posy, 0, drone);
+									}
 									break;
 								}
 							}
@@ -1176,7 +1179,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 
 		if(client && (client->drone & DRONE_KATY))
 		{
-            angle = RocketAngle(dist);
+			angle = RocketAngle(dist);
 
 			if(angle < 0)
 			{
