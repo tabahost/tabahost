@@ -716,19 +716,20 @@ typedef struct client_s
 
 	u_int8_t	chute;			// player ejected
 
-	int32_t		posxy[2];		// plane's position (x, y)
-	int32_t		posalt;			// plane's altitude
+	int16_t		offset;				// offset
+	int32_t		posxy[2][6];		// plane's position (x, y)
+	int32_t		posalt[6];			// plane's altitude
+	int16_t		angles[3][6];		// plane's angles (pitch, roll, yaw)
+	int16_t		accelxyz[3][6];	// plane's acceleration (x, y, z)
+	int16_t		aspeeds[3][6];		// plane's angular speeds (pitch, roll, yaw)
+	int16_t		speedxyz[3][6];	// plane's speed (x, y, z)
+
 	u_int8_t	contrail;		// plane is above contrail->value
 	u_int32_t	status1;		// plane's status (gun, fuselage, etc)
 	u_int32_t	status2;		// plane's status (engine, baydoor, smoke, etc)
 	int32_t		reldist;		// relative distance between 2 players
 	u_int8_t	mapdots;
 	visible_t	visible[MAX_SCREEN]; // array with visible entities
-
-	int16_t		speedxyz[3];	// plane's speed (x, y, z)
-	int16_t		accelxyz[3];	// plane's acceleration (x, y, z)
-	int16_t		angles[3];		// plane's angles (pitch, roll, yaw)
-	int16_t		aspeeds[3];		// plane's angular speeds (pitch, roll, yaw)
 
 	u_int8_t	field;			// which field player is
 	u_int8_t	hq;				// player moved to HQ
@@ -804,7 +805,7 @@ typedef struct client_s
 	u_int16_t	msgtimer;		// msgtimer (friendly hit)
 	u_int32_t	lastsql;		// last time client made a SQL request;
 	u_int32_t	timer;			// player timer
-	int16_t		offset;			// offset
+	u_int32_t	postimer;		// last position update arena's time
 	u_int32_t	awaytimer;		// away timer
 	u_int32_t	timeout;		// actual timeout
 	u_int8_t 	bugged;			// client had made a fatal bug and will be kicked

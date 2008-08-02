@@ -248,12 +248,12 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 		fprintf(fp, "key               = %10u  awaytimer     = %10u  timeout        = %10u\n", client->key, client->awaytimer, client->timeout);
 		fprintf(fp, "shortnick         = %10u  longnick      = %10s  chute          = %10u\n", client->shortnick, client->longnick, client->chute);
 		fprintf(fp, "arenabuildsok     = %10u  arenafieldsok = %10u  contrail       = %10u\n", client->arenabuildsok, client->arenafieldsok, client->contrail);
-		fprintf(fp, "posxy[0]          = %10d  posxy[1]      = %10d  posalt         = %10d\n", client->posxy[0], client->posxy[1], client->posalt);
+		fprintf(fp, "posxy[0]          = %10d  posxy[1]      = %10d  posalt         = %10d\n", client->posxy[0][0], client->posxy[1][0], client->posalt[0]);
 		fprintf(fp, "status1           = %10u  status2       = %10u  reldist        = %10d\n", client->status1, client->status2, client->reldist);
-		fprintf(fp, "speedxyz[0]       = %10d  speedxyz[1]   = %10d  speedxyz[2]    = %10d\n", client->speedxyz[0], client->speedxyz[1], client->speedxyz[2]);
-		fprintf(fp, "accelxyz[0]       = %10d  accelxyz[1]   = %10d  accelxyz[2]    = %10d\n", client->accelxyz[0], client->accelxyz[1], client->accelxyz[2]);
-		fprintf(fp, "angles[0]         = %10d  angles[1]     = %10d  angles[2]      = %10d\n", client->angles[0], client->angles[1], client->angles[2]);
-		fprintf(fp, "aspeeds[0]        = %10d  aspeeds[1]    = %10d  aspeeds[2]     = %10d\n", client->aspeeds[0], client->aspeeds[1], client->aspeeds[2]);
+		fprintf(fp, "speedxyz[0]       = %10d  speedxyz[1]   = %10d  speedxyz[2]    = %10d\n", client->speedxyz[0][0], client->speedxyz[1][0], client->speedxyz[2][0]);
+		fprintf(fp, "accelxyz[0]       = %10d  accelxyz[1]   = %10d  accelxyz[2]    = %10d\n", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
+		fprintf(fp, "angles[0]         = %10d  angles[1]     = %10d  angles[2]      = %10d\n", client->angles[0][0], client->angles[1][0], client->angles[2][0]);
+		fprintf(fp, "aspeeds[0]        = %10d  aspeeds[1]    = %10d  aspeeds[2]     = %10d\n", client->aspeeds[0][0], client->aspeeds[1][0], client->aspeeds[2][0]);
 		fprintf(fp, "field             = %10d  infly         = %10u  plane          = %10u\n", client->field, client->infly, client->plane);
 		fprintf(fp, "fuel              = %10u  conv          = %10u  ord            = %10u\n", client->fuel, client->conv, client->ord);
 		fprintf(fp, "country           = %10u  countrytime   = %10u  mapdots        = %10u\n", client->country, client->countrytime, client->mapdots);
@@ -472,6 +472,11 @@ int ProcessClient(client_t *client)
 					client->tklimit = 0;
 			}
 
+			if((arena->time - client->postimer) > 500) // if client didnt send position packet in 500ms
+			{
+				BackupPosition(client, TRUE);
+			}
+
 			if(!((arena->frame - client->frame) % 10))
 			{
 				SendPlayersNear(client);
@@ -492,10 +497,10 @@ int ProcessClient(client_t *client)
 
 					if(nearplane && (nearplane->related[0] != client) /*avoid collide with own drone*/)
 					{
-						x = client->posxy[0] - nearplane->posxy[0];
-						y = client->posxy[1] - nearplane->posxy[1];
+						x = client->posxy[0][0] - nearplane->posxy[0][0];
+						y = client->posxy[1][0] - nearplane->posxy[1][0];
 						z = sqrt(Com_Pow(x, 2) + Com_Pow(y, 2));
-						x = client->posalt - nearplane->posalt;
+						x = client->posalt[0] - nearplane->posalt[0];
 
 						if((y = sqrt(Com_Pow(x, 2) + Com_Pow(z, 2))) < 10) // 21
 						{
@@ -602,6 +607,138 @@ int ProcessClient(client_t *client)
 			DebugClient(__FILE__, __LINE__, TRUE, client);
 			return 0;
 		}
+	}
+}
+
+/*************
+BackupPosition
+
+Backup client position, leaving [0] free to predict or to store by PPlanePosition
+*************/
+
+void BackupPosition(client_t *client, u_int8_t predict);
+{
+	u_int8_t i;
+	int32_t temp = 0;
+
+	if(predict)
+		temp = PredictorCorrector(client->posxy[0], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->posxy[0][i + 1] = client->posxy[0][i];
+		client->posxy[0][0] = temp;
+	}
+
+	if(predict)
+		temp = PredictorCorrector(client->posxy[1], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->posxy[1][i + 1] = client->posxy[1][i];
+		client->posxy[1][0] = temp;
+	}
+
+	if(predict)
+		temp = PredictorCorrector(client->posalt, 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->posalt[i + 1] = posalt[i];
+		client->posalt[0] = temp;
+	}
+
+	if(predict)
+		temp = PredictorCorrector(client->angles[0], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->angles[0][i + 1] = client->angles[0][i];
+		client->angles[0][0] = temp;
+	}
+	if(predict)
+		temp = PredictorCorrector(client->angles[1], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->angles[1][i + 1] = client->angles[1][i];
+		client->angles[1][0] = temp;
+	}
+	if(predict)
+		temp = PredictorCorrector(client->angles[2], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->angles[2][i + 1] = client->angles[2][i];
+		client->angles[2][0] = temp;
+	}
+
+	if(predict)
+		temp = PredictorCorrector(client->accelxyz[0], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->accelxyz[0][i + 1] = client->accelxyz[0][i];
+		client->accelxyz[0][0] = temp;
+	}
+	if(predict)
+		temp = PredictorCorrector(client->accelxyz[1], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->accelxyz[1][i + 1] = client->accelxyz[1][i];
+		client->accelxyz[1][0] = temp;
+	}
+	if(predict)
+		temp = PredictorCorrector(client->accelxyz[2], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->accelxyz[2][i + 1] = client->accelxyz[2][i];
+		client->accelxyz[2][0] = temp;
+	}
+
+	if(predict)
+		temp = PredictorCorrector(client->aspeeds[0], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->aspeeds[0][i + 1] = client->aspeeds[0][i];
+		client->aspeeds[0][0] = temp;
+	}
+	if(predict)
+		temp = PredictorCorrector(client->aspeeds[1], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->aspeeds[1][i + 1] = client->aspeeds[1][i];
+		client->aspeeds[1][0] = temp;
+	}
+	if(predict)
+		temp = PredictorCorrector(client->aspeeds[2], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->aspeeds[2][i + 1] = client->aspeeds[2][i];
+		client->aspeeds[2][0] = temp;
+	}
+
+	if(predict)
+		temp = PredictorCorrector(client->speedxyz[0], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->speedxyz[0][i + 1] = client->speedxyz[0][i];
+		client->speedxyz[0][0] = temp;
+	}
+	if(predict)
+		temp = PredictorCorrector(client->speedxyz[1], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->speedxyz[1][i + 1] = client->speedxyz[1][i];
+		client->speedxyz[1][0] = temp;
+	}
+	if(predict)
+		temp = PredictorCorrector(client->speedxyz[2], 4);
+	for(i = 0; i < 6; i++)
+	{
+		client->speedxyz[2][i + 1] = client->speedxyz[2][i];
+		client->speedxyz[2][0] = temp;
+	}
+
+	if(predict)
+	{
+		client->offset = client->postimer - arena->timer;
+		client->timer -= client->offset;
+		client->postimer = arena->timer;
+		client->predict++;
 	}
 }
 
@@ -1497,7 +1634,7 @@ void CheckKiller(client_t *client)
 	{
 		Com_Printf("DEBUG: hit not found\n");
 		Com_Printf("DEBUG: Check nearest player (2000 feets radius)\n");
-		if((client->posalt - GetHeightAt(client->posxy[0], client->posxy[1])) <= 164) // explosions above 50mts are not maneuver kill
+		if((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) <= 164) // explosions above 50mts are not maneuver kill
 		{
 			nearplane = NearPlane(client, client->country, 2000);
 	
@@ -1643,7 +1780,7 @@ void CheckKiller(client_t *client)
 				BPrintf(RADIO_GREEN, buffer);
 			}
 
-			Com_Printf("%s at %s\n", buffer, Com_Padloc(client->posxy[0], client->posxy[1]));
+			Com_Printf("%s at %s\n", buffer, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			
 			if(!client->hitby[j]->drone)
 			{
@@ -1709,7 +1846,7 @@ void CheckKiller(client_t *client)
 				BPrintf(RADIO_YELLOW, buffer);	
 			}
 
-			Com_Printf("%s at %s\n", buffer, Com_Padloc(client->posxy[0], client->posxy[1]));
+			Com_Printf("%s at %s\n", buffer, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 		}
 
 		//score
@@ -1992,7 +2129,7 @@ client_t *NearPlane(client_t *client, u_int8_t country, int32_t limit)
 	{
 		if(client->visible[i].client && (client->visible[i].client->country != country))
 		{
-			client->visible[i].client->reldist = DistBetween(client->posxy[0], client->posxy[1], client->posalt, client->visible[i].client->posxy[0], client->visible[i].client->posxy[1], client->visible[i].client->posalt, limit);
+			client->visible[i].client->reldist = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], client->visible[i].client->posxy[0][0], client->visible[i].client->posxy[1][0], client->visible[i].client->posalt[0], limit);
 
 			if(client->drone && client->visible[i].client->reldist >= 0)
 				return client->visible[i].client;
@@ -2468,7 +2605,7 @@ void ForceEndFlight(u_int8_t remdron, client_t *client)
 		client->damby[i] = 0;
 	}
 
-	client->speedxyz[0] = client->speedxyz[1] = client->speedxyz[2] = 0;
+	client->speedxyz[0][0] = client->speedxyz[1][0] = client->speedxyz[2][0] = 0;
 
 	client->view = client->shanghai = client->attached = NULL;
 }
@@ -2671,21 +2808,21 @@ void LogRAWPosition(u_int8_t server, client_t *client)
 	else
 	{
 		fprintf(fp, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%u;%d;%u;%u\n",
-				client->posxy[0],
-				client->posxy[1],
-				client->posalt,
-				client->angles[0],
-				client->angles[1],
-				client->angles[2],
-				client->speedxyz[0],
-				client->speedxyz[1],
-				client->speedxyz[2],
-				client->accelxyz[0],
-				client->accelxyz[1],
-				client->accelxyz[2],
-				client->aspeeds[0],
-				client->aspeeds[1],
-				client->aspeeds[2],
+				client->posxy[0][0],
+				client->posxy[1][0],
+				client->posalt[0],
+				client->angles[0][0],
+				client->angles[1][0],
+				client->angles[2][0],
+				client->speedxyz[0][0],
+				client->speedxyz[1][0],
+				client->speedxyz[2][0],
+				client->accelxyz[0][0],
+				client->accelxyz[1][0],
+				client->accelxyz[2][0],
+				client->aspeeds[0][0],
+				client->aspeeds[1][0],
+				client->aspeeds[2][0],
 				client->timer,
 				client->offset,
 				arena->time,
@@ -2714,12 +2851,12 @@ void LogPosition(client_t *client)
 	else
 	{
 		fprintf(fp, "%d;%d;%d;%.0f;%.0f;%.0f;%u\n",
-				client->posxy[0],
-				client->posxy[1],
-				client->posalt,
-				FloorDiv(client->angles[0], 10),
-				FloorDiv(client->angles[1], 10),
-				WBtoHdg(client->angles[2]),
+				client->posxy[0][0],
+				client->posxy[1][0],
+				client->posalt[0],
+				FloorDiv(client->angles[0][0], 10),
+				FloorDiv(client->angles[1][0], 10),
+				WBtoHdg(client->angles[2][0]),
 				(u_int32_t)time(NULL));
 		fclose(fp);
 	}

@@ -711,8 +711,8 @@ void SendMapDots(void)
 				{
 					radar2 = (radardot2_t *)(buffer+3+(7*j));
 					radar2->slot = htons(i);
-					radar2->posx = htons((float) clients[i].posxy[0] / (312 * 3.28));
-					radar2->posy = htons((float) clients[i].posxy[1] / (312 * 3.28));
+					radar2->posx = htons((float) clients[i].posxy[0][0] / (312 * 3.28));
+					radar2->posy = htons((float) clients[i].posxy[1][0] / (312 * 3.28));
 					radar2->country = clients[i].country;
 					j++;
 				}
@@ -720,8 +720,8 @@ void SendMapDots(void)
 				{
 					radar2 = (radardot2_t *)(buffer+3+(7*j));
 					radar2->slot = htons(i);
-					radar2->posx = htons((float) clients[i].posxy[0] / (312 * 3.28));
-					radar2->posy = htons((float) clients[i].posxy[1] / (312 * 3.28));
+					radar2->posx = htons((float) clients[i].posxy[0][0] / (312 * 3.28));
+					radar2->posy = htons((float) clients[i].posxy[1][0] / (312 * 3.28));
 					if(iff->value)
 						radar2->country = clients[i].country;
 					else
@@ -765,13 +765,13 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 					{
 						if(!arena->fields[i].buildings[k].status/* || arena->fields[i].type == FIELD_CV || arena->fields[i].type == FIELD_CARGO || arena->fields[i].type == FIELD_DD || arena->fields[i].type == FIELD_SUBMARINE*/)
 						{
-							x = (arena->fields[i].posxyz[0] - client->posxy[0]) / 22;
-							y = (arena->fields[i].posxyz[1] - client->posxy[1]) / 22;
-							z = client->posalt - arena->fields[i].posxyz[2];
+							x = (arena->fields[i].posxyz[0] - client->posxy[0][0]) / 22;
+							y = (arena->fields[i].posxyz[1] - client->posxy[1][0]) / 22;
+							z = client->posalt[0] - arena->fields[i].posxyz[2];
 
 							if(x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (arena->fields[i].posxyz[2] + radaralt->value) && z < (arena->fields[i].posxyz[2] + radarheight->value))
 							{
-								if(IsVisible(client->posxy[0], client->posxy[1], client->posalt ,arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], arena->fields[i].posxyz[2]))
+								if(IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0] ,arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], arena->fields[i].posxyz[2]))
 								{
 									if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range/11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
 									{
@@ -805,13 +805,13 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 						{
 							if(!arena->cities[i].buildings[k].status)
 							{
-								x = (arena->cities[i].posxyz[0] - client->posxy[0]) / 22;
-								y = (arena->cities[i].posxyz[1] - client->posxy[1]) / 22;
-								z = client->posalt - arena->cities[i].posxyz[2];
+								x = (arena->cities[i].posxyz[0] - client->posxy[0][0]) / 22;
+								y = (arena->cities[i].posxyz[1] - client->posxy[1][0]) / 22;
+								z = client->posalt[0] - arena->cities[i].posxyz[2];
 	
 								if(x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (arena->cities[i].posxyz[2] + radaralt->value) && z < (int32_t)range)
 								{
-									if(IsVisible(client->posxy[0], client->posxy[1], client->posalt ,arena->cities[i].posxyz[0], arena->cities[i].posxyz[1], arena->cities[i].posxyz[2]))
+									if(IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0] ,arena->cities[i].posxyz[0], arena->cities[i].posxyz[1], arena->cities[i].posxyz[2]))
 									{
 										if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range/11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
 										{
@@ -844,13 +844,13 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 				{
 					if(arena->fields[k].type >= FIELD_CV || arena->fields[k].type <= FIELD_SUBMARINE)
 					{
-						x = (arena->fields[k].posxyz[0] - client->posxy[0]) / 22;
-						y = (arena->fields[k].posxyz[1] - client->posxy[1]) / 22;
-						z = client->posalt - arena->fields[k].posxyz[2];
+						x = (arena->fields[k].posxyz[0] - client->posxy[0][0]) / 22;
+						y = (arena->fields[k].posxyz[1] - client->posxy[1][0]) / 22;
+						z = client->posalt[0] - arena->fields[k].posxyz[2];
 
 						if(x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (arena->fields[k].posxyz[2] + radaralt->value) && z < (arena->fields[k].posxyz[2] + radarheight->value))
 						{
-							if(IsVisible(client->posxy[0], client->posxy[1], client->posalt ,arena->fields[k].posxyz[0], arena->fields[k].posxyz[1], arena->fields[k].posxyz[2]))
+							if(IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0] ,arena->fields[k].posxyz[0], arena->fields[k].posxyz[1], arena->fields[k].posxyz[2]))
 							{
 								if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range/11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
 								{
@@ -870,9 +870,9 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 		{
 			if(clients[i].inuse && !clients[i].drone && clients[i].infly && clients[i].obradar && clients[i].country == country)
 			{
-				x = (client->posxy[0] - clients[i].posxy[0]) / 10;
-				y = (client->posxy[1] - clients[i].posxy[1]) / 10;
-				z = (client->posalt - clients[i].posalt) / 10;
+				x = (client->posxy[0][0] - clients[i].posxy[0][0]) / 10;
+				y = (client->posxy[1][0] - clients[i].posxy[1][0]) / 10;
+				z = (client->posalt[0] - clients[i].posalt[0]) / 10;
 
 				if(x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (clients[i].obradar / -10) && z < (clients[i].obradar / 10))
 				{
@@ -3545,9 +3545,9 @@ void WB3Mapper(client_t *client)
 {
 	int32_t x, y, z;
 
-	x = X2INDEX(client->posxy[0]);
-	y = Y2INDEX(client->posxy[1]);
-	z = Alt2Index(client->posalt);
+	x = X2INDEX(client->posxy[0][0]);
+	y = Y2INDEX(client->posxy[1][0]);
+	z = Alt2Index(client->posalt[0]);
 
 	if (x < 0 || x >= MWIDTH || y < 0 || y >= MHEIGHT)
 	{

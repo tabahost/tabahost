@@ -822,7 +822,7 @@ void CheckArenaRules(void)
 					{
 						if(clients[j].inuse && clients[j].ready && clients[j].infly && clients[j].country != arena->fields[arena->cv[i].field].country)
 						{
-							if(DistBetween(clients[j].posxy[0], clients[j].posxy[1], clients[j].posalt,	arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], 15000) >= 0)
+							if(DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0], arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], 15000) >= 0)
 							{
 								ChangeCVRoute(&(arena->cv[i]), 0, 0, NULL);
 								break;
@@ -1573,7 +1573,7 @@ void ProcessCommands(char *command, client_t *client)
 		else if(!Com_Stricmp(command, "pos"))
 		{
 			if(client->attr & FLAG_ADMIN)
-				PPrintf(client, RADIO_LIGHTYELLOW, "X %d Y %d Z %d - P %d R %d Y %d", client->posxy[0], client->posxy[1], client->posalt, client->angles[0], client->angles[1], client->angles[2]);
+				PPrintf(client, RADIO_LIGHTYELLOW, "X %d Y %d Z %d - P %d R %d Y %d", client->posxy[0][0], client->posxy[1][0], client->posalt[0], client->angles[0][0], client->angles[1][0], client->angles[2][0]);
 
 			if(!arcade->value)
 			{
@@ -1614,7 +1614,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_YELLOW, "Command disabled in Arcade Mode");
 			}
 
-//			CPrintf(client->country, RADIO_LIGHTYELLOW, "%s Position: %.2f, %.2f, Alt %d [x %d y %d]", client->longnick, (float)(client->posxy[0] - 633157) / -105592, (float)(client->posxy[1] + 633157) / 105592, client->posalt, client->posxy[0], client->posxy[1]);
+//			CPrintf(client->country, RADIO_LIGHTYELLOW, "%s Position: %.2f, %.2f, Alt %d [x %d y %d]", client->longnick, (float)(client->posxy[0][0] - 633157) / -105592, (float)(client->posxy[1][0] + 633157) / 105592, client->posalt[0], client->posxy[0][0], client->posxy[1][0]);
 			return;
 		}
 		else if(!Com_Stricmp(command, "thanks"))
@@ -2331,7 +2331,7 @@ void ProcessCommands(char *command, client_t *client)
 //				}
 //			}
 			PPrintf(client, RADIO_RED, "Start drone plane %u", client->plane);
-			AddDrone(DRONE_DEBUG, client->posxy[0], client->posxy[1], client->posalt + 100, client->country, Com_Atoi(argv[0]), client);
+			AddDrone(DRONE_DEBUG, client->posxy[0][0], client->posxy[1][0], client->posalt[0] + 100, client->country, Com_Atoi(argv[0]), client);
 			return;
 		}
 		else if(!Com_Stricmp(command, "capt"))
@@ -4627,6 +4627,8 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		plane = (planeposition_t *) buffer;
 	}
 
+	client->postimer = arena->time; // set the time when last position packet has been received
+
 	if(attached)
 	{
 		plane2 = (planeposition2_t *) buffer;
@@ -4638,9 +4640,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		{
 			if(client->attached->infly)
 			{
-				client->posxy[0] = client->attached->posxy[0];
-				client->posxy[1] = client->attached->posxy[1];
-				client->posalt = client->attached->posalt;
+				client->posxy[0][0] = client->attached->posxy[0][0];
+				client->posxy[1][0] = client->attached->posxy[1][0];
+				client->posalt[0] = client->attached->posalt[0];
 				SendDronePos(client->attached, client);
 			}
 		}
@@ -4648,56 +4650,74 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	}
 	else// if(!client->chute)
 	{
+		BackupPosition(client, FALSE);
+
 		if(wb3->value)
 		{
-			client->posxy[0] = ntohl(wb3plane->posx);
-			client->posxy[1] = ntohl(wb3plane->posy);
-			client->posalt = ntohl(wb3plane->alt);
+			client->posxy[0][0] = ntohl(wb3plane->posx);
+			client->posxy[1][0] = ntohl(wb3plane->posy);
+			client->posalt[0] = ntohl(wb3plane->alt);
 	//		client->atradar = ntohs(wb3plane->radar);
-			client->offset = client->timer - ntohl(wb3plane->timer);		
-			client->timer = ntohl(wb3plane->timer);
+			if(!client->predict)
+			{
+				client->offset = client->timer - ntohl(wb3plane->timer);
+				client->timer = ntohl(wb3plane->timer);
+			}
 		}
 		else
 		{
-			client->posxy[0] = ntohl(plane->posx);
-			client->posxy[1] = ntohl(plane->posy);
-			client->posalt = ntohl(plane->alt);
+			client->posxy[0][0] = ntohl(plane->posx);
+			client->posxy[1][0] = ntohl(plane->posy);
+			client->posalt[0] = ntohl(plane->alt);
 	//		client->atradar = ntohs(plane->radar);
-			client->offset = client->timer - ntohl(plane->timer);		
-			client->timer = ntohl(plane->timer);
+			if(!client->predict)
+			{
+				client->offset = client->timer - ntohl(plane->timer);
+				client->timer = ntohl(plane->timer);
+			}
+		}
+
+		if(client->predict)
+		{
+			if(client->predict > 5)
+				i = 5;
+			else
+				i = client->predict;
+
+			client->predict--;
 		}
 
 		if(client->infly)
 		{
 			if(wb3->value)
 			{			
-				client->speedxyz[0] = ntohs(wb3plane->xspeed);
-				client->speedxyz[1] = ntohs(wb3plane->yspeed);
-				client->speedxyz[2] = ntohs(wb3plane->climbspeed);
-				client->accelxyz[0] = ntohs(wb3plane->sideaccel);
-				client->accelxyz[1] = ntohs(wb3plane->forwardaccel);
-				client->accelxyz[2] = ntohs(wb3plane->climbaccel);
-				client->angles[0] = ntohs(wb3plane->pitchangle);
-				client->angles[1] = ntohs(wb3plane->rollangle);
-				client->angles[2] = ntohs(wb3plane->yawangle);
-				client->aspeeds[0] = ntohs(wb3plane->pitchangspeed);
-				client->aspeeds[1] = ntohs(wb3plane->rollangspeed);
-				client->aspeeds[2] = ntohs(wb3plane->yawangspeed);
+				client->speedxyz[0][i] = ntohs(wb3plane->xspeed);
+				client->speedxyz[1][i] = ntohs(wb3plane->yspeed);
+				client->speedxyz[2][i] = ntohs(wb3plane->climbspeed);
+				client->accelxyz[0][i] = ntohs(wb3plane->sideaccel);
+				client->accelxyz[1][i] = ntohs(wb3plane->forwardaccel);
+				client->accelxyz[2][i] = ntohs(wb3plane->climbaccel);
+				client->angles[0][i] = ntohs(wb3plane->pitchangle);
+				client->angles[1][i] = ntohs(wb3plane->rollangle);
+				client->angles[2][i] = ntohs(wb3plane->yawangle);
+				client->aspeeds[0][i] = ntohs(wb3plane->pitchangspeed);
+				client->aspeeds[1][i] = ntohs(wb3plane->rollangspeed);
+				client->aspeeds[2][i] = ntohs(wb3plane->yawangspeed);
 			}
 			else
 			{
-				client->speedxyz[0] = ntohs(plane->xspeed);
-				client->speedxyz[1] = ntohs(plane->yspeed);
-				client->speedxyz[2] = ntohs(plane->climbspeed);
-				client->accelxyz[0] = ntohs(plane->sideaccel);
-				client->accelxyz[1] = ntohs(plane->forwardaccel);
-				client->accelxyz[2] = ntohs(plane->climbaccel);
-				client->angles[0] = ntohs(plane->pitchangle);
-				client->angles[1] = ntohs(plane->rollangle);
-				client->angles[2] = ntohs(plane->yawangle);
-				client->aspeeds[0] = ntohs(plane->pitchangspeed);
-				client->aspeeds[1] = ntohs(plane->rollangspeed);
-				client->aspeeds[2] = ntohs(plane->yawangspeed);
+				client->speedxyz[0][i] = ntohs(plane->xspeed);
+				client->speedxyz[1][i] = ntohs(plane->yspeed);
+				client->speedxyz[2][i] = ntohs(plane->climbspeed);
+				client->accelxyz[0][i] = ntohs(plane->sideaccel);
+				client->accelxyz[1][i] = ntohs(plane->forwardaccel);
+				client->accelxyz[2][i] = ntohs(plane->climbaccel);
+				client->angles[0][i] = ntohs(plane->pitchangle);
+				client->angles[1][i] = ntohs(plane->rollangle);
+				client->angles[2][i] = ntohs(plane->yawangle);
+				client->aspeeds[0][i] = ntohs(plane->pitchangspeed);
+				client->aspeeds[1][i] = ntohs(plane->rollangspeed);
+				client->aspeeds[2][i] = ntohs(plane->yawangspeed);
 			}
 			
 			if(client->lograwdata)
@@ -4707,23 +4727,23 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		}
 		else
 		{
-			client->speedxyz[0] = 0;
-			client->speedxyz[1] = 0;
-			client->speedxyz[2] = 0;
-			client->accelxyz[0] = 0;
-			client->accelxyz[1] = 0;
-			client->accelxyz[2] = 0;
-			client->angles[0] = 0;
-			client->angles[1] = 0;
-			client->angles[2] = 0;
-			client->aspeeds[0] = 0;
-			client->aspeeds[1] = 0;
-			client->aspeeds[2] = 0;
+			client->speedxyz[0][0] = 0;
+			client->speedxyz[1][0] = 0;
+			client->speedxyz[2][0] = 0;
+			client->accelxyz[0][0] = 0;
+			client->accelxyz[1][0] = 0;
+			client->accelxyz[2][0] = 0;
+			client->angles[0][0] = 0;
+			client->angles[1][0] = 0;
+			client->angles[2][0] = 0;
+			client->aspeeds[0][0] = 0;
+			client->aspeeds[1][0] = 0;
+			client->aspeeds[2][0] = 0;
 		}
 		
 		if(!wb3->value)
 		{
-			if((arena->hour >= 6 && arena->hour <= 18) && (client->posalt > contrail->value)) // allow contrail during day
+			if((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value)) // allow contrail during day
 			{
 				client->status1 |= (STATUS_LFUEL | STATUS_RFUEL);
 
@@ -4761,7 +4781,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			{
 				if(((arena->time - client->dronetimer)/1000) > 10)
 				{
-					if((client->posalt - arena->fields[client->field - 1].posxyz[2]) > 15)
+					if((client->posalt[0] - arena->fields[client->field - 1].posxyz[2]) > 15)
 					{
 						PPrintf(client, RADIO_YELLOW, "Friendly collision enabled");
 						client->cancollide = 1;
@@ -4785,42 +4805,42 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		{
 			if(wb3->value)
 			{
-				client->related[i]->posxy[0] = ntohl(wb3plane->posx);
-				client->related[i]->posxy[1] = ntohl(wb3plane->posy);
-				client->related[i]->posalt = ntohl(wb3plane->alt);
-				client->related[i]->speedxyz[0] = ntohs(wb3plane->xspeed);
-				client->related[i]->speedxyz[1] = ntohs(wb3plane->yspeed);
-				client->related[i]->speedxyz[2] = ntohs(wb3plane->climbspeed);
-				client->related[i]->accelxyz[0] = ntohs(wb3plane->sideaccel);
-				client->related[i]->accelxyz[1] = ntohs(wb3plane->forwardaccel);
-				client->related[i]->accelxyz[2] = ntohs(wb3plane->climbaccel);
-				client->related[i]->angles[0] = ntohs(wb3plane->pitchangle);
-				client->related[i]->angles[1] = ntohs(wb3plane->rollangle);
-				client->related[i]->angles[2] = ntohs(wb3plane->yawangle);
-				client->related[i]->aspeeds[0] = ntohs(wb3plane->pitchangspeed);
-				client->related[i]->aspeeds[1] = ntohs(wb3plane->rollangspeed);
-				client->related[i]->aspeeds[2] = ntohs(wb3plane->yawangspeed);
+				client->related[i]->posxy[0][0] = ntohl(wb3plane->posx);
+				client->related[i]->posxy[1][0] = ntohl(wb3plane->posy);
+				client->related[i]->posalt[0] = ntohl(wb3plane->alt);
+				client->related[i]->speedxyz[0][0] = ntohs(wb3plane->xspeed);
+				client->related[i]->speedxyz[1][0] = ntohs(wb3plane->yspeed);
+				client->related[i]->speedxyz[2][0] = ntohs(wb3plane->climbspeed);
+				client->related[i]->accelxyz[0][0] = ntohs(wb3plane->sideaccel);
+				client->related[i]->accelxyz[1][0] = ntohs(wb3plane->forwardaccel);
+				client->related[i]->accelxyz[2][0] = ntohs(wb3plane->climbaccel);
+				client->related[i]->angles[0][0] = ntohs(wb3plane->pitchangle);
+				client->related[i]->angles[1][0] = ntohs(wb3plane->rollangle);
+				client->related[i]->angles[2][0] = ntohs(wb3plane->yawangle);
+				client->related[i]->aspeeds[0][0] = ntohs(wb3plane->pitchangspeed);
+				client->related[i]->aspeeds[1][0] = ntohs(wb3plane->rollangspeed);
+				client->related[i]->aspeeds[2][0] = ntohs(wb3plane->yawangspeed);
 	//			client->related[i]->atradar = ntohs(plane->radar);
 				client->related[i]->offset = client->related[i]->timer - ntohl(wb3plane->timer);
 				client->related[i]->timer = ntohl(wb3plane->timer);
 			}
 			else
 			{
-				client->related[i]->posxy[0] = ntohl(plane->posx);
-				client->related[i]->posxy[1] = ntohl(plane->posy);
-				client->related[i]->posalt = ntohl(plane->alt);
-				client->related[i]->speedxyz[0] = ntohs(plane->xspeed);
-				client->related[i]->speedxyz[1] = ntohs(plane->yspeed);
-				client->related[i]->speedxyz[2] = ntohs(plane->climbspeed);
-				client->related[i]->accelxyz[0] = ntohs(plane->sideaccel);
-				client->related[i]->accelxyz[1] = ntohs(plane->forwardaccel);
-				client->related[i]->accelxyz[2] = ntohs(plane->climbaccel);
-				client->related[i]->angles[0] = ntohs(plane->pitchangle);
-				client->related[i]->angles[1] = ntohs(plane->rollangle);
-				client->related[i]->angles[2] = ntohs(plane->yawangle);
-				client->related[i]->aspeeds[0] = ntohs(plane->pitchangspeed);
-				client->related[i]->aspeeds[1] = ntohs(plane->rollangspeed);
-				client->related[i]->aspeeds[2] = ntohs(plane->yawangspeed);
+				client->related[i]->posxy[0][0] = ntohl(plane->posx);
+				client->related[i]->posxy[1][0] = ntohl(plane->posy);
+				client->related[i]->posalt[0] = ntohl(plane->alt);
+				client->related[i]->speedxyz[0][0] = ntohs(plane->xspeed);
+				client->related[i]->speedxyz[1][0] = ntohs(plane->yspeed);
+				client->related[i]->speedxyz[2][0] = ntohs(plane->climbspeed);
+				client->related[i]->accelxyz[0][0] = ntohs(plane->sideaccel);
+				client->related[i]->accelxyz[1][0] = ntohs(plane->forwardaccel);
+				client->related[i]->accelxyz[2][0] = ntohs(plane->climbaccel);
+				client->related[i]->angles[0][0] = ntohs(plane->pitchangle);
+				client->related[i]->angles[1][0] = ntohs(plane->rollangle);
+				client->related[i]->angles[2][0] = ntohs(plane->yawangle);
+				client->related[i]->aspeeds[0][0] = ntohs(plane->pitchangspeed);
+				client->related[i]->aspeeds[1][0] = ntohs(plane->rollangspeed);
+				client->related[i]->aspeeds[2][0] = ntohs(plane->yawangspeed);
 	//			client->related[i]->atradar = ntohs(plane->radar);
 				client->related[i]->offset = client->related[i]->timer - ntohl(plane->timer);
 				client->related[i]->timer = ntohl(plane->timer);
@@ -4842,9 +4862,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				{
 					if(client->gunners[i]->attached == client)
 					{
-						client->gunners[i]->posxy[0] = client->posxy[0];
-						client->gunners[i]->posxy[1] = client->posxy[1];
-						client->gunners[i]->posalt = client->posalt;
+						client->gunners[i]->posxy[0][0] = client->posxy[0][0];
+						client->gunners[i]->posxy[1][0] = client->posxy[1][0];
+						client->gunners[i]->posalt[0] = client->posalt[0];
 						SendDronePos(client, client->gunners[i]);
 					}
 				}
@@ -4855,9 +4875,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		{
 			if(client->shanghai->attached == client)
 			{
-				client->shanghai->posxy[0] = client->posxy[0];
-				client->shanghai->posxy[1] = client->posxy[1];
-				client->shanghai->posalt = client->posalt;
+				client->shanghai->posxy[0][0] = client->posxy[0][0];
+				client->shanghai->posxy[1][0] = client->posxy[1][0];
+				client->shanghai->posalt[0] = client->posalt[0];
 				SendDronePos(client, client->shanghai);
 			}
 		}
@@ -4866,9 +4886,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		{
 			if(client->view->attached == client)
 			{
-				client->view->posxy[0] = client->posxy[0];
-				client->view->posxy[1] = client->posxy[1];
-				client->view->posalt = client->posalt;
+				client->view->posxy[0][0] = client->posxy[0][0];
+				client->view->posxy[1][0] = client->posxy[1][0];
+				client->view->posalt[0] = client->posalt[0];
 				SendDronePos(client, client->view);
 			}
 		}
@@ -4951,10 +4971,10 @@ float ClientG(client_t *client)
 {
 	double Ax, Ay, Az, g, pitch, roll, yaw, hyaw;
 
-	pitch = (double)((double)client->angles[0] / 10);
-	roll = (double)((double)client->angles[1] / 10);
+	pitch = (double)((double)client->angles[0][0] / 10);
+	roll = (double)((double)client->angles[1][0] / 10);
 
-	yaw = WBtoHdg(client->angles[2]);
+	yaw = WBtoHdg(client->angles[2][0]);
 
 /////////// Az
 	Az = Com_Deg(acos(cos(Com_Rad(pitch)) * cos(Com_Rad(MODULUS(roll)))));
@@ -5049,11 +5069,11 @@ float ClientG(client_t *client)
 	Ax += g;
 
 ///////////
-	g = (((double)client->accelxyz[0]/31) * cos(Com_Rad(Ax))) +
-		(((double)client->accelxyz[1]/31) * cos(Com_Rad(Ay))) +
-		((((double)client->accelxyz[2]/31) + 1) * cos(Com_Rad(Az)));
+	g = (((double)client->accelxyz[0][0]/31) * cos(Com_Rad(Ax))) +
+		(((double)client->accelxyz[1][0]/31) * cos(Com_Rad(Ay))) +
+		((((double)client->accelxyz[2][0]/31) + 1) * cos(Com_Rad(Az)));
 
-//	PPrintf(client, RADIO_WHITE, "Az %.3f AccZ %d G %.3f", Az, client->accelxyz[2], g);
+//	PPrintf(client, RADIO_WHITE, "Az %.3f AccZ %d G %.3f", Az, client->accelxyz[2][0], g);
 
 	return g;
 }
@@ -5098,7 +5118,7 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 
 			if(!client->attached)
 			{
-				AddDrone(DRONE_EJECTED, client->posxy[0], client->posxy[1], client->posalt, client->country, client->plane, client);
+				AddDrone(DRONE_EJECTED, client->posxy[0][0], client->posxy[1][0], client->posalt[0], client->country, client->plane, client);
 
 				if(!wb3->value)
 				{
@@ -5161,12 +5181,12 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 		
 		if(i < MAX_RELATED)
 		{
-			client->related[i]->posxy[0] = ntohl(chute->posx);
-			client->related[i]->posxy[1] = ntohl(chute->posy);
-			client->related[i]->posalt = ntohl(chute->alt);
-			client->related[i]->speedxyz[0] = client->related[i]->speedxyz[1] = client->related[i]->speedxyz[2] = client->related[i]->accelxyz[0] =
-				client->related[i]->accelxyz[1] = client->related[i]->accelxyz[2] = client->related[i]->angles[0] = client->related[i]->angles[1] =
-				client->related[i]->angles[2] = client->related[i]->aspeeds[0] = client->related[i]->aspeeds[1] = client->related[i]->aspeeds[2] = 0;
+			client->related[i]->posxy[0][0] = ntohl(chute->posx);
+			client->related[i]->posxy[1][0] = ntohl(chute->posy);
+			client->related[i]->posalt[0] = ntohl(chute->alt);
+			client->related[i]->speedxyz[0][0] = client->related[i]->speedxyz[1][0] = client->related[i]->speedxyz[2][0] = client->related[i]->accelxyz[0][0] =
+				client->related[i]->accelxyz[1][0] = client->related[i]->accelxyz[2][0] = client->related[i]->angles[0][0] = client->related[i]->angles[1][0] =
+				client->related[i]->angles[2][0] = client->related[i]->aspeeds[0][0] = client->related[i]->aspeeds[1][0] = client->related[i]->aspeeds[2][0] = 0;
 		
 			client->related[i]->offset = client->related[i]->timer - ntohl(chute->timer);
 			client->related[i]->timer = ntohl(chute->timer);
@@ -5239,7 +5259,7 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 		client->status2 = htonl(status->status2);
 	}
 
-	if((arena->hour >= 6 && arena->hour <= 18) && (client->posalt > contrail->value) && !wb3->value)
+	if((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value) && !wb3->value)
 		client->status1 |= (STATUS_LFUEL | STATUS_RFUEL);
 
 	for(i = 0; i < maxentities->value; i++)
@@ -5758,10 +5778,10 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 	if(building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE)
 	{
-		distance = DistBetween(client->posxy[0], client->posxy[1], client->posalt, arena->fields[building->field - 1].posxyz[0], arena->fields[building->field - 1].posxyz[1], arena->fields[building->field - 1].posxyz[2], -1);	
+		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->fields[building->field - 1].posxyz[0], arena->fields[building->field - 1].posxyz[1], arena->fields[building->field - 1].posxyz[2], -1);	
 	}
 	else
-		distance = DistBetween(client->posxy[0], client->posxy[1], client->posalt, building->posx, building->posy, building->posz, -1);
+		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], building->posx, building->posy, building->posz, -1);
 
 	if(distance < 0)
 	{
@@ -5976,10 +5996,10 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 	if((client == pvictim)) // ack hit
 	{
-		if((val = NearestField(client->posxy[0], client->posxy[1], 0, TRUE, TRUE, &dist)) >= 0)
+		if((val = NearestField(client->posxy[0][0], client->posxy[1][0], 0, TRUE, TRUE, &dist)) >= 0)
 		{
 			distance = (float) dist;
-			distance = DistBetween(client->posxy[0], client->posxy[1], client->posalt, (client->posxy[0] > 0 ? client->posxy[0] - distance : client->posxy[0] + distance), client->posxy[1], 0, -1);
+			distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], (client->posxy[0][0] > 0 ? client->posxy[0][0] - distance : client->posxy[0][0] + distance), client->posxy[1][0], 0, -1);
 		}
 		else
 		{
@@ -5994,7 +6014,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			FireAck(client, pvictim, 1);
 		}
 
-		distance = DistBetween(client->posxy[0], client->posxy[1], client->posalt, pvictim->posxy[0], pvictim->posxy[1], pvictim->posalt, MAX_INT16);
+		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], pvictim->posxy[0][0], pvictim->posxy[1][0], pvictim->posalt[0], MAX_INT16);
 	}
 
 	if(distance < 0)
@@ -7229,9 +7249,9 @@ void POttoFiring(u_int8_t *buffer, u_int8_t len, client_t *client)
 					{
 					    if(client->related[k] && (client->related[k]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 						{
-							otto->posx = htonl(client->related[k]->posxy[0]);
-							otto->posy = htonl(client->related[k]->posxy[1]);
-							otto->alt = htonl(client->related[k]->posalt);
+							otto->posx = htonl(client->related[k]->posxy[0][0]);
+							otto->posy = htonl(client->related[k]->posxy[1][0]);
+							otto->alt = htonl(client->related[k]->posalt[0]);
 							otto->shortnick = htonl(client->related[k]->shortnick);
 							SendPacket(buffer, len, &clients[i]);
 						}
@@ -8345,7 +8365,7 @@ void SendPlayersNear(client_t *client)
 	{
 		if(client != &clients[i] && clients[i].inuse && clients[i].infly && !clients[i].attached && !(clients[i].drone == DRONE_EJECTED && clients[i].related[0] == client))
 		{
-			if((clients[i].reldist = DistBetween(client->posxy[0], client->posxy[1], client->posalt, clients[i].posxy[0], clients[i].posxy[1], clients[i].posalt, MAX_INT16)) >= 0)
+			if((clients[i].reldist = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], clients[i].posxy[0][0], clients[i].posxy[1][0], clients[i].posalt[0], MAX_INT16)) >= 0)
 				carray[k++] = &clients[i];
 		}
 	}
@@ -8578,9 +8598,9 @@ void SendScreenUpdates(client_t *client)
 	}
 
 	updateplane->timer = htonl(arena->time);
-	updateplane->posx = htonl(((client->posxy[0] >> 11) << 11));
-	updateplane->posy = htonl(((client->posxy[1] >> 11) << 11));
-	updateplane->alt = htonl(((client->posalt >> 9) << 9));
+	updateplane->posx = htonl(((client->posxy[0][0] >> 11) << 11));
+	updateplane->posy = htonl(((client->posxy[1][0] >> 11) << 11));
+	updateplane->alt = htonl(((client->posalt[0] >> 9) << 9));
 
 
 
@@ -8598,21 +8618,21 @@ void SendScreenUpdates(client_t *client)
 	
 				wb3updateplane2->slot = i;
 				wb3updateplane2->unk1 = 0x10;
-				wb3updateplane2->relposx = htons(client->visible[i].client->posxy[0] - ((client->posxy[0] >> 11) << 11));
-				wb3updateplane2->relposy = htons(client->visible[i].client->posxy[1] - ((client->posxy[1] >> 11) << 11));
-				wb3updateplane2->relalt = htons(client->visible[i].client->posalt - ((client->posalt >> 9) << 9));
-				wb3updateplane2->pitch = client->visible[i].client->angles[0] / 14; // >> 4;
-				wb3updateplane2->xaccel = client->visible[i].client->accelxyz[0] >> 2;
-				wb3updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0] >> 6) << 9) ^ 0x8000); // 7
-				wb3updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0] >> 2) & 0x1FF) ^ 0x0100); // 9
-				wb3updateplane2->roll = client->visible[i].client->angles[1] / 14; // >> 4;
-				wb3updateplane2->yaccel = client->visible[i].client->accelxyz[1] >> 2;
-				wb3updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1] >> 6) << 9) ^ 0x8000); // 7
-				wb3updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1] >> 2) & 0x1FF) ^ 0x0100); // 9
-				wb3updateplane2->yaw = client->visible[i].client->angles[2] / 14; //>> 4;
-				wb3updateplane2->zaccel = client->visible[i].client->accelxyz[2] >> 2;
-				wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2] >> 6) << 9) ^ 0x8000); // 7
-				wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2] >> 2) & 0x1FF) ^ 0x0100); // 9
+				wb3updateplane2->relposx = htons(client->visible[i].client->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
+				wb3updateplane2->relposy = htons(client->visible[i].client->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
+				wb3updateplane2->relalt = htons(client->visible[i].client->posalt[0] - ((client->posalt[0] >> 9) << 9));
+				wb3updateplane2->pitch = client->visible[i].client->angles[0][0] / 14; // >> 4;
+				wb3updateplane2->xaccel = client->visible[i].client->accelxyz[0][0] >> 2;
+				wb3updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
+				wb3updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+				wb3updateplane2->roll = client->visible[i].client->angles[1][0] / 14; // >> 4;
+				wb3updateplane2->yaccel = client->visible[i].client->accelxyz[1][0] >> 2;
+				wb3updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
+				wb3updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+				wb3updateplane2->yaw = client->visible[i].client->angles[2][0] / 14; //>> 4;
+				wb3updateplane2->zaccel = client->visible[i].client->accelxyz[2][0] >> 2;
+				wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
+				wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
 			}
 			else
 			{
@@ -8621,34 +8641,34 @@ void SendScreenUpdates(client_t *client)
 				updateplane2->timeoffset = htons(client->visible[i].client->offset);//htons(0xFFFC);
 	
 				updateplane2->slot = i;
-				updateplane2->relposx = htons(client->visible[i].client->posxy[0] - ((client->posxy[0] >> 11) << 11));
-				updateplane2->relposy = htons(client->visible[i].client->posxy[1] - ((client->posxy[1] >> 11) << 11));
-				updateplane2->relalt = htons(client->visible[i].client->posalt - ((client->posalt >> 9) << 9));
-				updateplane2->pitch = client->visible[i].client->angles[0] / 14; // >> 4;
-				updateplane2->xaccel = client->visible[i].client->accelxyz[0] >> 2;
-				updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0] >> 6) << 9) ^ 0x8000); // 7
-				updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0] >> 2) & 0x1FF) ^ 0x0100); // 9
-				updateplane2->roll = client->visible[i].client->angles[1] / 14; // >> 4;
-				updateplane2->yaccel = client->visible[i].client->accelxyz[1] >> 2;
-				updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1] >> 6) << 9) ^ 0x8000); // 7
-				updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1] >> 2) & 0x1FF) ^ 0x0100); // 9
-				updateplane2->yaw = client->visible[i].client->angles[2] / 14; //>> 4;
-				updateplane2->zaccel = client->visible[i].client->accelxyz[2] >> 2;
-				updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2] >> 6) << 9) ^ 0x8000); // 7
-				updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2] >> 2) & 0x1FF) ^ 0x0100); // 9
+				updateplane2->relposx = htons(client->visible[i].client->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
+				updateplane2->relposy = htons(client->visible[i].client->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
+				updateplane2->relalt = htons(client->visible[i].client->posalt[0] - ((client->posalt[0] >> 9) << 9));
+				updateplane2->pitch = client->visible[i].client->angles[0][0] / 14; // >> 4;
+				updateplane2->xaccel = client->visible[i].client->accelxyz[0][0] >> 2;
+				updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
+				updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+				updateplane2->roll = client->visible[i].client->angles[1][0] / 14; // >> 4;
+				updateplane2->yaccel = client->visible[i].client->accelxyz[1][0] >> 2;
+				updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
+				updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+				updateplane2->yaw = client->visible[i].client->angles[2][0] / 14; //>> 4;
+				updateplane2->zaccel = client->visible[i].client->accelxyz[2][0] >> 2;
+				updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
+				updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
 	
-	//			updateplane2->pitch = (float) client->visible[i].client->angles[0] * 128 / 1800;
-	//			updateplane2->xaccel = (float) client->visible[i].client->accelxyz[0] / 4;
-	//			updateplane2->prxspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[0] / 64) << 9) ^ 0x8000); // 7
-	//			updateplane2->prxspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[0] / 4) & 0x1FF) ^ 0x0100); // 9
-	//			updateplane2->roll = (float) client->visible[i].client->angles[1] * 128 / 1800;
-	//			updateplane2->yaccel = (float) client->visible[i].client->accelxyz[1] / 4;
-	//			updateplane2->bryspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[1] / 64) << 9) ^ 0x8000); // 7
-	//			updateplane2->bryspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[1] / 4) & 0x1FF) ^ 0x0100); // 9
-	//			updateplane2->yaw = (float) client->visible[i->client]->angles[2] * 128 / 1800;
-	//			updateplane2->zaccel = (float) client->visible[i].client->accelxyz[2] / 4;
-	//			updateplane2->yrzspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[2] / 64) << 9) ^ 0x8000); // 7
-	//			updateplane2->yrzspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[2] / 4) & 0x1FF) ^ 0x0100); // 9
+	//			updateplane2->pitch = (float) client->visible[i].client->angles[0][0] * 128 / 1800;
+	//			updateplane2->xaccel = (float) client->visible[i].client->accelxyz[0][0] / 4;
+	//			updateplane2->prxspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[0][0] / 64) << 9) ^ 0x8000); // 7
+	//			updateplane2->prxspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[0][0] / 4) & 0x1FF) ^ 0x0100); // 9
+	//			updateplane2->roll = (float) client->visible[i].client->angles[1][0] * 128 / 1800;
+	//			updateplane2->yaccel = (float) client->visible[i].client->accelxyz[1][0] / 4;
+	//			updateplane2->bryspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[1][0] / 64) << 9) ^ 0x8000); // 7
+	//			updateplane2->bryspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[1][0] / 4) & 0x1FF) ^ 0x0100); // 9
+	//			updateplane2->yaw = (float) client->visible[i->client]->angles[2][0] * 128 / 1800;
+	//			updateplane2->zaccel = (float) client->visible[i].client->accelxyz[2][0] / 4;
+	//			updateplane2->yrzspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[2][0] / 64) << 9) ^ 0x8000); // 7
+	//			updateplane2->yrzspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[2][0] / 4) & 0x1FF) ^ 0x0100); // 9
 			}
 			j++;
 		}
@@ -10336,9 +10356,9 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 	startack->plane = htons(ntohl(reqack->plane));
 	startack->numofarrays = 1;
 	startack->ord = 0;
-	startack->posx = htonl(building->posx?building->posx:client->posxy[0]);
-	startack->posy = htonl(building->posy?building->posy:client->posxy[1]);
-	startack->posz = htonl(building->posz?building->posz:client->posalt);
+	startack->posx = htonl(building->posx?building->posx:client->posxy[0][0]);
+	startack->posy = htonl(building->posy?building->posy:client->posxy[1][0]);
+	startack->posz = htonl(building->posz?building->posz:client->posalt[0]);
 
 	client->plane = ntohl(reqack->plane);
 	client->dronetimer = arena->time; // stores time when client started flight
@@ -10862,12 +10882,12 @@ void Kamikase(client_t *client)
 		
 	if(client->cancollide)
 	{
-		i = client->posalt + (client->speedxyz[2] / 2) - GetHeightAt(client->posxy[0], client->posxy[1]);
+		i = client->posalt[0] + (client->speedxyz[2][0] / 2) - GetHeightAt(client->posxy[0][0], client->posxy[1][0]);
 
 		if(i < 100) // supposed to made a kamikase
 		{
 			PPrintf(client, RADIO_YELLOW, "You made a Kamikase hit!");
-			AddBomb(0x01F9, client->posxy[0] + (client->speedxyz[0] / 2), client->posxy[1] + (client->speedxyz[1] / 2), 85/*800Kg*/, client->speedxyz[2], 0, client);
+			AddBomb(0x01F9, client->posxy[0][0] + (client->speedxyz[0][0] / 2), client->posxy[1][0] + (client->speedxyz[1][0] / 2), 85/*800Kg*/, client->speedxyz[2][0], 0, client);
 		}
 	}
 }

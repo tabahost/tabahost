@@ -445,8 +445,8 @@ void Cmd_Move(char *field, int country, client_t *client)
 	move->options = nothq; // 00 to HQ
 	move->field = fieldn;
 
-	client->posxy[0] = arena->fields[fieldn].posxyz[0];
-	client->posxy[1] = arena->fields[fieldn].posxyz[1];
+	client->posxy[0][0] = arena->fields[fieldn].posxyz[0];
+	client->posxy[1][0] = arena->fields[fieldn].posxyz[1];
 
 	UpdateIngameClients(0);
 
@@ -2691,10 +2691,10 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 	
 	drone->status1 = 0xC003;
 
-	drone->speedxyz[0] = DRONE_FAU_SPEED * sin(Com_Rad(angle)) * -1;
-	drone->speedxyz[1] = DRONE_FAU_SPEED * cos(Com_Rad(angle));
-	drone->speedxyz[2] = 100;
-	drone->angles[0] = 80;
+	drone->speedxyz[0][0] = DRONE_FAU_SPEED * sin(Com_Rad(angle)) * -1;
+	drone->speedxyz[1][0] = DRONE_FAU_SPEED * cos(Com_Rad(angle));
+	drone->speedxyz[2][0] = 100;
+	drone->angles[0][0] = 80;
 
 	PPrintf(client, RADIO_YELLOW, "V-1 launched azimuth: %.1f°, distance: %d fts ", angle, dist);
 
@@ -2703,7 +2703,7 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 		angle -= 3600;
 	}
 
-	drone->angles[2] = angle;
+	drone->angles[2][0] = angle;
 	drone->dronetimer = (float)dist*100/DRONE_FAU_SPEED;
 
 	if(attached)
@@ -4644,7 +4644,7 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 		}
 		*/
 
-		client->speedxyz[0] = client->speedxyz[1] =	client->angles[2] = 0;
+		client->speedxyz[0][0] = client->speedxyz[1][0] =	client->angles[2][0] = 0;
 		Cmd_Fly(1, client);
 	}
 	else
@@ -4655,59 +4655,59 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 			{
 				if(!Com_Stricmp(command, "speed"))
 				{
-					angle = WBtoHdg(client->angles[2]);
+					angle = WBtoHdg(client->angles[2][0]);
 
-					if(client->posalt)
+					if(client->posalt[0])
 					{
-						client->speedxyz[0] = (client->hmackgear + 1) * -25 * sin(Com_Rad(angle));
-						client->speedxyz[1] = (client->hmackgear + 1) * 25 * cos(Com_Rad(angle));
+						client->speedxyz[0][0] = (client->hmackgear + 1) * -25 * sin(Com_Rad(angle));
+						client->speedxyz[1][0] = (client->hmackgear + 1) * 25 * cos(Com_Rad(angle));
 					}
 				}
 				else if(!Com_Stricmp(command, "run"))
 				{
-					if(client->speedxyz[0] || client->speedxyz[1])
+					if(client->speedxyz[0][0] || client->speedxyz[1][0])
 						client->hmackgear = 1;
 
 					Cmd_Hmack(client, "speed", 0);
 				}
 				else if(!Com_Stricmp(command, "stop"))
 				{
-					client->speedxyz[0] = 0;
-					client->speedxyz[1] = 0;
+					client->speedxyz[0][0] = 0;
+					client->speedxyz[1][0] = 0;
 					client->hmackgear = 0;
 				}
 				else if(command[0] == '+')
 				{
 					command++;
-					if(client->angles[2] < 0)
-						client->angles[2] += 3600;
+					if(client->angles[2][0] < 0)
+						client->angles[2][0] += 3600;
 
-					if((client->angles[2] += (Com_Atof(command) * 10)) >= 3600)
-						client->angles[2] %= 3600;
+					if((client->angles[2][0] += (Com_Atof(command) * 10)) >= 3600)
+						client->angles[2][0] %= 3600;
 
-					if(client->angles[2] > 901)
+					if(client->angles[2][0] > 901)
 					{
-						client->angles[2] -= 3600;
+						client->angles[2][0] -= 3600;
 					}
 
-					if(client->speedxyz[0] || client->speedxyz[1])
+					if(client->speedxyz[0][0] || client->speedxyz[1][0])
 						Cmd_Hmack(client, "speed", 0);
 				}
 				else if(command[0] == '-')
 				{
 					command++;
-					if(client->angles[2] < 0)
-						client->angles[2] += 3600;
+					if(client->angles[2][0] < 0)
+						client->angles[2][0] += 3600;
 
-					if((client->angles[2] -= (Com_Atof(command) * 10)) < 0)
-						client->angles[2] = (3600 + client->angles[2]);
+					if((client->angles[2][0] -= (Com_Atof(command) * 10)) < 0)
+						client->angles[2][0] = (3600 + client->angles[2][0]);
 
-					if(client->angles[2] > 901)
+					if(client->angles[2][0] > 901)
 					{
-						client->angles[2] -= 3600;
+						client->angles[2][0] -= 3600;
 					}
 
-					if(client->speedxyz[0] || client->speedxyz[1])
+					if(client->speedxyz[0][0] || client->speedxyz[1][0])
 						Cmd_Hmack(client, "speed", 0);
 				}
 				else
@@ -4723,9 +4723,9 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 						angle -= 3600;
 					}
 
-					client->angles[2] = angle;
+					client->angles[2][0] = angle;
 
-					if(client->speedxyz[0] || client->speedxyz[1])
+					if(client->speedxyz[0][0] || client->speedxyz[1][0])
 						Cmd_Hmack(client, "speed", 0);
 				}
 				break;
@@ -4774,8 +4774,8 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 
 	for(i = 0; i < fields->value; i++)
 	{
-		x = client->posxy[0] - arena->fields[i].posxyz[0];
-		y = client->posxy[1] - arena->fields[i].posxyz[1];
+		x = client->posxy[0][0] - arena->fields[i].posxyz[0];
+		y = client->posxy[1][0] - arena->fields[i].posxyz[1];
 
 		if((x >= -10000 && x <= 10000) && (y >= -10000 && y <= 10000))
 		{
@@ -4812,7 +4812,7 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 			return;
 		}
 		
-		drone = AddDrone(DRONE_COMMANDOS, client->posxy[0], client->posxy[1], height, client->country, 61/*chute*/, client);
+		drone = AddDrone(DRONE_COMMANDOS, client->posxy[0][0], client->posxy[1][0], height, client->country, 61/*chute*/, client);
 
 		if(!drone)
 			return;
@@ -5235,13 +5235,13 @@ void Cmd_Minen(u_int32_t dist, float angle, client_t *client)
 	}
 
 	if(wb3->value)
-		destx = client->posxy[0] + (dist * sin(Com_Rad(angle)));
+		destx = client->posxy[0][0] + (dist * sin(Com_Rad(angle)));
 	else
-		destx = client->posxy[0] - (dist * sin(Com_Rad(angle)));
-	desty = client->posxy[1] + (dist * cos(Com_Rad(angle)));
+		destx = client->posxy[0][0] - (dist * sin(Com_Rad(angle)));
+	desty = client->posxy[1][0] + (dist * cos(Com_Rad(angle)));
 
-	ThrowBomb(FALSE, client->posxy[0], client->posxy[1], client->posalt, destx, desty, 0, client);
-//	ThrowBomb(TRUE, client->posxy[0], client->posxy[1], client->posalt, destx, desty, 0, client);
+	ThrowBomb(FALSE, client->posxy[0][0], client->posxy[1][0], client->posalt[0], destx, desty, 0, client);
+//	ThrowBomb(TRUE, client->posxy[0][0], client->posxy[1][0], client->posalt[0], destx, desty, 0, client);
 
 	PPrintf(client, RADIO_YELLOW, "Mortar fired dist %u azimuth %.2f (%d left)", dist, angle, client->mortars);
 }
@@ -5322,12 +5322,12 @@ void Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek)
 	{
 		sprintf(buffer, "I'm a %s at %s angels%.0f(%.0fm) %s to %s(%.0f)",
 			GetSmallPlaneName(client->plane),
-			Com_Padloc(client->posxy[0], client->posxy[1]),
-			WBAngels(client->posalt),
-			WBAltMeters(client->posalt),
-			WBVSI(client->speedxyz[2], 0),
-			WBRhumb(WBtoHdg(client->angles[2])),
-			WBHeading(WBtoHdg(client->angles[2]))
+			Com_Padloc(client->posxy[0][0], client->posxy[1][0]),
+			WBAngels(client->posalt[0]),
+			WBAltMeters(client->posalt[0]),
+			WBVSI(client->speedxyz[2][0], 0),
+			WBRhumb(WBtoHdg(client->angles[2][0])),
+			WBHeading(WBtoHdg(client->angles[2][0]))
 		);
 	}
 	else
@@ -5602,7 +5602,7 @@ void Cmd_Reload(client_t *client)
 	{
 		if(!(client->speedxyz[0] + client->speedxyz[1] + client->speedxyz[2]))
 		{
-			field = NearestField(client->posxy[0], client->posxy[1], 0, FALSE, FALSE, &distance);
+			field = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, FALSE, &distance);
 			
 			if(field >= 0 && arena->fields[field].country == client->country)
 			{
@@ -5690,9 +5690,9 @@ void Cmd_Rocket(int32_t y, double angle, double angle2, client_t *client)
 	drop->packetid = htons(Com_WBhton(0x1900));
 	drop->item = y;//113;//64;
 	drop->id = htons(0x01F9);
-	drop->posx = htonl(client->posxy[0]);
-	drop->posy = htonl(client->posxy[1]);// - y);
-	drop->alt = htonl(client->posalt);
+	drop->posx = htonl(client->posxy[0][0]);
+	drop->posy = htonl(client->posxy[1][0]);// - y);
+	drop->alt = htonl(client->posalt[0]);
 	drop->xspeed = htons(velx);
 	drop->yspeed = htons(vely);
 	drop->zspeed = htons(velz);
