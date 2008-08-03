@@ -610,7 +610,7 @@ void CheckArenaRules(void)
 				{
 					if(clients[j].inuse && clients[j].country != arena->fields[i].country &&(clients[j].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY)))
 					{
-						if(sqrt(Com_Pow(clients[j].posxy[0] - arena->fields[i].posxyz[0], 2) + Com_Pow(clients[j].posxy[1] - arena->fields[i].posxyz[1], 2)) < 9000)
+						if(sqrt(Com_Pow(clients[j].posxy[0][0] - arena->fields[i].posxyz[0], 2) + Com_Pow(clients[j].posxy[1][0] - arena->fields[i].posxyz[1], 2)) < 9000)
 						{
 							CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! Enemy column has been seen near F%d", i+1);
 							break;
@@ -1471,8 +1471,8 @@ void ProcessCommands(char *command, client_t *client)
 						{
 							if(client->related[i]->drone == DRONE_HMACK)
 							{
-								client->related[i]->posxy[0] = Com_Atoi(argv[1]);
-								client->related[i]->posxy[1] = Com_Atoi(argv[2]);
+								client->related[i]->posxy[0][0] = Com_Atoi(argv[1]);
+								client->related[i]->posxy[1][0] = Com_Atoi(argv[2]);
 								break;
 							}
 						}
@@ -1554,7 +1554,7 @@ void ProcessCommands(char *command, client_t *client)
 					return;
 				}
 			}
-			Cmd_Commandos(client, GetHeightAt(client->posxy[0], client->posxy[1]));
+			Cmd_Commandos(client, GetHeightAt(client->posxy[0][0], client->posxy[1][0]));
 			return;
 		}
 		else if(!Com_Stricmp(command, "minen"))
@@ -3850,7 +3850,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 	
 	if(end != 0x01)
 	{
-		land = NearestField(client->posxy[0], client->posxy[1], 0, FALSE, TRUE, &dist);
+		land = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, TRUE, &dist);
 		
 		if(land < 0)
 		{
@@ -3941,7 +3941,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			}
 			else
 			{
-				land = NearestField(client->posxy[0], client->posxy[1], 0, FALSE, FALSE, NULL);
+				land = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, FALSE, NULL);
 
 				if(land < 0)
 				{
@@ -3969,7 +3969,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			break;
 		case 0x02:
 			client->status1 |= STATUS_PILOT;
-			Com_Printf("%s is killed in flight at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+			Com_Printf("%s is killed in flight at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			PPrintf(client, RADIO_YELLOW, "%s is killed in flight", client->longnick);
 			CheckKiller(client);
 			Kamikase(client);
@@ -3977,12 +3977,12 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		case 0x04:
 			if(client->chute)
 			{
-				Com_Printf("%s's plane crashed at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+				Com_Printf("%s's plane crashed at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				PPrintf(client, RADIO_YELLOW, "%s's plane crashed", client->longnick);
 			}
 			else
 			{
-				Com_Printf("%s crashed at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+				Com_Printf("%s crashed at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				PPrintf(client, RADIO_YELLOW, "%s crashed", client->longnick);
 			}
 
@@ -3993,13 +3993,13 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				client->infly = 0;
 			break;
 		case 0x05:
-			Com_Printf("%s failed to ditch at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+			Com_Printf("%s failed to ditch at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			PPrintf(client, RADIO_YELLOW, "%s failed to ditch", client->longnick);
 			CheckKiller(client);
 			Kamikase(client);
 			break;
 		case 0x07:
-			Com_Printf("%s sucessfully bailed at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+			Com_Printf("%s sucessfully bailed at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 		
 			Com_LogEvent(EVENT_BAIL, client->id, 0);
 			Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4008,7 +4008,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			CheckKiller(client);
 			break;
 		case 0x08:
-			Com_Printf("%s ditched at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+			Com_Printf("%s ditched at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 		
 			Com_LogEvent(EVENT_DITCH, client->id, 0);
 			Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4025,7 +4025,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 			if(!emulatecollision->value || arcade->value)
 			{
-				Com_Printf("%s collided at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+				Com_Printf("%s collided at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				
 				Com_LogEvent(EVENT_COLLIDED, client->id, 0);
 				Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4037,7 +4037,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 				if(nearplane)
 				{
-					Com_Printf("%s collided with %s at %s\n", client->longnick, nearplane->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+					Com_Printf("%s collided with %s at %s\n", client->longnick, nearplane->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					
 					Com_LogEvent(EVENT_COLLIDED, client->id, nearplane->id);
 					Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4092,7 +4092,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			}
 			break;
 		case 0x0C:
-			Com_Printf("%s became a pancake at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0], client->posxy[1]));
+			Com_Printf("%s became a pancake at %s\n", client->longnick, land?field:Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			PPrintf(client, RADIO_YELLOW, "%s became pancake", client->longnick);
 			CheckKiller(client);
 			break;
@@ -4159,7 +4159,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 		
 		client->view = client->shanghai = client->attached = NULL;
-		client->speedxyz[0] = client->speedxyz[1] = client->speedxyz[2] = 0;
+		client->speedxyz[0][0] = client->speedxyz[1][0] = client->speedxyz[2][0] = 0;
 		UpdateIngameClients(0);
 
 		SendPacket(buffer, len, client);
@@ -5101,13 +5101,13 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 			{
 				BPrintf(RADIO_YELLOW, "%s ejected at %s",
 					client->longnick,
-					Com_Padloc(client->posxy[0], client->posxy[1]));
+					Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			}
 			else
 			{
 				Com_Printf("%s ejected at %s\n",
 					client->longnick,
-					Com_Padloc(client->posxy[0], client->posxy[1]));
+					Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			}
 			
 			client->chute = 1;
@@ -5462,8 +5462,8 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 	{
 		if(client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 		{
-			drop->posx = htonl(client->related[i]->posxy[0]);
-			drop->posy = htonl(client->related[i]->posxy[1]);
+			drop->posx = htonl(client->related[i]->posxy[0][0]);
+			drop->posy = htonl(client->related[i]->posxy[1][0]);
 
 			drop->id = htons(ntohs(drop->id) + (500 * (i+1)));
 
@@ -5471,7 +5471,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 			{
 				dist = 0;
 
-				j = NearestField(client->posxy[0], client->posxy[1], 0, TRUE, TRUE, &dist);
+				j = NearestField(client->posxy[0][0], client->posxy[1][0], 0, TRUE, TRUE, &dist);
 
 				if((j < 0) || (dist > MAX_FIELDRADIUS))//if(j == fields->value)
 					alt = ntohl(drop->alt);
@@ -10790,7 +10790,7 @@ void CheckCaptured(client_t *client)
 //	int32_t x, y;
 	u_int32_t dist, nearplane;
 
-	k = NearestField(client->posxy[0], client->posxy[1], client->country, TRUE, TRUE, &nearplane);
+	k = NearestField(client->posxy[0][0], client->posxy[1][0], client->country, TRUE, TRUE, &nearplane);
 
 	if(k >= 0)
 	{

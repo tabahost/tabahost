@@ -186,7 +186,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].plane = plane;
 					clients[i].posxy[0][0] = posx;
 					clients[i].posxy[1][0] = posy;
-					clients[i].posalt = posz + 100;
+					clients[i].posalt[0] = posz + 100;
 //					clients[i].atradar = 0;
 					clients[i].country = country;
 					clients[i].shortnick = shortnick;
@@ -676,7 +676,7 @@ int ProcessDrone(client_t *drone)
 
 			if(drone->dronetimer)
 			{
-				j = NearestField(drone->posxy[0], drone->posxy[1], drone->country, TRUE, TRUE, &dist);
+				j = NearestField(drone->posxy[0][0], drone->posxy[1][0], drone->country, TRUE, TRUE, &dist);
 
 				if(!((arena->frame - drone->frame) % 50))
 				{

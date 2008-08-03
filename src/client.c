@@ -411,7 +411,7 @@ int ProcessClient(client_t *client)
 						Com_Printf("%s %s is in fire at %s\n",
 							client-> longnick,
 							GetHitSite(client->oildamaged),
-							Com_Padloc(client->posxy[0], client->posxy[1]));
+							Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 						PPrintf(client, RADIO_WHITE, "Your %s is in Fire! Jump out!", GetHitSite(client->oildamaged));
 					}
 					client->oiltimer--;
@@ -421,7 +421,7 @@ int ProcessClient(client_t *client)
 					Com_Printf("%s %s exploded at %s\n",
 						client-> longnick,
 						GetHitSite(client->oildamaged),
-						Com_Padloc(client->posxy[0], client->posxy[1]));
+						Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 					PPrintf(client, RADIO_WHITE, "Your %s exploded!", GetHitSite(client->oildamaged - 4));
 					{
@@ -616,14 +616,14 @@ BackupPosition
 Backup client position, leaving [0] free to predict or to store by PPlanePosition
 *************/
 
-void BackupPosition(client_t *client, u_int8_t predict);
+void BackupPosition(client_t *client, u_int8_t predict)
 {
 	u_int8_t i;
 	int32_t temp = 0;
 
 	if(predict)
 		temp = PredictorCorrector(client->posxy[0], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->posxy[0][i + 1] = client->posxy[0][i];
 		client->posxy[0][0] = temp;
@@ -631,7 +631,7 @@ void BackupPosition(client_t *client, u_int8_t predict);
 
 	if(predict)
 		temp = PredictorCorrector(client->posxy[1], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->posxy[1][i + 1] = client->posxy[1][i];
 		client->posxy[1][0] = temp;
@@ -639,29 +639,29 @@ void BackupPosition(client_t *client, u_int8_t predict);
 
 	if(predict)
 		temp = PredictorCorrector(client->posalt, 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
-		client->posalt[i + 1] = posalt[i];
+		client->posalt[i + 1] = client->posalt[i];
 		client->posalt[0] = temp;
 	}
 
 	if(predict)
 		temp = PredictorCorrector(client->angles[0], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->angles[0][i + 1] = client->angles[0][i];
 		client->angles[0][0] = temp;
 	}
 	if(predict)
 		temp = PredictorCorrector(client->angles[1], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->angles[1][i + 1] = client->angles[1][i];
 		client->angles[1][0] = temp;
 	}
 	if(predict)
 		temp = PredictorCorrector(client->angles[2], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->angles[2][i + 1] = client->angles[2][i];
 		client->angles[2][0] = temp;
@@ -669,21 +669,21 @@ void BackupPosition(client_t *client, u_int8_t predict);
 
 	if(predict)
 		temp = PredictorCorrector(client->accelxyz[0], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->accelxyz[0][i + 1] = client->accelxyz[0][i];
 		client->accelxyz[0][0] = temp;
 	}
 	if(predict)
 		temp = PredictorCorrector(client->accelxyz[1], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->accelxyz[1][i + 1] = client->accelxyz[1][i];
 		client->accelxyz[1][0] = temp;
 	}
 	if(predict)
 		temp = PredictorCorrector(client->accelxyz[2], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->accelxyz[2][i + 1] = client->accelxyz[2][i];
 		client->accelxyz[2][0] = temp;
@@ -691,21 +691,21 @@ void BackupPosition(client_t *client, u_int8_t predict);
 
 	if(predict)
 		temp = PredictorCorrector(client->aspeeds[0], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->aspeeds[0][i + 1] = client->aspeeds[0][i];
 		client->aspeeds[0][0] = temp;
 	}
 	if(predict)
 		temp = PredictorCorrector(client->aspeeds[1], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->aspeeds[1][i + 1] = client->aspeeds[1][i];
 		client->aspeeds[1][0] = temp;
 	}
 	if(predict)
 		temp = PredictorCorrector(client->aspeeds[2], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->aspeeds[2][i + 1] = client->aspeeds[2][i];
 		client->aspeeds[2][0] = temp;
@@ -713,21 +713,21 @@ void BackupPosition(client_t *client, u_int8_t predict);
 
 	if(predict)
 		temp = PredictorCorrector(client->speedxyz[0], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->speedxyz[0][i + 1] = client->speedxyz[0][i];
 		client->speedxyz[0][0] = temp;
 	}
 	if(predict)
 		temp = PredictorCorrector(client->speedxyz[1], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->speedxyz[1][i + 1] = client->speedxyz[1][i];
 		client->speedxyz[1][0] = temp;
 	}
 	if(predict)
 		temp = PredictorCorrector(client->speedxyz[2], 4);
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		client->speedxyz[2][i + 1] = client->speedxyz[2][i];
 		client->speedxyz[2][0] = temp;
@@ -735,9 +735,9 @@ void BackupPosition(client_t *client, u_int8_t predict);
 
 	if(predict)
 	{
-		client->offset = client->postimer - arena->timer;
+		client->offset = client->postimer - arena->time;
 		client->timer -= client->offset;
-		client->postimer = arena->timer;
+		client->postimer = arena->time;
 		client->predict++;
 	}
 }

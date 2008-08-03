@@ -1809,9 +1809,9 @@ Made a predictor-corrector analysis and return next prediction for the value
 int32_t PredictorCorrector(int32_t *values, u_int8_t degree)
 {
 	u_int8_t i;
-	int64_t val[6];
+	int64_t val[MAX_PREDICT];
 
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
 		val[i] = (int64_t) values[i];
 	}

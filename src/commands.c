@@ -5600,7 +5600,7 @@ void Cmd_Reload(client_t *client)
 	
 	if(distance < 600)
 	{
-		if(!(client->speedxyz[0] + client->speedxyz[1] + client->speedxyz[2]))
+		if(!(client->speedxyz[0][0] + client->speedxyz[1][0] + client->speedxyz[2][0]))
 		{
 			field = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, FALSE, &distance);
 			

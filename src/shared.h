@@ -149,7 +149,8 @@ typedef unsigned int u_int32_t;
 #define MAX_RECVDATA		1024	// max data recv each recv()
 #define MAX_SENDDATA		1024 	// max data can send
 #define MAX_QUERY			4096 	// max data can be query
-#define MAX_RETRY			5 		// max number of retries
+#define MAX_RETRY			5		// max number of retries
+#define MAX_PREDICT			6		// max number os history for prediction
 #define MAX_TIMEOUT			6000	// 60 seconds of timeout (60x100frames)
 #define MAX_PRINTMSG		4096	// max chars per line
 #define MAX_RADIOMSG		74		// max of radio msg (63 chars + info)
@@ -716,13 +717,14 @@ typedef struct client_s
 
 	u_int8_t	chute;			// player ejected
 
+	u_int8_t	predict;		//
 	int16_t		offset;				// offset
-	int32_t		posxy[2][6];		// plane's position (x, y)
-	int32_t		posalt[6];			// plane's altitude
-	int16_t		angles[3][6];		// plane's angles (pitch, roll, yaw)
-	int16_t		accelxyz[3][6];	// plane's acceleration (x, y, z)
-	int16_t		aspeeds[3][6];		// plane's angular speeds (pitch, roll, yaw)
-	int16_t		speedxyz[3][6];	// plane's speed (x, y, z)
+	int32_t		posxy[2][MAX_PREDICT];		// plane's position (x, y)
+	int32_t		posalt[MAX_PREDICT];			// plane's altitude
+	int16_t		angles[3][MAX_PREDICT];		// plane's angles (pitch, roll, yaw)
+	int16_t		accelxyz[3][MAX_PREDICT];	// plane's acceleration (x, y, z)
+	int16_t		aspeeds[3][MAX_PREDICT];		// plane's angular speeds (pitch, roll, yaw)
+	int16_t		speedxyz[3][MAX_PREDICT];	// plane's speed (x, y, z)
 
 	u_int8_t	contrail;		// plane is above contrail->value
 	u_int32_t	status1;		// plane's status (gun, fuselage, etc)
@@ -2113,6 +2115,7 @@ void	AddClient(int socket, struct sockaddr_in *cli_addr);
 void	RemoveClient(client_t *client);
 void	DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client);
 int		ProcessClient (client_t *client);
+void	BackupPosition(client_t *client, u_int8_t predict);
 int32_t ProcessLogin (client_t *client);
 int 	CalcLoginKey(u_int8_t *Data, int Len);
 u_int8_t LoginKey(client_t *client);
