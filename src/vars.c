@@ -137,6 +137,7 @@ var_t	*planeatradar;	// extern
 var_t	*planerangelimit;	// extern
 var_t	*planerangelimitbomber;	// extern
 var_t	*port;			// extern
+var_t	*predictpos;	// extern
 var_t	*printeject;	// extern
 var_t	*printkills;	// extern
 var_t	*printqueries;	// extern
@@ -293,6 +294,7 @@ void InitVars(void)
 	planeatradar = Var_Get("planeatradar", "0", VAR_ARCHIVE);
 	planerangelimit = Var_Get("planerangelimit", "1500", VAR_ARCHIVE);
 	planerangelimitbomber = Var_Get("planerangelimitbomber", "1500", VAR_ARCHIVE);
+	predictpos = Var_Get("predictpos", "0", 0);
 	printeject = Var_Get("printeject", "0", VAR_ARCHIVE);
 	printkills = Var_Get("printkills", "1", VAR_ARCHIVE);
 	radaralt = Var_Get("radaralt", "600", VAR_ARCHIVE);

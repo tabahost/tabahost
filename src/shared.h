@@ -717,6 +717,8 @@ typedef struct client_s
 
 	u_int8_t	chute;			// player ejected
 
+	u_int16_t	warp;			// DEBUG: simulate warps
+	u_int16_t	warptimer;		// DEBUG: simulate warps
 	u_int8_t	predict;		//
 	int16_t		offset;				// offset
 	int32_t		posxy[2][MAX_PREDICT];		// plane's position (x, y)
@@ -2362,6 +2364,7 @@ extern	var_t		*planeatradar;	// show planes models at radar range
 extern	var_t		*planerangelimit;	//
 extern	var_t		*planerangelimitbomber;	//
 extern	var_t		*port;			// server port
+extern	var_t		*predictpos;	// enable position prediction with x degree
 extern	var_t		*printeject;	// print eject messages to everyone
 extern	var_t		*printkills;	// print kills messages
 extern	var_t		*radaralt;		//

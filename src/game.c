@@ -1256,6 +1256,19 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
+		else if(!Com_Stricmp(command, "warp") && (permission & (FLAG_ADMIN | FLAG_OP)))
+		{
+			if(argv[0])
+			{
+				client->warp = Com_Atoi(argv[0]) * 100; // convert seconds to frames
+				client->warptimer = client->warp;
+			}
+			else
+			{
+				PPrintf(client, RADIO_YELLOW, "usage: .warp <seconds>");
+			}
+			return;
+		}
 		else if(!Com_Stricmp(command, "fuel"))
 		{
 			if(argv[0])

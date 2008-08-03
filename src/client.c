@@ -472,9 +472,12 @@ int ProcessClient(client_t *client)
 					client->tklimit = 0;
 			}
 
-			if((arena->time - client->postimer) > 500) // if client didnt send position packet in 500ms
+			if(predictpos->value)
 			{
-				BackupPosition(client, TRUE);
+				if((arena->time - client->postimer) > 500) // if client didnt send position packet in 500ms
+				{
+					BackupPosition(client, TRUE);
+				}
 			}
 
 			if(!((arena->frame - client->frame) % 10))
@@ -578,6 +581,17 @@ int ProcessClient(client_t *client)
 					return -1;
 				}
 			}
+		}
+
+		if(!((arena->frame - client->frame) % 1000)) // 10 secs
+		{
+			client->warptimer = client->warp;
+		}
+
+		if(client->warptimer)
+		{
+			client->warptimer--;
+			return 0;
 		}
 
 		if(!setjmp(debug_buffer))
