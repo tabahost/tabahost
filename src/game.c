@@ -4690,6 +4690,8 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 		}
 
+		i = 0;
+		
 		if(client->predict)
 		{
 			if(client->predict > 5)
@@ -4699,6 +4701,8 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 
 			client->predict--;
 		}
+		
+		Com_Printf("DEBUG: i = %u\n", i);
 
 		if(client->infly)
 		{

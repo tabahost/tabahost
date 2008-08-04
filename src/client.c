@@ -472,10 +472,11 @@ int ProcessClient(client_t *client)
 					client->tklimit = 0;
 			}
 
-			if(predictpos->value)
+			if(predictpos->value && client->infly)
 			{
-				if((arena->time - client->postimer) > 500) // if client didnt send position packet in 500ms
+				if((arena->time - client->postimer) > 600) // if client didnt send position packet in 500ms
 				{
+					Com_Printf("DEBUG: arena - postimer %u\n", arena->time - client->postimer);
 					BackupPosition(client, TRUE);
 				}
 			}
@@ -635,6 +636,8 @@ void BackupPosition(client_t *client, u_int8_t predict)
 	u_int8_t i;
 	int32_t temp = 0;
 
+	Com_Printf("DEBUG: Backuping %u\n", predict);
+	
 	if(predict)
 		temp = PredictorCorrector(client->posxy[0], 4);
 	for(i = 0; i < MAX_PREDICT; i++)
