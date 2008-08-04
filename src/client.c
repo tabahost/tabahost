@@ -476,6 +476,7 @@ int ProcessClient(client_t *client)
 			{
 				if((arena->time - client->postimer) > 600) // if client didnt send position packet in 500ms
 				{
+					Com_Printf("DEBUG: arena->time %u\n", arena->time);
 					Com_Printf("DEBUG: arena - postimer %u\n", arena->time - client->postimer);
 					BackupPosition(client, TRUE);
 				}
@@ -485,7 +486,7 @@ int ProcessClient(client_t *client)
 			{
 				SendPlayersNear(client);
 
-				if(client->lograwdata)
+				if(client->lograwdata && !((arena->frame - client->frame) % 50))
 				{
 					LogRAWPosition(TRUE, client);
 				}
@@ -639,117 +640,166 @@ void BackupPosition(client_t *client, u_int8_t predict)
 	Com_Printf("DEBUG: Backuping %u\n", predict);
 	
 	if(predict)
-		temp = PredictorCorrector(client->posxy[0], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
 	{
-		client->posxy[0][i + 1] = client->posxy[0][i];
+		temp = PredictorCorrector32(client->posxy[0], (u_int8_t)predictpos->value);
+	}
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
+	{
+		client->posxy[0][i] = client->posxy[0][i - 1];
+	}
+	if(predict)
+	{
 		client->posxy[0][0] = temp;
 	}
 
 	if(predict)
-		temp = PredictorCorrector(client->posxy[1], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector32(client->posxy[1], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->posxy[1][i + 1] = client->posxy[1][i];
+		client->posxy[1][i] = client->posxy[1][i - 1];
+	}
+	if(predict)
+	{
 		client->posxy[1][0] = temp;
 	}
 
 	if(predict)
-		temp = PredictorCorrector(client->posalt, 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector32(client->posalt, (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->posalt[i + 1] = client->posalt[i];
+		client->posalt[i] = client->posalt[i - 1];
+	}
+	if(predict)
+	{
 		client->posalt[0] = temp;
 	}
-
+/*
 	if(predict)
-		temp = PredictorCorrector(client->angles[0], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
 	{
-		client->angles[0][i + 1] = client->angles[0][i];
-		client->angles[0][0] = temp;
+		temp = PredictorCorrector16(client->angles[0], (u_int8_t)predictpos->value);
+	}
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
+	{
+		client->angles[0][i] = client->angles[0][i - 1];
 	}
 	if(predict)
-		temp = PredictorCorrector(client->angles[1], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
 	{
-		client->angles[1][i + 1] = client->angles[1][i];
+		client->angles[0][0] = (int16_t)temp;
+	}
+	if(predict)
+		temp = PredictorCorrector16(client->angles[1], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
+	{
+		client->angles[1][i] = client->angles[1][i - 1];
+	}
+	if(predict)
+	{
 		client->angles[1][0] = temp;
 	}
 	if(predict)
-		temp = PredictorCorrector(client->angles[2], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->angles[2], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->angles[2][i + 1] = client->angles[2][i];
+		client->angles[2][i] = client->angles[2][i - 1];
+	}
+	if(predict)
+	{
 		client->angles[2][0] = temp;
 	}
 
 	if(predict)
-		temp = PredictorCorrector(client->accelxyz[0], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->accelxyz[0], predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->accelxyz[0][i + 1] = client->accelxyz[0][i];
+		client->accelxyz[0][i] = client->accelxyz[0][i - 1];
+	}
+	if(predict)
+	{
 		client->accelxyz[0][0] = temp;
 	}
 	if(predict)
-		temp = PredictorCorrector(client->accelxyz[1], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->accelxyz[1], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->accelxyz[1][i + 1] = client->accelxyz[1][i];
+		client->accelxyz[1][i] = client->accelxyz[1][i - 1];
+	}
+	if(predict)
+	{
 		client->accelxyz[1][0] = temp;
 	}
 	if(predict)
-		temp = PredictorCorrector(client->accelxyz[2], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->accelxyz[2], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->accelxyz[2][i + 1] = client->accelxyz[2][i];
+		client->accelxyz[2][i] = client->accelxyz[2][i - 1];
+	}
+	if(predict)
+	{
 		client->accelxyz[2][0] = temp;
 	}
 
 	if(predict)
-		temp = PredictorCorrector(client->aspeeds[0], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->aspeeds[0], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->aspeeds[0][i + 1] = client->aspeeds[0][i];
+		client->aspeeds[0][i] = client->aspeeds[0][i - 1];
+	}
+	if(predict)
+	{
 		client->aspeeds[0][0] = temp;
 	}
 	if(predict)
-		temp = PredictorCorrector(client->aspeeds[1], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->aspeeds[1], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->aspeeds[1][i + 1] = client->aspeeds[1][i];
+		client->aspeeds[1][i] = client->aspeeds[1][i - 1];
+	}
+	if(predict)
+	{
 		client->aspeeds[1][0] = temp;
 	}
 	if(predict)
-		temp = PredictorCorrector(client->aspeeds[2], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->aspeeds[2], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
 		client->aspeeds[2][i + 1] = client->aspeeds[2][i];
+	}
+	if(predict)
+	{
 		client->aspeeds[2][0] = temp;
 	}
-
+*/
 	if(predict)
-		temp = PredictorCorrector(client->speedxyz[0], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->speedxyz[0], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->speedxyz[0][i + 1] = client->speedxyz[0][i];
+		client->speedxyz[0][i] = client->speedxyz[0][i - 1];
+	}
+	if(predict)
+	{
 		client->speedxyz[0][0] = temp;
 	}
 	if(predict)
-		temp = PredictorCorrector(client->speedxyz[1], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->speedxyz[1], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->speedxyz[1][i + 1] = client->speedxyz[1][i];
+		client->speedxyz[1][i] = client->speedxyz[1][i - 1];
+	}
+	if(predict)
+	{
 		client->speedxyz[1][0] = temp;
 	}
 	if(predict)
-		temp = PredictorCorrector(client->speedxyz[2], 4);
-	for(i = 0; i < MAX_PREDICT; i++)
+		temp = PredictorCorrector16(client->speedxyz[2], (u_int8_t)predictpos->value);
+	for(i = (MAX_PREDICT - 1); i > 0; i--)
 	{
-		client->speedxyz[2][i + 1] = client->speedxyz[2][i];
+		client->speedxyz[2][i] = client->speedxyz[2][i - 1];
+	}
+	if(predict)
+	{
 		client->speedxyz[2][0] = temp;
 	}
-
+	
 	if(predict)
 	{
 		client->offset = client->postimer - arena->time;

@@ -1938,6 +1938,8 @@ double	WBAltMeters(double dAbsAltitude);
 char	*WBVSI(double dClimbRate, int fIsBomber);
 char	*WBRhumb(double dHeading /* in degrees*/);
 double	WBHeading(double dHeading);
+int32_t PredictorCorrector32(int32_t *values, u_int8_t degree);
+int16_t PredictorCorrector16(int16_t *values, u_int8_t degree);
 char	*PadLoc(char *szBuffer, double dLongitude, double dLatitude);
 // vars.c
 void	InitVars(void);

@@ -4640,6 +4640,8 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		plane = (planeposition_t *) buffer;
 	}
 
+	Com_Printf("DEBUG:2arena->time %u\n", arena->time);
+	Com_Printf("DEBUG:2arena - postimer %u\n", arena->time - client->postimer);
 	client->postimer = arena->time; // set the time when last position packet has been received
 
 	if(attached)

@@ -1801,31 +1801,62 @@ double WBHeading(double dHeading)
 }
 
 /*******************
-PredictorCorrector
+PredictorCorrector32
 
 Made a predictor-corrector analysis and return next prediction for the value
 ********************/
 
-int32_t PredictorCorrector(int32_t *values, u_int8_t degree)
+int32_t PredictorCorrector32(int32_t *values, u_int8_t degree)
 {
 	u_int8_t i;
 	int64_t val[MAX_PREDICT];
 
 	for(i = 0; i < MAX_PREDICT; i++)
 	{
-		val[i] = (int64_t) values[i];
+		val[i] = (int64_t)values[i];
 	}
-
+	
 	switch(degree)
 	{
 		case 1:
-			return (int32_t)3*val[2] - 3*val[1] + val[0];
+			return (int32_t) 3*val[0] - 3*val[1] + val[2];
 		case 2:
-			return (int32_t)4*val[3] - 6*val[2] + 4*val[1] - val[0];
+			return (int32_t) 4*val[0] - 6*val[1] + 4*val[2] - val[3];
 		case 3:
-			return (int32_t)5*val[4] - 10*val[3] + 10*val[2] - 5*val[1] + val[0];
+			return (int32_t) 5*val[0] - 10*val[1] + 10*val[2] - 5*val[3] + val[4];
 		case 4:
-			return (int32_t)6*val[5] - 15*val[4] + 20*val[3] - 15*val[2] + 6*val[1] - val[0];
+			return (int32_t) 6*val[0] - 15*val[1] + 20*val[2] - 15*val[3] + 6*val[4] - val[5];
+		default:
+			return 0;
+	}
+}
+
+/*******************
+PredictorCorrector16
+
+Made a predictor-corrector analysis and return next prediction for the value
+********************/
+
+int16_t PredictorCorrector16(int16_t *values, u_int8_t degree)
+{
+	u_int8_t i;
+	int32_t val[MAX_PREDICT];
+
+	for(i = 0; i < MAX_PREDICT; i++)
+	{
+		val[i] = (int32_t)values[i];
+	}
+	
+	switch(degree)
+	{
+		case 1:
+			return (int16_t) 3*val[0] - 3*val[1] + val[2];
+		case 2:
+			return (int16_t) 4*val[0] - 6*val[1] + 4*val[2] - val[3];
+		case 3:
+			return (int16_t) 5*val[0] - 10*val[1] + 10*val[2] - 5*val[3] + val[4];
+		case 4:
+			return (int16_t) 6*val[0] - 15*val[1] + 20*val[2] - 15*val[3] + 6*val[4] - val[5];
 		default:
 			return 0;
 	}
