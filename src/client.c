@@ -476,8 +476,6 @@ int ProcessClient(client_t *client)
 			{
 				if((arena->time - client->postimer) > 600) // if client didnt send position packet in 500ms
 				{
-					Com_Printf("DEBUG: arena->time %u\n", arena->time);
-					Com_Printf("DEBUG: arena - postimer %u\n", arena->time - client->postimer);
 					BackupPosition(client, TRUE);
 				}
 			}
@@ -637,7 +635,6 @@ void BackupPosition(client_t *client, u_int8_t predict)
 	u_int8_t i;
 	int32_t temp = 0;
 
-	Com_Printf("DEBUG: Backuping %u\n", predict);
 	
 	if(predict)
 	{
@@ -1648,8 +1645,6 @@ void ClearKillers(client_t *client)
 CheckKiller
 
 Check who killed client
-
-DEBUG: CHANGE IsFighter and IsBomber for a plane number function
 *************/
 
 void CheckKiller(client_t *client)

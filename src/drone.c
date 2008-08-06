@@ -945,6 +945,8 @@ int ProcessDrone(client_t *drone)
 
 						if(drone->dronelasttarget < MAX_BUILDINGS)
 						{
+							if(drone->related[0] && (drone->related[0]->attr & (FLAG_ADMIN | FLAG_OP)))
+								PPrintf(drone->related[0], RADIO_YELLOW, "Fire mortar to %s at F%d (armor left %d)", GetBuildingType(arena->fields[drone->dronefield].buildings[drone->dronelasttarget].type), drone->dronefield+1, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].armor);
 							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 //							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 						}
