@@ -4784,7 +4784,7 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 			if((arena->fields[i].type == FIELD_WB3POST && dist < 1000) ||
 				(arena->fields[i].type == FIELD_WB3VILLAGE && dist < 2700) ||
 				(arena->fields[i].type == FIELD_WB3TOWN && dist < 3600) ||
-				(arena->fields[i].type <= FIELD_MAIN && dist < 3600))
+				(arena->fields[i].type <= FIELD_MAIN && dist < 4500))
 			{
 				PPrintf(client, RADIO_YELLOW, "Too near to field f%d, acks would kill Commandos", i+1);
 				return;

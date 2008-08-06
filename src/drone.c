@@ -1475,7 +1475,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	}
 
 	min = GetMunition(81);
-	max = GetMunition(87);
+	max = GetMunition(88); // 250kg bomb
 
 	if(max->he == min->he)
 	{
@@ -1510,9 +1510,9 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 			b = y - arena->cities[field - (int16_t)fields->value].posxyz[1];
 		}
 
-		if((a >= -3600 && a <= 3600) && (b >= -3600 && b <= 3600))
+		if((a >= -4500 && a <= 4500) && (b >= -4500 && b <= 4500))
 		{
-			if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < 3600)
+			if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < 4500)
 			{
 				if(field < fields->value)
 				{
@@ -1665,9 +1665,9 @@ void PFAUDamage(client_t *fau)
 			b = fau->posxy[1][0] - arena->cities[i - (int16_t)fields->value].posxyz[1];
 		}
 
-		if((a >= -3600 && a <= 3600) && (b >= -3600 && b <= 3600))
+		if((a >= -4500 && a <= 4500) && (b >= -4500 && b <= 4500))
 		{
-			if((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < 3600)
+			if((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < 4500)
 				break;
 		}
 	}

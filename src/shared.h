@@ -170,7 +170,7 @@ typedef unsigned int u_int32_t;
 #define MAX_BOMBS			256		// emulated bombs array
 #define MAX_BOMBRADIUS		315		//
 #define MIN_BOMBRADIUS		129		//
-#define MAX_FIELDRADIUS		3600 //10000	// FIXME: tweak it
+#define MAX_FIELDRADIUS		4500 //10000	MAIN= 4500	// FIXME: tweak it
 #define	MAX_MAPCYCLE		16		// max of maps can contain mapcycle
 #define MAX_PLACE			32		// max num of plane parts
 #define VAR_ARCHIVE			1		// set to cause it to be saved to config.cfg
