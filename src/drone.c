@@ -941,28 +941,15 @@ int ProcessDrone(client_t *drone)
 				{
 					if(arena->fields[drone->dronefield].country != drone->country)
 					{
-						for(i = 0; i < MAX_BUILDINGS; i++)
-						{
-							if(!arena->fields[drone->dronefield].buildings[i].field)
-							{
-								break;
-							}
-							else if(!arena->fields[drone->dronefield].buildings[i].status && IsVitalBuilding(&(arena->fields[drone->dronefield].buildings[i])))
-							{
-								x = drone->posxy[0][0] - arena->fields[drone->dronefield].buildings[i].posx;
-								y = drone->posxy[1][0] - arena->fields[drone->dronefield].buildings[i].posy;
+						DroneGetTarget(drone);
 
-								if(x < 10000 && x > -10000 && y < 10000 && y > -10000)
-								{
-									if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < 14000)
-									{
-										ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[i].posx, arena->fields[drone->dronefield].buildings[i].posy, 0, drone);
-//										ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[i].posx, arena->fields[drone->dronefield].buildings[i].posy, 0, drone);
-									}
-									break;
-								}
-							}
+						if(drone->dronelasttarget < MAX_BUILDINGS)
+						{
+							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
+//							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 						}
+						else
+							drone->dronetimer = 0;
 					}
 					else
 						drone->dronetimer = 0;
@@ -1009,10 +996,64 @@ int ProcessDrone(client_t *drone)
 
 		drone->offset = drone->timer - arena->time;
 		drone->timer = arena->time;
-	}
+	}	
 
 	return 0;
 }
+
+/*************
+DroneGetTarget
+
+Get randomized in-range target
+*************/
+
+void DroneGetTarget(client_t *drone)
+{
+	int32_t x, y;
+	u_int16_t i, j;
+	u_int16_t temp[MAX_BUILDINGS];
+
+	if(!drone || !drone->drone || (drone->dronelasttarget < MAX_BUILDINGS && !arena->fields[drone->dronefield].buildings[drone->dronelasttarget].status))
+		return;
+
+	for(i = 0, j = 0; i < MAX_BUILDINGS; i++)
+	{
+		if(!arena->fields[drone->dronefield].buildings[i].field)
+		{
+			break; // end of array
+		}
+		else if(!arena->fields[drone->dronefield].buildings[i].status && IsVitalBuilding(&(arena->fields[drone->dronefield].buildings[i])))
+		{
+			x = drone->posxy[0][0] - arena->fields[drone->dronefield].buildings[i].posx;
+			y = drone->posxy[1][0] - arena->fields[drone->dronefield].buildings[i].posy;
+
+			if(x < 10000 && x > -10000 && y < 10000 && y > -10000)
+			{
+				//if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < 14000) 
+				if(1.0*x*x + 1.0*y*y < 196000000 /* 14000^2 */) // 14000^2 = 28 bits; x^2+y^2 = 28 bits
+				{
+					temp[j] = i;
+					j++;
+				}
+			}
+		}
+	}
+	
+	
+	if(!j)
+	{
+		drone->dronelasttarget = MAX_BUILDINGS;
+	}
+	else
+	{
+		i = rand() % j;
+		if(i < MAX_BUILDINGS)
+			drone->dronelasttarget = temp[i];
+		else 
+			drone->dronelasttarget = MAX_BUILDINGS;
+	}
+}
+
 
 /*************
 FireAck

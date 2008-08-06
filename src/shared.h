@@ -690,6 +690,7 @@ typedef struct client_s
 	float		dronedistance;	// wingmen formation changed (angle diff between last pos to new pos)
 	u_int8_t	dronefield;		// where drone was dropped
 	u_int32_t	dronetimer;		// how many frames drones will live & time client started to fly (game.c:1643)
+	u_int16_t	dronelasttarget; // Last target drone (commandos) had aimed
 	u_int8_t	commandos;		// how many commandos client is allowed to drop
 	int32_t		aim[3];			// where drone is aiming
 //	drone vars END
@@ -2155,6 +2156,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 void	RemoveDrone(client_t *drone);
 void	DroneVisibleList(client_t *drone);
 int		ProcessDrone(client_t *drone);
+void	DroneGetTarget(client_t *drone);
 void	FireAck(client_t *source, client_t *dest, u_int8_t animate);
 void	CVFire(int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz);
 void	ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz, client_t *client);
