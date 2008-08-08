@@ -321,7 +321,10 @@ void CheckArenaRules(void)
 			}
 			else
 			{
-				HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, 0, arena->bombs[i].from);
+				if(arena->bombs[i].type == 89) // DEBUG: Nuke test
+					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, TRUE, arena->bombs[i].from);
+				else
+					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, FALSE, arena->bombs[i].from);
 				arena->bombs[i].id = 0;
 			}
 		}
@@ -2667,6 +2670,11 @@ void ProcessCommands(char *command, client_t *client)
 				Cmd_Rocket(Com_Atoi(argv[0]), Com_Atof(argv[1]), Com_Atof(argv[2]), client);
 			}
 
+			return;
+		}
+		else if(!Com_Stricmp(command, "nuke") && client)
+		{
+			Cmd_DropNukeBomb(client);
 			return;
 		}
 		else if(!Com_Stricmp(command, "restore"))
@@ -5413,6 +5421,11 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 	
 	drop->packetid = htons(Com_WBhton(0x1900));
 	
+	if(drop->item == 89) // DEBUG: Nuke
+	{
+		SendPacket(buffer, len, client);
+	}
+
 	for(i = 0; i < maxentities->value; i++)
 	{
 		if(clients[i].inuse && !clients[i].drone)
@@ -8809,7 +8822,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->maxpilotg = htons(maxpilotg->value);
 		wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
 		wb3arenarules->ywindvelocity = htonl(ywindvelocity->value);
-		wb3arenarules->zwindvelocity = htonl(zwindvelocity->value);
+		wb3arenarules->zwindvelocity = client->plane == 54 /*ju52*/?htonl(zwindvelocity->value - 10):htonl(zwindvelocity->value);
 		wb3arenarules->structlim = structlim->value;
 		wb3arenarules->unknown1 = 0x2D;
 		wb3arenarules->unknown2 = 0xA0;

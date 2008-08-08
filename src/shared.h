@@ -2220,6 +2220,7 @@ void	Cmd_Shanghai(u_int8_t *buffer, client_t *client);
 void	Cmd_View(client_t *victim, client_t *client);
 void	Cmd_Minen(u_int32_t dist, float angle, client_t *client);
 void	Cmd_Tanks(char *field, client_t *client);
+void	Cmd_DropNukeBomb(client_t *client);
 void	Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek);
 void	Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client);
 void	Cmd_Restore(u_int8_t field, client_t *client);

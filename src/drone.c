@@ -1460,36 +1460,46 @@ Check if there are structs near bomb hit and kill them
 u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_int8_t nuke, client_t *client)
 {
 	int32_t a, b;
-	u_int16_t i, j, k;
+	u_int16_t i, k, j;
+	int16_t m;
 	u_int8_t field, city, damaged;
 	munition_t *munition, *max, *min;
 	int16_t radius;
 	int8_t killer = 0;
 	
-	munition = GetMunition(type);
+	if(type == 89)  // DEBUG: NUKE
+		munition = GetMunition(88);
+	else
+		munition = GetMunition(type);
 		
 	if(!munition)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Unknown munition ID %d, plane %d", type, client?client->plane:0);
 		return 0;
 	}
-
-	min = GetMunition(81);
-	max = GetMunition(88); // 250kg bomb
-
-	if(max->he == min->he)
-	{
-		Com_Printf("WARNING: HitStructsNear(): min->he == max->he\n");
-		radius = 0;
-	}
-	else
-		radius = (munition->he - min->he) * (MAX_BOMBRADIUS - MIN_BOMBRADIUS) / (max->he - min->he);
-
-	radius += MIN_BOMBRADIUS;
-
+	
 	if(!nuke)
+	{
+		min = GetMunition(81);
+		max = GetMunition(88); // 250kg bomb
+	
+		if(max->he == min->he)
+		{
+			Com_Printf("WARNING: HitStructsNear(): min->he == max->he\n");
+			radius = 0;
+		}
+		else
+			radius = (munition->he - min->he) * (MAX_BOMBRADIUS - MIN_BOMBRADIUS) / (max->he - min->he);
+	
+		radius += MIN_BOMBRADIUS;
+		
 		if(radius > MAX_BOMBRADIUS)
 			radius = MAX_BOMBRADIUS;
+	}
+	else
+	{
+		radius = MAX_FIELDRADIUS;
+	}
 
 	if(gunstats->value)
 		PPrintf(client, RADIO_RED, "Radius %d", radius);
@@ -1604,16 +1614,24 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	{
 		if(clients[i].inuse && clients[i].infly)
 		{
-			if(clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
-				radius = 50;
+			if(!nuke)
+			{
+				if(clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
+					radius = 50;
+				else
+					radius = 180;
+				
+				m = 200;
+			}
 			else
-				radius = 180;
-
+			{
+				m = radius * 1.4;
+			}
 
 			a = x - clients[i].posxy[0][0];
 			b = y - clients[i].posxy[1][0];
 
-			if(a > -200 && a < 200 && b > -200 && b < 200)
+			if(a > (m * -1) && a < m && b > (m * -1) && b < m)
 			{
 				if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
 				{
