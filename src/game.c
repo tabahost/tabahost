@@ -2287,6 +2287,8 @@ void ProcessCommands(char *command, client_t *client)
 
 	if(permission & (FLAG_ADMIN | FLAG_OP)) // commands that ADMIN's and OP's can execute
 	{
+		Com_Printf("COMMAND: %s:.%s %s %s %s\n", client?client->longnick:"-HOST-", command, argv[0]?argv[0]:" ", argv[1]?argv[1]:" ", argv[2]?argv[2]:" ");
+		
 		if(!Com_Stricmp(command, "dbpasswd"))
 		{
 			if(!argv[0])
