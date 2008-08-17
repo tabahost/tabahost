@@ -4096,7 +4096,7 @@ void NoopArenalist(void)
 
 	if(arenalist->value)
 	{
-		inet_aton("89.108.72.190", &Target.sin_addr); // Target.sin_addr.s_addr = inet_addr("83.149.244.5");
+		inet_aton("83.149.244.5", &Target.sin_addr); // Target.sin_addr.s_addr = inet_addr("83.149.244.5");
 		sendto(UdpSock, buffer, offset, 0, (struct sockaddr *) &Target, sizeof(Target)); // send to russian arena
 
 		if(strlen(nooparena->string) > 4)

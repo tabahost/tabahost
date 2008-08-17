@@ -170,7 +170,7 @@ typedef unsigned int u_int32_t;
 #define MAX_BOMBS			256		// emulated bombs array
 #define MAX_BOMBRADIUS		315		//
 #define MIN_BOMBRADIUS		129		//
-#define MAX_FIELDRADIUS		4500 //10000	MAIN= 4500	// FIXME: tweak it
+#define MAX_FIELDRADIUS		3600 //10000	// FIXME: tweak it
 #define	MAX_MAPCYCLE		16		// max of maps can contain mapcycle
 #define MAX_PLACE			32		// max num of plane parts
 #define VAR_ARCHIVE			1		// set to cause it to be saved to config.cfg
@@ -964,7 +964,7 @@ typedef struct reqbomberlist_s			// 02 04
 {
 	u_int16_t	packetid;
 	u_int8_t	unknown1;
-	u_int8_t	unknown2;
+	u_int8_t	numofnicks;
 	u_int32_t	nick;
 } reqbomberlist_t;
 
@@ -1115,8 +1115,8 @@ typedef struct wb3startack_s	// 02 1F
 	u_int32_t	unk18;
 	u_int32_t	unk19;
 	
-	u_int32_t	posx;
-	u_int32_t	posy;
+	int32_t		posx;
+	int32_t		posy;
 	u_int32_t	posz;
 	
 	u_int32_t	unk23;
@@ -1617,7 +1617,7 @@ typedef struct hardhitstructure_s	// 1B 05
 	u_int16_t	speed;
 } hardhitstructure_t;
 
-typedef struct weapondestroy_2	// 1B 06
+typedef struct weapondestroy_s	// 1B 06
 {
 	u_int16_t	packetid;
 	u_int16_t	itemid;
@@ -2220,7 +2220,6 @@ void	Cmd_Shanghai(u_int8_t *buffer, client_t *client);
 void	Cmd_View(client_t *victim, client_t *client);
 void	Cmd_Minen(u_int32_t dist, float angle, client_t *client);
 void	Cmd_Tanks(char *field, client_t *client);
-void	Cmd_DropNukeBomb(client_t *client);
 void	Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek);
 void	Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client);
 void	Cmd_Restore(u_int8_t field, client_t *client);

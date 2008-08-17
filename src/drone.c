@@ -945,8 +945,6 @@ int ProcessDrone(client_t *drone)
 
 						if(drone->dronelasttarget < MAX_BUILDINGS)
 						{
-							if(drone->related[0] && (drone->related[0]->attr & (FLAG_ADMIN | FLAG_OP)))
-								PPrintf(drone->related[0], RADIO_YELLOW, "Fire mortar to %s at F%d (armor left %d)", GetBuildingType(arena->fields[drone->dronefield].buildings[drone->dronelasttarget].type), drone->dronefield+1, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].armor);
 							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 //							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 						}
@@ -1113,7 +1111,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 	}
 	else
 	{
-		otto->packetid = htons(0x2101);
+		otto->packetid = htons(Com_WBhton(0x2101));
 	}
 	otto->item = 143;
 	otto->posx = htonl(source->posxy[0][0]);
@@ -1460,46 +1458,36 @@ Check if there are structs near bomb hit and kill them
 u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_int8_t nuke, client_t *client)
 {
 	int32_t a, b;
-	u_int16_t i, k, j;
-	int16_t m;
+	u_int16_t i, j, k;
 	u_int8_t field, city, damaged;
 	munition_t *munition, *max, *min;
 	int16_t radius;
 	int8_t killer = 0;
 	
-	if(type == 89)  // DEBUG: NUKE
-		munition = GetMunition(88);
-	else
-		munition = GetMunition(type);
+	munition = GetMunition(type);
 		
 	if(!munition)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Unknown munition ID %d, plane %d", type, client?client->plane:0);
 		return 0;
 	}
-	
-	if(!nuke)
+
+	min = GetMunition(81);
+	max = GetMunition(87);
+
+	if(max->he == min->he)
 	{
-		min = GetMunition(81);
-		max = GetMunition(88); // 250kg bomb
-	
-		if(max->he == min->he)
-		{
-			Com_Printf("WARNING: HitStructsNear(): min->he == max->he\n");
-			radius = 0;
-		}
-		else
-			radius = (munition->he - min->he) * (MAX_BOMBRADIUS - MIN_BOMBRADIUS) / (max->he - min->he);
-	
-		radius += MIN_BOMBRADIUS;
-		
-		if(radius > MAX_BOMBRADIUS)
-			radius = MAX_BOMBRADIUS;
+		Com_Printf("WARNING: HitStructsNear(): min->he == max->he\n");
+		radius = 0;
 	}
 	else
-	{
-		radius = MAX_FIELDRADIUS;
-	}
+		radius = (munition->he - min->he) * (MAX_BOMBRADIUS - MIN_BOMBRADIUS) / (max->he - min->he);
+
+	radius += MIN_BOMBRADIUS;
+
+	if(!nuke)
+		if(radius > MAX_BOMBRADIUS)
+			radius = MAX_BOMBRADIUS;
 
 	if(gunstats->value)
 		PPrintf(client, RADIO_RED, "Radius %d", radius);
@@ -1520,9 +1508,9 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 			b = y - arena->cities[field - (int16_t)fields->value].posxyz[1];
 		}
 
-		if((a >= -4500 && a <= 4500) && (b >= -4500 && b <= 4500))
+		if((a >= -3600 && a <= 3600) && (b >= -3600 && b <= 3600))
 		{
-			if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < 4500)
+			if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < 3600)
 			{
 				if(field < fields->value)
 				{
@@ -1614,24 +1602,16 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	{
 		if(clients[i].inuse && clients[i].infly)
 		{
-			if(!nuke)
-			{
-				if(clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
-					radius = 50;
-				else
-					radius = 180;
-				
-				m = 200;
-			}
+			if(clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
+				radius = 50;
 			else
-			{
-				m = radius * 1.4;
-			}
+				radius = 180;
+
 
 			a = x - clients[i].posxy[0][0];
 			b = y - clients[i].posxy[1][0];
 
-			if(a > (m * -1) && a < m && b > (m * -1) && b < m)
+			if(a > -200 && a < 200 && b > -200 && b < 200)
 			{
 				if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
 				{
@@ -1683,9 +1663,9 @@ void PFAUDamage(client_t *fau)
 			b = fau->posxy[1][0] - arena->cities[i - (int16_t)fields->value].posxyz[1];
 		}
 
-		if((a >= -4500 && a <= 4500) && (b >= -4500 && b <= 4500))
+		if((a >= -3600 && a <= 3600) && (b >= -3600 && b <= 3600))
 		{
-			if((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < 4500)
+			if((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < 3600)
 				break;
 		}
 	}

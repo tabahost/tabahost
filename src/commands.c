@@ -4784,7 +4784,7 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 			if((arena->fields[i].type == FIELD_WB3POST && dist < 1000) ||
 				(arena->fields[i].type == FIELD_WB3VILLAGE && dist < 2700) ||
 				(arena->fields[i].type == FIELD_WB3TOWN && dist < 3600) ||
-				(arena->fields[i].type <= FIELD_MAIN && dist < 4500))
+				(arena->fields[i].type <= FIELD_MAIN && dist < 3600))
 			{
 				PPrintf(client, RADIO_YELLOW, "Too near to field f%d, acks would kill Commandos", i+1);
 				return;
@@ -5303,72 +5303,6 @@ void Cmd_Tanks(char *field, client_t *client)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Invalid Field");
 	}
-}
-
-/*************
-Cmd_DropNukeBomb
-
-Drop a virtual bomb
-*************/
-
-void Cmd_DropNukeBomb(client_t *client)
-{
-	u_int8_t buffer[64];
-	rocketbomb_t *drop;
-	int16_t j;
-	u_int32_t time, dist;
-	int16_t speed, z, x, y;
-	int32_t destx, desty, alt;
-	
-	drop = (rocketbomb_t *)buffer;
-	
-	drop->posx = htonl(client->posxy[0][0]);
-	drop->posy = htonl(client->posxy[1][0]);
-	drop->alt = htonl(client->posalt[0]);
-	drop->id = htons((rand() % 500) + 500);
-	drop->item = 89;
-	drop->packetid = htons(Com_WBhton(0x1900));
-	drop->shortnick = htonl(client->shortnick);
-	drop->xspeed = htons(client->speedxyz[0][0]);
-	drop->yspeed = htons(client->speedxyz[1][0]);
-	drop->zspeed = htons(-1);
-
-	dist = 0;
-
-	j = NearestField(client->posxy[0][0], client->posxy[1][0], 0, TRUE, TRUE, &dist);
-
-	if((j < 0) || (dist > MAX_FIELDRADIUS))//if(j == fields->value)
-		alt = client->posalt[0];
-	else
-	{
-		if(j < fields->value)
-			alt = client->posalt[0] - arena->fields[j].posxyz[2]; // FIXME: calculate destx desty and GetHeightAt()
-		else
-			alt = client->posalt[0] - arena->cities[j - (int16_t)fields->value].posxyz[2]; // FIXME: calculate destx desty and GetHeightAt()
-	}
-
-	if(alt < 0)
-		alt = 0;
-
-	x = client->speedxyz[0][0];
-	y = client->speedxyz[1][0];
-	z = -1;
-
-	speed = sqrt(Com_Pow(z, 2) + (double)(2 * GRAVITY * alt));
-	time = (z + speed) / GRAVITY;
-	
-	destx = client->posxy[0][0];
-	desty = client->posxy[1][0];
-
-	destx += x * time;
-	desty += y * time;
-
-	time *= 100; // convert to frames
-
-
-//				PPrintf(client, RADIO_WHITE, "Vx %d Vy %d Vz %d speed %d", x, y, z, speed);
-	AddBomb(ntohs(drop->id), destx, desty, drop->item, speed, time, client);
-	PDropItem(buffer, 31, client);
 }
 
 /*************

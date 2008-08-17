@@ -68,10 +68,10 @@ u_int8_t	mainbuffer[MAX_RECVDATA]; //extern
 u_int16_t	packets_tab[209][3] = {
 		// WB2   WB2007  WB2008
 		{0x0200, 0x0400, 0xFFFF}, // pcNEW_USER
-		{0x0201, 0x0401, 0x0809}, // pcSTART_FLIGHT
+		{0x0201, 0x0401, 0x0809}, // pcSTART_FLIGHT *
 		{0x0202, 0x0402, 0x080A}, // pcEXIT_FLIGHT =
-		{0x0203, 0x0403, 0x080B}, // pcMOVE_TO
-		{0x0204, 0x0404, 0x080C}, // pcCONFIG_USER
+		{0x0203, 0x0403, 0x080B}, // pcMOVE_TO *
+		{0x0204, 0x0404, 0x080C}, // pcCONFIG_USER *
 		{0x0205, 0x0405, 0xFFFF}, // pcSETSQDNINFO
 		{0x0206, 0x0406, 0x080E}, // pcREQUEST_ONLINE_PLAYERS =
 		{0x0207, 0x0407, 0x080F}, // pcSEND_ONLINE_PLAYERS *
@@ -98,31 +98,31 @@ u_int16_t	packets_tab[209][3] = {
 		{0xFFFF, 0x041C, 0x0814}, // pcWB3_REQUEST_START_FLIGHT =
 		{0xFFFF, 0x041D, 0x0815}, // pcWB3_HEARTBEAT
 		{0xFFFF, 0x041E, 0xFFFF}, // pcSTART_FLIGHTAIWING
-		{0xFFFF, 0x041F, 0x0817}, // pcSTART_FLIGHTSPAWN
+		{0xFFFF, 0x041F, 0x0817}, // pcSTART_FLIGHTSPAWN *
 		{0xFFFF, 0x0420, 0x0828}, // pcWB3_REQUEST_MANNEDACK =
 		{0xFFFF, 0x0421, 0xFFFF}, // pcWB3_NEW_USER
 		{0xFFFF, 0x0422, 0xFFFF}, // pcEXIT_FLIGHT2
 		{0xFFFF, 0x0423, 0xFFFF}, // pcWB3_AIJUMP
 									
-		{0x0300, 0x0300, 0x0606}, // arnaSET_CONFIG
-		{0x0301, 0x0301, 0x0607}, // arnaSET_TIME
+		{0x0300, 0x0300, 0x0606}, // arnaSET_CONFIG *
+		{0x0301, 0x0301, 0x0607}, // arnaSET_TIME *
 		{0x0302, 0x0302, 0xFFFF}, // arnaSET_TASKGROUP_POSITION *******************************
 		{0x0303, 0x0303, 0xFFFF}, // arnaSET_TASKGROUP_DESTINATION *******************************
 		{0x0304, 0x0304, 0xFFFF}, // arnaSINK_BOAT *******************************
 		{0x0305, 0x0305, 0xFFFF}, // arnaRAISE_BOAT *******************************
-		{0x0306, 0x0306, 0x0600}, // arnaSET_FIELD_OWNER
-		{0x0307, 0x0307, 0x0601}, // arnaOBJECT_DAMAGE
+		{0x0306, 0x0306, 0x0600}, // arnaSET_FIELD_OWNER *
+		{0x0307, 0x0307, 0x0601}, // arnaOBJECT_DAMAGE *
 		{0x0308, 0x0308, 0xFFFF}, // arnaSET_TERRAIN
 		{0x0309, 0x0309, 0x060F}, // arnaOBJECT_DAMAGE_RESPONSE =
 		{0x030A, 0x030A, 0x060C}, // arnaMAP_VECTOR
 		{0x030B, 0x030B, 0xFFFF}, // arnaREFRESH_FIELD_OBJECTS *******************************
 		{0xFFFF, 0x030C, 0xFFFF}, // arnaSET_DATE
-		{0xFFFF, 0x030D, 0x060B}, // arnaGRUNT_CONFIG
+		{0xFFFF, 0x030D, 0x060B}, // arnaGRUNT_CONFIG *
 		{0xFFFF, 0x030E, 0xFFFF}, // arnaRANDOM_SEED
-		{0xFFFF, 0x030F, 0x0608}, // arnaARENAFLAGS3
-		{0xFFFF, 0x0310, 0xFFFF}, // arnaCONFIG_FLIGHTMODEL ===============================
+		{0xFFFF, 0x030F, 0x0608}, // arnaARENAFLAGS3 *
+		{0xFFFF, 0x0310, 0xFFFF}, // arnaCONFIG_FLIGHTMODEL *******************************
 		{0xFFFF, 0x0311, 0xFFFF}, // arnaCONFIG_WEAPONS
-		{0xFFFF, 0x0312, 0x0614}, // arnaSET_CONFIG2
+		{0xFFFF, 0x0312, 0x0614}, // arnaSET_CONFIG2 *
 									
 		{0x0800, 0xFFFF, 0xFFFF}, // cmPLAYER_STARTED_FLIGHT
 		{0x0801, 0xFFFF, 0xFFFF}, // cmPLAYER_EXITED_FLIGHT
@@ -137,7 +137,7 @@ u_int16_t	packets_tab[209][3] = {
 		{0x0901, 0x1D01, 0xFFFF}, // utilSETHANDLE
 		{0x0902, 0x1D02, 0xFFFF}, // utilINFO
 		{0x0903, 0x1D03, 0xFFFF}, // utilSETVARIABLE
-		{0x0904, 0x1D04, 0x3A3E}, // utilWATCH_DOG
+		{0x0904, 0x1D04, 0x3A3E}, // utilWATCH_DOG *
 		{0x0905, 0x1D05, 0x3A3F}, // utilATTACH_REQUEST =
 		{0x0906, 0x1D06, 0xFFFF}, // utilATTACH_ACCEPT ===============================
 		{0x0907, 0x1D07, 0xFFFF}, // utilATTACH_JUMP ===============================
@@ -148,12 +148,12 @@ u_int16_t	packets_tab[209][3] = {
 		{0x090C, 0x1D0C, 0x3A36}, // utilSHANGHAI =
 		{0x090D, 0x1D0D, 0xFFFF}, // utilPLANECOUNT
 		{0x090E, 0x1D0E, 0xFFFF}, // utilPLANECOUNTS ===============================
-		{0x090F, 0x1D0F, 0x3A35}, // utilENABLED_PLANES_RESPONSE2
+		{0x090F, 0x1D0F, 0x3A35}, // utilENABLED_PLANES_RESPONSE2 *
 		{0xFFFF, 0x1D10, 0xFFFF}, // utilPLANECOUNTS2
 		{0xFFFF, 0x1D11, 0xFFFF}, // utilACKSPAWN
-		{0xFFFF, 0x1D12, 0x3A28}, // utilACKSPAWNS
+		{0xFFFF, 0x1D12, 0x3A28}, // utilACKSPAWNS *
 									
-		{0x0C00, 0x0D00, 0x1A1A}, // cnVERSION_DATA
+		{0x0C00, 0x0D00, 0x1A1A}, // cnVERSION_DATA *
 		{0x0C01, 0x0D01, 0x1A1B}, // cnCLIENT_IS_READY =
 		{0x0C02, 0x0D02, 0xFFFF}, // cnPING_DATA ===============================
 		{0x0C03, 0x0D03, 0xFFFF}, // cnTIMEOUT_LIMITS
@@ -162,7 +162,7 @@ u_int16_t	packets_tab[209][3] = {
 									
 		{0x0E00, 0x0E00, 0x1C1C}, // piUSER_UPDATE =
 		{0x0E01, 0x0E01, 0x1C1D}, // piSET_PLAYER_PLANE_DAMAGE =
-		{0x0E02, 0x0E02, 0x1C1E}, // piPLANE_DAMAGE
+		{0x0E02, 0x0E02, 0x1C1E}, // piPLANE_DAMAGE *
 		{0x0E03, 0x0E03, 0xFFFF}, // piHIT_RECEIVED
 		{0x0E04, 0x0E04, 0xFFFF}, // piGUNNER_UPDATE ===============================
 		{0x0E05, 0x0E05, 0x1C19}, // piCHUTE_UPDATE =
@@ -174,44 +174,44 @@ u_int16_t	packets_tab[209][3] = {
 		{0xFFFF, 0x0E0B, 0xFFFF}, // piNWATTACH_SLOT *******************************
 		{0xFFFF, 0x0E0C, 0x1C10}, // piMASTER_VIEW
 		{0xFFFF, 0x0E0D, 0xFFFF}, // piFORCE_SPAWN
-		{0xFFFF, 0x0E0E, 0x1C12}, // piFIRE_SUPPRESSION (server reply other clients with 0022)
-		{0xFFFF, 0x0E0F, 0x1C13}, // piEXTERNAL_AMMOCNT
+		{0xFFFF, 0x0E0E, 0x1C12}, // piFIRE_SUPPRESSION = (wb3server reply other clients with 0022)
+		{0xFFFF, 0x0E0F, 0x1C13}, // piEXTERNAL_AMMOCNT =
 		{0xFFFF, 0x0E10, 0xFFFF}, // piUSERREC_UPDATE
 		{0xFFFF, 0x0E11, 0xFFFF}, // piCONTROL_UPDATE
 		{0xFFFF, 0x0E12, 0xFFFF}, // piENGINE_UPDATE
 									
-		{0x0F00, 0x2100, 0x4242}, // olgSET_PARAMETERS
-		{0x0F01, 0x2101, 0x4243}, // olgWEAPON_FIRED
+		{0x0F00, 0x2100, 0x4242}, // olgSET_PARAMETERS * (otto parameters)
+		{0x0F01, 0x2101, 0x4243}, // olgWEAPON_FIRED *= (otto fire in wb2)
 		{0x0F02, 0x2102, 0x4240}, // olgACCURACY_MOD
 		{0xFFFF, 0x2103, 0x4241}, // olgSET_PARAMETERS2
 									
-		{0x1200, 0x1200, 0x2424}, // rmRADIO_TALK =
+		{0x1200, 0x1200, 0x2424}, // rmRADIO_TALK *=
 		{0x1201, 0x1201, 0x2425}, // rmRADIO_TUNE =
 		{0x1202, 0x1202, 0xFFFF}, // rmRADIO_TALK_WITH_ACK
 		{0x1203, 0x1203, 0xFFFF}, // rmRADIO_TALK_RESPONSE
 		{0xFFFF, 0x1204, 0xFFFF}, // rmRADIO_TALK_ABORT_UL
-		{0xFFFF, 0x1205, 0x2421}, // rmRADIO_DOTCMD
+		{0xFFFF, 0x1205, 0x2421}, // rmRADIO_DOTCMD *
 									
 		{0x1800, 0x1B00, 0xFFFF}, // csGET_CHECK_SUM *******************************
 		{0x1801, 0x1B01, 0xFFFF}, // csGET_CHECK_SUM_RESPONSE ===============================
 									
-		{0x1A00, 0x2000, 0x4040}, // idSET_PLAYER_ID
+		{0x1A00, 0x2000, 0x4040}, // idSET_PLAYER_ID =
 		{0x1A01, 0x2001, 0x4041}, // idSET_PLAYER_ID_RESPONSE *
 		{0x1A02, 0x2002, 0xFFFF}, // idSET_PERSONA
 									
-		{0x1B00, 0x1900, 0x3232}, // wpWEAPON_FIRED =
+		{0x1B00, 0x1900, 0x3232}, // wpWEAPON_FIRED =* (including otto fire in wb3)
 		{0x1B01, 0x1901, 0xFFFF}, // wpGUIDED_WEAPON_FIRED
 		{0x1B02, 0x1902, 0xFFFF}, // wpHIT_SCORED_ON_BADGUY ===============================
 		{0x1B03, 0x1903, 0x3231}, // wpHIT_SCORED_ON_OBJECT =
 		{0x1B04, 0x1904, 0x3236}, // wpWEAPON_HIT_BADGUY =
 		{0x1B05, 0x1905, 0x3237}, // wpWEAPON_HIT_OBJECT =
-		{0x1B06, 0x1906, 0x3234}, // wpWEAPON_DESTROYED =
-		{0x1B07, 0x1907, 0x3235}, // wpHIT_RECEIVED
+		{0x1B06, 0x1906, 0x3234}, // wpWEAPON_DESTROYED =*
+		{0x1B07, 0x1907, 0x3235}, // wpHIT_RECEIVED *
 		{0x1B08, 0x1908, 0xFFFF}, // wpSHOOTING_BULLETS
-		{0x1B09, 0x1909, 0x323B}, // wpSHOOTING_HARDPOINTS
+		{0x1B09, 0x1909, 0x323B}, // wpSHOOTING_HARDPOINTS =*
 		{0x1B0A, 0x190A, 0xFFFF}, // wpDESTROY_PLAYER_WEPS
 		{0x1B0B, 0x190B, 0x3239}, // wpHIT_SCORED_ON_BADGUY2 =
-		{0xFFFF, 0x190C, 0x323E}, // wpGRUNT_DESTROYED =
+		{0xFFFF, 0x190C, 0x323E}, // wpGRUNT_DESTROYED =*
 		{0xFFFF, 0x190D, 0xFFFF}, // wpWEAPON_LAUNCH_SOUND
 		{0xFFFF, 0x190E, 0xFFFF}, // wpOTTOHIT_SCORED_ON_BADGUY
 		{0xFFFF, 0x190F, 0x323D}, // wpOTTOHIT_SCORED_ON_BADGUY2 =
@@ -222,16 +222,16 @@ u_int16_t	packets_tab[209][3] = {
 		{0xFFFF, 0x1914, 0xFFFF}, // wpSTRIKE_EFFECT
 		{0xFFFF, 0x1915, 0x3227}, // wpBULLETS_FIRED =
 		{0xFFFF, 0x1916, 0x3224}, // wpFUEL_CONSUMED =
-		{0xFFFF, 0x1917, 0x3225}, // wpMAXALT_WEAPON_FIRED =
+		{0xFFFF, 0x1917, 0x3225}, // wpMAXALT_WEAPON_FIRED =*
 		{0xFFFF, 0x1918, 0xFFFF}, // wpDELAYEDFUSE_WEAPON_FIRED
 		{0xFFFF, 0x1919, 0xFFFF}, // wpAICONTROLLED_WEAPON_FIRED
 									
 		{0x1F00, 0x1600, 0x2C2C}, // ftDNLOAD_REQUEST =
-		{0x1F01, 0x1601, 0x2C2D}, // ftDNLOAD_RESPONCE
+		{0x1F01, 0x1601, 0x2C2D}, // ftDNLOAD_RESPONCE *
 		{0x1F02, 0x1602, 0x2C2E}, // ftSTART_DNLOAD =
-		{0x1F03, 0x1603, 0x2C2F}, // ftUPLOAD_REQUEST
+		{0x1F03, 0x1603, 0x2C2F}, // ftUPLOAD_REQUEST *
 		{0x1F04, 0x1604, 0xFFFF}, // ftUPLOAD_RESPONCE
-		{0x1F05, 0x1605, 0x2C29}, // ftFILE_DATA
+		{0x1F05, 0x1605, 0x2C29}, // ftFILE_DATA *
 		{0x1F06, 0x1606, 0x2C2A}, // ftDATA_ACK =
 		{0x1F07, 0x1607, 0xFFFF}, // ftDISPLAY_FILE *******************************
 		{0x1F08, 0x1608, 0xFFFF}, // ftVERSION_DOWNLOAD_REQUEST
@@ -241,14 +241,14 @@ u_int16_t	packets_tab[209][3] = {
 		{0xFFFF, 0x160C, 0xFFFF}, // ftDOWNLOAD_FILE
 		{0xFFFF, 0x160D, 0xFFFF}, // ftPIPE
 									
-		{0x2100, 0x0000, 0x0000}, // bgFILL_SLOT
-		{0x2101, 0x0001, 0xFFFF}, // bgUPDATE
-		{0x2102, 0x0002, 0x0002}, // bgPLANE_DAMAGE
+		{0x2100, 0x0000, 0x0000}, // bgFILL_SLOT *
+		{0x2101, 0x0001, 0xFFFF}, // bgUPDATE * (wb2, same as 0001 in wb3)
+		{0x2102, 0x0002, 0x0002}, // bgPLANE_DAMAGE *
 		{0x2103, 0x0003, 0xFFFF}, // bgRESEND_SLOT_INFO
 		{0x2104, 0x0004, 0xFFFF}, // bgALL_PLANES_UPDATE
 		{0x2105, 0x0005, 0x0005}, // bgRADAR_PLANES_UPDATE
 		{0x2106, 0x0006, 0x0006}, // bgCLEAR_RADAR
-		{0xFFFF, 0x0007, 0x0007}, // bgGUNNER_ATT
+		{0xFFFF, 0x0007, 0x0007}, // bgGUNNER_ATT *
 		{0xFFFF, 0x0008, 0xFFFF}, // bgAI_FILL_SLOT
 		{0xFFFF, 0x0009, 0xFFFF}, // bgAI_UPDATE
 		{0xFFFF, 0x000A, 0xFFFF}, // bgAI_PLANE_DAMAGE
@@ -271,11 +271,11 @@ u_int16_t	packets_tab[209][3] = {
 		{0xFFFF, 0x001B, 0xFFFF}, // bgAI_MOUNT_UPDATE
 		{0xFFFF, 0x001C, 0xFFFF}, // bgCMEYESLAVE_FILL_SLOT
 		{0xFFFF, 0x001D, 0xFFFF}, // bgAI_CLIENT_UPDATE
-		{0xFFFF, 0x001E, 0x001E}, // bgUPDATE2
+		{0xFFFF, 0x001E, 0x001E}, // bgUPDATE2 * (wb3, same as 0001 in wb2)
 		{0xFFFF, 0x001F, 0xFFFF}, // bgAI_UPDATE2
 		{0xFFFF, 0x0020, 0xFFFF}, // bgAI_UPDATE3
 		{0xFFFF, 0x0021, 0xFFFF}, // bgAI_WANTSAIHITFLAG
-		{0xFFFF, 0x0022, 0x0022}, // bgSUPPRESS_FIRE
+		{0xFFFF, 0x0022, 0x0022}, // bgSUPPRESS_FIRE *
 		{0xFFFF, 0x0023, 0xFFFF}, // bgAI_SUPPRESS_FIRE
 		{0xFFFF, 0x0024, 0x0024}, // bgEXTERNAL_AMMOCNT *
 		{0xFFFF, 0x0025, 0xFFFF}, // bgAI_EXTERNAL_AMMOCNT
@@ -321,10 +321,7 @@ void CheckArenaRules(void)
 			}
 			else
 			{
-				if(arena->bombs[i].type == 89) // DEBUG: Nuke test
-					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, TRUE, arena->bombs[i].from);
-				else
-					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, FALSE, arena->bombs[i].from);
+				HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, 0, arena->bombs[i].from);
 				arena->bombs[i].id = 0;
 			}
 		}
@@ -1011,9 +1008,8 @@ void CheckArenaRules(void)
 		{
 
 			arena->countdown = 0;
-			arena->mapnum++;
 
-			if((arena->mapnum) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum)].date)
+			if((arena->mapnum + 1) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum + 1)].date)
 			{
 				BackupScores(COLLECT_CYCLE);
 				NewWar(); // set mapnum to zero, etc
@@ -2287,8 +2283,6 @@ void ProcessCommands(char *command, client_t *client)
 
 	if(permission & (FLAG_ADMIN | FLAG_OP)) // commands that ADMIN's and OP's can execute
 	{
-		Com_Printf("COMMAND: %s:.%s %s %s %s\n", client?client->longnick:"-HOST-", command, argv[0]?argv[0]:" ", argv[1]?argv[1]:" ", argv[2]?argv[2]:" ");
-		
 		if(!Com_Stricmp(command, "dbpasswd"))
 		{
 			if(!argv[0])
@@ -2672,11 +2666,6 @@ void ProcessCommands(char *command, client_t *client)
 				Cmd_Rocket(Com_Atoi(argv[0]), Com_Atof(argv[1]), Com_Atof(argv[2]), client);
 			}
 
-			return;
-		}
-		else if(!Com_Stricmp(command, "nuke") && client)
-		{
-			Cmd_DropNukeBomb(client);
 			return;
 		}
 		else if(!Com_Stricmp(command, "restore"))
@@ -3365,17 +3354,6 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				DebugClient(__FILE__, __LINE__, TRUE, client);
 			}
 			break;
-		case 0x1D0F:
-			if(wb3->value)
-			{
-				Com_Printf("WB3 0x1D0F Packet\n");
-			}
-			else
-			{
-				;
-			}
-			// FIXME: unknown packet
-			break;
 		case 0x0D01:
 			if(!setjmp(debug_buffer))
 			{
@@ -3842,7 +3820,7 @@ void PReqBomberList(client_t *client)
 	}
 
 	list = (reqbomberlist_t *)buffer;
-	list->unknown2 = j;
+	list->numofnicks = j;
 
 	if(debug->value)
 		PPrintf(client, RADIO_RED, "DEBUG: 0x0407: Available list (%d players)", j);
@@ -4651,6 +4629,8 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		plane = (planeposition_t *) buffer;
 	}
 
+	Com_Printf("DEBUG:2arena->time %u\n", arena->time);
+	Com_Printf("DEBUG:2arena - postimer %u\n", arena->time - client->postimer);
 	client->postimer = arena->time; // set the time when last position packet has been received
 
 	if(attached)
@@ -4713,6 +4693,8 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			client->predict--;
 		}
 		
+		Com_Printf("DEBUG: i = %u\n", i);
+
 		if(client->infly)
 		{
 			if(wb3->value)
@@ -5423,11 +5405,6 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 	
 	drop->packetid = htons(Com_WBhton(0x1900));
 	
-	if(drop->item == 89) // DEBUG: Nuke
-	{
-		SendPacket(buffer, len, client);
-	}
-
 	for(i = 0; i < maxentities->value; i++)
 	{
 		if(clients[i].inuse && !clients[i].drone)
@@ -8247,6 +8224,13 @@ struct
 	}
 	while(i);
 
+	// make compatible with WB 2008, remove to WB2007
+	if(wb3->value == 2)
+	{
+		sprintf(&(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2008 Tabajara Host\n$Welcome to the Free Public Arenas!\n$\n");
+		offset += 139;
+	}
+
 	for(i = 0; i < MAX_ARENASLIST; i++)
 	{
 		if(p_arenas[i]->time)
@@ -8254,13 +8238,6 @@ struct
 			// 2008: MAIN:72.232.165.203:wb3abmain:0:300:025:3004:arnabob:atoll
 			//       Practice:72.232.165.203:wfprac:0:300:000:3005:arnalst3:atoll
 			// %s:%s:%d:Free:%d:%d:00000000:%s:%s%s
-			
-			// make compatible with WB 2008, remove to WB2007
-			if(wb3->value)
-			{
-				sprintf(&(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2008 Tabajara Host\n$Welcome to the Free Public Arenas!\n$\n");
-				offset += 139;
-			}
 			
 			sprintf(&(buffer[offset]), "%s:%s:%d:Free:%d:%d:00000000:%s:%s%s",
 				p_arenas[i]->hostname,
@@ -8625,7 +8602,7 @@ void SendScreenUpdates(client_t *client)
 	}
 	else
 	{
-		updateplane->packetid = htons(0x0001);
+		updateplane->packetid = htons(Com_WBhton(0x0001));
 	}
 
 	updateplane->timer = htonl(arena->time);
@@ -8824,7 +8801,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->maxpilotg = htons(maxpilotg->value);
 		wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
 		wb3arenarules->ywindvelocity = htonl(ywindvelocity->value);
-		wb3arenarules->zwindvelocity = client->plane == 54 /*ju52*/?htonl(zwindvelocity->value - 10):htonl(zwindvelocity->value);
+		wb3arenarules->zwindvelocity = htonl(zwindvelocity->value);
 		wb3arenarules->structlim = structlim->value;
 		wb3arenarules->unknown1 = 0x2D;
 		wb3arenarules->unknown2 = 0xA0;
