@@ -3411,7 +3411,6 @@ u_int8_t IsVitalBuilding(building_t *building)
 			(building->type == BUILD_CARGO) ||
 			(building->type == BUILD_SUBMARINE) ||
 			(building->type == BUILD_BRIDGE) ||
-			(building->type == BUILD_SPECIALBUILD) ||
 			(building->type == BUILD_FACTORY) ||
 			(building->type == BUILD_BARRACKS) ||
 			(building->type == BUILD_STATICS) ||
@@ -3419,13 +3418,14 @@ u_int8_t IsVitalBuilding(building_t *building)
 			(building->type == BUILD_PLANEFACTORY) ||
 			(building->type == BUILD_BUILDING) ||
 			(building->type == BUILD_CRANE) ||
-			(building->type == BUILD_STRATEGIC) ||
 			(building->type == BUILD_ARTILLERY) ||
 			(building->type == BUILD_HUT) ||
 			(building->type == BUILD_TRUCK))
 			return TRUE;
 		else
 	/*
+	BUILD_STRATEGIC
+	BUILD_SPECIALBUILD
 	BUILD_TOWER
 	BUILD_TREE
 	BUILD_SPAWNPOINT
@@ -3454,7 +3454,6 @@ u_int8_t IsVitalBuilding(building_t *building)
 			(building->type == BUILD_CARGO) ||
 			(building->type == BUILD_SUBMARINE) ||
 			(building->type == BUILD_BRIDGE) ||
-			(building->type == BUILD_SPECIALBUILD) ||
 			(building->type == BUILD_FACTORY) ||
 			(building->type == BUILD_BARRACKS) ||
 			(building->type == BUILD_STATICS) ||
@@ -3462,13 +3461,14 @@ u_int8_t IsVitalBuilding(building_t *building)
 			(building->type == BUILD_PLANEFACTORY) ||
 			(building->type == BUILD_BUILDING) ||
 			(building->type == BUILD_CRANE) ||
-			(building->type == BUILD_STRATEGIC) ||
 			(building->type == BUILD_ARTILLERY) ||
 			(building->type == BUILD_HUT) ||
 			(building->type == BUILD_TRUCK))
 			return TRUE;
 		else
 	/*
+	BUILD_STRATEGIC
+	BUILD_SPECIALBUILD
 	BUILD_TOWER
 	BUILD_TREE
 	BUILD_SPAWNPOINT
