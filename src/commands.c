@@ -1469,7 +1469,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 //				arena->fields[field].abletocapture = 1;
 
 			// check end of war (arena reset)
-			if(canreset->value)
+			if(canreset->value && arena->fields[field].country /* to avoid reset by capt neutrals */)
 			{
 				for(j = i = 0; i < fields->value; i++)
 				{

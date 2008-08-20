@@ -1007,9 +1007,10 @@ void CheckArenaRules(void)
 		if(arena->countdown == 1)
 		{
 
+			arena->mapnum++;
 			arena->countdown = 0;
 
-			if((arena->mapnum + 1) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum + 1)].date)
+			if((arena->mapnum) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum)].date)
 			{
 				BackupScores(COLLECT_CYCLE);
 				NewWar(); // set mapnum to zero, etc
@@ -1919,7 +1920,7 @@ void ProcessCommands(char *command, client_t *client)
 				{
 					if(arena->mapcycle[i].date)
 					{
-						PPrintf(client, RADIO_YELLOW, "%u: %s comes out at %04d/%02d/%02d", i+1, arena->mapcycle[i].mapname, arena->mapcycle[i].date / 10000, (arena->mapcycle[i].date - ((arena->mapcycle[i].date / 100) * 100)), (arena->mapcycle[i].date - ((arena->mapcycle[i].date / 10000) * 10000)) / 100);
+						PPrintf(client, RADIO_YELLOW, "%u: %s comes out at %04d/%02d/%02d", i+1, arena->mapcycle[i].mapname, arena->mapcycle[i].date / 10000, (arena->mapcycle[i].date - ((arena->mapcycle[i].date / 10000) * 10000)) / 100, (arena->mapcycle[i].date - ((arena->mapcycle[i].date / 100) * 100)));
 					}
 					else
 						break;
@@ -4629,8 +4630,6 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		plane = (planeposition_t *) buffer;
 	}
 
-	Com_Printf("DEBUG:2arena->time %u\n", arena->time);
-	Com_Printf("DEBUG:2arena - postimer %u\n", arena->time - client->postimer);
 	client->postimer = arena->time; // set the time when last position packet has been received
 
 	if(attached)
@@ -4693,8 +4692,6 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			client->predict--;
 		}
 		
-		Com_Printf("DEBUG: i = %u\n", i);
-
 		if(client->infly)
 		{
 			if(wb3->value)

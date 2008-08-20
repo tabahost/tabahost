@@ -637,8 +637,6 @@ void BackupPosition(client_t *client, u_int8_t predict)
 	u_int8_t i;
 	int32_t temp = 0;
 
-	Com_Printf("DEBUG: Backuping %u\n", predict);
-	
 	if(predict)
 	{
 		temp = PredictorCorrector32(client->posxy[0], (u_int8_t)predictpos->value);
