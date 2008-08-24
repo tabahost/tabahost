@@ -201,7 +201,8 @@ int main(int argc, char *argv[])
 		else
 		{
 			arena->frame = 1; // reset frames when max divisible by one minute (600 decasecs)
-			arena->time = Sys_ResetMilliseconds();
+			oldtime = Sys_ResetMilliseconds();
+			arena->time = Sys_Milliseconds();
 			Com_Printf("DEBUG: Time Reset\n");
 		}
 

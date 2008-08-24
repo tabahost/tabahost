@@ -2935,6 +2935,11 @@ Make a hardhit query (add hits in DB)
 
 void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 {
+	if(munition >= maxmuntype)
+	{
+		Com_Printf("WARNING: HardHit(): Munition ID overflow %d. maxmuntype=%d\n", munition, maxmuntype);
+		return;
+	}
 	if(!arena->munition[munition].type)
 		return;
 	

@@ -5869,7 +5869,13 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	building_t tempbuild;
 
 	hardhitstructure = (hardhitstructure_t *)buffer;
-	
+
+	if(hardhitstructure->munition >= maxmuntype)
+	{
+		Com_Printf("WARNING: PHardHitStructure(): Munition ID overflow %d. maxmuntype=%d\n", hardhitstructure->munition, MAX_MUNTYPE);
+		return;
+	}
+
 	building = GetBuilding(htons(hardhitstructure->build));
 
 	if(!building)
@@ -5907,7 +5913,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 			return;
 		}
 	}
-	
+
 	Com_LogEvent(EVENT_HITSTRUCT, client->id, 0);
 	Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
 	Com_LogDescription(EVENT_DESC_COUNTRY, building->country, NULL);
@@ -5937,7 +5943,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	else
 	{
 		HardHit(hardhitstructure->munition, (client->country == building->country), client);
-		
+
 		if(client->country == building->country && !client->msgtimer)
 		{
 			CPrintf(client->country, RADIO_GREEN, "ALERT!!! ALERT!!! %s hit friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST)?"C":"F", building->field);
@@ -5959,7 +5965,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 		PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 	
 	Com_Printf("%s %shit %s with %s\n", client->longnick, client->country==building->country?"friendly ":"", GetBuildingType(building->type), munition->abbrev);
-		
+
 	if(building->field <= fields->value)
 	{
 		if(building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE && i)

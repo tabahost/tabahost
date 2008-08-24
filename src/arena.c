@@ -63,7 +63,6 @@ building_t *GetBuilding(u_int16_t id)
 			}
 		}
 	}
-
 	return NULL;
 }
 
@@ -98,7 +97,7 @@ char *GetFieldType(u_int8_t type)
 		case FIELD_CITY:
 			return "City";
 		case FIELD_PORT:
-			return "Port";
+			return "City Port";
 		case FIELD_CONVOY:
 			return "Convoy";
 		case FIELD_FACTORY:
@@ -113,6 +112,8 @@ char *GetFieldType(u_int8_t type)
 			return "Village";
 		case FIELD_WB3TOWN:
 			return "Town";
+		case FIELD_WB3PORT:
+			return "Port";
 		default:
 			return "Unknown";
 	}

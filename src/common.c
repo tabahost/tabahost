@@ -1681,8 +1681,16 @@ double WBLongitude(double dAbsLongitude)
 	
 	if(wb3->value)
 	{
-		cdSquare00Longitude = 21120.0L;
-		cdSquareWidth = 105600.0L;
+		if(!Com_Strncmp(mapname->string, "atoll", 5))
+		{
+			cdSquare00Longitude = 14843.0L;
+			cdSquareWidth = 52800.0L;
+		}
+		else
+		{
+			cdSquare00Longitude = 21120.0L;
+			cdSquareWidth = 105600.0L;
+		}
 	}
 	else
 	{
@@ -1706,8 +1714,16 @@ double WBLatitude(double dAbsLatitude)
 	
 	if(wb3->value)
 	{
-		cdSquare00Latitude = 21120.0L;
-		cdSquareHeight = 105600.0L;
+		if(!Com_Strncmp(mapname->string, "atoll", 5))
+		{
+			cdSquare00Latitude = 14843.0L;
+			cdSquareHeight = 52800.0L;
+		}
+		else
+		{
+			cdSquare00Latitude = 21120.0L;
+			cdSquareHeight = 105600.0L;
+		}
 	}
 	else
 	{
@@ -1874,36 +1890,49 @@ char *PadLoc(char *szBuffer, double dLongitude, double dLatitude)
 	const double cdSquareLatitideSections = 3.0L;
 	double dPad1;
 	double dPad2;
+	double cdSquareWidth;
 	memset(szBuffer, 0, 20);
 	/*normalisation to 0..105600 range*/
 	
 	if(wb3->value)
 	{
-		dLongitude -= 21117.0L;
-		dLatitude -= 21117.0L;
+		if(!Com_Strncmp(mapname->string, "atoll", 5))
+		{
+			cdSquareWidth = 52800.0L;
+			dLongitude -= 14843.0L;
+			dLatitude -= 14843.0L;
+		}
+		else
+		{
+			cdSquareWidth = 105600.0L;
+			dLongitude -= 21120.0L;
+			dLatitude -= 21120.0L;
+		}
 		
 		dLongitude = dLongitude * -1;
 	}
+	else
+		cdSquareWidth = 105600.0L;
 
-	for ( ; dLongitude < 0.0L; dLongitude += 105600.0L);
-	dLongitude = ModRange(dLongitude, 105600.0L);
-	for ( ; dLatitude < 0.0L; dLatitude += 105600.0L); // franz-: why sum 105600 if negative if normalization was done?
-	dLatitude = ModRange(dLatitude, 105600.0L);
+	for ( ; dLongitude < 0.0L; dLongitude += cdSquareWidth);
+	dLongitude = ModRange(dLongitude, cdSquareWidth);
+	for ( ; dLatitude < 0.0L; dLatitude += cdSquareWidth); // franz-: why sum 105600 if negative if normalization was done?
+	dLatitude = ModRange(dLatitude, cdSquareWidth);
 
 
 	/*calculation*/
-	dPad1 = cdSquareLongitudeSections - FloorDiv(dLongitude, 35200.0L) // franz-: gets keypad (1-9) based on lon and lat
-		+ cdSquareLatitideSections * FloorDiv(dLatitude, 35200.0L);
+	dPad1 = cdSquareLongitudeSections - FloorDiv(dLongitude, (cdSquareWidth/3)) // franz-: gets keypad (1-9) based on lon and lat
+		+ cdSquareLatitideSections * FloorDiv(dLatitude, (cdSquareWidth/3));
 
 	/*normalisation to 0..35200 range*/
-	for ( ; dLatitude < 0.0L; dLatitude += 35200.0L);
-	dLatitude = ModRange(dLatitude, 35200.0L);
-	for ( ; dLongitude < 0.0L; dLongitude += 35200.0L);
-	dLongitude = ModRange(dLongitude, 35200.0L);
+	for ( ; dLatitude < 0.0L; dLatitude += (cdSquareWidth/3));
+	dLatitude = ModRange(dLatitude, (cdSquareWidth/3));
+	for ( ; dLongitude < 0.0L; dLongitude += (cdSquareWidth/3));
+	dLongitude = ModRange(dLongitude, (cdSquareWidth/3));
 
 	/*calculation*/
-	dPad2 = cdSquareLongitudeSections - FloorDiv(dLongitude, 11733.333L)
-		+ cdSquareLatitideSections * FloorDiv(dLatitude, 11733.333L);
+	dPad2 = cdSquareLongitudeSections - FloorDiv(dLongitude, (cdSquareWidth/9))
+		+ cdSquareLatitideSections * FloorDiv(dLatitude, (cdSquareWidth/9));
 
 	sprintf(szBuffer, ".%1.0f.%1.0f", dPad1, dPad2);
 
