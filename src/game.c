@@ -650,7 +650,7 @@ void CheckArenaRules(void)
 
 		if(arena->fields[i].warehouse && !arcade->value) // warehouse effect
 		{
-			if(arena->fields[i].warehouse + 60000 <= arena->frame)
+			if((arena->fields[i].warehouse + 60000) <= arena->frame)
 			{
 				for(j = 0; j < MAX_BUILDINGS; j++)
 				{
@@ -659,13 +659,19 @@ void CheckArenaRules(void)
 						break;
 					}
 					else if((arena->fields[i].buildings[j].type >= BUILD_50CALACK && arena->fields[i].buildings[j].type <= BUILD_88MMFLAK) ||
-						    (arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
+							(arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
 					{
-						if(!arena->fields[i].buildings[j].status)
-						{
+//						if(!arena->fields[i].buildings[j].status) // obsolete
+//						{
 							arena->fields[i].buildings[j].status = 2;
-							arena->fields[i].buildings[j].timer = 60000; // 10min
-						}
+							arena->fields[i].buildings[j].timer += 60000; // 10min // changed = to +=
+							
+							// added this "if"
+							if(arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
+							{
+								arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
+							}
+//						}
 					}
 				}
 
@@ -7031,11 +7037,8 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 					}
 					else if(building->type == BUILD_WARE)
 					{
-						if(((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST)))
-						{
-							arena->fields[building->field - 1].warehouse = arena->frame;
-							IncreaseAcksReup(building->field);
-						}
+						arena->fields[building->field - 1].warehouse = arena->frame;
+						// IncreaseAcksReup(building->field); // obsolete
 					}
 				}
 			}
