@@ -733,6 +733,7 @@ void CheckArenaRules(void)
 					arena->fields[i].abletocapture = 1;
 
 				arena->fields[i].closed = 0;
+
 				BPrintf(RADIO_YELLOW, "Field %d reopened", i+1);
 			}
 		}
