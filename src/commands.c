@@ -2437,28 +2437,21 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	{
 		PPrintf(client, RADIO_YELLOW, "Field F%d: Country %s, Type: %s, Status: %s", field, GetCountry(country), GetFieldType(type), status?"Closed":"Open");
 
-		if(status) // if closed
+		if(status)
 		{
-			field--;
-			reup = MAX_UINT32;
+			reup = arena->fields[--field].buildings[0].timer;
 
-			for(i = 0; i < MAX_BUILDINGS; i++)
+			for(i = 1; i < MAX_BUILDINGS; i++)
 			{
 				if(!arena->fields[field].buildings[i].field)
 					break;
-
-				Com_Printf("DEBUG: F%d - %s %d %d sec\n", field - 1, GetBuildingType(arena->fields[field].buildings[i].type), arena->fields[field].buildings[i].status, (arena->fields[field].buildings[i].timer / 100));
 
 				if(arena->fields[field].buildings[i].status && arena->fields[field].buildings[i].timer < reup && 
 						IsVitalBuilding(&(arena->fields[field].buildings[i])))
 					reup = arena->fields[field].buildings[i].timer;
 			}
 
-			reup /= 100; // convert to seconds
-			
-			Com_Printf("DEBUG: Reopen in %s, Able to capture: %s\n", Com_TimeSeconds(reup), arena->fields[field].abletocapture?"Yes":"No");
-
-			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup), arena->fields[field].abletocapture?"Yes":"No");
+			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup/100), arena->fields[field].abletocapture?"Yes":"No");
 		}
 	}
 	else
@@ -4791,7 +4784,7 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 			if((arena->fields[i].type == FIELD_WB3POST && dist < 1000) ||
 				(arena->fields[i].type == FIELD_WB3VILLAGE && dist < 2700) ||
 				(arena->fields[i].type == FIELD_WB3TOWN && dist < 3600) ||
-				(arena->fields[i].type <= FIELD_MAIN && dist < 3600))
+				(arena->fields[i].type <= FIELD_MAIN && dist < MAX_FIELDRADIUS))
 			{
 				PPrintf(client, RADIO_YELLOW, "Too near to field f%d, acks would kill Commandos", i+1);
 				return;

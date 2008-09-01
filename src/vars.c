@@ -228,7 +228,7 @@ void InitVars(void)
 	dbuser = Var_Get("dbuser", "franz", VAR_ADMIN);
 	dirname = Var_Get("dirname", "wbmed3", VAR_ARCHIVE | VAR_ADMIN);
 	easymode = Var_Get("easymode", "0", VAR_ARCHIVE);
-	emulatecollision = Var_Get("emulatecollision", "1", VAR_ARCHIVE);
+	emulatecollision = Var_Get("emulatecollision", "0", VAR_ARCHIVE);
 	enableottos = Var_Get("enableottos", "1", VAR_ARCHIVE);
 	endday = Var_Get("endday", "16", VAR_ARCHIVE);
 	endmonth = Var_Get("endmonth", "8", VAR_ARCHIVE);

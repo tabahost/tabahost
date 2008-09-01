@@ -2930,7 +2930,6 @@ void CaptureField(u_int8_t field, client_t *client)
 
 	Cmd_Capt(field - 1, client->country, NULL);
 	arena->fields[field - 1].paras = 0;
-	arena->fields[field - 1].warehouse = 0; // Remove warehouse effect to avoid field to close again after reopen
 
 /*
 	for(i = 0; i < MAX_CITYFIELD; i++)
