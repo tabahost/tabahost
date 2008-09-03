@@ -1578,7 +1578,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 								Com_Printf("%s %shit %s with %s\n", client?client->longnick:"-HOST-", (client && client->country==arena->cities[city].buildings[i].country)?"friendly ":"", GetBuildingType(arena->cities[city].buildings[i].type), munition->abbrev);
 									
 								if(client)
-								{									
+								{
 									Com_LogEvent(EVENT_HITSTRUCT, client->id, 0);
 									Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
 									Com_LogDescription(EVENT_DESC_COUNTRY, arena->cities[city].buildings[i].country, NULL);

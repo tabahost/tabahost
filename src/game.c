@@ -410,7 +410,14 @@ void CheckArenaRules(void)
 
 // weather
 
-	if(!(arena->frame % 60000)) // 180000
+	if(metar->value)
+	{
+		if(!(arena->frame % 360000)) // 1 hour
+		{
+			ProcessMetarWeather();
+		}
+	}
+	else if(!(arena->frame % 60000)) // 10 minutes
 	{
 		switch((int)weather->value)
 		{
@@ -1118,6 +1125,55 @@ void CheckArenaRules(void)
 		Cmd_CheckBuildings(NULL); // DEBUG
 	}
 }
+
+/*************
+ProcessMetarWeather
+
+Process METAR code get by a PHP script and use as WB weather
+*************/
+
+void ProcessMetarWeather()
+{
+	FILE* fp;
+	buffer[64];
+	u_int16_t wind, angle, xwind, ywind;
+	char *token;
+	char value[8];
+
+	if(!(fp = fopen("weather.cfg", "r"))
+	{
+		if(!fgets(buffer, sizeof(buffer), fp))
+		{
+			PPrintf(client, RADIO_YELLOW, "WARNING: Unexpected end of weather.cfg",);
+			fclose(fp);
+			return;
+		}
+		else
+		{
+			Com_Atoi((char *)strtok(buffer, ";"));
+			Com_Atoi((char *)strtok(NULL, ";"));
+			Com_Atoi((char *)strtok(NULL, ";"));
+			token = (char *)strtok(NULL, ";");
+			strcpy(value, token?token:"0");
+			Var_Set("weather", value);
+
+			xwind = wind * sin(Com_Rad(angle));
+			sprintf(value, "%d", xwind);
+			Var_Set("xwindvelocity", value);
+
+			ywind = wind * cos(Com_Rad(angle));
+			sprintf(value, "%d", ywind);
+			Var_Set("ywindvelocity", value);
+
+			fclose(fp);
+		}
+	}
+	else
+	{
+		return;
+	}
+}
+
 
 /*************
 ProcessCommands
@@ -5694,7 +5750,7 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 			
 		Com_Printf("-HOST- hit %s with %s\n", pvictim->longnick, munition->abbrev);
 
-		if(gunstats->value || client->gunstat|| pvictim->gunstat)
+		if(gunstats->value || client->gunstat || pvictim->gunstat)
 		{
 			memset(heb, 0, sizeof(heb));
 			AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, heb, NULL, pvictim);
