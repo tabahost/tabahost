@@ -1955,6 +1955,7 @@ void	UpdateArenaStatus(u_int8_t uptime);
 
 // game.c
 void	CheckArenaRules(void);
+void	ProcessMetarWeather(void);
 void	ProcessCommands(char *command, client_t *client);
 void	SendFileSeq1(char *file, client_t *client);
 void	SendFileSeq3(client_t *client);
@@ -2348,6 +2349,7 @@ extern	var_t		*mapname;		// name of current map
 extern	var_t		*maxclients;	// maximum of incomming connections
 extern	var_t		*maxentities;	// maximum of players + drones in world
 extern	var_t		*maxpilotg;		//
+extern	var_t		*metar;			// allow use metar information
 extern	var_t		*midairs;		// midairs collisions
 extern	var_t		*mortars;		// set how much mortars JU52 and Li-2 can fire
 extern	var_t		*mview;			// set who can use .view (OPs, Admins or both)

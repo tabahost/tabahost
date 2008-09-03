@@ -117,6 +117,7 @@ var_t	*mapname;		// extern
 var_t	*maxclients;	// extern
 var_t	*maxentities;	// extern
 var_t	*maxpilotg;		// extern
+var_t	*metar;			// extern
 var_t	*midairs;		// extern
 var_t	*mortars;		// extern
 var_t	*mview;			// extern
@@ -275,6 +276,7 @@ void InitVars(void)
 	mapflagstwr = Var_Get("mapflagstwr", "1", VAR_ARCHIVE);
 	mapname = Var_Get("mapname", "wbmed3", VAR_ARCHIVE | VAR_ADMIN);
 	maxpilotg = Var_Get("maxpilotg", "11", VAR_ARCHIVE);
+	metar = Var_Get("metar", "0", VAR_ARCHIVE);
 	midairs = Var_Get("midairs", "1", VAR_ARCHIVE);
 	mortars = Var_Get("mortars", "10", VAR_ARCHIVE);
 	mview = Var_Get("mview", "1", VAR_ARCHIVE | VAR_ADMIN);
