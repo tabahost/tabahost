@@ -451,7 +451,8 @@ int ProcessClient(client_t *client)
 			{
 				if(!((arena->frame - client->frame) % 30000))
 				{
-					WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
+					if(!metar->value)
+						WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
 					WB3DotCommand(client, ".clutterdistance 8500");
 				}
 

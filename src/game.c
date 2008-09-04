@@ -429,7 +429,7 @@ void CheckArenaRules(void)
 
 	if(metar->value)
 	{
-		if (!(arena->frame % 120000)) // 30 minutes
+		if (!(arena->frame % 30000)) // 5 minutes
 		{
 			ProcessMetarWeather();
 		}
@@ -1233,12 +1233,12 @@ void ProcessMetarWeather(void)
 {
 	FILE* fp;
 	char buffer[64];
-	u_int16_t wind, angle, weather;
-	int16_t xwind, ywind;
+	float wind, angle, xwind, ywind;
+	u_int8_t weather;
 	char *token;
 	char value[8];
 
-	if ((fp = fopen("weather.cfg", "r")))
+	if ((fp = fopen("./cron/weather.cfg", "r")))
 	{
 		if (!fgets(buffer, sizeof(buffer), fp))
 		{
@@ -1248,15 +1248,15 @@ void ProcessMetarWeather(void)
 		}
 		else
 		{
-			angle = Com_Atoi((char *)strtok(buffer, ";"));
-			wind = Com_Atoi((char *)strtok(NULL, ";"));
-
+			angle = Com_Atof((char *)strtok(buffer, ";"));
+			wind = Com_Atof((char *)strtok(NULL, ";"));
+			
 			xwind = wind * sin(Com_Rad(angle));
-			sprintf(value, "%d", xwind);
+			sprintf(value, "%d", (int32_t)(xwind+0.5));
 			Var_Set("xwindvelocity", value);
 
 			ywind = wind * cos(Com_Rad(angle));
-			sprintf(value, "%d", ywind);
+			sprintf(value, "%d", (int32_t)(ywind+0.5));
 			Var_Set("ywindvelocity", value);
 
 			token = (char *)strtok(NULL, ";");
@@ -1264,9 +1264,9 @@ void ProcessMetarWeather(void)
 			weather = Com_Atoi(value);
 			Var_Set("weather", value);
 
-			BPrintf(RADIO_YELLOW, "Weather: %s, Wind: %uKm/h from %s",
+			BPrintf(RADIO_YELLOW, "Weather: %s, Wind: %.2fKm/h from %s",
 					(!weather)?"Cloudy":(weather == 1)?"Clear":(weather == 2)?"Raining":"Partialy Cloudy",
-					wind,
+					(wind * 1.09728),
 					WBRhumb(angle));
 
 		fclose(fp);
@@ -11936,7 +11936,7 @@ void BackupScores(u_int8_t collect_type)
 				mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
-	fp = fopen("./scores/scores.cfg", "w");
+	fp = fopen("./cron/scores.cfg", "w");
 	fprintf(
 			fp,
 			"actual_map=%s\n\
@@ -11964,7 +11964,7 @@ vdate_tod_end=%04.0f-%02.0f-%02.0f\n",
 
 	fclose(fp);
 
-	system("php -f ./scores/cron.php &");
+	system("php -f ./cron/cron.php &");
 }
 
 /*************
