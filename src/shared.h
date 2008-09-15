@@ -810,6 +810,7 @@ typedef struct client_s
 	u_int16_t	msgtimer;		// msgtimer (friendly hit)
 	u_int32_t	lastsql;		// last time client made a SQL request;
 	u_int32_t	timer;			// player timer
+	u_int32_t	pingtest;		// pingtest timer
 	u_int32_t	postimer;		// last position update arena's time
 	u_int32_t	awaytimer;		// away timer
 	u_int32_t	timeout;		// actual timeout
@@ -1260,6 +1261,13 @@ typedef struct buildstatus_s	// 03 07
 	u_int8_t	status;
 	u_int8_t	country;
 } buildstatus_t;
+
+typedef struct pingtest_s	// 03 09
+{
+	u_int16_t	packetid;
+	u_int16_t	unk1;
+	u_int16_t	frame;
+} pingtest_t;
 
 typedef struct wb3gruntconfig_s	// 03 0D
 {
@@ -1963,6 +1971,7 @@ void	SendFileSeq5(u_int16_t seek, client_t *client);
 void	SendFileSeq6(u_int8_t *buffer, client_t *client);
 void	SendFileSeq7(client_t *client);
 int		ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client);
+void	PingTest(u_int8_t *buffer, client_t *client);
 void	PReqBomberList(client_t *client);
 void	PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client);
 void	PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, client_t *client);
@@ -2189,6 +2198,7 @@ void	Cmd_White(char *user, u_int8_t white, client_t *client);
 void	Cmd_Chmod(char *user, int8_t mod, client_t *client);
 void	Cmd_Part(char *argv[], u_int8_t argc, client_t *client);
 void	Cmd_Decl(char *argv[], u_int8_t argc, client_t *client);
+void	Cmd_Pingtest(u_int16_t frame, client_t *client);
 void	Cmd_Undecl(u_int16_t id, client_t *client);
 void	Cmd_Time(u_int16_t time, char *mult, client_t *client);
 void	Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client);

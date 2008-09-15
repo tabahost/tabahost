@@ -1496,6 +1496,11 @@ void ProcessCommands(char *command, client_t *client)
 
 			return;
 		}
+		else if(!Com_Stricmp(command, "pingtest"))
+		{
+			Cmd_Pingtest(0, client);
+			return;
+		}
 		else if (!Com_Stricmp(command, "easy"))
 		{
 			if (argv[0])
@@ -3424,604 +3429,635 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					DebugClient(__FILE__, __LINE__, TRUE, client);
 				}
 				break	;
-					case 0x0406:
-					if(!setjmp(debug_buffer))
-					{
-						if(debug->value)
-						PPrintf(client, RADIO_RED, "DEBUG: 0x0406: Request Available list (%d)", buffer[2]); // debug
-						PReqBomberList(client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					case 0x0408:
-					if(!setjmp(debug_buffer))
-					{
-						PSquadInfo(NULL, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x040C:
-					if(!setjmp(debug_buffer))
-					{
-						PSquadLookup(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x040D:
-					if(!setjmp(debug_buffer))
-					{
-						PClientMedals(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0410:
-					if(!setjmp(debug_buffer))
-					{
-						if(debug->value)
-						PPrintf(client, RADIO_RED, "DEBUG: 0x0410: Ask for Request/Binded list (0x%0X%0X)", buffer[2], buffer[3]);
-						if(client->gunnerview == client || !client->gunnerview)
-						SendAttachList(NULL, client);
-						else
-						{
-							reqgunnerlist_t *gunner;
-							gunner = (reqgunnerlist_t *) buffer;
-							gunner->unknown1 = htons(0x0006);
-							gunner->nick = htonl(client->gunnerview->shortnick);
-							SendAttachList(buffer, client);
-						}
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0412:
-					if(!setjmp(debug_buffer))
-					{
-						SendAttachList(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x041A:
-					if(!setjmp(debug_buffer))
-					{
-						PCurrentView(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x041C: //wb3 start flight
-					if(!setjmp(debug_buffer))
-					{
-						WB3RequestStartFly(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0420: //wb3 start ack
-					if(!setjmp(debug_buffer))
-					{
-						WB3RequestMannedAck(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0309:
-					PPrintf(client, RADIO_GREEN, "DEBUG: arnaOBJECT_DAMAGE_RESPONSE()");
-					break; // FIXME
-					case 0x0310:
-					PPrintf(client, RADIO_GREEN, "DEBUG: arnaCONFIG_FLIGHTMODEL()");
-					break; // FIXME
-					case 0x1D05:
-					if(!setjmp(debug_buffer))
-					{
-						PRequestGunner(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1D06:
-					if(!setjmp(debug_buffer))
-					{
-						PAcceptGunner(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1D07:
-					if(!setjmp(debug_buffer))
-					{
-						if(client->attached)
-						PSwitchOttoPos(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1D0C:
-					if(!setjmp(debug_buffer))
-					{
-						Cmd_Shanghai(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1D0E:
-					if(!setjmp(debug_buffer))
-					{
-						ClientHDSerial(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0D01:
-					if(!setjmp(debug_buffer))
-					{
-						client->ready = 1;
-
-						SendArenaRules(client);
-						if(wb3->value)
-						{
-							WB3SendGruntConfig(client);
-							//					WB3SendArenaFlags3(client);
-							WB3ArenaConfig2(client);
-							WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
-							WB3DotCommand(client, ".date %u %u %u", arena->month, arena->day, arena->year);
-							WB3DotCommand(client, ".gunstat");
-							WB3NWAttachSlot(client);
-						}
-
-						SendOttoParams(client);
-						if(!wb3->value)
-						SendExecutablesCheck(1, client);
-						SendLastConfig(client);
-
-						sprintf(file, "./arenas/%s/motd.txt", dirname->string);
-
-						if((fp = fopen(file, "r")) == NULL)
-						{
-							Com_Printf("WARNING: Couldn't open \"%s\"\n", file);
-							sprintf(file, "motd.txt");
-						}
-						else
-						{
-							fclose(fp);
-						}
-
-						SendFileSeq1(file, client);
-
-						PPrintf(client, RADIO_YELLOW, "Warbirds Tabajara Host version %s, build %s", VERSION, __DATE__); //BUILD);
-
-						if(!(client->attr == 1 && hideadmin->value))
-						{
-							if(client->loginkey)
-							BPrintf(RADIO_GRAY, "%s entered the game", client->longnick);
-							else
-							BPrintf(RADIO_GRAY, "%s entered the game using WBChat", client->longnick);
-
-							Com_LogEvent(EVENT_LOGIN, client->id, 0);
-							Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);
-							Com_LogDescription(EVENT_DESC_PLCTRID, client->ctrid, 0);
-
-							for(i = 0; i < maxentities->value; i++)
-							{
-								if(clients[i].inuse && !clients[i].drone && clients[i].ready && client != &clients[i])
-								{
-									if(!strcmp(clients[i].ip, client->ip))
-									{
-										Com_Printf("%s and %s are sharing the same IP (%s)\n", client->longnick, clients[i].longnick, client->ip);
-										BPrintf(RADIO_YELLOW, "%s and %s are sharing the same IP (%s)\n", client->longnick, clients[i].longnick, client->ip);
-										break;
-									}
-								}
-							}
-						}
-
-						ClientIpaddr(client);
-						CheckTK(client);
-
-						sprintf(my_query, "INSERT INTO online_players SET player_id = '%u', country = '%u', login_time = FROM_UNIXTIME(%u)", client->id, client->country, (u_int32_t)time(NULL));
-
-						if(d_mysql_query(&my_sock, my_query)) // query succeeded
-
-						{
-							if(mysql_errno(&my_sock) != 1062)
-							Com_Printf("WARNING: LOGIN: couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-						}
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0D02:
-					if(!setjmp(debug_buffer))
-					{
-						SendPacket(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0D04:
-					if(!setjmp(debug_buffer))
-					{
-						client->disconnect = 1;
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0E00:
-					if(!setjmp(debug_buffer))
-					{
-						PPlanePosition(buffer, client, 0);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0E01:
-					if(!setjmp(debug_buffer))
-					{
-						if(client->infly)
-						PPlaneStatus(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0E04:
-					if(!setjmp(debug_buffer))
-					{
-						PPlanePosition(buffer, client, 1);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0E05:
-					if(!setjmp(debug_buffer))
-					{
-						PChutePos(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0E07:
-					if(!setjmp(debug_buffer))
-					{
-						WB3GunnerUpdate(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0E0E:
-					if(!setjmp(debug_buffer))
-					{
-						WB3SupressFire(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x0E0F:
-					if(!setjmp(debug_buffer))
-					{
-						WB3ExternalAmmoCnt(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x2101:
-					if(!setjmp(debug_buffer))
-					{
-						POttoFiring(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1200:
-					if(!setjmp(debug_buffer))
-					{
-						PRadioMessage(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1201:
-					if(!setjmp(debug_buffer))
-					{
-						PSetRadioChannel(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1B01:
-					if(!setjmp(debug_buffer))
-					{
-						PFileCheck(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x2000:
-					if(!setjmp(debug_buffer))
-					{
-						PNewNick(buffer+2, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1900:
-					if(!setjmp(debug_buffer))
-					{
-						PDropItem(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1902:
-					if(!setjmp(debug_buffer))
-					{
-						// FIXME: are you sure it's only flak hit?
-						PFlakHit(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1903:
-					if(!setjmp(debug_buffer))
-					{
-						PHitStructure(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1904:
-					if(!setjmp(debug_buffer))
-					{
-						PHardHitPlane(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1905:
-					if(!setjmp(debug_buffer))
-					{
-						PHardHitStructure(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1906:
-					if(!setjmp(debug_buffer))
-					{
-						PRemoveDropItem(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1909:
-					if(!setjmp(debug_buffer))
-					{
-						PFireMG(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x190B:
-					if(!setjmp(debug_buffer))
-					{
-						if(client->infly)
-						PHitPlane(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x190C:
-					if(!setjmp(debug_buffer))
-					{
-						PRemoveDropItem(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x190F: // wpOTTOHIT_SCORED_ON_BADGUY2
-					if(!setjmp(debug_buffer))
-					{
-						if(client->infly)
-						PHitPlane(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1913:
-					if(!setjmp(debug_buffer))
-					{
-						WB3TonnageOnTarget(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1915:
-					if(!setjmp(debug_buffer))
-					{
-						PFireMG(buffer, len, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1916:
-					if(!setjmp(debug_buffer))
-					{
-						WB3FuelConsumed(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1917:
-					if(!setjmp(debug_buffer))
-					{
-						WB3DelayedFuse(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1600:
-					if(!setjmp(debug_buffer))
-					{
-						if(client->ready)
-						SendFileSeq3(client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1602:
-					if(!setjmp(debug_buffer))
-					{
-						if(client->ready)
-						SendFileSeq5(0, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x1606:
-					if(!setjmp(debug_buffer))
-					{
-						if(client->ready)
-						SendFileSeq6(buffer, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					case 0x160A:
-					if(!setjmp(debug_buffer))
-					{
-						if(debug->value)
-						Com_Printf("160A\n");
-						memset(buffer+2, 0, 8);
-						buffer[1] = 0x0B; // FRANZ verificar WB2008
-						SendPacket(buffer, 10, client);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
-					default:
-					if(!setjmp(debug_buffer))
-					{
-						if(client->ready && client->attr & (FLAG_ADMIN | FLAG_OP))
-						PPrintf(client, RADIO_LIGHTYELLOW, "Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
-						Com_Printf("WARNING: Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
-						Com_Printfhex(buffer, len);
-					}
-					else
-					{
-						DebugClient(__FILE__, __LINE__, TRUE, client);
-					}
-					break;
+			case 0x0406:
+			if(!setjmp(debug_buffer))
+			{
+				if(debug->value)
+				PPrintf(client, RADIO_RED, "DEBUG: 0x0406: Request Available list (%d)", buffer[2]); // debug
+				PReqBomberList(client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			case 0x0408:
+			if(!setjmp(debug_buffer))
+			{
+				PSquadInfo(NULL, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x040C:
+			if(!setjmp(debug_buffer))
+			{
+				PSquadLookup(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x040D:
+			if(!setjmp(debug_buffer))
+			{
+				PClientMedals(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0410:
+			if(!setjmp(debug_buffer))
+			{
+				if(debug->value)
+				PPrintf(client, RADIO_RED, "DEBUG: 0x0410: Ask for Request/Binded list (0x%0X%0X)", buffer[2], buffer[3]);
+				if(client->gunnerview == client || !client->gunnerview)
+				SendAttachList(NULL, client);
+				else
+				{
+					reqgunnerlist_t *gunner;
+					gunner = (reqgunnerlist_t *) buffer;
+					gunner->unknown1 = htons(0x0006);
+					gunner->nick = htonl(client->gunnerview->shortnick);
+					SendAttachList(buffer, client);
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: %s(%s) invalid checksum\n", client->longnick, client->ip);
-				return -1;
+				DebugClient(__FILE__, __LINE__, TRUE, client);
 			}
-			return 0;
+			break;
+			case 0x0412:
+			if(!setjmp(debug_buffer))
+			{
+				SendAttachList(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x041A:
+			if(!setjmp(debug_buffer))
+			{
+				PCurrentView(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x041C: //wb3 start flight
+			if(!setjmp(debug_buffer))
+			{
+				WB3RequestStartFly(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0420: //wb3 start ack
+			if(!setjmp(debug_buffer))
+			{
+				WB3RequestMannedAck(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0309:
+			if(!setjmp(debug_buffer))
+			{
+				PingTest(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break; // FIXME
+			case 0x0310:
+			PPrintf(client, RADIO_GREEN, "DEBUG: arnaCONFIG_FLIGHTMODEL()");
+			break; // FIXME
+			case 0x1D05:
+			if(!setjmp(debug_buffer))
+			{
+				PRequestGunner(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1D06:
+			if(!setjmp(debug_buffer))
+			{
+				PAcceptGunner(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1D07:
+			if(!setjmp(debug_buffer))
+			{
+				if(client->attached)
+				PSwitchOttoPos(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1D0C:
+			if(!setjmp(debug_buffer))
+			{
+				Cmd_Shanghai(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1D0E:
+			if(!setjmp(debug_buffer))
+			{
+				ClientHDSerial(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0D01:
+			if(!setjmp(debug_buffer))
+			{
+				client->ready = 1;
+
+				SendArenaRules(client);
+				if(wb3->value)
+				{
+					WB3SendGruntConfig(client);
+					//					WB3SendArenaFlags3(client);
+					WB3ArenaConfig2(client);
+					WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
+					WB3DotCommand(client, ".date %u %u %u", arena->month, arena->day, arena->year);
+					WB3DotCommand(client, ".gunstat");
+					WB3NWAttachSlot(client);
+				}
+
+				SendOttoParams(client);
+				if(!wb3->value)
+				SendExecutablesCheck(1, client);
+				SendLastConfig(client);
+
+				sprintf(file, "./arenas/%s/motd.txt", dirname->string);
+
+				if((fp = fopen(file, "r")) == NULL)
+				{
+					Com_Printf("WARNING: Couldn't open \"%s\"\n", file);
+					sprintf(file, "motd.txt");
+				}
+				else
+				{
+					fclose(fp);
+				}
+
+				SendFileSeq1(file, client);
+
+				PPrintf(client, RADIO_YELLOW, "Warbirds Tabajara Host version %s, build %s", VERSION, __DATE__); //BUILD);
+
+				if(!(client->attr == 1 && hideadmin->value))
+				{
+					if(client->loginkey)
+					BPrintf(RADIO_GRAY, "%s entered the game", client->longnick);
+					else
+					BPrintf(RADIO_GRAY, "%s entered the game using WBChat", client->longnick);
+
+					Com_LogEvent(EVENT_LOGIN, client->id, 0);
+					Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);
+					Com_LogDescription(EVENT_DESC_PLCTRID, client->ctrid, 0);
+
+					for(i = 0; i < maxentities->value; i++)
+					{
+						if(clients[i].inuse && !clients[i].drone && clients[i].ready && client != &clients[i])
+						{
+							if(!strcmp(clients[i].ip, client->ip))
+							{
+								Com_Printf("%s and %s are sharing the same IP (%s)\n", client->longnick, clients[i].longnick, client->ip);
+								BPrintf(RADIO_YELLOW, "%s and %s are sharing the same IP (%s)\n", client->longnick, clients[i].longnick, client->ip);
+								break;
+							}
+						}
+					}
+				}
+
+				ClientIpaddr(client);
+				CheckTK(client);
+
+				sprintf(my_query, "INSERT INTO online_players SET player_id = '%u', country = '%u', login_time = FROM_UNIXTIME(%u)", client->id, client->country, (u_int32_t)time(NULL));
+
+				if(d_mysql_query(&my_sock, my_query)) // query succeeded
+
+				{
+					if(mysql_errno(&my_sock) != 1062)
+					Com_Printf("WARNING: LOGIN: couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				}
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0D02:
+			if(!setjmp(debug_buffer))
+			{
+				SendPacket(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0D04:
+			if(!setjmp(debug_buffer))
+			{
+				client->disconnect = 1;
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0E00:
+			if(!setjmp(debug_buffer))
+			{
+				PPlanePosition(buffer, client, 0);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0E01:
+			if(!setjmp(debug_buffer))
+			{
+				if(client->infly)
+				PPlaneStatus(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0E04:
+			if(!setjmp(debug_buffer))
+			{
+				PPlanePosition(buffer, client, 1);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0E05:
+			if(!setjmp(debug_buffer))
+			{
+				PChutePos(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0E07:
+			if(!setjmp(debug_buffer))
+			{
+				WB3GunnerUpdate(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0E0E:
+			if(!setjmp(debug_buffer))
+			{
+				WB3SupressFire(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x0E0F:
+			if(!setjmp(debug_buffer))
+			{
+				WB3ExternalAmmoCnt(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x2101:
+			if(!setjmp(debug_buffer))
+			{
+				POttoFiring(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1200:
+			if(!setjmp(debug_buffer))
+			{
+				PRadioMessage(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1201:
+			if(!setjmp(debug_buffer))
+			{
+				PSetRadioChannel(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1B01:
+			if(!setjmp(debug_buffer))
+			{
+				PFileCheck(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x2000:
+			if(!setjmp(debug_buffer))
+			{
+				PNewNick(buffer+2, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1900:
+			if(!setjmp(debug_buffer))
+			{
+				PDropItem(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1902:
+			if(!setjmp(debug_buffer))
+			{
+				// FIXME: are you sure it's only flak hit?
+				PFlakHit(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1903:
+			if(!setjmp(debug_buffer))
+			{
+				PHitStructure(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1904:
+			if(!setjmp(debug_buffer))
+			{
+				PHardHitPlane(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1905:
+			if(!setjmp(debug_buffer))
+			{
+				PHardHitStructure(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1906:
+			if(!setjmp(debug_buffer))
+			{
+				PRemoveDropItem(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1909:
+			if(!setjmp(debug_buffer))
+			{
+				PFireMG(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x190B:
+			if(!setjmp(debug_buffer))
+			{
+				if(client->infly)
+				PHitPlane(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x190C:
+			if(!setjmp(debug_buffer))
+			{
+				PRemoveDropItem(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x190F: // wpOTTOHIT_SCORED_ON_BADGUY2
+			if(!setjmp(debug_buffer))
+			{
+				if(client->infly)
+				PHitPlane(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1913:
+			if(!setjmp(debug_buffer))
+			{
+				WB3TonnageOnTarget(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1915:
+			if(!setjmp(debug_buffer))
+			{
+				PFireMG(buffer, len, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1916:
+			if(!setjmp(debug_buffer))
+			{
+				WB3FuelConsumed(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1917:
+			if(!setjmp(debug_buffer))
+			{
+				WB3DelayedFuse(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1600:
+			if(!setjmp(debug_buffer))
+			{
+				if(client->ready)
+				SendFileSeq3(client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1602:
+			if(!setjmp(debug_buffer))
+			{
+				if(client->ready)
+				SendFileSeq5(0, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x1606:
+			if(!setjmp(debug_buffer))
+			{
+				if(client->ready)
+				SendFileSeq6(buffer, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			case 0x160A:
+			if(!setjmp(debug_buffer))
+			{
+				if(debug->value)
+				Com_Printf("160A\n");
+				memset(buffer+2, 0, 8);
+				buffer[1] = 0x0B; // FRANZ verificar WB2008
+				SendPacket(buffer, 10, client);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
+			default:
+			if(!setjmp(debug_buffer))
+			{
+				if(client->ready && client->attr & (FLAG_ADMIN | FLAG_OP))
+				PPrintf(client, RADIO_LIGHTYELLOW, "Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
+				Com_Printf("WARNING: Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
+				Com_Printfhex(buffer, len);
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+			}
+			break;
 		}
+	}
+	else
+	{
+		Com_Printf("WARNING: %s(%s) invalid checksum\n", client->longnick, client->ip);
+		return -1;
+	}
+	return 0;
+}
 
-		/*************
-		 PReqBomberList
+/*************
+ PingTest
 
-		 Send a list of all players that are with buffer and still in tower
-		 *************/
+ Calculate PingTest response
+ *************/
+
+void PingTest(u_int8_t *buffer, client_t *client)
+{
+	pingtest_t *pingtest;
+	u_int16_t frame;
+	
+	pingtest = (pingtest_t *)buffer;
+	frame = htons(pingtest->frame);
+
+	if((++frame) < 20)
+	{
+		Cmd_Pingtest(frame, client);
+	}
+	else
+	{
+		PPrintf(client, RADIO_RED, "Ping: %ums", ((arena->time - client->pingtest) / 20));
+	}
+}
+
+/*************
+ PReqBomberList
+
+ Send a list of all players that are with buffer and still in tower
+ *************/
 
 void PReqBomberList(client_t *client)
 {

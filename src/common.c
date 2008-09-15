@@ -1681,10 +1681,18 @@ double WBLongitude(double dAbsLongitude)
 	
 	if(wb3->value)
 	{
-		if(!Com_Strncmp(mapname->string, "atoll", 5))
+		if(!Com_Strncmp(mapname->string, "atoll", 5) || !Com_Strncmp(mapname->string, "ardennes", 8))
 		{
-			cdSquare00Longitude = 14843.0L;
-			cdSquareWidth = 52800.0L;
+			if(!Com_Strncmp(mapname->string, "atoll", 5))
+			{
+				cdSquareWidth = 52800.0L;
+				cdSquare00Longitude = 14843.0L;
+			}
+			else
+			{
+				cdSquareWidth = 54400.0L;
+				cdSquare00Longitude = 18162.0L;
+			}
 		}
 		else
 		{
@@ -1714,10 +1722,19 @@ double WBLatitude(double dAbsLatitude)
 	
 	if(wb3->value)
 	{
-		if(!Com_Strncmp(mapname->string, "atoll", 5))
+		if(!Com_Strncmp(mapname->string, "atoll", 5) || !Com_Strncmp(mapname->string, "ardennes", 8))
 		{
-			cdSquare00Latitude = 14843.0L;
-			cdSquareHeight = 52800.0L;
+			if(!Com_Strncmp(mapname->string, "atoll", 5))
+			{
+				cdSquare00Latitude = 14843.0L;
+				cdSquareHeight = 52800.0L;
+			}
+			else
+			{
+				cdSquare00Latitude = 18162.0L;
+				cdSquareHeight = 54400.0L;
+			}
+
 		}
 		else
 		{
@@ -1896,11 +1913,21 @@ char *PadLoc(char *szBuffer, double dLongitude, double dLatitude)
 	
 	if(wb3->value)
 	{
-		if(!Com_Strncmp(mapname->string, "atoll", 5))
+		if(!Com_Strncmp(mapname->string, "atoll", 5) || !Com_Strncmp(mapname->string, "ardennes", 8))
 		{
-			cdSquareWidth = 52800.0L;
-			dLongitude -= 14843.0L;
-			dLatitude -= 14843.0L;
+			
+			if(!Com_Strncmp(mapname->string, "atoll", 5))
+			{
+				cdSquareWidth = 52800.0L;
+				dLongitude -= 14843.0L;
+				dLatitude -= 14843.0L;
+			}
+			else
+			{
+				cdSquareWidth = 54400.0L;
+				dLongitude -= 18162.0L;
+				dLatitude -= 18162.0L;
+			}
 		}
 		else
 		{

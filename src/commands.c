@@ -2227,6 +2227,31 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 }
 
 /*************
+Cmd_Pingtest
+
+Make a Pingtest call
+*************/
+
+void Cmd_Pingtest(u_int16_t frame, client_t *client)
+{
+	buildstatus_t *buildstatus;
+	u_int8_t buffer[6];
+
+	memset(buffer, 0, sizeof(buffer));
+
+	buildstatus = (buildstatus_t *) buffer;
+
+	buildstatus->packetid = htons(Com_WBhton(0x0307));
+	buildstatus->building = htons(frame);
+	buildstatus->status = 4;
+	buildstatus->country = arena->fields[0].country;
+	if(!frame)
+		client->pingtest = arena->time;
+
+	SendPacket(buffer, sizeof(buffer), client);
+}
+
+/*************
 Cmd_Undecl
 
 Remove an structure from declaration list
