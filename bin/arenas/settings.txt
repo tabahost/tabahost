@@ -2,9 +2,9 @@ airshowsmoke            0
 blackout                1
 contrail                0
 countrytime           600
-currday                 3
-currmonth               1
-curryear             1943
+currday                24
+currmonth               9
+curryear             1944
 cvcapture               0
 cvdelay                 0
 cvradarrange1           0
@@ -44,10 +44,10 @@ planerangelimit      8100
 radaralt              600
 radarrange1         40000
 radarrange3         40000
-rebuildtime           300
+rebuildtime           360
 rps                    60
 tanksrange              0
 teamkiller              1
-timemult               24
+timemult                6
 timeout               360
-whitelist               0
+whotelist               0
