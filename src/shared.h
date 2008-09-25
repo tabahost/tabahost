@@ -154,7 +154,7 @@ typedef unsigned int u_int32_t;
 #define MAX_TIMEOUT			6000	// 60 seconds of timeout (60x100frames)
 #define MAX_PRINTMSG		4096	// max chars per line
 #define MAX_RADIOMSG		74		// max of radio msg (63 chars + info)
-#define MAX_SCREEN			32		// max aircrafts you can see on screen
+#define MAX_SCREEN			64		// max aircrafts you can see on screen (32 wb2, 64, wb3)
 #define MAX_SCREENBUF		800		// buffer of MAX_SCREEN (19+MAX_SCREEN*21)
 #define MAX_MUNTYPE			200 	// = number of munition types
 #define MAX_BUILDINGS		300		// 39?
@@ -179,7 +179,7 @@ typedef unsigned int u_int32_t;
 #define	MORTAR				585.0 // mortar velocity (ft/s) (492, range= 10697; 585, range = 15072)
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s²)
 #define MODULUS(a) (a > 0 ? a : a * -1)
-#define PLANE_FAU			180		// Predator
+#define PLANE_FAU			48	// ME262 48, Predator 180
 #define COLLECT_CYCLE		0
 #define COLLECT_MAP			1
 #define COLLECT_EVENT		2
@@ -1742,9 +1742,10 @@ typedef struct addplane_s		// 21 00
 	u_int8_t	slot;
 	u_int32_t	shortnick;
 	u_int32_t	country;
-	u_int32_t	plane;
+	u_int16_t	unknown1; //?? 00, 01 (in shanghai?), 02, 03
+	u_int16_t	plane;
 	u_int16_t	remove;			// set 0D to remove player from screen
-	u_int16_t	unknown1;
+	u_int16_t	unknown2;
 } addplane_t;
 
 typedef struct updateplane_s            // 21 01

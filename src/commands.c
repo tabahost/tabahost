@@ -1101,8 +1101,8 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		wb3fly->bulletradius2 = htons((u_int16_t)(bulletradius->value * 10));
 		wb3fly->gunrad = htons((u_int16_t)(gunrad->value * 10));
 		wb3fly->bulletradius3 = htons((u_int16_t)(bulletradius->value * 10));
-		wb3fly->unknown10 = htonl(dpitch->value); // same value from wb3requestfly_t unk4 (100)
-		wb3fly->unknown11 = htonl(droll->value); // same value from wb3requestfly_t unk5 (900)
+		wb3fly->unknown10 = htonl(100); // same value from wb3requestfly_t unk4 (100)
+		wb3fly->unknown11 = htonl(900); // same value from wb3requestfly_t unk5 (900)
 		wb3fly->rules = htonl(rules);
 		wb3fly->attachedpos = htonl(position);
 		wb3fly->numofarrays = 1;
@@ -1130,7 +1130,6 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		if(wb3->value)
 		{
 			wb3fly->plane = htons(client->attached->plane);
-			wb3fly->attached = htons(2);
 			j = wb3fly->numofarrays;
 		}
 		else
@@ -1193,26 +1192,26 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		{
 			switch(client->plane)
 			{
-				case 1:
-				case 4:
-				case 9:
-				case 16:
-				case 19:
-				case 27:
-				case 35:
-				case 37:
-				case 38:
-				case 48:
-				case 52:
-				case 57:
-				case 59:
-				case 71:
-				case 82:
-				case 88:
-				case 101:
-				case 113:
-				case 114:
-				case 125:
+				case 1: /*f6f5*/
+				case 4: /*f4u1d*/
+				case 9: /*ki84ia*/
+				case 16: /*110g2*/
+				case 19: /*190d9*/
+				case 27: /*p38l*/
+				case 35: /*ju88a4*/
+				case 37: /*b25j*/
+				case 38: /*b17g*/
+				case 48: /*me262*/
+				case 52: /*mosq6*/
+				case 57: /*ju87g*/
+				case 59: /*b24j*/
+				case 71: /*f86*/
+				case 82: /*mosqnf2*/
+				case 88: /*g4m1*/
+				case 101: /*he111h3*/
+				case 113: /*do17z*/
+				case 114: /*109g2eto*/
+				case 125: /*ki44iib*/
 					client->obradar = MAX_OBRADARRANGE;
 					break;
 				default:
@@ -1251,12 +1250,12 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			client->mortars = mortars->value;
 
 		Cmd_Plane(client->plane, client);
+		
+		SendArenaRules(client);
+		WB3SendGruntConfig(client);
+	//	WB3SendArenaFlags3(client);
+		WB3ArenaConfig2(client);
 	}
-
-	SendArenaRules(client);
-	WB3SendGruntConfig(client);
-//	WB3SendArenaFlags3(client);
-	WB3ArenaConfig2(client);
 
 	SendPacket(buffer, (wb3->value?69:67) + (12 * j /*num of arrays*/), client);
 	
@@ -2734,10 +2733,11 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 	if(attached)
 	{
 		client->attached = drone;
-		SendGunnerStatusChange(drone, 2, client);
+		SendGunnerStatusChange(drone, 2, client); // define position to be attached in drone
 		SendAttachList(NULL, client);
-		//AddRemovePlaneScreen(drone, client, FALSE);
-		Cmd_Fly(0, client);
+		client->visible[MAX_SCREEN - 1].client = drone;
+		AddRemovePlaneScreen(drone, client, FALSE);
+		Cmd_Fly(2, client);
 		//SendPlaneStatus(drone, client);
 	}
 }
@@ -4652,8 +4652,11 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 			return;
 
 		client->attached = drone;
-		SendGunnerStatusChange(drone, 2, client);
+		
+		SendGunnerStatusChange(drone, 2, client); // define position to be attached in client
 		SendAttachList(NULL, client);
+		client->visible[MAX_SCREEN - 1].client = drone;
+		AddRemovePlaneScreen(drone, client, FALSE);
 
 		/*
 		if(!client->visible[MAX_SCREEN - 1].client)
@@ -5214,7 +5217,11 @@ void Cmd_View(client_t *victim, client_t *client)
 
 			victim->view = client;
 			client->attached = victim;
-			Cmd_Fly(0, client);
+			SendGunnerStatusChange(victim, 2, client); // define position to be attached in client
+			SendAttachList(NULL, client);
+			client->visible[MAX_SCREEN - 1].client = victim;
+			AddRemovePlaneScreen(victim, client, FALSE);
+			Cmd_Fly(2, client);
 		}
 	}
 	else

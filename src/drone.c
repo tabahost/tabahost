@@ -1388,31 +1388,59 @@ Send drone pos to attached player
 void SendDronePos(client_t *drone, client_t *client)
 {
 	u_int8_t buffer[46];
+	wb3planeposition_t *wb3pos;
 	planeposition_t *pos;
 
 	memset(buffer, 0, sizeof(buffer));
 
-	pos = (planeposition_t *)buffer;
+	if(wb3->value)
+	{
+		wb3pos = (wb3planeposition_t *)buffer;
 
-	pos->packetid = htons(0x0e00);
-	pos->posx = htonl(drone->posxy[0][0]);
-	pos->posy = htonl(drone->posxy[1][0]);
-	pos->alt = htonl(drone->posalt[0]);
-	pos->xspeed = htons(drone->speedxyz[0][0]);
-	pos->yspeed = htons(drone->speedxyz[1][0]);
-	pos->climbspeed = htons(drone->speedxyz[2][0]);
-	pos->sideaccel = htons(drone->accelxyz[0][0]);
-	pos->forwardaccel = htons(drone->accelxyz[1][0]);
-	pos->climbaccel = htons(drone->accelxyz[2][0]);
-	pos->pitchangle = htons(drone->angles[0][0]);
-	pos->rollangle = htons(drone->angles[1][0]);
-	pos->yawangle = htons(drone->angles[2][0]);
-	pos->pitchangspeed = htons(drone->aspeeds[0][0]);
-	pos->rollangspeed = htons(drone->aspeeds[1][0]);
-	pos->yawangspeed = htons(drone->aspeeds[2][0]);
-	pos->timer = htonl(arena->time); // FIXME: drone->timer?
-	pos->radar = htons(0x30);
-	pos->plane = 0;//htons(drone->plane);
+		wb3pos->packetid = htons(Com_WBhton(0x0E00));
+		wb3pos->timer = htonl(arena->time); // FIXME: drone->timer?
+		wb3pos->radar = htons(0); // htons(0x30);
+		wb3pos->plane = htons(drone->plane); // 0;
+		wb3pos->posx = htonl(drone->posxy[0][0]);
+		wb3pos->posy = htonl(drone->posxy[1][0]);
+		wb3pos->alt = htonl(drone->posalt[0]);
+		wb3pos->xspeed = htons(drone->speedxyz[0][0]);
+		wb3pos->yspeed = htons(drone->speedxyz[1][0]);
+		wb3pos->climbspeed = htons(drone->speedxyz[2][0]);
+		wb3pos->sideaccel = htons(drone->accelxyz[0][0]);
+		wb3pos->forwardaccel = htons(drone->accelxyz[1][0]);
+		wb3pos->climbaccel = htons(drone->accelxyz[2][0]);
+		wb3pos->pitchangle = htons(drone->angles[0][0]);
+		wb3pos->rollangle = htons(drone->angles[1][0]);
+		wb3pos->yawangle = htons(drone->angles[2][0]);
+		wb3pos->pitchangspeed = htons(drone->aspeeds[0][0]);
+		wb3pos->rollangspeed = htons(drone->aspeeds[1][0]);
+		wb3pos->yawangspeed = htons(drone->aspeeds[2][0]);
+	}
+	else
+	{
+		pos = (planeposition_t *)buffer;
+
+		pos->packetid = htons(Com_WBhton(0x0E00));
+		pos->posx = htonl(drone->posxy[0][0]);
+		pos->posy = htonl(drone->posxy[1][0]);
+		pos->alt = htonl(drone->posalt[0]);
+		pos->xspeed = htons(drone->speedxyz[0][0]);
+		pos->yspeed = htons(drone->speedxyz[1][0]);
+		pos->climbspeed = htons(drone->speedxyz[2][0]);
+		pos->sideaccel = htons(drone->accelxyz[0][0]);
+		pos->forwardaccel = htons(drone->accelxyz[1][0]);
+		pos->climbaccel = htons(drone->accelxyz[2][0]);
+		pos->pitchangle = htons(drone->angles[0][0]);
+		pos->rollangle = htons(drone->angles[1][0]);
+		pos->yawangle = htons(drone->angles[2][0]);
+		pos->pitchangspeed = htons(drone->aspeeds[0][0]);
+		pos->rollangspeed = htons(drone->aspeeds[1][0]);
+		pos->yawangspeed = htons(drone->aspeeds[2][0]);
+		pos->timer = htonl(arena->time); // FIXME: drone->timer?
+		pos->radar = htons(0x30);
+		pos->plane = 0;
+	}
 
 	SendPacket(buffer, sizeof(buffer), client);
 }

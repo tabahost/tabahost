@@ -39,8 +39,6 @@ u_int8_t mainbuffer[MAX_RECVDATA]; //extern
 /*
 
  {0x0209, 0x0409, 0x08FF}, // pcSEND_SQUAD_INFO *******************************
- {0x0219, 0x0419, 0x08FF}, // pcSEND_HL_SQUAD *******************************
- {0x021B, 0x041B, 0x08FF}, // pcSYNC_VIEW *******************************
  {0x030B, 0x030B, 0x06FF}, // arnaREFRESH_FIELD_OBJECTS *******************************
  {0x0909, 0x1D09, 0x3AFF}, // utilSET_AMMO_LOAD *******************************
  {0xFFFF, 0x0E0B, 0x1CFF}, // piNWATTACH_SLOT *******************************
@@ -53,7 +51,6 @@ u_int8_t mainbuffer[MAX_RECVDATA]; //extern
  {0x020C, 0x040C, 0x08FF}, // pcREQUEST_SPECIFIC_SQUAD_INFO ===============================
  {0x020D, 0x040D, 0x08FF}, // pcREQUEST_PILOT_MEDALS ===============================
  {0x0210, 0x0410, 0x08FF}, // pcREQUEST_GUN_STATUS ===============================
- {0x021A, 0x041A, 0x08FF}, // pcSEND_SYNC_VIEW ===============================
  {0xFFFF, 0x0310, 0x06FF}, // arnaCONFIG_FLIGHTMODEL ===============================
  {0x0906, 0x1D06, 0x3AFF}, // utilATTACH_ACCEPT ===============================
  {0x0907, 0x1D07, 0x3AFF}, // utilATTACH_JUMP ===============================
@@ -93,9 +90,9 @@ u_int16_t packets_tab[209][3] =
 		{ 0x0216, 0x0416, 0xFFFF }, // pcSEND_SET_RANKS_MEDALS_DISPLAY
 		{ 0x0217, 0x0417, 0xFFFF }, // pcSEND_SQUAD_MEMBER_REMOVED
 		{ 0x0218, 0x0418, 0xFFFF }, // pcSEND_REQUESTED_TRAINER_HELP
-		{ 0x0219, 0x0419, 0xFFFF }, // pcSEND_HL_SQUAD *******************************
-		{ 0x021A, 0x041A, 0xFFFF }, // pcSEND_SYNC_VIEW ===============================
-		{ 0x021B, 0x041B, 0xFFFF }, // pcSYNC_VIEW *******************************
+		{ 0x0219, 0x0419, 0x0811 }, // pcSEND_HL_SQUAD *
+		{ 0x021A, 0x041A, 0x0812 }, // pcSEND_SYNC_VIEW =
+		{ 0x021B, 0x041B, 0x0813 }, // pcSYNC_VIEW *
 		{ 0xFFFF, 0x041C, 0x0814 }, // pcWB3_REQUEST_START_FLIGHT =
 		{ 0xFFFF, 0x041D, 0x0815 }, // pcWB3_HEARTBEAT
 		{ 0xFFFF, 0x041E, 0xFFFF }, // pcSTART_FLIGHTAIWING
@@ -173,7 +170,7 @@ u_int16_t packets_tab[209][3] =
 		{ 0xFFFF, 0x0E09, 0xFFFF }, // piCMEYESLAVE_UPDATE
 		{ 0xFFFF, 0x0E0A, 0xFFFF }, // piUSERY_UPDATE
 		{ 0xFFFF, 0x0E0B, 0xFFFF }, // piNWATTACH_SLOT *******************************
-		{ 0xFFFF, 0x0E0C, 0x1C10 }, // piMASTER_VIEW
+		{ 0xFFFF, 0x0E0C, 0x1C10 }, // piMASTER_VIEW "bbbbbbbbb"
 		{ 0xFFFF, 0x0E0D, 0xFFFF }, // piFORCE_SPAWN
 		{ 0xFFFF, 0x0E0E, 0x1C12 }, // piFIRE_SUPPRESSION = (wb3server reply other clients with 0022)
 		{ 0xFFFF, 0x0E0F, 0x1C13 }, // piEXTERNAL_AMMOCNT =
@@ -1527,11 +1524,13 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				if (!Cmd_Fly(0, client))
 				{
-					if (client->shanghai) // start shanghai flight
+					if(client->shanghai) // start shanghai flight
 					{
+						Com_Printf("DEBUG: Client have Shanghai\n");
 						if (client->shanghai->ready && !client->shanghai->infly)
 						{
 							client->shanghai->attached = client;
+							Com_Printf("DEBUG: Start Shanghai Fly\n");
 							Cmd_Fly(2, client->shanghai);
 						}
 					}
@@ -2804,9 +2803,9 @@ void ProcessCommands(char *command, client_t *client)
 			if(client->attr && (client->attr & (u_int8_t)mview->value))
 			{
 				if(!argv[0])
-				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .view [<nick>|exit]");
+					PPrintf(client, RADIO_LIGHTYELLOW, "usage: .view [<nick>|exit]");
 				else
-				Cmd_View(FindLClient(argv[0]), client);
+					Cmd_View(FindLClient(argv[0]), client);
 			}
 			else
 			{
@@ -4457,24 +4456,10 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			}
 		}
 
-		client->score.airscore
-				= client->score.groundscore
-						= client->score.captscore
-								= client->score.rescuescore
-										= client->killssortie
-												= client->status1
-														= client->status2
-																= client->infly
-																		= client->hits
-																				= client->hitstaken
-																						= client->chute
-																								= client->obradar
-																										= client->mortars
-																												= client->cancollide
-																														= client->fueltimer
-																																= client->score.penaltyscore
-																																		= client->commandos
-																																				= 0;
+		client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore
+			= client->killssortie = client->status1 = client->status2 = client->infly = client->hits
+			= client->hitstaken = client->chute = client->obradar = client->mortars = client->cancollide
+			= client->fueltimer = client->score.penaltyscore = client->commandos = 0;
 
 		for (i = 0; i < MAX_HITBY; i++) // for debug only
 		{
@@ -5243,7 +5228,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 		}
 
-		if (client->shanghai)
+		if(client->shanghai)
 		{
 			if (client->shanghai->attached == client)
 			{
@@ -5254,7 +5239,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 		}
 
-		if (client->view)
+		if(client->view)
 		{
 			if (client->view->attached == client)
 			{
@@ -5522,13 +5507,11 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 
 								if (client == clients[i].visible[j].client)
 								{
-									AddRemovePlaneScreen(client, &clients[i],
-											TRUE);
+									AddRemovePlaneScreen(client, &clients[i], TRUE);
 									num = client->country;
 									client->country = 0; // neutral
 									//client->status1 = client->status2 = 0;
-									AddRemovePlaneScreen(client, &clients[i],
-											FALSE);
+									AddRemovePlaneScreen(client, &clients[i], FALSE);
 									client->country = num;
 									break;
 								}
@@ -9062,20 +9045,23 @@ void SendPlayersNear(client_t *client)
 
 	for (j = 0; j < MAX_SCREEN; j++) /* check for removing from list */
 	{
-		if (client->visible[j].client)
+		if((j != (MAX_SCREEN - 1)) || ((arena->time - client->dronetimer) > 15000))
 		{
-			for (i = 0; i < k; i++)
+			if (client->visible[j].client)
 			{
-				if (client->visible[j].client == carray[i])
+				for (i = 0; i < k; i++)
 				{
-					i = -1;
-					break;
+					if (client->visible[j].client == carray[i])
+					{
+						i = -1;
+						break;
+					}
 				}
-			}
-			if (i >= 0) // not found on 'nearplanes' array
-			{
-				AddRemovePlaneScreen(client->visible[j].client, client, TRUE); // remove plane from screen
-				client->visible[j].client = NULL; // remove plane from array
+				if (i >= 0) // not found on 'nearplanes' array
+				{
+					AddRemovePlaneScreen(client->visible[j].client, client, TRUE); // remove plane from screen
+					client->visible[j].client = NULL; // remove plane from array
+				}
 			}
 		}
 	}
@@ -9227,6 +9213,7 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 	addplane = (addplane_t *)buffer;
 
 	addplane->packetid = htons(Com_WBhton(0x0000));
+	
 	addplane->slot = GetSlot(plane, client);
 
 	if (remove)
@@ -9237,7 +9224,7 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 	{
 		addplane->shortnick = htonl(plane->shortnick);
 		addplane->country = htonl(plane->country);
-		addplane->plane = htonl(plane->plane);
+		addplane->plane = htons(plane->plane);
 	}
 
 	SendPacket(buffer, sizeof(buffer), client);
@@ -10609,12 +10596,10 @@ int8_t FirstFieldCountry(u_int8_t country)
 /*************
  SendGunnerStatusChange
 
- Gunner Status Change
- FIXME: understand it!!!
+ Send the nick of who client will be gunner
  *************/
 
-void SendGunnerStatusChange(client_t *gunner, u_int16_t status,
-		client_t *client)
+void SendGunnerStatusChange(client_t *gunner, u_int16_t status, client_t *client)
 {
 	u_int8_t buffer[8];
 	gunnerstatus_t *gunnerstatus;
@@ -11078,6 +11063,7 @@ u_int16_t GunPos(u_int16_t pos, u_int8_t reverse)
 void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 {
 	wb3requestfly_t *reqfly;
+	u_int8_t i;
 
 	reqfly = (wb3requestfly_t *) buffer;
 
@@ -11094,7 +11080,39 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 	client->field = ntohl(reqfly->field);
 	client->ord = ntohl(reqfly->ord);
 
-	Cmd_Fly(0, client);
+	if (!Cmd_Fly(0, client))
+	{
+		if(client->shanghai) // start shanghai flight
+		{
+			Com_Printf("DEBUG: Client have Shanghai\n");
+			if (client->shanghai->ready && !client->shanghai->infly)
+			{
+				client->shanghai->attached = client;
+				Com_Printf("DEBUG: Start Shanghai Fly\n");
+				SendGunnerStatusChange(client, 2, client->shanghai); // define position to be attached in client
+				SendAttachList(NULL, client->shanghai);
+				client->shanghai->visible[MAX_SCREEN - 1].client = client;
+				AddRemovePlaneScreen(client, client->shanghai, FALSE);
+				Cmd_Fly(2, client->shanghai);
+			}
+		}
+
+		if (HaveGunner(client->plane))
+		{
+			for (i = 0; i < 7; i++) // start gunners flight
+			{
+				if (client->gunners[i])
+				{
+					if (client->gunners[i]->ready
+							&& !client->gunners[i]->infly)
+					{
+						client->gunners[i]->attached = client;
+						Cmd_Fly(GunPos(i, 1), client->gunners[i]);
+					}
+				}
+			}
+		}
+	}
 }
 
 /*************
