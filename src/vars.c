@@ -121,7 +121,6 @@ var_t	*metar;			// extern
 var_t	*midairs;		// extern
 var_t	*mortars;		// extern
 var_t	*mview;			// extern
-var_t	*nooparena;		// extern
 var_t	*notanks;		// extern
 var_t	*nowings;		// extern
 var_t	*ottoaccuracy;	// set otto accuracy
@@ -195,7 +194,7 @@ void InitVars(void)
 	arenaflags1 = Var_Get("arenaflags1", "3", VAR_ARCHIVE);
 	arenaflags2 = Var_Get("arenaflags2", "0", VAR_ARCHIVE);
 	arenaflags3 = Var_Get("arenaflags3", "27", VAR_ARCHIVE);
-	arenalist = Var_Get("arenalist", "0", VAR_ARCHIVE | VAR_ADMIN);
+	arenalist = Var_Get("arenalist", "0", VAR_ADMIN);
 	batchfile = Var_Get("batchfile", "0", VAR_ARCHIVE);
 	blackout = Var_Get("blackout", "1", VAR_ARCHIVE);
 	broadcast = Var_Get("broadcast", "1", VAR_ARCHIVE);
@@ -231,9 +230,9 @@ void InitVars(void)
 	easymode = Var_Get("easymode", "0", VAR_ARCHIVE);
 	emulatecollision = Var_Get("emulatecollision", "0", VAR_ARCHIVE);
 	enableottos = Var_Get("enableottos", "1", VAR_ARCHIVE);
-	endday = Var_Get("endday", "16", VAR_ARCHIVE);
-	endmonth = Var_Get("endmonth", "8", VAR_ARCHIVE);
-	endyear = Var_Get("endyear", "1945", VAR_ARCHIVE);
+	endday = Var_Get("endday", "16", VAR_ADMIN);
+	endmonth = Var_Get("endmonth", "8", VAR_ADMIN);
+	endyear = Var_Get("endyear", "1945", VAR_ADMIN);
 	enemydotsfly = Var_Get("enemydotsfly", "1", VAR_ARCHIVE);
 	enemydotstwr = Var_Get("enemydotstwr", "1", VAR_ARCHIVE);
 	enemyidlim = Var_Get("enemyidlim", "1500", VAR_ARCHIVE);
@@ -260,9 +259,9 @@ void InitVars(void)
 	hostname = Var_Get("hostname", "Main Arena", VAR_ARCHIVE | VAR_ADMIN);
 	iconbombersoverride = Var_Get("iconbombersoverride", "1", VAR_ARCHIVE);
 	iff = Var_Get("iff", "1", VAR_ARCHIVE);
-	initday = Var_Get("initday", "1", VAR_ARCHIVE);
-	initmonth = Var_Get("initmonth", "9", VAR_ARCHIVE);
-	inityear = Var_Get("inityear", "1939", VAR_ARCHIVE);
+	initday = Var_Get("initday", "1", VAR_ADMIN);
+	initmonth = Var_Get("initmonth", "9", VAR_ADMIN);
+	inityear = Var_Get("inityear", "1939", VAR_ADMIN);
 	katyrange = Var_Get("katyrange", "8000", VAR_ARCHIVE); // theorical max of 46339
 	killcvtoreset = Var_Get("killcvtoreset", "1", VAR_ARCHIVE);
 	landingcapture = Var_Get("landingcapture", "0", VAR_ARCHIVE | VAR_ADMIN);
@@ -280,7 +279,6 @@ void InitVars(void)
 	midairs = Var_Get("midairs", "1", VAR_ARCHIVE);
 	mortars = Var_Get("mortars", "10", VAR_ARCHIVE);
 	mview = Var_Get("mview", "1", VAR_ARCHIVE | VAR_ADMIN);
-	nooparena = Var_Get("nooparena", "0", VAR_ADMIN);
 	notanks = Var_Get("notanks", "0", VAR_ARCHIVE);
 	nowings = Var_Get("nowings", "0", VAR_ARCHIVE);
 	ottoaccuracy = Var_Get("ottoaccuracy", "5", VAR_ARCHIVE);

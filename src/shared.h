@@ -2272,7 +2272,7 @@ extern	var_t		*arcade;		// enable arena arcade mode
 extern	var_t		*arenaflags1;	// arena flags
 extern	var_t		*arenaflags2;	// arena flags
 extern	var_t		*arenaflags3;	// arena flags
-extern	var_t		*arenalist;		// arenalist update
+extern	var_t		*arenalist;		// domain of central arena that receive UDP packets
 extern	var_t		*batchfile;		// exec batch file on login
 extern	var_t		*blackout;		// enable blackout
 extern	var_t		*broadcast;		// enable broadcast channel
@@ -2364,7 +2364,6 @@ extern	var_t		*metar;			// allow use metar information
 extern	var_t		*midairs;		// midairs collisions
 extern	var_t		*mortars;		// set how much mortars JU52 and Li-2 can fire
 extern	var_t		*mview;			// set who can use .view (OPs, Admins or both)
-extern	var_t		*nooparena;		// domain of central arena that receive UDP packets
 extern	var_t		*notanks;		// dont allow players and arena to spawn tanks/hmack/katy
 extern	var_t		*nowings;		// dont allow players to use wingmen
 extern	var_t		*ottoaccuracy;	// set otto accuracy

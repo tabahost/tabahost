@@ -7571,7 +7571,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap,
 					Com_Printf("%s destroyed %s at F%d\n", client->longnick,
 							GetBuildingType(building->type), building->field);
 				}
-				else
+				else if(IsVitalBuilding(building))
 				{
 					PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s",
 							GetBuildingType(building->type),

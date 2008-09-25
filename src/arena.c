@@ -4095,17 +4095,14 @@ void NoopArenalist(void)
 	inet_aton("127.0.0.1", &Target.sin_addr); // Target.sin_addr.s_addr = inet_addr("127.0.0.1");
 	sendto(UdpSock, buffer, offset, 0, (struct sockaddr *) &Target, sizeof(Target)); // send arena to itself
 
-	if(arenalist->value)
+	if(strlen(arenalist->string) > 4)
 	{
-		inet_aton("83.149.244.5", &Target.sin_addr); // Target.sin_addr.s_addr = inet_addr("83.149.244.5");
-		sendto(UdpSock, buffer, offset, 0, (struct sockaddr *) &Target, sizeof(Target)); // send to russian arena
+		//inet_aton("83.149.244.5", &Target.sin_addr); // Target.sin_addr.s_addr = inet_addr("83.149.244.5");
+		//sendto(UdpSock, buffer, offset, 0, (struct sockaddr *) &Target, sizeof(Target)); // send to russian arena
 
-		if(strlen(nooparena->string) > 4)
-		{
-			he = gethostbyname(nooparena->string);
-			memcpy (&(Target.sin_addr.s_addr), he->h_addr, he->h_length);
-			sendto(UdpSock, buffer, offset, 0, (struct sockaddr *) &Target, sizeof(Target)); // send arena to central arena
-		}
+		he = gethostbyname(arenalist->string);
+		memcpy (&(Target.sin_addr.s_addr), he->h_addr, he->h_length);
+		sendto(UdpSock, buffer, offset, 0, (struct sockaddr *) &Target, sizeof(Target)); // send arena to central arena
 	}
 
 	Com_Close(&UdpSock);
