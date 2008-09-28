@@ -1537,6 +1537,14 @@ typedef struct wb3dotcmd_s	// 12 05
 	char	message;	// contain the first char of msg, must be used as &(variable->message)
 } wb3dotcmd_t;
 
+typedef struct hostvar_s	// 0x1412
+{
+	u_int16_t	packetid;	//
+	u_int32_t	unk1;	// 
+	u_int8_t	size;
+	char	var;	// contain the first char of msg, must be used as &(variable->var)
+} hostvar_t;
+
 typedef struct checkexecutables_s	// 18 00
 {
 	u_int16_t	packetid;
@@ -2044,6 +2052,7 @@ void	PSquadLookup(u_int8_t *buffer, client_t *client);
 u_int16_t GunPos(u_int16_t pos, u_int8_t reverse);
 void	WB3RequestStartFly(u_int8_t *buffer, client_t *client);
 void	WB3RequestMannedAck(u_int8_t *buffer, client_t *client);
+void	PHostVar(u_int8_t *buffer, client_t *client);
 void	PRequestGunner(u_int8_t *buffer, client_t *client);
 void	PAcceptGunner(u_int8_t *buffer, client_t *client);
 void	PSwitchOttoPos(u_int8_t *buffer, client_t *client);

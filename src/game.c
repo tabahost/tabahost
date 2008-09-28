@@ -90,9 +90,9 @@ u_int16_t packets_tab[209][3] =
 		{ 0x0216, 0x0416, 0xFFFF }, // pcSEND_SET_RANKS_MEDALS_DISPLAY
 		{ 0x0217, 0x0417, 0xFFFF }, // pcSEND_SQUAD_MEMBER_REMOVED
 		{ 0x0218, 0x0418, 0xFFFF }, // pcSEND_REQUESTED_TRAINER_HELP
-		{ 0x0219, 0x0419, 0x0811 }, // pcSEND_HL_SQUAD *
-		{ 0x021A, 0x041A, 0x0812 }, // pcSEND_SYNC_VIEW =
-		{ 0x021B, 0x041B, 0x0813 }, // pcSYNC_VIEW *
+		{ 0x0219, 0x0419, 0x0811 }, // pcSEND_HL_SQUAD 
+		{ 0x021A, 0x041A, 0xFFFF }, // pcSEND_SYNC_VIEW ===============================
+		{ 0x021B, 0x041B, 0xFFFF }, // pcSYNC_VIEW *******************************
 		{ 0xFFFF, 0x041C, 0x0814 }, // pcWB3_REQUEST_START_FLIGHT =
 		{ 0xFFFF, 0x041D, 0x0815 }, // pcWB3_HEARTBEAT
 		{ 0xFFFF, 0x041E, 0xFFFF }, // pcSTART_FLIGHTAIWING
@@ -122,14 +122,15 @@ u_int16_t packets_tab[209][3] =
 		{ 0xFFFF, 0x0311, 0xFFFF }, // arnaCONFIG_WEAPONS
 		{ 0xFFFF, 0x0312, 0x0614 }, // arnaSET_CONFIG2 *
 
-		{ 0x0800, 0xFFFF, 0xFFFF }, // cmPLAYER_STARTED_FLIGHT
-		{ 0x0801, 0xFFFF, 0xFFFF }, // cmPLAYER_EXITED_FLIGHT
-		{ 0x0802, 0xFFFF, 0xFFFF }, // cmPLAYER_TALK
-		{ 0x0803, 0xFFFF, 0xFFFF }, // cmPLAYER_DROP
-		{ 0xFFFF, 0xFFFF, 0xFFFF }, // cmPLAYER_HIT
-		{ 0xFFFF, 0xFFFF, 0xFFFF }, // cmPLAYER_KILL
-		{ 0xFFFF, 0xFFFF, 0xFFFF }, // cmHOSTVAR
-		{ 0xFFFF, 0xFFFF, 0xFFFF }, // cmHOSTVARSTR
+		// These wb2007 ID's are not tested, and must be checked enabling field info in tower
+		{ 0x0800, 0x1400, 0xFFFF }, // cmPLAYER_STARTED_FLIGHT
+		{ 0x0801, 0x1401, 0xFFFF }, // cmPLAYER_EXITED_FLIGHT
+		{ 0x0802, 0x1402, 0xFFFF }, // cmPLAYER_TALK
+		{ 0x0803, 0x1403, 0xFFFF }, // cmPLAYER_DROP
+		{ 0xFFFF, 0x1404, 0xFFFF }, // cmPLAYER_HIT
+		{ 0xFFFF, 0x1405, 0xFFFF }, // cmPLAYER_KILL
+		{ 0xFFFF, 0x1406, 0x1412 }, // cmHOSTVAR
+		{ 0xFFFF, 0x1407, 0xFFFF }, // cmHOSTVARSTR
 
 		{ 0x0900, 0x1D00, 0xFFFF }, // utilGET_CHECK_SUM
 		{ 0x0901, 0x1D01, 0xFFFF }, // utilSETHANDLE
@@ -3541,8 +3542,11 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			}
 			break; // FIXME
 			case 0x0310:
-			PPrintf(client, RADIO_GREEN, "DEBUG: arnaCONFIG_FLIGHTMODEL()");
+				PPrintf(client, RADIO_GREEN, "DEBUG: arnaCONFIG_FLIGHTMODEL()");
 			break; // FIXME
+			case 0x1406:
+				PHostVar(buffer, client);
+			break;
 			case 0x1D05:
 			if(!setjmp(debug_buffer))
 			{
@@ -11210,6 +11214,52 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 	SendOttoParams(client);
 	if (!wb3->value)
 		SendExecutablesCheck(2, client);
+}
+
+/*************
+ PHostVar
+
+ Get a HostVar packet
+ *************/
+
+void PHostVar(u_int8_t *buffer, client_t *client)
+{
+	u_int8_t i;
+	hostvar_t *hostvar;
+	char message[32];
+
+	hostvar = (hostvar_t *) buffer;
+	
+	strncpy(message, &(hostvar->var), hostvar->size);
+	
+	PPrintf(client, RADIO_LIGHTYELLOW, "%s", message);
+	
+	for(i = 0; i < 20; i++)
+	{
+		if(message[i] == ':')
+		{
+			message[i] = '\0';
+			break;
+		}
+	}
+	
+	buffer[0] = 0x14;
+	buffer[1] = 0x13;
+	buffer[2] = strlen(message);
+	strcpy((buffer+3), message);
+	if(!strcmp(message, "TOTENABLED"))
+	{
+		buffer[buffer[2]+3] = strlen(dpitch->string);
+		strcpy((buffer+(buffer[2]+4)), dpitch->string);
+	}
+	else
+	{
+		buffer[buffer[2]+3] = strlen(droll->string);
+		strcpy((buffer+(buffer[2]+4)), droll->string);
+	}
+	
+	Com_Printfhex(buffer, buffer[2]+buffer[buffer[2]+3]+4);
+	SendPacket(buffer, buffer[2]+buffer[buffer[2]+3]+4, client);
 }
 
 /*************
