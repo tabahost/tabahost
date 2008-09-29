@@ -340,19 +340,18 @@ void FlushSocket(int sockfd)
 
 	memset(mainbuffer, 0, MAX_RECVDATA);
 
+#ifdef _WIN32
+			ConnError(WSAGetLastError());
+#else
+			ConnError(errno);
+#endif
+	
 	while((n=Com_Recv(sockfd, mainbuffer, MAX_RECVDATA)) > 0)
 	{
 //		if(debug->value)
 //		{
-
-#ifdef _WIN32
 			Com_Printf("DEBUG: Flushing socket (%d) n(%d):\n", socket, n);
-			ConnError(WSAGetLastError());
-#else
-			Com_Printf("DEBUG: Flushing socket (%d) n(%d):\n", socket, n);
-			ConnError(errno);
-#endif
-//			Com_Printfhex(mainbuffer, n);
+			Com_Printfhex(mainbuffer, n);
 //		}
 //		else
 //			;

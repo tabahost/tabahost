@@ -1561,7 +1561,7 @@ void UpdateClientFile(client_t *client)
 					client->conv,
 					client->easymode,
 					client->radio[0],
-					cliant->rank, // Elo rating
+					client->rank, // Elo rating
 					(u_int32_t)time(NULL),
 					client->ip,
 					client->loginuser);
