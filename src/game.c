@@ -2453,7 +2453,7 @@ void ProcessCommands(char *command, client_t *client)
 					}
 				}
 				else
-				ForceEndFlight(TRUE, FindLClient(argv[0]));
+					ForceEndFlight(TRUE, FindLClient(argv[0]));
 			}
 
 			return;
@@ -4177,6 +4177,9 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 	if (!client->attached)
 	{
+		if(client->attr == 2)
+			PPrintf(client, RADIO_RED, "DEBUG: end flight code %d", end);
+
 		switch (end)
 		{
 			case 0x01:

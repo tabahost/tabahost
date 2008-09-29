@@ -437,14 +437,14 @@ void RunFrame(void)
 		UpdateArenaStatus(TRUE);
 	}
 
-//	if(!setjmp(debug_buffer))
-//	{
+	if(!setjmp(debug_buffer))
+	{
 		CheckArenaRules();
-//	}
-//	else
-//	{
-//		DebugArena(__FILE__, __LINE__);
-//	}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
+	}
 
 	if(server_speeds->value)
 		time_after_arena = Sys_Milliseconds();

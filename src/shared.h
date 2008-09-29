@@ -428,6 +428,9 @@ typedef unsigned int u_int32_t;
 #define RADIO_WHITE			200
 #define RADIO_BLUE			201
 #define RADIO_YELLOW		202
+#define ELO_WINNER			1
+#define ELO_LOOSER			2
+#define ELO_BOTH			3
 #define SCORE_KILL			100.0
 #define SCORE_ASSIST		30.0
 #define SCORE_FAU			50.0
@@ -773,6 +776,7 @@ typedef struct client_s
 	float		lastscore;		// score in last flight
 	float		streakscore;	// score accumulated in the streak // DEBUD: unused????
 	u_int8_t	nummedals;		// num of medals received // DEBUG: unused????
+	int16_t		rank;			// Elo rating
 	u_int8_t	ranking;		// pilot ranking
 
 	u_int8_t	tklimit;		// FIXME: add limit for friendly buildings/planes kills till be kicked
@@ -2159,6 +2163,7 @@ u_int8_t GetClientInfo(client_t *client);
 void	UpdateClientFile(client_t *client);
 int8_t	AddKiller(client_t *victim, client_t *client);
 void	CheckKiller(client_t *client);
+void	CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags);
 client_t *NearPlane(client_t *client, u_int8_t country, int32_t limit);
 u_int8_t CheckMedals(client_t *client);
 u_int8_t AddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);

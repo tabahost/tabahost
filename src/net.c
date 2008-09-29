@@ -298,10 +298,11 @@ int GetPacket(client_t *client)
 				{
 					m = ProcessPacket(mainbuffer, len-1, client); // len-1 to remove checksum from buffer
 					
-					if(m < 0)
+					if(m < 0) // invalid checksum
 					{
-						Com_Printf("WARNING: %s(%s) - Invalid Packet\n", client->longnick, client->ip);
+						Com_Printf("WARNING: %s(%s) - Invalid Packet Checksum\n", client->longnick, client->ip);
 						FlushSocket(client->socket);
+						return 0;
 					}
 				}
 				else
@@ -318,7 +319,6 @@ int GetPacket(client_t *client)
 
 	Com_Printf("WARNING: %s(%s) %d - Invalid Packet\n", client->longnick, client->ip, n);
 	FlushSocket(client->socket);
-
 	return 0;
 }
 
@@ -346,7 +346,7 @@ void FlushSocket(int sockfd)
 //		{
 
 #ifdef _WIN32
-			Com_Printf("DEBUG: Flushing socket (%d) n(%d):", socket, n);
+			Com_Printf("DEBUG: Flushing socket (%d) n(%d):\n", socket, n);
 			ConnError(WSAGetLastError());
 #else
 			Com_Printf("DEBUG: Flushing socket (%d) n(%d):\n", socket, n);

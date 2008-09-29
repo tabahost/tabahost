@@ -4207,3 +4207,85 @@ void CrediteFactoryBuildings(city_t *city)
 		}
 	}
 }
+
+/*************
+DebugArena
+
+Save Debug information before arena crashes
+*************/
+
+void DebugArena(char *file, u_int32_t line)
+{
+	char filename[128];
+	time_t ltime;
+	FILE *fp;
+
+	memset(filename, 0, sizeof(filename));
+
+	time(&ltime);
+
+	sprintf(filename, "./debug/%uarena.txt.LOCK", (u_int32_t)ltime);
+
+	Sys_WaitForLock(filename);
+
+	if(Sys_LockFile(filename) < 0)
+	{
+		Com_Printf("WARNING: Couldn't open file \"%s\"\n", filename);
+		return;
+	}
+
+	filename[strlen(filename) - 5] = '\0';
+
+	if((fp = fopen(filename, "wb")) == NULL)
+	{
+		Com_Printf("WARNING: Couldn't open file \"%s\"\n", filename);
+	}
+	else
+	{
+		fprintf(fp, "%sZ - Debug file\n\n", asc2time(gmtime(&ltime)));
+
+		fprintf(fp, "Error at %s, line %d\n\n", file, line);
+		
+		fprintf(fp, "Current map: %s\n\n", mapname->string);
+
+//		fprintf(fp, "Registers:\n");
+//		fprintf(fp, "ebp=%08lx ebx=%10d edi=%10d esi=%10d\n", debug_buffer[0], debug_buffer[1], debug_buffer[2], debug_buffer[3]);
+//		fprintf(fp, "esp=%10d ret=%10d exc=%10d con=%10d\n\n", debug_buffer[4], debug_buffer[5], debug_buffer[6], debug_buffer[7]);
+
+		fprintf(fp, "arena_s:\n");
+		fprintf(fp, "time            = %10u  sent          = %10u  recv          = %10u\n", arena->time, arena->sent, arena->recv);
+		fprintf(fp, "frame           = %10d  year          = %10u  month         = %10u\n", arena->frame, arena->year, arena->month);
+		fprintf(fp, "day             = %10u  hour          = %10u  minute        = %10u\n", arena->day, arena->hour, arena->minute);
+		fprintf(fp, "multiplier      = %10u  scenario      = %10u  mapnum        = %10d\n", arena->multiplier, arena->scenario, arena->mapnum);
+		fprintf(fp, "countdown       = %10u  numplayers    = %10d  numdrones     = %10d\n", arena->countdown, arena->numplayers, arena->numdrones);
+
+//		fprintf(fp, "day             = %10u  hour    = %10u  minute = %10u\n", client->drone, client->threatened, client->droneformation);
+//		fprintf(fp, "day             = %10u  hour    = %10u  minute = %10u\n", client->drone, client->threatened, client->droneformation);
+//		fprintf(fp, "day             = %10u  hour    = %10u  minute = %10u\n", client->drone, client->threatened, client->droneformation);
+
+//	munition_t	munition[MAX_MUNTYPE];		// ammo characteristics
+//	cv_t		cv[8];			// cv structure
+//	rps_t		rps[MAX_PLANES]; // planes to auto field update
+//	mapcycle_t	mapcycle[16];	// list of maps to cycle
+//	char		*mapname;		// name of current map
+//	char		*name;			// Arena name (e.g.: New WBmed Arena)
+//	char		*address;		// Arena address (e.g.: wb.chph.ras.ru)
+//	damage_t	planedamage[MAX_PLANES]; // Set plane armor
+//	struct	{
+//				int32_t	points;
+//				int32_t	apstop;
+//				int32_t	imunity;
+//			} buildarmor[BUILD_MAX];
+//	bomb_t		bombs[MAX_BOMBS]; //
+//	field_t		*fields;
+//	city_t		*cities;
+
+		fprintf(fp, "\n");
+
+		fclose(fp);
+	}
+
+	Sys_UnlockFile(strcat(filename, ".LOCK"));
+
+	Com_Printf("WARNING: Arena Bugged - Error at %s, line %d\n", file, line);
+}

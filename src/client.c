@@ -1517,6 +1517,7 @@ u_int8_t GetClientInfo(client_t *client)
 		client->radio[0] = Com_Atou(Com_MyRow("radio"));
 		client->squadron = Com_Atou(Com_MyRow("squad_owner"));
 		client->squad_flag = Com_Atou(Com_MyRow("squad_flag"));
+		client->rank = Com_Atou(Com_MyRow("rank")); // Elo rating
 		
 		// from score_common
 		client->ranking = Com_Atou(Com_MyRow("ranking"));
@@ -1551,7 +1552,7 @@ void UpdateClientFile(client_t *client)
 		return;
 	}
 	
-	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', plane_id = '%u', fuel = '%d', ord = '%d', conv = '%d', easymode = '%d', radio = '%d', lastseen = FROM_UNIXTIME(%u), ipaddr = '%s' WHERE loginuser = '%s' LIMIT 1", 
+	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', plane_id = '%u', fuel = '%d', ord = '%d', conv = '%d', easymode = '%d', radio = '%d', rank = '%d', lastseen = FROM_UNIXTIME(%u), ipaddr = '%s' WHERE loginuser = '%s' LIMIT 1", 
 					client->countrytime,
 					client->country,
 					client->plane,
@@ -1560,6 +1561,7 @@ void UpdateClientFile(client_t *client)
 					client->conv,
 					client->easymode,
 					client->radio[0],
+					cliant->rank, // Elo rating
 					(u_int32_t)time(NULL),
 					client->ip,
 					client->loginuser);
@@ -1824,6 +1826,9 @@ void CheckKiller(client_t *client)
 		{
 			sprintf(buffer, "TeamKill of %s(%s) by %s(%s)", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j]->longnick, GetSmallPlaneName(client->planeby[j]));
 
+			// in TK, winner is the killed pilot.
+			CalcEloRating(client /*winner*/, client->hitby[j] /*looser*/, ELO_LOOSER);
+
 			if(!client->tkstatus) // if victim is not TK, add penalty to killer
 			{
 				if(teamkiller->value)
@@ -1886,11 +1891,13 @@ void CheckKiller(client_t *client)
 
 				sprintf(buffer, "Maneuver kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), nearplane?nearplane->longnick:"Ack Weenies");
 			}
-			
+
+			CalcEloRating(client->hitby[j] /*winner*/, client /*looser*/, ELO_BOTH);
+
 			if(client->hitby[j] != client) // not ack kill
 			{
 				sprintf(buffer, "%s(%s)", buffer, GetSmallPlaneName(client->planeby[j]));
-	
+
 				if(!client->hitby[j]->drone)
 				{
 					if(IsFighter(NULL, client->planeby[j]))
@@ -2175,6 +2182,48 @@ void CheckKiller(client_t *client)
 	}
 	
 	ClearKillers(client);
+}
+
+/*************
+CalcEloRating
+
+Calc rank based in Elo Rating
+*************/
+
+void CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags)
+{
+	float Ea, Eb, K;
+
+	if(!winner->drone && !looser->drone)
+	{
+		if((flags & ELO_WINNER) && (winner != looser) /*ack dont have rank*/)
+		{
+			Ea = 1 / (1 + powf(10, (float)(looser->rank - winner->rank) / 400));
+
+			if(winner->rank > 2400)
+				K = 16;
+			else if(winner->rank < 2100)
+				K = 32;
+			else
+				K = 24;
+
+			winner->rank += (int16_t)floorf(K * (1 - Ea) + 0.5);
+		}
+
+		if((flags & ELO_LOOSER) && (winner != looser) /*ack dont have rank*/)
+		{
+			Eb = 1 / (1 + powf(10, (float)(winner->rank - looser->rank) / 400));
+
+			if(looser->rank > 2400)
+				K = 16;
+			else if(looser->rank < 2100)
+				K = 32;
+			else
+				K = 24;
+
+			looser->rank += (int16_t)floorf(K * (0 - Eb) + 0.5);
+		}
+	}
 }
 
 
