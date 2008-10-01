@@ -1,14 +1,25 @@
+[IMG]offln\common\wtg3.tga 0 0 512 185[/IMG]
 
-Welcome to Tabajara Host TOD # 01 !!!
-Server is running in MA mode at IP 62.75.138.245
-MA mode means RPS enabled, Mapcycle enabled
-and scores active.
-Scorepages at www.tabajarahost.com
-type .help and .show to get info about arena.
-Attention!!:
-Some fields needs extra targets in order to be captured!
-To assure that you target field needs it or not please
-type .field f# (your target field) and check it needs.
-Please enjoy!!!
-                -=Ø=-
-                                                franz-
+    Welcome to Tabajara Host WB2007
+
+This is a Beta version, some bugs WILL occour If arena crashes, wait, we
+will debug and put again online ;-)
+
+If anyone think did something that may cause arena crash, please report
+to us. We have saved any bugged player file for debugging.
+
+Please report bugs at www.tabajarahost.com in bugs section
+
+Download image pack at Download section
+
+TEAMSPEAK:
+RED: tabaspeak.servegame.org:8767   password: red
+GOLD: tabaspeak.servegame.org:8768  password: gold
+
+SOME COMMANDS CHANGES:
+
+.FIELD changed do .STATUS (due internal issues from WB3)
+
+Pls enjoy ;-)
+
+                                    franz-
