@@ -309,7 +309,7 @@ void CheckArenaRules(void)
 	//	double angle;
 
 	// Emulated Bombs tick
-
+	
 	for (i = 0; i < MAX_BOMBS; i++)
 	{
 		if (arena->bombs[i].id)
@@ -365,8 +365,7 @@ void CheckArenaRules(void)
 							Cmd_Capt(i, arena->fields[i].country, NULL);
 							//							arena->fields[i].abletocapture = close;
 						}
-						else if (arena->fields[i].buildings[j].type
-								== BUILD_WARE) // to cancel warehouse effect
+						else if (arena->fields[i].buildings[j].type == BUILD_WARE) // to cancel warehouse effect
 						{
 							arena->fields[i].warehouse = 0;
 						}
@@ -703,26 +702,22 @@ void CheckArenaRules(void)
 					{
 						break;
 					}
-					else if ((arena->fields[i].buildings[j].type
-							>= BUILD_50CALACK
-							&& arena->fields[i].buildings[j].type
-									<= BUILD_88MMFLAK)
-							|| (arena->fields[i].buildings[j].type
-									== BUILD_ARTILLERY))
+					else if ((arena->fields[i].buildings[j].type >= BUILD_50CALACK && arena->fields[i].buildings[j].type <= BUILD_88MMFLAK) || 
+						(arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
 					{
-						//						if(!arena->fields[i].buildings[j].status) // obsolete
-						//						{
+//						if(!arena->fields[i].buildings[j].status) // obsolete
+//						{
 						arena->fields[i].buildings[j].status = 2;
 						arena->fields[i].buildings[j].timer += 60000; // 10min // changed = to +=
 
-						// added this "if"
+// added this "if"
 						if (arena->fields[i].buildings[j].timer
 								> (u_int32_t)(rebuildtime->value * 1200))
 						{
 							arena->fields[i].buildings[j].timer
 									= (rebuildtime->value * 1200);
 						}
-						//						}
+//						}
 					}
 				}
 
@@ -789,6 +784,7 @@ void CheckArenaRules(void)
 					arena->fields[i].abletocapture = 1;
 
 				arena->fields[i].closed = 0;
+				arena->fields[i].warehouse = 0; // to avoid field be reclosed by warehouse effect
 				BPrintf(RADIO_YELLOW, "Field %d reopened", i+1);
 			}
 		}
@@ -6529,13 +6525,14 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	}
 
 	Com_Printf("%s %shit %u rounds at %s with %s\n",
-			client!=pvictim ? client->longnick : "-HOST", (client!=pvictim
-					&& client->country==pvictim->country) ? "friendly " : "",
-			hits, pvictim->longnick, munition->abbrev);
-
+			client!=pvictim ? client->longnick : "-HOST",
+			(client!=pvictim && client->country==pvictim->country) ? "friendly " : "",
+			hits, pvictim->longnick,
+			munition->abbrev);
+	Com_Printf("DEBUG 1\n");
 	if (!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 		killer = AddKiller(pvictim, client);
-
+	Com_Printf("DEBUG 2\n");
 	if (pvictim != client) //not a ack hit
 	{
 		for (i = 0; i < MAX_RELATED; i++)
@@ -6554,7 +6551,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			pvictim = pvictim->related[i]; // send damage to first wingman
 		//	return; // dont hit plane if with wingmans
 	}
-
+	Com_Printf("DEBUG 3\n");
 	// Random damage while there are wingmans
 	if (IsBomber(client) && client->wings)
 	{
@@ -6568,7 +6565,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		if (j)
 			hits *= (rand() % j) + 1; // random damage multiply according with wings number
 	}
-
+	Com_Printf("DEBUG 4\n");
 	memset(buffer, 0, sizeof(buffer));
 
 	for (i = 0; i < hits; i++)
@@ -6608,8 +6605,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if (hitplane->place[j] >= MAX_PLACE)
 			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "invalid place %d",
-						hitplane->place[j]);
+				PPrintf(client, RADIO_LIGHTYELLOW, "invalid place %d", hitplane->place[j]);
 				Com_Printf("WARNING: PHitPlane(): invalid place\n");
 				continue;
 			}
@@ -6656,7 +6652,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			needle[k++] = hitplane->place[j];
 		}
-
+		Com_Printf("DEBUG 4.2\n");
 		// End Needle pre-processing
 
 		he = munition->he;
@@ -6680,11 +6676,16 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			damage += (he + ap);
 
-			if (gunstats->value)
-				ap = AddPlaneDamage(needle[j], he, ap, (heb + strlen(heb)),
-						(apb + strlen(apb)), pvictim);
+			if (gunstats->value) // Verificar isto, pq (gunstats->value || client->gunstat || pvictim->gunstat)
+			{
+				Com_Printf("DEBUG 4.3\n");
+				ap = AddPlaneDamage(needle[j], he, ap, (heb + strlen(heb)), (apb + strlen(apb)), pvictim);
+			}
 			else
+			{
+				Com_Printf("DEBUG 4.4\n");
 				ap = AddPlaneDamage(needle[j], he, ap, NULL, NULL, pvictim);
+			}
 
 			damage -= ap;
 
@@ -6693,7 +6694,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			he = 0;
 		}
-
+		Com_Printf("DEBUG 4.5\n");
 		if (gunstats->value || client->gunstat || pvictim->gunstat)
 		{
 			hitplane = (hitplane_t *)buffer;
@@ -6753,7 +6754,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			if (gunstats->value || pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 		}
-
+		Com_Printf("DEBUG 4.6\n");
 		if (killer >= 0)
 		{
 			pvictim->damby[killer] += damage;
@@ -6761,9 +6762,10 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 		pvictim->score.airscore -= SCORE_BULLETHIT;
 	}
-
+	Com_Printf("DEBUG 5\n");
 	if (killer >=0 && pvictim->chute && (pvictim->status1 & (1 << PLACE_PILOT)))
 		pvictim->damby[killer] = MAX_UINT32;
+	Com_Printf("DEBUG 6\n");
 }
 
 /*************
@@ -6894,7 +6896,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		he = munition->he;
 
 	Com_Printf("%s %shit %s with %s\n", client->longnick, client->country
-			==pvictim->country ? "friendly " : "", pvictim->longnick,
+			== pvictim->country ? "friendly " : "", pvictim->longnick,
 			munition->abbrev);
 
 	HardHit(hardhitplane->munition, !((pvictim->country != client->country)
@@ -7155,15 +7157,14 @@ munition_t *GetMunition(u_int8_t id)
 	{
 		if (arena->munition[id].he < 0)
 		{
-			Com_Printf(
-					"WARNING: GetMunition(): Unused weapon (he = -1) ID %u\n",
-					id);
+			Com_Printf("WARNING: GetMunition(): Unused weapon (he = -1) ID %u\n", id);
+			Com_Printf("DEBUG 4.1.1\n");
 			return NULL;
 		}
-
+		Com_Printf("DEBUG 4.1.2\n");
 		return (munition_t *) &arena->munition[id];
 	}
-
+	Com_Printf("DEBUG 4.1.3\n");
 	return NULL;
 }
 
@@ -7187,11 +7188,12 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 	apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place]
 			: ap;
 	dmgprobe = he + apabsorb;
-
+	Com_Printf("DEBUG 4.4.1");
 	if (dmgprobe > client->armor.imunity[place]) // hit makes damage
 	{
 		if (dmgprobe >= client->armor.points[place])
 		{
+			Com_Printf("DEBUG 4.4.2");
 			if (he)
 			{
 				he = dmgprobe - client->armor.points[place];
@@ -7241,6 +7243,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 		}
 		else
 		{
+			Com_Printf("DEBUG 4.4.3");
 			client->armor.points[place] -= dmgprobe;
 
 			if (gunstats->value)
@@ -7252,7 +7255,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 
 			he = 0;
 		}
-
+		Com_Printf("DEBUG 4.4.4");
 		if (gunstats->value)
 		{
 			if (ap && pap)
@@ -7263,7 +7266,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 				sprintf(phe, "%s=%d", GetSmallHitSite(place),
 						client->armor.points[place]);
 		}
-
+		Com_Printf("DEBUG 4.4.5");
 		if (he)
 		{
 			if (client->armor.parent[place] >= 0)
@@ -7294,6 +7297,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 		ap = 0;
 	}
 
+	Com_Printf("DEBUG 4.4.6");
 	return ap;
 }
 

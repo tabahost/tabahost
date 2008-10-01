@@ -177,6 +177,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].country = country;
 					clients[i].status1 = 0;
 					clients[i].shortnick = shortnick;
+					clients[i].dronelasttarget = MAX_BUILDINGS; // to avoid unrandomized first target at DroneGetTarget()
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
 					clients[i].dronetimer = 360*100;
 					clients[i].ready = 0;
@@ -1540,9 +1541,9 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 			b = y - arena->cities[field - (int16_t)fields->value].posxyz[1];
 		}
 
-		if((a >= -3600 && a <= 3600) && (b >= -3600 && b <= 3600))
+		if((a >= (-1 * MAX_FIELDRADIUS) && a <= MAX_FIELDRADIUS) && (b >= (-1 * MAX_FIELDRADIUS) && b <= MAX_FIELDRADIUS))
 		{
-			if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < 3600)
+			if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < MAX_FIELDRADIUS)
 			{
 				if(field < fields->value)
 				{
@@ -1695,9 +1696,9 @@ void PFAUDamage(client_t *fau)
 			b = fau->posxy[1][0] - arena->cities[i - (int16_t)fields->value].posxyz[1];
 		}
 
-		if((a >= -3600 && a <= 3600) && (b >= -3600 && b <= 3600))
+		if((a >= (-1 * MAX_FIELDRADIUS) && a <= MAX_FIELDRADIUS) && (b >= (-1 * MAX_FIELDRADIUS) && b <= MAX_FIELDRADIUS))
 		{
-			if((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < 3600)
+			if((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < MAX_FIELDRADIUS)
 				break;
 		}
 	}

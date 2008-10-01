@@ -179,58 +179,65 @@ int main(int argc, char *argv[])
 
 	while (!stop)
 	{
-		do
+		if(!setjmp(debug_buffer))
 		{
-			if(sync)
-#ifdef _WIN32
-				sleep(1);
-#else
-				usleep(1);
-#endif
-			arena->time = Sys_Milliseconds();
-			if(oldtime > arena->time)
-				Com_Printf("WARNING: oldtime > arena->time (%u, %u)\n", oldtime, arena->time);
-				
-			time = arena->time - oldtime;
-		} while (time < sync); // server fps = 100
-
-		if(arena->frame < (u_int32_t) 429496200UL /*49 days*/) // change: reset Sys_Milliseconds and frame, every changearena
-		{
-			arena->frame++;
-		}
-		else
-		{
-			arena->frame = 1; // reset frames when max divisible by one minute (600 decasecs)
-			oldtime = Sys_ResetMilliseconds();
-			arena->time = Sys_Milliseconds();
-			Com_Printf("DEBUG: Time Reset\n");
-		}
-
-		checksync = FloorDiv(arena->time, 10);
-			
-		if(checksync > arena->frame)
-		{
-			sync = 0;
-			if((checksync - arena->frame) > 30000)
+			do
 			{
-				Com_Printf("WARNING: clock warp\n");
-				arena->frame= checksync;
+				if(sync)
+	#ifdef _WIN32
+					sleep(1);
+	#else
+					usleep(1);
+	#endif
+				arena->time = Sys_Milliseconds();
+				if(oldtime > arena->time)
+					Com_Printf("WARNING: oldtime > arena->time (%u, %u)\n", oldtime, arena->time);
+					
+				time = arena->time - oldtime;
+			} while (time < sync); // server fps = 100
+	
+			if(arena->frame < (u_int32_t) 429496200UL /*49 days*/) // change: reset Sys_Milliseconds and frame, every changearena
+			{
+				arena->frame++;
+			}
+			else
+			{
+				arena->frame = 1; // reset frames when max divisible by one minute (600 decasecs)
+				oldtime = Sys_ResetMilliseconds();
+				arena->time = Sys_Milliseconds();
+				Com_Printf("DEBUG: Time Reset\n");
+			}
+
+			checksync = FloorDiv(arena->time, 10);
+				
+			if(checksync > arena->frame)
+			{
+				sync = 0;
+				if((checksync - arena->frame) > 30000)
+				{
+					Com_Printf("WARNING: clock warp\n");
+					arena->frame= checksync;
+				}
+			}
+			else
+			{
+				sync = 10;
+			}
+	
+			if(arena->frame > checksync)
+			{
+				Com_Printf("WARNING: server frame unsynchronized\n");
+				arena->frame = checksync;
+			}
+	
+			if(time > overload->value)
+			{
+				Com_Printf("WARNING: possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
 			}
 		}
 		else
 		{
-			sync = 10;
-		}
-
-		if(arena->frame > checksync)
-		{
-			Com_Printf("WARNING: server frame unsynchronized\n");
-			arena->frame = checksync;
-		}
-
-		if(time > overload->value)
-		{
-			Com_Printf("WARNING: possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
+			DebugArena(__FILE__, __LINE__);
 		}
 			
 /*		} while ((u_int8_t)time < sync); // server fps = 100 // change: (int32_t) time
@@ -253,45 +260,61 @@ int main(int argc, char *argv[])
 			Com_Printf("WARNING: possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
 		}*/
 
-		if ((newsocket = accept(sockfd, (struct sockaddr *) &cli_addr, &clisize)) == -1)
+		if(!setjmp(debug_buffer))
 		{
-#ifdef _WIN32
-			if ((err = WSAGetLastError()) != WSAEWOULDBLOCK)
+			if ((newsocket = accept(sockfd, (struct sockaddr *) &cli_addr, &clisize)) == -1)
 			{
-				Com_Printf("ERROR: accept()\n");
-//				ConnError(err);
-				ExitServer(1);
+	#ifdef _WIN32
+				if ((err = WSAGetLastError()) != WSAEWOULDBLOCK)
+				{
+					Com_Printf("ERROR: accept()\n");
+	//				ConnError(err);
+					ExitServer(1);
+				}
+	#else
+				if (errno != EWOULDBLOCK)
+				{
+					Com_Printf("ERROR: accept()\n");
+	//				ConnError(errno);
+					ExitServer(1);
+				}
+	#endif
 			}
-#else
-			if (errno != EWOULDBLOCK)
+			else
 			{
-				Com_Printf("ERROR: accept()\n");
-//				ConnError(errno);
-				ExitServer(1);
+	#ifdef _WIN32
+				if (ioctlsocket(newsocket, FIONBIO, &ioctlv) == SOCKET_ERROR)
+				{
+					Com_Printf("ERROR: setting nonblocking socket (newsocket) (code %d)\n", (err = WSAGetLastError()));
+					ConnError(err);
+					ExitServer(1);
+				}
+	#else
+				if (ioctl(newsocket, FIONBIO, &ioctlv) == -1)
+				{
+					Com_Printf("ERROR: setting nonblocking socket (newsocket) (code %d)\n", errno);
+					ConnError(errno);
+					ExitServer(1);
+				}
+	#endif
+				AddClient(newsocket, &cli_addr);
 			}
-#endif
 		}
 		else
 		{
-#ifdef _WIN32
-			if (ioctlsocket(newsocket, FIONBIO, &ioctlv) == SOCKET_ERROR)
-			{
-				Com_Printf("ERROR: setting nonblocking socket (newsocket) (code %d)\n", (err = WSAGetLastError()));
-				ConnError(err);
-				ExitServer(1);
-			}
-#else
-			if (ioctl(newsocket, FIONBIO, &ioctlv) == -1)
-			{
-				Com_Printf("ERROR: setting nonblocking socket (newsocket) (code %d)\n", errno);
-				ConnError(errno);
-				ExitServer(1);
-			}
-#endif
-			AddClient(newsocket, &cli_addr);
+			DebugArena(__FILE__, __LINE__);
 		}
+	
 
-		RunFrame();
+		if(!setjmp(debug_buffer))
+		{
+			RunFrame();
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
+		}
+		
 		UpdateLocalArenaslist();
 		oldtime = arena->time; // change: why this is here and not up there?
 	}
