@@ -3844,9 +3844,10 @@ void WB3MapTopography(client_t *client)
 			{
 				WB3Mapper(client);
 				
-				if(client->mapperx++ >= (droll->value?Com_Atoi(droll->string):MWIDTH))
+				client->mapperx += !(client->mappery % 2) ? 1 : -1;
+				
+				if(client->mapperx >= (droll->value?Com_Atoi(droll->string):MWIDTH))
 				{
-					client->mapperx = 0;
 					if(client->mappery++ >= (dpitch->value?Com_Atoi(dpitch->string):MWIDTH)) // end of topography mapping, end all this
 					{
 						client->mapper = 0;
@@ -3856,6 +3857,9 @@ void WB3MapTopography(client_t *client)
 						return;
 					}
 					PPrintf(client, RADIO_LIGHTYELLOW, "Switching to next row");
+					
+					if((client->mappery % 2))
+						client->mapperx = 0;
 				}
 				
 				client->related[0]->posxy[0][0] = INDEX2X(client->mapperx);
@@ -3890,8 +3894,10 @@ void WB3Mapper(client_t *client)
 
 	if (!earthMap[(y * MWIDTH) + x]) // if altitude not defined (remember, vehicles cannot run in water (yet)
 	{
-		if (client->attr)
+		if(client->attr)
 			PPrintf(client, RADIO_GREEN, "TOPO: X %d Y %d Z %d", x, y, z);
+		
+		Com_Printf("TOPO: %s - X %d Y %d Z %d", client->longnick, x, y, z )
 		earthMap[(y * MWIDTH) + x] = z;
 	}
 	else
