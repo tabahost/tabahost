@@ -150,8 +150,16 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 						clients[i].plane = plane;
 					else
 						clients[i].plane = plane;
-					clients[i].posxy[0][0] = posx + (Com_Pow(-1, rand()%2) * (rand()%1000));
-					clients[i].posxy[1][0] = posy + (Com_Pow(-1, rand()%2) * (rand()%1000));
+					if(client->mapper)
+					{
+						clients[i].posxy[0][0] = posx;
+						clients[i].posxy[1][0] = posy;
+					}
+					else
+					{
+						clients[i].posxy[0][0] = posx + (Com_Pow(-1, rand()%2) * (rand()%1000));
+						clients[i].posxy[1][0] = posy + (Com_Pow(-1, rand()%2) * (rand()%1000));
+					}
 					clients[i].posalt[0] = posz;
 					clients[i].status1 = 0;
 					clients[i].shortnick = shortnick;
@@ -909,8 +917,8 @@ int ProcessDrone(client_t *drone)
 					drone->posxy[0][0] += drone->related[0]->speedxyz[0][0]/2;
 					drone->posxy[1][0] += drone->related[0]->speedxyz[1][0]/2;
 
-					if(!((arena->frame - drone->frame) % 200))
-						drone->posalt[0] = GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]);
+//					if(!((arena->frame - drone->frame) % 200))
+//						drone->posalt[0] = GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]);
 
 					if(drone->posalt[0])
 					{
@@ -919,7 +927,7 @@ int ProcessDrone(client_t *drone)
 					}
 					else
 					{
-					drone->speedxyz[0][0] = drone->related[0]->speedxyz[0][0] = 0;
+						drone->speedxyz[0][0] = drone->related[0]->speedxyz[0][0] = 0;
 						drone->speedxyz[1][0] = drone->related[0]->speedxyz[1][0] = 0;
 					}
 
@@ -929,7 +937,7 @@ int ProcessDrone(client_t *drone)
 					{
 						drone->related[0]->posxy[0][0] = drone->posxy[0][0];
 						drone->related[0]->posxy[1][0] = drone->posxy[1][0];
-						drone->related[0]->posalt[0] = drone->posalt[0];
+						// drone->related[0]->posalt[0] = drone->posalt[0]; // removed to more acurated topography mapping
 						SendDronePos(drone, drone->related[0]);
 					}
 				}

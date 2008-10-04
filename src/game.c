@@ -1655,12 +1655,12 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "hmack"))
 		{
-			if (wb3->value)
-			{
-				PPrintf(client, RADIO_LIGHTYELLOW,
-						"This command not available in WB3");
-				return;
-			}
+//			if (wb3->value)
+//			{
+//				PPrintf(client, RADIO_LIGHTYELLOW,
+//						"This command not available in WB3");
+//				return;
+//			}
 
 			if (!argv[0])
 			{
@@ -1788,7 +1788,7 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "pos"))
 		{
-			if (client->attr & FLAG_ADMIN)
+			if (client->attr & (FLAG_ADMIN | FLAG_OP))
 				PPrintf(client, RADIO_LIGHTYELLOW,
 						"X %d Y %d Z %d - P %d R %d Y %d", client->posxy[0][0],
 						client->posxy[1][0], client->posalt[0],
@@ -2416,7 +2416,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_YELLOW, "usage: .force <status> <player's nick>");
 			}
 			else
-			SendForceStatus(Com_Atoi(argv[0]), 0, FindLClient(argv[1]));
+			SendForceStatus((1 << Com_Atoi(argv[0])), 0, FindLClient(argv[1]));
 
 			return;
 		}
@@ -2899,6 +2899,20 @@ void ProcessCommands(char *command, client_t *client)
 				Cmd_Rocket(Com_Atoi(argv[0]), Com_Atof(argv[1]), Com_Atof(argv[2]), client);
 			}
 
+			return;
+		}
+		else if(!Com_Stricmp(command, "startmapping"))
+		{
+			PPrintf(client, RADIO_LIGHTYELLOW, "Starting Topography mapping");
+			client->mapper = 1;
+			client->mapperx = Com_Atoi(argv[0]);
+			client->mappery = Com_Atoi(argv[1]);
+			return;
+		}
+		else if(!Com_Stricmp(command, "stopmapping"))
+		{
+			client->mapper = 0;
+			PPrintf(client, RADIO_LIGHTYELLOW, "Stopping Topography mapping");
 			return;
 		}
 		else if(!Com_Stricmp(command, "restore"))
@@ -4967,6 +4981,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	planeposition_t *plane;
 	wb3planeposition_t *wb3plane;
 	planeposition2_t *plane2;
+	u_int32_t distance;
 
 	if (wb3->value)
 	{
@@ -5095,8 +5110,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 
 		if (!wb3->value)
 		{
-			if ((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0]
-					> contrail->value)) // allow contrail during day
+			if ((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value)) // allow contrail during day
 			{
 				client->status1 |= (STATUS_LFUEL | STATUS_RFUEL);
 
@@ -5127,6 +5141,54 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 					client->contrail = 0;
 					PPlaneStatus(NULL, client);
 				}
+			}
+		}
+
+		// ackstar rules
+		if(client->infly && (client->posalt[0] < 1000) && IsBomber(client))
+		{
+			if(client->ackstarcount > 4)
+			{
+				for(i = 0; i < MAX_RELATED; i++)
+				{
+					if(client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+					{
+						NearestField(client->posxy[0][0], client->posxy[1][0], (client->country == 1)?3:1, FALSE, FALSE, &distance);
+
+						if(distance < MAX_FIELDRADIUS)
+						{
+							if(!client->ackstar)
+							{
+								client->ackstar = 1;
+								SendOttoParams(client);
+								PPrintf(client, RADIO_YELLOW, "Ackstar rules applied, your ottos are Safe!");
+							}
+						}
+						else
+						{
+							if(client->ackstar)
+							{
+								client->ackstar = 0;
+								SendOttoParams(client);
+								PPrintf(client, RADIO_YELLOW, "Ackstar rules removed, your ottos are Hot!");
+							}
+						}
+						break;
+					}
+				}
+
+				client->ackstarcount = 0;
+			}
+			else
+				client->ackstarcount++;
+		}
+		else
+		{
+			if(client->ackstar)
+			{
+				client->ackstarcount = client->ackstar = 0;
+				SendOttoParams(client);
+				PPrintf(client, RADIO_YELLOW, "Ackstar rules removed, your ottos are Hot!");
 			}
 		}
 
@@ -5212,6 +5274,13 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	 }
 	 */
 
+	if(client->mapper)
+	{
+		if(!(client->mapper % 5))
+			WB3MapTopography(client);
+		client->mapper++;
+	}
+	
 	if (client->infly)
 	{
 		if (HaveGunner(client->plane))
@@ -5647,8 +5716,7 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 		client->status2 = htonl(status->status2);
 	}
 
-	if ((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0]
-			> contrail->value) && !wb3->value)
+	if ((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value) && !wb3->value)
 		client->status1 |= (STATUS_LFUEL | STATUS_RFUEL);
 
 	for (i = 0; i < maxentities->value; i++)
@@ -6529,10 +6597,10 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			(client!=pvictim && client->country==pvictim->country) ? "friendly " : "",
 			hits, pvictim->longnick,
 			munition->abbrev);
-	Com_Printf("DEBUG 1\n");
+
 	if (!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 		killer = AddKiller(pvictim, client);
-	Com_Printf("DEBUG 2\n");
+
 	if (pvictim != client) //not a ack hit
 	{
 		for (i = 0; i < MAX_RELATED; i++)
@@ -6551,7 +6619,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			pvictim = pvictim->related[i]; // send damage to first wingman
 		//	return; // dont hit plane if with wingmans
 	}
-	Com_Printf("DEBUG 3\n");
+
 	// Random damage while there are wingmans
 	if (IsBomber(client) && client->wings)
 	{
@@ -6565,7 +6633,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		if (j)
 			hits *= (rand() % j) + 1; // random damage multiply according with wings number
 	}
-	Com_Printf("DEBUG 4\n");
+
 	memset(buffer, 0, sizeof(buffer));
 
 	for (i = 0; i < hits; i++)
@@ -6652,7 +6720,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			needle[k++] = hitplane->place[j];
 		}
-		Com_Printf("DEBUG 4.2\n");
+
 		// End Needle pre-processing
 
 		he = munition->he;
@@ -6676,14 +6744,12 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			damage += (he + ap);
 
-			if (gunstats->value) // Verificar isto, pq (gunstats->value || client->gunstat || pvictim->gunstat)
+			if (gunstats->value)
 			{
-				Com_Printf("DEBUG 4.3\n");
 				ap = AddPlaneDamage(needle[j], he, ap, (heb + strlen(heb)), (apb + strlen(apb)), pvictim);
 			}
 			else
 			{
-				Com_Printf("DEBUG 4.4\n");
 				ap = AddPlaneDamage(needle[j], he, ap, NULL, NULL, pvictim);
 			}
 
@@ -6694,7 +6760,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			he = 0;
 		}
-		Com_Printf("DEBUG 4.5\n");
+
 		if (gunstats->value || client->gunstat || pvictim->gunstat)
 		{
 			hitplane = (hitplane_t *)buffer;
@@ -6754,7 +6820,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			if (gunstats->value || pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 		}
-		Com_Printf("DEBUG 4.6\n");
+
 		if (killer >= 0)
 		{
 			pvictim->damby[killer] += damage;
@@ -6762,10 +6828,9 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 		pvictim->score.airscore -= SCORE_BULLETHIT;
 	}
-	Com_Printf("DEBUG 5\n");
+
 	if (killer >=0 && pvictim->chute && (pvictim->status1 & (1 << PLACE_PILOT)))
 		pvictim->damby[killer] = MAX_UINT32;
-	Com_Printf("DEBUG 6\n");
 }
 
 /*************
@@ -7158,13 +7223,13 @@ munition_t *GetMunition(u_int8_t id)
 		if (arena->munition[id].he < 0)
 		{
 			Com_Printf("WARNING: GetMunition(): Unused weapon (he = -1) ID %u\n", id);
-			Com_Printf("DEBUG 4.1.1\n");
+			
 			return NULL;
 		}
-		Com_Printf("DEBUG 4.1.2\n");
+		
 		return (munition_t *) &arena->munition[id];
 	}
-	Com_Printf("DEBUG 4.1.3\n");
+	
 	return NULL;
 }
 
@@ -7178,6 +7243,15 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 		char *pap, client_t *client)
 {
 	int32_t apabsorb, dmgprobe;
+	static u_int8_t depth = 0;
+	
+	if(++depth > 10)
+	{
+		Com_Printf("DEBUG: AddPlaneDamage() Possible Infinite Loop, %s - %d\n", client, client->armor.parent[place]);
+		PPrintf(client, RADIO_YELLOW, "Damage Model error, please inform admins");
+		depth--;
+		return 0;
+	}
 
 	if (place >= MAX_PLACE)
 	{
@@ -7185,15 +7259,13 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 		return 0;
 	}
 
-	apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place]
-			: ap;
+	apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place] : ap;
 	dmgprobe = he + apabsorb;
-	Com_Printf("DEBUG 4.4.1");
-	if (dmgprobe > client->armor.imunity[place]) // hit makes damage
+
+	if(dmgprobe > client->armor.imunity[place]) // hit makes damage
 	{
 		if (dmgprobe >= client->armor.points[place])
 		{
-			Com_Printf("DEBUG 4.4.2");
 			if (he)
 			{
 				he = dmgprobe - client->armor.points[place];
@@ -7243,7 +7315,6 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 		}
 		else
 		{
-			Com_Printf("DEBUG 4.4.3");
 			client->armor.points[place] -= dmgprobe;
 
 			if (gunstats->value)
@@ -7255,7 +7326,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 
 			he = 0;
 		}
-		Com_Printf("DEBUG 4.4.4");
+
 		if (gunstats->value)
 		{
 			if (ap && pap)
@@ -7266,8 +7337,8 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 				sprintf(phe, "%s=%d", GetSmallHitSite(place),
 						client->armor.points[place]);
 		}
-		Com_Printf("DEBUG 4.4.5");
-		if (he)
+
+		if(he)
 		{
 			if (client->armor.parent[place] >= 0)
 			{
@@ -7297,7 +7368,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 		ap = 0;
 	}
 
-	Com_Printf("DEBUG 4.4.6");
+	depth--;
 	return ap;
 }
 
@@ -9149,7 +9220,12 @@ void SendOttoParams(client_t *client)
 	otto->packetid = htons(Com_WBhton(0x2100));
 	otto->accuracy = ottoaccuracy->value;
 	otto->override = htons((u_int16_t)ottooverrides->value);
-	otto->range = htons((u_int16_t)ottorange->value);
+	
+	if(client->ackstar)
+		otto->range = htons(0);
+	else
+		otto->range = htons((u_int16_t)ottorange->value);
+
 	otto->burston = htons((u_int16_t)(ottoburston->value * 100));
 	otto->burstonmax = htons((u_int16_t)(ottoburstonmax->value * 100));
 	otto->burstoff = htons((u_int16_t)(ottoburstoff->value * 100));

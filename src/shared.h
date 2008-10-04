@@ -732,6 +732,8 @@ typedef struct client_s
 	int16_t		aspeeds[3][MAX_PREDICT];		// plane's angular speeds (pitch, roll, yaw)
 	int16_t		speedxyz[3][MAX_PREDICT];	// plane's speed (x, y, z)
 
+	u_int8_t	ackstarcount;	// count to avoid recalc every time
+	u_int8_t	ackstar;		// flag to check ackstar rules (below 1000ft, in friendlyfield range, with wingmen, buffer, have otto disabled).
 	u_int8_t	contrail;		// plane is above contrail->value
 	u_int32_t	status1;		// plane's status (gun, fuselage, etc)
 	u_int32_t	status2;		// plane's status (engine, baydoor, smoke, etc)
@@ -811,6 +813,10 @@ typedef struct client_s
 	struct client_s	*gunners[14];
 	struct client_s	*related[MAX_RELATED]; // 0 reserved for fau or hmack
 
+	u_int32_t	mapper;			// mapper mode activated
+	u_int16_t	mapperx;		// X index
+	u_int16_t	mappery;		// Y index
+	
 	u_int16_t	msgtimer;		// msgtimer (friendly hit)
 	u_int32_t	lastsql;		// last time client made a SQL request;
 	u_int32_t	timer;			// player timer
@@ -2127,6 +2133,7 @@ void	ReducePlanes(u_int8_t field);
 void	IncreaseAcksReup(u_int8_t field);
 u_int8_t IsVitalBuilding(building_t *building);
 u_int8_t Alt2Index(int32_t alt);
+void	WB3MapTopography(client_t *client);
 void	WB3Mapper(client_t *client);
 u_int32_t GetHeightAt(int32_t x, int32_t y);
 u_int8_t LoadEarthMap(char *FileName);

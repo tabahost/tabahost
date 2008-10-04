@@ -2463,9 +2463,9 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 		if(status)
 		{
-			reup = arena->fields[--field].buildings[0].timer;
+			reup = MAX_UINT32;
 
-			for(i = 1; i < MAX_BUILDINGS; i++)
+			for(i = 0; i < MAX_BUILDINGS; i++)
 			{
 				if(!arena->fields[field].buildings[i].field)
 					break;
@@ -4646,7 +4646,12 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 		if(tank)
 			drone = AddDrone(DRONE_HTANK, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1], arena->fields[client->field - 1].posxyz[2], client->country, 101/*TANK*/, client);
 		else
-			drone = AddDrone(DRONE_HMACK, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1], arena->fields[client->field - 1].posxyz[2], client->country, 85/*JEEP*/,client);
+		{
+			if(client->mapper)
+				drone = AddDrone(DRONE_HMACK, client->posxy[0][0], client->posxy[1][0], 0, client->country, 79/*OPEL*/,client);
+			else
+				drone = AddDrone(DRONE_HMACK, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1], arena->fields[client->field - 1].posxyz[2], client->country, 85/*JEEP*/,client);
+		}
 
 		if(!drone)
 			return;
@@ -4673,7 +4678,7 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 		*/
 
 		client->speedxyz[0][0] = client->speedxyz[1][0] =	client->angles[2][0] = 0;
-		Cmd_Fly(1, client);
+		Cmd_Fly(2, client);
 	}
 	else
 	{
@@ -5699,8 +5704,6 @@ void Cmd_CheckWaypoints(client_t *client)
 			PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> 1] error", i, j - 1);
 	}
 }
-
-
 
 void Cmd_Rocket(int32_t y, double angle, double angle2, client_t *client)
 {

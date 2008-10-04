@@ -456,10 +456,10 @@ int ProcessClient(client_t *client)
 					WB3DotCommand(client, ".clutterdistance 8500");
 				}
 
-				if(IsGround(client) && client->infly && !((arena->frame - client->frame) % 1000))
-				{
-					WB3Mapper(client);
-				}
+//				if(IsGround(client) && client->infly && !((arena->frame - client->frame) % 1000))
+//				{
+//					WB3Mapper(client);
+//				}
 			}
 
 			if(!((arena->frame - client->frame) % 30000))
@@ -1620,7 +1620,6 @@ int8_t AddKiller(client_t *victim, client_t *client)
 		victim->planeby[empty] = client->attached?client->attached->plane:client->plane;
 		found = empty;
 	}
-	Com_Printf("DEBUG 1.1\n");
 	return found;
 }
 
