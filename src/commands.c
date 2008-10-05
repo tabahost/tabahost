@@ -2452,14 +2452,16 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		PPrintf(client, RADIO_YELLOW, "Invalid field");
 		return;
 	}
+	
+	field--;
 
-	country = arena->fields[field-1].country;
-	type = arena->fields[field-1].type;
-	status = arena->fields[field-1].closed;
+	country = arena->fields[field].country;
+	type = arena->fields[field].type;
+	status = arena->fields[field].closed;
 
 	if(!client || client->infly)
 	{
-		PPrintf(client, RADIO_YELLOW, "Field F%d: Country %s, Type: %s, Status: %s", field, GetCountry(country), GetFieldType(type), status?"Closed":"Open");
+		PPrintf(client, RADIO_YELLOW, "Field F%d: Country %s, Type: %s, Status: %s", field+1, GetCountry(country), GetFieldType(type), status?"Closed":"Open");
 
 		if(status)
 		{
@@ -2472,7 +2474,10 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 				if(arena->fields[field].buildings[i].status && arena->fields[field].buildings[i].timer < reup && 
 						IsVitalBuilding(&(arena->fields[field].buildings[i])))
+				{
+					Com_Printf("DEBUG %d %u\n", i, arena->fields[field].buildings[i].timer);
 					reup = arena->fields[field].buildings[i].timer;
+				}
 			}
 
 			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup/100), arena->fields[field].abletocapture?"Yes":"No");
@@ -2482,7 +2487,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	{
 		memset(buffer, 0, sizeof(buffer));
 
-		sprintf(buffer, "./fields/field%d.txt", field);
+		sprintf(buffer, "./fields/field%d.txt", field+1);
 
 		if(!(fp = fopen(buffer, "wb")))
 		{
@@ -2490,8 +2495,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		}
 		else
 		{
-			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\n", field, GetCountry(country), GetFieldType(type), status?"Closed":"Open");
-			field--;
+			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\n", field+1, GetCountry(country), GetFieldType(type), status?"Closed":"Open");
 
 			if(status)
 			{

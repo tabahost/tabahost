@@ -3896,18 +3896,21 @@ void WB3Mapper(client_t *client)
 
 	if (!earthMap[(y * MWIDTH) + x]) // if altitude not defined (remember, vehicles cannot run in water (yet)
 	{
-		if(client->attr)
-			PPrintf(client, RADIO_GREEN, "TOPO: X %d Y %d Z %d", x, y, z);
+		PPrintf(client, RADIO_GREEN, "TOPO: X %d Y %d Z %d", x, y, z);
 		
 		Com_Printf("TOPO: %s - X %d Y %d Z %d\n", client->longnick, x, y, z );
 		earthMap[(y * MWIDTH) + x] = z;
 	}
 	else
 	{
-		if (earthMap[(y * MWIDTH) + x] != z)
-		{
-			earthMap[(y * MWIDTH) + x] = (earthMap[(y * MWIDTH) + x] + z) / 2;
-		}
+		PPrintf(client, RADIO_GREEN, "TOPO OK: X %d Y %d Z %d", x, y, z);
+		
+		Com_Printf("TOPO OK: %s - X %d Y %d Z %d\n", client->longnick, x, y, z );
+		earthMap[(y * MWIDTH) + x] = z;
+//		if (earthMap[(y * MWIDTH) + x] != z)
+//		{
+//			earthMap[(y * MWIDTH) + x] = (earthMap[(y * MWIDTH) + x] + z) / 2;
+//		}
 	}
 }
 
