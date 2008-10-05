@@ -4994,7 +4994,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 
 	client->postimer = arena->time; // set the time when last position packet has been received
 
-	if (attached)
+	if(attached)
 	{
 		plane2 = (planeposition2_t *) buffer;
 		client->offset = client->timer - ntohl(plane2->timer);
@@ -5017,10 +5017,13 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	{
 		BackupPosition(client, FALSE);
 
-		if (wb3->value)
+		if(wb3->value)
 		{
-			client->posxy[0][0] = ntohl(wb3plane->posx);
-			client->posxy[1][0] = ntohl(wb3plane->posy);
+			if(!client->mapper)
+			{
+				client->posxy[0][0] = ntohl(wb3plane->posx);
+				client->posxy[1][0] = ntohl(wb3plane->posy);
+			}
 			client->posalt[0] = ntohl(wb3plane->alt);
 			//		client->atradar = ntohs(wb3plane->radar);
 			if (!client->predict)
@@ -7245,17 +7248,18 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 	int32_t apabsorb, dmgprobe;
 	static u_int8_t depth = 0;
 	
-	if(++depth > 10)
-	{
-		Com_Printf("DEBUG: AddPlaneDamage() Possible Infinite Loop, %s - %d\n", client, client->armor.parent[place]);
-		PPrintf(client, RADIO_YELLOW, "Damage Model error, please inform admins");
-		depth--;
-		return 0;
-	}
+//	if(++depth > 10)
+//	{
+//		Com_Printf("DEBUG: AddPlaneDamage() Possible Infinite Loop, %s - %d\n", client, client->armor.parent[place]);
+//		PPrintf(client, RADIO_YELLOW, "Damage Model error, please inform admins");
+//		depth--;
+//		return 0;
+//	}
 
 	if (place >= MAX_PLACE)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Unknown hit place 0x%X", place);
+//		depth--;
 		return 0;
 	}
 
@@ -7283,7 +7287,10 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 				SendForceStatus((1 << place), 0, client);
 
 				if (!client->inuse || !client->infly) // drone killed
+				{
+//					depth--;
 					return 0;
+				}
 			}
 			else if (place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL
 					&& (dmgprobe - apabsorb)) // fuel is leaking
@@ -7368,7 +7375,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe,
 		ap = 0;
 	}
 
-	depth--;
+//	depth--;
 	return ap;
 }
 

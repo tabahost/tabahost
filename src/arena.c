@@ -3836,17 +3836,17 @@ u_int8_t Alt2Index(int32_t alt)
 
 void WB3MapTopography(client_t *client)
 {
-	if(client->mapper) // if not mapper, may never gets here
+	if(client->mapper) // if not mapper, may never get here
 	{
 		if(client->infly)
 		{
-			if(((arena->time - client->dronetimer)/1000) > 2) // 5 seconds flight
+			if(((arena->time - client->dronetimer)/1000) > 2) // 2 seconds flight
 			{
 				WB3Mapper(client);
 				
 				client->mapperx += !(client->mappery % 2) ? 1 : -1;
 				
-				if(client->mapperx >= (droll->value?Com_Atoi(droll->string):MWIDTH))
+				if(client->mapperx > (droll->value?Com_Atoi(droll->string):MWIDTH))
 				{
 					if(client->mappery++ >= (dpitch->value?Com_Atoi(dpitch->string):MWIDTH)) // end of topography mapping, end all this
 					{
@@ -3859,7 +3859,9 @@ void WB3MapTopography(client_t *client)
 					PPrintf(client, RADIO_LIGHTYELLOW, "Switching to next row");
 					
 					if((client->mappery % 2))
-						client->mapperx = 0;
+						client->mapperx--;
+					else
+						client->mapperx = 0; 
 				}
 				
 				client->related[0]->posxy[0][0] = INDEX2X(client->mapperx);
@@ -3897,7 +3899,7 @@ void WB3Mapper(client_t *client)
 		if(client->attr)
 			PPrintf(client, RADIO_GREEN, "TOPO: X %d Y %d Z %d", x, y, z);
 		
-		Com_Printf("TOPO: %s - X %d Y %d Z %d", client->longnick, x, y, z )
+		Com_Printf("TOPO: %s - X %d Y %d Z %d\n", client->longnick, x, y, z );
 		earthMap[(y * MWIDTH) + x] = z;
 	}
 	else
