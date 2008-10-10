@@ -22,17 +22,16 @@
 
 #include "shared.h"
 
-
 /*************
-InitTCPNet
+ InitTCPNet
 
-Initializes all net stuffs and return a server-side socket
-*************/
+ Initializes all net stuffs and return a server-side socket
+ *************/
 
 int InitTCPNet(int portno)
 {
 	int isockfd;
-    u_long ioctlv;
+	u_long ioctlv;
 	struct sockaddr_in serv_addr;
 
 	ioctlv = 1;
@@ -71,16 +70,16 @@ int InitTCPNet(int portno)
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
-	memset((char *)&(serv_addr.sin_zero),0 ,8);
+	memset((char *)&(serv_addr.sin_zero), 0, 8);
 
-	if(bind(isockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+	if (bind(isockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 	{
 		Com_Close(&isockfd);
 		Com_Printf("ERROR: binding TCP socket\n");
 		ExitServer(1);
 	}
 
-	if(listen(isockfd, maxclients->value))
+	if (listen(isockfd, maxclients->value))
 	{
 		Com_Close(&isockfd);
 		Com_Printf("ERROR: listen()\n");
@@ -91,15 +90,15 @@ int InitTCPNet(int portno)
 }
 
 /*************
-InitUDPNet
+ InitUDPNet
 
-bind UDP listen socket and return socket descriptor
-*************/
+ bind UDP listen socket and return socket descriptor
+ *************/
 
 int InitUDPNet(int portno)
 {
 	int isockfd;
-    u_long ioctlv;
+	u_long ioctlv;
 	struct sockaddr_in serv_addr;
 
 	ioctlv = 1;
@@ -129,9 +128,9 @@ int InitUDPNet(int portno)
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
-	memset((char *)&(serv_addr.sin_zero),0 ,8);
+	memset((char *)&(serv_addr.sin_zero), 0, 8);
 
-	if(bind(isockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+	if (bind(isockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 	{
 		Com_Close(&isockfd);
 		Com_Printf("ERROR: binding UDP socket\n");
@@ -144,10 +143,10 @@ int InitUDPNet(int portno)
 }
 
 /*************
-SendPacket
+ SendPacket
 
-Gets a pre-made packet, encrypt, checksum, and send to client
-*************/
+ Gets a pre-made packet, encrypt, checksum, and send to client
+ *************/
 
 int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
@@ -156,10 +155,10 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	datagram_t *packet;
 
 	memset(datagram, 0, MAX_SENDDATA);
-	
-	if(buffer)
+
+	if (buffer)
 	{
-		if((buffer[0] == 0xff) && (buffer[1] == 0xff))
+		if ((buffer[0] == 0xff) && (buffer[1] == 0xff))
 		{
 			Com_Printf("WARNING: SendPacket() header 0xffff, Packet not sent\n");
 			Com_Printfhex(datagram, len+4);
@@ -172,13 +171,13 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		return 0;
 	}
 
-	if((len+4) <= MAX_SENDDATA)
+	if ((len+4) <= MAX_SENDDATA)
 	{
 		packet = (datagram_t *)(datagram+1);
 
-		if(wb3->value)
+		if (wb3->value)
 		{
-			if(!client->loginkey)
+			if (!client->loginkey)
 				datagram[0] = 0x07;
 			else
 				datagram[0] = 0x09;
@@ -193,23 +192,23 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		datagram[len+3] = CheckSum(&(packet->data), len); // checksum
 
-		if(debug->value)
+		if (debug->value)
 		{
 			Com_Printf("DEBUG: --->>> ");
 			Com_Printfhex(datagram, len+4);
 		}
 
-		if(!client->login)
+		if (!client->login)
 		{
-			if(client->loginkey)
+			if (client->loginkey)
 				wbcrypt(&(packet->data), client->key, len, FALSE); // encrypting
 			else
 				wbcrypt(&(packet->data), client->key, len, TRUE); // encrypting
 		}
 
- 		if(client->login || (client->inuse && client->socket))
+		if (client->login || (client->inuse && client->socket))
 		{
-			if((i = Com_Send(client->socket, datagram, len+4)) == len+4)
+			if ((i = Com_Send(client->socket, datagram, len+4)) == len+4)
 			{
 				return 0;
 			}
@@ -217,7 +216,7 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			{
 				Com_Printf("DEBUG: len+4 (%d), Com_Send() (%d)\n", len+4, i);
 				Com_Printf("WARNING: SendPacket() error sending packet to %s (%s)\n", client->longnick, client->ip);
-//				client->timeout = MAX_TIMEOUT;
+				//				client->timeout = MAX_TIMEOUT;
 				RemoveClient(client);
 				return -1;
 			}
@@ -237,10 +236,10 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 }
 
 /*************
-GetPacket
+ GetPacket
 
-Receive last wbpacket at socket buffer and process it
-*************/
+ Receive last wbpacket at socket buffer and process it
+ *************/
 
 int GetPacket(client_t *client)
 {
@@ -251,12 +250,12 @@ int GetPacket(client_t *client)
 
 	n = Com_Recv(client->socket, mainbuffer, 3);
 
-	if(n <= 0)
+	if (n <= 0)
 		return n;
-		
-	if(wb3->value)
+
+	if (wb3->value)
 	{
-		if(!client->loginkey)
+		if (!client->loginkey)
 			n = 0x07;
 		else
 			n = 0x09;
@@ -290,15 +289,15 @@ int GetPacket(client_t *client)
 			recvlen = len;
 		}
 
-		if((n = Com_Recv(client->socket, mainbuffer, recvlen)) > 0)
+		if ((n = Com_Recv(client->socket, mainbuffer, recvlen)) > 0)
 		{
 			if (n == len) //
 			{ //
-				if(!setjmp(debug_buffer))
+				if (!setjmp(debug_buffer))
 				{
 					m = ProcessPacket(mainbuffer, len-1, client); // len-1 to remove checksum from buffer
-					
-					if(m < 0) // invalid checksum
+
+					if (m < 0) // invalid checksum
 					{
 						Com_Printf("WARNING: %s(%s) - Invalid Packet Checksum\n", client->longnick, client->ip);
 						FlushSocket(client->socket);
@@ -311,28 +310,28 @@ int GetPacket(client_t *client)
 					return 0;
 				}
 			} //
-			return n;
+return					n;
+				}
+				else
+				return n;
+			}
+
+			Com_Printf("WARNING: %s(%s) %d - Invalid Packet\n", client->longnick, client->ip, n);
+			FlushSocket(client->socket);
+			return 0;
 		}
-		else
-			return n;
-	}
 
-	Com_Printf("WARNING: %s(%s) %d - Invalid Packet\n", client->longnick, client->ip, n);
-	FlushSocket(client->socket);
-	return 0;
-}
+		/*************
+		 FlushSocket
 
-/*************
-FlushSocket
-
-Flush the client socket
-*************/
+		 Flush the client socket
+		 *************/
 
 void FlushSocket(int sockfd)
 {
 	int n;
 
-	if(!sockfd)
+	if (!sockfd)
 	{
 		Com_Printf("WARNING: FlushSocket() tried to flush socket ZERO\n");
 		return;
@@ -341,28 +340,28 @@ void FlushSocket(int sockfd)
 	memset(mainbuffer, 0, MAX_RECVDATA);
 
 #ifdef _WIN32
-			ConnError(WSAGetLastError());
+	ConnError(WSAGetLastError());
 #else
-			ConnError(errno);
+	ConnError(errno);
 #endif
-	
-	while((n=Com_Recv(sockfd, mainbuffer, MAX_RECVDATA)) > 0)
+
+	while ((n=Com_Recv(sockfd, mainbuffer, MAX_RECVDATA)) > 0)
 	{
-//		if(debug->value)
-//		{
-			Com_Printf("DEBUG: Flushing socket (%d) n(%d):\n", socket, n);
-			Com_Printfhex(mainbuffer, n);
-//		}
-//		else
-//			;
+		//		if(debug->value)
+		//		{
+		Com_Printf("DEBUG: Flushing socket (%d) n(%d):\n", socket, n);
+		Com_Printfhex(mainbuffer, n);
+		//		}
+		//		else
+		//			;
 	}
 }
 
 /*************
-ProtocolError
+ ProtocolError
 
-Send back to client the protocol error message code
-*************/
+ Send back to client the protocol error message code
+ *************/
 
 void ProtocolError(client_t *client)
 {
@@ -373,5 +372,5 @@ void ProtocolError(client_t *client)
 
 	Com_Printf("WARNING: %s(%s) Invalid login protocol (Code %d)\n", client->longnick, client->ip, client->login);
 
- 	Com_Send(client->socket, buffer, 2);
+	Com_Send(client->socket, buffer, 2);
 }

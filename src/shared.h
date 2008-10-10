@@ -2371,6 +2371,7 @@ extern	var_t		*killcvtoreset;	// CVs are in reset accounting
 extern	var_t		*landingcapture;	 // enable landing capture
 extern	var_t		*lethality;		// damage multiplier
 extern	var_t		*logfile_active;
+extern	var_t		*lograwposition; // log raw position in files
 extern	var_t		*mapcycle;		// enable mapcycle
 extern	var_t		*mapflags;		// enable mapflags
 extern	var_t		*mapflagsenemy;	// show circles of enemy countries

@@ -22,159 +22,160 @@
 
 #include "shared.h"
 
-var_t	*airshowsmoke;	// extern
-var_t	*allowtakeoff;	// extern
-var_t	*altv;			// extern
-var_t	*ammomult;		// extern
-var_t	*arcade;		// extern
-var_t	*arenaflags1;	// extern
-var_t	*arenaflags2;	// extern
-var_t	*arenaflags3;	// extern
-var_t	*arenalist;		// extern
-var_t	*batchfile;		// extern
-var_t	*blackout;		// extern
-var_t	*broadcast;		// extern
-var_t	*bulletradius;	// extern
-var_t	*canreload;		// extern
-var_t	*canreset;		// extern
-var_t	*cities;		// extern
-var_t	*changemaponreset; // extern
-var_t	*consoleinput;	// extern
-var_t	*contrail;		// extern
-var_t	*countries;		// extern
-var_t	*countrytime;	// extern
-var_t	*crcview;		// extern
-var_t	*currday;		// extern
-var_t	*currmonth;		// extern
-var_t	*curryear;		// extern
-var_t	*cvcapture;		// extern
-var_t	*cvdelay;		// extern
-var_t	*cvradarrange0;	// extern
-var_t	*cvradarrange1;	// extern
-var_t	*cvradarrange2;	// extern
-var_t	*cvradarrange3;	// extern
-var_t	*cvradarrange4;	// extern
-var_t	*cvrange;		// extern
-var_t	*cvs;			// extern
-var_t	*cvsalvo;		// extern
-var_t	*cvspeed;		// extern
-var_t	*database;		// extern
-var_t	*dayhours;		// extern
-var_t	*dbpasswd;		// extern
-var_t	*dbuser;		// extern
-var_t	*debug;			// extern
-var_t	*dirname;		// extern
-var_t	*dpitch;		// extern
-var_t	*droll;			// extern
-var_t	*dyaw;			// extern
-var_t	*easymode;		// extern
-var_t	*emulatecollision;	// extern
-var_t	*enableottos;		// extern
-var_t	*endday;			// extern
-var_t	*endmonth;		// extern
-var_t	*endyear;		// extern
-var_t	*enemydotsfly;	// extern
-var_t	*enemydotstwr;	// extern
-var_t	*enemyidlim;	// extern
-var_t	*enemyidlimbomber;	// extern
-var_t	*enemynames;	// extern
-var_t	*enemyplanes;	// extern
-var_t	*fields;		// extern
-var_t	*flakmax;		// extern
-var_t	*flypenalty;	// extern
-var_t	*friendlydotsfly;	// extern
-var_t	*friendlydotstwr;	// extern
-var_t	*friendlyfire;	// extern
-var_t	*friendlyidlim;	// extern
-var_t	*friendlyidlimbomber;	// extern
-var_t	*fueldiv;		// extern
-var_t	*gruntsmaxd;	// extern
-var_t	*gruntshoot;	// extern
-var_t	*gruntcapture;	// extern
-var_t	*gunrad;		// extern
-var_t	*gunstats;		// extern
-var_t	*gwarning;		// extern
-var_t	*hideadmin;		// extern
-var_t	*hostdomain;	// extern
-var_t	*hostname;		// extern
-var_t	*iconbombersoverride; //extern
-var_t	*iff;			// extern
-var_t	*initday;		// extern
-var_t	*initmonth;		// extern
-var_t	*inityear;		// extern
-var_t	*katyrange;		// extern
-var_t	*killcvtoreset;	// extern
-var_t	*landingcapture;	// extern
-var_t	*lethality;		// extern
-var_t	*logfile_active;	// extern
-var_t	*mapcycle;		// extern
-var_t	*mapflags;		// extern
-var_t	*mapflagsenemy;	// extern
-var_t	*mapflagsfly;	// extern
-var_t	*mapflagsown;	// extern
-var_t	*mapflagstwr;	// extern
-var_t	*mapname;		// extern
-var_t	*maxclients;	// extern
-var_t	*maxentities;	// extern
-var_t	*maxpilotg;		// extern
-var_t	*metar;			// extern
-var_t	*midairs;		// extern
-var_t	*mortars;		// extern
-var_t	*mview;			// extern
-var_t	*notanks;		// extern
-var_t	*nowings;		// extern
-var_t	*ottoaccuracy;	// set otto accuracy
-var_t	*ottoadjust;	// set otto adjust
-var_t	*ottoburstoff;	// set otto burst pause time
-var_t	*ottoburston;	// set otto burst time by dist
-var_t	*ottoburstonmax; // set otto burst time by hit
-var_t	*ottorange;		// set otto max range
-var_t	*ottoretarget;	// set otto retarget rime
-var_t	*ottooverrides;	// set parameters client can override
-var_t	*overload;		// extern
-var_t	*paratroopers;	// extern
-var_t	*planeatradar;	// extern
-var_t	*planerangelimit;	// extern
-var_t	*planerangelimitbomber;	// extern
-var_t	*port;			// extern
-var_t	*predictpos;	// extern
-var_t	*printeject;	// extern
-var_t	*printkills;	// extern
-var_t	*printqueries;	// extern
-var_t	*radaralt;		// extern
-var_t	*radarheight;	// extern
-var_t	*radarrange0;	// extern
-var_t	*radarrange1;	// extern
-var_t	*radarrange2;	// extern
-var_t	*radarrange3;	// extern
-var_t	*radarrange4;	// extern
-var_t	*rebuildtime;	// extern
-var_t	*respawncvs;	// extern
-var_t	*rps;			// extern
-var_t	*server_speeds;	// extern
-var_t	*sqlserver;		// extern
-var_t	*startalt;		// extern
-var_t	*structlim;		// extern
-var_t	*tanksrange;	// extern
-var_t	*teamkiller;	// extern
-var_t	*teamkillstructs;	// extern
-var_t	*timemult;		// extern
-var_t	*timeout;		// extern
-var_t	*wb3;			// extern
-var_t	*weather;		// extern
-var_t	*whitelist;		// extern
-var_t	*xwindvelocity;	// extern
-var_t	*ywindvelocity;	// extern
-var_t	*zwindvelocity;	// extern
+var_t *airshowsmoke; // extern
+var_t *allowtakeoff; // extern
+var_t *altv; // extern
+var_t *ammomult; // extern
+var_t *arcade; // extern
+var_t *arenaflags1; // extern
+var_t *arenaflags2; // extern
+var_t *arenaflags3; // extern
+var_t *arenalist; // extern
+var_t *batchfile; // extern
+var_t *blackout; // extern
+var_t *broadcast; // extern
+var_t *bulletradius; // extern
+var_t *canreload; // extern
+var_t *canreset; // extern
+var_t *cities; // extern
+var_t *changemaponreset; // extern
+var_t *consoleinput; // extern
+var_t *contrail; // extern
+var_t *countries; // extern
+var_t *countrytime; // extern
+var_t *crcview; // extern
+var_t *currday; // extern
+var_t *currmonth; // extern
+var_t *curryear; // extern
+var_t *cvcapture; // extern
+var_t *cvdelay; // extern
+var_t *cvradarrange0; // extern
+var_t *cvradarrange1; // extern
+var_t *cvradarrange2; // extern
+var_t *cvradarrange3; // extern
+var_t *cvradarrange4; // extern
+var_t *cvrange; // extern
+var_t *cvs; // extern
+var_t *cvsalvo; // extern
+var_t *cvspeed; // extern
+var_t *database; // extern
+var_t *dayhours; // extern
+var_t *dbpasswd; // extern
+var_t *dbuser; // extern
+var_t *debug; // extern
+var_t *dirname; // extern
+var_t *dpitch; // extern
+var_t *droll; // extern
+var_t *dyaw; // extern
+var_t *easymode; // extern
+var_t *emulatecollision; // extern
+var_t *enableottos; // extern
+var_t *endday; // extern
+var_t *endmonth; // extern
+var_t *endyear; // extern
+var_t *enemydotsfly; // extern
+var_t *enemydotstwr; // extern
+var_t *enemyidlim; // extern
+var_t *enemyidlimbomber; // extern
+var_t *enemynames; // extern
+var_t *enemyplanes; // extern
+var_t *fields; // extern
+var_t *flakmax; // extern
+var_t *flypenalty; // extern
+var_t *friendlydotsfly; // extern
+var_t *friendlydotstwr; // extern
+var_t *friendlyfire; // extern
+var_t *friendlyidlim; // extern
+var_t *friendlyidlimbomber; // extern
+var_t *fueldiv; // extern
+var_t *gruntsmaxd; // extern
+var_t *gruntshoot; // extern
+var_t *gruntcapture; // extern
+var_t *gunrad; // extern
+var_t *gunstats; // extern
+var_t *gwarning; // extern
+var_t *hideadmin; // extern
+var_t *hostdomain; // extern
+var_t *hostname; // extern
+var_t *iconbombersoverride; //extern
+var_t *iff; // extern
+var_t *initday; // extern
+var_t *initmonth; // extern
+var_t *inityear; // extern
+var_t *katyrange; // extern
+var_t *killcvtoreset; // extern
+var_t *landingcapture; // extern
+var_t *lethality; // extern
+var_t *logfile_active; // extern
+var_t *lograwposition; // extern
+var_t *mapcycle; // extern
+var_t *mapflags; // extern
+var_t *mapflagsenemy; // extern
+var_t *mapflagsfly; // extern
+var_t *mapflagsown; // extern
+var_t *mapflagstwr; // extern
+var_t *mapname; // extern
+var_t *maxclients; // extern
+var_t *maxentities; // extern
+var_t *maxpilotg; // extern
+var_t *metar; // extern
+var_t *midairs; // extern
+var_t *mortars; // extern
+var_t *mview; // extern
+var_t *notanks; // extern
+var_t *nowings; // extern
+var_t *ottoaccuracy; // set otto accuracy
+var_t *ottoadjust; // set otto adjust
+var_t *ottoburstoff; // set otto burst pause time
+var_t *ottoburston; // set otto burst time by dist
+var_t *ottoburstonmax; // set otto burst time by hit
+var_t *ottorange; // set otto max range
+var_t *ottoretarget; // set otto retarget rime
+var_t *ottooverrides; // set parameters client can override
+var_t *overload; // extern
+var_t *paratroopers; // extern
+var_t *planeatradar; // extern
+var_t *planerangelimit; // extern
+var_t *planerangelimitbomber; // extern
+var_t *port; // extern
+var_t *predictpos; // extern
+var_t *printeject; // extern
+var_t *printkills; // extern
+var_t *printqueries; // extern
+var_t *radaralt; // extern
+var_t *radarheight; // extern
+var_t *radarrange0; // extern
+var_t *radarrange1; // extern
+var_t *radarrange2; // extern
+var_t *radarrange3; // extern
+var_t *radarrange4; // extern
+var_t *rebuildtime; // extern
+var_t *respawncvs; // extern
+var_t *rps; // extern
+var_t *server_speeds; // extern
+var_t *sqlserver; // extern
+var_t *startalt; // extern
+var_t *structlim; // extern
+var_t *tanksrange; // extern
+var_t *teamkiller; // extern
+var_t *teamkillstructs; // extern
+var_t *timemult; // extern
+var_t *timeout; // extern
+var_t *wb3; // extern
+var_t *weather; // extern
+var_t *whitelist; // extern
+var_t *xwindvelocity; // extern
+var_t *ywindvelocity; // extern
+var_t *zwindvelocity; // extern
 
-var_t	*var_vars;		// extern
+var_t *var_vars; // extern
 
 
 /*************
-Init_Vars
+ Init_Vars
 
-Initialize variable table
-*************/
+ Initialize variable table
+ *************/
 
 void InitVars(void)
 {
@@ -217,7 +218,7 @@ void InitVars(void)
 	cvradarrange1 = Var_Get("cvradarrange1", "50000", VAR_ARCHIVE);
 	cvradarrange2 = Var_Get("cvradarrange2", "50000", VAR_ARCHIVE);
 	cvradarrange3 = Var_Get("cvradarrange3", "50000", VAR_ARCHIVE);
-	cvradarrange4 = Var_Get("cvradarrange4", "50000", VAR_ARCHIVE);	
+	cvradarrange4 = Var_Get("cvradarrange4", "50000", VAR_ARCHIVE);
 	cvrange = Var_Get("cvrange", "40000", VAR_ARCHIVE); // max of 46339
 	cvs = Var_Get("cvs", "1", VAR_ARCHIVE | VAR_ADMIN);
 	cvsalvo = Var_Get("cvsalvo", "10", VAR_ARCHIVE);
@@ -267,6 +268,7 @@ void InitVars(void)
 	landingcapture = Var_Get("landingcapture", "0", VAR_ARCHIVE | VAR_ADMIN);
 	lethality = Var_Get("lethality", "1", VAR_ARCHIVE | VAR_ADMIN);
 	logfile_active = Var_Get("logfile_active", "1", VAR_ARCHIVE | VAR_ADMIN);
+	lograwposition = Var_Get("lograwposition", "0", VAR_ARCHIVE);
 	mapcycle = Var_Get("mapcycle", "1", VAR_ARCHIVE);
 	mapflags = Var_Get("mapflags", "1", VAR_ARCHIVE);
 	mapflagsenemy = Var_Get("mapflagsenemy", "1", VAR_ARCHIVE);
@@ -286,7 +288,7 @@ void InitVars(void)
 	ottoburstoff = Var_Get("ottoburstoff", "1.00", VAR_ARCHIVE);
 	ottoburston = Var_Get("ottoburston", "1.00", VAR_ARCHIVE);
 	ottoburstonmax = Var_Get("ottoburstonmax", "3.00", VAR_ARCHIVE);
-	ottooverrides = Var_Get("ottooverrides", "0", VAR_ARCHIVE);	
+	ottooverrides = Var_Get("ottooverrides", "0", VAR_ARCHIVE);
 	ottorange = Var_Get("ottorange", "10", VAR_ARCHIVE);
 	ottoretarget = Var_Get("ottoretarget", "0.20", VAR_ARCHIVE);
 	overload = Var_Get("overload", "500", VAR_ARCHIVE | VAR_ADMIN);
@@ -331,31 +333,31 @@ void InitVars(void)
 }
 
 /*************
-CheckVars
+ CheckVars
 
-Check if vars was modified and make its action
-*************/
+ Check if vars was modified and make its action
+ *************/
 
 void CheckVars(void)
 {
 	u_int8_t i;
 	u_int32_t date;
-	var_t *var;	
+	var_t *var;
 
-	if(logfile_active->modified)
+	if (logfile_active->modified)
 	{
-		if((!logfile_active->value) && logfile)
+		if ((!logfile_active->value) && logfile)
 		{
-				fclose(logfile);
-				logfile = NULL;
+			fclose(logfile);
+			logfile = NULL;
 		}
 	}
-	
-	if(database->modified || sqlserver->modified)
+
+	if (database->modified || sqlserver->modified)
 	{
 		mysql_close(&my_sock);
-		
-		if(!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, 3306, NULL /*unix_socket*/, 0))
+
+		if (!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, 3306, NULL /*unix_socket*/, 0))
 		{
 			BPrintf(RADIO_YELLOW, "ERROR: Sys_SQL_Init(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
 		}
@@ -363,69 +365,69 @@ void CheckVars(void)
 		{
 			Com_Printf("MySQL connected successfully to %s:%s\n", sqlserver->string, database->string);
 		}
-		
+
 		LoadDamageModel(NULL);
-		LoadAmmo(NULL);		
+		LoadAmmo(NULL);
 	}
 
-	if(dirname->modified)
+	if (dirname->modified)
 	{
 		arena->mapnum = -1;
 
-		for(i = 0; i < MAX_MAPCYCLE; i++)
+		for (i = 0; i < MAX_MAPCYCLE; i++)
 		{
 
-			if(!Com_Strcmp(dirname->string, arena->mapcycle[i].mapname))
+			if (!Com_Strcmp(dirname->string, arena->mapcycle[i].mapname))
 			{
 				arena->mapnum = i;
 
 				date = (arena->year * 10000)+(arena->month * 100) + arena->day;
 
-//				if(arena->mapcycle[i].date > date)
-					break;
+				//				if(arena->mapcycle[i].date > date)
+				break;
 			}
 		}
 
-/*  this area was commented to get current date from config.cfg so we can change arena and start next arena with a gap date
-		if(mapcycle->value) 
-		{
-			if(i > 0  && arena->mapcycle[i - 1].date)
-			{
-				arena->day = (arena->mapcycle[i - 1].date - ((arena->mapcycle[i - 1].date / 100) * 100));
-				arena->month = (arena->mapcycle[i - 1].date - ((arena->mapcycle[i - 1].date / 10000) * 10000)) / 100;
-				arena->year = arena->mapcycle[i - 1].date / 10000;
-			}
-			else if(!i)
-			{
-				arena->day = initday->value;
-				arena->month = initmonth->value;
-				arena->year = inityear->value;
-			}
-		}
-*/
+		/*  this area was commented to get current date from config.cfg so we can change arena and start next arena with a gap date
+		 if(mapcycle->value) 
+		 {
+		 if(i > 0  && arena->mapcycle[i - 1].date)
+		 {
+		 arena->day = (arena->mapcycle[i - 1].date - ((arena->mapcycle[i - 1].date / 100) * 100));
+		 arena->month = (arena->mapcycle[i - 1].date - ((arena->mapcycle[i - 1].date / 10000) * 10000)) / 100;
+		 arena->year = arena->mapcycle[i - 1].date / 10000;
+		 }
+		 else if(!i)
+		 {
+		 arena->day = initday->value;
+		 arena->month = initmonth->value;
+		 arena->year = inityear->value;
+		 }
+		 }
+		 */
 	}
 
-	if(countrytime->modified)
+	if (countrytime->modified)
 	{
-		for(i = 0; i < maxentities->value; i++)
+		for (i = 0; i < maxentities->value; i++)
 		{
-			if(clients[i].inuse && !clients[i].drone)
+			if (clients[i].inuse && !clients[i].drone)
 			{
 				clients[i].countrytime = time(NULL) + countrytime->value;
 			}
 		}
 	}
 
-	if(hideadmin->modified)
+	if (hideadmin->modified)
 	{
 		date = 0;
 
-		for(i = 0; i < maxentities->value; i++)
+		for (i = 0; i < maxentities->value; i++)
 		{
-			if(clients[i].attr == 1 && hideadmin->value)
+			if (clients[i].attr == 1 && hideadmin->value)
 				continue;
 
-			if(clients[i].inuse && !clients[i].drone)
+			if (clients[i].inuse && !clients[i].drone)
 				date++;
 		}
 
@@ -434,82 +436,76 @@ void CheckVars(void)
 		UpdateIngameClients(0);
 	}
 
-	if(server_speeds->modified)
+	if (server_speeds->modified)
 	{
-		if(server_speeds->value >= 100)
+		if (server_speeds->value >= 100)
 		{
 			Var_Set("server_speeds", "99");
 		}
 
-		if(server_speeds->value < 0)
+		if (server_speeds->value < 0)
 		{
 			Var_Set("server_speeds", "0");
 		}
 	}
 
-	if(timemult->modified)
+	if (timemult->modified)
 	{
-		if(timemult->value >= 6000)
+		if (timemult->value >= 6000)
 		{
 			Var_Set("timemult", "5999");
 		}
 
-		if(timemult->value < 0)
+		if (timemult->value < 0)
 		{
 			Var_Set("timemult", "0");
 		}
 
 		CalcTimemultBasedOnTime();
 	}
-	
-	if(wb3->value && weather->modified)
+
+	if (wb3->value && weather->modified)
 	{
-		for(i = 0; i < maxentities->value; i++)
+		for (i = 0; i < maxentities->value; i++)
 		{
-			if(clients[i].inuse && !clients[i].drone)
+			if (clients[i].inuse && !clients[i].drone)
 			{
 				WB3DotCommand(&clients[i], ".weather %u", (u_int8_t)weather->value);
 			}
 		}
 	}
 
-	if(wb3->value && (gruntsmaxd->modified || gruntshoot->modified || gruntcapture->modified))
+	if (wb3->value && (gruntsmaxd->modified || gruntshoot->modified || gruntcapture->modified))
 	{
-		for(i = 0; i < maxentities->value; i++)
+		for (i = 0; i < maxentities->value; i++)
 		{
-			if(clients[i].inuse && !clients[i].drone)
+			if (clients[i].inuse && !clients[i].drone)
 			{
 				WB3SendGruntConfig(&clients[i]);
 			}
 		}
 	}
 
-	if(radaralt->modified || mapflags->modified || mapflagsfly->modified ||
-	   mapflagstwr->modified || mapflagsown->modified || mapflagsenemy->modified ||
-	   planeatradar->modified || friendlydotsfly->modified || enemydotsfly->modified ||
-	   friendlydotstwr->modified || enemydotstwr->modified || planerangelimit->modified ||
-	   enemyidlim->modified || friendlyidlim->modified || ammomult->modified ||
-	   xwindvelocity->modified || ywindvelocity->modified || zwindvelocity->modified ||
-	   maxpilotg->modified || altv->modified || fueldiv->modified || flakmax->modified ||
-	   radarrange0->modified || radarrange1->modified || radarrange2->modified ||
-	   radarrange3->modified || radarrange4->modified || structlim->modified ||
-	   enemyidlimbomber->modified || friendlyidlimbomber->modified || planerangelimitbomber->modified ||
-	   arenaflags1->modified || arenaflags2->modified)
+	if (radaralt->modified || mapflags->modified || mapflagsfly->modified || mapflagstwr->modified || mapflagsown->modified || mapflagsenemy->modified || planeatradar->modified
+			|| friendlydotsfly->modified || enemydotsfly->modified || friendlydotstwr->modified || enemydotstwr->modified || planerangelimit->modified || enemyidlim->modified
+			|| friendlyidlim->modified || ammomult->modified || xwindvelocity->modified || ywindvelocity->modified || zwindvelocity->modified || maxpilotg->modified || altv->modified
+			|| fueldiv->modified || flakmax->modified || radarrange0->modified || radarrange1->modified || radarrange2->modified || radarrange3->modified || radarrange4->modified
+			|| structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified || planerangelimitbomber->modified || arenaflags1->modified || arenaflags2->modified)
 	{
-		for(i = 0; i < maxentities->value; i++)
+		for (i = 0; i < maxentities->value; i++)
 		{
-			if(clients[i].inuse && !clients[i].drone)
+			if (clients[i].inuse && !clients[i].drone)
 			{
 				SendArenaRules(&clients[i]);
 			}
 		}
 	}
 
-	if(arenaflags3->modified)
+	if (arenaflags3->modified)
 	{
-		for(i = 0; i < maxentities->value; i++)
+		for (i = 0; i < maxentities->value; i++)
 		{
-			if(clients[i].inuse && !clients[i].drone)
+			if (clients[i].inuse && !clients[i].drone)
 			{
 				WB3SendArenaFlags3(&clients[i]);
 			}
@@ -518,32 +514,31 @@ void CheckVars(void)
 
 	UpdateArenaStatus(FALSE);
 
-	
-	for(var = var_vars; var; var = var->next)
+	for (var = var_vars; var; var = var->next)
 	{
-		if(var->modified)
+		if (var->modified)
 			var->modified = 0;
 	}
 }
 
 /*************
-Var_Get
+ Var_Get
 
-Put a new variable at vars array or set flags if it already exists
-*************/
+ Put a new variable at vars array or set flags if it already exists
+ *************/
 
 var_t *Var_Get(char *var_name, char *var_value, int flags)
 {
-	var_t	*var;
+	var_t *var;
 
 	var = Var_FindVar(var_name);
-	if(var)
+	if (var)
 	{
 		var->flags = flags;
 		return var;
 	}
 
-	if(!var_value)
+	if (!var_value)
 		return 0;
 
 	var = Z_Malloc(sizeof(*var));
@@ -555,7 +550,7 @@ var_t *Var_Get(char *var_name, char *var_value, int flags)
 	// link the variable in
 	var->next = var_vars;
 
-	if(var)
+	if (var)
 	{
 		var_vars = var;
 	}
@@ -568,18 +563,18 @@ var_t *Var_Get(char *var_name, char *var_value, int flags)
 }
 
 /*************
-Var_FindVar
+ Var_FindVar
 
-Find a variable at vars array and return a pointed to it
-*************/
+ Find a variable at vars array and return a pointed to it
+ *************/
 
 var_t *Var_FindVar(char *var_name)
 {
-	var_t	*var = NULL;
+	var_t *var= NULL;
 
-	for(var = var_vars; var; var = var->next)
+	for (var = var_vars; var; var = var->next)
 	{
-		if(!Com_Strcmp(var_name, var->name))
+		if (!Com_Strcmp(var_name, var->name))
 			return var;
 	}
 
@@ -587,26 +582,26 @@ var_t *Var_FindVar(char *var_name)
 }
 
 /*************
-Var_Set
+ Var_Set
 
-Change a variable value or creates a new one if it doesn't exists
-*************/
+ Change a variable value or creates a new one if it doesn't exists
+ *************/
 
 var_t *Var_Set(char *var_name, char *value)
 {
-	var_t	*var;
+	var_t *var;
 
 	var = Var_FindVar(var_name);
 	if (!var)
-	{	// create it
+	{ // create it
 		return Var_Get(var_name, value, 0);
 	}
 
-	if(var->flags & VAR_NOSET)
+	if (var->flags & VAR_NOSET)
 		return NULL;
 
 	if (!Com_Strcmp(value, var->string))
-		return var;		// not changed
+		return var; // not changed
 
 	var->modified = 1;
 
@@ -619,15 +614,15 @@ var_t *Var_Set(char *var_name, char *value)
 }
 
 /*************
-Var_VariableValue
+ Var_VariableValue
 
-Searches the variable at vars array and return its value
-OBS: do not use it indiscriminately, may cause overprocessing
-*************/
+ Searches the variable at vars array and return its value
+ OBS: do not use it indiscriminately, may cause overprocessing
+ *************/
 
-float Var_VariableValue (char *var_name)
+float Var_VariableValue(char *var_name)
 {
-	var_t	*var;
+	var_t *var;
 
 	var = Var_FindVar(var_name);
 	if (!var)
@@ -636,39 +631,39 @@ float Var_VariableValue (char *var_name)
 }
 
 /*************
-Var_VariableString
+ Var_VariableString
 
-Searches the variable at vars array and return its string value
-OBS: do not use it indiscriminately, may cause overprocessing
-*************/
+ Searches the variable at vars array and return its string value
+ OBS: do not use it indiscriminately, may cause overprocessing
+ *************/
 
-char *Var_VariableString (char *var_name)
+char *Var_VariableString(char *var_name)
 {
 	var_t *var;
 
-	var = Var_FindVar (var_name);
+	var = Var_FindVar(var_name);
 	if (!var)
 		return "";
 	return var->string;
 }
 
 /*************
-Var_WriteVariables
+ Var_WriteVariables
 
-Save all variables set with VAR_ARCHIVE flag in "path" file
-*************/
+ Save all variables set with VAR_ARCHIVE flag in "path" file
+ *************/
 
-void Var_WriteVariables (char *path, client_t *client)
+void Var_WriteVariables(char *path, client_t *client)
 {
-	var_t	*var;
-	char	file[128];
-	char	buffer[MAX_PRINTMSG];
-	FILE	*fp;
+	var_t *var;
+	char file[128];
+	char buffer[MAX_PRINTMSG];
+	FILE *fp;
 
 	strcpy(file, path);
 	strcat(file, ".cfg");
 
-	if (!(fp = fopen (file, "w")))
+	if (!(fp = fopen(file, "w")))
 	{
 		PPrintf(client, RADIO_YELLOW, "WARNING: Error opening %s\n", path);
 		return;
@@ -686,46 +681,38 @@ void Var_WriteVariables (char *path, client_t *client)
 }
 
 /*************
-UpdateArenaStatus
+ UpdateArenaStatus
 
-Update table arena_status
-*************/
+ Update table arena_status
+ *************/
 
 void UpdateArenaStatus(u_int8_t uptime)
 {
 	u_int8_t i, j;
-	var_t *upvars[52] = {
-				airshowsmoke, blackout, contrail, countrytime, currday, currmonth,
-				curryear, cvcapture, cvdelay, cvradarrange1, cvradarrange3, cvrange, cvs, cvsalvo, cvspeed, dayhours,
-				easymode, emulatecollision, enemyidlim, enemynames, enemyplanes, flakmax,
-				flypenalty, friendlyfire, friendlyidlim, fueldiv, gunstats, iff, katyrange,
-				mapname, midairs, mortars, mview, ottoaccuracy, ottoadjust, ottoburstoff, ottoburston,
-				ottoburstonmax, ottorange, ottoretarget, ottooverrides, paratroopers,
-				planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
-				tanksrange, timemult, timeout, whitelist};
-				
+	var_t *upvars[52] =
+	{ airshowsmoke, blackout, contrail, countrytime, currday, currmonth, curryear, cvcapture, cvdelay, cvradarrange1, cvradarrange3, cvrange, cvs, cvsalvo, cvspeed, dayhours, easymode,
+			emulatecollision, enemyidlim, enemynames, enemyplanes, flakmax, flypenalty, friendlyfire, friendlyidlim, fueldiv, gunstats, iff, katyrange, mapname, midairs, mortars, mview, ottoaccuracy,
+			ottoadjust, ottoburstoff, ottoburston, ottoburstonmax, ottorange, ottoretarget, ottooverrides, paratroopers, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
+			tanksrange, timemult, timeout, whitelist };
+
 	sprintf(my_query, "UPDATE arena_status SET");
-	
-	for(i = 0, j = 0; i < 49; i++)
+
+	for (i = 0, j = 0; i < 49; i++)
 	{
-		if(upvars[i]->modified)
+		if (upvars[i]->modified)
 		{
 			sprintf(my_query, "%s %s = '%s',", my_query, upvars[i]->name, upvars[i]->string);
 			j++;
 		}
 	}
-	
-	if(uptime || j)
+
+	if (uptime || j)
 	{
-		sprintf(my_query, "%s uptime = '%ud %.2d:%.2d:%.2d'", my_query,
-							arena->frame/8640000,
-							(arena->frame/360000)%24,
-							(arena->frame/6000)%60,
-							(arena->frame/100)%60);
-		
-		if(d_mysql_query(&my_sock, my_query)) // query succeeded
+		sprintf(my_query, "%s uptime = '%ud %.2d:%.2d:%.2d'", my_query, arena->frame/8640000, (arena->frame/360000)%24, (arena->frame/6000)%60, (arena->frame/100)%60);
+
+		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
 			Com_Printf("WARNING: UpdateArenaStatus(): couldn't query UPDATE error %d: %s\nquery = %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
-		}	
+		}
 	}
 }

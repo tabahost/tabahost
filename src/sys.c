@@ -33,10 +33,10 @@
 GeoIP *gi; //extern
 
 /*************
-Sys_Milliseconds
+ Sys_Milliseconds
 
-Return a relative milliseconds since first call
-*************/
+ Return a relative milliseconds since first call
+ *************/
 #ifndef _WIN32
 static u_int32_t secbase;
 #endif
@@ -44,8 +44,8 @@ u_int32_t Sys_Milliseconds(void)
 #ifdef _WIN32
 {
 	u_int32_t curtime;
-	static int	base;
-	static u_short	initialized = 0;
+	static int base;
+	static u_short initialized = 0;
 
 	if (!initialized)
 	{
@@ -85,22 +85,21 @@ u_int32_t Sys_ResetMilliseconds(void)
 	gettimeofday(&tp, &tzp);
 
 	secbase = tp.tv_sec;
-	
+
 	return tp.tv_usec/1000;
 }
 
-
 #ifdef _WIN32
-static HANDLE		hinput, houtput;
-static char	console_text[256];
-static int	console_textlen;
+static HANDLE hinput, houtput;
+static char console_text[256];
+static int console_textlen;
 #endif
 
 /*************
-Sys_Init
+ Sys_Init
 
-Initializes System functions
-*************/
+ Initializes System functions
+ *************/
 
 void Sys_Init(void)
 {
@@ -115,16 +114,16 @@ void Sys_Init(void)
 	system("del *.LOCK");
 	system("del .\\players\\*.LOCK");
 	system("del .\\squads\\*.LOCK");
-// 	system("del .\\fields\\*.LOCK"); // not needed because Cmd_Field() doesnt share info
+	// 	system("del .\\fields\\*.LOCK"); // not needed because Cmd_Field() doesnt share info
 
 	//unlink(FILE_INGAME_LOCK);
 #endif
 
 #ifdef _WIN32
 	if(!FreeConsole())
-		Com_Printf("WARNING: Couldn't detach console (%u)\n", GetLastError());
+	Com_Printf("WARNING: Couldn't detach console (%u)\n", GetLastError());
 	if(!AllocConsole())
-		Com_Printf("WARNING: Couldn't create dedicated server console (%u)\n", GetLastError());
+	Com_Printf("WARNING: Couldn't create dedicated server console (%u)\n", GetLastError());
 
 	hinput = GetStdHandle(STD_INPUT_HANDLE);
 	houtput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -145,10 +144,10 @@ void Sys_Init(void)
 }
 
 /*************
-Sys_RemoveFiles
+ Sys_RemoveFiles
 
-Delete files. Syntaxe: "path/file"
-*************/
+ Delete files. Syntaxe: "path/file"
+ *************/
 
 void Sys_RemoveFiles(char *pathfile)
 {
@@ -158,27 +157,27 @@ void Sys_RemoveFiles(char *pathfile)
 	char path[256];
 	char file[64];
 	char *temp;
-	
+
 	strncpy(path, pathfile, 256);
-	
+
 	temp = strrchr(path, '/');
-	
-	if(!temp)
+
+	if (!temp)
 	{
 		Com_Printf("WARNING: RemoveFiles(): Invalid pointer\n");
 		return;
 	}
-	
+
 	strncpy(file, temp+1, 64);
 
 	*temp = 0;
 	dp = opendir(path);
 
-	if(dp != NULL)
+	if (dp != NULL)
 	{
 		while (ep = readdir(dp))
 		{
-			if(strstr(ep->d_name, file))
+			if (strstr(ep->d_name, file))
 			{
 				Com_Printf("Deleting file %s/%s\n", path, ep->d_name);
 				sprintf(temp, "/%s", ep->d_name);
@@ -193,19 +192,19 @@ void Sys_RemoveFiles(char *pathfile)
 }
 
 /*************
-Sys_SQL_Init
+ Sys_SQL_Init
 
-Init SQL system
-*************/
+ Init SQL system
+ *************/
 
 void Sys_SQL_Init(void)
 {
 	u_int32_t port = 3306; /*default = 3306*/
 	u_int32_t flags = 0; // CLIENT_MULTI_STATEMENTS
-	
-//	mysql_library_init();
 
-	if(!mysql_init(&my_sock))
+	//	mysql_library_init();
+
+	if (!mysql_init(&my_sock))
 	{
 		Com_Printf("ERROR: Sys_SQL_Init(): Error initializing my_sock\n");
 		ExitServer(1);
@@ -214,11 +213,11 @@ void Sys_SQL_Init(void)
 	{
 		Com_Printf("MySQL Initialized\n");
 	}
-	
-	if(mysql_options(&my_sock, MYSQL_OPT_RECONNECT, "1"))
+
+	if (mysql_options(&my_sock, MYSQL_OPT_RECONNECT, "1"))
 		Com_Printf("WARNING: Sys_SQL_Init(): MYSQL_OPT_RECONNECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-	
-	if(!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, port, NULL /*unix_socket*/, flags))
+
+	if (!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, port, NULL /*unix_socket*/, flags))
 	{
 		Com_Printf("ERROR: Sys_SQL_Init(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
 		ExitServer(1);
@@ -230,29 +229,29 @@ void Sys_SQL_Init(void)
 }
 
 /*************
-Sys_SQL_Close
+ Sys_SQL_Close
 
-Stops SQL system
-*************/
+ Stops SQL system
+ *************/
 
 void Sys_SQL_Close(void)
 {
 	Com_Printf("Closing mySQL System\n");
-	
+
 	mysql_close(&my_sock);
-	
+
 	mysql_library_end();
 }
 
 /*************
-Sys_GeoIP_Init
+ Sys_GeoIP_Init
 
-Init GeoIP Module
-*************/
+ Init GeoIP Module
+ *************/
 
 void Sys_GeoIP_Init(void)
 {
-	if(!(gi = GeoIP_open("GeoIP.dat", GEOIP_MEMORY_CACHE)))//GEOIP_STANDARD)))
+	if (!(gi = GeoIP_open("GeoIP.dat", GEOIP_MEMORY_CACHE)))//GEOIP_STANDARD)))
 	{
 		Com_Printf("ERROR: Sys_GeoIP_Init(): Error initializing gi\n");
 		ExitServer(1);
@@ -265,19 +264,19 @@ void Sys_GeoIP_Init(void)
 
 void Sys_GeoIP_Close(void)
 {
-	if(gi)
+	if (gi)
 	{
 		Com_Printf("Closing GeoIP Module\n");
-		
+
 		GeoIP_delete(gi);
 	}
 }
 
 /*************
-Sys_SigHandler
+ Sys_SigHandler
 
-Handles every got signal
-*************/
+ Handles every got signal
+ *************/
 
 void Sys_SigHandler(int s)
 {
@@ -287,9 +286,9 @@ void Sys_SigHandler(int s)
 	{
 #ifdef _WIN32
 		case SIGBREAK:
-			signal(SIGBREAK, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGBREAK\n");
-			break;
+		signal(SIGBREAK, Sys_SigHandler);
+		Com_Printf("WARNING: Got signal SIGBREAK\n");
+		break;
 #else
 		case SIGQUIT:
 			signal(SIGQUIT, Sys_SigHandler);
@@ -314,8 +313,8 @@ void Sys_SigHandler(int s)
 			Com_Printf("WARNING: Got signal SIGFPE\n");
 
 #ifdef _WIN32
-//		    _fpreset(); //we can clear math proc state with this function under Win32,
-		                //if really needed with the view of "total cleaner" longjmp()
+			//		    _fpreset(); //we can clear math proc state with this function under Win32,
+			//if really needed with the view of "total cleaner" longjmp()
 #endif
 			longjmp(debug_buffer, 1);
 
@@ -345,7 +344,7 @@ void Sys_SigHandler(int s)
 		case SIGINT:
 			signal(SIGINT, Sys_SigHandler);
 			Com_Printf("WARNING: Got signal SIGINT\n");
-			if(!consoleinput->value)
+			if (!consoleinput->value)
 			{
 				Var_Set("consoleinput", "1");
 				return;
@@ -360,10 +359,10 @@ void Sys_SigHandler(int s)
 }
 
 /*************
-Sys_ConsoleInput
+ Sys_ConsoleInput
 
-Get any typed data in stdin and return the string received newline
-*************/
+ Get any typed data in stdin and return the string received newline
+ *************/
 
 #ifdef _WIN32
 char *Sys_ConsoleInput (void)
@@ -382,13 +381,13 @@ char *Sys_ConsoleInput (void)
 		}
 
 		if(numevents <= 0)
-			break;
+		break;
 
 		if(!ReadConsoleInput(hinput, records, 1, &numread))
-			Com_Printf("WARNING: Error reading console input\n");
+		Com_Printf("WARNING: Error reading console input\n");
 
 		if(numread != 1)
-			Com_Printf("WARNING: Couldn't read console input\n");
+		Com_Printf("WARNING: Couldn't read console input\n");
 
 		if(records[0].EventType == KEY_EVENT)
 		{
@@ -399,35 +398,35 @@ char *Sys_ConsoleInput (void)
 				switch(ch)
 				{
 					case '\r':
-						WriteFile(houtput, "\r\n", 2, &temp, NULL);
+					WriteFile(houtput, "\r\n", 2, &temp, NULL);
 
-						if(console_textlen)
-						{
-							console_text[console_textlen] = 0;
-							console_textlen = 0;
-							return console_text;
-						}
-						break;
+					if(console_textlen)
+					{
+						console_text[console_textlen] = 0;
+						console_textlen = 0;
+						return console_text;
+					}
+					break;
 
 					case '\b':
-						if(console_textlen)
-						{
-							console_textlen--;
-							WriteFile(houtput, "\b \b", 3, &temp, NULL);
-						}
-						break;
+					if(console_textlen)
+					{
+						console_textlen--;
+						WriteFile(houtput, "\b \b", 3, &temp, NULL);
+					}
+					break;
 
 					default:
-						if(ch >= ' ')
+					if(ch >= ' ')
+					{
+						if(console_textlen < sizeof(console_text)-2)
 						{
-							if(console_textlen < sizeof(console_text)-2)
-							{
-								WriteFile(houtput, &ch, 1, &temp, NULL);
-								console_text[console_textlen] = ch;
-								console_textlen++;
-							}
+							WriteFile(houtput, &ch, 1, &temp, NULL);
+							console_text[console_textlen] = ch;
+							console_textlen++;
 						}
-						break;
+					}
+					break;
 				}
 			}
 		}
@@ -436,7 +435,7 @@ char *Sys_ConsoleInput (void)
 	return NULL;
 }
 #else
-char *Sys_ConsoleInput (void)
+char *Sys_ConsoleInput(void)
 {
 	static char buff[256];
 	int len;
@@ -449,10 +448,10 @@ char *Sys_ConsoleInput (void)
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
 
-	if(select(1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(0, &fdset))
+	if (select(1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(0, &fdset))
 		return NULL;
-// http://www.opengroup.org/onlinepubs/000095399/functions/read.html
-	
+	// http://www.opengroup.org/onlinepubs/000095399/functions/read.html
+
 	len = read(0, buff, sizeof(buff));
 
 	if (!len) // EOF
@@ -468,16 +467,16 @@ char *Sys_ConsoleInput (void)
 #endif
 
 /*************
-LockFile
+ LockFile
 
-Create a Lock file
-*************/
+ Create a Lock file
+ *************/
 
 int8_t Sys_LockFile(char *file)
 {
 	FILE *fp;
 
-	if(!(fp = fopen(file, "w")))
+	if (!(fp = fopen(file, "w")))
 	{
 		Com_Printf("WARNING: Couldn't create file \"%s\"\n", file);
 		return -1;
@@ -490,10 +489,10 @@ int8_t Sys_LockFile(char *file)
 }
 
 /*************
-UnlockFile
+ UnlockFile
 
-Remove a Lock file
-*************/
+ Remove a Lock file
+ *************/
 
 int8_t Sys_UnlockFile(char *file)
 {
@@ -501,16 +500,16 @@ int8_t Sys_UnlockFile(char *file)
 }
 
 /*************
-WaitForLock
+ WaitForLock
 
-Waits till LOCK file is gone
-*************/
+ Waits till LOCK file is gone
+ *************/
 
 void Sys_WaitForLock(char *file)
 {
 	FILE *fp;
 
-	while((fp = fopen(file, "r")))
+	while ((fp = fopen(file, "r")))
 	{
 		fclose(fp);
 #ifdef _WIN32
@@ -522,10 +521,10 @@ void Sys_WaitForLock(char *file)
 }
 
 /*************
-Sys_Printfile
+ Sys_Printfile
 
-Print a file in console
-*************/
+ Print a file in console
+ *************/
 
 void Sys_Printfile(char *file)
 {
@@ -533,7 +532,7 @@ void Sys_Printfile(char *file)
 	char buffer[1024];
 	FILE *fp;
 
-	if(strlen(file)+6 > sizeof(lock))
+	if (strlen(file)+6 > sizeof(lock))
 		return;
 
 	memset(lock, 0, sizeof(lock));
@@ -546,7 +545,7 @@ void Sys_Printfile(char *file)
 
 	Sys_LockFile(lock);
 
-	if(!(fp = fopen(file, "r")))
+	if (!(fp = fopen(file, "r")))
 	{
 		printf("WARNING: Couldn't open file \"%s\"", file);
 		fflush(stdout);
@@ -555,7 +554,7 @@ void Sys_Printfile(char *file)
 	}
 	else
 	{
-		while(fgets(buffer, sizeof(buffer), fp))
+		while (fgets(buffer, sizeof(buffer), fp))
 		{
 			printf("%s", buffer);
 			fflush(stdout);
@@ -568,30 +567,30 @@ void Sys_Printfile(char *file)
 }
 
 /*
-			if(!d_mysql_query(&my_sock, my_query)) // query succeeded
-			{
-				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
-				{
-					if((my_row = mysql_fetch_row(my_result)))
-					{
-						DOTHINGS
-					}
-					else
-					{
-						Com_Printf("WARNING: UNNAMED: Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));						
-					}
-					
-					mysql_free_result(my_result);
-					my_result = NULL;
-					my_row = NULL;
-				}
-				else
-				{
-					Com_Printf("WARNING: UNNAMED: my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-				}				
-			}
-			else
-			{
-				Com_Printf("WARNING: UNNAMED: couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-			}
-*/
+ if(!d_mysql_query(&my_sock, my_query)) // query succeeded
+ {
+ if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+ {
+ if((my_row = mysql_fetch_row(my_result)))
+ {
+ DOTHINGS
+ }
+ else
+ {
+ Com_Printf("WARNING: UNNAMED: Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));						
+ }
+ 
+ mysql_free_result(my_result);
+ my_result = NULL;
+ my_row = NULL;
+ }
+ else
+ {
+ Com_Printf("WARNING: UNNAMED: my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+ }				
+ }
+ else
+ {
+ Com_Printf("WARNING: UNNAMED: couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+ }
+ */
