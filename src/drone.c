@@ -993,21 +993,19 @@ int ProcessDrone(client_t *drone)
 			return -1;
 	}
 
-	if (drone->related[0])
+	if((!((arena->frame - drone->frame) % 50)))
 	{
-		drone->offset = drone->timer - drone->related[0]->timer;
-		drone->timer = drone->related[0]->timer;
+		drone->offset = drone->timer - arena->time;
+		drone->timer = arena->time;
 	}
-	else
+
+	if (!drone->related[0])
 	{
 		if (drone->drone & (DRONE_FAU | DRONE_WINGS1 | DRONE_WINGS2 | DRONE_HMACK | DRONE_HTANK | DRONE_KATY | DRONE_EJECTED | DRONE_COMMANDOS | DRONE_DEBUG))
 		{
 			Com_Printf("DEBUG: Removed unrelated drone %s type %u\n", drone->longnick, drone->drone);
 			return -1;
 		}
-
-		drone->offset = drone->timer - arena->time;
-		drone->timer = arena->time;
 	}
 
 	return 0;

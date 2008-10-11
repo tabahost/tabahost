@@ -489,7 +489,7 @@ if			(client->arenafieldsok && client->arenabuildsok < (fields->value + cities->
 				{
 					SendPlayersNear(client);
 
-					if((client->lograwdata || lograwposition->value) && !((arena->frame - client->frame) % 50))
+					if((client->lograwdata || lograwposition->value) && !((arena->frame - client->frame) % 50) && client->infly)
 					{
 						LogRAWPosition(TRUE, client);
 					}

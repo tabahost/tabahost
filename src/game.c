@@ -3927,11 +3927,10 @@ void PingTest(u_int8_t *buffer, client_t *client)
 	if ((++frame) < 20)
 	{
 		Cmd_Pingtest(frame, client);
-		PPrintf(client, RADIO_RED, "Ping: %ums", ((arena->time - client->pingtest) / 3));
 	}
 	else
 	{
-		PPrintf(client, RADIO_RED, "Ping Average: %ums", ((arena->time - client->pingtest) / 60));
+		PPrintf(client, RADIO_RED, "Ping Average: %ums", ((arena->time - client->pingtest) / 40));
 	}
 }
 
@@ -4869,7 +4868,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				client->aspeeds[2][i] = ntohs(plane->yawangspeed);
 			}
 
-			if (client->lograwdata || lograwposition->value)
+			if ((client->lograwdata || lograwposition->value) && client->infly)
 			{
 				LogRAWPosition(FALSE, client);
 			}
@@ -8835,7 +8834,7 @@ void SendScreenUpdates(client_t *client)
 
 	sprintf(file, "./logs/%s.screen", client->longnick);
 
-	if (client->lograwdata || lograwposition->value)
+	if ((client->lograwdata || lograwposition->value) && client->infly)
 	{
 		if (!(fp = fopen(file, "a")))
 		{
@@ -8875,9 +8874,18 @@ void SendScreenUpdates(client_t *client)
 
 				if (fp)
 				{
-					fprintf(fp, "%u;%d;%d;%d;%d;%u;%d;%d;%d;%d;%u\n", ntohl(updateplane->timer), ntohl(updateplane->posx), ntohl(updateplane->posy), ntohl(updateplane->alt),
-							ntohs(wb3updateplane2->timeoffset), wb3updateplane2->slot, wb3updateplane2->unk1, ntohs(wb3updateplane2->relposx), ntohs(wb3updateplane2->relposy),
-							ntohs(wb3updateplane2->relalt), Sys_Milliseconds());
+					fprintf(fp, "%u;%d;%d;%d;%d;%u;%d;%d;%d;%d;%u\n",
+							ntohl(updateplane->timer),
+							(int32_t)ntohl(updateplane->posx),
+							(int32_t)ntohl(updateplane->posy),
+							(int32_t)ntohl(updateplane->alt),
+							(int16_t)ntohs(wb3updateplane2->timeoffset),
+							wb3updateplane2->slot,
+							wb3updateplane2->unk1,
+							(int16_t)ntohs(wb3updateplane2->relposx),
+							(int16_t)ntohs(wb3updateplane2->relposy),
+							(int16_t)ntohs(wb3updateplane2->relalt),
+							Sys_Milliseconds());
 				}
 			}
 			else
@@ -8920,6 +8928,9 @@ void SendScreenUpdates(client_t *client)
 		}
 	}
 
+	if (fp)
+		fclose(fp);
+	
 	if (!j)
 		return;
 
