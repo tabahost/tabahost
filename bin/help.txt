@@ -2,8 +2,6 @@
 *************** HELP FILE FOR TH WARBIRDS ***************
 *********************************************************
 
-# = Commands not implemented yet
-
 .mov [f1..f21]         move to field fNN
 .plane [1..57]         set plane
 .fuel [30..100]        set fuel %
@@ -24,6 +22,7 @@
 .slogan [squad_slogan] assign motto to the squad
 .remove [player]       remove player from the squad
 .withdraw              exit from squad
+.shanghai [player]     Invite player to be shanghaied
 .psq                   (sq leader) change membs permission
 .hls                   on|off hls mode
 
@@ -39,10 +38,9 @@
 .motd                  show Message Of The Day
 .nextarena             show next arena and when will change
 .maplist               list all arenas in mapcycle
-#.gunstat               on/off gunnery statistic
+.gunstat               on/off gunnery statistic
 .version               get server version
 .kill                  kill yourself if you are bored...
-.belt [1|2] [muntype]  set your gun belt configuration
 .thanks [upto 3 nicks] give 10% of your last flight score
                        to given nicks
 
@@ -59,19 +57,23 @@
 
 .commandos             launch commandos to destroy enemy
                        field. Distance to launch not more
-                       6000 ft and not less 3600 ft.
+                       10,000 ft.
+
+.remdron               remove any flying drone
+
+*********************************************************
+***************** WB 2.77 only features *****************
+*********************************************************
 
 .tanks f[field]        start a convoy to attack a field
 
 .tank                  start human tank (drive as hmack)
 
-.hmack                 start human ack.
+.hmack                 start human ack. 
 .hmack run             run hmack forward.
 .hmack stop            stop hmack.
 .hmack -N              turn left N degrees.
 .hmack +N              turn right N degrees.
 
-.remdron               remove any flying drone
-
-#.mapflags 0|1          switch off or on radar's circus (for superuser
+.mapflags 0|1          switch off or on radar's circus (for superuser
                         or squad's leaders).
