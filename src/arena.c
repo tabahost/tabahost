@@ -3339,12 +3339,33 @@ u_int8_t IsVitalBuilding(building_t *building)
 {
 	if (arcade->value)
 	{
-		if ((building->type == BUILD_50CALACK) || (building->type == BUILD_20MMACK) || (building->type == BUILD_40MMACK) || (building->type == BUILD_88MMFLAK) || (building->type == BUILD_HANGAR)
-				|| (building->type == BUILD_FUEL) || (building->type == BUILD_AMMO) || (building->type == BUILD_RADAR) || (building->type == BUILD_WARE) || (building->type == BUILD_RADIOHUT)
-				|| (building->type == BUILD_ANTENNA) || (building->type == BUILD_CV) || (building->type == BUILD_DESTROYER) || (building->type == BUILD_CRUISER) || (building->type == BUILD_CARGO)
-				|| (building->type == BUILD_SUBMARINE) || (building->type == BUILD_BRIDGE) || (building->type == BUILD_FACTORY) || (building->type == BUILD_BARRACKS) || (building->type
-				== BUILD_STATICS) || (building->type == BUILD_REFINERY) || (building->type == BUILD_PLANEFACTORY) || (building->type == BUILD_BUILDING) || (building->type == BUILD_CRANE)
-				|| (building->type == BUILD_ARTILLERY) || (building->type == BUILD_HUT) || (building->type == BUILD_TRUCK))
+		if ((building->type == BUILD_50CALACK) ||
+			(building->type == BUILD_20MMACK) ||
+			(building->type == BUILD_40MMACK) ||
+			(building->type == BUILD_88MMFLAK) ||
+			(building->type == BUILD_HANGAR) ||
+			(building->type == BUILD_FUEL) ||
+			(building->type == BUILD_AMMO) ||
+			(building->type == BUILD_RADAR) ||
+			(building->type == BUILD_WARE) ||
+			(building->type == BUILD_RADIOHUT) ||
+			(building->type == BUILD_ANTENNA) ||
+			(building->type == BUILD_CV) ||
+			(building->type == BUILD_DESTROYER) ||
+			(building->type == BUILD_CRUISER) ||
+			(building->type == BUILD_CARGO) ||
+			(building->type == BUILD_SUBMARINE) ||
+			(building->type == BUILD_BRIDGE) ||
+			(building->type == BUILD_FACTORY) ||
+			(building->type == BUILD_BARRACKS) ||
+			(building->type == BUILD_STATICS) ||
+			(building->type == BUILD_REFINERY) ||
+			(building->type == BUILD_PLANEFACTORY) ||
+			(building->type == BUILD_BUILDING) || 
+			(building->type == BUILD_CRANE) ||
+			(building->type == BUILD_ARTILLERY) ||
+			(building->type == BUILD_HUT) ||
+			(building->type == BUILD_TRUCK))
 			return TRUE;
 		else
 			/*
@@ -3361,14 +3382,37 @@ u_int8_t IsVitalBuilding(building_t *building)
 	}
 	else
 	{
-		if ((building->type == BUILD_50CALACK) || (building->type == BUILD_20MMACK) || (building->type == BUILD_40MMACK) || (building->type == BUILD_88MMFLAK) || (building->type == BUILD_HANGAR)
-				|| (building->type == BUILD_FUEL) || (building->type == BUILD_AMMO) || (building->type == BUILD_RADAR) || (building->type == BUILD_WARE) || (building->type == BUILD_RADIOHUT)
-				|| (building->type == BUILD_ANTENNA) || (building->type == BUILD_CV) || (building->type == BUILD_DESTROYER) || (building->type == BUILD_CRUISER) || (building->type == BUILD_CARGO)
-				|| (building->type == BUILD_SUBMARINE) || (building->type == BUILD_BRIDGE) || (building->type == BUILD_FACTORY) || (building->type == BUILD_BARRACKS) || (building->type
-				== BUILD_STATICS) || (building->type == BUILD_REFINERY) || (building->type == BUILD_PLANEFACTORY) || (building->type == BUILD_BUILDING) || (building->type == BUILD_CRANE)
-				|| (building->type == BUILD_ARTILLERY) || (building->type == BUILD_HUT) || (building->type == BUILD_TRUCK))
-			return TRUE;
-		else
+		if(oldcapt->value || !wb3->value)
+		{
+			if ((building->type == BUILD_50CALACK) ||
+				(building->type == BUILD_20MMACK) ||
+				(building->type == BUILD_40MMACK) ||
+				(building->type == BUILD_88MMFLAK) ||
+				(building->type == BUILD_HANGAR) ||
+				(building->type == BUILD_FUEL) ||
+				(building->type == BUILD_AMMO) ||
+				(building->type == BUILD_RADAR) ||
+				(building->type == BUILD_WARE) ||
+				(building->type == BUILD_RADIOHUT) ||
+				(building->type == BUILD_ANTENNA) ||
+				(building->type == BUILD_CV) ||
+				(building->type == BUILD_DESTROYER) ||
+				(building->type == BUILD_CRUISER) ||
+				(building->type == BUILD_CARGO) ||
+				(building->type == BUILD_SUBMARINE) ||
+				(building->type == BUILD_BRIDGE) ||
+				(building->type == BUILD_FACTORY) ||
+				(building->type == BUILD_BARRACKS) ||
+				(building->type == BUILD_STATICS) ||
+				(building->type == BUILD_REFINERY) ||
+				(building->type == BUILD_PLANEFACTORY) ||
+				(building->type == BUILD_BUILDING) ||
+				(building->type == BUILD_CRANE) ||
+				(building->type == BUILD_ARTILLERY) ||
+				(building->type == BUILD_HUT) ||
+				(building->type == BUILD_TRUCK))
+				return TRUE;
+			else
 			/*
 			 BUILD_STRATEGIC
 			 BUILD_SPECIALBUILD
@@ -3380,6 +3424,122 @@ u_int8_t IsVitalBuilding(building_t *building)
 			 BUILD_FENCE
 			 */
 			return FALSE;
+		}
+		else
+		{
+			if ((building->type == BUILD_50CALACK) ||
+				(building->type == BUILD_20MMACK) ||
+				(building->type == BUILD_40MMACK) ||
+				(building->type == BUILD_88MMFLAK) ||
+				(building->type == BUILD_RADAR) ||
+				(building->type == BUILD_RADIOHUT) ||
+				(building->type == BUILD_ANTENNA) ||
+				(building->type == BUILD_ARTILLERY))
+				return TRUE;
+			else
+			/*
+			 BUILD_STRATEGIC
+			 BUILD_SPECIALBUILD
+			 BUILD_TOWER
+			 BUILD_TREE
+			 BUILD_SPAWNPOINT
+			 BUILD_HOUSE
+			 BUILD_ROCK
+			 BUILD_FENCE
+			 BUILD_HANGAR
+			 BUILD_FUEL
+			 BUILD_AMMO
+			 BUILD_WARE
+			 BUILD_BARRACKS
+			 BUILD_STATICS
+			 BUILD_CV
+			 BUILD_DESTROYER
+			 BUILD_CRUISER
+			 BUILD_CARGO
+			 BUILD_SUBMARINE
+			 BUILD_BRIDGE
+			 BUILD_FACTORY
+			 BUILD_REFINERY
+			 BUILD_PLANEFACTORY
+			 BUILD_BUILDING
+			 BUILD_CRANE
+			 BUILD_HUT
+			 BUILD_TRUCK
+			 */
+			return FALSE;
+		}
+	}
+}
+
+u_int32_t GetTonnageToClose(u_int8_t fieldtype)
+{
+	switch(fieldtype)
+	{
+		case FIELD_LITTLE:
+			return 4000;
+		case FIELD_MEDIUM:
+			return 4000;
+		case FIELD_MAIN:
+			return 6000;
+		case FIELD_CV:
+			return 4000;
+		case FIELD_CARGO:
+			return 1000;
+		case FIELD_DD:
+			return 1000;
+		case FIELD_SUBMARINE:
+			return 1000;
+		case FIELD_RADAR:
+			return 1000;
+		case FIELD_BRIDGE:
+			return 1000;
+		case FIELD_CITY:
+			return 6000;
+		case FIELD_PORT:
+			return 6000;
+		case FIELD_CONVOY:
+			return 4000;
+		case FIELD_FACTORY:
+			return 1000;
+		case FIELD_REFINERY:
+			return 1000;
+		case FIELD_OPENFIELD:
+			return 2000;
+		case FIELD_WB3POST:
+			return 1000;
+		case FIELD_WB3VILLAGE:
+			return 4000;
+		case FIELD_WB3TOWN:
+			return 6000;
+		case FIELD_WB3PORT:
+			return 6000;
+		default:
+			Com_Printf("WARNING: GetTonnageToClose() Invalid Field Type %d\n", fieldtype);
+			return 0;
+	}
+}
+
+int32_t GetFieldRadius(u_int8_t fieldtype)
+{
+	switch(fieldtype)
+	{
+		case FIELD_LITTLE:
+			return 1350;
+		case FIELD_MEDIUM:
+			return 2600;
+		case FIELD_MAIN:
+			return 4200;
+		case FIELD_WB3POST:
+			return 230;
+		case FIELD_WB3VILLAGE:
+			return 1200;
+		case FIELD_WB3TOWN:
+			return 4050;
+		case FIELD_WB3PORT:
+			return 7900;
+		default:
+			Com_Printf("WARNING: GetFieldRadius() Invalid Field Type %d\n", fieldtype);
+			return 3700;
 	}
 }
 
@@ -3656,9 +3816,14 @@ u_int32_t GetHeightAt(int32_t x, int32_t y)
 		tx[0] = NearestField(x, y, 0, TRUE, TRUE, &dist);
 
 		if (tx[0] < 0)
+		{
 			z = 0;
+		}
 		else
+		{
+			Com_Printf("DEBUG: GetHeightAt() got no topography information\n");
 			z = arena->fields[tx[0]].posxyz[2];
+		}
 
 		return z;
 	}

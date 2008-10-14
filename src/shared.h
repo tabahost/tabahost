@@ -170,7 +170,6 @@ typedef unsigned int u_int32_t;
 #define MAX_BOMBS			256		// emulated bombs array
 #define MAX_BOMBRADIUS		315		//
 #define MIN_BOMBRADIUS		129		//
-#define MAX_FIELDRADIUS		5200 //10000	// FIXME: tweak it
 #define	MAX_MAPCYCLE		16		// max of maps can contain mapcycle
 #define MAX_PLACE			32		// max num of plane parts
 #define VAR_ARCHIVE			1		// set to cause it to be saved to config.cfg
@@ -539,6 +538,7 @@ typedef struct field_s
 	int32_t		posxyz[3];
 	u_int8_t	abletocapture;
 	u_int8_t	closed;
+	int32_t		tonnage;
 	u_int8_t	paras;
 	u_int32_t	alert;
 	u_int32_t	warehouse;
@@ -1677,8 +1677,8 @@ typedef struct wb3tonnage_s		// 1B 13
 {
 	u_int16_t	packetid;
 	u_int8_t	ammo;
-	u_int16_t	unk2;
-	u_int16_t	unk3;
+	u_int16_t	field;
+	u_int16_t	distance;
 } wb3tonnage_t;
 
 typedef struct wb3firemg_s			// 1B 15
@@ -2132,6 +2132,7 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 void	ReducePlanes(u_int8_t field);
 void	IncreaseAcksReup(u_int8_t field);
 u_int8_t IsVitalBuilding(building_t *building);
+u_int32_t GetTonnageToClose(u_int8_t fieldtype);
 u_int8_t Alt2Index(int32_t alt);
 void	WB3MapTopography(client_t *client);
 void	WB3Mapper(client_t *client);
@@ -2388,6 +2389,7 @@ extern	var_t		*mortars;		// set how much mortars JU52 and Li-2 can fire
 extern	var_t		*mview;			// set who can use .view (OPs, Admins or both)
 extern	var_t		*notanks;		// dont allow players and arena to spawn tanks/hmack/katy
 extern	var_t		*nowings;		// dont allow players to use wingmen
+extern	var_t		*oldcapt;		// enable old way to capture fields (destroy all structures and drop paras)
 extern	var_t		*ottoaccuracy;	// set otto accuracy
 extern	var_t		*ottoadjust;	// set otto adjust
 extern	var_t		*ottoburstoff;	// set otto burst pause time

@@ -330,6 +330,15 @@ void CheckArenaRules(void)
 
 	for (i = 0; i < fields->value; i++)
 	{
+		if(!oldcapt->value && wb3->value && !(arena->frame % 100))
+		{
+			if(arena->fields[i].tonnage)
+				arena->fields[i].tonnage -= 10;
+			
+			if(arena->fields[i].tonnage < 0)
+				arena->fields[i].tonnage = 0;
+		}
+		
 		for (j = 0; j < MAX_BUILDINGS; j++)
 		{
 			if (arena->fields[i].buildings[j].field)
@@ -702,6 +711,12 @@ void CheckArenaRules(void)
 				}
 				else
 					break;
+			}
+			
+			if(!oldcapt->value && wb3->value)
+			{
+				if(arena->fields[i].tonnage < GetTonnageToClose(arena->fields[i].type))
+					close = 0;
 			}
 
 			if (!arena->fields[i].closed && close)
@@ -3996,8 +4011,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 	if (end != 0x01)
 	{
-		land = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, 
-		TRUE, &dist);
+		land = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, TRUE, &dist);
 
 		if (land < 0)
 		{
@@ -4016,8 +4030,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		{
 			land += 1;
 		}
-
-		if (!land || dist > MAX_FIELDRADIUS) // no fields found, or too far
+		
+		if (land <= fields->value && dist > GetFieldRadius(arena->fields[land-1].type)) // no fields found, or too far
 		{
 			if (arena->fields[client->field - 1].country == client->country)
 			{
@@ -4759,6 +4773,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	planeposition_t *plane;
 	wb3planeposition_t *wb3plane;
 	planeposition2_t *plane2;
+	int32_t field;
 	u_int32_t distance;
 
 	if (wb3->value)
@@ -4924,7 +4939,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		}
 
 		// ackstar rules
-		if (client->infly && (client->posalt[0] < 1000) && IsBomber(client))
+		if (client->infly && ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) < 1000) && IsBomber(client))
 		{
 			if (client->ackstarcount > 4)
 			{
@@ -4932,9 +4947,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				{
 					if (client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 					{
-						NearestField(client->posxy[0][0], client->posxy[1][0], (client->country == 1) ? 3 : 1, FALSE, FALSE, &distance);
+						field = NearestField(client->posxy[0][0], client->posxy[1][0], (client->country == 1) ? 3 : 1, FALSE, FALSE, &distance);
 
-						if (distance < MAX_FIELDRADIUS)
+						if (field >= 0 && field < fields->value && distance < GetFieldRadius(arena->fields[field].type))
 						{
 							if (!client->ackstar)
 							{
@@ -5674,15 +5689,15 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 				j = NearestField(client->posxy[0][0], client->posxy[1][0], 0, 
 				TRUE, TRUE, &dist);
 
-				if ((j < 0) || (dist > MAX_FIELDRADIUS))//if(j == fields->value)
-					alt = ntohl(drop->alt);
-				else
+				if(j >= 0 && j < fields->value && dist < GetFieldRadius(arena->fields[j].type))
 				{
 					if (j < fields->value)
 						alt = ntohl(drop->alt) - arena->fields[j].posxyz[2]; // FIXME: calculate destx desty and GetHeightAt()
 					else
 						alt = ntohl(drop->alt) - arena->cities[j - (int16_t)fields->value].posxyz[2]; // FIXME: calculate destx desty and GetHeightAt()
 				}
+				else
+					alt = ntohl(drop->alt);
 
 				if (alt < 0)
 					alt = 0;
@@ -5784,11 +5799,22 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 
 void WB3TonnageOnTarget(u_int8_t *buffer, u_int8_t len, client_t *client)
 {
+	munition_t *ammo;
+	u_int16_t field, distance;
 	wb3tonnage_t *wb3tonnage;
 	wb3tonnage = (wb3tonnage_t *)buffer;
 
 	if (client->attr)
-		PPrintf(client, RADIO_GREEN, "DEBUG: tonnage ammoID: %d, unk2: %d, unk3: %d", wb3tonnage->ammo, ntohs(wb3tonnage->unk2), ntohs(wb3tonnage->unk3));
+		PPrintf(client, RADIO_GREEN, "DEBUG: tonnage ammoID: %d, field: %d, distance: %d", wb3tonnage->ammo, ntohs(wb3tonnage->field), ntohs(wb3tonnage->distance));
+	
+	ammo = GetMunition(wb3tonnage->ammo);
+	field = ntohs(wb3tonnage->field);
+	distance = ntohs(wb3tonnage->distance);
+	
+	if(field && field <= fields->value && distance < GetFieldRadius(arena->fields[field-1].type))
+	{
+		arena->fields[field-1].tonnage += (ammo->he / 50);
+	}
 }
 
 /*************

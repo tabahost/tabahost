@@ -2456,7 +2456,12 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 	if (!client || client->infly)
 	{
-		PPrintf(client, RADIO_YELLOW, "Field F%d: Country %s, Type: %s, Status: %s", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
+		PPrintf(client, RADIO_YELLOW, "Field F%d: Country: %s, Type: %s, Status: %s", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
+		
+		if(!oldcapt->value && wb3->value)
+		{
+			PPrintf(client, RADIO_YELLOW, "ToT: %d, TTC: %d", arena->fields[field].tonnage, GetTonnageToClose(arena->fields[field].type));
+		}
 
 		if (status)
 		{
@@ -2469,10 +2474,11 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 				if (arena->fields[field].buildings[i].status && arena->fields[field].buildings[i].timer < reup && IsVitalBuilding(&(arena->fields[field].buildings[i])))
 				{
-					Com_Printf("DEBUG %d %u\n", i, arena->fields[field].buildings[i].timer);
 					reup = arena->fields[field].buildings[i].timer;
 				}
 			}
+			
+			// Add Here check if ToT will reopen field sooner than reup
 
 			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup/100), arena->fields[field].abletocapture ? "Yes" : "No");
 		}
@@ -2490,6 +2496,10 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		else
 		{
 			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\n", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
+			if(!oldcapt->value && wb3->value)
+			{
+				fprintf(fp, "TONNAGE ON TARGET: %d\nTONNAGE TO CLOSE: %d\n", arena->fields[field].tonnage, GetTonnageToClose(arena->fields[field].type));
+			}
 
 			if (status)
 			{
@@ -4827,7 +4837,7 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 			dist = sqrt(Com_Pow(x, 2) + Com_Pow(y, 2));
 
 			if ((arena->fields[i].type == FIELD_WB3POST && dist < 1000) || (arena->fields[i].type == FIELD_WB3VILLAGE && dist < 2700) || (arena->fields[i].type == FIELD_WB3TOWN && dist < 3600)
-					|| (arena->fields[i].type <= FIELD_MAIN && dist < MAX_FIELDRADIUS))
+					|| (arena->fields[i].type <= FIELD_MAIN && dist < GetFieldRadius(arena->fields[i].type)))
 			{
 				PPrintf(client, RADIO_YELLOW, "Too near to field f%d, acks would kill Commandos", i+1);
 				return;
@@ -5644,7 +5654,7 @@ void Cmd_Reload(client_t *client)
 
 			if (field >= 0 && arena->fields[field].country == client->country)
 			{
-				if (distance < MAX_FIELDRADIUS)
+				if (distance < GetFieldRadius(arena->fields[field].type))
 				{
 					if (!(client->status1))
 					{

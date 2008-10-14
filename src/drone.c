@@ -1496,6 +1496,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	u_int8_t field, city, damaged;
 	munition_t *munition, *max, *min;
 	int16_t radius;
+	u_int8_t fieldtype;
 	int8_t killer = 0;
 
 	munition = GetMunition(type);
@@ -1535,16 +1536,18 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 		{
 			a = x - arena->fields[field].posxyz[0];
 			b = y - arena->fields[field].posxyz[1];
+			fieldtype = arena->fields[field].type;
 		}
 		else
 		{
 			a = x - arena->cities[field - (int16_t)fields->value].posxyz[0];
 			b = y - arena->cities[field - (int16_t)fields->value].posxyz[1];
+			fieldtype = arena->cities[field - (int16_t)fields->value].type;
 		}
 
-		if ((a >= (-1 * MAX_FIELDRADIUS) && a <= MAX_FIELDRADIUS) && (b >= (-1 * MAX_FIELDRADIUS) && b <= MAX_FIELDRADIUS))
+		if ((a >= (-1 * GetFieldRadius(fieldtype)) && a <= GetFieldRadius(fieldtype)) && (b >= (-1 * GetFieldRadius(fieldtype)) && b <= GetFieldRadius(fieldtype)))
 		{
-			if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < MAX_FIELDRADIUS)
+			if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < GetFieldRadius(fieldtype))
 			{
 				if (field < fields->value)
 				{
@@ -1679,6 +1682,7 @@ void PFAUDamage(client_t *fau)
 	u_int8_t i, j, k;
 	int32_t a, b;
 	u_int32_t dist;
+	u_int8_t fieldtype;
 
 	k = fields->value + cities->value;
 
@@ -1689,16 +1693,18 @@ void PFAUDamage(client_t *fau)
 		{
 			a = fau->posxy[0][0] - arena->fields[i].posxyz[0];
 			b = fau->posxy[1][0] - arena->fields[i].posxyz[1];
+			fieldtype = arena->fields[i].type;
 		}
 		else
 		{
 			a = fau->posxy[0][0] - arena->cities[i - (int16_t)fields->value].posxyz[0];
 			b = fau->posxy[1][0] - arena->cities[i - (int16_t)fields->value].posxyz[1];
+			fieldtype = arena->cities[i - (int16_t)fields->value].type;
 		}
 
-		if ((a >= (-1 * MAX_FIELDRADIUS) && a <= MAX_FIELDRADIUS) && (b >= (-1 * MAX_FIELDRADIUS) && b <= MAX_FIELDRADIUS))
+		if ((a >= (-1 * GetFieldRadius(fieldtype)) && a <= GetFieldRadius(fieldtype)) && (b >= (-1 * GetFieldRadius(fieldtype)) && b <= GetFieldRadius(fieldtype)))
 		{
-			if ((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < MAX_FIELDRADIUS)
+			if ((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < GetFieldRadius(fieldtype))
 				break;
 		}
 	}
