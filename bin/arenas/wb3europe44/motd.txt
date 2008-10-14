@@ -1,16 +1,14 @@
 [IMG]offln\common\wtg3.tga 0 0 512 185[/IMG]
+Overlord 10/05/44-10/10/44 150 tabadays 12,5RD 
 
-1944
-Operação Overlord
-Chegou a hora dos Aliados retomarem o território francês ocupado pelos alemães 
-na Segunda Guerra Mundial. As Forças aéreas aliadas precisam preparar a invasão
-da Normandia neutralizando as bases da Luftwaffe e os pilotos alemães devem impedir
-o sucesso da operação, se possível retribuindo o ataque.
+France, 1944. After the disembark in 6/june, The Allies runs over france and Lower Countries. The Germans still not believe that is the main attack and dont oppose its entire forces to block the invasion. The fate of Europe is in the french battlefield.
 
-Welcome to TabaHost WB2008 TOD # 01
-Server is running in MA mode: RPS enabled, Mapcycle enabled and scores active.
-Scorepages at www.tabajarahost.com
+Welcome to TabaHost WB2008! - RPS, Mapcycle enabled; scores active.
+Scorepages at tabahost.dreamhosters.com
+
 type .help and .show to get info about arena.
-Please enjoy!!!
+
+>> TabaSpeak server passwords: purple for GOLDS | green for REDS <<
+                         Please enjoy!!!
                            --=Ø=--
                          TH DevTeam

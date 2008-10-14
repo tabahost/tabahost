@@ -1,25 +1,14 @@
 [IMG]offln\common\wtg3.tga 0 0 512 185[/IMG]
+Bulge 15/12/44-15/05/45 153 tabadays 10,473RD 
 
-    Welcome to Tabajara Host WB2007
+Ardennes, 1944. O derradeiro esforço alemão para parar os aliados no fronte oeste se dá (novamente)através da floresta das Ardenas. O poderoso golpe que os alemães pensavam convencer os aliados à uma paz honrosa seria seu último. Aos aliados cabe resistir ao avanço; aos alemães cabe a estocada definitiva nas forças invasoras.
 
-This is a Beta version, some bugs WILL occour If arena crashes, wait, we
-will debug and put again online ;-)
+Welcome to TabaHost WB2008! - RPS, Mapcycle enabled; scores active.
+Scorepages at tabahost.dreamhosters.com
 
-If anyone think did something that may cause arena crash, please report
-to us. We have saved any bugged player file for debugging.
+type .help and .show to get info about arena.
 
-Please report bugs at www.tabajarahost.com in bugs section
-
-Download image pack at Download section
-
-TEAMSPEAK:
-RED: tabaspeak.servegame.org:8767   password: red
-GOLD: tabaspeak.servegame.org:8768  password: gold
-
-SOME COMMANDS CHANGES:
-
-.FIELD changed do .STATUS (due internal issues from WB3)
-
-Pls enjoy ;-)
-
-                                    franz-
+>> TabaSpeak server passwords: purple for GOLDS | green for REDS <<
+                         Please enjoy!!!
+                           --=Ø=--
+                         TH DevTeam

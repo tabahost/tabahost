@@ -1,25 +1,14 @@
 [IMG]offln\common\wtg3.tga 0 0 512 185[/IMG]
+Smolensk-Moscow 01/set/41-28/fev/42=180 tabadays 13,25RD
 
-    Welcome to Tabajara Host WB2007
+Soviet Union, 1941. The 2nd panzer Army led by Guderian runs over Russian inland. With support of the Luftwaffe, he must get Moscow before winter. The VVS and Russian Army led by Zhukov must stop it!
 
-This is a Beta version, some bugs WILL occour If arena crashes, wait, we
-will debug and put again online ;-)
+Welcome to TabaHost WB2008! - RPS, Mapcycle enabled; scores active.
+Scorepages at tabahost.dreamhosters.com
 
-If anyone think did something that may cause arena crash, please report
-to us. We have saved any bugged player file for debugging.
+type .help and .show to get info about arena.
 
-Please report bugs at www.tabajarahost.com in bugs section
-
-Download image pack at Download section
-
-TEAMSPEAK:
-RED: tabaspeak.servegame.org:8767   password: red
-GOLD: tabaspeak.servegame.org:8768  password: gold
-
-SOME COMMANDS CHANGES:
-
-.FIELD changed do .STATUS (due internal issues from WB3)
-
-Pls enjoy ;-)
-
-                                    franz-
+>> TabaSpeak server passwords: purple for GOLDS | green for REDS <<
+                         Please enjoy!!!
+                           --=Ø=--
+                         TH DevTeam

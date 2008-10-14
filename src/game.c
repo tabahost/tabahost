@@ -11415,12 +11415,16 @@ vdate_tod_end=%04.0f-%02.0f-%02.0f\n",
 	{
 		case COLLECT_CYCLE:
 			fprintf(fp, "collect_type=cycle\n");
+			break;
 		case COLLECT_MAP:
 			fprintf(fp, "collect_type=map\n");
+			break;
 		case COLLECT_EVENT:
 			fprintf(fp, "collect_type=special\nspecial_name=%s\n", dirname->string);
+			break;
 		default:
 			fprintf(fp, "collect_type=default\n");
+			break;
 	}
 
 	fclose(fp);
@@ -11449,7 +11453,7 @@ void ResetScores(void)
 
 	sprintf(temp, "%d-%02d-%02d", 1900 + timeptr->tm_year, timeptr->tm_mon + 1, timeptr->tm_mday);
 
-	for (i = 0; i < 7; i++)
+	for (i = 0; i < 9; i++)
 	{
 		sprintf(my_query, "CREATE TABLE `bkp-%s-%s` SELECT * FROM `%s`", tables[i], temp, tables[i]);
 
