@@ -2432,13 +2432,68 @@ void Cmd_Field(u_int8_t field, client_t *client)
 {
 	u_int8_t country, type, status;
 	u_int16_t i;
-	u_int32_t reup;
+	u_int32_t reup, treup;
 	FILE *fp;
 	char buffer[32];
 
 	if (!field)
 	{
-		PPrintf(client, RADIO_YELLOW, "Invalid argument");
+		// Prints all fields status
+		if (!(fp = fopen("./fields/fields.txt", "wb")))
+		{
+			PPrintf(client, RADIO_YELLOW, "WARNING: Cmd_Field() Couldn't open file \"./fields/fields.txt\"");
+		}
+		else
+		{
+			fprintf(fp, "FIELD   COUNTRY     TYPE    STATUS");
+			
+			if(!oldcapt->value && wb3->value)
+			{
+				fprintf(fp, "     ToT     TTC\n---------------------------------------------------\n");
+			}
+			else
+			{
+				fprintf(fp, "\n----------------------------------\n");
+			}
+
+			for(i = 0; i < fields->value; i++)
+			{
+				fprintf(fp, "F%d%s%12s%9s", i+1, i < 9 ? " " :"", GetCountry(arena->fields[i].country), GetFieldType(arena->fields[i].type));
+
+				if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
+				{
+					if (arena->fields[field].cv)
+						sprintf(buffer, "%.3f ft/s", arena->fields[field].cv->speed);
+					else
+						Com_Printf("WARNING: Cmd_Field() cv pointer = 0\n");
+				}
+				else
+				{
+					sprintf(buffer, "%10s", arena->fields[i].closed ? "Closed" : "Open");
+				}
+
+				fprintf(fp, "%s", buffer);
+
+				if(!oldcapt->value && wb3->value)
+				{
+					fprintf(fp, "   %5d   %5d\n", arena->fields[i].tonnage, GetTonnageToClose(arena->fields[i].type));
+				}
+				else
+				{
+					fprintf(fp, "\n");
+				}
+				
+//				if (status)
+//				{
+//					fprintf(fp, "ABLE TO CAPTURE: %s\n", arena->fields[field].abletocapture ? "Yes" : "No");
+//				}
+			}
+
+			fclose(fp);
+
+			if(client)
+				SendFileSeq1("./fields/fields.txt", client);
+		}
 		return;
 	}
 
@@ -2478,7 +2533,14 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				}
 			}
 			
-			// Add Here check if ToT will reopen field sooner than reup
+			treup = ((arena->fields[field].tonnage - GetTonnageToClose(arena->fields[field].type)) * 100) / TONNAGE_RECOVER;
+			
+			if(treup < reup)
+			{
+				if(client->attr)
+					PPrintf(client, RADIO_RED, "DEBUG: Reup: %u, ToT Reup = %u", reup, treup);
+				reup = treup;
+			}
 
 			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup/100), arena->fields[field].abletocapture ? "Yes" : "No");
 		}

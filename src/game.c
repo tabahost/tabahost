@@ -301,7 +301,7 @@ void CheckArenaRules(void)
 {
 	static u_int32_t players_num = 0;
 	static u_int16_t players_count = 0;
-	u_int8_t close;
+	u_int8_t close, vitals;
 	int16_t i, j;
 	u_int32_t dist, tempdist;
 	int32_t posx;
@@ -333,7 +333,7 @@ void CheckArenaRules(void)
 		if(!oldcapt->value && wb3->value && !(arena->frame % 100))
 		{
 			if(arena->fields[i].tonnage)
-				arena->fields[i].tonnage -= 10;
+				arena->fields[i].tonnage -= TONNAGE_RECOVER;
 			
 			if(arena->fields[i].tonnage < 0)
 				arena->fields[i].tonnage = 0;
@@ -699,18 +699,27 @@ void CheckArenaRules(void)
 		if ((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) //!= FIELD_CV && arena->fields[i].type != FIELD_CARGO && arena->fields[i].type != FIELD_DD && arena->fields[i].type != FIELD_SUBMARINE)
 		{
 			close = 1;
+			vitals = arena->fields[i].vitals;
+			arena->fields[i].vitals = 0;
 			for (j = 0; j < MAX_BUILDINGS; j++)
 			{
 				if (arena->fields[i].buildings[j].field)
 				{
 					if (!arena->fields[i].buildings[j].status && IsVitalBuilding(&(arena->fields[i].buildings[j]))) // Vital building UP, field not closed
 					{
+						arena->fields[i].vitals = 1;
 						close = 0;
 						break;
 					}
 				}
 				else
 					break;
+			}
+			
+			if(vitals && !arena->fields[i].vitals)
+			{
+				CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i+1);
+				CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
 			}
 			
 			if(!oldcapt->value && wb3->value)
@@ -2093,10 +2102,17 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else
 		{
-			if(tolower(*argv[0]) == 'f')
-			argv[0]++; // ignore compiler error
-
-			Cmd_Field(Com_Atoi(argv[0]), client);
+			if(!Com_Stricmp(argv[0], "all"))
+			{
+				Cmd_Field(0, client);
+			}
+			else
+			{
+				if(tolower(*argv[0]) == 'f')
+				argv[0]++; // ignore compiler error
+	
+				Cmd_Field(Com_Atoi(argv[0]), client);
+			}
 		}
 		return;
 	}
@@ -5987,18 +6003,21 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 		return;
 	}
 
-	if (building->country == client->country)
+	if (building->country == client->country) 
 	{
-		if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
+		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals)
 		{
-			return;
-		}
-		else if (client->tkstatus)
-		{
-			PPrintf(client, RADIO_YELLOW, "You've hit again a friendly structure, please don't do that...");
-			if (client->infly)
-				ForceEndFlight(TRUE, client);
-			return;
+			if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
+			{
+				return;
+			}
+			else if (client->tkstatus)
+			{
+				PPrintf(client, RADIO_YELLOW, "You've hit again a friendly structure, please don't do that...");
+				if (client->infly)
+					ForceEndFlight(TRUE, client);
+				return;
+			}
 		}
 
 		Com_Printf("%s hit friendly %s\n", client->longnick, GetBuildingType(building->type));
@@ -6126,16 +6145,19 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (building->country == client->country)
 	{
-		if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
+		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals)
 		{
-			return;
-		}
-		else if (client->tkstatus)
-		{
-			PPrintf(client, RADIO_YELLOW, "You've hit again a friendly structure, please don't do that...");
-			if (client->infly)
-				ForceEndFlight(TRUE, client);
-			return;
+			if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
+			{
+				return;
+			}
+			else if (client->tkstatus)
+			{
+				PPrintf(client, RADIO_YELLOW, "You've hit again a friendly structure, please don't do that...");
+				if (client->infly)
+					ForceEndFlight(TRUE, client);
+				return;
+			}
 		}
 	}
 
@@ -7042,8 +7064,11 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	if (building->status)
 		return 0;
 
-	if ((client->country == building->country) && !teamkillstructs->value)
-		return 0;
+	if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals)
+	{
+		if ((client->country == building->country) && !teamkillstructs->value)
+			return 0;
+	}
 
 	dmgprobe = GetBuildingAPstop(building->type, NULL);
 	apabsorb = (ap > dmgprobe) ? dmgprobe : ap;
@@ -7127,131 +7152,134 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 			Com_LogDescription(EVENT_DESC_STRUCT, building->type, NULL);
 			Com_LogDescription(EVENT_DESC_FIELD, building->field, NULL);
 
-			if (client->country == building->country)
+			if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals)
 			{
-				//debug
-				if (building->country != arena->fields[building->field - 1].country)
-					Com_Printf("DEBUG: structure at field %d differ country value (b%d;f%d;p%d)\n", building->field, building->country, arena->fields[building->field - 1].country, client->country);
-
-				client->structstod--;
-
-				CPrintf(client->country, 
-				RADIO_GREEN, "ALERT!!! ALERT!!! %s destroyed friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
-						building->field);
-
-				if (!client->tkstatus) // if player is not TK yet, increase tklimit
+				if (client->country == building->country)
 				{
-					if (teamkiller->value)
-						client->tklimit++;
-				}
-
-				if (client->tklimit > 5)
-				{
-					if (!client->tkstatus)
-						Cmd_TK(client->longnick, TRUE, NULL);
-					else
-						; // FIXME: BAN CLIENT UNTIL END OF TOD
-				}
-			}
-			else
-			{
-				client->structstod++;
-			}
-
-			if (client->infly)
-			{
-				if (client->country != building->country)
-				{
-					if (IsFighter(client))
+					//debug
+					if (building->country != arena->fields[building->field - 1].country)
+						Com_Printf("DEBUG: structure at field %d differ country value (b%d;f%d;p%d)\n", building->field, building->country, arena->fields[building->field - 1].country, client->country);
+	
+					client->structstod--;
+	
+					CPrintf(client->country, 
+					RADIO_GREEN, "ALERT!!! ALERT!!! %s destroyed friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
+							building->field);
+	
+					if (!client->tkstatus) // if player is not TK yet, increase tklimit
 					{
-						sprintf(my_query, "UPDATE score_fighter SET");
+						if (teamkiller->value)
+							client->tklimit++;
 					}
-					else if (IsBomber(client))
+	
+					if (client->tklimit > 5)
 					{
-						sprintf(my_query, "UPDATE score_bomber SET");
-					}
-					else if (IsGround(client))
-					{
-						sprintf(my_query, "UPDATE score_ground SET");
-					}
-					else
-					{
-						Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
-						sprintf(my_query, "UPDATE score_fighter SET");
+						if (!client->tkstatus)
+							Cmd_TK(client->longnick, TRUE, NULL);
+						else
+							; // FIXME: BAN CLIENT UNTIL END OF TOD
 					}
 				}
 				else
 				{
-					sprintf(my_query, "UPDATE score_penalty SET");
+					client->structstod++;
 				}
-
-				if (building->type == BUILD_CV)
+	
+				if (client->infly)
 				{
 					if (client->country != building->country)
 					{
-						if (IsBomber(client))
-							client->score.captscore += SCORE_CAPTURE;
+						if (IsFighter(client))
+						{
+							sprintf(my_query, "UPDATE score_fighter SET");
+						}
+						else if (IsBomber(client))
+						{
+							sprintf(my_query, "UPDATE score_bomber SET");
+						}
+						else if (IsGround(client))
+						{
+							sprintf(my_query, "UPDATE score_ground SET");
+						}
 						else
-							client->score.groundscore += SCORE_CV;
+						{
+							Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+							sprintf(my_query, "UPDATE score_fighter SET");
+						}
 					}
 					else
 					{
-						if (IsBomber(client))
-							client->score.penaltyscore += 2* SCORE_CAPTURE;
-						else
-							client->score.penaltyscore += 2 * SCORE_CV;
+						sprintf(my_query, "UPDATE score_penalty SET");
 					}
-
-					strcat(my_query, " cvs = cvs + '1'");
-				}
-				else if (building->type >= BUILD_50CALACK && building->type <= BUILD_88MMFLAK)
-				{
-					if (client->country != building->country)
-						client->score.groundscore += SCORE_ACK;
-					else
-						client->score.penaltyscore += 2 * SCORE_ACK;
-
-					strcat(my_query, " acks = acks + '1'");
-				}
-				else if (building->type >= BUILD_DESTROYER && building->type <= BUILD_CARGO)
-				{
-					if (client->country != building->country)
-						client->score.groundscore += SCORE_SHIP;
-					else
-						client->score.penaltyscore += 2 * SCORE_SHIP;
-
-					strcat(my_query, " ships = ships + '1'");
-				}
-				else
-				{
-					if ((building->type != BUILD_TREE) && (building->type != BUILD_ROCK) && (building->type != BUILD_FENCE))
+	
+					if (building->type == BUILD_CV)
 					{
 						if (client->country != building->country)
 						{
-							client->score.groundscore += SCORE_BUILDING;
+							if (IsBomber(client))
+								client->score.captscore += SCORE_CAPTURE;
+							else
+								client->score.groundscore += SCORE_CV;
 						}
 						else
 						{
-							client->score.penaltyscore += 2 * SCORE_BUILDING;
+							if (IsBomber(client))
+								client->score.penaltyscore += 2* SCORE_CAPTURE;
+							else
+								client->score.penaltyscore += 2 * SCORE_CV;
 						}
-
-						strcat(my_query, " buildings = buildings + '1'");
+	
+						strcat(my_query, " cvs = cvs + '1'");
+					}
+					else if (building->type >= BUILD_50CALACK && building->type <= BUILD_88MMFLAK)
+					{
+						if (client->country != building->country)
+							client->score.groundscore += SCORE_ACK;
+						else
+							client->score.penaltyscore += 2 * SCORE_ACK;
+	
+						strcat(my_query, " acks = acks + '1'");
+					}
+					else if (building->type >= BUILD_DESTROYER && building->type <= BUILD_CARGO)
+					{
+						if (client->country != building->country)
+							client->score.groundscore += SCORE_SHIP;
+						else
+							client->score.penaltyscore += 2 * SCORE_SHIP;
+	
+						strcat(my_query, " ships = ships + '1'");
 					}
 					else
 					{
-						my_query[0] = '\0';
+						if ((building->type != BUILD_TREE) && (building->type != BUILD_ROCK) && (building->type != BUILD_FENCE))
+						{
+							if (client->country != building->country)
+							{
+								client->score.groundscore += SCORE_BUILDING;
+							}
+							else
+							{
+								client->score.penaltyscore += 2 * SCORE_BUILDING;
+							}
+	
+							strcat(my_query, " buildings = buildings + '1'");
+						}
+						else
+						{
+							my_query[0] = '\0';
+						}
 					}
-				}
-
-				if (strlen(my_query))
-				{
-					sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
-
-					if (d_mysql_query(&my_sock, my_query))
+	
+					if (strlen(my_query))
 					{
-						PPrintf(client, 
-						RADIO_YELLOW, "AddBuildingDamage(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-						Com_Printf("WARNING: AddBuildingDamage(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
+	
+						if (d_mysql_query(&my_sock, my_query))
+						{
+							PPrintf(client, 
+							RADIO_YELLOW, "AddBuildingDamage(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
+							Com_Printf("WARNING: AddBuildingDamage(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						}
 					}
 				}
 			}
