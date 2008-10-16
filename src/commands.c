@@ -5492,6 +5492,9 @@ void Cmd_Restore(u_int8_t field, client_t *client)
 		return;
 	}
 
+	arena->fields[field - 1].tonnage = 0;
+	arena->fields[field - 1].paras = 0;
+	
 	for (i = 0; i < MAX_BUILDINGS; i++)
 	{
 		if (arena->fields[field - 1].buildings[i].field)

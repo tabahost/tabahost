@@ -2003,7 +2003,7 @@ void	WB3SupressFire(u_int8_t *buffer, client_t *client);
 void	PPlaneStatus(u_int8_t *buffer, client_t *client);
 void	WB3ExternalAmmoCnt(u_int8_t *buffer, u_int16_t len, client_t *client);
 void	PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client);
-void	WB3TonnageOnTarget(u_int8_t *buffer, u_int8_t len, client_t *client);
+void	WB3TonnageOnTarget(u_int8_t *buffer, client_t *client);
 void	PRemoveDropItem(u_int8_t *buffer, u_int8_t len, client_t *client);
 void	PFlakHit(u_int8_t *buffer, client_t *client);
 void	PHitStructure(u_int8_t *buffer, client_t *client);

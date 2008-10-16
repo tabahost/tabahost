@@ -960,6 +960,10 @@ int ProcessDrone(client_t *drone)
 							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 							//							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 						}
+						else if(!oldcapt->value && wb3->value)
+						{
+							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1], 0, drone);
+						}
 						else
 							drone->dronetimer = 0;
 					}
@@ -1492,12 +1496,17 @@ void SendXBombs(client_t *drone)
 u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_int8_t nuke, client_t *client)
 {
 	int32_t a, b;
+	u_int16_t c;
 	u_int16_t i, j, k;
 	u_int8_t field, city, damaged;
 	munition_t *munition, *max, *min;
 	int16_t radius;
 	u_int8_t fieldtype;
 	int8_t killer = 0;
+	u_int8_t buffer[7];
+	wb3tonnage_t *wb3tonnage;
+	
+	wb3tonnage = (wb3tonnage_t *)buffer;
 
 	munition = GetMunition(type);
 
@@ -1547,10 +1556,17 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 
 		if ((a >= (-1 * GetFieldRadius(fieldtype)) && a <= GetFieldRadius(fieldtype)) && (b >= (-1 * GetFieldRadius(fieldtype)) && b <= GetFieldRadius(fieldtype)))
 		{
-			if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < GetFieldRadius(fieldtype))
+			c = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2));
+			
+			if (c < GetFieldRadius(fieldtype))
 			{
 				if (field < fields->value)
 				{
+					wb3tonnage->ammo = type;
+					wb3tonnage->distance = htons(c);
+					wb3tonnage->field = htons(field+1);
+					WB3TonnageOnTarget(buffer, client);
+					
 					for (i = 0; i < MAX_BUILDINGS; i++)
 					{
 						if (!arena->fields[field].buildings[i].field)

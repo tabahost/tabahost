@@ -3818,7 +3818,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x1913:
 				if(!setjmp(debug_buffer))
 				{
-					WB3TonnageOnTarget(buffer, len, client);
+					WB3TonnageOnTarget(buffer, client);
 				}
 				else
 				{
@@ -5797,11 +5797,12 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
  misterious packet from ien
  *************/
 
-void WB3TonnageOnTarget(u_int8_t *buffer, u_int8_t len, client_t *client)
+void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 {
 	munition_t *ammo;
 	u_int16_t field, distance;
 	wb3tonnage_t *wb3tonnage;
+	
 	wb3tonnage = (wb3tonnage_t *)buffer;
 
 	if (client->attr)
@@ -5813,7 +5814,8 @@ void WB3TonnageOnTarget(u_int8_t *buffer, u_int8_t len, client_t *client)
 	
 	if(field && field <= fields->value && distance < GetFieldRadius(arena->fields[field-1].type))
 	{
-		arena->fields[field-1].tonnage += (ammo->he / 50);
+		if(client->country != arena->fields[field-1].country)
+			arena->fields[field-1].tonnage += (ammo->he / 50);
 	}
 }
 
