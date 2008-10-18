@@ -6005,7 +6005,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (building->country == client->country) 
 	{
-		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals)
+		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 		{
 			if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
 			{
@@ -6145,7 +6145,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (building->country == client->country)
 	{
-		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals)
+		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 		{
 			if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
 			{
@@ -7064,7 +7064,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	if (building->status)
 		return 0;
 
-	if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals)
+	if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 	{
 		if ((client->country == building->country) && !teamkillstructs->value)
 			return 0;
@@ -7152,7 +7152,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 			Com_LogDescription(EVENT_DESC_STRUCT, building->type, NULL);
 			Com_LogDescription(EVENT_DESC_FIELD, building->field, NULL);
 
-			if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals)
+			if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 			{
 				if (client->country == building->country)
 				{

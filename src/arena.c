@@ -2863,6 +2863,7 @@ void CheckBoatDamage(building_t *building, client_t *client)
 void CaptureField(u_int8_t field, client_t *client)
 {
 	u_int32_t timer= MAX_UINT32; //ignore compiler warning
+	u_int8_t hangar = 0;
 	int16_t i;
 
 	BPrintf(RADIO_YELLOW, "%c Field %d captured by %s", 0x95, field, client->longnick);
@@ -2946,6 +2947,10 @@ void CaptureField(u_int8_t field, client_t *client)
 		}
 		else
 		{
+			if(!oldcapt->value && wb3->value)
+				if (arena->fields[field - 1].buildings[i].type == BUILD_HANGAR && !arena->fields[field - 1].buildings[i].status)
+					hangar = 1;
+			
 			if (arena->fields[field - 1].buildings[i].type <= BUILD_88MMFLAK)
 				arena->fields[field - 1].buildings[i].timer = timer;
 		}
@@ -2954,7 +2959,12 @@ void CaptureField(u_int8_t field, client_t *client)
 	for (i = 0; i < maxplanes; i++)
 	{
 		if (arena->fields[field - 1].rps[i] > 0)
-			arena->fields[field - 1].rps[i] = 1;
+		{
+			if (hangar)
+				arena->fields[field - 1].rps[i] = 1;
+			else
+				arena->fields[field - 1].rps[i] = 0;
+		}
 	}
 }
 
