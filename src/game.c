@@ -9103,7 +9103,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->maxpilotg = htons(maxpilotg->value);
 		wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
 		wb3arenarules->ywindvelocity = htonl(ywindvelocity->value);
-		wb3arenarules->zwindvelocity = htonl(zwindvelocity->value);
+		wb3arenarules->zwindvelocity = client->plane == 54 ? htonl(zwindvelocity->value - 9):htonl(zwindvelocity->value);
 		wb3arenarules->structlim = structlim->value;
 		wb3arenarules->unknown1 = 0x2D;
 		wb3arenarules->unknown2 = 0xA0;
