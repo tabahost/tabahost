@@ -3767,7 +3767,7 @@ void GetTriangleUnder(int32_t x, int32_t y, int32_t *resx, int32_t *resy)
 u_int32_t GetHeightAt(int32_t x, int32_t y)
 {
 	int32_t tx[3], ty[3], tz[3];
-	u_int32_t dist;
+//	u_int32_t dist;
 	double dx1, dy1, dz1, dx2, dy2, dz2;
 	double a, b, c, z;
 

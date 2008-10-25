@@ -1823,7 +1823,8 @@ void CheckKiller(client_t *client)
 			sprintf(buffer, "TeamKill of %s(%s) by %s(%s)", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j]->longnick, GetSmallPlaneName(client->planeby[j]));
 
 			// in TK, winner is the killed pilot.
-			CalcEloRating(client /*winner*/, client->hitby[j] /*looser*/, ELO_LOOSER);
+			if(IsFighter(client->hitby[j]) && IsFighter(client))
+				CalcEloRating(client /*winner*/, client->hitby[j] /*looser*/, ELO_LOOSER);
 
 			if (!client->tkstatus) // if victim is not TK, add penalty to killer
 			{
@@ -1888,7 +1889,8 @@ void CheckKiller(client_t *client)
 				sprintf(buffer, "Maneuver kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), nearplane ? nearplane->longnick : "Ack Weenies");
 			}
 
-			CalcEloRating(client->hitby[j] /*winner*/, client /*looser*/, ELO_BOTH);
+			if(IsFighter(client->hitby[j]) && IsFighter(client))
+				CalcEloRating(client->hitby[j] /*winner*/, client /*looser*/, ELO_BOTH);
 
 			if (client->hitby[j] != client) // not ack kill
 			{
