@@ -3817,26 +3817,26 @@ u_int32_t GetHeightAt(int32_t x, int32_t y)
 		z = tz[0] - (a * (x - tx[0]) - b * (y - ty[0])) / c;
 	}
 
-	if (z > 0)
-	{
+//	if (z > 0)
+//	{
 		return (u_int32_t)(z > 0 ? z : 0);
-	}
-	else
-	{
-		tx[0] = NearestField(x, y, 0, TRUE, TRUE, &dist);
-
-		if (tx[0] < 0)
-		{
-			z = 0;
-		}
-		else
-		{
-			Com_Printf("DEBUG: GetHeightAt() got no topography information\n");
-			z = arena->fields[tx[0]].posxyz[2];
-		}
-
-		return z;
-	}
+//	}
+//	else
+//	{
+//		tx[0] = NearestField(x, y, 0, TRUE, TRUE, &dist);
+//
+//		if (tx[0] < 0)
+//		{
+//			z = 0;
+//		}
+//		else
+//		{
+//			Com_Printf("DEBUG: GetHeightAt() got no topography information\n");
+//			z = arena->fields[tx[0]].posxyz[2];
+//		}
+//
+//		return z;
+//	}
 }
 
 /* loading map */

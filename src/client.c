@@ -70,6 +70,7 @@ void AddClient(int socket, struct sockaddr_in *cli_addr)
 			clients[i].conv = 300;
 			clients[i].squadron = 0;
 			clients[i].squad_flag = 0;
+			clients[i].rank = 1500;
 			clients[i].ranking = 0;
 			clients[i].killstod = 0;
 			clients[i].structstod = 0;

@@ -176,7 +176,7 @@ typedef unsigned int u_int32_t;
 #define VAR_NOSET			2		// block variable from change value
 #define VAR_ADMIN			4		// only admins can change this variable
 #define MORTAR				585.0	// mortar velocity (ft/s) (492, range= 10697; 585, range = 15072)
-#define TONNAGE_RECOVER		10		// Amount of Kg field will recover per second
+#define TONNAGE_RECOVER		5		// Amount of Kg field will recover per second
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s²)
 #define MODULUS(a) (a > 0 ? a : a * -1)
 #define PLANE_FAU			48	// ME262 48, Predator 180
