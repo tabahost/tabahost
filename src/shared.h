@@ -1587,7 +1587,7 @@ typedef struct insertnick_s	// 1A 01
 	char	msg;
 } insertnick_t;
 
-typedef struct rocketbomb_s	// 1B 00
+typedef struct rocketbomb_s	// 19 00
 {
 	u_int16_t	packetid;
 	u_int8_t	item;
@@ -1600,9 +1600,10 @@ typedef struct rocketbomb_s	// 1B 00
 	int16_t		zspeed;
 	u_int32_t	unknown1;
 	u_int32_t	shortnick;
+	u_int32_t	fuse; // only in 0x1918 packet
 } rocketbomb_t;
 
-typedef struct flakhit_s	// 1B 02
+typedef struct flakhit_s	// 19 02
 {
 	u_int16_t	packetid;
 	u_int32_t	victim;

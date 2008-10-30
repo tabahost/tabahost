@@ -52,7 +52,6 @@ u_int8_t mainbuffer[MAX_RECVDATA]; //extern
  {0x020D, 0x040D, 0x08FF}, // pcREQUEST_PILOT_MEDALS ===============================
  {0x0210, 0x0410, 0x08FF}, // pcREQUEST_GUN_STATUS ===============================
  {0xFFFF, 0x0310, 0x06FF}, // arnaCONFIG_FLIGHTMODEL ===============================
- {0x0906, 0x1D06, 0x3AFF}, // utilATTACH_ACCEPT ===============================
  {0x0907, 0x1D07, 0x3AFF}, // utilATTACH_JUMP ===============================
  {0x090E, 0x1D0E, 0x3AFF}, // utilPLANECOUNTS ===============================
  {0x0C02, 0x0D02, 0x1AFF}, // cnPING_DATA ===============================
@@ -130,7 +129,7 @@ u_int16_t packets_tab[209][3] =
 		{ 0xFFFF, 0x1404, 0xFFFF }, // cmPLAYER_HIT
 		{ 0xFFFF, 0x1405, 0xFFFF }, // cmPLAYER_KILL
 		{ 0xFFFF, 0x1406, 0x1412 }, // cmHOSTVAR
-		{ 0xFFFF, 0x1407, 0xFFFF }, // cmHOSTVARSTR
+		{ 0xFFFF, 0x1407, 0x1413 }, // cmHOSTVARSTR
 
 		{ 0x0900, 0x1D00, 0xFFFF }, // utilGET_CHECK_SUM
 		{ 0x0901, 0x1D01, 0xFFFF }, // utilSETHANDLE
@@ -138,7 +137,7 @@ u_int16_t packets_tab[209][3] =
 		{ 0x0903, 0x1D03, 0xFFFF }, // utilSETVARIABLE
 		{ 0x0904, 0x1D04, 0x3A3E }, // utilWATCH_DOG *
 		{ 0x0905, 0x1D05, 0x3A3F }, // utilATTACH_REQUEST =
-		{ 0x0906, 0x1D06, 0xFFFF }, // utilATTACH_ACCEPT ===============================
+		{ 0x0906, 0x1D06, 0x3A3C }, // utilATTACH_ACCEPT =
 		{ 0x0907, 0x1D07, 0xFFFF }, // utilATTACH_JUMP ===============================
 		{ 0x0908, 0x1D08, 0xFFFF }, // utilATTACH_NOTIFY
 		{ 0x0909, 0x1D09, 0xFFFF }, // utilSET_AMMO_LOAD *******************************
@@ -222,7 +221,7 @@ u_int16_t packets_tab[209][3] =
 		{ 0xFFFF, 0x1915, 0x3227 }, // wpBULLETS_FIRED =
 		{ 0xFFFF, 0x1916, 0x3224 }, // wpFUEL_CONSUMED =
 		{ 0xFFFF, 0x1917, 0x3225 }, // wpMAXALT_WEAPON_FIRED =*
-		{ 0xFFFF, 0x1918, 0xFFFF }, // wpDELAYEDFUSE_WEAPON_FIRED
+		{ 0xFFFF, 0x1918, 0x322A }, // wpDELAYEDFUSE_WEAPON_FIRED
 		{ 0xFFFF, 0x1919, 0xFFFF }, // wpAICONTROLLED_WEAPON_FIRED
 
 		{ 0x1F00, 0x1600, 0x2C2C }, // ftDNLOAD_REQUEST =
@@ -3871,6 +3870,16 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					DebugClient(__FILE__, __LINE__, TRUE, client);
 				}
 				break;
+			case 0x1918:
+				if(!setjmp(debug_buffer))
+				{
+					PDropItem(buffer, len, client);
+				}
+				else
+				{
+					DebugClient(__FILE__, __LINE__, TRUE, client);
+				}
+				break;
 			case 0x1600:
 				if(!setjmp(debug_buffer))
 				{
@@ -5608,7 +5617,7 @@ void PSetRadioChannel(u_int8_t *buffer, client_t *client)
  Process client informing it dropped some item
  *************/
 
-void PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
+void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *client)
 {
 	rocketbomb_t *drop;
 	u_int8_t i;
