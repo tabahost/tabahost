@@ -27,7 +27,7 @@
 int Lua_Init(void);
 void Lua_Close(void);
 void Lua_RunMainFrame(void);
-void Lua_Test(void);
+void Lua_TestLua(void);
 
 /*
 	Funções para usar LUA com agilidade
@@ -923,6 +923,7 @@ void Lua_TestLua(void) {
 	luaL_openlibs(L);
 	luaL_dostring(L, "print 'Hello World'");
 	lua_close(L);
+	fflush(stdout);
 }
 
 void Lua_RunMainFrame(void) {
