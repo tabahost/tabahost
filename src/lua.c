@@ -863,7 +863,7 @@ int luaL_loadfunctions(void* hModule, struct lua_All_functions* functions, size_
 	FIM: Funções para usar LUA com agilidade
 */
 
-BOOL LuaLoaded = FALSE;
+u_int8_t LuaLoaded = FALSE;
 lua_All_functions LuaFunctions;
 
 #ifdef _WIN32
@@ -905,7 +905,7 @@ void Lua_Close(void) {
 #ifdef _WIN32
 	FreeLibrary(hLibLua);
 #else
-	dlclose(fLibLua);
+	dlclose(hLibLua);
 #endif
 
 	LuaLoaded = FALSE;
