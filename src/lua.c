@@ -867,6 +867,7 @@ int luaL_loadfunctions(void* hModule, struct lua_All_functions* functions, size_
 
 u_int8_t LuaLoaded = FALSE;
 lua_All_functions LuaFunctions;
+lua_State* LuaState;
 
 #ifdef _WIN32
 HMODULE hLibLua;
@@ -915,6 +916,11 @@ int Lua_Init(void) {
 		return 1;
 	}
 
+	LuaState = lua_open();
+	luaL_openlibs(LuaState);
+	lua_register(LuaState, "printf", Lua_printf);
+	luaL_dofile(LuaState, "scripts/oninit.lc");
+
 	Com_Printf("Lua Module Initialized\n");
 	LuaLoaded = TRUE;
 	return 0;
@@ -928,6 +934,9 @@ void Lua_Close(void) {
 		return;
 
 	Com_Printf("Closing Lua Module\n");
+	luaL_dofile(LuaState, "scripts/onclose.lc");
+	lua_close(LuaState);
+
 #ifdef _WIN32
 	FreeLibrary(hLibLua);
 #else
@@ -938,6 +947,8 @@ void Lua_Close(void) {
 }
 
 void Lua_TestLua(void) {
+	lua_State* L;
+
 	Com_Printf("Lua test...\n");
 	if (!LuaLoaded) {
 		Lua_Init();
@@ -946,7 +957,6 @@ void Lua_TestLua(void) {
 		Com_Printf("Lua test failed!\n");
 		return;
 	}
-	lua_State* L;
 	L = lua_open();
 	luaL_openlibs(L);
 	lua_register(L, "printf", Lua_printf);
