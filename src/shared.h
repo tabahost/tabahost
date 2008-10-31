@@ -134,8 +134,7 @@ typedef unsigned int u_int32_t;
 #define FALSE 0
 #endif
 
-
-#define VERSION				"b3.71"
+#define VERSION				"b3.80"
 #define BUILD 				"Apr-26-2008"
 
 #define V_WB2				0
