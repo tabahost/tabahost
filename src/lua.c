@@ -875,6 +875,25 @@ void* hLibLua;
 #endif
 
 /*
+	Casamento C / Lua
+*/
+
+static int Lua_printf(lua_State *L) {
+	int n;
+	char value[256];
+	value[0] = '\0';
+	n = LuaFunctions.Gettop(L);
+	if (n == 1) {
+		strcpy(value, LuaFunctions.Tolstring(L, 1, NULL));
+	}
+	value[255] = '\0';
+
+	Com_Printf(value);
+
+	return 0;
+}
+
+/*
 	Load lua.dll dynamically
 */
 int Lua_Init(void) {
@@ -886,6 +905,11 @@ int Lua_Init(void) {
 #else
 	hLibLua = dlopen("liblua-5.1.so", RTLD_LAZY);
 #endif
+	if (!hLibLua) {
+		Com_Printf("ERROR: Lua_Init(): Error opening Lua Library\n");
+		return 1;
+	}
+
 	if (!luaL_loadfunctions(hLibLua, &LuaFunctions, sizeof(LuaFunctions))) {
 		Com_Printf("ERROR: Lua_Init(): Error initializing luaL_loadfunctions\n");
 		return 1;
@@ -914,16 +938,21 @@ void Lua_Close(void) {
 }
 
 void Lua_TestLua(void) {
-	Com_Printf("Lua test: ");
+	Com_Printf("Lua test...\n");
 	if (!LuaLoaded) {
 		Lua_Init();
+	}
+	if (!LuaLoaded) {
+		Com_Printf("Lua test failed!\n");
+		return;
 	}
 	lua_State* L;
 	L = lua_open();
 	luaL_openlibs(L);
-	luaL_dostring(L, "print 'Hello World'");
+	lua_register(L, "printf", Lua_printf);
+	luaL_dostring(L, "printf('Hello World\\n')");
 	lua_close(L);
-	fflush(stdout);
+	Com_Printf("Lua test passed!\n");
 }
 
 void Lua_RunMainFrame(void) {
