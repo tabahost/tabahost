@@ -22,6 +22,8 @@
 
 #include "shared.h"
 
+#define _WIN32
+
 int Lua_Init(void);
 void Lua_Close(void);
 void Lua_RunMainFrame(void);
@@ -912,8 +914,9 @@ void Lua_Close(void) {
 }
 
 void Lua_TestLua(void) {
+	Com_Printf("Lua test: ");
 	if (!LuaLoaded) {
-		LuaLoad();
+		Lua_Init();
 	}
 	lua_State* L;
 	L = lua_open();
