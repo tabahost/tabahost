@@ -138,6 +138,7 @@ int main(int argc, char *argv[])
 
 	Sys_SQL_Init(); // startting SQL after InitTCPNet 'cause WSAStartup() in windows
 	Sys_GeoIP_Init(); // Starts GeoIP module
+	Lua_Init(); // LUA init
 
 	InitClients();
 	InitArena();
@@ -620,6 +621,9 @@ void ExitServer(int status)
 
 	Sys_GeoIP_Close();
 
+	Lua_TestLua();
+	Lua_Close();
+	
 	Sys_SQL_Close();
 
 	Com_Printf("Closing server socket\n"); /*********/
