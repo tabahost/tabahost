@@ -567,7 +567,7 @@ void CheckArenaRules(void)
 				arena->month = initmonth->value;
 				arena->day = initday->value;
 
-				UpdateRPS();
+				UpdateRPS(0);
 			}
 		}
 
@@ -982,9 +982,9 @@ void CheckArenaRules(void)
 
 	if (rps->value)
 	{
-		if (!(arena->frame % (u_int32_t)(rps->value * 6000)))
+		if (!(arena->frame % 6000)) // every minute
 		{
-			UpdateRPS();
+			UpdateRPS(1);
 		}
 	}
 
@@ -4389,7 +4389,7 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, client_t *c
 {
 	u_int16_t i;
 
-	if (land && end == 0x01 && arena->fields[land - 1].rps[client->plane] >= 0 && client->plane < maxplanes && !client->tkstatus && !(client->plane >= 131 && client->plane <= 134))
+	if (land && end == 0x01 && arena->fields[land - 1].rps[client->plane] > -1 && client->plane < maxplanes && !client->tkstatus && !(client->plane >= 131 && client->plane <= 134))
 		arena->fields[land - 1].rps[client->plane]++;
 
 	if ((end == 0x01) || (end == 0x07) || (end == 0x08))

@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 		Cmd_Seta("f-1", 0, -1, 0); // set 0 to all planes in all fields
 		sprintf(buffer, "./arenas/%s/planes", dirname->string);
 		LoadRPS(buffer, NULL);
-		UpdateRPS();
+		UpdateRPS(0);
 	}
 
 	LoadAmmo(NULL);

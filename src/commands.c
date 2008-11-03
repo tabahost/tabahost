@@ -488,7 +488,7 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 				if (arcade->value)
 					sprintf(message, "You selected %s (N%d)", GetPlaneName(planenumber), planenumber);
 				else
-					sprintf(message, "You selected %s (N%d), %d left", GetPlaneName(planenumber), planenumber, arena->fields[client->field - 1].rps[planenumber]);
+					sprintf(message, "You selected %s (N%d), %.2f left", GetPlaneName(planenumber), planenumber, arena->fields[client->field - 1].rps[planenumber]);
 			}
 
 			client->plane = planenumber;
@@ -498,7 +498,7 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 			if (arcade->value)
 				sprintf(message, "Your plane is %s (N%d)", GetPlaneName(client->plane), client->plane);
 			else
-				sprintf(message, "Your plane is %s (N%d), %d left", GetPlaneName(client->plane), client->plane, arena->fields[client->field - 1].rps[client->plane]);
+				sprintf(message, "Your plane is %s (N%d), %.2f left", GetPlaneName(client->plane), client->plane, arena->fields[client->field - 1].rps[client->plane]);
 		}
 
 		if (rps->value && strlen(message) && !arcade->value)
@@ -922,7 +922,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	if (position != 100)
 	{
-		if (!arena->fields[client->field - 1].rps[client->plane] && !client->attached && client->attr != 1)
+		if ((arena->fields[client->field - 1].rps[client->plane] > -1 && arena->fields[client->field - 1].rps[client->plane] < 1) && !client->attached && client->attr != 1)
 		{
 			PPrintf(client, RADIO_YELLOW, "Plane not available");
 			if (wb3->value)
@@ -1528,7 +1528,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			}
 
 			if (arcade->value) // set available planes w/o capture enemy planes
-				UpdateRPS();
+				UpdateRPS(0);
 		}
 
 		for (i = 0; i < maxentities->value; i++)
@@ -2744,7 +2744,7 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 		return;
 	}
 
-	if (!arena->fields[client->field - 1].rps[PLANE_FAU])
+	if ((arena->fields[client->field - 1].rps[PLANE_FAU] > -1 && arena->fields[client->field - 1].rps[PLANE_FAU] < 1))
 	{
 		if (rps->value)
 		{
@@ -2758,7 +2758,7 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 		PPrintf(client, RADIO_YELLOW, "No FAU available, wait %s", Com_TimeSeconds(time));
 		return;
 	}
-	else if (arena->fields[client->field - 1].rps[PLANE_FAU] > 0)
+	else if (arena->fields[client->field - 1].rps[PLANE_FAU] >= 1)
 	{
 		arena->fields[client->field - 1].rps[PLANE_FAU]--;
 	}
@@ -4547,7 +4547,7 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 		{
 			if (GetPlaneName(i))
 			{
-				PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available", GetPlaneName(i), i, arena->fields[field - 1].rps[i]);
+				PPrintf(client, RADIO_YELLOW, "%s (N%d), %.2f available", GetPlaneName(i), i, arena->fields[field - 1].rps[i]);
 			}
 		}
 	}

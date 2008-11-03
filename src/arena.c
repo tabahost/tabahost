@@ -391,7 +391,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 			if (rps->value)
 			{
 				Cmd_Seta("f-1", 0, -1, 0); // set 0 to all planes in all fields
-				UpdateRPS();
+				UpdateRPS(0);
 			}
 		}
 
@@ -531,11 +531,11 @@ void LoadPlanesPool(char *filename, client_t *client)
 			}
 			else
 			{
-				arena->fields[i].rps[0] = Com_Atoi((char *)strtok(buffer, ";"));
+				arena->fields[i].rps[0] = Com_Atof((char *)strtok(buffer, ";"));
 
 				for (j = 1; j < maxplanes; j++)
 				{
-					arena->fields[i].rps[j] = Com_Atoi((char *)strtok(NULL, ";"));
+					arena->fields[i].rps[j] = Com_Atof((char *)strtok(NULL, ";"));
 				}
 			}
 		}
@@ -569,7 +569,7 @@ void SavePlanesPool(char *filename, client_t *client)
 		{
 			for (j = 0; j < maxplanes; j++)
 			{
-				fprintf(fp, "%d;", arena->fields[i].rps[j]);
+				fprintf(fp, "%f;", arena->fields[i].rps[j]);
 			}
 			fprintf(fp, "\n");
 		}
@@ -1296,13 +1296,16 @@ char *GetSmallPlaneName(u_int16_t plane)
  Update field with new planes
  *************/
 
-void UpdateRPS(void)
+void UpdateRPS(u_int16_t minutes)
 {
 	time_t tdate;
 	struct tm timestr;
 	struct tm *timeptr;
 	u_int8_t i, j;
+	float rate;
 	u_int32_t basedate, lagdate[4];
+	
+	rate = (float)minutes / rps->value;
 
 	timestr.tm_sec = 0;
 	timestr.tm_min = 0;
@@ -1335,7 +1338,7 @@ void UpdateRPS(void)
 						&& arena->rps[j].country & 0x04) || (arena->fields[i].country == 4 && arena->rps[j].country & 0x08)) && ((arena->rps[j].in <= basedate && arena->rps[j].out > basedate)
 						|| (!arena->rps[j].in && !arena->rps[j].out)))
 				{
-					arena->fields[i].rps[j] = arena->rps[j].pool[arena->fields[i].type - 1];
+					arena->fields[i].rps[j] += (float)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
 				}
 				else if (arcade->value)
 				{
@@ -1349,7 +1352,7 @@ void UpdateRPS(void)
 						&& arena->rps[j].out > lagdate[arena->fields[i].country - 1]) || (!arena->rps[j].in && !arena->rps[j].out)))
 				{
 					arena->rps[j].used = 1;
-					arena->fields[i].rps[j] = arena->rps[j].pool[arena->fields[i].type - 1];
+					arena->fields[i].rps[j] += (float)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
 				}
 				else if (arcade->value)
 				{
@@ -1401,7 +1404,7 @@ void SendRPS(client_t *client)
 
 	for (i = 1; i < maxplanes; i++)
 	{
-		if (arena->fields[client->field - 1].rps[i] > 0 || arena->fields[client->field - 1].rps[i] == -1 || (i >= 131 && i <=134 && wb3->value))
+		if (arena->fields[client->field - 1].rps[i] >= 1 || arena->fields[client->field - 1].rps[i] == -1 || (i >= 131 && i <=134 && wb3->value))
 		{
 			if (wb3->value)
 				buffer[i+2] = 0;
@@ -2958,13 +2961,15 @@ void CaptureField(u_int8_t field, client_t *client)
 
 	for (i = 0; i < maxplanes; i++)
 	{
-		if (arena->fields[field - 1].rps[i] > 0)
+		if (arena->fields[field - 1].rps[i] >= 1)
 		{
 			if (hangar)
 				arena->fields[field - 1].rps[i] = 1;
 			else
 				arena->fields[field - 1].rps[i] = 0;
 		}
+		else
+			arena->fields[field - 1].rps[i] = 0;
 	}
 }
 
@@ -3144,7 +3149,7 @@ void ChangeArena(char *map, client_t *client)
 			Cmd_Seta("f-1", 0, -1, 0); // set 0 to all planes in all fields
 			sprintf(file, "./arenas/%s/planes", map);
 			LoadRPS(file, NULL);
-			UpdateRPS();
+			UpdateRPS(0);
 		}
 
 		if (arena->frame > 100)

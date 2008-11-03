@@ -545,7 +545,7 @@ typedef struct field_s
 	u_int32_t	warehouse;
 	cv_t		*cv; // linked CV
 	struct city_s *city[MAX_CITYFIELD]; // linked city
-	int8_t		rps[MAX_PLANES];
+	float		rps[MAX_PLANES];
 	building_t	buildings[MAX_BUILDINGS]; // 1st building is radar
 } field_t;
 
@@ -2107,7 +2107,7 @@ void	LogCVsPosition(void);
 void	ListWaypoints(client_t *client);
 char	*GetPlaneName(u_int16_t plane);
 char	*GetSmallPlaneName(u_int16_t plane);
-void	UpdateRPS(void);
+void	UpdateRPS(u_int16_t minutes);
 void	SendRPS(client_t *client);
 void	WB3SendAcks(client_t *client);
 void	AddBomb(u_int16_t id, int32_t destx, int32_t desty, u_int8_t type, int16_t speed, u_int32_t timer, client_t *client);
