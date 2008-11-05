@@ -501,9 +501,15 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 				sprintf(message, "Your plane is %s (N%d), %.2f left", GetPlaneName(client->plane), client->plane, arena->fields[client->field - 1].rps[client->plane]);
 		}
 
+//		if (rps->value && strlen(message) && !arcade->value)
+//		{
+//			rpsreplace = (u_int32_t)(rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000));
+//			sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace/100));
+//		}
+		
 		if (rps->value && strlen(message) && !arcade->value)
 		{
-			rpsreplace = (u_int32_t)(rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000));
+			rpsreplace = rps->value * arena->rps[client->plane].pool[arena->fields[client->field - 1].type - 1];
 			sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace/100));
 		}
 
@@ -4547,16 +4553,16 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 		{
 			if (GetPlaneName(i))
 			{
-				PPrintf(client, RADIO_YELLOW, "%s (N%d), %.2f available", GetPlaneName(i), i, arena->fields[field - 1].rps[i]);
+				PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available", GetPlaneName(i), i, (int16_t)arena->fields[field - 1].rps[i]);
 			}
 		}
 	}
 
-	if (rps->value)
-	{
-		time = (u_int32_t)((rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000)))/100;
-		PPrintf(client, RADIO_YELLOW, "Time for replace: %s", Com_TimeSeconds(time));
-	}
+//	if (rps->value)
+//	{
+//		time = (u_int32_t)((rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000)))/100;
+//		PPrintf(client, RADIO_YELLOW, "Time for replace: %s", Com_TimeSeconds(time));
+//	}
 }
 
 /*************

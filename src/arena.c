@@ -569,7 +569,7 @@ void SavePlanesPool(char *filename, client_t *client)
 		{
 			for (j = 0; j < maxplanes; j++)
 			{
-				fprintf(fp, "%f;", arena->fields[i].rps[j]);
+				fprintf(fp, "%.f;", arena->fields[i].rps[j]);
 			}
 			fprintf(fp, "\n");
 		}
@@ -1305,7 +1305,10 @@ void UpdateRPS(u_int16_t minutes)
 	float rate;
 	u_int32_t basedate, lagdate[4];
 	
-	rate = (float)minutes / rps->value;
+	if(minutes)
+		rate = (float)minutes / rps->value;
+	else
+		rate = 1.00;
 
 	timestr.tm_sec = 0;
 	timestr.tm_min = 0;
@@ -1339,6 +1342,9 @@ void UpdateRPS(u_int16_t minutes)
 						|| (!arena->rps[j].in && !arena->rps[j].out)))
 				{
 					arena->fields[i].rps[j] += (float)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
+					
+					if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
+						arena->fields[i].rps[j] = (float)arena->rps[j].pool[arena->fields[i].type - 1];
 				}
 				else if (arcade->value)
 				{
@@ -1353,6 +1359,9 @@ void UpdateRPS(u_int16_t minutes)
 				{
 					arena->rps[j].used = 1;
 					arena->fields[i].rps[j] += (float)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
+					
+					if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
+						arena->fields[i].rps[j] = (float)arena->rps[j].pool[arena->fields[i].type - 1];
 				}
 				else if (arcade->value)
 				{
