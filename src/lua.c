@@ -22,7 +22,11 @@
 
 #include "shared.h"
 
+#ifdef __CYGWIN__
+#ifndef _WIN32
 #define _WIN32
+#endif
+#endif
 
 int Lua_Init(void);
 void Lua_Close(void);
@@ -906,6 +910,7 @@ int Lua_Init(void) {
 #else
 	hLibLua = dlopen("liblua-5.1.so", RTLD_LAZY);
 #endif
+
 	if (!hLibLua) {
 		Com_Printf("ERROR: Lua_Init(): Error opening Lua Library\n");
 		return 1;
