@@ -488,7 +488,7 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 				if (arcade->value)
 					sprintf(message, "You selected %s (N%d)", GetPlaneName(planenumber), planenumber);
 				else
-					sprintf(message, "You selected %s (N%d), %.2f left", GetPlaneName(planenumber), planenumber, arena->fields[client->field - 1].rps[planenumber]);
+					sprintf(message, "You selected %s (N%d), %d left", GetPlaneName(planenumber), planenumber, (int16_t)arena->fields[client->field - 1].rps[planenumber]);
 			}
 
 			client->plane = planenumber;
@@ -498,7 +498,7 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 			if (arcade->value)
 				sprintf(message, "Your plane is %s (N%d)", GetPlaneName(client->plane), client->plane);
 			else
-				sprintf(message, "Your plane is %s (N%d), %.2f left", GetPlaneName(client->plane), client->plane, arena->fields[client->field - 1].rps[client->plane]);
+				sprintf(message, "Your plane is %s (N%d), %d left", GetPlaneName(client->plane), client->plane, (int16_t)arena->fields[client->field - 1].rps[client->plane]);
 		}
 
 //		if (rps->value && strlen(message) && !arcade->value)
@@ -509,8 +509,18 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 		
 		if (rps->value && strlen(message) && !arcade->value)
 		{
-			rpsreplace = rps->value * arena->rps[client->plane].pool[arena->fields[client->field - 1].type - 1];
-			sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace/100));
+			rpsreplace = (rps->value * 6000) / arena->rps[client->plane].pool[arena->fields[client->field - 1].type - 1];
+
+			if(rpsreplace)
+			{
+				rpsreplace -= (arena->frame % rpsreplace);
+
+				sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace/100));
+			}
+			else
+			{
+				sprintf(message, "%s (no replacement)", message);
+			}
 		}
 
 		if (strlen(message))
@@ -4531,6 +4541,7 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 {
 	u_int8_t i;
 	u_int32_t time;
+	u_int32_t rpsreplace;
 
 	if (field > fields->value)
 	{
@@ -4553,7 +4564,25 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 		{
 			if (GetPlaneName(i))
 			{
-				PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available", GetPlaneName(i), i, (int16_t)arena->fields[field - 1].rps[i]);
+				if (rps->value && !arcade->value)
+				{
+					rpsreplace = (rps->value * 6000) / arena->rps[i].pool[arena->fields[field - 1].type - 1];
+
+					if(rpsreplace)
+					{
+						rpsreplace -= (arena->frame % rpsreplace);
+
+						PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available (%s to replace)", GetPlaneName(i), i, (int16_t)arena->fields[field - 1].rps[i], Com_TimeSeconds(rpsreplace/100));
+					}
+					else
+					{
+						PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available (no replacement)", GetPlaneName(i), i, (int16_t)arena->fields[field - 1].rps[i]);
+					}
+				}
+				else
+				{
+					PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available", GetPlaneName(i), i, (int16_t)arena->fields[field - 1].rps[i]);
+				}
 			}
 		}
 	}
