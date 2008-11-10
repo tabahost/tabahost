@@ -28,6 +28,8 @@
 #endif
 #endif
 
+#include <dlfcn.h>
+
 int Lua_Init(void);
 void Lua_Close(void);
 void Lua_RunMainFrame(void);
@@ -908,7 +910,7 @@ int Lua_Init(void) {
 #ifdef _WIN32
 	hLibLua = LoadLibrary("lua5.1.dll");
 #else
-	hLibLua = dlopen("liblua-5.1.so", RTLD_LAZY);
+	hLibLua = dlopen("liblua5.1.so", RTLD_LAZY);
 #endif
 
 	if (!hLibLua) {

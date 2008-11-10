@@ -8296,22 +8296,24 @@ void UpdateIngameClients(u_int8_t attr)
 				if (clients[i].infly)
 				{
 					if (IsGround(&clients[i]))
-						fprintf(fp, "In Ground\n");
+						fprintf(fp, "In Ground");
 					else
-						fprintf(fp, "In Flight\n");
+						fprintf(fp, "In Flight");
 				}
 				else
 				{
 					if (clients[i].field)
 					{
 						if (!clients[i].hq)
-							fprintf(fp, "FIELD F%d\n", clients[i].field);
+							fprintf(fp, "FIELD F%d", clients[i].field);
 						else
-							fprintf(fp, "HQ\n");
+							fprintf(fp, "HQ");
 					}
 					else
-						fprintf(fp, "CONNECTING\n");
+						fprintf(fp, "CONNECTING");
 				}
+				
+				fprintf(fp, " (%s)\n", GeoIP_country_name_by_addr(gi, clients[i].ip));
 
 				for (k = 0; k < maxentities->value; k++) // add sharing IP
 				{

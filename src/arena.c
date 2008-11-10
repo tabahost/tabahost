@@ -2889,6 +2889,7 @@ void CaptureField(u_int8_t field, client_t *client)
 
 	Cmd_Capt(field - 1, client->country, NULL);
 	arena->fields[field - 1].paras = 0;
+	arena->fields[field - 1].alert = 0;
 
 	/*
 	 for(i = 0; i < MAX_CITYFIELD; i++)
@@ -2960,8 +2961,12 @@ void CaptureField(u_int8_t field, client_t *client)
 		else
 		{
 			if(!oldcapt->value && wb3->value)
+			{
 				if (arena->fields[field - 1].buildings[i].type == BUILD_HANGAR && !arena->fields[field - 1].buildings[i].status)
 					hangar = 1;
+			}
+			else
+				hangar = 1;
 			
 			if (arena->fields[field - 1].buildings[i].type <= BUILD_88MMFLAK)
 				arena->fields[field - 1].buildings[i].timer = timer;
