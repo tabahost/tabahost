@@ -5019,7 +5019,18 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				{
 					if ((client->posalt[0] - arena->fields[client->field - 1].posxyz[2]) > 15)
 					{
-						PPrintf(client, RADIO_YELLOW, "Friendly collision enabled");
+						if(midairs->value)
+						{
+							if(!wb3->value)
+							{
+								PPrintf(client, RADIO_YELLOW, "Friendly collision enabled");
+							}
+							else
+							{
+								WB3DotCommand(client, ".midairs_frndly 1");
+							}
+						}
+
 						client->cancollide = 1;
 					}
 				}
