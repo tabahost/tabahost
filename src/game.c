@@ -718,7 +718,9 @@ void CheckArenaRules(void)
 			if(vitals && !arena->fields[i].vitals)
 			{
 				CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i+1);
-				CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
+				
+				if(!oldcapt->value && wb3->value)
+					CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
 			}
 			
 			if(!oldcapt->value && wb3->value)
