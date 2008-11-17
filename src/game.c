@@ -2274,10 +2274,13 @@ void ProcessCommands(char *command, client_t *client)
 	}
 
 	//     //     //     //     //     //
-
+	
+	if(permission & (FLAG_ADMIN | FLAG_OP) && arena && arena->frame > 100)
+	{
+		Com_Printf("OPCMD: %s(%s) - .%s %s %s %s %s %s %s\n", client?client->longnick:"-HOST-", client?client->ip:"", command, argv[0]?argv[0]:"", argv[1]?argv[1]:"", argv[2]?argv[2]:"", argv[3]?argv[3]:"", argv[4]?argv[4]:"", argv[5]?argv[5]:"");
+	}
 
 	if (permission & FLAG_ADMIN) // commands that only ADMIN's can execute
-
 	{
 		if(!Com_Stricmp(command, "say"))
 		{
@@ -2387,11 +2390,9 @@ void ProcessCommands(char *command, client_t *client)
 			BPrintf(RADIO_YELLOW, "Exiting Server...");
 			ExitServer(0);
 		}
-
 	}
-
+	
 	if(permission & (FLAG_ADMIN | FLAG_OP)) // commands that ADMIN's and OP's can execute
-
 	{
 		if(!Com_Stricmp(command, "dbpasswd"))
 		{
@@ -2408,7 +2409,7 @@ void ProcessCommands(char *command, client_t *client)
 				return;
 			}
 		}
-		if(!Com_Stricmp(command, "dbuser"))
+		else if(!Com_Stricmp(command, "dbuser"))
 		{
 			if(!argv[0])
 			{
@@ -2423,7 +2424,7 @@ void ProcessCommands(char *command, client_t *client)
 				return;
 			}
 		}
-		if(!Com_Stricmp(command, "alt"))
+		else if(!Com_Stricmp(command, "alt"))
 		{
 			if(!argv[1])
 			{
@@ -2435,7 +2436,7 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		if(!Com_Stricmp(command, "sink") && client)
+		else if(!Com_Stricmp(command, "sink") && client)
 		{
 			if(argv[1])
 			{
@@ -2443,7 +2444,7 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		if(!Com_Stricmp(command, "droneg"))
+		else if(!Com_Stricmp(command, "droneg"))
 		{
 			//			if(argv[1])
 			//			{
@@ -2714,15 +2715,21 @@ void ProcessCommands(char *command, client_t *client)
 			else if(!Com_Stricmp(argv[0], "all"))
 			{
 				Com_Printf("ATTENTION: All users were kicked out by %s\n", client?client->longnick:"-HOST-");
+				BPrintf(RADIO_YELLOW, "ATTENTION: All users were kicked out by %s\n", client?client->longnick:"-HOST-");
+				
 				for(i = 0; i < maxentities->value; i++)
-				if(clients[i].inuse && !clients[i].drone)
 				{
-					RemoveClient(&clients[i]);
+					if(clients[i].inuse && !clients[i].drone)
+					{
+						RemoveClient(&clients[i]);
+					}
 				}
 			}
 			else
 			{
 				Com_Printf("ATTENTION: %s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
+				BPrintf(RADIO_YELLOW, "ATTENTION: %s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
+				
 				RemoveClient(FindLClient(argv[0]));
 			}
 			return;
@@ -3036,7 +3043,6 @@ void ProcessCommands(char *command, client_t *client)
 			return;
 		}
 	}
-
 	// else unknown command
 	PPrintf(client, RADIO_LIGHTYELLOW, "Unknown command \"%s\"", command);
 }
