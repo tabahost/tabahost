@@ -1486,7 +1486,7 @@ void ProcessCommands(char *command, client_t *client)
 				fclose(fp);
 			}
 
-			SendFileSeq1(file, client);
+			SendFileSeq1(file, "motd.txt", client);
 			return;
 		}
 		else if (!Com_Stricmp(command, "show"))
@@ -1542,7 +1542,7 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "help"))
 		{
-			SendFileSeq1("help.txt", client);
+			SendFileSeq1("help.txt", "helpcommands.asc", client);
 			return;
 		}
 		else if (!Com_Stricmp(command, "startfau"))
@@ -2059,7 +2059,7 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				if(!client->infly)
 				{
-					SendFileSeq1(FILE_OP, client);
+					SendFileSeq1(FILE_OP, "helpop.asc", client);
 				}
 			}
 			else
@@ -2082,7 +2082,7 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				if(!client->infly)
 				{
-					SendFileSeq1(FILE_ADMIN, client);
+					SendFileSeq1(FILE_ADMIN, "onlineadmins.asc", client);
 				}
 			}
 			else
@@ -2736,7 +2736,7 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if(!Com_Stricmp(command, "helpop") && client)
 		{
-			SendFileSeq1("helpop.txt", client);
+			SendFileSeq1("helpop.txt", "helpop.asc", client);
 			return;
 		}
 		else if(!Com_Stricmp(command, "uptime"))
@@ -3053,7 +3053,7 @@ void ProcessCommands(char *command, client_t *client)
  Begin Sending File Sequence
  *************/
 
-void SendFileSeq1(char *file, client_t *client)
+void SendFileSeq1(char *file, char *clifile, client_t *client)
 {
 	u_int8_t buffer[128];
 	u_int8_t filesize;
@@ -3082,25 +3082,25 @@ void SendFileSeq1(char *file, client_t *client)
 
 	sendfile = (sendfile1_t *)(buffer+1+filesize);
 
-	sendfile->msgsize = 0x0B;
+	sendfile->msgsize = strlen(clifile);
 
 	//	if(wb3->value)
 	//	{
-	//		memcpy(&(sendfile->msg), "message.dtx", sendfile->msgsize);
+	memcpy(&(sendfile->msg), clifile, sendfile->msgsize);
 	//	}
 	//	else
 	//	{
-	memcpy(&(sendfile->msg), "DISPLAY.TXT", sendfile->msgsize);
+	//memcpy(&(sendfile->msg), "DISPLAY.TXT", sendfile->msgsize);
 	//	}
 
-	sendfile = (sendfile1_t *)(buffer+filesize+11);
+	sendfile = (sendfile1_t *)(buffer+filesize+sendfile->msgsize);
 
 	sendfile->unknown2 = htonl(0x0A);
 	sendfile->unknown3 = htonl(0x0200);
 
 	PPrintf(client, RADIO_YELLOW, "Sending file");
 
-	SendPacket(buffer, 24+filesize, client);
+	SendPacket(buffer, 13+sendfile->msgsize+filesize, client);
 }
 
 void SendFileSeq3(client_t *client)
@@ -3548,7 +3548,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						fclose(fp);
 					}
 
-					SendFileSeq1(file, client);
+					SendFileSeq1(file, "motd.txt", client);
 
 					PPrintf(client, RADIO_YELLOW, "Warbirds Tabajara Host version %s, build %s", VERSION, __DATE__); //BUILD);
 
@@ -3903,7 +3903,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(client->ready)
-					SendFileSeq5(0, client);
+						SendFileSeq5(0, client);
 				}
 				else
 				{
@@ -10516,7 +10516,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 					if (wb3->value)
 					{
 						fclose(fp);
-						SendFileSeq1(filename, client);
+						SendFileSeq1(filename, "medals.txt", client);
 						Sys_UnlockFile(strcat(filename, ".LOCK"));
 						return;
 					}

@@ -106,7 +106,7 @@ void Cmd_Ros(client_t *client)
 	{
 		if (!client->infly)
 		{
-			SendFileSeq1(FILE_INGAME, client);
+			SendFileSeq1(FILE_INGAME, "roster.asc", client);
 		}
 	}
 	else
@@ -2508,7 +2508,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 			fclose(fp);
 
 			if(client)
-				SendFileSeq1("./fields/fields.txt", client);
+				SendFileSeq1("./fields/fields.txt", "fields.asc", client);
 		}
 		return;
 	}
@@ -2631,7 +2631,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 			fclose(fp);
 
-			SendFileSeq1(buffer, client);
+			SendFileSeq1(buffer, "field.asc", client);
 		}
 	}
 }
@@ -2697,7 +2697,7 @@ void Cmd_City(u_int8_t citynum, client_t *client)
 
 		fclose(fp);
 
-		SendFileSeq1(buffer, client);
+		SendFileSeq1(buffer, "city.asc", client);
 	}
 }
 
@@ -3000,7 +3000,7 @@ void Cmd_Show(client_t *client)
 
 		fclose(fp);
 
-		SendFileSeq1(filename, client);
+		SendFileSeq1(filename, "configs.asc", client);
 	}
 
 	Sys_UnlockFile(strcat(filename, ".LOCK"));
@@ -3669,7 +3669,7 @@ void Cmd_Score(char *player, client_t *client)
 																		fprintf(fp, "                   Score System by Sonicx\n");
 																		fprintf(fp, "==========\n");
 
-																		SendFileSeq1(filename, client);
+																		SendFileSeq1(filename, "scores.asc", client);
 																	}
 																	else
 																	{

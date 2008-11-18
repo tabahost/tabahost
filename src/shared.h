@@ -1986,7 +1986,7 @@ void	UpdateArenaStatus(u_int8_t uptime);
 void	CheckArenaRules(void);
 void	ProcessMetarWeather(void);
 void	ProcessCommands(char *command, client_t *client);
-void	SendFileSeq1(char *file, client_t *client);
+void	SendFileSeq1(char *file, char *clifile, client_t *client);
 void	SendFileSeq3(client_t *client);
 void	SendFileSeq5(u_int16_t seek, client_t *client);
 void	SendFileSeq6(u_int8_t *buffer, client_t *client);
