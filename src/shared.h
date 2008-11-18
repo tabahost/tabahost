@@ -527,7 +527,7 @@ typedef struct rps_s
 	u_int8_t	country;		// 1 = red, 2 = green, 4 = gold, 8 = purp (can use "OR" |)
 	u_int32_t	in;				// date plane enter in rps (yyyymmdd)
 	u_int32_t	out;			// date plane exit rps (yyyymmdd)
-	int8_t		pool[18];		// -1 = infinite (S,M,B,CV,Cargo, DD, SUB, Radar, Bridge, City, Port, Convoy, Factory, Refinery, Openfield, Post ,Village, Town)
+	int8_t		pool[19];		// -1 = infinite (S,M,B,CV,Cargo, DD, SUB, Radar, Bridge, City, Port, Convoy, Factory, Refinery, Openfield, Post ,Village, Town)
 } rps_t;
 
 typedef struct field_s

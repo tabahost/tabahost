@@ -1660,10 +1660,10 @@ void SaveRPS(char *path, client_t *client)
 
 	for (i = 0; i < maxplanes; i++)
 	{
-		fprintf(fp, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n", arena->rps[i].country, arena->rps[i].in, arena->rps[i].out, arena->rps[i].pool[0], arena->rps[i].pool[1],
+		fprintf(fp, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n", arena->rps[i].country, arena->rps[i].in, arena->rps[i].out, arena->rps[i].pool[0], arena->rps[i].pool[1],
 				arena->rps[i].pool[2], arena->rps[i].pool[3], arena->rps[i].pool[4], arena->rps[i].pool[5], arena->rps[i].pool[6], arena->rps[i].pool[7], arena->rps[i].pool[8], arena->rps[i].pool[9],
 				arena->rps[i].pool[10], arena->rps[i].pool[11], arena->rps[i].pool[12], arena->rps[i].pool[13], arena->rps[i].pool[14], arena->rps[i].pool[15], arena->rps[i].pool[16],
-				arena->rps[i].pool[17]);
+				arena->rps[i].pool[17], arena->rps[i].pool[18]);
 	}
 
 	fclose(fp);
