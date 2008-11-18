@@ -1610,9 +1610,10 @@ void LoadRPS(char *path, client_t *client)
 			arena->rps[i].pool[12] = Com_Atoi((char *)strtok(NULL, ";")); // Factory
 			arena->rps[i].pool[13] = Com_Atoi((char *)strtok(NULL, ";")); // Refinery
 			arena->rps[i].pool[14] = Com_Atoi((char *)strtok(NULL, ";")); // Openfield
-			arena->rps[i].pool[15] = Com_Atoi((char *)strtok(NULL, ";")); // Post
-			arena->rps[i].pool[16] = Com_Atoi((char *)strtok(NULL, ";")); // Village
-			arena->rps[i].pool[17] = Com_Atoi((char *)strtok(NULL, ";")); // Town
+			arena->rps[i].pool[15] = Com_Atoi((char *)strtok(NULL, ";")); // WB3Post
+			arena->rps[i].pool[16] = Com_Atoi((char *)strtok(NULL, ";")); // WB3Village
+			arena->rps[i].pool[17] = Com_Atoi((char *)strtok(NULL, ";")); // WB3Town
+			arena->rps[i].pool[18] = Com_Atoi((char *)strtok(NULL, ";")); // WB3Port
 		}
 	}
 
@@ -1688,13 +1689,13 @@ void ShowRPS(client_t *client)
 		if (arena->rps[i].pool[0] + arena->rps[i].pool[1] + arena->rps[i].pool[2] + arena->rps[i].pool[3] + arena->rps[i].pool[4] + arena->rps[i].pool[5] + arena->rps[i].pool[6]
 				+ arena->rps[i].pool[7] + arena->rps[i].pool[8] + arena->rps[i].pool[9] + arena->rps[i].pool[10] + arena->rps[i].pool[7] + arena->rps[i].pool[8] + arena->rps[i].pool[9]
 				+ arena->rps[i].pool[10] + arena->rps[i].pool[11] + arena->rps[i].pool[12] + arena->rps[i].pool[13] + arena->rps[i].pool[14] + arena->rps[i].pool[15] + arena->rps[i].pool[16]
-				+ arena->rps[i].pool[17])
+				+ arena->rps[i].pool[17] + arena->rps[i].pool[18])
 		{
 			PPrintf(client, 
-			RADIO_LIGHTYELLOW, "%-7s:c%d;i%d;o%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d", GetSmallPlaneName(i), arena->rps[i].country, arena->rps[i].in, arena->rps[i].out,
+			RADIO_LIGHTYELLOW, "%-7s:c%d;i%d;o%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d", GetSmallPlaneName(i), arena->rps[i].country, arena->rps[i].in, arena->rps[i].out,
 					arena->rps[i].pool[0], arena->rps[i].pool[1], arena->rps[i].pool[2], arena->rps[i].pool[3], arena->rps[i].pool[4], arena->rps[i].pool[5], arena->rps[i].pool[6],
 					arena->rps[i].pool[7], arena->rps[i].pool[8], arena->rps[i].pool[9], arena->rps[i].pool[10], arena->rps[i].pool[11], arena->rps[i].pool[12], arena->rps[i].pool[13],
-					arena->rps[i].pool[14], arena->rps[i].pool[15], arena->rps[i].pool[16], arena->rps[i].pool[17]);
+					arena->rps[i].pool[14], arena->rps[i].pool[15], arena->rps[i].pool[16], arena->rps[i].pool[17], arena->rps[i].pool[18]);
 		}
 
 	}

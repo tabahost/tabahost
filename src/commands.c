@@ -4572,7 +4572,7 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 					{
 						rpsreplace -= (arena->frame % rpsreplace);
 
-						PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available (%s to replace)", GetPlaneName(i), i, (int16_t)arena->fields[field - 1].rps[i], Com_TimeSeconds(rpsreplace/100));
+						PPrintf(client, RADIO_YELLOW, "%s (N%d), %f available (%s to replace)", GetPlaneName(i), i, arena->fields[field - 1].rps[i], Com_TimeSeconds(rpsreplace/100));
 					}
 					else
 					{
