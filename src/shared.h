@@ -1856,6 +1856,14 @@ typedef struct wb3supressfire_s		// 21 22
 	u_int32_t	supress;
 } wb3supressfire_t;
 
+typedef struct wb3overrideskin_s		// 00 2D
+{
+	u_int16_t	packetid;
+	u_int16_t	msgsize;
+	u_int8_t	msg;
+} wb3overrideskin_t;
+
+
 typedef struct datagram_s		//
 {
 	u_int16_t	size;
@@ -2179,6 +2187,7 @@ u_int8_t CheckMedals(client_t *client);
 u_int8_t AddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
 void	ForceEndFlight(u_int8_t remdron, client_t *client);
 void	ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client);
+void	WB3OverrideSkin(u_int16_t plane, client_t *client);
 void	CreateScores(client_t *client);
 void	ClientHDSerial(u_int8_t *buffer, client_t *client);
 void	ClientIpaddr(client_t *client);

@@ -2256,7 +2256,10 @@ void Cmd_Pingtest(u_int16_t frame, client_t *client)
 	buildstatus->packetid = htons(Com_WBhton(0x0307));
 	buildstatus->building = htons(frame);
 	buildstatus->status = 4;
-	buildstatus->country = arena->fields[0].country;
+	if(!Com_Strncmp(mapname->string, "atoll", 5))
+		buildstatus->country = arena->fields[1].country;
+	else
+		buildstatus->country = arena->fields[0].country;
 	if (!frame)
 		client->pingtest = arena->time;
 

@@ -283,9 +283,9 @@ u_int16_t packets_tab[209][3] =
 		{ 0xFFFF, 0x0029, 0xFFFF }, // bgACMCAM_PLANE_DAMAGE
 		{ 0xFFFF, 0x002A, 0xFFFF }, // bgACMCAM_EXTERNAL_AMMOCNT
 		{ 0xFFFF, 0x002B, 0xFFFF }, // bgACMCAM_SUPPRESS_FIRE
-		{ 0xFFFF, 0x002C, 0xFFFF }, // bgUSER_SHAPE
-		{ 0xFFFF, 0x002D, 0xFFFF }, // bgOVERRIDE_SHAPE
-		{ 0xFFFF, 0x002E, 0xFFFF } // bgAI_OVERRIDE_SHAPE
+		{ 0xFFFF, 0x002C, 0x002C }, // bgUSER_SHAPE
+		{ 0xFFFF, 0x002D, 0x002D }, // bgOVERRIDE_SHAPE
+		{ 0xFFFF, 0x002E, 0x002E } // bgAI_OVERRIDE_SHAPE
 }; // extern
 jmp_buf debug_buffer; // debug buffer
 
@@ -3972,13 +3972,13 @@ void PingTest(u_int8_t *buffer, client_t *client)
 	pingtest = (pingtest_t *)buffer;
 	frame = htons(pingtest->frame);
 
-	if ((++frame) < 20)
+	if ((++frame) < 12)
 	{
 		Cmd_Pingtest(frame, client);
 	}
 	else
 	{
-		PPrintf(client, RADIO_RED, "Ping Average: %ums", ((arena->time - client->pingtest) / 40));
+		PPrintf(client, RADIO_RED, "Ping Average: %ums", ((arena->time - client->pingtest) / 24));
 	}
 }
 
@@ -5045,7 +5045,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 
 			if (((client->armor.points[PLACE_LWING] < arena->planedamage[client->plane].points[PLACE_LWING]) || (client->armor.points[PLACE_RWING]
-					< arena->planedamage[client->plane].points[PLACE_RWING])))
+					< arena->planedamage[client->plane].points[PLACE_RWING])));
 				CheckMaxG(client);
 		}
 	}
@@ -5174,7 +5174,7 @@ void CheckMaxG(client_t *client)
 	{
 		g = ClientG(client);
 	}
-
+	
 	if (!(client->status1 & STATUS_LWING))
 	{
 		maxg = (double)(arena->planedamage[client->plane].positiveG * client->armor.points[PLACE_LWING] / arena->planedamage[client->plane].points[PLACE_LWING]) + 1.5;
@@ -5193,7 +5193,10 @@ void CheckMaxG(client_t *client)
 			if ((maxg - g) < gwarning->value || (g - ming) < gwarning->value)
 			{
 				if (client->armor.points[PLACE_LWING] > 0)
+				{
+					WB3DotCommand(client, ".playsoundfile sounds/checksix.wav");
 					PPrintf(client, RADIO_DARKGREEN, "Warning! Your left wing is about to fall!");
+				}
 			}
 		}
 	}
@@ -5217,6 +5220,7 @@ void CheckMaxG(client_t *client)
 			{
 				if (client->armor.points[PLACE_RWING] > 0)
 				{
+					WB3DotCommand(client, ".playsoundfile sounds/checksix.wav");
 					PPrintf(client, RADIO_DARKGREEN, "Warning! Your right wing is about to fall!");
 				}
 			}
@@ -5243,6 +5247,12 @@ float ClientG(client_t *client)
 	Az = Com_Deg(acos(cos(Com_Rad(pitch)) * cos(Com_Rad(MODULUS(roll)))));
 	///////////
 	/////////// Ay
+	
+	PPrintf(client, RADIO_GREEN, "Pitch %.2f, Roll %.2f, Yaw %.2f", pitch, roll, yaw);
+	PPrintf(client, RADIO_RED, "AccX %d, AccY %d, Accz %d", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
+	
+	
+	
 	hyaw = yaw;
 
 	if (yaw > 180)
@@ -5332,9 +5342,13 @@ float ClientG(client_t *client)
 	Ax += g;
 
 	///////////
+	
+	Ax = 180 - Ax;
+	Ay = 180 - Ay;
+	
 	g = (((double)client->accelxyz[0][0]/31) * cos(Com_Rad(Ax))) + (((double)client->accelxyz[1][0]/31) * cos(Com_Rad(Ay))) + ((((double)client->accelxyz[2][0]/31) + 1) * cos(Com_Rad(Az)));
 
-	//	PPrintf(client, RADIO_WHITE, "Az %.3f AccZ %d G %.3f", Az, client->accelxyz[2][0], g);
+	PPrintf(client, RADIO_WHITE, "Ax %.3f Ay %.3f Az %.3f G %.3f", Ax, Ay, Az, g);
 
 	return g;
 }
@@ -8883,6 +8897,7 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 
 	SendPacket(buffer, sizeof(buffer), client);
 	SendPlaneStatus(plane, client);
+	WB3OverrideSkin(plane->plane, client);
 }
 
 /*************
@@ -10718,7 +10733,7 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 			rules |= FLAG_ENABLEOTTOS;
 	}
 
-	startack->packetid = htons(Com_WBhton(0x041F));
+	startack->packetid = htons(Com_WBhton(0x041E));
 	startack->country = reqack->country;
 	startack->field = htonl(ntohl(reqack->field) - 1);
 	startack->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
@@ -10726,7 +10741,7 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 	startack->gunrad = htons((u_int16_t)(gunrad->value * 10));
 	startack->bulletradius3 = htons((u_int16_t)(bulletradius->value * 10));
 	startack->rules = htonl(rules);
-	startack->plane = htons(ntohl(reqack->plane));
+	startack->plane = htons(13);//ntohl(reqack->plane));
 	startack->numofarrays = 1;
 	startack->ord = 0;
 	startack->posx = htonl(building->posx ? building->posx : client->posxy[0][0]);
