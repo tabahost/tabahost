@@ -5045,7 +5045,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 
 			if (((client->armor.points[PLACE_LWING] < arena->planedamage[client->plane].points[PLACE_LWING]) || (client->armor.points[PLACE_RWING]
-					< arena->planedamage[client->plane].points[PLACE_RWING])));
+					< arena->planedamage[client->plane].points[PLACE_RWING])))
 				CheckMaxG(client);
 		}
 	}
@@ -5194,8 +5194,8 @@ void CheckMaxG(client_t *client)
 			{
 				if (client->armor.points[PLACE_LWING] > 0)
 				{
-					WB3DotCommand(client, ".playsoundfile sounds/checksix.wav");
-					PPrintf(client, RADIO_DARKGREEN, "Warning! Your left wing is about to fall!");
+					WB3DotCommand(client, ".playsoundfile sounds/gexceed.wav");
+					//PPrintf(client, RADIO_DARKGREEN, "Warning! Your left wing is about to fall!");
 				}
 			}
 		}
@@ -5220,8 +5220,8 @@ void CheckMaxG(client_t *client)
 			{
 				if (client->armor.points[PLACE_RWING] > 0)
 				{
-					WB3DotCommand(client, ".playsoundfile sounds/checksix.wav");
-					PPrintf(client, RADIO_DARKGREEN, "Warning! Your right wing is about to fall!");
+					WB3DotCommand(client, ".playsoundfile sounds/gexceed.wav");
+					//PPrintf(client, RADIO_DARKGREEN, "Warning! Your right wing is about to fall!");
 				}
 			}
 		}
@@ -5248,10 +5248,11 @@ float ClientG(client_t *client)
 	///////////
 	/////////// Ay
 	
-	PPrintf(client, RADIO_GREEN, "Pitch %.2f, Roll %.2f, Yaw %.2f", pitch, roll, yaw);
-	PPrintf(client, RADIO_RED, "AccX %d, AccY %d, Accz %d", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
+//	PPrintf(client, RADIO_GREEN, "Pitch %.2f, Roll %.2f, Yaw %.2f", pitch, roll, yaw);
+//	PPrintf(client, RADIO_RED, "AccX %d, AccY %d, Accz %d", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
 	
-	
+	if(wb3->value)
+		pitch *= -1;
 	
 	hyaw = yaw;
 
@@ -5306,6 +5307,7 @@ float ClientG(client_t *client)
 		hyaw = 360 - yaw;
 
 	/// pitch influence
+	
 	if (pitch > 0)
 		Ax = ((90 - hyaw) * 2) - Com_Deg(asin(sin(Com_Rad(90+pitch)) * cos(Com_Rad(hyaw))));
 	else
@@ -5343,12 +5345,12 @@ float ClientG(client_t *client)
 
 	///////////
 	
-	Ax = 180 - Ax;
-	Ay = 180 - Ay;
+	if(wb3->value)
+		Ay = 180 - Ay;
 	
 	g = (((double)client->accelxyz[0][0]/31) * cos(Com_Rad(Ax))) + (((double)client->accelxyz[1][0]/31) * cos(Com_Rad(Ay))) + ((((double)client->accelxyz[2][0]/31) + 1) * cos(Com_Rad(Az)));
 
-	PPrintf(client, RADIO_WHITE, "Ax %.3f Ay %.3f Az %.3f G %.3f", Ax, Ay, Az, g);
+//	PPrintf(client, RADIO_WHITE, "Ax %.3f Ay %.3f Az %.3f G %.3f", Ax, Ay, Az, g);
 
 	return g;
 }
