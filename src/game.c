@@ -3668,7 +3668,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x0E0E:
 				if(!setjmp(debug_buffer))
 				{
-					WB3SupressFire(buffer, client);
+					WB3FireSuppression(buffer, client);
 				}
 				else
 				{
@@ -5557,12 +5557,12 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 }
 
 /*************
- WB3SupressFire
+ WB3FireSuppression
 
  Some strange WB3 packet
  *************/
 
-void WB3SupressFire(u_int8_t *buffer, client_t *client)
+void WB3FireSuppression(u_int8_t *buffer, client_t *client)
 {
 	u_int8_t packet[7];
 	wb3firesupression_t *firesupression;
@@ -5596,6 +5596,29 @@ void WB3SupressFire(u_int8_t *buffer, client_t *client)
 		}
 	}
 }
+
+/*************
+ WB3SupressFire
+
+ Some strange WB3 packet
+ *************/
+
+void WB3SupressFire(u_int8_t slot, client_t *client)
+{
+	u_int8_t packet[7];
+	wb3supressfire_t *supressfire;
+
+	memset(packet, 0, sizeof(packet));
+
+	supressfire = (wb3supressfire_t *)packet;
+
+	supressfire->packetid = htons(Com_WBhton(0x0022));
+	supressfire->slot = slot;
+	supressfire->supress = htonl(0);
+	
+	SendPacket(packet, sizeof(packet), client);
+}
+
 
 /*************
  WB3ExternalAmmoCnt
@@ -8898,8 +8921,9 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 	}
 
 	SendPacket(buffer, sizeof(buffer), client);
+	WB3SupressFire(addplane->slot, client);
 	SendPlaneStatus(plane, client);
-	WB3OverrideSkin(plane->plane, client);
+	WB3OverrideSkin(addplane->slot, plane->plane, client);
 }
 
 /*************

@@ -2552,13 +2552,16 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				}
 			}
 			
-			treup = ((arena->fields[field].tonnage - GetTonnageToClose(arena->fields[field].type)) * 100) / TONNAGE_RECOVER;
-			
-			if(treup < reup)
+			if(!oldcapt->value && wb3->value)
 			{
-				if(client->attr)
-					PPrintf(client, RADIO_RED, "DEBUG: Reup: %u, ToT Reup = %u", reup, treup);
-				reup = treup;
+				treup = ((arena->fields[field].tonnage - GetTonnageToClose(arena->fields[field].type)) * 100) / TONNAGE_RECOVER;
+			
+				if(treup < reup)
+				{
+					if(client->attr)
+						PPrintf(client, RADIO_RED, "DEBUG: Reup: %u, ToT Reup = %u", reup, treup);
+					reup = treup;
+				}
 			}
 
 			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup/100), arena->fields[field].abletocapture ? "Yes" : "No");
@@ -2609,7 +2612,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 						if (arena->fields[field].buildings[i].timer)
 							if ((arena->fields[field].type <= FIELD_MAIN) || (arena->fields[field].type >= FIELD_WB3POST))
-								fprintf(fp, " (%d secs)\n", arena->fields[field].buildings[i].timer/100);
+								fprintf(fp, " (%s)\n", Com_TimeSeconds(arena->fields[field].buildings[i].timer/100));
 							else
 								fprintf(fp, " DESTROYED\n");
 						else

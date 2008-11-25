@@ -1859,7 +1859,8 @@ typedef struct wb3supressfire_s		// 21 22
 typedef struct wb3overrideskin_s		// 00 2D
 {
 	u_int16_t	packetid;
-	u_int16_t	msgsize;
+	u_int8_t	slot;
+	u_int8_t	msgsize;
 	u_int8_t	msg;
 } wb3overrideskin_t;
 
@@ -2009,7 +2010,8 @@ void	CheckMaxG(client_t *client);
 float	ClientG(client_t *client);
 void	PChutePos(u_int8_t *buffer, client_t *client);
 void	WB3GunnerUpdate(u_int8_t *buffer, client_t *client);
-void	WB3SupressFire(u_int8_t *buffer, client_t *client);
+void	WB3FireSuppression(u_int8_t *buffer, client_t *client);
+void	WB3SupressFire(u_int8_t slot, client_t *client);
 void	PPlaneStatus(u_int8_t *buffer, client_t *client);
 void	WB3ExternalAmmoCnt(u_int8_t *buffer, u_int16_t len, client_t *client);
 void	PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client);
@@ -2187,7 +2189,7 @@ u_int8_t CheckMedals(client_t *client);
 u_int8_t AddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
 void	ForceEndFlight(u_int8_t remdron, client_t *client);
 void	ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client);
-void	WB3OverrideSkin(u_int16_t plane, client_t *client);
+void	WB3OverrideSkin(u_int8_t slot, u_int16_t plane, client_t *client);
 void	CreateScores(client_t *client);
 void	ClientHDSerial(u_int8_t *buffer, client_t *client);
 void	ClientIpaddr(client_t *client);

@@ -2752,10 +2752,10 @@ void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
  Make a Pingtest call
  *************/
 
-void WB3OverrideSkin(u_int16_t plane, client_t *client)
+void WB3OverrideSkin(u_int8_t slot, u_int16_t plane, client_t *client)
 {
 	wb3overrideskin_t *overrideskin;
-	u_int16_t size;
+	u_int8_t size;
 	char skin[64];
 	u_int8_t buffer[256];
 	
@@ -2887,7 +2887,8 @@ void WB3OverrideSkin(u_int16_t plane, client_t *client)
 	size = strlen(skin);
 
 	overrideskin->packetid = htons(Com_WBhton(0x002D));
-	overrideskin->msgsize = htons(size);
+	overrideskin->slot = slot;
+	overrideskin->msgsize = size;
 	memcpy(&(overrideskin->msg), skin, size);
 
 	SendPacket(buffer, size + 4, client);
