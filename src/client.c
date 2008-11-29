@@ -348,7 +348,7 @@ int ProcessClient(client_t *client)
 	}
 	else
 	{
-if			(client->arenafieldsok && client->arenabuildsok < (fields->value + cities->value))
+			if(client->arenafieldsok && client->arenabuildsok < (fields->value + cities->value) && !((arena->frame - client->frame) % 100))
 			{
 				SendFieldStatus(client->arenabuildsok, client);
 
@@ -365,8 +365,8 @@ if			(client->arenafieldsok && client->arenabuildsok < (fields->value + cities->
 
 			if(client->ready && !client->arenafieldsok)
 			{
-				//			for(i = 0; i < fields->value; i++)
-				//				Cmd_Capt(i, arena->fields[i].country, client);
+				//	for(i = 0; i < fields->value; i++)
+				//		Cmd_Capt(i, arena->fields[i].country, client);
 
 				SendFieldsCountries(client);
 

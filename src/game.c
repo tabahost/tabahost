@@ -2218,7 +2218,7 @@ void ProcessCommands(char *command, client_t *client)
 			else
 			{
 				if(tolower(*argv[0]) == 'f')
-				argv[0]++; // ignore compiler error
+					argv[0]++; // ignore compiler error
 
 				Cmd_Listavail(Com_Atoi(argv[0]), client);
 			}
@@ -2774,10 +2774,15 @@ void ProcessCommands(char *command, client_t *client)
 
 			return;
 		}
+		else if(!Com_Stricmp(command, "flare") && client)
+		{
+			Cmd_Flare(client);
+			return;
+		}
 		else if(!Com_Stricmp(command, "rocket") && client)
 		{
 			if(!argv[2])
-			return;
+				return;
 			else
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Launched");
@@ -3532,7 +3537,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					}
 
 					SendOttoParams(client);
-					if(!wb3->value)
+					//if(!wb3->value)
 					SendExecutablesCheck(1, client);
 					SendLastConfig(client);
 
@@ -4029,7 +4034,7 @@ void PReqBomberList(client_t *client)
 void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
 	char field[4];
-	u_int16_t i, gunused;
+	u_int16_t i, j, gunused;
 	int8_t land = 0;
 	u_int16_t end = 0;
 	u_int32_t dist = 0;
@@ -4120,15 +4125,50 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					Com_Printf("%s landed at %s\n", client->longnick, field);
 					PPrintf(client, RADIO_YELLOW, "%s landed %s", client->longnick, field);
 
-					if (landingcapture->value)
+					if (landingcapture->value && IsBomber(client))
 					{
 						if ((arena->fields[land - 1].country != client->country) && arena->fields[land - 1].abletocapture && arena->fields[land - 1].closed)
 						{
-							i = 0;
+							i = 1;
 
-							if (IsCargo(client))
-								i = 1;
-
+							for (j = 0; j < MAX_RELATED; j++) // dont capture if bomber has wingmen
+							{
+								if (client->related[j] && (client->related[j]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+								{
+									i = 0;
+									break;
+								}
+							}
+							
+							// dont capture if plane is damaged
+							if (client->status1 & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE | STATUS_LGEAR | STATUS_RGEAR))
+							{
+								i = 0;
+							}
+							
+							for (j = 0; j < MAX_BUILDINGS; j++)
+							{
+								if (arena->fields[land - 1].buildings[j].field)
+								{
+									if (arena->fields[land - 1].buildings[j].status)
+									{
+										if (arena->fields[land - 1].buildings[j].type == BUILD_TOWER)
+										{
+											PPrintf(client, RADIO_RED, "Distance %d", DistBetween(client->posxy[0][0], client->posxy[1][0], 0, arena->fields[land - 1].buildings[j].posx, arena->fields[land - 1].buildings[j].posy, 0, 1000));
+											
+											j = DistBetween(client->posxy[0][0], client->posxy[1][0], 0, arena->fields[land - 1].buildings[j].posx, arena->fields[land - 1].buildings[j].posy, 0, 1000);
+											
+											if(j > 300 /* D1 */)
+												i = 0;
+											
+											break;
+										}
+									}
+								}
+								else
+									break;
+							}
+							
 							if (i)
 							{
 								CaptureField(land, client);
@@ -10794,7 +10834,7 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 	SetPlaneDamage(client->plane, client);
 	UpdateIngameClients(0);
 	SendOttoParams(client);
-	if (!wb3->value)
+	//if (!wb3->value)
 		SendExecutablesCheck(2, client);
 }
 

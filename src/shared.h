@@ -2276,6 +2276,7 @@ void	Cmd_UTC(client_t *client);
 void	Cmd_Lives(char *nick, int8_t amount, client_t *client);
 void	Cmd_Reload(client_t *client);
 void	Cmd_CheckWaypoints(client_t *client);
+void	Cmd_Flare(client_t *client);
 void	Cmd_Rocket(int32_t y, double angle, double angle2, client_t *client); // debug
 void	Cmd_Sink(u_int16_t a, u_int16_t b, client_t *client); // debug
 void	Cmd_CheckBuildings(client_t *client); // debug

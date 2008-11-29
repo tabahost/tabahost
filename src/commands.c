@@ -511,6 +511,14 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 		{
 			rpsreplace = (rps->value * 6000) / arena->rps[client->plane].pool[arena->fields[client->field - 1].type - 1];
 
+			if(!((arena->fields[client->field - 1].country == 1 && arena->rps[client->plane].country & 0x01) ||
+				(arena->fields[client->field - 1].country == 2 && arena->rps[client->plane].country & 0x02) ||
+				(arena->fields[client->field - 1].country == 3 && arena->rps[client->plane].country & 0x04) ||
+				(arena->fields[client->field - 1].country == 4 && arena->rps[client->plane].country & 0x08)))
+			{
+				rpsreplace = 0 ;
+			}
+
 			if(rpsreplace)
 			{
 				rpsreplace -= (arena->frame % rpsreplace);
@@ -1347,7 +1355,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	UpdateIngameClients(0);
 
 	SendOttoParams(client);
-	if (!wb3->value)
+	//if (!wb3->value)
 		SendExecutablesCheck(2, client);
 
 	if (!client->attached && client->wings && IsBomber(client))
@@ -4545,7 +4553,7 @@ void Cmd_Hls(client_t *client)
 
 void Cmd_Listavail(u_int8_t field, client_t *client)
 {
-	u_int8_t i;
+	u_int8_t i, j;
 	u_int32_t time;
 	u_int32_t rpsreplace;
 
@@ -4555,39 +4563,49 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 		return;
 	}
 
+	j = field - 1;
+
 	if (client)
 	{
-		if (arena->fields[field - 1].country != client->country && !(client->attr & (FLAG_OP | FLAG_ADMIN)))
+		if (arena->fields[j].country != client->country && !(client->attr & (FLAG_OP | FLAG_ADMIN)))
 		{
 			PPrintf(client, RADIO_YELLOW, "This field is not from your country");
 			return;
 		}
 	}
 
-	for (i = 0; i < maxplanes; i++)
+	for (i = 1; i < maxplanes; i++)
 	{
-		if (arena->fields[field - 1].rps[i])
+		if (arena->fields[j].rps[i])
 		{
 			if (GetPlaneName(i))
 			{
 				if (rps->value && !arcade->value)
 				{
-					rpsreplace = (rps->value * 6000) / arena->rps[i].pool[arena->fields[field - 1].type - 1];
+					rpsreplace = (rps->value * 6000) / arena->rps[i].pool[arena->fields[j].type - 1];
+
+					if(!((arena->fields[j].country == 1 && arena->rps[i].country & 0x01) ||
+						(arena->fields[j].country == 2 && arena->rps[i].country & 0x02) ||
+						(arena->fields[j].country == 3 && arena->rps[i].country & 0x04) ||
+						(arena->fields[j].country == 4 && arena->rps[i].country & 0x08)))
+					{
+						rpsreplace = 0 ;
+					}
 
 					if(rpsreplace)
 					{
 						rpsreplace -= (arena->frame % rpsreplace);
 
-						PPrintf(client, RADIO_YELLOW, "%s (N%d), %f available (%s to replace)", GetPlaneName(i), i, arena->fields[field - 1].rps[i], Com_TimeSeconds(rpsreplace/100));
+						PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available (%s to replace)", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i], Com_TimeSeconds(rpsreplace/100));
 					}
 					else
 					{
-						PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available (no replacement)", GetPlaneName(i), i, (int16_t)arena->fields[field - 1].rps[i]);
+						PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available (no replacement)", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i]);
 					}
 				}
 				else
 				{
-					PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available", GetPlaneName(i), i, (int16_t)arena->fields[field - 1].rps[i]);
+					PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i]);
 				}
 			}
 		}
@@ -5822,6 +5840,52 @@ void Cmd_CheckWaypoints(client_t *client)
 	}
 }
 
+void Cmd_Flare(client_t *client)
+{
+	rocketbomb_t *drop;
+	u_int8_t i, j;
+	u_int8_t buffer[31];
+
+	memset(buffer, 0, sizeof(buffer));
+
+	PPrintf(client, RADIO_YELLOW, "You fired a flare!");
+
+	drop = (rocketbomb_t *) buffer;
+
+	drop->packetid = htons(Com_WBhton(0x1900));
+	drop->item = 61;//155, 61
+	drop->id = htons(0x01F9);
+	drop->posx = htonl(client->posxy[0][0]);
+	drop->posy = htonl(client->posxy[1][0]);
+	drop->alt = htonl(client->posalt[0]);
+	drop->xspeed = htons(0);
+	drop->yspeed = htons(-10);
+	drop->zspeed = htons(70);
+	drop->unknown1 = htonl(0x20);
+	drop->shortnick = htonl(client->shortnick);
+
+	
+	for (i = 0; i < maxentities->value; i++)
+	{
+		if (clients[i].inuse && !clients[i].drone)
+		{
+			for (j = 0; j < MAX_SCREEN; j++)
+			{
+				if (!clients[i].visible[j].client)
+					continue;
+
+				if (client == clients[i].visible[j].client)
+				{
+					SendPacket(buffer, sizeof(buffer), &clients[i]);
+					break;
+				}
+			}
+		}
+	}
+	
+	SendPacket(buffer, sizeof(buffer), client);
+}
+
 void Cmd_Rocket(int32_t y, double angle, double angle2, client_t *client)
 {
 	rocketbomb_t *drop;
@@ -5840,7 +5904,7 @@ void Cmd_Rocket(int32_t y, double angle, double angle2, client_t *client)
 	drop = (rocketbomb_t *) buffer;
 
 	drop->packetid = htons(Com_WBhton(0x1900));
-	drop->item = y;//113;//64;
+	drop->item = y;//155, 61
 	drop->id = htons(0x01F9);
 	drop->posx = htonl(client->posxy[0][0]);
 	drop->posy = htonl(client->posxy[1][0]);// - y);
