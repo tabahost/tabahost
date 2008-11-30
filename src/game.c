@@ -1412,7 +1412,8 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "pingtest"))
 		{
-			Cmd_Pingtest(0, client);
+			PPrintf(client, RADIO_YELLOW, "Command currently disabled"); 
+			//Cmd_Pingtest(0, client);
 			return;
 		}
 		else if (!Com_Stricmp(command, "easy"))
@@ -3612,6 +3613,8 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x0D04:
 				if(!setjmp(debug_buffer))
 				{
+					Com_Printf("Printing request disco packet:\n");
+					Com_Printfhex(buffer, len);
 					client->disconnect = 1;
 				}
 				else
@@ -7465,6 +7468,10 @@ void SendFieldStatus(u_int16_t field, client_t *client)
 						SinkBoat(FALSE, &arena->fields[field].buildings[i], client);
 
 					SetBuildingStatus(&arena->fields[field].buildings[i], 2, client);
+				}
+				else
+				{
+					SetBuildingStatus(&arena->fields[field].buildings[i], 0, client);
 				}
 			}
 			else

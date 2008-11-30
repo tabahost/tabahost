@@ -216,6 +216,7 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			{
 				Com_Printf("DEBUG: len+4 (%d), Com_Send() (%d)\n", len+4, i);
 				Com_Printf("WARNING: SendPacket() error sending packet to %s (%s)\n", client->longnick, client->ip);
+				Com_Printf("%s error in Com_Send()\n", client->longnick);
 				//				client->timeout = MAX_TIMEOUT;
 				RemoveClient(client);
 				return -1;
@@ -223,6 +224,8 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 		else
 		{
+			Com_Printf("WARNING: client not in use or without socket\n");
+			Com_Printf("%s client not in use or without socket\n", client->longnick);
 			RemoveClient(client);
 			return -1;
 		}
@@ -340,9 +343,9 @@ void FlushSocket(int sockfd)
 	memset(mainbuffer, 0, MAX_RECVDATA);
 
 #ifdef _WIN32
-	ConnError(WSAGetLastError());
+	//ConnError(WSAGetLastError());
 #else
-	ConnError(errno);
+	//ConnError(errno);
 #endif
 
 	while ((n=Com_Recv(sockfd, mainbuffer, MAX_RECVDATA)) > 0)

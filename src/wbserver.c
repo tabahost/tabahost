@@ -523,6 +523,7 @@ void RunFrame(void)
 						if(strlen(clients[i].longnick))
 						UpdateClientFile(&clients[i]);
 
+						Com_Printf("%s ProcessClient() returned -1\n", clients[i].longnick);
 						RemoveClient(&clients[i]);
 					}
 				}

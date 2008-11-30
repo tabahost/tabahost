@@ -1382,7 +1382,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 		return 0;
 	}
 
-	if (field >= fields->value) // capture city
+	if (field >= fields->value) // capture just a city
 	{
 		if (field < (fields->value + cities->value))
 		{
@@ -1451,7 +1451,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 		{
 			BPrintf(RADIO_YELLOW, "System: FIELDF%d has been captured by the %s", field+1, GetCountry(country));
 
-			for (/*j = */i = 0; i < MAX_CITYFIELD; i++)
+			for (/*j = */i = 0; i < MAX_CITYFIELD; i++) // Capture field and it captures the cities
 			{
 				if (arena->fields[field].city[i])
 				{
@@ -1562,6 +1562,8 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 				SendPacket(buffer, sizeof(buffer), &clients[i]);
 			}
 		}
+		
+		SendFieldStatus(field, NULL);
 	}
 
 	return 1;
