@@ -392,32 +392,17 @@ int Com_Send(int s, u_int8_t *buf, int len)
 		return -1;
 	}
 
-	total = len;
+	total = 0;
 
 	for (i = 0; i < MAX_RETRY; i++)
 	{
-		if ((n=send(s, buf, len, 0)) ==
-#ifdef _WIN32
-				SOCKET_ERROR
-#else
-				-1
-#endif
-		)
+		if ((n = send(s, buf, len, 0)) == -1)
 		{
-#ifdef	_WIN32
-			n = WSAGetLastError();
-			if (n != WSAEWOULDBLOCK)
-#else
-			n = errno;
-			if (n != EWOULDBLOCK)
-#endif
+			if (errno != EWOULDBLOCK)
 			{
 				Com_Printf("WARNING: Com_Send() socket %d error\n", s);
-				ConnError(n);
-				// return -1;
+				ConnError(errno);
 			}
-			else
-				return 0;
 		}
 		else
 		{
@@ -427,16 +412,15 @@ int Com_Send(int s, u_int8_t *buf, int len)
 #endif
 			if (server_speeds->value)
 				arena->sent += n;
+			
+			total += n;
 
 			if (len != n)
 			{
-				Com_Printf("DEBUG: Com_Send(): retry = %d\n", i);
-				Com_Printf("DEBUG: Com_Send(): sent = %d, len = %d, total = %d\n", n, len, total);
-
 				buf += n;
 				len -= n;
-
-				Com_Printf("DEBUG: Com_Send(): len = %d\n", len);
+				
+				Com_Printf("DEBUG: Com_Send(): sent %d, left %d, try %d", n, len, i);
 			}
 			else
 			{
@@ -445,7 +429,12 @@ int Com_Send(int s, u_int8_t *buf, int len)
 		}
 	}
 
-	return -1;
+	if(total)
+		return total;
+	else if(n < 0)
+		return -1;
+	else
+		return 0;
 }
 
 /*************

@@ -615,6 +615,8 @@ int ProcessClient(client_t *client)
 					{
 						if(x < 0)
 						{
+							BPrintf(RADIO_YELLOW, "%s broke connection", client->longnick);
+							Com_Printf("%s broke connection\n", client->longnick);
 							z = -1;
 						}
 
