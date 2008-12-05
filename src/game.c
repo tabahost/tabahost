@@ -717,10 +717,11 @@ void CheckArenaRules(void)
 			
 			if(vitals && !arena->fields[i].vitals)
 			{
-				CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i+1);
-				
 				if(!oldcapt->value && wb3->value)
+				{
+					CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i+1);
 					CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
+				}
 			}
 			
 			if(!oldcapt->value && wb3->value)
@@ -3533,7 +3534,6 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						WB3ArenaConfig2(client);
 						WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
 						WB3DotCommand(client, ".date %u %u %u", arena->month, arena->day, arena->year);
-						WB3DotCommand(client, ".gunstat");
 						WB3NWAttachSlot(client);
 					}
 
@@ -5078,7 +5078,8 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 							}
 							else
 							{
-								WB3DotCommand(client, ".midairs_frndly 1");
+								if(IsBomber(client) || IsCargo(client)) // DEBUG this is a temporary fix to wings collision
+									WB3DotCommand(client, ".midairs_frndly 1");
 							}
 						}
 

@@ -306,6 +306,12 @@ void Com_Close(int *fd)
 int Com_Recv(int s, u_int8_t *buf, int len)
 {
 	int n;
+	
+	if(!s)
+	{
+		ConnError(ENOTSOCK);
+		return -1;
+	}
 
 	if ((n=recv(s, buf, len, 0)) ==
 #ifdef _WIN32
@@ -385,6 +391,8 @@ int Com_Send(int s, u_int8_t *buf, int len)
 {
 	int n, total;
 	u_int8_t i;
+	
+	u_int8_t ldebug = 0;
 
 	if (!s) // to avoid SIGPIPE
 	{
@@ -402,7 +410,10 @@ int Com_Send(int s, u_int8_t *buf, int len)
 			{
 				Com_Printf("WARNING: Com_Send() socket %d error\n", s);
 				ConnError(errno);
+				return -1;
 			}
+			else if(ldebug)
+					Com_Printf("DEBUG: Com_Send(): EWOULDBLOCK\n");
 		}
 		else
 		{
@@ -414,13 +425,17 @@ int Com_Send(int s, u_int8_t *buf, int len)
 				arena->sent += n;
 			
 			total += n;
+			
+			if(ldebug)
+				Com_Printf("DEBUG: Com_Send(): sent %d, left %d, try %d\n", n, len, i);
 
 			if (len != n)
 			{
 				buf += n;
 				len -= n;
 				
-				Com_Printf("DEBUG: Com_Send(): sent %d, left %d, try %d", n, len, i);
+				Com_Printf("DEBUG: Com_Send(): sent %d, left %d, try %d\n", n, len, i);
+				ldebug = 1;
 			}
 			else
 			{
@@ -429,6 +444,9 @@ int Com_Send(int s, u_int8_t *buf, int len)
 		}
 	}
 
+	if(ldebug)
+		Com_Printf("DEBUG: Com_Send(): total %d, n %d\n", total, n);
+	
 	if(total)
 		return total;
 	else if(n < 0)

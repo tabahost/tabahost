@@ -215,7 +215,9 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			else
 			{
 				Com_Printf("DEBUG: len+4 (%d), Com_Send() (%d)\n", len+4, i);
-				Com_Printf("WARNING: SendPacket() error sending packet to %s (%s)\n", client->longnick, client->ip);
+				Com_Printf(
+						"WARNING: SendPacket() error sending packet to %s (%s)\n",
+						client->longnick, client->ip);
 				Com_Printf("%s error in Com_Send()\n", client->longnick);
 				//				client->timeout = MAX_TIMEOUT;
 				RemoveClient(client);
@@ -225,14 +227,16 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		else
 		{
 			Com_Printf("WARNING: client not in use or without socket\n");
-			Com_Printf("%s client not in use or without socket\n", client->longnick);
+			Com_Printf("%s client not in use or without socket\n",
+					client->longnick);
 			RemoveClient(client);
 			return -1;
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: SendPacket() overflowed (packet to %s - %s)\n", client->longnick, client->ip);
+		Com_Printf("WARNING: SendPacket() overflowed (packet to %s - %s)\n",
+				client->longnick, client->ip);
 		RemoveClient(client);
 		return -1;
 	}
@@ -283,7 +287,9 @@ int GetPacket(client_t *client)
 
 		if (len > MAX_RECVDATA)
 		{
-			Com_Printf("WARNING: %s(%s) GetPacket(): mainbuffer oversized, packet skipped\n", client->longnick, client->ip);
+			Com_Printf(
+					"WARNING: %s(%s) GetPacket(): mainbuffer oversized, packet skipped\n",
+					client->longnick, client->ip);
 			FlushSocket(client->socket);
 			return 0;
 		}
@@ -302,7 +308,9 @@ int GetPacket(client_t *client)
 
 					if (m < 0) // invalid checksum
 					{
-						Com_Printf("WARNING: %s(%s) - Invalid Packet Checksum\n", client->longnick, client->ip);
+						Com_Printf(
+								"WARNING: %s(%s) - Invalid Packet Checksum\n",
+								client->longnick, client->ip);
 						FlushSocket(client->socket);
 						return 0;
 					}
@@ -313,22 +321,23 @@ int GetPacket(client_t *client)
 					return 0;
 				}
 			} //
-return					n;
-				}
-				else
-				return n;
-			}
-
-			Com_Printf("WARNING: %s(%s) %d - Invalid Packet\n", client->longnick, client->ip, n);
-			FlushSocket(client->socket);
-			return 0;
+			
+			return n;
 		}
+		else
+			return n;
+	}
 
-		/*************
-		 FlushSocket
+	Com_Printf("WARNING: %s(%s) %d - Invalid Packet\n", client->longnick, client->ip, n);
+	FlushSocket(client->socket);
+	return 0;
+}
 
-		 Flush the client socket
-		 *************/
+/*************
+ FlushSocket
+
+ Flush the client socket
+ *************/
 
 void FlushSocket(int sockfd)
 {
@@ -373,7 +382,8 @@ void ProtocolError(client_t *client)
 	buffer[0] = 0xC0;
 	buffer[1] = 0x04;
 
-	Com_Printf("WARNING: %s(%s) Invalid login protocol (Code %d)\n", client->longnick, client->ip, client->login);
+	Com_Printf("WARNING: %s(%s) Invalid login protocol (Code %d)\n",
+			client->longnick, client->ip, client->login);
 
 	Com_Send(client->socket, buffer, 2);
 }
