@@ -208,21 +208,22 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		if (client->login || (client->inuse && client->socket))
 		{
-			if ((i = Com_Send(client->socket, datagram, len+4)) == len+4)
-			{
-				return 0;
-			}
-			else
-			{
-				Com_Printf("DEBUG: len+4 (%d), Com_Send() (%d)\n", len+4, i);
-				Com_Printf(
-						"WARNING: SendPacket() error sending packet to %s (%s)\n",
-						client->longnick, client->ip);
-				Com_Printf("%s error in Com_Send()\n", client->longnick);
-				//				client->timeout = MAX_TIMEOUT;
-				RemoveClient(client);
-				return -1;
-			}
+			return Com_Send(client, datagram, (int)len+4);
+//			if ((i = Com_Send(client, datagram, (int)len+4)) == len+4)
+//			{
+//				return 0;
+//			}
+//			else
+//			{
+//				Com_Printf("DEBUG: len+4 (%d), Com_Send() (%d)\n", len+4, i);
+//				Com_Printf(
+//						"WARNING: SendPacket() error sending packet to %s (%s)\n",
+//						client->longnick, client->ip);
+//				Com_Printf("%s error in Com_Send()\n", client->longnick);
+//				//				client->timeout = MAX_TIMEOUT;
+//				RemoveClient(client);
+//				return -1;
+//			}
 		}
 		else
 		{
@@ -385,5 +386,5 @@ void ProtocolError(client_t *client)
 	Com_Printf("WARNING: %s(%s) Invalid login protocol (Code %d)\n",
 			client->longnick, client->ip, client->login);
 
-	Com_Send(client->socket, buffer, 2);
+	Com_Send(client, buffer, 2);
 }

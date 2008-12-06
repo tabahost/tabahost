@@ -700,6 +700,8 @@ typedef struct client_s
 //	drone vars END
 
 	int			socket;			// player's socket
+	u_int16_t	buf_offset;		//
+	u_int8_t	buffer[MAX_SENDDATA]; // Com_Send() buffer
 	char		ip[16];			// player's IP
 	u_int16_t	ctrid;			// player's country ID
 	u_int32_t	hdserial;		// player's HD serial
@@ -1929,7 +1931,7 @@ char	*sqltime(const struct tm *timeptr);
 void	Com_Close(int *fd);
 int		Com_Recv(int s, u_int8_t *buf, int len);
 double	Com_Pow(double x, u_int32_t y);
-int		Com_Send(int s, u_int8_t *buf, int len);
+int		Com_Send(client_t *client, u_int8_t *buf, int len);
 void	ConnError(int n);
 int		Com_Read(FILE *fp, u_int8_t *buffer, u_int32_t num);
 void	Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id);

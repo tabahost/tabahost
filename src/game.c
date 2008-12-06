@@ -8645,7 +8645,7 @@ int32_t SendArenaNames(client_t *client)
 	sprintf(&(buffer[offset]), "*\n");
 	offset += 2;
 
-	n = Com_Send(client->socket, buffer, offset);
+	n = Com_Send(client, buffer, (int)offset);
 
 	/*
 	 for(i = 0, i < 4, i++)
@@ -8713,7 +8713,7 @@ void SendPlayersNames(client_t *client)
 
 	buffer[offset++] = 0xff;
 
-	Com_Send(client->socket, buffer, offset);
+	Com_Send(client, buffer, offset);
 }
 
 /*************

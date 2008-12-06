@@ -515,9 +515,12 @@ int ProcessClient(client_t *client)
 
 							{
 								if(!nearplane->drone)
-								PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
-
+									PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
+								Com_Printf("%s collided emulated with %s\n", client, nearplane->longnick);
+								
+								
 								PPrintf(client, RADIO_DARKGREEN, "%s collided with you!!!", nearplane->longnick);
+								Com_Printf("%s collided emulated with %s\n", nearplane->longnick, client);
 
 								if(rand()%2)
 								{
@@ -899,7 +902,7 @@ int32_t ProcessLogin(client_t *client)
 						// Requesting Arenalist
 						u_int8_t temp[2] =
 						{ 0x00, 0x00 };
-						n = Com_Send(client->socket, temp, 2);
+						n = Com_Send(client, temp, 2);
 
 						if (n < 0 || !(SendArenaNames(client) > 0))
 						{
@@ -919,7 +922,7 @@ int32_t ProcessLogin(client_t *client)
 						// Entering the game
 						u_int8_t temp[2] =
 						{ 0x00, 0x00 };
-						n = Com_Send(client->socket, temp, 2);
+						n = Com_Send(client, temp, 2);
 
 						if (n != 2)
 						{
@@ -1031,7 +1034,7 @@ u_int8_t LoginKey(client_t *client)
 
 	client->loginkey = CalcLoginKey(buffer, 32);
 
-	return Com_Send(client->socket, buffer, 32);
+	return Com_Send(client, buffer, 32);
 }
 
 void DecryptOctet(u_int8_t Octet[8], unsigned long Key)
@@ -1181,7 +1184,7 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 		buffer[0] = 0x05;
 	}
 
-	if ((Com_Send(client->socket, buffer, 2)) != 2)
+	if ((Com_Send(client, buffer, 2)) != 2)
 	{
 		return -1;
 	}
@@ -2088,10 +2091,8 @@ void CheckKiller(client_t *client)
 						{
 							PPrintf(client->hitby[i], RADIO_YELLOW, "You've got a piece of %s", client->longnick);
 						}
-						else
-						{
-							Com_Printf("%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
-						}
+
+						Com_Printf("%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
 
 						client->hitby[i]->score.airscore += SCORE_ASSIST;
 

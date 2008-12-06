@@ -387,72 +387,110 @@ double Com_Pow(double x, u_int32_t y)
  Just a send() with padronized return value
  *************/
 
-int Com_Send(int s, u_int8_t *buf, int len)
+int Com_Send(client_t *client, u_int8_t *buf, int len)
 {
-	int n, total;
+	int n, tlen;
 	u_int8_t i;
-	
-	u_int8_t ldebug = 0;
+	u_int8_t *tbuf;
 
-	if (!s) // to avoid SIGPIPE
+	if (!client->socket) // to avoid SIGPIPE
 	{
 		Com_Printf("WARNING: Com_Send() tried to send data to socket zero\n");
 		return -1;
 	}
 
-	total = 0;
-
-	for (i = 0; i < MAX_RETRY; i++)
+	// save the pointers and length
+	tbuf = buf;
+	tlen = len;
+	
+	// if there is something in buffer, send it first
+	if(client->buf_offset)
 	{
-		if ((n = send(s, buf, len, 0)) == -1)
+		// redirect the sending buffer
+		buf = client->buffer;
+		len = client->buf_offset;
+	}
+
+	if ((n = send(client->socket, buf, len, 0)) == -1)
+	{
+		if (errno != EWOULDBLOCK)
 		{
-			if (errno != EWOULDBLOCK)
-			{
-				Com_Printf("WARNING: Com_Send() socket %d error\n", s);
-				ConnError(errno);
-				return -1;
-			}
-			else if(ldebug)
-					Com_Printf("DEBUG: Com_Send(): EWOULDBLOCK\n");
+			Com_Printf("WARNING: Com_Send() socket %d error\n", client->socket);
+			ConnError(errno);
+			return -1;
 		}
 		else
 		{
-#ifdef DEBUGLOGIN
-			Com_Printf("-->>");
-			Com_Printfhex(buf, n);
-#endif
-			if (server_speeds->value)
-				arena->sent += n;
-			
-			total += n;
-			
-			if(ldebug)
-				Com_Printf("DEBUG: Com_Send(): sent %d, left %d, try %d\n", n, len, i);
-
-			if (len != n)
+			// socket blocked, copy data to buffer
+			if((client->buf_offset + tlen) < MAX_SENDDATA)
 			{
-				buf += n;
-				len -= n;
-				
-				Com_Printf("DEBUG: Com_Send(): sent %d, left %d, try %d\n", n, len, i);
-				ldebug = 1;
+				memcpy(client->buffer+client->buf_offset, tbuf, tlen);
+				client->buf_offset += tlen;
 			}
 			else
 			{
-				return total;
+				Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+				return -1;
 			}
+		
+			Com_Printf("WARNING: Com_Send() %s EWOULDBLOCK\n", client->longnick);
+			return 0;
 		}
 	}
-
-	if(ldebug)
-		Com_Printf("DEBUG: Com_Send(): total %d, n %d\n", total, n);
-	
-	if(total)
-		return total;
-	else if(n < 0)
-		return -1;
 	else
-		return 0;
+	{
+#ifdef DEBUGLOGIN
+		Com_Printf("-->>");
+		Com_Printfhex(buf, n);
+#endif
+		if (server_speeds->value)
+			arena->sent += n;
+		
+		if (len != n)
+		{
+			buf += n;
+			len -= n;
+			
+			Com_Printf("WARNING: %s sent %d offset %d\n", client->longnick, n, client->buf_offset);
+			
+			if(client->buf_offset)
+			{
+				// copy unsent bytes to top of the list
+				memcpy(client->buffer, client->buffer+n, len);
+				client->buf_offset = len;
+				
+				// now copy the rest of data to buffer
+				if((client->buf_offset + tlen) < MAX_SENDDATA)
+				{
+					memcpy(client->buffer+client->buf_offset, tbuf, tlen);
+					client->buf_offset += tlen;
+				}
+				else
+				{
+					Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+				}
+			}
+			else
+			{
+				memcpy(client->buffer, buf, len);
+				client->buf_offset = len;
+			}
+			
+			return n;
+		}
+		else
+		{
+			// if all data sent from buffer, clear it and send the actual data
+			if(client->buf_offset)
+			{
+				Com_Printf("WARNING: %s full buffer sent, not sending the actual data\n", client->longnick);
+				client->buf_offset = 0;
+				return Com_Send(client, tbuf, tlen);
+			}
+			
+			return n;
+		}
+	}
 }
 
 /*************
