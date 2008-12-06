@@ -1505,6 +1505,9 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "gunstat"))
 		{
+			PPrintf(client, RADIO_YELLOW, "gunstat disabled for maintenance");
+			return;
+			
 			if (client->gunstat)
 			{
 				client->gunstat = 0;
@@ -3615,7 +3618,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				{
 					Com_Printf("Printing request disco packet:\n");
 					Com_Printfhex(buffer, len);
-					client->disconnect = 1;
+					//client->disconnect = 1;
 				}
 				else
 				{
@@ -5958,15 +5961,7 @@ void PRemoveDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 	weapondestroy_t *weapondestroy;
 	weapondestroy = (weapondestroy_t *)buffer;
 
-	if (wb3->value)
-	{
-		if (weapondestroy->packetid == ntohs(0x1906))
-			weapondestroy->packetid = htons(Com_WBhton(0x1906));
-		else
-			weapondestroy->packetid = htons(Com_WBhton(0x190C));
-	}
-	else
-		weapondestroy->packetid = htons(Com_WBhton(0x1906));
+	weapondestroy->packetid = htons(Com_WBhton(0x1906));
 
 	for (i = 0; i < maxentities->value; i++)
 	{
