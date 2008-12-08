@@ -338,47 +338,50 @@ void CheckArenaRules(void)
 				arena->fields[i].tonnage = 0;
 		}
 		
-		for (j = 0; j < MAX_BUILDINGS; j++)
+		if(rebuildtime->value < 9999)
 		{
-			if (arena->fields[i].buildings[j].field)
+			for (j = 0; j < MAX_BUILDINGS; j++)
 			{
-				if (arena->fields[i].buildings[j].status)
+				if (arena->fields[i].buildings[j].field)
 				{
-					if (arena->fields[i].buildings[j].type < BUILD_CV || arena->fields[i].buildings[j].type > BUILD_SUBMARINE)
-						arena->fields[i].buildings[j].timer--;
-
-					if (arena->fields[i].buildings[j].timer <= 0)
+					if (arena->fields[i].buildings[j].status)
 					{
-						arena->fields[i].buildings[j].timer = 0;
-						arena->fields[i].buildings[j].status = 0;
-						arena->fields[i].buildings[j].armor = GetBuildingArmor(arena->fields[i].buildings[j].type, NULL);
-
-						if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
-							SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
-
-						SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status, NULL);
-
-						if (arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
+						if (arena->fields[i].buildings[j].type < BUILD_CV || arena->fields[i].buildings[j].type > BUILD_SUBMARINE)
+							arena->fields[i].buildings[j].timer--;
+	
+						if (arena->fields[i].buildings[j].timer <= 0)
 						{
-							Com_Printf("DEBUG: Reup TOWER f%d\n", i+1);
-							//							close = arena->fields[i].abletocapture;
-							Cmd_Capt(i, arena->fields[i].country, NULL);
-							//							arena->fields[i].abletocapture = close;
+							arena->fields[i].buildings[j].timer = 0;
+							arena->fields[i].buildings[j].status = 0;
+							arena->fields[i].buildings[j].armor = GetBuildingArmor(arena->fields[i].buildings[j].type, NULL);
+	
+							if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
+								SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
+	
+							SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status, NULL);
+	
+							if (arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
+							{
+								Com_Printf("DEBUG: Reup TOWER f%d\n", i+1);
+								//							close = arena->fields[i].abletocapture;
+								Cmd_Capt(i, arena->fields[i].country, NULL);
+								//							arena->fields[i].abletocapture = close;
+							}
+							else if (arena->fields[i].buildings[j].type == BUILD_WARE) // to cancel warehouse effect
+							{
+								arena->fields[i].warehouse = 0;
+							}
 						}
-						else if (arena->fields[i].buildings[j].type == BUILD_WARE) // to cancel warehouse effect
-						{
-							arena->fields[i].warehouse = 0;
-						}
+						//					else if(arena->fields[i].buildings[j].status == 1 && arena->fields[i].buildings[j].timer < (u_int32_t)(rebuildtime->value/2))
+						//					{
+						//						arena->fields[i].buildings[j].status = 2;
+						//						SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status);
+						//					}
 					}
-					//					else if(arena->fields[i].buildings[j].status == 1 && arena->fields[i].buildings[j].timer < (u_int32_t)(rebuildtime->value/2))
-					//					{
-					//						arena->fields[i].buildings[j].status = 2;
-					//						SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status);
-					//					}
 				}
+				else
+					break;
 			}
-			else
-				break;
 		}
 	}
 
@@ -10802,7 +10805,7 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 			rules |= FLAG_ENABLEOTTOS;
 	}
 
-	startack->packetid = htons(Com_WBhton(0x041E));
+	startack->packetid = htons(Com_WBhton(0x041F));
 	startack->country = reqack->country;
 	startack->field = htonl(ntohl(reqack->field) - 1);
 	startack->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
