@@ -25,18 +25,16 @@
   
  compiler settings to gdb: "-fomit-frame-pointer" removed
 
- 2DO:
- Verify vital structures
- test arena->frame = 1 with numer lesser than 4294962000UL
- Check warehouse in cities
- change RPS of captured fields
- change update wingman pos when receive player data
+ TODO: Verify vital structures
+ TODO: test arena->frame = 1 with numer lesser than 4294962000UL
+ TODO: Check warehouse in cities
+ TODO: change RPS of captured fields
+ TODO: change update wingman pos when receive player data
  
- abletocapture with linked cities: test it
+ TODO: abletocapture with linked cities: test it
 	 game.c:363
   
- search for "timer = "
- correct all clients/drones timer and offset
+ TODO: search for "timer = ", correct all clients/drones timer and offset
 
  UnBeta Jobs:
 
@@ -46,34 +44,23 @@
 
  Primary jobs:
 
- * CODE bail speed limit
- * CODE reup economy at field capt
- * CODE "verbose"
- * CODE exclusive armor to special planes
+ * TODO: bail speed limit
+ * TODO: reup economy at field capt
+ * TODO: "verbose"
+ * TODO: exclusive armor to special planes
 
  Secondary jobs:
- * CODE 2 cities surrender
- * CODE spheric/elyptic radar range
- * CODE change FAU explosion
- * CODE pingtest
+ * TODO: 2 cities surrender
+ * TODO: spheric/elyptic radar range
+ * TODO: change FAU explosion
+ * TODO: pingtest
 
- * CODE Nuclear Bomb (done, not allowed yet)
- * CODE .fieldalt <field> <alt>
- * CODE Easter egg
- * CODE NA Map
- * CODE arenas intercommunication
- * CODE buffer known busy gunner position
- * CODE free gunner position when player ejects but keep sending 0e00 packet (not needed)
-
- Ask Aike:
-
- * Packet 0214
- * Packet 0309
- * Packet 090E
- * Packet 090F
- * Packet 0F00
-
- * Packet
+ * TODO: Nuclear Bomb (done, not allowed yet)
+ * TODO: .fieldalt <field> <alt>
+ * TODO: Easter egg
+ * TODO: arenas intercommunication
+ * TODO: buffer known busy gunner position
+ * TODO: free gunner position when player ejects but keep sending 0e00 packet (not needed)
 
  ****************************************************
  ****************************************************/
@@ -147,6 +134,7 @@ typedef unsigned int u_int32_t;
 #define MAX_UDPDATA			4096	// max udp packet size
 #define MAX_RECVDATA		1024	// max data recv each recv()
 #define MAX_SENDDATA		1024 	// max data can send
+#define MAX_SENDBUFFER		8192 	// max data can store in send buffer
 #define MAX_QUERY			4096 	// max data can be query
 #define MAX_RETRY			5		// max number of retries
 #define MAX_PREDICT			6		// max number os history for prediction
@@ -600,6 +588,7 @@ typedef struct arena_s
 	u_int32_t	sent;			// bytes sent
 	u_int32_t	recv;			// bytes recv
 	u_int32_t	frame;			//
+	u_int8_t	bufferit;		// buffer the next sent packet if send() returns EWOULDBLOCK
 	u_int16_t	year;			// arena year
 	u_int8_t	month;			// arena month
 	u_int8_t	day;			// arena day
@@ -701,7 +690,7 @@ typedef struct client_s
 
 	int			socket;			// player's socket
 	u_int16_t	buf_offset;		//
-	u_int8_t	buffer[MAX_SENDDATA]; // Com_Send() buffer
+	u_int8_t	buffer[MAX_SENDBUFFER]; // Com_Send() buffer
 	char		ip[16];			// player's IP
 	u_int16_t	ctrid;			// player's country ID
 	u_int32_t	hdserial;		// player's HD serial
@@ -779,8 +768,8 @@ typedef struct client_s
 	u_int16_t	killstod;		// kills in this TOD
 	u_int16_t	structstod;		// structures in this TOD
 	float		lastscore;		// score in last flight
-	float		streakscore;	// score accumulated in the streak // DEBUD: unused????
-	u_int8_t	nummedals;		// num of medals received // DEBUG: unused????
+	float		streakscore;	// score accumulated in the streak // TODO: unused????
+	u_int8_t	nummedals;		// num of medals received // TODO: unused????
 	int16_t		rank;			// Elo rating
 	u_int8_t	ranking;		// pilot ranking
 
@@ -794,6 +783,7 @@ typedef struct client_s
 	u_int8_t	lograwdata;		// flag to log raw data
 	char		logfile[64];	// logfile name
 	char		file[128];		// filenames (motd, score, etc)
+	char		skin[64];		// client skin
 	u_int8_t	fileframe;		// if filesize bigger than a value, clip it in fileframe packets
 
 	int8_t		lives;			// how many lives player have (-1 = infinite)
@@ -2191,7 +2181,8 @@ u_int8_t CheckMedals(client_t *client);
 u_int8_t AddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
 void	ForceEndFlight(u_int8_t remdron, client_t *client);
 void	ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client);
-void	WB3OverrideSkin(u_int8_t slot, u_int16_t plane, client_t *client);
+void	WB3ClientSkin(u_int8_t *buffer, client_t *client);
+void	WB3OverrideSkin(u_int8_t slot, client_t *client);
 void	CreateScores(client_t *client);
 void	ClientHDSerial(u_int8_t *buffer, client_t *client);
 void	ClientIpaddr(client_t *client);

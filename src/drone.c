@@ -1111,7 +1111,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 
 			part = AddKiller(dest, source);
 			if (part >= 0)
-				dest->damby[part] += 40;
+				dest->damby[part] += 40; // TODO: new score system
 
 			SendPings(1, 143, dest);
 		}
@@ -1674,7 +1674,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 							killer = AddKiller(&clients[i], client);
 
 							if (killer >= 0)
-								clients[i].damby[killer] += munition->he;
+								clients[i].damby[killer] += munition->he; // TODO: new score system
 						}
 
 						AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, NULL, NULL, &clients[i]);

@@ -3106,7 +3106,7 @@ void ChangeArena(char *map, client_t *client)
 			{
 				if (clients[i].inuse && clients[i].infly)
 				{
-					PEndflightScores(1, 0, 0, &clients[i]); // DEBUG: force client to land or just simulate land scores
+					PEndflightScores(1, 0, 0, &clients[i]); // TODO: force client to land or just simulate land scores
 				}
 
 				Com_Close(&(clients[i].socket));

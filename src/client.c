@@ -2750,6 +2750,30 @@ void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
 }
 
 /*************
+ WB3ClientSkin
+
+ Set client skin
+ *************/
+
+void WB3ClientSkin(u_int8_t *buffer, client_t *client)
+{
+	wb3overrideskin_t *clientskin;
+
+	clientskin = (wb3overrideskin_t *) buffer;
+
+	if(clientskin->msgsize < 64)
+	{
+		memcpy(client->skin, &(clientskin->msg), size);
+	}
+	else
+	{
+		client->skin[0] = '\0';
+	}
+
+	Com_Printf("%s skin set to \"%s\"\n", client->longnick, client->skin);
+}
+
+/*************
  WB3OverrideSkin
 
  Make a Pingtest call
@@ -2759,142 +2783,23 @@ void WB3OverrideSkin(u_int8_t slot, u_int16_t plane, client_t *client)
 {
 	wb3overrideskin_t *overrideskin;
 	u_int8_t size;
-	char skin[64];
 	u_int8_t buffer[256];
 	
 	memset(buffer, 0, sizeof(buffer));
 
 	overrideskin = (wb3overrideskin_t *) buffer;
 	
-	switch (plane)
+	size = strlen(client->skin);
+
+	if(size && size < 64)
 	{
-		case 2:
-			sprintf(skin, "ppv\\f4f4\\f4f4_2ppv.vfc@f4f4_2.ppv");
-			break;
-		case 4:
-			sprintf(skin, "ppv\\F4U1D\\f4u1d_4ppv.vfc@f4u1d_4.ppv");
-			break;
-		case 9:
-			sprintf(skin, "ppv\\ki84\\ki84_4ppv.vfc@ki84_4.ppv");
-			break;
-		case 10:
-			sprintf(skin, "ppv\\BF109E\\bf109e_2ppv.vfc@bf109e_2.ppv");
-			break;
-		case 11:
-			sprintf(skin, "ppv\\bf109f\\bf109f_4ppv.vfc@bf109f_4.ppv");
-			break;
-		case 13:
-			sprintf(skin, "ppv\\109gr6\\g6r6jg302ppv.vfc@g6r6jg302.ppv");
-			break;
-		case 17:
-			sprintf(skin, "ppv\\fw1904\\fw1904_4ppv.vfc@fw1904_4.ppv");
-			break;
-		case 21:
-			sprintf(skin, "ppv\\hurri2\\hurri2_2ppv.vfc@hurri2_2.ppv");
-			break;
-		case 23:
-			sprintf(skin, "ppv\\spit5\\spit5_14ppv.vfc@spit5_14.ppv");
-			break;
-		case 24:
-			sprintf(skin, "ppv\\spit9\\spit9_10ppv.vfc@spit9_10.ppv");
-			break;
-		case 25:
-			sprintf(skin, "ppv\\p38f\\p38f_4ppv.vfc@p38f_4.ppv");
-			break;
-		case 27:
-			sprintf(skin, "ppv\\p38l\\p38l2ppv.vfc@p38l2.ppv");
-			break;
-		case 28:
-			sprintf(skin, "ppv\\p39d\\p39d2ppv.vfc@p39d2.ppv");
-			break;
-		case 31:
-			sprintf(skin, "ppv\\P51\\p51d332ppv.vfc@p51d332.ppv");
-			break;
-		case 32:
-			sprintf(skin, "ppv\\d3a\\d3a_2ppv.vfc@d3a_2.ppv");
-			break;
-		case 35:
-			sprintf(skin, "ppv\\ju88a\\ju88a_2ppv.vfc@ju88a_2.ppv");
-			break;
-		case 38:
-			sprintf(skin, "ppv\\b17\\b17bppv.vfc@b17b.ppv");
-			break;
-		case 41:
-			sprintf(skin, "ppv\\b25c\\b25c_3ppv.vfc@b25c_3.ppv");
-			break;
-		case 42:
-			sprintf(skin, "ppv\\p40b\\p40b2ppv.vfc@p40b2.ppv");
-			break;
-		case 43:
-			sprintf(skin, "ppv\\p47c\\p47c_10ppv.vfc@p47c_10.ppv");
-			break;
-		case 45:
-			sprintf(skin, "ppv\\seaf2\\seaf2_2ppv.vfc@seaf2_2.ppv");
-			break;
-		case 48:
-			sprintf(skin, "ppv\\me262\\me262_2ppv.vfc@me262_2.ppv");
-			break;
-		case 49:
-			sprintf(skin, "ppv\\yak3\\yak3_2ppv.vfc@yak3_2.ppv");
-			break;
-		case 51:
-			sprintf(skin, "ppv\\ju87d\\ju87d_6ppv.vfc@ju87d_6.ppv");
-			break;
-		case 52:
-			sprintf(skin, "ppv\\mosq6\\mosq6_2ppv.vfc@mosq6_2.ppv");
-			break;
-		case 56:
-			sprintf(skin, "ppv\\ki61\\ki61_3ppv.vfc@ki61_3.ppv");
-			break;
-		case 58:
-			sprintf(skin, "ppv\\b24d\\b24d_4ppv.vfc@b24d_4.ppv");
-			break;
-		case 59:
-			sprintf(skin, "ppv\\B24J\\b24j_2ppv.vfc@b24j_2.ppv");
-			break;
-		case 75:
-			sprintf(skin, "ppv\\mc202\\mc202_2ppv.vfc@mc202_2.ppv");
-			break;
-		case 79:
-			sprintf(skin, "ppv\\truck2\\opelakppv.vfc@opelak.ppv");
-			break;
-		case 91:
-			sprintf(skin, "ppv\\camel\\camelrbppv.vfc@camelrb.ppv");
-			break;
-		case 93:
-			sprintf(skin, "ppv\\d5a\\d5abppv.vfc@d5ab.ppv");
-			break;
-		case 94:
-			sprintf(skin, "ppv\\spad13\\spad13_5ppv.vfc@spad13_5.ppv");
-			break;
-		case 95:
-			sprintf(skin, "ppv\\d7\\d7_2ppv.vfc@d7_2.ppv");
-			break;
-		case 96:
-			sprintf(skin, "ppv\\dr1\\redbaronppv.vfc@redbaron.ppv");
-			break;
-		case 110:
-			sprintf(skin, "ppv\\spit5b1\\spit5b1_4ppv.vfc@spit5b1_4.ppv");
-			break;
-		case 114:
-			sprintf(skin, "ppv\\bf109g2e\\bf109g2e_2ppv.vfc@bf109g2e_2.ppv");
-			break;
-		case 137:
-			sprintf(skin, "ppv\\c47\\c47_3ppv.vfc@c47_3.ppv");
-			break;
-		case 184:
-			sprintf(skin, "ppv\\nport17\\np17bbppv.vfc@np17bb.ppv");
-			break;
+		overrideskin->packetid = htons(Com_WBhton(0x002D));
+		overrideskin->slot = slot;
+		overrideskin->msgsize = size;
+		memcpy(&(overrideskin->msg), client->skin, size);
+
+		SendPacket(buffer, size + 4, client);
 	}
-	
-	size = strlen(skin);
-
-	overrideskin->packetid = htons(Com_WBhton(0x002D));
-	overrideskin->slot = slot;
-	overrideskin->msgsize = size;
-	memcpy(&(overrideskin->msg), skin, size);
-
-	SendPacket(buffer, size + 4, client);
 }
 
 /*************

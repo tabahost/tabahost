@@ -271,7 +271,7 @@ void Com_Close(int *fd)
 {
 	int i;
 
-	shutdown(*fd, SHUT_RDWR); // DEBUG: make socket errors 
+	shutdown(*fd, SHUT_RDWR); // TODO: make socket errors 
 	/*
 	 errno:
 	 [EBADF] 
@@ -421,19 +421,23 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 		}
 		else
 		{
-			// socket blocked, copy data to buffer
-			if((client->buf_offset + tlen) < MAX_SENDDATA)
+			if(arena->bufferit)
 			{
-				memcpy(client->buffer+client->buf_offset, tbuf, tlen);
-				client->buf_offset += tlen;
-			}
-			else
-			{
-				Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
-				return -1;
+				// socket blocked, copy data to buffer
+				if(arena->bufferit (client->buf_offset + tlen) < MAX_SENDBUFFER)
+				{
+					memcpy(client->buffer+client->buf_offset, tbuf, tlen);
+					client->buf_offset += tlen;
+				}
+				else
+				{
+					Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+					return -1;
+				}
 			}
 		
 			Com_Printf("WARNING: Com_Send() %s EWOULDBLOCK\n", client->longnick);
+			arena->bufferit = 1;
 			return 0;
 		}
 	}
@@ -453,29 +457,33 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 			
 			Com_Printf("WARNING: %s sent %d offset %d\n", client->longnick, n, client->buf_offset);
 			
-			if(client->buf_offset)
+			if(arena->bufferit)
 			{
-				// copy unsent bytes to top of the list
-				memcpy(client->buffer, client->buffer+n, len);
-				client->buf_offset = len;
-				
-				// now copy the rest of data to buffer
-				if((client->buf_offset + tlen) < MAX_SENDDATA)
+				if(client->buf_offset)
 				{
-					memcpy(client->buffer+client->buf_offset, tbuf, tlen);
-					client->buf_offset += tlen;
+					// copy unsent bytes to top of the list
+					memcpy(client->buffer, client->buffer+n, len);
+					client->buf_offset = len;
+					
+					// now copy the rest of data to buffer
+					if((client->buf_offset + tlen) < MAX_SENDBUFFER)
+					{
+						memcpy(client->buffer+client->buf_offset, tbuf, tlen);
+						client->buf_offset += tlen;
+					}
+					else
+					{
+						Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+					}
 				}
 				else
 				{
-					Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+					memcpy(client->buffer, buf, len);
+					client->buf_offset = len;
 				}
 			}
-			else
-			{
-				memcpy(client->buffer, buf, len);
-				client->buf_offset = len;
-			}
-			
+
+			arena->bufferit = 1;
 			return n;
 		}
 		else
@@ -488,6 +496,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 				return Com_Send(client, tbuf, tlen);
 			}
 			
+			arena->bufferit = 1;
 			return n;
 		}
 	}

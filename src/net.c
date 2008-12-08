@@ -153,6 +153,7 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	int i;
 	u_int8_t datagram[MAX_SENDDATA];
 	datagram_t *packet;
+	u_int16_t header;
 
 	memset(datagram, 0, MAX_SENDDATA);
 
@@ -186,6 +187,20 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		{
 			datagram[0] = 0x07;
 		}
+
+		header = (u_int16_t)(datagram[3] << 2) + datagram[4];
+
+		Com_WBntoh(&header);
+
+		switch(header)
+		{
+			case 0x001E:
+				arena->bufferit = 0;
+				break;
+			default:
+				arena->bufferit = 1;
+		}
+
 		packet->size = htons(len);
 
 		memcpy(&(packet->data), buffer, len);

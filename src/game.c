@@ -1882,7 +1882,7 @@ void ProcessCommands(char *command, client_t *client)
 			Cmd_Disband(client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "test")) // DEBUG debug dot commands
+		else if (!Com_Stricmp(command, "test")) // TODO: debug dot commands
 		{
 			WB3ConfigFM(client);
 
@@ -3326,6 +3326,16 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		switch (n)
 		{
+			case 0x002C:
+				if (!setjmp(debug_buffer))
+				{
+					WB3ClientSkin(buffer, client);
+				}
+				else
+				{
+					DebugClient(__FILE__, __LINE__, TRUE, client);
+				}
+				break;
 			case 0x0402:
 				if (!setjmp(debug_buffer))
 				{
@@ -3341,7 +3351,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				{
 					if(debug->value)
 					{
-						PPrintf(client, RADIO_RED, "DEBUG: 0x0406: Request Available list (%d)", buffer[2]); // debug
+						PPrintf(client, RADIO_RED, "DEBUG: 0x0406: Request Available list (%d)", buffer[2]); // TODO:
 					}
 					PReqBomberList(client);
 				}
@@ -4359,7 +4369,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 	}
 
-	// DEBUG: Make a new function to handle Scores after end flight
+	// TODO: Make a new function to handle Scores after end flight
 	if (!client->chute || (client->chute && ((end == 0x02) || (end == 0x07) || (end == 0x0C))))
 	{
 		PEndflightScores(end, land, gunused, client);
@@ -4835,7 +4845,7 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, client_t *c
 	PPrintf(client, RADIO_WHITE, "You've got %d shots", client->hitstaken);
 	PPrintf(client, RADIO_WHITE, "==================================================");
 
-	/////////// DEBUG: if client is chute and not that end-flight?
+	/////////// TODO: if client is chute and not that end-flight?
 	if ((i = CheckMedals(client)))
 	{
 		PPrintf(client, RADIO_GREEN, "You are awarded with %u medal%s!", i, i > 1 ? "s" : "");
@@ -5000,7 +5010,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				}
 			}
 			else // remove contrail if night
-			{ // DEBUG: remove fuel leak at night
+			{ // TODO: remove fuel leak at night
 				if (client->armor.points[PLACE_LFUEL] > 0) // 0x4000
 				{
 					client->status1 &= 0xFFFFBFFF;
@@ -5084,7 +5094,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 							}
 							else
 							{
-								if(IsBomber(client) || IsCargo(client)) // DEBUG this is a temporary fix to wings collision
+								if(IsBomber(client) || IsCargo(client)) // TODO: this is a temporary fix to wings collision
 									WB3DotCommand(client, ".midairs_frndly 1");
 							}
 						}
@@ -6626,7 +6636,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 		if (killer >= 0)
 		{
-			pvictim->damby[killer] += damage;
+			pvictim->damby[killer] += damage; // TODO: new score system
 		}
 
 		pvictim->score.airscore -= SCORE_BULLETHIT;
@@ -6778,7 +6788,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 			killer = AddKiller(pvictim, client);
 
 			if (killer >= 0)
-				pvictim->damby[killer] += he;
+				pvictim->damby[killer] += he; // TODO: new score system
 		}
 	}
 

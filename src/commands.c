@@ -1393,7 +1393,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			}
 			else
 			{
-				// DEBUG: Send build status to all players. same in commandsc.c:1144
+				// TODO: Send build status to all players. same in commandsc.c:1144
 				arena->cities[field].country = country;
 
 				for (i = 0; i < MAX_BUILDINGS; i++)
