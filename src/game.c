@@ -4404,7 +4404,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 
 		client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status1 = client->status2 = client->infly
-				= client->hits = client->hitstaken = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = client->score.penaltyscore = client->commandos = 0;
+				= client->hits = client->hitstaken = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = client->score.penaltyscore = client->commandos
+					= client->skin[0] = 0;
 
 		for (i = 0; i < MAX_HITBY; i++) // for debug only
 		{
@@ -8979,7 +8980,7 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 	SendPacket(buffer, sizeof(buffer), client);
 	WB3SupressFire(addplane->slot, client);
 	SendPlaneStatus(plane, client);
-	WB3OverrideSkin(addplane->slot, plane->plane, client);
+	WB3OverrideSkin(addplane->slot, client);
 }
 
 /*************
@@ -10725,6 +10726,7 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 		PPrintf(client, RADIO_GREEN, "ord = %d, spawnpoint = %u, unk4 = %u, unk5 = %u", ntohl(reqfly->ord), ntohl(reqfly->spawnpoint), ntohl(reqfly->unk4), ntohl(reqfly->unk5));
 	}
 
+	client->plane = ntohl(reqfly->plane);
 	client->field = ntohl(reqfly->field);
 	client->ord = ntohl(reqfly->ord);
 

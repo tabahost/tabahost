@@ -1848,6 +1848,13 @@ typedef struct wb3supressfire_s		// 21 22
 	u_int32_t	supress;
 } wb3supressfire_t;
 
+typedef struct wb3planeskin_s		// 00 2C
+{
+	u_int16_t	packetid;
+	u_int8_t	msgsize;
+	u_int8_t	msg;
+} wb3planeskin_t;
+
 typedef struct wb3overrideskin_s		// 00 2D
 {
 	u_int16_t	packetid;

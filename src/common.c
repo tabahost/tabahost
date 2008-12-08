@@ -424,7 +424,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 			if(arena->bufferit)
 			{
 				// socket blocked, copy data to buffer
-				if(arena->bufferit (client->buf_offset + tlen) < MAX_SENDBUFFER)
+				if((client->buf_offset + tlen) < MAX_SENDBUFFER)
 				{
 					memcpy(client->buffer+client->buf_offset, tbuf, tlen);
 					client->buf_offset += tlen;

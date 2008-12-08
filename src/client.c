@@ -2757,13 +2757,32 @@ void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
 
 void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 {
-	wb3overrideskin_t *clientskin;
+	u_int8_t i, j;
+	wb3planeskin_t *clientskin;
 
-	clientskin = (wb3overrideskin_t *) buffer;
+	clientskin = (wb3planeskin_t *) buffer;
 
 	if(clientskin->msgsize < 64)
 	{
-		memcpy(client->skin, &(clientskin->msg), size);
+		memcpy(client->skin, &(clientskin->msg), clientskin->msgsize);
+		
+		for (i = 0; i < maxentities->value; i++)
+		{
+			if (clients[i].inuse && !clients[i].drone)
+			{
+				for (j = 0; j < MAX_SCREEN; j++)
+				{
+					if (!clients[i].visible[j].client)
+						continue;
+
+					if (client == clients[i].visible[j].client)
+					{
+						WB3OverrideSkin(j, &clients[i]);
+						break;
+					}
+				}
+			}
+		}
 	}
 	else
 	{
@@ -2779,7 +2798,7 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
  Make a Pingtest call
  *************/
 
-void WB3OverrideSkin(u_int8_t slot, u_int16_t plane, client_t *client)
+void WB3OverrideSkin(u_int8_t slot, client_t *client)
 {
 	wb3overrideskin_t *overrideskin;
 	u_int8_t size;
@@ -2789,16 +2808,21 @@ void WB3OverrideSkin(u_int8_t slot, u_int16_t plane, client_t *client)
 
 	overrideskin = (wb3overrideskin_t *) buffer;
 	
-	size = strlen(client->skin);
-
-	if(size && size < 64)
+	if(client->visible[slot].client)
 	{
-		overrideskin->packetid = htons(Com_WBhton(0x002D));
-		overrideskin->slot = slot;
-		overrideskin->msgsize = size;
-		memcpy(&(overrideskin->msg), client->skin, size);
-
-		SendPacket(buffer, size + 4, client);
+		size = strlen(client->visible[slot].client->skin);
+		
+		if(size && size < 64)
+		{
+			overrideskin->packetid = htons(Com_WBhton(0x002D));
+			overrideskin->slot = slot;
+			overrideskin->msgsize = size;
+			memcpy(&(overrideskin->msg), client->visible[slot].client->skin, size);
+	
+			Com_Printf("%s sent skin \"%s\"\n", client->longnick, client->visible[slot].client->skin);
+			
+			SendPacket(buffer, size + 4, client);
+		}
 	}
 }
 
