@@ -1342,10 +1342,20 @@ void CPrintf(u_int8_t country, u_int8_t radio, char *fmt, ...)
 	vsprintf(msg, fmt, argptr);
 	va_end(argptr);
 
+	memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 	for (i = 0; i < maxentities->value; i++)
 	{
 		if (clients[i].inuse && !clients[i].drone && clients[i].ready && clients[i].country == country)
 		{
+			if(clients[i].thai) // CPrintf
+			{
+				if(arena->thaisent[clients[i].thai].b)
+					continue;
+				else
+					arena->thaisent[clients[i].thai].b = 1;
+			}
+
 			PPrintf(&clients[i], radio, msg);
 		}
 	}
@@ -1369,10 +1379,20 @@ void BPrintf(u_int8_t radio, char *fmt, ...)
 	vsprintf(msg, fmt, argptr);
 	va_end(argptr);
 
+	memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 	for (i = 0; i < maxentities->value; i++)
 	{
 		if (clients[i].inuse && !clients[i].drone && clients[i].ready)
 		{
+			if(clients[i].thai) // BPrintf
+			{
+				if(arena->thaisent[clients[i].thai].b)
+					continue;
+				else
+					arena->thaisent[clients[i].thai].b = 1;
+			}
+
 			PPrintf(&clients[i], radio, msg);
 		}
 	}

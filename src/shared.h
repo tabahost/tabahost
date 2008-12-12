@@ -467,6 +467,11 @@ typedef unsigned int u_int32_t;
 
 // Structures & Unions
 
+typedef struct bool_s
+{
+	u_int	b:1;
+} bool_t;
+
 typedef struct munition_s
 {
 	char		name[32];		// gun name
@@ -596,6 +601,7 @@ typedef struct arena_s
 	u_int8_t	minute;			// arena minute
 	u_int8_t	multiplier;		// timer multiplier
 	u_int32_t	scenario;		// scenario start frame
+	bool_t		thaisent[256];	// array of 256 bits. used in loops to check if already sent data to some THAI group;
 	munition_t	munition[MAX_MUNTYPE];		// ammo characteristics
 	cv_t		cv[8];			// cv structure
 	rps_t		rps[MAX_PLANES]; // planes to auto field update
@@ -674,7 +680,11 @@ typedef struct client_s
 	u_int8_t	inuse;			// client exist in world?
 
 	u_int32_t	id;				// player DB id
-	
+
+//	THAI vars BEGIN
+	u_int8_t	thai;			// set THAI group
+//	THAI vars END
+
 //	drone vars BEGIN
 	u_int16_t	drone;			// client is drone? if yes, define its classes
 	u_int8_t	threatened;		// drone are in threat?
@@ -1315,6 +1325,15 @@ typedef struct idle_s			// 09 04
 	u_int16_t	packetid;
 	u_int32_t	timer;
 } idle_t;
+
+typedef struct thaiwatchdog_s		// 09 04
+{
+	u_int16_t	packetid;
+	u_int8_t	group;
+	u_int8_t	id2;
+	u_int8_t	id3;
+	u_int8_t	id4;
+} thaiwatchdog_t;
 
 typedef struct requestgunner_s	// 09 05
 {
@@ -2074,6 +2093,7 @@ u_int16_t GunPos(u_int16_t pos, u_int8_t reverse);
 void	WB3RequestStartFly(u_int8_t *buffer, client_t *client);
 void	WB3RequestMannedAck(u_int8_t *buffer, client_t *client);
 void	PHostVar(u_int8_t *buffer, client_t *client);
+void	THAIWatchDog(u_int8_t *buffer, client_t *client);
 void	PRequestGunner(u_int8_t *buffer, client_t *client);
 void	PAcceptGunner(u_int8_t *buffer, client_t *client);
 void	PSwitchOttoPos(u_int8_t *buffer, client_t *client);

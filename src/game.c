@@ -3485,6 +3485,16 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				{
 					DebugClient(__FILE__, __LINE__, TRUE, client);
 				}
+				break; // THAI watchdog
+			case 0x1D04:
+				if(!setjmp(debug_buffer))
+				{
+					THAIWatchDog(buffer, client);
+				}
+				else
+				{
+					DebugClient(__FILE__, __LINE__, TRUE, client);
+				}
 				break;
 			case 0x1D05:
 				if(!setjmp(debug_buffer))
@@ -7541,10 +7551,20 @@ void SetBuildingStatus(building_t *building, u_int8_t status, client_t *client)
 	}
 	else
 	{
+		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone && clients[i].ready)
 			{
+				if(clients[i].thai) // SetBuildingStatus
+				{
+					if(arena->thaisent[clients[i].thai].b)
+						continue;
+					else
+						arena->thaisent[clients[i].thai].b = 1;
+				}
+
 				SendPacket(buffer, sizeof(buffer), &clients[i]);
 			}
 		}
@@ -10901,6 +10921,22 @@ void PHostVar(u_int8_t *buffer, client_t *client)
 	Com_Printfhex(buffer, buffer[2]+buffer[buffer[2]+3]+4);
 	SendPacket(buffer, buffer[2]+buffer[buffer[2]+3]+4, client);
 }
+
+/*************
+ THAIWatchDog
+
+ THAI Watch Dog, used to identify THAI Drones
+ *************/
+
+void THAIWatchDog(u_int8_t *buffer, client_t *client)
+{
+	thaiwatchdog_t *watchdog;
+
+	watchdog = (thaiwatchdog_t *) buffer;
+
+	client->thai = watchdog->group;
+}
+
 
 /*************
  PRequestGunner

@@ -393,7 +393,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 			{
 				if (clients[i].inuse && !clients[i].drone && clients[i].ready && &clients[i] != client)
 				{
-					if (clients[i].country != country && !strcmp(clients[i].ip, client->ip))
+					if (clients[i].country != country && !strcmp(clients[i].ip, client->ip) && !clients[i].thai)
 					{
 						country = clients[i].country;
 						PPrintf(client, RADIO_YELLOW, "Country forced to %s due IP Sharing with %s", GetCountry(country), clients[i].longnick);
@@ -1555,10 +1555,20 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 				UpdateRPS(0);
 		}
 
+		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone)
 			{
+				if(clients[i].thai) // Cmd_Capt
+				{
+					if(arena->thaisent[clients[i].thai].b)
+						continue;
+					else
+						arena->thaisent[clients[i].thai].b = 1;
+				}
+
 				SendPacket(buffer, sizeof(buffer), &clients[i]);
 			}
 		}

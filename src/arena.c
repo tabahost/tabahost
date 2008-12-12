@@ -654,10 +654,20 @@ void SendMapDots(void)
 				radar1->packetid = htons(Com_WBhton(0x0005));
 				radar1->numdots = j;
 
+				memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 				for (k = 0; k < maxentities->value; k++)
 				{
-					if (clients[k].inuse && !clients[k].drone && clients[k].ready && (clients[k].attr == 1 || ((!clients[k].infly || clients[k].obradar) && clients[k].country == country)))
+					if (clients[k].inuse && !clients[k].drone && clients[k].ready && (clients[k].thai || clients[k].attr == 1 || ((!clients[k].infly || clients[k].obradar) && clients[k].country == country)))
 					{
+						if(clients[k].thai) // SendMapDots
+						{				   // this case assume that all AI have access to all mapdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
+							if(arena->thaisent[clients[k].thai].b)
+								continue;
+							else
+								arena->thaisent[clients[k].thai].b = 1;
+						}
+
 						if (clients[k].mapdots)
 							ClearMapDots(&clients[k]);
 
@@ -961,10 +971,21 @@ void SetCVSpeed(cv_t *cv)
 
 	SetCVRoute(cv);
 
+
+	memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 	for (i = 0; i < maxentities->value; i++)
 	{
 		if (clients[i].inuse && !clients[i].drone && clients[i].ready)
 		{
+			if(clients[i].thai) // SetCVSpeed
+			{
+				if(arena->thaisent[clients[i].thai].b)
+					continue;
+				else
+					arena->thaisent[clients[i].thai].b = 1;
+			}
+
 			SendCVRoute(&clients[i], cv->id);
 
 			if (!cv->outofport) // send cv pos when it return to base (e.g. capt cv)
