@@ -329,17 +329,17 @@ void CheckArenaRules(void)
 
 	for (i = 0; i < fields->value; i++)
 	{
-		if(!oldcapt->value && wb3->value && !(arena->frame % 100))
-		{
-			if(arena->fields[i].tonnage)
-				arena->fields[i].tonnage -= TONNAGE_RECOVER;
-			
-			if(arena->fields[i].tonnage < 0)
-				arena->fields[i].tonnage = 0;
-		}
-		
 		if(rebuildtime->value < 9999)
 		{
+			if(!oldcapt->value && wb3->value && !(arena->frame % 100))
+			{
+				if(arena->fields[i].tonnage)
+					arena->fields[i].tonnage -= TONNAGE_RECOVER;
+				
+				if(arena->fields[i].tonnage < 0)
+					arena->fields[i].tonnage = 0;
+			}
+			
 			for (j = 0; j < MAX_BUILDINGS; j++)
 			{
 				if (arena->fields[i].buildings[j].field)

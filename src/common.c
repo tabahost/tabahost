@@ -457,31 +457,34 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 			
 			Com_Printf("WARNING: %s sent %d offset %d\n", client->longnick, n, client->buf_offset);
 			
-			if(arena->bufferit)
-			{
 				if(client->buf_offset)
 				{
 					// copy unsent bytes to top of the list
 					memcpy(client->buffer, client->buffer+n, len);
 					client->buf_offset = len;
 					
-					// now copy the rest of data to buffer
-					if((client->buf_offset + tlen) < MAX_SENDBUFFER)
+					if(arena->bufferit)
 					{
-						memcpy(client->buffer+client->buf_offset, tbuf, tlen);
-						client->buf_offset += tlen;
-					}
-					else
-					{
-						Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+						// now copy the rest of data to buffer
+						if((client->buf_offset + tlen) < MAX_SENDBUFFER)
+						{
+							memcpy(client->buffer+client->buf_offset, tbuf, tlen);
+							client->buf_offset += tlen;
+						}
+						else
+						{
+							Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+						}
 					}
 				}
 				else
 				{
-					memcpy(client->buffer, buf, len);
-					client->buf_offset = len;
+					if(arena->bufferit)
+					{
+						memcpy(client->buffer, buf, len);
+						client->buf_offset = len;
+					}
 				}
-			}
 
 			arena->bufferit = 1;
 			return n;

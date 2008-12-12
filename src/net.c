@@ -194,6 +194,14 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		switch(header)
 		{
+			case 0x0301:
+			case 0x1D04:
+			case 0x2101:
+			case 0x1900:
+			case 0x1907:
+			case 0x1909:
+			case 0x1917:
+			case 0x0007:
 			case 0x001E:
 				arena->bufferit = 0;
 				break;
