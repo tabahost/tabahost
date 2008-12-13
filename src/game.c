@@ -8102,12 +8102,22 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 
 		if (!n)
 		{
+			memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 			for (i = 0; i < maxentities->value; i++)
 			{
 				if (clients[i].inuse && !clients[i].drone && clients[i].ready)
 				{
 					if ((n=CanHear(client, &clients[i], msgto)) > 0)
 					{
+						if(clients[i].thai) // PrintRadioMessage
+						{
+							if(arena->thaisent[clients[i].thai].b)
+								continue;
+							else
+								arena->thaisent[clients[i].thai].b = 1;
+						}
+
 						SendPacket(buffer, radiomessage->msgsize + 11, &clients[i]);
 					}
 				}
@@ -8452,7 +8462,7 @@ void UpdateIngameClients(u_int8_t attr)
 
 				for (k = 0; k < maxentities->value; k++) // add sharing IP
 				{
-					if (clients[k].inuse && !clients[k].drone && clients[k].ready && &clients[i] != &clients[k])
+					if (clients[k].inuse && !clients[k].drone && clients[k].ready && &clients[i] != &clients[k] && !clients[k].thai)
 					{
 						if (!strcmp(clients[k].ip, clients[i].ip))
 						{
@@ -11494,10 +11504,20 @@ void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
 		SendPacket(buffer, sizeof(buffer), client);
 	else
 	{
+		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone && clients[i].ready)
 			{
+				if(clients[i].thai) // SinkBoat
+				{
+					if(arena->thaisent[clients[i].thai].b)
+						continue;
+					else
+						arena->thaisent[clients[i].thai].b = 1;
+				}
+
 				SendPacket(buffer, sizeof(buffer), &clients[i]);
 			}
 		}

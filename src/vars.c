@@ -468,10 +468,20 @@ void CheckVars(void)
 
 	if (wb3->value && weather->modified)
 	{
+		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone)
 			{
+				if(clients[i].thai) // CheckVars
+				{
+					if(arena->thaisent[clients[i].thai].b)
+						continue;
+					else
+						arena->thaisent[clients[i].thai].b = 1;
+				}
+
 				WB3DotCommand(&clients[i], ".weather %u", (u_int8_t)weather->value);
 			}
 		}
@@ -479,10 +489,20 @@ void CheckVars(void)
 
 	if (wb3->value && (gruntsmaxd->modified || gruntshoot->modified || gruntcapture->modified))
 	{
+		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone)
 			{
+				if(clients[i].thai) // CheckVars
+				{
+					if(arena->thaisent[clients[i].thai].b)
+						continue;
+					else
+						arena->thaisent[clients[i].thai].b = 1;
+				}
+
 				WB3SendGruntConfig(&clients[i]);
 			}
 		}
@@ -494,10 +514,20 @@ void CheckVars(void)
 			|| fueldiv->modified || flakmax->modified || radarrange0->modified || radarrange1->modified || radarrange2->modified || radarrange3->modified || radarrange4->modified
 			|| structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified || planerangelimitbomber->modified || arenaflags1->modified || arenaflags2->modified)
 	{
+		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone)
 			{
+				if(clients[i].thai) // CheckVars
+				{
+					if(arena->thaisent[clients[i].thai].b)
+						continue;
+					else
+						arena->thaisent[clients[i].thai].b = 1;
+				}
+
 				SendArenaRules(&clients[i]);
 			}
 		}
@@ -505,10 +535,20 @@ void CheckVars(void)
 
 	if (arenaflags3->modified)
 	{
+		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone)
 			{
+				if(clients[i].thai) // CheckVars
+				{
+					if(arena->thaisent[clients[i].thai].b)
+						continue;
+					else
+						arena->thaisent[clients[i].thai].b = 1;
+				}
+
 				WB3SendArenaFlags3(&clients[i]);
 			}
 		}
