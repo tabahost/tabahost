@@ -500,7 +500,7 @@ int ProcessClient(client_t *client)
 						LogPosition(client);
 					}
 
-					if(client->cancollide> 0 && emulatecollision->value && !arcade->value)
+					if(client->cancollide > 0 && emulatecollision->value && !arcade->value)
 					{
 						nearplane = NearPlane(client, 99, 150);
 
@@ -522,6 +522,8 @@ int ProcessClient(client_t *client)
 								PPrintf(client, RADIO_DARKGREEN, "%s collided with you!!!", nearplane->longnick);
 								Com_Printf("%s collided emulated with %s\n", nearplane->longnick, client);
 
+								client->damaged = 1;
+								
 								if(rand()%2)
 								{
 									SendForceStatus(STATUS_LWING, 0, nearplane); // lwing
@@ -1713,7 +1715,6 @@ void CheckKiller(client_t *client)
 		{
 			Com_Printf("DEBUG: %u - hitby = (null), damby = %u, planeby = %s\n", i, client->damby[i], GetSmallPlaneName(client->planeby[i]));
 		}
-
 	}
 	//
 	Com_Printf("DEBUG: Check if any logged player had hit client\n");
@@ -2806,9 +2807,9 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 	}
 	else
 	{
-		client->skin[0] = '\0';
+		memset(client->skin, 0, sizeof(client->skin));
 	}
-
+	
 	Com_Printf("%s skin set to \"%s\"\n", client->longnick, client->skin);
 }
 
@@ -2839,7 +2840,7 @@ void WB3OverrideSkin(u_int8_t slot, client_t *client)
 			overrideskin->msgsize = size;
 			memcpy(&(overrideskin->msg), client->visible[slot].client->skin, size);
 	
-			Com_Printf("%s sent skin \"%s\"\n", client->longnick, client->visible[slot].client->skin);
+			Com_Printf("%s[%d] sent skin to %s \"%s\"\n", client->visible[slot].client->longnick, slot, client->longnick, client->visible[slot].client->skin);
 			
 			SendPacket(buffer, size + 4, client);
 		}

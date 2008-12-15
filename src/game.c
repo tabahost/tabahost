@@ -4169,7 +4169,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 								}
 							}
 							
-							// dont capture if plane is damaged
+							// dont capture field if plane is damaged
 							if (client->status1 & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE | STATUS_LGEAR | STATUS_RGEAR))
 							{
 								i = 0;
@@ -4347,6 +4347,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						nearplane->damby[0] = MAX_UINT32;
 						client->hitby[0] = nearplane;
 						client->damby[0] = MAX_UINT32;
+						
+						client->damaged = 1;
 
 						if (rand()%2)
 							SendForceStatus(STATUS_LWING, 0, nearplane);
@@ -4414,8 +4416,9 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 
 		client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status1 = client->status2 = client->infly
-				= client->hits = client->hitstaken = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = client->score.penaltyscore = client->commandos
-					= client->skin[0] = 0;
+				= client->hits = client->hitstaken = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = client->score.penaltyscore = client->commandos = 0;
+				
+		memset(client->skin, 0, sizeof(client->skin));
 
 		for (i = 0; i < MAX_HITBY; i++) // for debug only
 		{
@@ -5258,6 +5261,7 @@ void CheckMaxG(client_t *client)
 			if (client->armor.points[PLACE_LWING] > 0)
 				PPrintf(client, RADIO_DARKGREEN, "Your left wing blown off due G overload");
 			SendForceStatus((client->status1 | STATUS_LWING), client->status2, client);
+			client->damaged = 1;
 		}
 		else
 		{
@@ -5284,6 +5288,7 @@ void CheckMaxG(client_t *client)
 			if (client->armor.points[PLACE_RWING] > 0)
 				PPrintf(client, RADIO_DARKGREEN, "Your right wing blown off due G overload");
 			SendForceStatus((client->status1 | STATUS_RWING), client->status2, client);
+			client->damaged = 1;
 		}
 		else
 		{
@@ -7087,6 +7092,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 						client->fueltimer = 1;
 				}
 
+				client->damaged = 1;
 				client->armor.points[place] = 0;
 				SendForceStatus((1 << place), 0, client);
 
@@ -7100,6 +7106,8 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 			{
 				if (client->fueltimer && client->fueltimer > 1000)
 				{
+					client->damaged = 1;
+					
 					if (place == PLACE_LFUEL)
 					{
 						client->armor.points[PLACE_LWING] = 0;

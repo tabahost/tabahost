@@ -124,6 +124,7 @@ var_t *mortars; // extern
 var_t *mview; // extern
 var_t *notanks; // extern
 var_t *nowings; // extern
+var_t *obradar;	// extern
 var_t *oldcapt; // extern
 var_t *ottoaccuracy; // set otto accuracy
 var_t *ottoadjust; // set otto adjust
@@ -284,6 +285,7 @@ void InitVars(void)
 	mview = Var_Get("mview", "1", VAR_ARCHIVE | VAR_ADMIN);
 	notanks = Var_Get("notanks", "0", VAR_ARCHIVE);
 	nowings = Var_Get("nowings", "0", VAR_ARCHIVE);
+	obradar = Var_Get("obradar", "6000", VAR_ARCHIVE); // D20
 	oldcapt = Var_Get("oldcapt", "1", VAR_ARCHIVE);
 	ottoaccuracy = Var_Get("ottoaccuracy", "5", VAR_ARCHIVE);
 	ottoadjust = Var_Get("ottoadjust", "6", VAR_ARCHIVE);

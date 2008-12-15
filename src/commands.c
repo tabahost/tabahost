@@ -1117,6 +1117,8 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	if (wb3->value)
 	{
+		memset(client->skin, 0, sizeof(client->skin));
+		
 		wb3fly->country = htonl(client->country);
 		wb3fly->field = htons(client->field - 1);
 		wb3fly->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
@@ -1233,7 +1235,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 				case 113: /*do17z*/
 				case 114: /*109g2eto*/
 				case 125: /*ki44iib*/
-					client->obradar = MAX_OBRADARRANGE;
+					client->obradar = (int32_t)obradar->value;
 					break;
 				default:
 					client->obradar = 0;
@@ -1257,7 +1259,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 				case 91:
 				case 95:
 				case 100:
-					client->obradar = MAX_OBRADARRANGE;
+					client->obradar = (int32_t)obradar->value;
 					break;
 				default:
 					client->obradar = 0;

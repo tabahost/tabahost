@@ -25,6 +25,7 @@
   
  compiler settings to gdb: "-fomit-frame-pointer" removed
 
+ TODO: Com_Printf(VERBOSE)
  TODO: Verify vital structures
  TODO: test arena->frame = 1 with numer lesser than 4294962000UL
  TODO: Check warehouse in cities
@@ -152,7 +153,6 @@ typedef unsigned int u_int32_t;
 #define MAX_RELATED			7		// max of drones user can mantain relationship
 #define	MAX_PLANES			210		// (126 = FHL v1.66) max of plane numbers (last plane number + 1)
 #define	MAX_WAYPOINTS		128		// max of waypoint a CV or Cargo Ship can make
-#define	MAX_OBRADARRANGE	6000	// onboard radar range, 6000 ~ D20
 #define MAX_MEDALS			20		// max number of medals player can be award
 #define MAX_BOMBS			256		// emulated bombs array
 #define MAX_BOMBRADIUS		315		//
@@ -737,6 +737,7 @@ typedef struct client_s
 	u_int8_t	ackstarcount;	// count to avoid recalc every time
 	u_int8_t	ackstar;		// flag to check ackstar rules (below 1000ft, in friendlyfield range, with wingmen, buffer, have otto disabled).
 	u_int8_t	contrail;		// plane is above contrail->value
+	u_int8_t	damaged;		// is plane was damaged by attacker
 	u_int32_t	status1;		// plane's status (gun, fuselage, etc)
 	u_int32_t	status2;		// plane's status (engine, baydoor, smoke, etc)
 	int32_t		reldist;		// relative distance between 2 players
@@ -2423,6 +2424,7 @@ extern	var_t		*mortars;		// set how much mortars JU52 and Li-2 can fire
 extern	var_t		*mview;			// set who can use .view (OPs, Admins or both)
 extern	var_t		*notanks;		// dont allow players and arena to spawn tanks/hmack/katy
 extern	var_t		*nowings;		// dont allow players to use wingmen
+extern	var_t		*obradar;		// adjust obradar for historical planes
 extern	var_t		*oldcapt;		// enable old way to capture fields (destroy all structures and drop paras)
 extern	var_t		*ottoaccuracy;	// set otto accuracy
 extern	var_t		*ottoadjust;	// set otto adjust
