@@ -523,6 +523,7 @@ int ProcessClient(client_t *client)
 								Com_Printf("%s collided emulated with %s\n", nearplane->longnick, client);
 
 								client->damaged = 1;
+								nearplane->damaged = 1;
 								
 								if(rand()%2)
 								{
