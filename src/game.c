@@ -6600,7 +6600,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			damage -= ap;
 			
 			if(needle[j] >= 0 && needle[j] < 32 && killer >= 0 && killer < MAX_HITBY)
-				pvictim->damby[killer] += (u_int32_t)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(clients[i].armor.points[needle[j]] + 1.0)));
+				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(clients[i].armor.points[needle[j]] + 1.0)));
 
 			if (ap == 0)
 				break;
@@ -6806,7 +6806,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 			killer = AddKiller(pvictim, client);
 
 			if (hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
-				pvictim->damby[killer] += (u_int32_t)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(clients[i].armor.points[hardhitplane->place] + 1.0)));
+				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(clients[i].armor.points[hardhitplane->place] + 1.0)));
 		}
 	}
 

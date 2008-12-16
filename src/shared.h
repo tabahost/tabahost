@@ -788,7 +788,7 @@ typedef struct client_s
 	u_int8_t	tkstatus;		//
 
 	struct client_s	*hitby[MAX_HITBY]; // players who hit client
-	u_int32_t	damby[MAX_HITBY]; // damage get from any player above
+	float		damby[MAX_HITBY]; // damage get from any player above
 	u_int16_t	planeby[MAX_HITBY]; // last plane used by killer
 
 	u_int8_t	lograwdata;		// flag to log raw data
