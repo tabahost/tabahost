@@ -6399,8 +6399,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 	if ((client == pvictim)) // ack hit
 	{
-		if ((val = NearestField(client->posxy[0][0], client->posxy[1][0], 0, 
-		TRUE, TRUE, &dist)) >= 0)
+		if ((val = NearestField(client->posxy[0][0], client->posxy[1][0], 0, TRUE, TRUE, &dist)) >= 0)
 		{
 			distance = (float) dist;
 			distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], (client->posxy[0][0] > 0 ? client->posxy[0][0] - distance : client->posxy[0][0] + distance),
@@ -6600,8 +6599,8 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			damage -= ap;
 			
-			if(needle[j] >= 0 && needle[j] < 32 && killer >= 0)
-				pvictim->damby[killer] += (u_int32_t) 10 * logf(100 * damage / (clients[i].armor.points[needle[j]] + 1));
+			if(needle[j] >= 0 && needle[j] < 32 && killer >= 0 && killer < MAX_HITBY)
+				pvictim->damby[killer] += (u_int32_t)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(clients[i].armor.points[needle[j]] + 1.0)));
 
 			if (ap == 0)
 				break;
@@ -6806,8 +6805,8 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		{
 			killer = AddKiller(pvictim, client);
 
-			if (hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0)
-				pvictim->damby[killer] += (u_int32_t) 10 * logf(100 * he / (clients[i].armor.points[hardhitplane->place] + 1));
+			if (hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
+				pvictim->damby[killer] += (u_int32_t)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(clients[i].armor.points[hardhitplane->place] + 1.0)));
 		}
 	}
 
