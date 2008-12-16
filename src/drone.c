@@ -1076,6 +1076,7 @@ void DroneGetTarget(client_t *drone)
 void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 {
 	u_int8_t i, buffer[31];
+	int8_t j;
 	int16_t velx, vely, velz, part;
 	int32_t dist;
 	ottofiring_t *otto;
@@ -1109,10 +1110,10 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 
 			AddPlaneDamage(part, 40, 0, NULL, NULL, dest);
 
-			part = AddKiller(dest, source);
-			if (part >= 0)
-				dest->damby[part] += 40; // TODO: new score system
-
+			j = AddKiller(dest, source);
+			if (j >= 0)
+				dest->damby[j] += (u_int32_t) 10 * logf(100 * 40 / (dest->armor.points[part] + 1));
+			
 			SendPings(1, 143, dest);
 		}
 	}
@@ -1674,7 +1675,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 							killer = AddKiller(&clients[i], client);
 
 							if (killer >= 0)
-								clients[i].damby[killer] += munition->he; // TODO: new score system
+								clients[i].damby[killer] += (u_int32_t) 10 * logf(100 * munition->he / (clients[i].armor.points[PLACE_CENTERFUSE] + 1));
 						}
 
 						AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, NULL, NULL, &clients[i]);

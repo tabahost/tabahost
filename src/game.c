@@ -4416,7 +4416,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 
 		client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status1 = client->status2 = client->infly
-				= client->hits = client->hitstaken = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = client->score.penaltyscore = client->commandos = 0;
+				= client->hits = client->hitstaken = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = client->score.penaltyscore = client->commandos
+				= client->damaged = 0;
 				
 		memset(client->skin, 0, sizeof(client->skin));
 
@@ -5770,7 +5771,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 	 */
 
 	drop->packetid = htons(Com_WBhton(0x1900));
-
+	
 	for (i = 0; i < maxentities->value; i++)
 	{
 		if (clients[i].inuse && !clients[i].drone)
@@ -5967,14 +5968,20 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 	if (client->attr)
 		PPrintf(client, RADIO_GREEN, "DEBUG: tonnage ammoID: %d, field: %d, distance: %d", wb3tonnage->ammo, ntohs(wb3tonnage->field), ntohs(wb3tonnage->distance));
 	
-	ammo = GetMunition(wb3tonnage->ammo);
-	field = ntohs(wb3tonnage->field);
-	distance = ntohs(wb3tonnage->distance);
-	
-	if(field && field <= fields->value && distance < GetFieldRadius(arena->fields[field-1].type))
+	if(ammo = GetMunition(wb3tonnage->ammo))
 	{
-		if(client->country != arena->fields[field-1].country)
-			arena->fields[field-1].tonnage += (ammo->he / 50);
+		field = ntohs(wb3tonnage->field);
+		distance = ntohs(wb3tonnage->distance);
+		
+		if(field && field <= fields->value && distance < GetFieldRadius(arena->fields[field-1].type))
+		{
+			if(client->country != arena->fields[field-1].country)
+				arena->fields[field-1].tonnage += (ammo->he / 50);
+		}
+	}
+	else
+	{
+		Com_Printf("WARNING: WB3TonnageOnTarget() unknown munition %d from plane %d", wb3tonnage->ammo, client->plane);
 	}
 }
 
@@ -6566,8 +6573,6 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		he = munition->he;
 		ap = ((float)munition->decay * distance) + munition->ap;
 
-		damage = 0;
-
 		if (gunstats->value)
 		{
 			memset(heb, 0, sizeof(heb));
@@ -6582,7 +6587,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			if (!pvictim->inuse)
 				break;
 
-			damage += (he + ap);
+			damage = (he + ap);
 
 			if (gunstats->value)
 			{
@@ -6594,6 +6599,9 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			}
 
 			damage -= ap;
+			
+			if(needle[j] >= 0 && needle[j] < 32 && killer >= 0)
+				pvictim->damby[killer] += (u_int32_t) 10 * logf(100 * damage / (clients[i].armor.points[needle[j]] + 1));
 
 			if (ap == 0)
 				break;
@@ -6648,11 +6656,6 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			}
 			if (gunstats->value || pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
-		}
-
-		if (killer >= 0)
-		{
-			pvictim->damby[killer] += damage; // TODO: new score system
 		}
 
 		pvictim->score.airscore -= SCORE_BULLETHIT;
@@ -6803,8 +6806,8 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		{
 			killer = AddKiller(pvictim, client);
 
-			if (killer >= 0)
-				pvictim->damby[killer] += he; // TODO: new score system
+			if (hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0)
+				pvictim->damby[killer] += (u_int32_t) 10 * logf(100 * he / (clients[i].armor.points[hardhitplane->place] + 1));
 		}
 	}
 

@@ -1191,6 +1191,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	}
 
 	client->dronetimer = arena->time; // stores time when client started flight
+	client->damaged = 0;
 
 	client->infly = 1;
 	if (arcade->value)

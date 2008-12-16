@@ -144,7 +144,7 @@ typedef unsigned int u_int32_t;
 #define MAX_RADIOMSG		74		// max of radio msg (63 chars + info)
 #define MAX_SCREEN			64		// max aircrafts you can see on screen (32 wb2, 64, wb3)
 #define MAX_SCREENBUF		800		// buffer of MAX_SCREEN (19+MAX_SCREEN*21)
-#define MAX_MUNTYPE			200 	// = number of munition types
+#define MAX_MUNTYPE			204 	// = number of munition types
 #define MAX_BUILDINGS		300		// 39?
 #define MAX_CITYFIELD		17		// max cities linked to a field
 #define	MAX_HITBY			32		// max of players can get kill assist
