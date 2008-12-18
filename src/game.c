@@ -3587,9 +3587,9 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					if(!(client->attr == 1 && hideadmin->value))
 					{
 						if(client->loginkey)
-						BPrintf(RADIO_GRAY, "%s entered the game", client->longnick);
+						BPrintf(RADIO_YELLOW, "%s entered the game", client->longnick);
 						else
-						BPrintf(RADIO_GRAY, "%s entered the game using WBChat", client->longnick);
+						BPrintf(RADIO_YELLOW, "%s entered the game using WBChat", client->longnick);
 
 						Com_LogEvent(EVENT_LOGIN, client->id, 0);
 						Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);
@@ -4296,6 +4296,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					Com_LogEvent(EVENT_COLLIDED, client->id, 0);
 					Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
 					Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
+
+					client->damaged = 1;
 				}
 				else
 				{
@@ -4349,6 +4351,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						client->damby[0] = MAX_UINT32;
 						
 						client->damaged = 1;
+						nearplane->damaged = 1;
 
 						if (rand()%2)
 							SendForceStatus(STATUS_LWING, 0, nearplane);
@@ -5607,7 +5610,11 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 	{
 		status = (planestatus1_t *)buffer;
 
-		client->status1 = htonl(status->status1);
+		if(client->status1 != htonl(status->status1)) // TODO: check when new damage from client, possible collision detection
+		{
+			client->status1 = htonl(status->status1);
+		}
+		
 		client->status2 = htonl(status->status2);
 	}
 
@@ -7713,11 +7720,22 @@ void POttoFiring(u_int8_t *buffer, u_int8_t len, client_t *client)
 void SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client)
 {
 	u_int8_t buffer[10];
+	u_int8_t i;
 	u_int32_t end;
 	planestatus1_t *status;
 
 	if (!client || !client->infly)
 		return;
+
+	// DM log
+
+	for(i = 0; i < 32; i++)
+	{
+		if(status1 & (1 << i))
+		{
+			Com_Printf("%s lost %s\n", client->longnick, GetHitSite((1 << i)));
+		}
+	}
 
 	// Begin parse status1
 	if (status1 & STATUS_REARFUSE)
@@ -7756,7 +7774,6 @@ void SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client)
 		client->armor.points[PLACE_RAILERON] = 0;
 	}
 	// End parse status1
-
 
 	if (client->drone)
 	{

@@ -413,7 +413,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 			}
 			else
 				client->field = fieldn+1;
-			BPrintf(RADIO_GRAY, "%s joined the %s side", client->longnick, GetCountry(country)); // Country changed to %s
+			BPrintf(RADIO_YELLOW, "%s joined the %s side", client->longnick, GetCountry(country)); // Country changed to %s
 
 			if (client->arenafieldsok && client->arenabuildsok)
 			{

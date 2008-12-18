@@ -164,7 +164,7 @@ void RemoveClient(client_t *client)
 		if (client->ready)
 		{
 			if (!(client->attr == 1 && hideadmin->value))
-				BPrintf(RADIO_GRAY, "%s became off-line", client->longnick);
+				BPrintf(RADIO_YELLOW, "%s became off-line", client->longnick);
 
 			Com_LogEvent(EVENT_LOGOUT, client->id, 0);
 			Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);
@@ -590,7 +590,7 @@ int ProcessClient(client_t *client)
 				{
 					if(client->awaytimer> (u_int32_t)(timeout->value * 100))
 					{
-						BPrintf(RADIO_GRAY, "%s is away and will be kicked", client->longnick);
+						BPrintf(RADIO_YELLOW, "%s is away and will be kicked", client->longnick);
 						return -1;
 					}
 				}
@@ -1691,17 +1691,17 @@ void CheckKiller(client_t *client)
 	char buffer[128];
 	char query_bomber[512];
 	char query_ground[512];
-	u_int32_t damage;
+	float damage;
 	client_t *nearplane= NULL;
 
 	if (client->infly) // if not infly, cant be killed
 	{
 		if(!client->damaged) // maneuver kill or nothing
 		{
-			Com_Printf("DEBUG: Check nearest player (2000 feets radius)\n");
+			Com_Printf("DEBUG: Check nearest player (3000 feets radius)\n");
 			if ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) <= 164) // explosions above 50mts are not maneuver kill
 			{
-				nearplane = NearPlane(client, client->country, 2000);
+				nearplane = NearPlane(client, client->country, 3000);
 	
 				if (nearplane)
 				{
@@ -2042,7 +2042,7 @@ void CheckKiller(client_t *client)
 				{
 					if (client->hitby[i]->inuse) // if still connected
 					{
-						Com_Printf("DEBUG: %s - %u\n", client->hitby[i]->longnick, client->damby[i]);
+						Com_Printf("DEBUG: %s - %f\n", client->hitby[i]->longnick, client->damby[i]);
 						if (client->damby[i] > damage) // if damage > current damage
 						{
 							damage = client->damby[i]; // set current damage as attacker damage
@@ -2506,12 +2506,12 @@ void CheckKiller(client_t *client)
 //			}
 //		}
 //	
-//		if (!j) // if no one in hit list, get nearest enemy plane within 2000 for maneuver kill
+//		if (!j) // if no one in hit list, get nearest enemy plane within 3000 for maneuver kill
 //		{
-//			Com_Printf("DEBUG: Check nearest player (2000 feets radius)\n");
+//			Com_Printf("DEBUG: Check nearest player (3000 feets radius)\n");
 //			if ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) <= 164) // explosions above 50mts are not maneuver kill
 //			{
-//				nearplane = NearPlane(client, client->country, 2000);
+//				nearplane = NearPlane(client, client->country, 3000);
 //	
 //				if (nearplane)
 //				{
@@ -2536,7 +2536,7 @@ void CheckKiller(client_t *client)
 //				{
 //					if (client->hitby[i]->inuse) // if still connected
 //					{
-//						Com_Printf("DEBUG: %s - %u\n", client->hitby[i]->longnick, client->damby[i]);
+//						Com_Printf("DEBUG: %s - %f\n", client->hitby[i]->longnick, client->damby[i]);
 //						if (client->damby[i] > damage) // if damage > current damage
 //						{
 //							damage = client->damby[i]; // set current damage as attacker damage
@@ -2681,7 +2681,7 @@ void CheckKiller(client_t *client)
 //				else
 //				{
 //					if (!nearplane)
-//						nearplane = NearPlane(client, client->country, 2000);
+//						nearplane = NearPlane(client, client->country, 3000);
 //	
 //					if (!nearplane)
 //						client->hitby[j] = client; // so Ack weenies wont receive "(plane) from squadron"...
@@ -3569,15 +3569,15 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 		{
 			i = 1;
 
-			if(strstr(ps, "2"))
+			if(strstr(ps, "2ppv"))
 			{
 				i = 2;
 			}
-			else if(strstr(ps, "3"))
+			else if(strstr(ps, "3ppv"))
 			{
 				i = 3;
 			}
-			else if(strstr(ps, "4"))
+			else if(strstr(ps, "4ppv"))
 			{
 				i = 4;
 			}
