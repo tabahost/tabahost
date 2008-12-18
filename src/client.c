@@ -3555,12 +3555,37 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 {
 	u_int8_t i, j;
 	wb3planeskin_t *clientskin;
+	char *ps;
 
 	clientskin = (wb3planeskin_t *) buffer;
 
 	if(clientskin->msgsize < 64)
 	{
-		memcpy(client->skin, &(clientskin->msg), clientskin->msgsize);
+		ps = &(clientskin->msg);
+
+		ps[clientskin->msgsize] = '\0';
+
+		if(thskins->value)
+		{
+			i = 1;
+
+			if(strstr(ps, "2"))
+			{
+				i = 2;
+			}
+			else if(strstr(ps, "3"))
+			{
+				i = 3;
+			}
+			else if(strstr(ps, "4"))
+			{
+				i = 4;
+			}
+
+			ps = CreateSkin(client, i);
+		}
+
+		strcpy(client->skin, ps);
 		
 		for (i = 0; i < maxentities->value; i++)
 		{
@@ -3589,9 +3614,34 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 }
 
 /*************
+ CreateSkin
+
+ Generate a padronized skin
+ *************/
+
+char *CreateSkin(client_t *client, u_int8_t number)
+{
+	static char buffer[64];
+
+	switch (client->country)
+	{
+		case COUNTRY_RED:
+			sprintf(buffer, "/ppv/%s/%sred%dppv.vfc@%sred%d.ppv", GetSmallPlaneName(client->plane), GetSmallPlaneName(client->plane), number, GetSmallPlaneName(client->plane), number);
+			break;
+		case COUNTRY_GOLD:
+			sprintf(buffer, "/ppv/%s/%sgold%dppv.vfc@%sgold%d.ppv", GetSmallPlaneName(client->plane), GetSmallPlaneName(client->plane), number, GetSmallPlaneName(client->plane), number);
+			break;
+		default:
+			buffer[0] = '\0';
+	}
+
+	return buffer;
+}
+
+/*************
  WB3OverrideSkin
 
- Make a Pingtest call
+ Send skin to client
  *************/
 
 void WB3OverrideSkin(u_int8_t slot, client_t *client)

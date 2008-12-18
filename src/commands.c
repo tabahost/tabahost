@@ -1117,7 +1117,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	if (wb3->value)
 	{
-		memset(client->skin, 0, sizeof(client->skin));
+		strcpy(client->skin, CreateSkin(client, 1));
 		
 		wb3fly->country = htonl(client->country);
 		wb3fly->field = htons(client->field - 1);

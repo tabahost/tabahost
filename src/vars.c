@@ -161,6 +161,7 @@ var_t *structlim; // extern
 var_t *tanksrange; // extern
 var_t *teamkiller; // extern
 var_t *teamkillstructs; // extern
+var_t *thskins; // extern
 var_t *timemult; // extern
 var_t *timeout; // extern
 var_t *wb3; // extern
@@ -320,6 +321,7 @@ void InitVars(void)
 	tanksrange = Var_Get("tanksrange", "5000", VAR_ARCHIVE); // max of 46339
 	teamkiller = Var_Get("teamkiller", "1", VAR_ARCHIVE);
 	teamkillstructs = Var_Get("teamkillstructs", "1", VAR_ARCHIVE);
+	thskins = Var_Get("thskins", "0", VAR_ARCHIVE);
 	timemult = Var_Get("timemult", "6", VAR_ARCHIVE);
 	timeout = Var_Get("timeout", "120", VAR_ARCHIVE);
 	wb3 = Var_Get("wb3", "0", VAR_ARCHIVE | VAR_ADMIN);

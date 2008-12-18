@@ -2210,6 +2210,7 @@ u_int8_t AddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *clie
 void	ForceEndFlight(u_int8_t remdron, client_t *client);
 void	ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client);
 void	WB3ClientSkin(u_int8_t *buffer, client_t *client);
+char	*CreateSkin(client_t *client, u_int8_t number);
 void	WB3OverrideSkin(u_int8_t slot, client_t *client);
 void	CreateScores(client_t *client);
 void	ClientHDSerial(u_int8_t *buffer, client_t *client);
@@ -2460,6 +2461,7 @@ extern	var_t		*structlim;		//
 extern	var_t		*tanksrange;	// max range of TANKS fire
 extern	var_t		*teamkiller;	// Allow server set TK flag for teamkillers
 extern	var_t		*teamkillstructs;	// Allow to damage friendly structures
+extern	var_t		*thskins;		// enable force TH Skins
 extern	var_t		*timemult;		// arena time multiplier
 extern	var_t		*timeout;		// away timer
 extern	var_t		*wb3;			// enable WB3 protocol
