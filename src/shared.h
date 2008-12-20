@@ -775,6 +775,8 @@ typedef struct client_s
 	u_int16_t	hits;			// hits scored
 	u_int16_t	hitstaken;		// hits taken
 	u_int16_t	calibers[6];	// [12mm, 20mm, 30-37mm, 40mm, 88mm] ???
+	u_int8_t	hitsstat[6];		// hits scored each 3 seconds
+	u_int8_t	hitstakenstat[6];	// hits taken each 3 seconds
 	u_int8_t	killssortie;	// kills in this sortie
 	u_int16_t	killstod;		// kills in this TOD
 	u_int16_t	structstod;		// structures in this TOD

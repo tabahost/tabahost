@@ -1508,9 +1508,6 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "gunstat"))
 		{
-			PPrintf(client, RADIO_YELLOW, "gunstat disabled for maintenance");
-			return;
-			
 			if (client->gunstat)
 			{
 				client->gunstat = 0;
@@ -6076,42 +6073,43 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 
 	Com_Printf("-HOST- hit %s with %s\n", pvictim->longnick, munition->abbrev);
 
-	if (gunstats->value || client->gunstat || pvictim->gunstat)
+	if (gunstats->value)// || client->gunstat || pvictim->gunstat)
 	{
 		memset(heb, 0, sizeof(heb));
 		AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, heb, NULL, pvictim);
 
 		if (client != pvictim)
 		{
-			if (gunstats->value)
-			{
+//			if (gunstats->value)
+//			{
 				memset(header, 0, sizeof(header));
 				sprintf(header, "%s(%u)[%de%dp]%s%s", munition->abbrev, flakhit->type, munition->he, munition->ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
 				memset(gunstatsb, 0, sizeof(gunstatsb));
 				sprintf(gunstatsb, "%s;;%s", header, heb);
-			}
-			else
-			{
-				memset(gunstatsb, 0, sizeof(gunstatsb));
-				sprintf(gunstatsb, "Hit %s with %s at cfz", pvictim->longnick, munition->abbrev);
-			}
-			if (gunstats->value || client->gunstat)
+//			}
+//			else
+//			{
+//				memset(gunstatsb, 0, sizeof(gunstatsb));
+//				sprintf(gunstatsb, "Hit %s with %s at cfz", pvictim->longnick, munition->abbrev);
+//			}
+//			if (gunstats->value || client->gunstat)
 				PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
 		}
 
-		if (gunstats->value)
-		{
+//		if (gunstats->value)
+//		{
 			memset(header, 0, sizeof(header));
 			sprintf(header, "%s%s%s(%u)[%de%dp]", client->longnick, GetSmallPlaneName(client->plane), munition->abbrev, flakhit->type, munition->he, munition->ap);
 			memset(gunstatsb, 0, sizeof(gunstatsb));
 			sprintf(gunstatsb, "%s;;%s", header, heb);
-		}
-		else
-		{
-			memset(gunstatsb, 0, sizeof(gunstatsb));
-			sprintf(gunstatsb, "%s hit you with %s at cfz", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev);
-		}
-		if (gunstats->value || pvictim->gunstat)
+//		}
+//		else
+//		{
+//			memset(gunstatsb, 0, sizeof(gunstatsb));
+//			sprintf(gunstatsb, "%s hit you with %s at cfz", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev);
+//		}
+
+//		if (gunstats->value || pvictim->gunstat)
 			PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 	}
 	else
@@ -6231,10 +6229,9 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 		}
 
 		if (gunstats->value)
-			PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id,
-					building->armor);
-		else if (client->gunstat)
-			PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
+			PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+//		else if (client->gunstat)
+//			PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 	}
 
 	if (building->field <= fields->value)
@@ -6358,10 +6355,9 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	i = AddBuildingDamage(building, he, munition->ap, client);
 
 	if (gunstats->value)
-		PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id,
-				building->armor);
-	else if (client->gunstat)
-		PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
+		PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+//	else if (client->gunstat)
+//		PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 
 	Com_Printf("%s %shit %s with %s\n", client->longnick, client->country ==building->country ? "friendly " : "", GetBuildingType(building->type), munition->abbrev);
 
@@ -6451,7 +6447,9 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	hits2 = hits = hitplane->hits;
 
 	client->hits += hits;
+	client->hitsstat[0] += hits;
 	pvictim->hitstaken += hits;
+	pvictim->hitstakenstat[0] += hits;
 
 	munition = GetMunition(hitplane->type);
 
@@ -6615,7 +6613,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			he = 0;
 		}
 
-		if (gunstats->value || client->gunstat || pvictim->gunstat)
+		if (gunstats->value) // || client->gunstat || pvictim->gunstat)
 		{
 			hitplane = (hitplane_t *)buffer;
 
@@ -6631,36 +6629,36 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if (client != pvictim)
 			{
-				if (gunstats->value)
-				{
+//				if (gunstats->value)
+//				{
 					memset(header, 0, sizeof(header));
 					sprintf(header, "%s(%u)[%de%dp]%s%s", munition->abbrev, hitplane->type, munition->he, ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
 					memset(gunstatsb, 0, sizeof(gunstatsb));
 					sprintf(gunstatsb, "%s;%s;%s%s", header, heb, ign, apb);
-				}
-				else
-				{
-					memset(gunstatsb, 0, sizeof(gunstatsb));
-					sprintf(gunstatsb, "Hit %s with %s at %s", pvictim->longnick, munition->abbrev, GetSmallHitSite(needle[0]));
-				}
+//				}
+//				else
+//				{
+//					memset(gunstatsb, 0, sizeof(gunstatsb));
+//					sprintf(gunstatsb, "Hit %s with %s at %s", pvictim->longnick, munition->abbrev, GetSmallHitSite(needle[0]));
+//				}
 
-				if (gunstats->value || client->gunstat)
+//				if (gunstats->value || client->gunstat)
 					PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
 			}
 
-			if (gunstats->value)
-			{
+//			if (gunstats->value)
+//			{
 				memset(header, 0, sizeof(header));
 				sprintf(header, "%s(%s)%s(%u)[%de%dp]", client->longnick, GetSmallPlaneName(client->plane), munition->abbrev, hitplane->type, munition->he, ap);
 				memset(gunstatsb, 0, sizeof(gunstatsb));
 				sprintf(gunstatsb, "%s;%s;%s%s", header, heb, ign, apb);
-			}
-			else
-			{
-				memset(gunstatsb, 0, sizeof(gunstatsb));
-				sprintf(gunstatsb, "%s hit you with %s at %s", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev, GetSmallHitSite(needle[0]));
-			}
-			if (gunstats->value || pvictim->gunstat)
+//			}
+//			else
+//			{
+//				memset(gunstatsb, 0, sizeof(gunstatsb));
+//				sprintf(gunstatsb, "%s hit you with %s at %s", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev, GetSmallHitSite(needle[0]));
+//			}
+//			if (gunstats->value || pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 		}
 
@@ -6784,8 +6782,10 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	if (!pvictim->drone)
 		SendPings(1, hardhitplane->munition, pvictim);
 
-	//	client->hits++;	
+	client->hits++;	
+	client->hitsstat[0]++;
 	pvictim->hitstaken++;
+	pvictim->hitstakenstat[0]++;
 
 	munition = GetMunition(hardhitplane->munition);
 
@@ -6825,44 +6825,44 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 			return; // not hit plane if with wingmans
 	}
 
-	if (gunstats->value || client->gunstat || pvictim->gunstat)
+	if (gunstats->value)// || client->gunstat || pvictim->gunstat)
 	{
 		memset(heb, 0, sizeof(heb));
 		AddPlaneDamage(hardhitplane->place, he, 0, heb, NULL, pvictim);
 
 		if (client != pvictim)
 		{
-			if (gunstats->value)
-			{
+//			if (gunstats->value)
+//			{
 				memset(header, 0, sizeof(header));
 				sprintf(header, "%s(%u)[%de%dp]%s%s", munition->abbrev, hardhitplane->munition, munition->he, munition->ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
 				memset(gunstatsb, 0, sizeof(gunstatsb));
 				sprintf(gunstatsb, "%s;;%s", header, heb);
-			}
-			else
-			{
-				memset(gunstatsb, 0, sizeof(gunstatsb));
-				sprintf(gunstatsb, "Hit %s with %s at %s", pvictim->longnick, munition->abbrev, GetSmallHitSite(hardhitplane->place));
-			}
+//			}
+//			else
+//			{
+//				memset(gunstatsb, 0, sizeof(gunstatsb));
+//				sprintf(gunstatsb, "Hit %s with %s at %s", pvictim->longnick, munition->abbrev, GetSmallHitSite(hardhitplane->place));
+//			}
 
-			if (gunstats->value || client->gunstat)
+//			if (gunstats->value || client->gunstat)
 				PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
 		}
 
-		if (gunstats->value)
-		{
+//		if (gunstats->value)
+//		{
 			memset(header, 0, sizeof(header));
 			sprintf(header, "%s%s%s(%u)[%de%dp]", client->longnick, GetSmallPlaneName(client->plane), munition->abbrev, hardhitplane->munition, munition->he, munition->ap);
 			memset(gunstatsb, 0, sizeof(gunstatsb));
 			sprintf(gunstatsb, "%s;;%s", header, heb);
-		}
-		else
-		{
-			memset(gunstatsb, 0, sizeof(gunstatsb));
-			sprintf(gunstatsb, "%s hit you with %s at %s", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev, GetSmallHitSite(hardhitplane->place));
-		}
+//		}
+//		else
+//		{
+//			memset(gunstatsb, 0, sizeof(gunstatsb));
+//			sprintf(gunstatsb, "%s hit you with %s at %s", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev, GetSmallHitSite(hardhitplane->place));
+//		}
 
-		if (gunstats->value || pvictim->gunstat)
+//		if (gunstats->value || pvictim->gunstat)
 			PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 	}
 	else
@@ -7086,7 +7086,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 	if (dmgprobe > client->armor.imunity[place]) // hit makes damage
 	{
-		if (dmgprobe >= client->armor.points[place])
+		if (dmgprobe >= client->armor.points[place]) // hit destroy part
 		{
 			if (he)
 			{
@@ -7107,7 +7107,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 				if (!client->inuse || !client->infly) // drone killed
 				{
-					//					depth--;
+					// depth--;
 					return 0;
 				}
 			}
@@ -7139,7 +7139,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 				}
 			}
 		}
-		else
+		else // hit damage part but not destroy it
 		{
 			client->armor.points[place] -= dmgprobe;
 
@@ -7176,8 +7176,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 					}
 					else
 					{
-						AddPlaneDamage(client->armor.parent[place], he, 0, 
-						NULL, NULL, client);
+						AddPlaneDamage(client->armor.parent[place], he, 0, NULL, NULL, client);
 					}
 				}
 			}
@@ -7733,7 +7732,7 @@ void SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client)
 	{
 		if(status1 & (1 << i))
 		{
-			Com_Printf("%s lost %s\n", client->longnick, GetHitSite((1 << i)));
+			Com_Printf("%s lost %s\n", client->longnick, GetHitSite(i));
 		}
 	}
 

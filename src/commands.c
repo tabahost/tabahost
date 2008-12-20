@@ -291,10 +291,13 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 void Cmd_VarList(client_t *client, char *string)
 {
 	var_t *var;
-	u_int8_t i=0;
+	u_int8_t i = 0;
 
 	for (var = var_vars; var; var = var->next)
 	{
+		if((var->flags & VAR_ADMIN) && client->attr == FLAG_OP)
+			continue;
+
 		if (!string)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "%s %s \"%s\"", var->flags & VAR_ARCHIVE ? var->flags & VAR_NOSET ? "*" : "+" : var->flags & VAR_NOSET ? "x" : " ", var->name, var->string);

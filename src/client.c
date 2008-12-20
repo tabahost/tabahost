@@ -469,10 +469,25 @@ int ProcessClient(client_t *client)
 				}
 
 				if(!((arena->frame - client->frame) % 180000)) // 30 minutes
-
 				{
 					if(client->tklimit)
 					client->tklimit = 0;
+				}
+
+				// gunstat
+				if(client->gunstat && client->infly && !((arena->frame - client->frame) % 300)) // 3 seconds
+				{
+					if(client->hitsstat[0])
+					{
+						PPrintf(client, RADIO_GREEN, "Hit %d bullets", client->hitsstat[0]);
+						client->hitsstat[0] = 0;
+					}
+					
+					if(client->hitstakenstat[0])
+					{
+						PPrintf(client, RADIO_PURPLE, "Got hit %d bullets", client->hitstakenstat[0]);
+						client->hitstakenstat[0] = 0;
+					}
 				}
 
 				if(predictpos->value && client->infly)
@@ -640,11 +655,11 @@ int ProcessClient(client_t *client)
 		}
 	}
 
-	/*************
-	 BackupPosition
+/*************
+ BackupPosition
 
-	 Backup client position, leaving [0] free to predict or to store by PPlanePosition
-	 *************/
+ Backup client position, leaving [0] free to predict or to store by PPlanePosition
+ *************/
 
 void BackupPosition(client_t *client, u_int8_t predict)
 {
@@ -3626,10 +3641,10 @@ char *CreateSkin(client_t *client, u_int8_t number)
 	switch (client->country)
 	{
 		case COUNTRY_RED:
-			sprintf(buffer, "/ppv/%s/%sred%dppv.vfc@%sred%d.ppv", GetSmallPlaneName(client->plane), GetSmallPlaneName(client->plane), number, GetSmallPlaneName(client->plane), number);
+			sprintf(buffer, "ppv\\%s\\%sred%dppv.vfc@%sred%d.ppv", GetSmallPlaneName(client->plane), GetSmallPlaneName(client->plane), number, GetSmallPlaneName(client->plane), number);
 			break;
 		case COUNTRY_GOLD:
-			sprintf(buffer, "/ppv/%s/%sgold%dppv.vfc@%sgold%d.ppv", GetSmallPlaneName(client->plane), GetSmallPlaneName(client->plane), number, GetSmallPlaneName(client->plane), number);
+			sprintf(buffer, "ppv\\%s\\%sgold%dppv.vfc@%sgold%d.ppv", GetSmallPlaneName(client->plane), GetSmallPlaneName(client->plane), number, GetSmallPlaneName(client->plane), number);
 			break;
 		default:
 			buffer[0] = '\0';
