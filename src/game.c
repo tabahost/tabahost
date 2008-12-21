@@ -6446,8 +6446,11 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 	hits2 = hits = hitplane->hits;
 
-	client->hits += hits;
-	client->hitsstat[0] += hits;
+	if(client != pvictim)
+	{
+		client->hits += hits;
+		client->hitsstat[0] += hits;
+	}
 	pvictim->hitstaken += hits;
 	pvictim->hitstakenstat[0] += hits;
 
