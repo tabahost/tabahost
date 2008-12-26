@@ -3317,7 +3317,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		if (!client->drone)
 		{
-			if (n != 0x0E00) // FRANZ verificar
+			if (n != 0x0E00) // TODO: FRANZ verificar
 				client->awaytimer = 0;
 		}
 
