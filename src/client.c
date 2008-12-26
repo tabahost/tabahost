@@ -477,16 +477,32 @@ int ProcessClient(client_t *client)
 				// gunstat
 				if(client->gunstat && client->infly && !((arena->frame - client->frame) % 300)) // 3 seconds
 				{
-					if(client->hitsstat[0])
+					for(i = 0; i < 6; i++)
 					{
-						PPrintf(client, RADIO_GREEN, "Hit %d bullets", client->hitsstat[0]);
-						client->hitsstat[0] = 0;
+						if(client->hitsstat[i])
+						{
+							PPrintf(client, RADIO_GREEN, "Hit %d bullets [%s]", client->hitsstat[i],
+								i == 0?"7mm":
+								i == 1?"13mm":
+								i == 2?"20mm":
+								i == 3?"30-37mm":
+								i == 4?"40-57mm":"75-88mm");
+							client->hitsstat[i] = 0;
+						}
 					}
-					
-					if(client->hitstakenstat[0])
+
+					for(i = 0; i < 6; i++)
 					{
-						PPrintf(client, RADIO_PURPLE, "Got hit %d bullets", client->hitstakenstat[0]);
-						client->hitstakenstat[0] = 0;
+						if(client->hitstakenstat[i])
+						{
+							PPrintf(client, RADIO_PURPLE, "Got hit %d bullets [%s]", client->hitstakenstat[i],
+								i == 0?"7mm":
+								i == 1?"13mm":
+								i == 2?"20mm":
+								i == 3?"30-37mm":
+								i == 4?"40-57mm":"75-88mm");
+							client->hitstakenstat[i] = 0;
+						}
 					}
 				}
 
@@ -3641,10 +3657,10 @@ char *CreateSkin(client_t *client, u_int8_t number)
 	switch (client->country)
 	{
 		case COUNTRY_RED:
-			sprintf(buffer, "ppv\\%s\\%sred%dppv.vfc@%sred%d.ppv", GetSmallPlaneName(client->plane), GetSmallPlaneName(client->plane), number, GetSmallPlaneName(client->plane), number);
+			sprintf(buffer, "ppv\\%s\\%sred%dppv.vfc@%sred%d.ppv", GetPlaneDir(client->plane), GetPlaneDir(client->plane), number, GetPlaneDir(client->plane), number);
 			break;
 		case COUNTRY_GOLD:
-			sprintf(buffer, "ppv\\%s\\%sgold%dppv.vfc@%sgold%d.ppv", GetSmallPlaneName(client->plane), GetSmallPlaneName(client->plane), number, GetSmallPlaneName(client->plane), number);
+			sprintf(buffer, "ppv\\%s\\%sgold%dppv.vfc@%sgold%d.ppv", GetPlaneDir(client->plane), GetPlaneDir(client->plane), number, GetPlaneDir(client->plane), number);
 			break;
 		default:
 			buffer[0] = '\0';
@@ -3928,7 +3944,7 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 		sprintf(my_query, "UPDATE score_fighter SET");
 	}
 
-	if (arena->munition[munition].type == 2) // rocket
+	if (arena->munition[munition].type == MUNTYPE_ROCKET) // rocket
 	{
 		if (client->infly)
 		{
@@ -3940,7 +3956,7 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 
 		strcat(my_query, " rockethits = rockethits + '1'");
 	}
-	else if (arena->munition[munition].type == 3) // bomb
+	else if (arena->munition[munition].type == MUNTYPE_BOMB) // bomb
 	{
 		if (client->infly)
 		{
@@ -3952,7 +3968,7 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 
 		strcat(my_query, " bombhits = bombhits + '1'");
 	}
-	else if (arena->munition[munition].type == 4) // torpedo
+	else if (arena->munition[munition].type == MUNTYPE_TORPEDO) // torpedo
 	{
 		if (client->infly)
 		{
@@ -3964,7 +3980,7 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 
 		strcat(my_query, " torphits = torphits + '1'");
 	}
-	else if (arena->munition[munition].type == 1) // bullet
+	else if (arena->munition[munition].type == MUNTYPE_BULLET) // bullet
 	{
 		if (client->infly)
 		{

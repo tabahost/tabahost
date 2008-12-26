@@ -4060,7 +4060,7 @@ void PReqBomberList(client_t *client)
 void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
 	char field[4];
-	u_int16_t i, j, gunused;
+	u_int16_t i, j, gunused, totalhits;
 	int8_t land = 0;
 	u_int16_t end = 0;
 	u_int32_t dist = 0;
@@ -4125,8 +4125,10 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 	}
 
-	if (client->hits && !gunused)
-		gunused = client->hits * 2;
+	totalhits = client->hits[0] + client->hits[1] + client->hits[2] + client->hits[3] + client->hits[4] + client->hits[5];
+
+	if (totalhits && !gunused)
+		gunused = totalhits * 2;
 
 	if (!client->attached)
 	{
@@ -4384,7 +4386,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 	// TODO: Make a new function to handle Scores after end flight
 	if (!client->chute || (client->chute && ((end == 0x02) || (end == 0x07) || (end == 0x0C))))
 	{
-		PEndflightScores(end, land, gunused, client);
+		PEndflightScores(end, land, gunused, totalhits, client);
 
 		if (!client->attached)
 		{
@@ -4416,8 +4418,9 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 
 		client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status1 = client->status2 = client->infly
-				= client->hits = client->hitstaken = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = client->score.penaltyscore = client->commandos
-				= client->damaged = 0;
+				= client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2]
+				= client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer
+				= client->score.penaltyscore = client->commandos = client->damaged = 0;
 				
 		memset(client->skin, 0, sizeof(client->skin));
 
@@ -4467,7 +4470,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
  Check the type of end flight, guns used and hit, and credit scores
  *************/
 
-void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, client_t *client)
+void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client)
 {
 	u_int16_t i;
 
@@ -4811,8 +4814,8 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, client_t *c
 
 	if (gunused)
 		sprintf(my_query, "%s, gunused = gunused + '%u'", my_query, gunused);
-	if (client->hits)
-		sprintf(my_query, "%s, gunhits = gunhits + '%u'", my_query, client->hits);
+	if (totalhits)
+		sprintf(my_query, "%s, gunhits = gunhits + '%u'", my_query, totalhits);
 
 	sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
 
@@ -4856,8 +4859,33 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, client_t *c
 	PPrintf(client, RADIO_WHITE, "==================================================");
 	PPrintf(client, RADIO_WHITE, "Flight time: %s", Com_TimeSeconds(end));
 	PPrintf(client, RADIO_WHITE, "Last mission score: %11.3f - %s mission.", client->lastscore, IsFighter(client) ? "Fighter" : IsBomber(client) ? "Bomber" : "Ground");
-	PPrintf(client, RADIO_WHITE, "You've shot %d rounds, hit %d (acc:%.3f%%)", gunused, client->hits, gunused ? (float)client->hits*100/gunused : 0);
-	PPrintf(client, RADIO_WHITE, "You've got %d shots", client->hitstaken);
+	PPrintf(client, RADIO_WHITE, "You've shot %d rounds, hit %d (acc:%.3f%%)", gunused, totalhits, gunused ? (float)totalhits*100/gunused : 0);
+	if(totalhits)
+	{
+		for(i = 0; i < 6; i++)
+		{
+			PPrintf(client, RADIO_WHITE, "         %3d [%s]", client->hits[i],
+								i == 0?"7mm":
+								i == 1?"13mm":
+								i == 2?"20mm":
+								i == 3?"30-37mm":
+								i == 4?"40-57mm":"75-88mm");
+		}
+	}
+	totalhits = client->hitstaken[0] + client->hitstaken[1] + client->hitstaken[2] + client->hitstaken[3] + client->hitstaken[4] + client->hitstaken[5];
+	PPrintf(client, RADIO_WHITE, "You've got %d shots", totalhits);
+	if(totalhits)
+	{
+		for(i = 0; i < 6; i++)
+		{
+			PPrintf(client, RADIO_WHITE, "         %3d [%s]", client->hitstaken[i],
+								i == 0?"7mm":
+								i == 1?"13mm":
+								i == 2?"20mm":
+								i == 3?"30-37mm":
+								i == 4?"40-57mm":"75-88mm");
+		}
+	}
 	PPrintf(client, RADIO_WHITE, "==================================================");
 
 	/////////// TODO: if client is chute and not that end-flight?
@@ -6446,20 +6474,24 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 	hits2 = hits = hitplane->hits;
 
-	if(client != pvictim)
-	{
-		client->hits += hits;
-		client->hitsstat[0] += hits;
-	}
-	pvictim->hitstaken += hits;
-	pvictim->hitstakenstat[0] += hits;
-
 	munition = GetMunition(hitplane->type);
 
 	if (!munition)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Unknown munition ID %d, plane %d", hitplane->type, client->plane);
 		return;
+	}
+
+	if(munition->caliber && munition->caliber <= 6)
+	{
+		if(client != pvictim)
+		{
+			client->hits[munition->caliber - 1] += hits;
+			client->hitsstat[munition->caliber - 1] += hits;
+		}
+
+		pvictim->hitstaken[munition->caliber - 1] += hits;
+		pvictim->hitstakenstat[munition->caliber - 1] += hits;
 	}
 
 	Com_Printf("%s %shit %u rounds at %s with %s\n", client!=pvictim ? client->longnick : "-HOST", (client!=pvictim && client->country==pvictim->country) ? "friendly " : "", hits, pvictim->longnick,
@@ -6785,11 +6817,6 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	if (!pvictim->drone)
 		SendPings(1, hardhitplane->munition, pvictim);
 
-	client->hits++;	
-	client->hitsstat[0]++;
-	pvictim->hitstaken++;
-	pvictim->hitstakenstat[0]++;
-
 	munition = GetMunition(hardhitplane->munition);
 
 	if (!munition)
@@ -6799,6 +6826,18 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	}
 	else
 		he = munition->he;
+
+	if(munition->caliber && munition->caliber <= 6)
+	{
+		if(client != pvictim)
+		{
+			client->hits[munition->caliber - 1]++;
+			client->hitsstat[munition->caliber - 1]++;
+		}
+
+		pvictim->hitstaken[munition->caliber - 1]++;
+		pvictim->hitstakenstat[munition->caliber - 1]++;
+	}
 
 	Com_Printf("%s %shit %s with %s\n", client->longnick, client->country == pvictim->country ? "friendly " : "", pvictim->longnick, munition->abbrev);
 

@@ -159,6 +159,16 @@ typedef unsigned int u_int32_t;
 #define MIN_BOMBRADIUS		129		//
 #define	MAX_MAPCYCLE		16		// max of maps can contain mapcycle
 #define MAX_PLACE			32		// max num of plane parts
+#define MUNTYPE_BULLET		1		// munition type
+#define MUNTYPE_TORPEDO		2		// munition type
+#define MUNTYPE_BOMB		3		// munition type
+#define MUNTYPE_ROCKET		4		// munition type
+#define MUNCAL_7MM			1		// munition caliber
+#define MUNCAL_13MM			2		// munition caliber
+#define MUNCAL_20MM			3		// munition caliber
+#define MUNCAL_30MM			4		// munition caliber  30-37mm
+#define MUNCAL_40MM			5		// munition caliber
+#define MUNCAL_88MM			6		// munition caliber  75-88mm
 #define VAR_ARCHIVE			1		// set to cause it to be saved to config.cfg
 #define VAR_NOSET			2		// block variable from change value
 #define VAR_ADMIN			4		// only admins can change this variable
@@ -166,7 +176,7 @@ typedef unsigned int u_int32_t;
 #define TONNAGE_RECOVER		5		// Amount of Kg field will recover per second
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s²)
 #define MODULUS(a) (a > 0 ? a : a * -1)
-#define PLANE_FAU			48	// ME262 48, Predator 180
+#define PLANE_FAU			180	// ME262 48, Predator 180
 #define COLLECT_CYCLE		0
 #define COLLECT_MAP			1
 #define COLLECT_EVENT		2
@@ -480,6 +490,7 @@ typedef struct munition_s
 	u_int16_t	ap;				// penetration coeficient (linear coef)
 	int8_t		decay;			// penetration decay (angular coef)
 	u_int8_t	type;			// type: bullet, rocket, bomb, torp
+	u_int8_t	caliber;		// [7mm, 13mm, 20mm, 30-37mm, 40-57mm, 75-88mm]
 } munition_t;
 
 typedef struct building_s
@@ -772,9 +783,8 @@ typedef struct client_s
 	u_int16_t	hmackpenalty;	// time penalty if killed in flypenalty->value time
 	u_int8_t	hmackpenaltyfield; // which field client was penalized
 
-	u_int16_t	hits;			// hits scored
-	u_int16_t	hitstaken;		// hits taken
-	u_int16_t	calibers[6];	// [12mm, 20mm, 30-37mm, 40mm, 88mm] ???
+	u_int16_t	hits[6];			// hits scored [7mm, 13mm, 20mm, 30-37mm, 40-57mm, 75-88mm]
+	u_int16_t	hitstaken[6];		// hits taken
 	u_int8_t	hitsstat[6];		// hits scored each 3 seconds
 	u_int8_t	hitstakenstat[6];	// hits taken each 3 seconds
 	u_int8_t	killssortie;	// kills in this sortie
@@ -2025,7 +2035,7 @@ int		ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client);
 void	PingTest(u_int8_t *buffer, client_t *client);
 void	PReqBomberList(client_t *client);
 void	PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client);
-void	PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, client_t *client);
+void	PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client);
 void	PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached);
 void	CheckMaxG(client_t *client);
 float	ClientG(client_t *client);
@@ -2139,6 +2149,7 @@ void	LogCVsPosition(void);
 void	ListWaypoints(client_t *client);
 char	*GetPlaneName(u_int16_t plane);
 char	*GetSmallPlaneName(u_int16_t plane);
+char	*GetPlaneDir(u_int16_t plane);
 void	UpdateRPS(u_int16_t minutes);
 void	SendRPS(client_t *client);
 void	WB3SendAcks(client_t *client);

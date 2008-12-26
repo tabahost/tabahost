@@ -1312,6 +1312,47 @@ char *GetSmallPlaneName(u_int16_t plane)
 }
 
 /*************
+ GetPlaneDir
+
+ Get plane dir name from given number
+ *************/
+
+char *GetPlaneDir(u_int16_t plane)
+{
+	static char *directories[MAX_PLANES] = {NULL, /* 0 */ "f6f5", /* 1 */ "f4f4", /* 2 */ "fm2", /* 3 */ "f4u1d", /* 4 */ "zero?", /* 5 */
+		"zero21?", /* 6 */ "zero52?", /* 7 */ "ki43", /* 8 */ "ki84", /* 9 */ "bf109e", /* 10 */ "bf109f", /* 11 */ "bf109g", /* 12 */ "109gr6", /* 13 */
+		"bf109k", /* 14 */ "bf110c", /* 15 */ "bf110g", /* 16 */ "fw1904", /* 17 */ "fw1908", /* 18 */ "fw190d", /* 19 */ "hurri1", /* 20 */
+		"hurri2", /* 21 */ "spit1?", /* 22 */ "spit5", /* 23 */ "spit9", /* 24 */ "p38f", /* 25 */ "p38?", /* 26 */ "p38l", /* 27 */
+		"p39d", /* 28 */ "p40e", /* 29 */ "p47d", /* 30 */ "p51", /* 31 */ "d3a", /* 32 */ "b5n", /* 33 */ "sbd", /* 34 */ "ju88a", /* 35 */
+		"b25h", /* 36 */ "b25j?", /* 37 */ "b17", /* 38 */ NULL, /* 39 */ "b17f", /* 40 */ "b25c", /* 41 */ "p40b", /* 42 */ "p47c", /* 43 */
+		"p51b", /* 44 */ "seaf2", /* 45 */ "spit14", /* 46 */ "f4u4", /* 47 */ "me262", /* 48 */ "yak3", /* 49 */ "yak9d", /* 50 */ "ju87d", /* 51 */
+		"mosq6", /* 52 */ "mosq4", /* 53 */ "ju52", /* 54 */ "g4m2", /* 55 */ "ki61", /* 56 */ "ju87g", /* 57 */ "b24d", /* 58 */ "b24J", /* 59 */
+		"f4f3", /* 60 */ NULL, /* 61 */ NULL, /* 62 */ NULL, /* 63 */ "m3", /* 64 */ "m4a1", /* 65 */ "m16", /* 66 */ "m5", /* 67 */ "mkiv", /* 68 */
+		"mkivd", /* 69 */ "mkv", /* 70 */ "f86", /* 71 */ "a36", /* 72 */ NULL, /* 73 */ NULL, /* 74 */ "mc2022?", /* 75 */ "mc205", /* 76 */
+		NULL, /* 77 */ NULL, /* 78 */ "truck", /* 79 */ "p39q", /* 80 */ "p400", /* 81 */ "nfii", /* 82 */ "mc202?", /* 83 */ "t34", /* 84 */
+		"m4a3", /* 85 */ NULL, /* 86 */ "bf109f1", /* 87 */ "g4m1", /* 88 */ NULL, /* 89 */ "spad7", /* 90 */ "camel", /* 91 */ NULL, /* 92 */
+		"d5a", /* 93 */ "spad13", /* 94 */ "d7", /* 95 */ "dr1", /* 96 */ "f2b", /* 97 */ "se5a", /* 98 */ NULL, /* 99 */ NULL, /* 100 */
+		"he111h3", /* 101 */ NULL, /* 102 */ "tbd", /* 103 */ "f4u1", /* 104 */ "f4u1a", /* 105 */ NULL, /* 106 */ NULL, /* 107 */ NULL, /* 108 */
+		NULL, /* 109 */ "spit5b1", /* 110 */ NULL, /* 111 */ "ec03mk1", /* 112 */ "do17z", /* 113 */ "bf109g2e", /* 114 */ NULL, /* 115 */ "j2m2", /* 116 */
+		"j2m3", /* 117 */ "ki611c", /* 118 */ NULL, /* 119 */ NULL, /* 120 */ NULL, /* 121 */ "lanc1", /* 122 */ NULL, /* 123 */ NULL, /* 124 */
+		"ki44", /* 125 */ NULL, /* 126 */ NULL, /* 127 */ NULL, /* 128 */ NULL, /* 129 */ NULL, /* 130 */ NULL, /* 131 */ "20mmaaa", /* 132 */
+		"40mmaaa", /* 133 */ "88mmaaa", /* 134 */ NULL, /* 135 */ NULL, /* 136 */ "c47", /* 137 */ "la5f", /* 138 */ "la5fn", /* 139 */ "la72?", /* 140 */
+		"la73?", /* 141 */ NULL, /* 142 */ NULL, /* 143 */ NULL, /* 144 */ NULL, /* 145 */ NULL, /* 146 */ NULL, /* 147 */ "t6a", /* 148 */ NULL, /* 149 */
+		"109e1a0", /* 150 */ NULL, /* 151 */ NULL, /* 152 */ NULL, /* 153 */ NULL, /* 154 */ NULL, /* 155 */ NULL, /* 156 */ NULL, /* 157 */
+		NULL, /* 158 */ NULL, /* 159 */ NULL, /* 160 */ NULL, /* 161 */ NULL, /* 162 */ NULL, /* 163 */ NULL, /* 164 */ NULL, /* 165 */ NULL, /* 166 */
+		NULL, /* 167 */ NULL, /* 168 */ NULL, /* 169 */ NULL, /* 170 */ "spitm03f?", /* 171 */ NULL, /* 172 */ NULL, /* 173 */ NULL, /* 174 */ NULL, /* 175 */
+		NULL, /* 176 */ NULL, /* 177 */ NULL, /* 178 */ NULL, /* 179 */ "predator", /* 180 */ NULL, /* 181 */ NULL, /* 182 */ NULL, /* 183 */ "nport17", /* 184 */
+		NULL, /* 185 */ "gothagiv", /* 186 */ NULL, /* 187 */ NULL, /* 188 */ NULL, /* 189 */ NULL, /* 190 */ NULL, /* 191 */ NULL, /* 192 */ NULL, /* 193 */
+		NULL, /* 194 */ NULL, /* 195 */ NULL, /* 196 */ NULL, /* 197 */ NULL, /* 198 */ NULL, /* 199 */ "a67", /* 200 */ "f6f5n", /* 201 */ "bf109fn", /* 202 */
+		"fw190dn", /* 203 */ "p51n", /* 204 */ "b17n", /* 205 */ "p38ln", /* 206 */ "p38jn", /* 207 */ "p38fn", /* 208 */ NULL /* 209 */};
+
+	if(plane < maxplanes)
+		return directories[plane];
+	else
+		return NULL;
+}
+
+/*************
  UpdateRPS
 
  Update field with new planes
@@ -2126,6 +2167,7 @@ void LoadAmmo(client_t *client)
 						arena->munition[i].ap = Com_Atou(Com_MyRow("ap"));
 						arena->munition[i].decay = Com_Atoi(Com_MyRow("decay"));
 						arena->munition[i].type = Com_Atoi(Com_MyRow("muntype"));
+						arena->munition[i].caliber = Com_Atoi(Com_MyRow("caliber"));
 						if (Com_MyRow("name"))
 							strcpy(arena->munition[i].name, Com_MyRow("name"));
 						if (Com_MyRow("abbrev"))
@@ -3127,7 +3169,7 @@ void ChangeArena(char *map, client_t *client)
 			{
 				if (clients[i].inuse && clients[i].infly)
 				{
-					PEndflightScores(1, 0, 0, &clients[i]); // TODO: force client to land or just simulate land scores
+					PEndflightScores(1, 0, 0, 0, &clients[i]); // TODO: force client to land or just simulate land scores
 				}
 
 				Com_Close(&(clients[i].socket));
