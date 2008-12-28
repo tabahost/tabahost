@@ -164,6 +164,7 @@ var_t *teamkillstructs; // extern
 var_t *thskins; // extern
 var_t *timemult; // extern
 var_t *timeout; // extern
+var_t *verbose; // extern
 var_t *wb3; // extern
 var_t *weather; // extern
 var_t *whitelist; // extern
@@ -324,6 +325,7 @@ void InitVars(void)
 	thskins = Var_Get("thskins", "0", VAR_ARCHIVE);
 	timemult = Var_Get("timemult", "6", VAR_ARCHIVE);
 	timeout = Var_Get("timeout", "120", VAR_ARCHIVE);
+	verbose = Var_Get("verbose", VERBOSE_SMAX, VAR_ARCHIVE | VAR_ADMIN);
 	wb3 = Var_Get("wb3", "0", VAR_ARCHIVE | VAR_ADMIN);
 	weather = Var_Get("weather", "0", VAR_ARCHIVE);
 	whitelist = Var_Get("whitelist", "0", VAR_ARCHIVE);
@@ -352,10 +354,16 @@ void CheckVars(void)
 
 	if (logfile_active->modified)
 	{
-		if ((!logfile_active->value) && logfile)
+		if ((!logfile_active->value))
 		{
-			fclose(logfile);
-			logfile = NULL;
+			for(i = 0; i < MAX_LOGFILE; i++)
+			{
+				if(logfile[i])
+				{
+					fclose(logfile[i]);
+					logfile[i] = NULL;
+				}
+			}
 		}
 	}
 
@@ -369,7 +377,7 @@ void CheckVars(void)
 		}
 		else
 		{
-			Com_Printf("MySQL connected successfully to %s:%s\n", sqlserver->string, database->string);
+			Com_Printf(VERBOSE_ALWAYS, "MySQL connected successfully to %s:%s\n", sqlserver->string, database->string);
 		}
 
 		LoadDamageModel(NULL);
@@ -601,7 +609,7 @@ var_t *Var_Get(char *var_name, char *var_value, int flags)
 		var_vars = var;
 	}
 	else
-		Com_Printf("WARNING: Var_Get(): var == NULL\n");
+		Com_Printf(VERBOSE_WARNING, "Var_Get(): var == NULL\n");
 
 	var->flags = flags;
 
@@ -758,7 +766,7 @@ void UpdateArenaStatus(u_int8_t uptime)
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: UpdateArenaStatus(): couldn't query UPDATE error %d: %s\nquery = %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
+			Com_Printf(VERBOSE_WARNING, "UpdateArenaStatus(): couldn't query UPDATE error %d: %s\nquery = %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
 		}
 	}
 }

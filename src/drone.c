@@ -262,7 +262,7 @@ void RemoveDrone(client_t *drone)
 	}
 
 	if (i == MAX_RELATED)
-		Com_Printf("Server didnt find relationship between %s and his drone\n", drone->related[0] ? drone->related[0]->longnick : "(null)");
+		Com_Printf(VERBOSE_ALWAYS, "Server didnt find relationship between %s and his drone\n", drone->related[0] ? drone->related[0]->longnick : "(null)");
 
 	//	slot = drone->slot;
 	memset(drone, 0, sizeof(client_t)); //
@@ -777,7 +777,7 @@ int ProcessDrone(client_t *drone)
 								drone->ord = 1;
 
 								PPrintf(drone->related[0], RADIO_DARKGREEN, "Tank %s reached f%d", drone->longnick, drone->dronefield+1, dist);
-								Com_Printf("DEBUG: Tank %s reached f%d\n", drone->longnick, drone->dronefield+1, dist);
+								Com_Printf(VERBOSE_DEBUG, "Tank %s reached f%d\n", drone->longnick, drone->dronefield+1, dist);
 							}
 						}
 						else if (k) // no target far but near
@@ -828,7 +828,7 @@ int ProcessDrone(client_t *drone)
 									{
 										drone->ord = 1;
 										PPrintf(drone->related[0], RADIO_DARKGREEN, "Katyusha %s reached f%d", drone->longnick, drone->dronefield+1, dist);
-										Com_Printf("DEBUG: Katyusha %s reached f%d\n", drone->longnick, drone->dronefield+1, dist);
+										Com_Printf(VERBOSE_DEBUG, "Katyusha %s reached f%d\n", drone->longnick, drone->dronefield+1, dist);
 									}
 
 									if (j < fields->value)
@@ -1007,7 +1007,7 @@ int ProcessDrone(client_t *drone)
 	{
 		if (drone->drone & (DRONE_FAU | DRONE_WINGS1 | DRONE_WINGS2 | DRONE_HMACK | DRONE_HTANK | DRONE_KATY | DRONE_EJECTED | DRONE_COMMANDOS | DRONE_DEBUG))
 		{
-			Com_Printf("DEBUG: Removed unrelated drone %s type %u\n", drone->longnick, drone->drone);
+			Com_Printf(VERBOSE_DEBUG, "Removed unrelated drone %s type %u\n", drone->longnick, drone->drone);
 			return -1;
 		}
 	}
@@ -1100,10 +1100,10 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 			while (dest->armor.points[part = (rand()%32)] < 0)
 			{
 				i++;
-				//				Com_Printf("WARNING: DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
+				//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
 				if (i > 150)
 				{
-					Com_Printf("WARNING: DEBUG LOOP: Infinite loop detected, breaking off\n");
+					Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: Infinite loop detected, breaking off\n");
 					return;
 				}
 			}
@@ -1522,7 +1522,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 
 	if (max->he == min->he)
 	{
-		Com_Printf("WARNING: HitStructsNear(): min->he == max->he\n");
+		Com_Printf(VERBOSE_WARNING, "HitStructsNear(): min->he == max->he\n");
 		radius = 0;
 	}
 	else
@@ -1583,7 +1583,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 								if (gunstats->value)
 									PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->fields[field].buildings[i].type), munition->he);
 
-								Com_Printf("%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->fields[field].buildings[i].country) ? "friendly " : "",
+								Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->fields[field].buildings[i].country) ? "friendly " : "",
 										GetBuildingType(arena->fields[field].buildings[i].type), munition->abbrev);
 
 								if (client)
@@ -1629,7 +1629,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 								if (gunstats->value)
 									PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->cities[city].buildings[i].type), munition->he);
 
-								Com_Printf("%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->cities[city].buildings[i].country) ? "friendly " : "",
+								Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->cities[city].buildings[i].country) ? "friendly " : "",
 										GetBuildingType(arena->cities[city].buildings[i].type), munition->abbrev);
 
 								if (client)
@@ -1789,14 +1789,14 @@ u_int32_t NewDroneName(client_t *client)
 
 	if ((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
 	{
-		Com_Printf("WARNING: Couldn't open \"%s\"\n", FILE_DRONENICKS);
+		Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", FILE_DRONENICKS);
 		nick = client->shortnick;
 	}
 	else
 	{
 		if (fgets(buffer, 8, fp) == NULL)
 		{
-			Com_Printf("Unexpected end of %s\n", FILE_DRONENICKS);
+			Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 			fclose(fp);
 			Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 			return client->shortnick;
@@ -1811,7 +1811,7 @@ u_int32_t NewDroneName(client_t *client)
 		{
 			if (fgets(buffer, 8, fp) == NULL)
 			{
-				Com_Printf("Unexpected end of %s\n", FILE_DRONENICKS);
+				Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 				fclose(fp);
 				Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 				return client->shortnick;
@@ -1835,7 +1835,7 @@ u_int32_t NewDroneName(client_t *client)
 			{
 				if (fgets(buffer, 8, fp) == NULL)
 				{
-					Com_Printf("Unexpected end of %s\n", FILE_DRONENICKS);
+					Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 					fclose(fp);
 					Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 					return client->shortnick;
@@ -1862,7 +1862,7 @@ u_int32_t NewDroneName(client_t *client)
 
 			if ((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
 			{
-				Com_Printf("WARNING: Couldn't open \"%s\"\n", FILE_DRONENICKS);
+				Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", FILE_DRONENICKS);
 				Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 				return client->shortnick;
 			}
@@ -1871,7 +1871,7 @@ u_int32_t NewDroneName(client_t *client)
 				// crop end of ring
 				if (fgets(buffer, 8, fp) == NULL)
 				{
-					Com_Printf("Unexpected end of %s\n", FILE_DRONENICKS);
+					Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 					fclose(fp);
 					Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 					return client->shortnick;
@@ -1881,7 +1881,7 @@ u_int32_t NewDroneName(client_t *client)
 				{
 					if (fgets(buffer, 8, fp) == NULL)
 					{
-						Com_Printf("Unexpected end of %s\n", FILE_DRONENICKS);
+						Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 						fclose(fp);
 						Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 						return client->shortnick;

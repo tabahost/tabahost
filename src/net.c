@@ -40,14 +40,14 @@ int InitTCPNet(int portno)
 	WSADATA wsaData;
 	if (WSAStartup(0x0202, &wsaData))
 	{
-		Com_Printf("ERROR: initializing winsock\n");
+		Com_Printf(VERBOSE_ERROR, "initializing winsock\n");
 		ExitServer(1);
 	}
 #endif
 
 	if ((isockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
-		Com_Printf("ERROR: opening TCP socket\n");
+		Com_Printf(VERBOSE_ERROR, "opening TCP socket\n");
 		ExitServer(1);
 	}
 
@@ -55,14 +55,14 @@ int InitTCPNet(int portno)
 	if (ioctlsocket(isockfd, FIONBIO, &ioctlv) == -1)
 	{
 		Com_Close(&isockfd);
-		Com_Printf("ERROR: setting nonblocking TCP socket (isockfd)\n");
+		Com_Printf(VERBOSE_ERROR, "setting nonblocking TCP socket (isockfd)\n");
 		ExitServer(1);
 	}
 #else
 	if (ioctl(isockfd, FIONBIO, &ioctlv) == -1)
 	{
 		Com_Close(&isockfd);
-		Com_Printf("ERROR: setting nonblocking TCP socket (isockfd)\n");
+		Com_Printf(VERBOSE_ERROR, "setting nonblocking TCP socket (isockfd)\n");
 		ExitServer(1);
 	}
 #endif
@@ -75,14 +75,14 @@ int InitTCPNet(int portno)
 	if (bind(isockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 	{
 		Com_Close(&isockfd);
-		Com_Printf("ERROR: binding TCP socket\n");
+		Com_Printf(VERBOSE_ERROR, "binding TCP socket\n");
 		ExitServer(1);
 	}
 
 	if (listen(isockfd, maxclients->value))
 	{
 		Com_Close(&isockfd);
-		Com_Printf("ERROR: listen()\n");
+		Com_Printf(VERBOSE_ERROR, "listen()\n");
 		ExitServer(1);
 	}
 
@@ -105,7 +105,7 @@ int InitUDPNet(int portno)
 
 	if ((isockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
-		Com_Printf("ERROR: opening UDP socket\n");
+		Com_Printf(VERBOSE_ERROR, "opening UDP socket\n");
 		ExitServer(1);
 	}
 
@@ -113,14 +113,14 @@ int InitUDPNet(int portno)
 	if (ioctlsocket(isockfd, FIONBIO, &ioctlv) == -1)
 	{
 		Com_Close(&isockfd);
-		Com_Printf("ERROR: setting nonblocking UDP socket (isockfd)\n");
+		Com_Printf(VERBOSE_ERROR, "setting nonblocking UDP socket (isockfd)\n");
 		ExitServer(1);
 	}
 #else
 	if (ioctl(isockfd, FIONBIO, &ioctlv) == -1)
 	{
 		Com_Close(&isockfd);
-		Com_Printf("ERROR: setting nonblocking UDP socket (isockfd)\n");
+		Com_Printf(VERBOSE_ERROR, "setting nonblocking UDP socket (isockfd)\n");
 		ExitServer(1);
 	}
 #endif
@@ -133,7 +133,7 @@ int InitUDPNet(int portno)
 	if (bind(isockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 	{
 		Com_Close(&isockfd);
-		Com_Printf("ERROR: binding UDP socket\n");
+		Com_Printf(VERBOSE_ERROR, "binding UDP socket\n");
 		ExitServer(1);
 	}
 
@@ -161,14 +161,14 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	{
 		if ((buffer[0] == 0xff) && (buffer[1] == 0xff))
 		{
-			Com_Printf("WARNING: SendPacket() header 0xffff, Packet not sent\n");
+			Com_Printf(VERBOSE_WARNING, "SendPacket() header 0xffff, Packet not sent\n");
 			Com_Printfhex(datagram, len+4);
 			return 0;
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: SendPacket() buffer points to NULL\n");
+		Com_Printf(VERBOSE_WARNING, "SendPacket() buffer points to NULL\n");
 		return 0;
 	}
 
@@ -217,7 +217,7 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		if (debug->value)
 		{
-			Com_Printf("DEBUG: --->>> ");
+			Com_Printf(VERBOSE_DEBUG, "--->>> ");
 			Com_Printfhex(datagram, len+4);
 		}
 
@@ -238,11 +238,11 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 //			}
 //			else
 //			{
-//				Com_Printf("DEBUG: len+4 (%d), Com_Send() (%d)\n", len+4, i);
+//				Com_Printf(VERBOSE_DEBUG, "len+4 (%d), Com_Send() (%d)\n", len+4, i);
 //				Com_Printf(
 //						"WARNING: SendPacket() error sending packet to %s (%s)\n",
 //						client->longnick, client->ip);
-//				Com_Printf("%s error in Com_Send()\n", client->longnick);
+//				Com_Printf(VERBOSE_ALWAYS, "%s error in Com_Send()\n", client->longnick);
 //				//				client->timeout = MAX_TIMEOUT;
 //				RemoveClient(client);
 //				return -1;
@@ -250,8 +250,8 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: client not in use or without socket\n");
-			Com_Printf("%s client not in use or without socket\n",
+			Com_Printf(VERBOSE_WARNING, "client not in use or without socket\n");
+			Com_Printf(VERBOSE_ALWAYS, "%s client not in use or without socket\n",
 					client->longnick);
 			RemoveClient(client);
 			return -1;
@@ -259,7 +259,7 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	}
 	else
 	{
-		Com_Printf("WARNING: SendPacket() overflowed (packet to %s - %s)\n",
+		Com_Printf(VERBOSE_WARNING, "SendPacket() overflowed (packet to %s - %s)\n",
 				client->longnick, client->ip);
 		RemoveClient(client);
 		return -1;
@@ -352,7 +352,7 @@ int GetPacket(client_t *client)
 			return n;
 	}
 
-	Com_Printf("WARNING: %s(%s) %d - Invalid Packet\n", client->longnick, client->ip, n);
+	Com_Printf(VERBOSE_WARNING, "%s(%s) %d - Invalid Packet\n", client->longnick, client->ip, n);
 	FlushSocket(client->socket);
 	return 0;
 }
@@ -369,7 +369,7 @@ void FlushSocket(int sockfd)
 
 	if (!sockfd)
 	{
-		Com_Printf("WARNING: FlushSocket() tried to flush socket ZERO\n");
+		Com_Printf(VERBOSE_WARNING, "FlushSocket() tried to flush socket ZERO\n");
 		return;
 	}
 
@@ -385,7 +385,7 @@ void FlushSocket(int sockfd)
 	{
 		//		if(debug->value)
 		//		{
-		Com_Printf("DEBUG: Flushing socket (%d) n(%d):\n", socket, n);
+		Com_Printf(VERBOSE_DEBUG, "Flushing socket (%d) n(%d):\n", socket, n);
 		Com_Printfhex(mainbuffer, n);
 		//		}
 		//		else
@@ -406,7 +406,7 @@ void ProtocolError(client_t *client)
 	buffer[0] = 0xC0;
 	buffer[1] = 0x04;
 
-	Com_Printf("WARNING: %s(%s) Invalid login protocol (Code %d)\n",
+	Com_Printf(VERBOSE_WARNING, "%s(%s) Invalid login protocol (Code %d)\n",
 			client->longnick, client->ip, client->login);
 
 	Com_Send(client, buffer, 2);

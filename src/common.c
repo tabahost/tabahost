@@ -22,7 +22,7 @@
 
 #include "shared.h"
 
-FILE *logfile= NULL; // extern
+FILE *logfile[MAX_LOGFILE]; // extern
 
 /*************
  Z_Malloc
@@ -37,7 +37,7 @@ void *Z_Malloc(u_int32_t size)
 	z = malloc(size);
 	if (!z)
 	{
-		Com_Printf("ERROR: Z_Malloc()\n");
+		Com_Printf(VERBOSE_ERROR, "Z_Malloc()\n");
 		ExitServer(1);
 	}
 	memset(z, 0, size);
@@ -271,7 +271,7 @@ void Com_Close(int *fd)
 {
 	int i;
 
-	shutdown(*fd, SHUT_RDWR); // TODO: make socket errors 
+	shutdown(*fd, SHUT_RDWR); // TODO: Misc: make socket errors 
 	/*
 	 errno:
 	 [EBADF] 
@@ -329,7 +329,7 @@ int Com_Recv(int s, u_int8_t *buf, int len)
 		if (n != EWOULDBLOCK)
 #endif
 		{
-			Com_Printf("WARNING: Com_Recv() socket %d error\n", s);
+			Com_Printf(VERBOSE_WARNING, "Com_Recv() socket %d error\n", s);
 			ConnError(n);
 			return -1;
 		}
@@ -341,7 +341,7 @@ int Com_Recv(int s, u_int8_t *buf, int len)
 		if (n)
 		{
 #ifdef DEBUGLOGIN
-			Com_Printf("<<--");
+			Com_Printf(VERBOSE_DEBUG, "<<--");
 			Com_Printfhex(buf, n);
 #endif
 			if (server_speeds->value)
@@ -395,7 +395,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 
 	if (!client->socket) // to avoid SIGPIPE
 	{
-		Com_Printf("WARNING: Com_Send() tried to send data to socket zero\n");
+		Com_Printf(VERBOSE_WARNING, "Com_Send() tried to send data to socket zero\n");
 		return -1;
 	}
 
@@ -415,7 +415,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 	{
 		if (errno != EWOULDBLOCK)
 		{
-			Com_Printf("WARNING: Com_Send() socket %d error\n", client->socket);
+			Com_Printf(VERBOSE_WARNING, "Com_Send() socket %d error\n", client->socket);
 			ConnError(errno);
 			return -1;
 		}
@@ -431,12 +431,12 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 				}
 				else
 				{
-					Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+					Com_Printf(VERBOSE_WARNING, "%s send buffer overflow\n", client->longnick);
 					return -1;
 				}
 			}
 		
-			Com_Printf("WARNING: Com_Send() %s EWOULDBLOCK\n", client->longnick);
+			Com_Printf(VERBOSE_WARNING, "Com_Send() %s EWOULDBLOCK\n", client->longnick);
 			arena->bufferit = 1;
 			return 0;
 		}
@@ -444,7 +444,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 	else
 	{
 #ifdef DEBUGLOGIN
-		Com_Printf("-->>");
+		Com_Printf(VERBOSE_DEBUG, "-->>");
 		Com_Printfhex(buf, n);
 #endif
 		if (server_speeds->value)
@@ -455,7 +455,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 			buf += n;
 			len -= n;
 			
-			Com_Printf("WARNING: %s sent %d offset %d\n", client->longnick, n, client->buf_offset);
+			Com_Printf(VERBOSE_WARNING, "%s sent %d offset %d\n", client->longnick, n, client->buf_offset);
 			
 				if(client->buf_offset)
 				{
@@ -473,7 +473,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 						}
 						else
 						{
-							Com_Printf("WARNING: %s send buffer overflow\n", client->longnick);
+							Com_Printf(VERBOSE_WARNING, "%s send buffer overflow\n", client->longnick);
 						}
 					}
 				}
@@ -494,7 +494,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 			// if all data sent from buffer, clear it and send the actual data
 			if(client->buf_offset)
 			{
-				Com_Printf("WARNING: %s full buffer sent, not sending the actual data\n", client->longnick);
+				Com_Printf(VERBOSE_WARNING, "%s full buffer sent, not sending the actual data\n", client->longnick);
 				client->buf_offset = 0;
 				return Com_Send(client, tbuf, tlen);
 			}
@@ -517,103 +517,103 @@ void ConnError(int n)
 	{
 #ifdef _WIN32
 		case WSANOTINITIALISED:
-		Com_Printf("WARNING: WSAStartup() not initializated\n");
+		Com_Printf(VERBOSE_WARNING, "WSAStartup() not initializated\n");
 		break;
 		case WSAECONNRESET:
-		Com_Printf("WARNING: Connection reset by peer\n");
+		Com_Printf(VERBOSE_WARNING, "Connection reset by peer\n");
 		break;
 		case WSAENETDOWN:
-		Com_Printf("WARNING: Network subsystem has failed\n");
+		Com_Printf(VERBOSE_WARNING, "Network subsystem has failed\n");
 		break;
 		case WSAEFAULT:
-		Com_Printf("WARNING: Buffer is not totally contained in a valid part of the user address space\n");
+		Com_Printf(VERBOSE_WARNING, "Buffer is not totally contained in a valid part of the user address space\n");
 		break;
 		case WSAENETRESET:
-		Com_Printf("WARNING: Connection has been broken due to the remote host resetting\n");
+		Com_Printf(VERBOSE_WARNING, "Connection has been broken due to the remote host resetting\n");
 		break;
 		case WSAENOBUFS:
-		Com_Printf("WARNING: Not enough internal buffer space available\n");
+		Com_Printf(VERBOSE_WARNING, "Not enough internal buffer space available\n");
 		break;
 		case WSAENOTCONN:
-		Com_Printf("WARNING: Socket is not connected\n");
+		Com_Printf(VERBOSE_WARNING, "Socket is not connected\n");
 		break;
 		case WSAENOTSOCK:
-		Com_Printf("WARNING: Descriptor is not a socket\n");
+		Com_Printf(VERBOSE_WARNING, "Descriptor is not a socket\n");
 		break;
 		case WSAESHUTDOWN:
-		Com_Printf("WARNING: Socket has been shut down\n");
+		Com_Printf(VERBOSE_WARNING, "Socket has been shut down\n");
 		break;
 		case WSAEMSGSIZE:
-		Com_Printf("WARNING: Message too large to send atomically or message was too large to fit into the specified buffer and was truncated\n");
+		Com_Printf(VERBOSE_WARNING, "Message too large to send atomically or message was too large to fit into the specified buffer and was truncated\n");
 		break;
 		case WSAEHOSTUNREACH:
-		Com_Printf("WARNING: Remote host cannot be reached from this host at this time\n");
+		Com_Printf(VERBOSE_WARNING, "Remote host cannot be reached from this host at this time\n");
 		break;
 		case WSAEINVAL:
-		Com_Printf("WARNING: Socket not bound with bind()\n");
+		Com_Printf(VERBOSE_WARNING, "Socket not bound with bind()\n");
 		break;
 		case WSAECONNABORTED:
-		Com_Printf("WARNING: Virtual circuit was terminated due to a time-out or other failure\n");
+		Com_Printf(VERBOSE_WARNING, "Virtual circuit was terminated due to a time-out or other failure\n");
 		break;
 		case WSAETIMEDOUT:
-		Com_Printf("WARNING: Connection has been dropped, because of a network failure or because the system on the other end went down without notice\n");
+		Com_Printf(VERBOSE_WARNING, "Connection has been dropped, because of a network failure or because the system on the other end went down without notice\n");
 		break;
 #else
 		case ENOTCONN:
-			Com_Printf("WARNING: Socket is not connected\n");
+			Com_Printf(VERBOSE_WARNING, "Socket is not connected\n");
 			break;
 		case ENOTSOCK:
-			Com_Printf("WARNING: Descriptor is not a socket\n");
+			Com_Printf(VERBOSE_WARNING, "Descriptor is not a socket\n");
 			break;
 		case EBADF:
-			Com_Printf("WARNING: Socket argument is not a valid file descriptor\n");
+			Com_Printf(VERBOSE_WARNING, "Socket argument is not a valid file descriptor\n");
 			break;
 		case EMSGSIZE:
-			Com_Printf("WARNING: Message too large to send atomically\n");
+			Com_Printf(VERBOSE_WARNING, "Message too large to send atomically\n");
 			break;
 		case EPIPE:
-			Com_Printf("WARNING: Connection broken, failed sending SIGPIPE\n");
+			Com_Printf(VERBOSE_WARNING, "Connection broken, failed sending SIGPIPE\n");
 			break;
 		case EOPNOTSUPP:
-			Com_Printf("WARNING: Socket is associated with a socket that does not support one or more of the values set in flags\n");
+			Com_Printf(VERBOSE_WARNING, "Socket is associated with a socket that does not support one or more of the values set in flags\n");
 			break;
 		case EINTR:
-			Com_Printf("WARNING: A signal interrupted send() before any data was transmitted\n");
+			Com_Printf(VERBOSE_WARNING, "A signal interrupted send() before any data was transmitted\n");
 			break;
 		case EDESTADDRREQ:
-			Com_Printf("WARNING: Socket is not connection-mode and no peer address is set\n");
+			Com_Printf(VERBOSE_WARNING, "Socket is not connection-mode and no peer address is set\n");
 			break;
 		case ECONNRESET:
-			Com_Printf("WARNING: A connection was forcibly closed by a peer\n");
+			Com_Printf(VERBOSE_WARNING, "A connection was forcibly closed by a peer\n");
 			break;
 		case ETIMEDOUT:
-			Com_Printf("WARNING: Connection timed out\n");
+			Com_Printf(VERBOSE_WARNING, "Connection timed out\n");
 			break;
 		case EINVAL:
-			Com_Printf("WARNING: The MSG_OOB flag is set and no out-of-band data is available\n");
+			Com_Printf(VERBOSE_WARNING, "The MSG_OOB flag is set and no out-of-band data is available\n");
 			break;
 
 		case EACCES:
-			Com_Printf("WARNING: The calling process does not have the appropriate privileges\n");
+			Com_Printf(VERBOSE_WARNING, "The calling process does not have the appropriate privileges\n");
 			break;
 		case EIO:
-			Com_Printf("WARNING: An I/O error occurred while reading from or writing to the file system\n");
+			Com_Printf(VERBOSE_WARNING, "An I/O error occurred while reading from or writing to the file system\n");
 			break;
 		case ENOBUFS:
-			Com_Printf("WARNING: Not enough internal buffer space available\n");
+			Com_Printf(VERBOSE_WARNING, "Not enough internal buffer space available\n");
 			break;
 		case ENOMEM:
-			Com_Printf("WARNING: Insufficient memory was available to fulfill the request\n");
+			Com_Printf(VERBOSE_WARNING, "Insufficient memory was available to fulfill the request\n");
 			break;
 		case ENETUNREACH:
-			Com_Printf("WARNING: No route to the network is present\n");
+			Com_Printf(VERBOSE_WARNING, "No route to the network is present\n");
 			break;
 		case ENETDOWN:
-			Com_Printf("WARNING: The local network interface used to reach the destination is down\n");
+			Com_Printf(VERBOSE_WARNING, "The local network interface used to reach the destination is down\n");
 			break;
 #endif
 		default:
-			Com_Printf("WARNING: Connection dropped (Errno: %d)\n", n);
+			Com_Printf(VERBOSE_WARNING, "Connection dropped (Errno: %d)\n", n);
 			break;
 	}
 }
@@ -650,7 +650,7 @@ void Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id)
 
 	if (d_mysql_query(&my_sock, query_log))
 	{
-		Com_Printf("WARNING: Com_LogEvent(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Com_LogEvent(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	my_id = (u_int32_t)mysql_insert_id(&my_sock);
@@ -675,7 +675,7 @@ void Com_LogDescription(u_int32_t type, float value, char *string)
 
 	if (d_mysql_query(&my_sock, query_log))
 	{
-		Com_Printf("WARNING: Com_LogDescription(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Com_LogDescription(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
 
@@ -685,29 +685,122 @@ void Com_LogDescription(u_int32_t type, float value, char *string)
  Prints data in console and in logfile if enabled
  *************/
 
-void Com_Printf(char *fmt, ...)
+void Com_Printf(int8_t verb, char *fmt, ...)
 {
 	va_list argptr;
 	char msg[MAX_PRINTMSG];
+	u_int8_t tverb;
 	time_t ltime;
 
-	va_start(argptr, fmt);
-	vsprintf(msg, fmt, argptr);
-	va_end(argptr);
-
-	time(&ltime);
-	printf("%sZ: %s", asc2time(gmtime(&ltime)), msg);
-	fflush(stdout);
-
-	if (logfile_active->value)
+	if(verb <= verbose->value);
 	{
-		if (!logfile)
-			logfile = fopen(FILE_CONSOLE, "a");
+		tverb = MODULUS(verb);
+		va_start(argptr, fmt);
+		vsprintf(msg, fmt, argptr);
+		va_end(argptr);
 
-		if (logfile)
+		time(&ltime);
+		if (logfile_active->value)
 		{
-			fprintf(logfile, "%sZ: %s", asc2time(gmtime(&ltime)), msg);
-			fflush(logfile); // forces data to be writed
+			if (!logfile[0])
+				logfile[0] = fopen(FILE_CONSOLE, "a");
+			if(!logfile[0])
+				printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_CONSOLE);
+
+			if(tverb)
+			{
+				if (!logfile[tverb])
+				{
+					switch (verb)
+					{
+						case VERBOSE_ATTENTION:
+							logfile[tverb] = fopen(FILE_ATTENTION, "a");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_ATTENTION);
+							break;
+						case VERBOSE_WARNING:
+							logfile[tverb] = fopen(FILE_WARNING, "a");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_WARNING);
+							break;
+						case VERBOSE_ERROR:
+							logfile[tverb] = fopen(FILE_ERROR, "a");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_ERROR);
+							break;
+						case VERBOSE_DEBUG:
+							logfile[tverb] = fopen(FILE_DEBUG, "a");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_DEBUG);
+							break;
+						case VERBOSE_ONLINE:
+							logfile[tverb] = fopen(FILE_ONLINE, "a");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_ONLINE);
+							break;
+						case VERBOSE_CHAT:
+							logfile[tverb] = fopen(FILE_CHAT, "a");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_CHAT);
+							break;
+						case VERBOSE_KILL:
+							logfile[tverb] = fopen(FILE_KILL, "a");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_KILL);
+							break;
+					}
+				}
+			}
+		}
+
+		printf("%sZ: ", asc2time(gmtime(&ltime)));
+		if (logfile[0])
+			fprintf(logfile[0], "%sZ: ", asc2time(gmtime(&ltime)));
+		if (tverb && logfile[tverb])
+			fprintf(logfile[tverb], "%sZ: ", asc2time(gmtime(&ltime)));
+
+		switch(verb)
+		{
+			case VERBOSE_ATTENTION:
+				printf("ATTENTION:");
+				if (logfile[0])
+					fprintf(logfile[0], "ATTENTION:");
+				if (tverb && logfile[tverb])
+					fprintf(logfile[tverb], "ATTENTION:");
+				break;
+			case VERBOSE_WARNING:
+				printf("WARNING:");
+				if (logfile[0])
+					fprintf(logfile[0], "WARNING:");
+				if (tverb && logfile[tverb])
+					fprintf(logfile[tverb], "WARNING:");
+				break;
+			case VERBOSE_ERROR:
+				printf("ERROR:");
+				if (logfile[0])
+					fprintf(logfile[0], "ERROR:");
+				if (tverb && logfile[tverb])
+					fprintf(logfile[tverb], "ERROR:");
+				break;
+			case VERBOSE_DEBUG:
+				printf("DEBUG:");
+				if (logfile[0])
+					fprintf(logfile[0], "DEBUG:");
+				if (tverb && logfile[tverb])
+					fprintf(logfile[tverb], "DEBUG:");
+				break;
+		}
+		printf(" %s", msg);
+		fflush(stdout);
+		if (logfile[0])
+		{
+			fprintf(logfile[0], " %s", msg);
+			fflush(logfile[0]); // forces data to be writed
+		}
+		if (tverb && logfile[tverb])
+		{
+			fprintf(logfile[tverb], " %s", msg);
+			fflush(logfile[tverb]); // forces data to be writed
 		}
 	}
 }
@@ -751,7 +844,7 @@ int d_mysql_query(MYSQL *mysql, const char *query)
 	int32_t i;
 
 	if (printqueries->value)
-		Com_Printf("DEBUG: MYSQL \"%s\"\n", query);
+		Com_Printf(VERBOSE_DEBUG, "MYSQL \"%s\"\n", query);
 
 	debug_querytime = Sys_Milliseconds();
 	if ((i = mysql_query(mysql, query)))
@@ -761,7 +854,7 @@ int d_mysql_query(MYSQL *mysql, const char *query)
 
 	if ((debug_querytime = Sys_Milliseconds() - debug_querytime) > 70 /*ms*/)// || mysqlview->value)
 	{
-		Com_Printf("DEBUG: d_mysql_query() delayed query %ums \"%s\"\n", debug_querytime, query);
+		Com_Printf(VERBOSE_DEBUG, "d_mysql_query() delayed query %ums \"%s\"\n", debug_querytime, query);
 	}
 
 	return i;
@@ -779,27 +872,27 @@ int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
 	int32_t i;
 
 	if (printqueries->value)
-		Com_Printf("DEBUG: MYSQL \"%s\"\n", query);
+		Com_Printf(VERBOSE_DEBUG, "MYSQL \"%s\"\n", query);
 
 	if (!client || ((arena->frame - client->lastsql) > 300/*3 sec*/))
 	{
 		debug_querytime = Sys_Milliseconds();
 		if ((i = mysql_query(mysql, query)))
 		{
-			Com_Printf("WARNING: Com_MySQL_Query(): %s error %d: %s\n", client ? client->longnick : "-HOST-", mysql_errno(mysql), mysql_error(mysql));
+			Com_Printf(VERBOSE_WARNING, "Com_MySQL_Query(): %s error %d: %s\n", client ? client->longnick : "-HOST-", mysql_errno(mysql), mysql_error(mysql));
 			PPrintf(client, RADIO_YELLOW, "SQL Error (%d), please contact admin", mysql_errno(mysql));
 			return i;
 		}
 
 		if ((debug_querytime = Sys_Milliseconds() - debug_querytime) > 70 /*ms*/)// || mysqlview->value)
 		{
-			Com_Printf("DEBUG: Com_MySQL_Query() delayed query %ums \"%s\"\n", debug_querytime, query);
+			Com_Printf(VERBOSE_DEBUG, "Com_MySQL_Query() delayed query %ums \"%s\"\n", debug_querytime, query);
 		}
 	}
 	else
 	{
 		PPrintf(client, RADIO_YELLOW, "SQL flood, wait %.2f seconds", (float)(300 - (arena->frame - client->lastsql))/100);
-		Com_Printf("WARNING: %s SQL flood\n", client->longnick);
+		Com_Printf(VERBOSE_WARNING, "%s SQL flood\n", client->longnick);
 		return -1;
 	}
 
@@ -835,17 +928,17 @@ void Com_MySQL_Flush(client_t *client, MYSQL *mysql, char *file, u_int32_t line)
 		{
 			if (mysql_field_count(mysql) == 0)
 			{
-				Com_Printf("DEBUG: Com_MySQL_Flush(%s, %u): %lld rows affected\n", file, line, mysql_affected_rows(mysql));
+				Com_Printf(VERBOSE_DEBUG, "Com_MySQL_Flush(%s, %u): %lld rows affected\n", file, line, mysql_affected_rows(mysql));
 			}
 			else // some error occurred
 			{
-				Com_Printf("WARNING: Com_MySQL_Flush(%s, %u): Could not retrieve result set\n", file, line);
+				Com_Printf(VERBOSE_WARNING, "Com_MySQL_Flush(%s, %u): Could not retrieve result set\n", file, line);
 				break;
 			}
 		}
 		// more results? -1 = no, >0 = error, 0 = yes (keep looping)
 		if ((status = mysql_next_result(mysql)) > 0)
-			Com_Printf("WARNING: Com_MySQL_Flush(%s, %u): Could not execute statement\n", file, line);
+			Com_Printf(VERBOSE_WARNING, "Com_MySQL_Flush(%s, %u): Could not execute statement\n", file, line);
 	} while (status == 0);
 }
 
@@ -861,7 +954,7 @@ void Com_Printfhex(unsigned char *buffer, int len)
 
 	printf("( ");
 	fflush(stdout);
-	fprintf(logfile, "( ");
+	fprintf(logfile[0], "( "); // TODO: Misc: check logfile active
 
 	if (!((buffer[0] == 7) && (buffer[2] == (len - 1))))
 	{
@@ -870,14 +963,14 @@ void Com_Printfhex(unsigned char *buffer, int len)
 
 		if (logfile_active->value)
 		{
-			if (!logfile)
+			if (!logfile[0]) // TODO: Misc: Change this to FILE_DEBUG?
 			{
-				logfile = fopen(FILE_CONSOLE, "a");
+				logfile[0] = fopen(FILE_CONSOLE, "a");
 			}
 
-			if (logfile)
+			if (logfile[0])
 			{
-				fprintf(logfile, "07 00 %02X ", len-1);
+				fprintf(logfile[0], "07 00 %02X ", len-1);
 			}
 		}
 	}
@@ -889,21 +982,21 @@ void Com_Printfhex(unsigned char *buffer, int len)
 
 		if (logfile_active->value)
 		{
-			if (!logfile)
+			if (!logfile[0])
 			{
-				logfile = fopen(FILE_CONSOLE, "a");
+				logfile[0] = fopen(FILE_CONSOLE, "a");
 			}
 
-			if (logfile)
+			if (logfile[0])
 			{
-				fprintf(logfile, "%02X ", buffer[i]);
+				fprintf(logfile[0], "%02X ", buffer[i]);
 			}
 		}
 	}
 	printf(")\n");
 	fflush(stdout);
-	fprintf(logfile, ")\n");
-	fflush(logfile);
+	fprintf(logfile[0], ")\n");
+	fflush(logfile[0]);
 }
 
 /*************
@@ -926,11 +1019,11 @@ int Com_Stricmp(char *s1, char *s2)
 	{
 		if (!s1)
 		{
-			Com_Printf("WARNING: Com_Stricmp() s1 NULL array\n");
+			Com_Printf(VERBOSE_WARNING, "Com_Stricmp() s1 NULL array\n");
 		}
 		if (!s2)
 		{
-			Com_Printf("WARNING: Com_Stricmp() s2 NULL array\n");
+			Com_Printf(VERBOSE_WARNING, "Com_Stricmp() s2 NULL array\n");
 		}
 		return 1;
 	}
@@ -994,7 +1087,7 @@ u_int8_t GetSlot(client_t *plane, client_t *client)
 
 	if (!plane)
 	{
-		Com_Printf("WARNING: GetSlot(), plane == NULL\n");
+		Com_Printf(VERBOSE_WARNING, "GetSlot(), plane == NULL\n");
 		return MAX_SCREEN;
 	}
 
@@ -1230,7 +1323,7 @@ int Com_Atoi(char *string)
 		return atoi(string);
 	else
 	{
-		Com_Printf("WARNING: Com_Atoi() NULL array\n");
+		Com_Printf(VERBOSE_WARNING, "Com_Atoi() NULL array\n");
 		return 0;
 	}
 }
@@ -1266,7 +1359,7 @@ u_int32_t Com_Atou(char *string)
 	}
 	else
 	{
-		Com_Printf("WARNING: Com_Atou() NULL array\n");
+		Com_Printf(VERBOSE_WARNING, "Com_Atou() NULL array\n");
 		return 0;
 	}
 }
@@ -1283,7 +1376,7 @@ double Com_Atof(char *string)
 		return atof(string);
 	else
 	{
-		Com_Printf("WARNING: Com_Atof() NULL array\n");
+		Com_Printf(VERBOSE_WARNING, "Com_Atof() NULL array\n");
 		return 0;
 	}
 }
@@ -1312,7 +1405,7 @@ char *Com_MyRow(char *string)
 			}
 		}
 
-		Com_Printf("WARNING: Com_MyRow(): column '%s' not found\n", string);
+		Com_Printf(VERBOSE_WARNING, "Com_MyRow(): column '%s' not found\n", string);
 	}
 
 	return NULL;
@@ -1345,7 +1438,7 @@ char *Com_SquadronName(u_int32_t owner)
 			}
 			else
 			{
-				Com_Printf("WARNING: Com_SquadronName(): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Com_SquadronName(): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			mysql_free_result(my_result);
@@ -1354,12 +1447,12 @@ char *Com_SquadronName(u_int32_t owner)
 		}
 		else
 		{
-			Com_Printf("WARNING: Com_SquadronName(): my_result == NULL, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Com_SquadronName(): my_result == NULL, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: Com_SquadronName(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Com_SquadronName(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	return buffer;
@@ -1381,11 +1474,11 @@ int Com_Strncmp(char *s1, char *s2, int n)
 	{
 		if (!s1)
 		{
-			Com_Printf("WARNING: Com_Strncmp() s1 NULL array\n");
+			Com_Printf(VERBOSE_WARNING, "Com_Strncmp() s1 NULL array\n");
 		}
 		if (!s2)
 		{
-			Com_Printf("WARNING: Com_Strncmp() s2 NULL array\n");
+			Com_Printf(VERBOSE_WARNING, "Com_Strncmp() s2 NULL array\n");
 		}
 		return 1;
 	}
@@ -1407,11 +1500,11 @@ int Com_Strcmp(char *s1, char *s2)
 	{
 		if (!s1)
 		{
-			Com_Printf("WARNING: Com_Strcmp() s1 NULL array\n");
+			Com_Printf(VERBOSE_WARNING, "Com_Strcmp() s1 NULL array\n");
 		}
 		if (!s2)
 		{
-			Com_Printf("WARNING: Com_Strcmp() s2 NULL array\n");
+			Com_Printf(VERBOSE_WARNING, "Com_Strcmp() s2 NULL array\n");
 		}
 		return 1;
 	}
@@ -1463,14 +1556,14 @@ void Com_WBntoh(u_int16_t *packetid)
 	{
 		if ((tab_index = Com_PacketTabIndex(*packetid, wbv)) < 0)
 		{
-			Com_Printf("WARNING: Com_WBntoh() (S<-C) packet not identified yet (packetid = 0x%04X)\n", *packetid);
+			Com_Printf(VERBOSE_WARNING, "Com_WBntoh() (S<-C) packet not identified yet (packetid = 0x%04X)\n", *packetid);
 			// leave packet_id as it is to be detected below
 		}
 		else
 		{
 			*packetid = packets_tab[tab_index][V_WB2007]; // convert packet id to internal id
 			if (packets_tab[tab_index][V_WB2007] == 0xffff)
-				Com_Printf("WARNING: Com_WBntoh() (S<-C) invalid packetid conversion (0x%04X)\n", *packetid);
+				Com_Printf(VERBOSE_WARNING, "Com_WBntoh() (S<-C) invalid packetid conversion (0x%04X)\n", *packetid);
 		}
 	}
 }
@@ -1495,7 +1588,7 @@ u_int16_t Com_WBhton(u_int16_t packetid)
 	{
 		if ((tab_index = Com_PacketTabIndex(packetid, V_WB2007)) < 0)
 		{
-			Com_Printf("WARNING: Com_WBhton() (S->C) packet id not found (packetid = 0x%04X)\n", packetid);
+			Com_Printf(VERBOSE_WARNING, "Com_WBhton() (S->C) packet id not found (packetid = 0x%04X)\n", packetid);
 			packetid = 0xffff;
 			// change packetid to be detected below
 		}
@@ -1503,7 +1596,7 @@ u_int16_t Com_WBhton(u_int16_t packetid)
 		{
 			packetid = packets_tab[tab_index][wbv]; // convert packet id to external id
 			if (packetid == 0xffff)
-				Com_Printf("WARNING: Com_WBhton() (S->C) packet not identified yet (0x%04X)\n", packets_tab[tab_index][V_WB2007]);
+				Com_Printf(VERBOSE_WARNING, "Com_WBhton() (S->C) packet not identified yet (0x%04X)\n", packets_tab[tab_index][V_WB2007]);
 		}
 	}
 
@@ -1547,7 +1640,7 @@ u_int8_t Com_WB3ntoh(u_int8_t n)
 			//	case 0x1B:
 			//		return 0x18;
 		default:
-			Com_Printf("WARNING: Com_WB3ntoh() Unknown ID %X\n", n);
+			Com_Printf(VERBOSE_WARNING, "Com_WB3ntoh() Unknown ID %X\n", n);
 			return 0x00;
 	}
 }
@@ -1604,7 +1697,7 @@ u_int16_t Com_WB3hton(u_int16_t m)
 			n = 0x0E; //
 			break;
 		default:
-			Com_Printf("WARNING: Com_WB3hton() Unknown ID %X\n", n);
+			Com_Printf(VERBOSE_WARNING, "Com_WB3hton() Unknown ID %X\n", n);
 			//n = 0x99;
 			break;
 	}

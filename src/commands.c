@@ -39,7 +39,7 @@ void Cmd_LoadBatch(client_t *client)
 	if ((fp = fopen(file, "r")) == NULL)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "WARNING: Cannot execute file \"%s\"", file);
-		Com_Printf("WARNING: Couldn't execute file \"%s\"\n", file);
+		Com_Printf(VERBOSE_WARNING, "Couldn't execute file \"%s\"\n", file);
 	}
 	else
 	{
@@ -76,7 +76,7 @@ void Cmd_LoadConfig(char *filename, client_t *client)
 			PPrintf(client, RADIO_LIGHTYELLOW, "WARNING: Cannot execute file \"%s\"", file);
 		}
 
-		Com_Printf("WARNING: Couldn't execute file \"%s\"\n", file);
+		Com_Printf(VERBOSE_WARNING, "Couldn't execute file \"%s\"\n", file);
 	}
 	else
 	{
@@ -167,28 +167,28 @@ void Cmd_Ammo(client_t *client, u_int8_t arg, char *arg2)
 			arg2++;
 			arena->munition[arg].he = Com_Atoi(arg2);
 			PPrintf(client, RADIO_LIGHTYELLOW, "HE of %s(%u) was changed to %u", arena->munition[arg].name, arg, arena->munition[arg].he);
-			Com_Printf("ATTENTION: HE of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].he, client ? client->longnick : "-HOST-");
+			Com_Printf(VERBOSE_ATTENTION, "HE of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].he, client ? client->longnick : "-HOST-");
 		}
 		else if (*arg2 == 'a')
 		{
 			arg2++;
 			arena->munition[arg].ap = Com_Atoi(arg2);
 			PPrintf(client, RADIO_LIGHTYELLOW, "AP of %s(%u) was changed to %u", arena->munition[arg].name, arg, arena->munition[arg].ap);
-			Com_Printf("ATTENTION: AP of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].ap, client ? client->longnick : "-HOST-");
+			Com_Printf(VERBOSE_ATTENTION, "AP of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].ap, client ? client->longnick : "-HOST-");
 		}
 		else if (*arg2 == 'd')
 		{
 			arg2++;
 			arena->munition[arg].decay = Com_Atoi(arg2);
 			PPrintf(client, RADIO_LIGHTYELLOW, "Decay of %s(%u) was changed to %u", arena->munition[arg].name, arg, arena->munition[arg].decay);
-			Com_Printf("ATTENTION: Decay of %s(%u) was changed to %d by %s\n", arena->munition[arg].name, arg, arena->munition[arg].decay, client ? client->longnick : "-HOST-");
+			Com_Printf(VERBOSE_ATTENTION, "Decay of %s(%u) was changed to %d by %s\n", arena->munition[arg].name, arg, arena->munition[arg].decay, client ? client->longnick : "-HOST-");
 		}
 		else if (*arg2 == 't')
 		{
 			arg2++;
 			arena->munition[arg].decay = Com_Atoi(arg2);
 			PPrintf(client, RADIO_LIGHTYELLOW, "Type of %s(%u) was changed to %u", arena->munition[arg].name, arg, arena->munition[arg].type);
-			Com_Printf("ATTENTION: Type of %s(%u) was changed to %d by %s\n", arena->munition[arg].name, arg, arena->munition[arg].type, client ? client->longnick : "-HOST-");
+			Com_Printf(VERBOSE_ATTENTION, "Type of %s(%u) was changed to %d by %s\n", arena->munition[arg].name, arg, arena->munition[arg].type, client ? client->longnick : "-HOST-");
 		}
 		else
 		{
@@ -210,7 +210,7 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 		time = Sys_Milliseconds();
 
 		if (mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
-			Com_Printf("ERROR %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_ERROR, "%d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
 		for (i = 0; i < maxmuntype; i++)
 		{
@@ -221,7 +221,7 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 			{
 				if (d_mysql_query(&my_sock, my_query))
 				{
-					Com_Printf("WARNING: Cmd_Saveammo(): couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Saveammo(): couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 					mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 					return;
 				}
@@ -248,7 +248,7 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 		mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 
 		time = Sys_Milliseconds() - time;
-		Com_Printf("SaveAmmo(): Query Time %.3fsec\n", (float)(time)/1000);
+		Com_Printf(VERBOSE_DEBUG, "SaveAmmo(): Query Time %.3fsec\n", (float)(time)/1000);
 		PPrintf(client, RADIO_YELLOW, "Query Time %.3fsec\n", (float)(time)/1000);
 	}
 	else
@@ -271,7 +271,7 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 			{
 				if(mysql_errno(&my_sock))
 				{
-					Com_Printf("WARNING: Cmd_Saveammo(row): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Saveammo(row): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 		}
@@ -667,7 +667,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 					}
 					else
 					{
-						Com_Printf("WARNING: Cmd_TK(find): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "Cmd_TK(find): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						PPrintf(client, RADIO_YELLOW, "Cmd_TK(find): Couldn't Fetch Row, please contact admin");
 					}
 
@@ -683,7 +683,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 			}
 			else
 			{
-				Com_Printf("WARNING: Cmd_TK(find): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_TK(find): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				return;
 			}
 		}
@@ -691,7 +691,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 		{
 			if (mysql_errno(&my_sock))
 			{
-				Com_Printf("WARNING: Cmd_TK(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_TK(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 			return;
 		}
@@ -735,7 +735,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 					else
 						BPrintf(RADIO_LIGHTYELLOW, "%s was set as TK by %s", tkiller, client?client->longnick:"-HOST-");
 
-					Com_Printf("ATTENTION: %s was set as TK by %s\n", tkiller, client ? client->longnick : "-HOST-");
+					Com_Printf(VERBOSE_ATTENTION, "%s was set as TK by %s\n", tkiller, client ? client->longnick : "-HOST-");
 				}
 				else
 				{
@@ -743,7 +743,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 						PPrintf(ctk, RADIO_YELLOW, "*** Congratulations, your TK status was removed by %s***", client ? client->longnick : "-HOST-");
 					else
 						PPrintf(client, RADIO_YELLOW, "You removed TK status from %s", tkiller);
-					Com_Printf("ATTENTION: %s has removed TK from %s\n", client ? client->longnick : "-HOST-", tkiller);
+					Com_Printf(VERBOSE_ATTENTION, "%s has removed TK from %s\n", client ? client->longnick : "-HOST-", tkiller);
 				}
 
 				if (ctk)
@@ -758,7 +758,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 			}
 			else
 			{
-				Com_Printf("WARNING: Cmd_TK(TKid): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKid): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			if (wb3->value)
@@ -793,7 +793,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 							{
 								mysql_free_result(my_result);
 								my_result = NULL;
-								Com_Printf("WARNING: Cmd_TK(TKhd): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 								break;
 							}
 
@@ -803,7 +803,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 
 								if (d_mysql_query(&my_sock, my_query))
 								{
-									Com_Printf("WARNING: Cmd_TK(TKhd): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 									return;
 								}
 							}
@@ -815,7 +815,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 					}
 					else
 					{
-						Com_Printf("WARNING: Cmd_TK(TKhd): num_rows = %u\n", num_rows);
+						Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): num_rows = %u\n", num_rows);
 					}
 
 					mysql_free_result(my_result);
@@ -824,18 +824,18 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_TK(TKhd): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: Cmd_TK(TKhd): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: Cmd_TK() id == NULL\n");
+		Com_Printf(VERBOSE_WARNING, "Cmd_TK() id == NULL\n");
 	}
 }
 
@@ -1295,7 +1295,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	{
 		if (position != 100)
 		{
-			Com_Printf("%s takeoff from f%d with plane %s ord %d country %s\n", client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
+			Com_Printf(VERBOSE_ALWAYS, "%s takeoff from f%d with plane %s ord %d country %s\n", client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
 
 			Com_LogEvent(EVENT_TAKEOFF, client->id, 0);
 			Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -1318,7 +1318,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			}
 			else
 			{
-				Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+				Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 				sprintf(my_query, "UPDATE score_fighter SET");
 			}
 
@@ -1326,7 +1326,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 			if (d_mysql_query(&my_sock, my_query)) // query succeeded
 			{
-				Com_Printf("WARNING: Cmd_Fly(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Fly(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			sprintf(my_query, "UPDATE score_common SET");
@@ -1338,7 +1338,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 			if (d_mysql_query(&my_sock, my_query)) // query succeeded
 			{
-				Com_Printf("WARNING: Cmd_Fly(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Fly(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 		}
 	}
@@ -1399,7 +1399,6 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			}
 			else
 			{
-				// TODO: Send build status to all players. same in commandsc.c:1144
 				arena->cities[field].country = country;
 
 				for (i = 0; i < MAX_BUILDINGS; i++)
@@ -1624,7 +1623,7 @@ void Cmd_White(char *user, u_int8_t white, client_t *client)
 						}
 						else
 						{
-							Com_Printf("WARNING: Cmd_White(check): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "Cmd_White(check): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 					else
@@ -1638,13 +1637,13 @@ void Cmd_White(char *user, u_int8_t white, client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_White(check): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_White(check): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
 				if (mysql_errno(&my_sock))
-					Com_Printf("WARNING: Cmd_White(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_White(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 		}
 	}
@@ -1664,7 +1663,7 @@ void Cmd_White(char *user, u_int8_t white, client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: Cmd_White(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Cmd_White(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
 	}
@@ -1739,11 +1738,11 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 								if (client)
 									PPrintf(client, RADIO_YELLOW, "Attributes of %s changed to %s\n", user, mod == 1 ? "Admin" : mod == 2 ? "OP" : mod == 0 ? "Player" : "Unknown");
 
-								Com_Printf("Attributes of %s changed to %s by %s\n", user, mod == 1 ? "Admin" : mod == 2 ? "OP" : mod == 0 ? "Player" : "Unknown", client ? client->longnick : "-HOST-");
+								Com_Printf(VERBOSE_ATTENTION, "Attributes of %s changed to %s by %s\n", user, mod == 1 ? "Admin" : mod == 2 ? "OP" : mod == 0 ? "Player" : "Unknown", client ? client->longnick : "-HOST-");
 							}
 							else
 							{
-								Com_Printf("WARNING: Cmd_Chmod(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Chmod(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 						else
@@ -1754,7 +1753,7 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_Chmod(check): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Chmod(check): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
@@ -1768,13 +1767,13 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: Cmd_Chmod(check): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Cmd_Chmod(check): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
 		if (mysql_errno(&my_sock))
-			Com_Printf("WARNING: Cmd_Chmod(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Cmd_Chmod(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
 
@@ -2129,7 +2128,7 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 					}
 
 					if (j == MAX_CITYFIELD)
-						Com_Printf("Cmd_Decl(): Couldnt attach city to field\n");
+						Com_Printf(VERBOSE_WARNING, "Cmd_Decl(): Couldnt attach city to field\n");
 
 				}
 				else if (tolower(*argv[i]) == 'c')
@@ -2510,7 +2509,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					if (arena->fields[field].cv)
 						sprintf(buffer, "%.3f ft/s", arena->fields[field].cv->speed);
 					else
-						Com_Printf("WARNING: Cmd_Field() cv pointer = 0\n");
+						Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
 				}
 				else
 				{
@@ -2621,7 +2620,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				if (arena->fields[field].cv)
 					fprintf(fp, "CONVOY SPEED: %.3f ft/s\n\n", arena->fields[field].cv->speed);
 				else
-					Com_Printf("WARNING: Cmd_Field() cv pointer = 0\n");
+					Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
 			}
 			else
 			{
@@ -2972,7 +2971,7 @@ void Cmd_Show(client_t *client)
 
 	if ((fp = fopen(filename, "wb")) == NULL)
 	{
-		Com_Printf("WARNING: Couldn't open file \"%s\"\n", filename);
+		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
 	}
 	else
 	{
@@ -3083,7 +3082,7 @@ void Cmd_Score(char *player, client_t *client)
 
 			if (!Com_MySQL_Query(client, &my_sock, my_query))
 			{
-				Com_Printf("DEBUG: Cmd_Score() Query[1]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+				Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[1]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
 					if ((my_row = mysql_fetch_row(my_result)))
@@ -3098,7 +3097,7 @@ void Cmd_Score(char *player, client_t *client)
 						}
 						else
 						{
-							Com_Printf("WARNING: Cmd_Score(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "Cmd_Score(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							PPrintf(client, RADIO_YELLOW, "Cmd_Score(id): Couldn't Fetch Row, please contact admin");
 						}
 					}
@@ -3109,13 +3108,13 @@ void Cmd_Score(char *player, client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_Score(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Score(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					PPrintf(client, RADIO_YELLOW, "Cmd_Score(id, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: Cmd_Score(id): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Score(id): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				PPrintf(client, RADIO_YELLOW, "Cmd_Score(id): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 			}
 		}
@@ -3141,7 +3140,7 @@ void Cmd_Score(char *player, client_t *client)
 
 			if (!(player_id == client->id ? Com_MySQL_Query(client, &my_sock, my_query) : d_mysql_query(&my_sock, my_query)))
 			{
-				Com_Printf("DEBUG: Cmd_Score() Query[2]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+				Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[2]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 
 				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
@@ -3202,7 +3201,7 @@ void Cmd_Score(char *player, client_t *client)
 
 						if (!d_mysql_query(&my_sock, my_query))
 						{
-							Com_Printf("DEBUG: Cmd_Score() Query[4]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+							Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[4]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 							if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 							{
 								if ((my_row = mysql_fetch_row(my_result)))
@@ -3225,7 +3224,7 @@ void Cmd_Score(char *player, client_t *client)
 										fprintf(fp, "\nLast Air Victories:   ");
 										if (!d_mysql_query(&my_sock, my_query))
 										{
-											Com_Printf("DEBUG: Cmd_Score() Query[5]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+											Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[5]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 											if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 											{
 												if ((num_rows = mysql_num_rows(temp_result)) > 0)
@@ -3238,7 +3237,7 @@ void Cmd_Score(char *player, client_t *client)
 														}
 														else
 														{
-															Com_Printf("WARNING: Cmd_Score(fikills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 														}
 													}
 												}
@@ -3249,12 +3248,12 @@ void Cmd_Score(char *player, client_t *client)
 											}
 											else
 											{
-												Com_Printf("WARNING: Cmd_Score(fikills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+												Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 											}
 										}
 										else
 										{
-											Com_Printf("WARNING: Cmd_Score(fikills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+											Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 										}
 
 										debug_querytime = Sys_Milliseconds();
@@ -3271,7 +3270,7 @@ void Cmd_Score(char *player, client_t *client)
 										fprintf(fp, "\nLast Air Defeats for: ");
 										if (!d_mysql_query(&my_sock, my_query))
 										{
-											Com_Printf("DEBUG: Cmd_Score() Query[6]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+											Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[6]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 											if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 											{
 												if ((num_rows = mysql_num_rows(temp_result)) > 0)
@@ -3284,7 +3283,7 @@ void Cmd_Score(char *player, client_t *client)
 														}
 														else
 														{
-															Com_Printf("WARNING: Cmd_Score(fikilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 														}
 													}
 												}
@@ -3295,12 +3294,12 @@ void Cmd_Score(char *player, client_t *client)
 											}
 											else
 											{
-												Com_Printf("WARNING: Cmd_Score(fikilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+												Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 											}
 										}
 										else
 										{
-											Com_Printf("WARNING: Cmd_Score(fikilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+											Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 										}
 
 										ratio1 = Com_Atou(Com_MyRow("gunhits"));
@@ -3355,7 +3354,7 @@ void Cmd_Score(char *player, client_t *client)
 
 									if (!d_mysql_query(&my_sock, my_query))
 									{
-										Com_Printf("DEBUG: Cmd_Score() Query[7]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+										Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[7]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 										if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 										{
 											if ((my_row = mysql_fetch_row(my_result)))
@@ -3380,7 +3379,7 @@ void Cmd_Score(char *player, client_t *client)
 													fprintf(fp, "\nLast Air Victories:   ");
 													if (!d_mysql_query(&my_sock, my_query))
 													{
-														Com_Printf("DEBUG: Cmd_Score() Query[8]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+														Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[8]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 														if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 														{
 															if ((num_rows = mysql_num_rows(temp_result)) > 0)
@@ -3393,7 +3392,7 @@ void Cmd_Score(char *player, client_t *client)
 																	}
 																	else
 																	{
-																		Com_Printf("WARNING: Cmd_Score(bokills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																	}
 																}
 															}
@@ -3404,12 +3403,12 @@ void Cmd_Score(char *player, client_t *client)
 														}
 														else
 														{
-															Com_Printf("WARNING: Cmd_Score(bokills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 														}
 													}
 													else
 													{
-														Com_Printf("WARNING: Cmd_Score(bokills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+														Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 													}
 
 													debug_querytime = Sys_Milliseconds();
@@ -3426,7 +3425,7 @@ void Cmd_Score(char *player, client_t *client)
 													fprintf(fp, "\nLast Air Defeats for: ");
 													if (!d_mysql_query(&my_sock, my_query))
 													{
-														Com_Printf("DEBUG: Cmd_Score() Query[9]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+														Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[9]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 														if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 														{
 															if ((num_rows = mysql_num_rows(temp_result)) > 0)
@@ -3439,7 +3438,7 @@ void Cmd_Score(char *player, client_t *client)
 																	}
 																	else
 																	{
-																		Com_Printf("WARNING: Cmd_Score(bokilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																	}
 																}
 															}
@@ -3450,12 +3449,12 @@ void Cmd_Score(char *player, client_t *client)
 														}
 														else
 														{
-															Com_Printf("WARNING: Cmd_Score(bokilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 														}
 													}
 													else
 													{
-														Com_Printf("WARNING: Cmd_Score(bokilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+														Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 													}
 
 													ratio1 = Com_Atou(Com_MyRow("gunhits"));
@@ -3519,7 +3518,7 @@ void Cmd_Score(char *player, client_t *client)
 
 												if (!d_mysql_query(&my_sock, my_query))
 												{
-													Com_Printf("DEBUG: Cmd_Score() Query[10]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+													Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[10]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 													if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 													{
 														if ((my_row = mysql_fetch_row(my_result)))
@@ -3547,7 +3546,7 @@ void Cmd_Score(char *player, client_t *client)
 																fprintf(fp, "\nLast Air Victories:   ");
 																if (!d_mysql_query(&my_sock, my_query))
 																{
-																	Com_Printf("DEBUG: Cmd_Score() Query[11]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+																	Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[11]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 																	if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 																	{
 																		if ((num_rows = mysql_num_rows(temp_result)) > 0)
@@ -3560,7 +3559,7 @@ void Cmd_Score(char *player, client_t *client)
 																				}
 																				else
 																				{
-																					Com_Printf("WARNING: Cmd_Score(grkills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock),
+																					Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock),
 																							mysql_error(&my_sock));
 																				}
 																			}
@@ -3572,12 +3571,12 @@ void Cmd_Score(char *player, client_t *client)
 																	}
 																	else
 																	{
-																		Com_Printf("WARNING: Cmd_Score(grkills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																	}
 																}
 																else
 																{
-																	Com_Printf("WARNING: Cmd_Score(grkills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																}
 
 																debug_querytime = Sys_Milliseconds();
@@ -3594,7 +3593,7 @@ void Cmd_Score(char *player, client_t *client)
 																fprintf(fp, "\nLast Air Defeats for: ");
 																if (!d_mysql_query(&my_sock, my_query))
 																{
-																	Com_Printf("DEBUG: Cmd_Score() Query[12]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+																	Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[12]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 																	if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 																	{
 																		if ((num_rows = mysql_num_rows(temp_result)) > 0)
@@ -3607,7 +3606,7 @@ void Cmd_Score(char *player, client_t *client)
 																				}
 																				else
 																				{
-																					Com_Printf("WARNING: Cmd_Score(grkilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock),
+																					Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock),
 																							mysql_error(&my_sock));
 																				}
 																			}
@@ -3619,12 +3618,12 @@ void Cmd_Score(char *player, client_t *client)
 																	}
 																	else
 																	{
-																		Com_Printf("WARNING: Cmd_Score(grkilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																	}
 																}
 																else
 																{
-																	Com_Printf("WARNING: Cmd_Score(grkilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																}
 
 																ratio1 = Com_Atou(Com_MyRow("gunhits"));
@@ -3668,7 +3667,7 @@ void Cmd_Score(char *player, client_t *client)
 
 															if (!d_mysql_query(&my_sock, my_query))
 															{
-																Com_Printf("DEBUG: Cmd_Score() Query[13]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
+																Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[13]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 																if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 																{
 																	if ((my_row = mysql_fetch_row(my_result)))
@@ -3705,88 +3704,88 @@ void Cmd_Score(char *player, client_t *client)
 																	}
 																	else
 																	{
-																		Com_Printf("WARNING: Cmd_Score(penalty): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																		PPrintf(client, RADIO_YELLOW, "Cmd_Score(penalty): Couldn't Fetch Row, please contact admin");
 																	}
 																}
 																else
 																{
-																	Com_Printf("WARNING: Cmd_Score(penalty): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																	PPrintf(client, RADIO_YELLOW, "Cmd_Score(penalty, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 																}
 															}
 															else
 															{
-																Com_Printf("WARNING: Cmd_Score(penalty): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 																PPrintf(client, RADIO_YELLOW, "Cmd_Score(penalty): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 															}
 														}
 														else
 														{
-															Com_Printf("WARNING: Cmd_Score(ground): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 															PPrintf(client, RADIO_YELLOW, "Cmd_Score(ground): Couldn't Fetch Row, please contact admin");
 														}
 													}
 													else
 													{
-														Com_Printf("WARNING: Cmd_Score(ground): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+														Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 														PPrintf(client, RADIO_YELLOW, "Cmd_Score(ground, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 													}
 												}
 												else
 												{
-													Com_Printf("WARNING: Cmd_Score(ground): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+													Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 													PPrintf(client, RADIO_YELLOW, "Cmd_Score(ground): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 												}
 
 											}
 											else
 											{
-												Com_Printf("WARNING: Cmd_Score(bomber): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+												Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 												PPrintf(client, RADIO_YELLOW, "Cmd_Score(bomber): Couldn't Fetch Row, please contact admin");
 											}
 										}
 										else
 										{
-											Com_Printf("WARNING: Cmd_Score(bomber): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+											Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 											PPrintf(client, RADIO_YELLOW, "Cmd_Score(bomber, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 										}
 
 									}
 									else
 									{
-										Com_Printf("WARNING: Cmd_Score(bomber): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+										Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 										PPrintf(client, RADIO_YELLOW, "Cmd_Score(bomber): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 									}
 								}
 								else
 								{
-									Com_Printf("WARNING: Cmd_Score(fighter): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "Cmd_Score(fighter): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 									PPrintf(client, RADIO_YELLOW, "Cmd_Score(fighter): Couldn't Fetch Row, please contact admin");
 								}
 							}
 							else
 							{
-								Com_Printf("WARNING: Cmd_Score(fighter): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Score(fighter): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 								PPrintf(client, RADIO_YELLOW, "Cmd_Score(fighter, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 							}
 						}
 						else
 						{
-							Com_Printf("WARNING: Cmd_Score(fighter): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "Cmd_Score(fighter): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							PPrintf(client, RADIO_YELLOW, "Cmd_Score(fighter): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 						}
 					}
 					else
 					{
 						/*********************************************************************/
-						Com_Printf("WARNING: Cmd_Score(header): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "Cmd_Score(header): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						PPrintf(client, RADIO_YELLOW, "Cmd_Score(header): Couldn't Fetch Row, please contact admin");
 					}
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_Score(header): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Score(header): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					PPrintf(client, RADIO_YELLOW, "Cmd_Score(header, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 				}
 			}
@@ -3794,7 +3793,7 @@ void Cmd_Score(char *player, client_t *client)
 			{
 				if (mysql_errno(&my_sock))
 				{
-					Com_Printf("WARNING: Cmd_Score(header): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Score(header): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					PPrintf(client, RADIO_YELLOW, "Cmd_Score(header): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 				}
 			}
@@ -3809,7 +3808,7 @@ void Cmd_Score(char *player, client_t *client)
 	}
 	else
 	{
-		Com_Printf("WARNING: Cmd_Score(): Couldn't open file \"%s\"\n", filename);
+		Com_Printf(VERBOSE_WARNING, "Cmd_Score(): Couldn't open file \"%s\"\n", filename);
 		PPrintf(client, RADIO_YELLOW, "Cmd_Score(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
 	}
 
@@ -3839,7 +3838,7 @@ void Cmd_Clear(client_t *client)
 	sprintf(my_query, "%s; INSERT INTO score_common (player_id) VALUES ('%u')", my_query, client->id);
 
 	if (mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
-		Com_Printf("ERROR %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_ERROR, "%d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
 	if (!Com_MySQL_Query(client, &my_sock, my_query))
 	{
@@ -3848,13 +3847,13 @@ void Cmd_Clear(client_t *client)
 		Com_MySQL_Flush(client, &my_sock, __FILE__, __LINE__);
 
 		PPrintf(client, RADIO_LIGHTYELLOW, "Your score is cleared");
-		Com_Printf("MyDEBUG Score cleared\n");
+		Com_Printf(VERBOSE_DEBUG, "Score cleared\n");
 	}
 	else
 	{
 		if(mysql_errno(&my_sock))
 		{
-			Com_Printf("WARNING: Cmd_Clear(): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Cmd_Clear(): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 
@@ -3997,7 +3996,7 @@ void Cmd_Jsquad(client_t *client)
 				if (mysql_errno(&my_sock))
 				{
 					PPrintf(client, RADIO_YELLOW, "Cmd_Jsquad(join): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-					Com_Printf("WARNING: Cmd_Jsquad(join): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Jsquad(join): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 				else
 					return;
@@ -4015,7 +4014,7 @@ void Cmd_Jsquad(client_t *client)
 						client->invite->id, SQUADRON_INVITE, client->id, client->invite->id, (SQUADRON_INVITE | SQUADRON_REMOVE), client->invite->id);
 
 				if (mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
-					Com_Printf("ERROR %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_ERROR, "%d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
 				if (!d_mysql_query(&my_sock, my_query)) // query succeeded
 				{
@@ -4031,7 +4030,7 @@ void Cmd_Jsquad(client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_Jsquad(new): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Jsquad(new): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 
 #ifdef  _WIN32
@@ -4046,7 +4045,7 @@ void Cmd_Jsquad(client_t *client)
 				if(mysql_errno(&my_sock))
 				{
 					PPrintf(client, RADIO_YELLOW, "Cmd_Jsquad(new): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-					Com_Printf("WARNING: Cmd_Jsquad(new): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Jsquad(new): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 				else
 				return;
@@ -4095,7 +4094,7 @@ void Cmd_Name(char *name, client_t *client) // twin of Cmd_Slogan
 	else
 	{
 		PPrintf(client, RADIO_YELLOW, "Cmd_Name(): SQL Error(%d), please contact admin", mysql_errno(&my_sock));
-		Com_Printf("WARNING: Cmd_Name(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Cmd_Name(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
 
@@ -4128,7 +4127,7 @@ void Cmd_Slogan(char *motto, client_t *client) // twin of Cmd_Name
 	else
 	{
 		PPrintf(client, RADIO_YELLOW, "Cmd_Slogan(): SQL Error(%d), please contact admin", mysql_errno(&my_sock));
-		Com_Printf("WARNING: Cmd_Slogan(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Cmd_Slogan(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
 
@@ -4195,7 +4194,7 @@ void Cmd_Remove(char *nick, client_t *client)
 							}
 							else
 							{
-								Com_Printf("WARNING: Cmd_Remove(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Remove(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 					}
@@ -4207,7 +4206,7 @@ void Cmd_Remove(char *nick, client_t *client)
 						}
 						else
 						{
-							Com_Printf("WARNING: Cmd_Remove(find): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "Cmd_Remove(find): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 
 						mysql_free_result(my_result);
@@ -4217,14 +4216,14 @@ void Cmd_Remove(char *nick, client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_Remove(find): my_result == NULL, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Remove(find): my_result == NULL, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
 				if (mysql_errno(&my_sock))
 				{
-					Com_Printf("WARNING: Cmd_Remove(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Remove(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 		}
@@ -4273,7 +4272,7 @@ void Cmd_Withdraw(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: Cmd_Withdraw(member): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Cmd_Withdraw(member): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 
@@ -4331,7 +4330,7 @@ void Cmd_Disband(client_t *client)
 						{
 							mysql_free_result(my_result);
 							my_result = NULL;
-							Com_Printf("WARNING: Cmd_Disband(remallup): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remallup): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 							break;
 						}
 
@@ -4341,7 +4340,7 @@ void Cmd_Disband(client_t *client)
 
 							if (d_mysql_query(&my_sock, my_query))
 							{
-								Com_Printf("WARNING: Cmd_Disband(remallup): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remallup): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 								return;
 							}
 						}
@@ -4353,7 +4352,7 @@ void Cmd_Disband(client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_Disband(remall): num_rows = %u\n", num_rows);
+					Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remall): num_rows = %u\n", num_rows);
 				}
 
 				mysql_free_result(my_result);
@@ -4362,12 +4361,12 @@ void Cmd_Disband(client_t *client)
 			}
 			else
 			{
-				Com_Printf("WARNING: Cmd_Disband(remall): my_result == NULL, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remall): my_result == NULL, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 		}
 		else
 		{
-			Com_Printf("WARNING: Cmd_Disband(remall): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remall): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
 		// remove squadron
@@ -4379,7 +4378,7 @@ void Cmd_Disband(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: Cmd_Disband(delete): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Cmd_Disband(delete): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
 		// clear leader ids					
@@ -4392,7 +4391,7 @@ void Cmd_Disband(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: Cmd_Disband(delete): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Cmd_Disband(delete): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else // not squad leader
@@ -4443,7 +4442,7 @@ void Cmd_Psq(char *nick, u_int8_t attr, client_t *client)
 							}
 							else
 							{
-								Com_Printf("WARNING: Cmd_Psq(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Psq(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 						else
@@ -4453,7 +4452,7 @@ void Cmd_Psq(char *nick, u_int8_t attr, client_t *client)
 					}
 					else
 					{
-						Com_Printf("WARNING: Cmd_Psq(): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "Cmd_Psq(): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 
 					mysql_free_result(my_result);
@@ -4462,14 +4461,14 @@ void Cmd_Psq(char *nick, u_int8_t attr, client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_Psq(): my_result == NULL, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Psq(): my_result == NULL, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
 				if (mysql_errno(&my_sock))
 				{
-					Com_Printf("WARNING: Cmd_Psq(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Psq(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 		}
@@ -5099,7 +5098,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 					}
 					else
 					{
-						Com_Printf("WARNING: Cmd_Ban(find): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "Cmd_Ban(find): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						PPrintf(client, RADIO_YELLOW, "Cmd_Ban(find): Couldn't Fetch Row, please contact admin");
 					}
 
@@ -5115,7 +5114,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 			}
 			else
 			{
-				Com_Printf("WARNING: Cmd_Ban(find): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Ban(find): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				return;
 			}
 		}
@@ -5123,7 +5122,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 		{
 			if (mysql_errno(&my_sock))
 			{
-				Com_Printf("WARNING: Cmd_Ban(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Ban(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			return;
@@ -5164,12 +5163,12 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 				if (newvalue)
 				{
 					BPrintf(RADIO_LIGHTYELLOW, "%s was banned by %s", nick, client?client->longnick:"-HOST-");
-					Com_Printf("ATTENTION: %s was banned by %s\n", nick, client ? client->longnick : "-HOST-");
+					Com_Printf(VERBOSE_ATTENTION, "%s was banned by %s\n", nick, client ? client->longnick : "-HOST-");
 				}
 				else
 				{
 					BPrintf(RADIO_LIGHTYELLOW, "%s was unbanned by %s", nick, client?client->longnick:"-HOST-");
-					Com_Printf("ATTENTION: %s was unbanned by %s\n", nick, client ? client->longnick : "-HOST-");
+					Com_Printf(VERBOSE_ATTENTION, "%s was unbanned by %s\n", nick, client ? client->longnick : "-HOST-");
 				}
 				/*
 				 RemoveClient(cban);
@@ -5177,7 +5176,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 			}
 			else
 			{
-				Com_Printf("WARNING: Cmd_Ban(banid): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banid): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			sprintf(
@@ -5203,7 +5202,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 							{
 								mysql_free_result(my_result);
 								my_result = NULL;
-								Com_Printf("WARNING: Cmd_Ban(banhd): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 								break;
 							}
 
@@ -5213,7 +5212,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 
 								if (d_mysql_query(&my_sock, my_query))
 								{
-									Com_Printf("WARNING: Cmd_Ban(banhd): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 									return;
 								}
 							}
@@ -5225,7 +5224,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 					}
 					else
 					{
-						Com_Printf("WARNING: Cmd_Ban(banhd): num_rows = %u\n", num_rows);
+						Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): num_rows = %u\n", num_rows);
 					}
 
 					mysql_free_result(my_result);
@@ -5234,18 +5233,18 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 				}
 				else
 				{
-					Com_Printf("WARNING: Cmd_Ban(banhd): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: Cmd_Ban(banhd): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: Cmd_Ban(): id == NULL\n");
+		Com_Printf(VERBOSE_WARNING, "Cmd_Ban(): id == NULL\n");
 	}
 }
 
@@ -5596,7 +5595,7 @@ void Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client)
 
 			if (d_mysql_query(&my_sock, my_query))
 			{
-				Com_Printf("WARNING: Cmd_Thanks(sum): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Thanks(sum): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			client->streakscore -= score;
@@ -5606,7 +5605,7 @@ void Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client)
 
 			if (d_mysql_query(&my_sock, my_query))
 			{
-				Com_Printf("WARNING: Cmd_Thanks(sub): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Cmd_Thanks(sub): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			PPrintf(client, RADIO_YELLOW, "You rewarded %.3f score to %s", score, pclient->longnick);
@@ -5758,7 +5757,7 @@ void Cmd_Lives(char *nick, int8_t amount, client_t *client)
 
 	if (d_mysql_query(&my_sock, buffer)) // query succeeded
 	{
-		Com_Printf("WARNING: Cmd_Life(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Cmd_Life(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
 

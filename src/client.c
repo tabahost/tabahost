@@ -87,9 +87,9 @@ void AddClient(int socket, struct sockaddr_in *cli_addr)
 
 	if (debug->value)
 	{
-		Com_Printf("DEBUG: numplayers %d\n", arena->numplayers);
+		Com_Printf(VERBOSE_DEBUG, "numplayers %d\n", arena->numplayers);
 	}
-	Com_Printf("Incomming connection from %s - %s\n", clients[i].ip, GeoIP_country_name_by_addr(gi, clients[i].ip));
+	Com_Printf(VERBOSE_ALWAYS, "Incomming connection from %s - %s\n", clients[i].ip, GeoIP_country_name_by_addr(gi, clients[i].ip));
 }
 
 /*************
@@ -108,7 +108,7 @@ void RemoveClient(client_t *client)
 	if (client->socket != 0)
 		Com_Close(&(client->socket));
 	else
-		Com_Printf("WARNING: Com_Close tried to close socket ZERO\n");
+		Com_Printf(VERBOSE_WARNING, "Com_Close tried to close socket ZERO\n");
 
 	client->inuse = 0; // obsolete?
 
@@ -122,9 +122,9 @@ void RemoveClient(client_t *client)
 		else
 		{
 			if (arena->numplayers == 0)
-				Com_Printf("DEBUG: WARNING: RemoveClient() numplayers == 0\n");
+				Com_Printf(VERBOSE_DEBUG, "WARNING: RemoveClient() numplayers == 0\n");
 			else
-				Com_Printf("DEBUG: WARNING: RemoveClient() numplayers < 0\n");
+				Com_Printf(VERBOSE_DEBUG, "WARNING: RemoveClient() numplayers < 0\n");
 		}
 
 		for (i = 0; i < MAX_RELATED; i++)
@@ -174,15 +174,15 @@ void RemoveClient(client_t *client)
 
 			if (d_mysql_query(&my_sock, my_query)) // query succeeded
 			{
-				Com_Printf("WARNING: LOGOUT: couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "LOGOUT: couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 		}
 
-		Com_Printf("%s removed (%d players)\n", client->longnick, arena->numplayers);
+		Com_Printf(VERBOSE_ALWAYS, "%s removed (%d players)\n", client->longnick, arena->numplayers);
 	}
 	else
 	{
-		Com_Printf("%s removed (%d players)\n", client->ip, arena->numplayers);
+		Com_Printf(VERBOSE_ALWAYS, "%s removed (%d players)\n", client->ip, arena->numplayers);
 	}
 
 	//	slot = client->slot;
@@ -217,7 +217,7 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 
 	if (Sys_LockFile(filename) < 0)
 	{
-		Com_Printf("WARNING: Couldn't open file \"%s\"\n", filename);
+		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
 		return;
 	}
 
@@ -225,7 +225,7 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 
 	if ((fp = fopen(filename, "wb")) == NULL)
 	{
-		Com_Printf("WARNING: Couldn't open file \"%s\"\n", filename);
+		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
 	}
 	else
 	{
@@ -295,7 +295,7 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 
 	Sys_UnlockFile(strcat(filename, ".LOCK"));
 
-	Com_Printf("WARNING: Bugged player (%s) - Error at %s, line %d\n", strlen(client->longnick) ? client->longnick : client->ip, file, line);
+	Com_Printf(VERBOSE_WARNING, "Bugged player (%s) - Error at %s, line %d\n", strlen(client->longnick) ? client->longnick : client->ip, file, line);
 
 	if (kick)
 		client->bugged = 1;
@@ -316,7 +316,7 @@ int ProcessClient(client_t *client)
 
 	if (client->disconnect)
 	{
-		Com_Printf("%s has requested to disconnect\n", client->longnick);
+		Com_Printf(VERBOSE_ALWAYS, "%s has requested to disconnect\n", client->longnick);
 		return -1;
 	}
 
@@ -330,7 +330,7 @@ int ProcessClient(client_t *client)
 
 	if (client->timeout >= MAX_TIMEOUT)
 	{
-		Com_Printf("%s timed out\n", client->longnick);
+		Com_Printf(VERBOSE_ALWAYS, "%s timed out\n", client->longnick);
 		return -1;
 	}
 
@@ -409,7 +409,7 @@ int ProcessClient(client_t *client)
 					{
 						if(!(client->oiltimer % 200))
 						{
-							Com_Printf("%s %s is in fire at %s\n",
+							Com_Printf(VERBOSE_ALWAYS, "%s %s is in fire at %s\n",
 									client-> longnick,
 									GetHitSite(client->oildamaged),
 									Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
@@ -419,7 +419,7 @@ int ProcessClient(client_t *client)
 					}
 					else
 					{
-						Com_Printf("%s %s exploded at %s\n",
+						Com_Printf(VERBOSE_ALWAYS, "%s %s exploded at %s\n",
 								client-> longnick,
 								GetHitSite(client->oildamaged),
 								Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
@@ -511,8 +511,8 @@ int ProcessClient(client_t *client)
 					if((arena->time - client->postimer)> 600) // if client didnt send position packet in 500ms
 
 					{
-						Com_Printf("DEBUG: arena->time %u\n", arena->time);
-						Com_Printf("DEBUG: arena - postimer %u\n", arena->time - client->postimer);
+						Com_Printf(VERBOSE_DEBUG, "arena->time %u\n", arena->time);
+						Com_Printf(VERBOSE_DEBUG, "arena - postimer %u\n", arena->time - client->postimer);
 						BackupPosition(client, TRUE);
 					}
 				}
@@ -547,11 +547,11 @@ int ProcessClient(client_t *client)
 							{
 								if(!nearplane->drone)
 									PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
-								Com_Printf("%s collided emulated with %s\n", client, nearplane->longnick);
+								Com_Printf(VERBOSE_ALWAYS, "%s collided emulated with %s\n", client, nearplane->longnick);
 								
 								
 								PPrintf(client, RADIO_DARKGREEN, "%s collided with you!!!", nearplane->longnick);
-								Com_Printf("%s collided emulated with %s\n", nearplane->longnick, client);
+								Com_Printf(VERBOSE_ALWAYS, "%s collided emulated with %s\n", nearplane->longnick, client);
 
 								client->damaged = 1;
 								nearplane->damaged = 1;
@@ -653,7 +653,7 @@ int ProcessClient(client_t *client)
 						if(x < 0 && strlen(client->longnick))
 						{
 							BPrintf(RADIO_YELLOW, "%s broke connection", client->longnick);
-							Com_Printf("%s broke connection\n", client->longnick);
+							Com_Printf(VERBOSE_ALWAYS, "%s broke connection\n", client->longnick);
 							z = -1;
 						}
 
@@ -887,7 +887,7 @@ int32_t ProcessLogin(client_t *client)
 					else
 					{
 						if (client->key)
-							Com_Printf("%s Ping\n", client->ip);
+							Com_Printf(VERBOSE_ALWAYS, "%s Ping\n", client->ip);
 						client->key = 0;
 						client->login++;
 					}
@@ -945,9 +945,9 @@ int32_t ProcessLogin(client_t *client)
 						else
 						{
 							if (strlen(client->longnick))
-								Com_Printf("%s connected\n", client->longnick);
+								Com_Printf(VERBOSE_ALWAYS, "%s connected\n", client->longnick);
 							else
-								Com_Printf("%s connected\n", client->ip);
+								Com_Printf(VERBOSE_ALWAYS, "%s connected\n", client->ip);
 							client->login--;
 						}
 					}
@@ -982,9 +982,9 @@ int32_t ProcessLogin(client_t *client)
 						//	arena->numplayers++;
 
 						if (strlen(client->longnick))
-							Com_Printf("%s entered the game (%d players)\n", client->longnick, arena->numplayers);
+							Com_Printf(VERBOSE_ALWAYS, "%s entered the game (%d players)\n", client->longnick, arena->numplayers);
 						else
-							Com_Printf("Creating a new nick for %s (%d players)\n", client->ip, arena->numplayers);
+							Com_Printf(VERBOSE_ALWAYS, "Creating a new nick for %s (%d players)\n", client->ip, arena->numplayers);
 
 						client->login = 0;
 					}
@@ -1019,7 +1019,7 @@ int32_t ProcessLogin(client_t *client)
 			}
 			break;
 		default:
-			Com_Printf("login unk\n");
+			Com_Printf(VERBOSE_WARNING, "login unk\n");
 			return -1;
 	}
 
@@ -1133,7 +1133,7 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 		cpwd = crc32(pwd, strlen(pwd));
 
 		if (debug->value)
-			Com_Printf("DEBUG: User %s, Passwd %s\n", user, pwd);
+			Com_Printf(VERBOSE_DEBUG, "User %s, Passwd %s\n", user, pwd);
 
 		sprintf(my_query, "SELECT * FROM players LEFT JOIN score_common ON players.id = score_common.player_id WHERE players.loginuser = '%s' and players.password = '%u'", user, cpwd);
 
@@ -1166,7 +1166,7 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 					}
 					else
 					{
-						Com_Printf("WARNING: CheckUserPasswd(): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "CheckUserPasswd(): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						buffer[0] = 0xc0;
 					}
 				}
@@ -1184,7 +1184,7 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 					{
 						if (mysql_errno(&my_sock) != 1062)
 						{
-							Com_Printf("WARNING: CheckUserPasswd(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "CheckUserPasswd(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							buffer[0] = 0x04;
 						}
 						else
@@ -1200,19 +1200,19 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 			}
 			else
 			{
-				Com_Printf("WARNING: CheckUserPasswd(): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "CheckUserPasswd(): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				buffer[0] = 0x04;
 			}
 		}
 		else
 		{
-			Com_Printf("WARNING: CheckUserPasswd(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "CheckUserPasswd(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			buffer[0] = 0xc0;
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: CheckUserPasswd(): user contains non-valid chars (loginkey = %u)\n", client->loginkey);
+		Com_Printf(VERBOSE_WARNING, "CheckUserPasswd(): user contains non-valid chars (loginkey = %u)\n", client->loginkey);
 		Com_Printfhex(userpass, 96);
 
 		buffer[0] = 0x05;
@@ -1240,7 +1240,7 @@ int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client)
 
 	DecryptBlock(buffer, 32, client->loginkey);
 
-	Com_Printf("DEBUG: arenalist: %s\n", buffer);
+	Com_Printf(VERBOSE_DEBUG, "arenalist: %s\n", buffer);
 
 	if (!Com_Strcmp((char*)buffer, "arnalst2") || !Com_Strcmp((char*)buffer, "arnalst3") /*wb3*/) // retrieving arenalist
 	{
@@ -1327,7 +1327,7 @@ int PPrintf(client_t *client, u_int8_t radio, char *fmt, ...)
 
 	if (!client)
 	{
-		Com_Printf("%s\n", message);
+		Com_Printf(VERBOSE_ALWAYS, "%s\n", message);
 	}
 	else if (client->ready && !client->drone)
 	{
@@ -1394,7 +1394,7 @@ void CPrintf(u_int8_t country, u_int8_t radio, char *fmt, ...)
 		}
 	}
 
-	Com_Printf("-HOST-:(%d)%s\n", radio, msg);
+	Com_Printf(VERBOSE_CHAT, "-HOST-:(%d)%s\n", radio, msg);
 }
 
 /*************
@@ -1431,7 +1431,7 @@ void BPrintf(u_int8_t radio, char *fmt, ...)
 		}
 	}
 
-	Com_Printf("-HOST-:(%d)%s\n", radio, msg);
+	Com_Printf(VERBOSE_CHAT, "-HOST-:(%d)%s\n", radio, msg);
 }
 
 /*************
@@ -1464,16 +1464,16 @@ u_int8_t CheckBanned(client_t *client) // twin of CheckTK
 					if (!d_mysql_query(&my_sock, my_query)) // query succeeded
 					{
 						PPrintf(client, RADIO_YELLOW, "You are banned");
-						Com_Printf("%s was banned for use banned hdserial\n", client->longnick);
+						Com_Printf(VERBOSE_ATTENTION, "%s was banned for use banned hdserial\n", client->longnick);
 					}
 					else
 					{
-						Com_Printf("WARNING: CheckBanned(ban): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "CheckBanned(ban): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 				else
 				{
-					Com_Printf("WARNING: CheckBanned(check): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "CheckBanned(check): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 
@@ -1483,12 +1483,12 @@ u_int8_t CheckBanned(client_t *client) // twin of CheckTK
 		}
 		else
 		{
-			Com_Printf("WARNING: CheckBanned(check): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "CheckBanned(check): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: CheckBanned(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "CheckBanned(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	return banned;
@@ -1530,18 +1530,18 @@ u_int8_t CheckTK(client_t *client) // twin of CheckBanned
 					if (!d_mysql_query(&my_sock, my_query)) // query succeeded
 					{
 						PPrintf(client, RADIO_YELLOW, "You are disgraced as a team killer");
-						Com_Printf("%s was set TK for use TKed hdserial\n", client->longnick);
+						Com_Printf(VERBOSE_ATTENTION, "%s was set TK for use TKed hdserial\n", client->longnick);
 						client->tkstatus = 1;
 						client->wings = 0;
 					}
 					else
 					{
-						Com_Printf("WARNING: CheckTK(flag): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "CheckTK(flag): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 				else
 				{
-					Com_Printf("WARNING: CheckTK(check): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "CheckTK(check): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 
@@ -1551,12 +1551,12 @@ u_int8_t CheckTK(client_t *client) // twin of CheckBanned
 		}
 		else
 		{
-			Com_Printf("WARNING: CheckTK(check): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "CheckTK(check): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: CheckTK(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "CheckTK(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	return teamkiller;
@@ -1622,19 +1622,17 @@ void UpdateClientFile(client_t *client)
 
 	if (!strlen(client->loginuser))
 	{
-		Com_Printf("WARNING: UpdateClientFile() tried to print a (null) loginuser\n");
+		Com_Printf(VERBOSE_WARNING, "UpdateClientFile() tried to print a (null) loginuser\n");
 		return;
 	}
 
-	sprintf(
-			my_query,
-			"UPDATE players SET countrytime = '%u', country = '%d', plane_id = '%u', fuel = '%d', ord = '%d', conv = '%d', easymode = '%d', radio = '%d', rank = '%d', lastseen = FROM_UNIXTIME(%u), ipaddr = '%s' WHERE loginuser = '%s' LIMIT 1",
+	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', plane_id = '%u', fuel = '%d', ord = '%d', conv = '%d', easymode = '%d', radio = '%d', rank = '%d', lastseen = FROM_UNIXTIME(%u), ipaddr = '%s' WHERE loginuser = '%s' LIMIT 1",
 			client->countrytime, client->country, client->plane, client->fuel, client->ord, client->conv, client->easymode, client->radio[0], client->rank, // Elo rating
 			(u_int32_t)time(NULL), client->ip, client->loginuser);
 
 	if (d_mysql_query(&my_sock, my_query))
 	{
-		Com_Printf("WARNING: UpdateClientFile(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "UpdateClientFile(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
 
@@ -1729,14 +1727,14 @@ void CheckKiller(client_t *client)
 	{
 		if(!client->damaged) // maneuver kill or nothing
 		{
-			Com_Printf("DEBUG: Check nearest player (3000 feets radius)\n");
+			Com_Printf(VERBOSE_DEBUG, "Check nearest player (3000 feets radius)\n");
 			if ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) <= 164) // explosions above 50mts are not maneuver kill
 			{
 				nearplane = NearPlane(client, client->country, 3000);
 	
 				if (nearplane)
 				{
-					Com_Printf("DEBUG: Found nearest player (%s)\n", nearplane->longnick);
+					Com_Printf(VERBOSE_DEBUG, "Found nearest player (%s)\n", nearplane->longnick);
 					
 					if (printkills->value)
 					{
@@ -1747,13 +1745,13 @@ void CheckKiller(client_t *client)
 					}
 					else
 					{
-						Com_Printf("Maneuver kill of %s(%s) by %s(%s)\n", client->longnick, GetSmallPlaneName(client->plane), nearplane->longnick, GetSmallPlaneName(nearplane->plane));
+						Com_Printf(VERBOSE_CHAT, "Maneuver kill of %s(%s) by %s(%s)\n", client->longnick, GetSmallPlaneName(client->plane), nearplane->longnick, GetSmallPlaneName(nearplane->plane));
 						
 						if(nearplane->squadron)
-							Com_Printf("`-> from %s\n", Com_SquadronName(nearplane->squadron));
+							Com_Printf(VERBOSE_CHAT, "`-> from %s\n", Com_SquadronName(nearplane->squadron));
 					}
 					
-					Com_Printf("%s Maneuver Killed by %s at %s\n", client->longnick, nearplane->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_KILL, "%s Maneuver Killed by %s at %s\n", client->longnick, nearplane->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					
 					if(IsFighter(nearplane) && IsFighter(client))
 						CalcEloRating(nearplane /*winner*/, client /*looser*/, ELO_BOTH);
@@ -1766,7 +1764,7 @@ void CheckKiller(client_t *client)
 						sprintf(my_query, "UPDATE score_ground SET");
 					else
 					{
-						Com_Printf("WARNING: Plane not classified (N%d)\n", nearplane->plane);
+						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", nearplane->plane);
 						sprintf(my_query, "UPDATE score_fighter SET");
 					}
 					
@@ -1896,7 +1894,7 @@ void CheckKiller(client_t *client)
 					if (d_mysql_query(&my_sock, my_query))
 					{
 						PPrintf(client, RADIO_YELLOW, "CheckKiller(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-						Com_Printf("WARNING: CheckKiller(): couldn't query UPDATE error %d: %s query %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
+						Com_Printf(VERBOSE_WARNING, "CheckKiller(): couldn't query UPDATE error %d: %s query %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
 					}
 					
 					// EVENT LOGS
@@ -1911,7 +1909,7 @@ void CheckKiller(client_t *client)
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 3, NULL);
 					else
 					{
-						Com_Printf("WARNING: Plane not classified (N%d)\n", nearplane->plane);
+						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", nearplane->plane);
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 1, NULL);
 					}
 		
@@ -1926,7 +1924,7 @@ void CheckKiller(client_t *client)
 						Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 					else
 					{
-						Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 						Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 					}
 			
@@ -1949,7 +1947,7 @@ void CheckKiller(client_t *client)
 			
 					if (d_mysql_query(&my_sock, my_query))
 					{
-						Com_Printf("WARNING: CheckKiller(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "CheckKiller(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 		
 					// ASSISTS
@@ -1973,7 +1971,7 @@ void CheckKiller(client_t *client)
 										PPrintf(client->hitby[i], RADIO_YELLOW, "You've got a piece of %s", client->longnick);
 									}
 
-									Com_Printf("%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
+									Com_Printf(VERBOSE_KILL, "%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
 
 									client->hitby[i]->score.airscore += SCORE_ASSIST;
 
@@ -1994,7 +1992,7 @@ void CheckKiller(client_t *client)
 									}
 									else
 									{
-										Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+										Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 										sprintf(my_query, "%s'%u',", my_query, client->hitby[i]->id);
 										j |= 1;
 									}
@@ -2007,7 +2005,7 @@ void CheckKiller(client_t *client)
 									}
 									else
 									{
-										Com_Printf("%s got a piece of his friend %s\n", client->hitby[i]->longnick, client->longnick);
+										Com_Printf(VERBOSE_KILL, "%s got a piece of his friend %s\n", client->hitby[i]->longnick, client->longnick);
 									}
 			
 									client->hitby[i]->score.penaltyscore += SCORE_ASSIST;
@@ -2029,7 +2027,7 @@ void CheckKiller(client_t *client)
 			
 							if (d_mysql_query(&my_sock, my_query))
 							{
-								Com_Printf("WARNING: CheckKiller(assists): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "CheckKiller(assists): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 					}
@@ -2043,7 +2041,7 @@ void CheckKiller(client_t *client)
 			
 							if (d_mysql_query(&my_sock, query_bomber))
 							{
-								Com_Printf("WARNING: CheckKiller(assists2): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "CheckKiller(assists2): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 					}
@@ -2057,7 +2055,7 @@ void CheckKiller(client_t *client)
 			
 							if (d_mysql_query(&my_sock, query_ground))
 							{
-								Com_Printf("WARNING: CheckKiller(assists3): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "CheckKiller(assists3): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 					}
@@ -2066,14 +2064,14 @@ void CheckKiller(client_t *client)
 		}
 		else // Damaged, valid kill
 		{
-			Com_Printf("DEBUG: Now check who did more damage\n");
+			Com_Printf(VERBOSE_DEBUG, "Now check who did more damage\n");
 			for (i = 0, j = -1, damage = 0; i < MAX_HITBY; i++) // check who inflicted more damage
 			{
 				if (client->hitby[i]) // if client in list
 				{
 					if (client->hitby[i]->inuse) // if still connected
 					{
-						Com_Printf("DEBUG: %s - %f\n", client->hitby[i]->longnick, client->damby[i]);
+						Com_Printf(VERBOSE_DEBUG, "%s - %f\n", client->hitby[i]->longnick, client->damby[i]);
 						if (client->damby[i] > damage) // if damage > current damage
 						{
 							damage = client->damby[i]; // set current damage as attacker damage
@@ -2083,7 +2081,7 @@ void CheckKiller(client_t *client)
 					}
 					else // else, clear from list
 					{
-						Com_Printf("DEBUG: Clearing offline player from array[%u]\n", i);
+						Com_Printf(VERBOSE_DEBUG, "Clearing offline player from array[%u]\n", i);
 						client->hitby[i] = NULL;
 						client->damby[i] = 0;
 					}
@@ -2092,7 +2090,7 @@ void CheckKiller(client_t *client)
 	
 			if(!(j < 0)) // found a killer
 			{
-				Com_Printf("DEBUG: Server has chosen %s as killer!!!\n", client->hitby[j]->longnick);
+				Com_Printf(VERBOSE_DEBUG, "Server has chosen %s as killer!!!\n", client->hitby[j]->longnick);
 				
 				Com_LogEvent(EVENT_KILL, client->hitby[j] == client?0:client->hitby[j]->id, client->id);
 				if (client->hitby[j] != client)
@@ -2107,7 +2105,7 @@ void CheckKiller(client_t *client)
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 3, NULL);
 					else
 					{
-						Com_Printf("WARNING: Plane not classified (N%d)\n", client->planeby[j]);
+						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->planeby[j]);
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 1, NULL);
 					}
 		
@@ -2124,7 +2122,7 @@ void CheckKiller(client_t *client)
 					Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 				else
 				{
-					Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+					Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 					Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 				}
 		
@@ -2154,7 +2152,7 @@ void CheckKiller(client_t *client)
 		
 				if (d_mysql_query(&my_sock, my_query))
 				{
-					Com_Printf("WARNING: CheckKiller(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "CheckKiller(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 				
 				if ((client->hitby[j]->country == client->country) && (client->hitby[j] != client)) // not ack, TK
@@ -2187,7 +2185,7 @@ void CheckKiller(client_t *client)
 						BPrintf(RADIO_GREEN, buffer);
 					}
 		
-					Com_Printf("%s Teamkilled by %s at %s\n", client->longnick, client->hitby[j]->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_KILL, "%s Teamkilled by %s at %s\n", client->longnick, client->hitby[j]->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 		
 					if (!client->hitby[j]->drone)
 					{
@@ -2203,7 +2201,7 @@ void CheckKiller(client_t *client)
 								sprintf(my_query, "UPDATE score_ground SET");
 							else
 							{
-								Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 								sprintf(my_query, "UPDATE score_fighter SET");
 							}
 						}
@@ -2235,7 +2233,7 @@ void CheckKiller(client_t *client)
 								sprintf(my_query, "UPDATE score_ground SET");
 							else
 							{
-								Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 								sprintf(my_query, "UPDATE score_fighter SET");
 							}
 						}
@@ -2246,7 +2244,7 @@ void CheckKiller(client_t *client)
 						BPrintf(RADIO_YELLOW, buffer);
 					}
 		
-					Com_Printf("%s Killed by %s at %s\n", client->longnick, client->hitby[j]->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_KILL, "%s Killed by %s at %s\n", client->longnick, client->hitby[j]->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				}
 				
 				//score
@@ -2377,7 +2375,7 @@ void CheckKiller(client_t *client)
 					if (d_mysql_query(&my_sock, my_query))
 					{
 						PPrintf(client, RADIO_YELLOW, "CheckKiller(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-						Com_Printf("WARNING: CheckKiller(): couldn't query UPDATE error %d: %s query %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
+						Com_Printf(VERBOSE_WARNING, "CheckKiller(): couldn't query UPDATE error %d: %s query %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
 					}
 				}
 		
@@ -2388,7 +2386,7 @@ void CheckKiller(client_t *client)
 						if (printkills->value)
 							BPrintf(RADIO_YELLOW, "`-> from %s", Com_SquadronName(client->hitby[j]->squadron));
 						else
-							Com_Printf("`-> from %s\n", Com_SquadronName(client->hitby[j]->squadron));
+							Com_Printf(VERBOSE_CHAT, "`-> from %s\n", Com_SquadronName(client->hitby[j]->squadron));
 					}
 				}
 		
@@ -2413,7 +2411,7 @@ void CheckKiller(client_t *client)
 									PPrintf(client->hitby[i], RADIO_YELLOW, "You've got a piece of %s", client->longnick);
 								}
 		
-								Com_Printf("%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
+								Com_Printf(VERBOSE_KILL, "%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
 		
 								client->hitby[i]->score.airscore += SCORE_ASSIST;
 		
@@ -2434,7 +2432,7 @@ void CheckKiller(client_t *client)
 								}
 								else
 								{
-									Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+									Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 									sprintf(my_query, "%s'%u',", my_query, client->hitby[i]->id);
 									j |= 1;
 								}
@@ -2447,7 +2445,7 @@ void CheckKiller(client_t *client)
 								}
 								else
 								{
-									Com_Printf("%s got a piece of his friend %s\n", client->hitby[i]->longnick, client->longnick);
+									Com_Printf(VERBOSE_KILL, "%s got a piece of his friend %s\n", client->hitby[i]->longnick, client->longnick);
 								}
 		
 								client->hitby[i]->score.penaltyscore += SCORE_ASSIST;
@@ -2469,7 +2467,7 @@ void CheckKiller(client_t *client)
 		
 						if (d_mysql_query(&my_sock, my_query))
 						{
-							Com_Printf("WARNING: CheckKiller(assists): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "CheckKiller(assists): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 				}
@@ -2483,7 +2481,7 @@ void CheckKiller(client_t *client)
 		
 						if (d_mysql_query(&my_sock, query_bomber))
 						{
-							Com_Printf("WARNING: CheckKiller(assists2): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "CheckKiller(assists2): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 				}
@@ -2497,7 +2495,7 @@ void CheckKiller(client_t *client)
 		
 						if (d_mysql_query(&my_sock, query_ground))
 						{
-							Com_Printf("WARNING: CheckKiller(assists3): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "CheckKiller(assists3): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 				}
@@ -2505,32 +2503,32 @@ void CheckKiller(client_t *client)
 		}
 
 //		// DEBUG
-//		Com_Printf("DEBUG: Dump %s (%s) data:\n", client->longnick, GetSmallPlaneName(client->plane));
+//		Com_Printf(VERBOSE_DEBUG, "Dump %s (%s) data:\n", client->longnick, GetSmallPlaneName(client->plane));
 //		for (i = 0, j = 0; i < MAX_HITBY; i++)
 //		{
 //			if (client->hitby[i])
 //			{
 //				if (client->hitby[i]->inuse)
-//					Com_Printf("DEBUG: %u - hitby = %s, damby = %u, planeby = %s (%s)\n", i, client->hitby[i]->longnick, client->damby[i], GetSmallPlaneName(client->planeby[i]),
+//					Com_Printf(VERBOSE_DEBUG, "%u - hitby = %s, damby = %u, planeby = %s (%s)\n", i, client->hitby[i]->longnick, client->damby[i], GetSmallPlaneName(client->planeby[i]),
 //							GetSmallPlaneName(client->hitby[i]->plane));
 //				else
-//					Com_Printf("DEBUG: %u - hitby = %s (offline), damby = %u, planeby = %s (%s)\n", i, client->hitby[i]->longnick, client->damby[i], GetSmallPlaneName(client->planeby[i]),
+//					Com_Printf(VERBOSE_DEBUG, "%u - hitby = %s (offline), damby = %u, planeby = %s (%s)\n", i, client->hitby[i]->longnick, client->damby[i], GetSmallPlaneName(client->planeby[i]),
 //							GetSmallPlaneName(client->hitby[i]->plane));
 //			}
 //			else
 //			{
-//				Com_Printf("DEBUG: %u - hitby = (null), damby = %u, planeby = %s\n", i, client->damby[i], GetSmallPlaneName(client->planeby[i]));
+//				Com_Printf(VERBOSE_DEBUG, "%u - hitby = (null), damby = %u, planeby = %s\n", i, client->damby[i], GetSmallPlaneName(client->planeby[i]));
 //			}
 //		}
 //		//
-//		Com_Printf("DEBUG: Check if any logged player had hit client\n");
+//		Com_Printf(VERBOSE_DEBUG, "Check if any logged player had hit client\n");
 //		for (i = 0, j = 0; i < MAX_HITBY; i++) // check if any logged player had hit client
 //		{
 //			if (client->hitby[i])
 //			{
 //				if (client->hitby[i]->inuse && client->damby[i])
 //				{
-//					Com_Printf("DEBUG: hit found (%s)\n", client->hitby[i]->longnick);
+//					Com_Printf(VERBOSE_DEBUG, "hit found (%s)\n", client->hitby[i]->longnick);
 //					j = 1;
 //					break;
 //				}
@@ -2539,35 +2537,35 @@ void CheckKiller(client_t *client)
 //	
 //		if (!j) // if no one in hit list, get nearest enemy plane within 3000 for maneuver kill
 //		{
-//			Com_Printf("DEBUG: Check nearest player (3000 feets radius)\n");
+//			Com_Printf(VERBOSE_DEBUG, "Check nearest player (3000 feets radius)\n");
 //			if ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) <= 164) // explosions above 50mts are not maneuver kill
 //			{
 //				nearplane = NearPlane(client, client->country, 3000);
 //	
 //				if (nearplane)
 //				{
-//					Com_Printf("DEBUG: Found nearest player (%s)\n", nearplane->longnick);
+//					Com_Printf(VERBOSE_DEBUG, "Found nearest player (%s)\n", nearplane->longnick);
 //					j = 1;
 //					client->status1 = 0;
 //					client->cancollide = 0;
 //					client->hitby[0] = nearplane;
 //					client->damby[0] = MAX_UINT32; // ignore compiler warning
 //					client->planeby[0] = nearplane->plane;
-//					Com_Printf("DEBUG: Set hitby[0] to %s, damby[0] to %u and planeby[0] to %s\n", client->hitby[0]->longnick, client->damby[0], GetSmallPlaneName(client->planeby[0]));
+//					Com_Printf(VERBOSE_DEBUG, "Set hitby[0] to %s, damby[0] to %u and planeby[0] to %s\n", client->hitby[0]->longnick, client->damby[0], GetSmallPlaneName(client->planeby[0]));
 //				}
 //			}
 //		}
 //	
 //		if (j) // if anyone at list (hit or nearest enemy)
 //		{
-//			Com_Printf("DEBUG: Now check who did more damage\n");
+//			Com_Printf(VERBOSE_DEBUG, "Now check who did more damage\n");
 //			for (i = 0, j = 0, damage = 0; i < MAX_HITBY; i++) // check who inflicted more damage
 //			{
 //				if (client->hitby[i]) // if client in list
 //				{
 //					if (client->hitby[i]->inuse) // if still connected
 //					{
-//						Com_Printf("DEBUG: %s - %f\n", client->hitby[i]->longnick, client->damby[i]);
+//						Com_Printf(VERBOSE_DEBUG, "%s - %f\n", client->hitby[i]->longnick, client->damby[i]);
 //						if (client->damby[i] > damage) // if damage > current damage
 //						{
 //							damage = client->damby[i]; // set current damage as attacker damage
@@ -2577,14 +2575,14 @@ void CheckKiller(client_t *client)
 //					}
 //					else // else, clear from list
 //					{
-//						Com_Printf("DEBUG: Clearing offline player from array[%u]\n", i);
+//						Com_Printf(VERBOSE_DEBUG, "Clearing offline player from array[%u]\n", i);
 //						client->hitby[i] = NULL;
 //						client->damby[i] = 0;
 //					}
 //				}
 //			}
 //	
-//			Com_Printf("DEBUG: Server has chosen %s as killer!!!\n", client->hitby[j]->longnick);
+//			Com_Printf(VERBOSE_DEBUG, "Server has chosen %s as killer!!!\n", client->hitby[j]->longnick);
 //	
 //			Com_LogEvent(EVENT_KILL, client->hitby[j] == client?0:client->hitby[j]->id, client->id);
 //			if (client->hitby[j] != client)
@@ -2599,7 +2597,7 @@ void CheckKiller(client_t *client)
 //					Com_LogDescription(EVENT_DESC_PLPLTYPE, 3, NULL);
 //				else
 //				{
-//					Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+//					Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 //					Com_LogDescription(EVENT_DESC_PLPLTYPE, 1, NULL);
 //				}
 //	
@@ -2616,7 +2614,7 @@ void CheckKiller(client_t *client)
 //				Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 //			else
 //			{
-//				Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+//				Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 //				Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 //			}
 //	
@@ -2646,7 +2644,7 @@ void CheckKiller(client_t *client)
 //	
 //			if (d_mysql_query(&my_sock, my_query))
 //			{
-//				Com_Printf("WARNING: CheckKiller(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+//				Com_Printf(VERBOSE_WARNING, "CheckKiller(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 //			}
 //	
 //			if ((client->hitby[j]->country == client->country) && (client->hitby[j] != client)) // not ack, TK
@@ -2679,7 +2677,7 @@ void CheckKiller(client_t *client)
 //					BPrintf(RADIO_GREEN, buffer);
 //				}
 //	
-//				Com_Printf("%s at %s\n", buffer, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+//				Com_Printf(VERBOSE_ALWAYS, "%s at %s\n", buffer, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 //	
 //				if (!client->hitby[j]->drone)
 //				{
@@ -2695,7 +2693,7 @@ void CheckKiller(client_t *client)
 //							sprintf(my_query, "UPDATE score_ground SET");
 //						else
 //						{
-//							Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+//							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 //							sprintf(my_query, "UPDATE score_fighter SET");
 //						}
 //					}
@@ -2737,7 +2735,7 @@ void CheckKiller(client_t *client)
 //							sprintf(my_query, "UPDATE score_ground SET");
 //						else
 //						{
-//							Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+//							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 //							sprintf(my_query, "UPDATE score_fighter SET");
 //						}
 //					}
@@ -2748,7 +2746,7 @@ void CheckKiller(client_t *client)
 //					BPrintf(RADIO_YELLOW, buffer);
 //				}
 //	
-//				Com_Printf("%s at %s\n", buffer, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+//				Com_Printf(VERBOSE_ALWAYS, "%s at %s\n", buffer, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 //			}
 //	
 //			//score
@@ -2879,7 +2877,7 @@ void CheckKiller(client_t *client)
 //				if (d_mysql_query(&my_sock, my_query))
 //				{
 //					PPrintf(client, RADIO_YELLOW, "CheckKiller(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-//					Com_Printf("WARNING: CheckKiller(): couldn't query UPDATE error %d: %s query %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
+//					Com_Printf(VERBOSE_WARNING, "CheckKiller(): couldn't query UPDATE error %d: %s query %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
 //				}
 //			}
 //	
@@ -2890,7 +2888,7 @@ void CheckKiller(client_t *client)
 //					if (printkills->value)
 //						BPrintf(RADIO_YELLOW, "`-> from %s", Com_SquadronName(client->hitby[j]->squadron));
 //					else
-//						Com_Printf("`-> from %s\n", Com_SquadronName(client->hitby[j]->squadron));
+//						Com_Printf(VERBOSE_ALWAYS, "`-> from %s\n", Com_SquadronName(client->hitby[j]->squadron));
 //				}
 //			}
 //	
@@ -2918,7 +2916,7 @@ void CheckKiller(client_t *client)
 //								PPrintf(client->hitby[i], RADIO_YELLOW, "You've got a piece of %s", client->longnick);
 //							}
 //	
-//							Com_Printf("%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
+//							Com_Printf(VERBOSE_ALWAYS, "%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
 //	
 //							client->hitby[i]->score.airscore += SCORE_ASSIST;
 //	
@@ -2939,7 +2937,7 @@ void CheckKiller(client_t *client)
 //							}
 //							else
 //							{
-//								Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+//								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 //								sprintf(my_query, "%s'%u',", my_query, client->hitby[i]->id);
 //								j |= 1;
 //							}
@@ -2952,7 +2950,7 @@ void CheckKiller(client_t *client)
 //							}
 //							else
 //							{
-//								Com_Printf("%s got a piece of his friend %s\n", client->hitby[i]->longnick, client->longnick);
+//								Com_Printf(VERBOSE_ALWAYS, "%s got a piece of his friend %s\n", client->hitby[i]->longnick, client->longnick);
 //							}
 //	
 //							client->hitby[i]->score.penaltyscore += SCORE_ASSIST;
@@ -2974,7 +2972,7 @@ void CheckKiller(client_t *client)
 //	
 //					if (d_mysql_query(&my_sock, my_query))
 //					{
-//						Com_Printf("WARNING: CheckKiller(assists): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+//						Com_Printf(VERBOSE_WARNING, "CheckKiller(assists): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 //					}
 //				}
 //			}
@@ -2988,7 +2986,7 @@ void CheckKiller(client_t *client)
 //	
 //					if (d_mysql_query(&my_sock, query_bomber))
 //					{
-//						Com_Printf("WARNING: CheckKiller(assists2): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+//						Com_Printf(VERBOSE_WARNING, "CheckKiller(assists2): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 //					}
 //				}
 //			}
@@ -3002,7 +3000,7 @@ void CheckKiller(client_t *client)
 //	
 //					if (d_mysql_query(&my_sock, query_ground))
 //					{
-//						Com_Printf("WARNING: CheckKiller(assists3): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+//						Com_Printf(VERBOSE_WARNING, "CheckKiller(assists3): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 //					}
 //				}
 //			}
@@ -3021,6 +3019,11 @@ void CheckKiller(client_t *client)
 void CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags)
 {
 	float Ea, Eb, K;
+
+	if(!winner->rank)
+		winner->rank = 1500;
+	if(!looser->rank)
+		looser->rank = 1500;
 
 	if (!winner->drone && !looser->drone)
 	{
@@ -3387,7 +3390,7 @@ u_int8_t CheckMedals(client_t *client)
 			}
 			else
 			{
-				Com_Printf("WARNING: CheckMedals(): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "CheckMedals(): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			mysql_free_result(my_result);
@@ -3396,12 +3399,12 @@ u_int8_t CheckMedals(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: CheckMedals(): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "CheckMedals(): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: UNNAMED: couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "UNNAMED: couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	sprintf(my_query, "SELECT COUNT(*) FROM medals WHERE player_id = '%u'", client->id);
@@ -3439,12 +3442,12 @@ u_int8_t CheckMedals(client_t *client)
 
 				if (d_mysql_query(&my_sock, my_query)) // query succeeded
 				{
-					Com_Printf("WARNING: CheckMedals(rank): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "CheckMedals(rank): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: CheckMedals(rank): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "CheckMedals(rank): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			mysql_free_result(my_result);
@@ -3453,12 +3456,12 @@ u_int8_t CheckMedals(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: CheckMedals(rank): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "CheckMedals(rank): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: CheckMedals(rank): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "CheckMedals(rank): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	return new;
@@ -3485,7 +3488,7 @@ u_int8_t AddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *clie
 	{
 		if (mysql_errno(&my_sock) != 1062)
 		{
-			Com_Printf("WARNING: AddMedal(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "AddMedal(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
 		return 0;
@@ -3641,7 +3644,7 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 		memset(client->skin, 0, sizeof(client->skin));
 	}
 	
-	Com_Printf("%s skin set to \"%s\"\n", client->longnick, client->skin);
+	Com_Printf(VERBOSE_DEBUG, "%s skin set to \"%s\"\n", client->longnick, client->skin);
 }
 
 /*************
@@ -3696,7 +3699,7 @@ void WB3OverrideSkin(u_int8_t slot, client_t *client)
 			overrideskin->msgsize = size;
 			memcpy(&(overrideskin->msg), client->visible[slot].client->skin, size);
 	
-			Com_Printf("%s[%d] sent skin to %s \"%s\"\n", client->visible[slot].client->longnick, slot, client->longnick, client->visible[slot].client->skin);
+			Com_Printf(VERBOSE_DEBUG, "%s[%d] sent skin to %s \"%s\"\n", client->visible[slot].client->longnick, slot, client->longnick, client->visible[slot].client->skin);
 			
 			SendPacket(buffer, size + 4, client);
 		}
@@ -3733,7 +3736,7 @@ void CreateScores(client_t *client)
 					{
 						if (mysql_errno(&my_sock) != 1062)
 						{
-							Com_Printf("WARNING: CreateScores(penalty): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "CreateScores(penalty): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 				}
@@ -3741,7 +3744,7 @@ void CreateScores(client_t *client)
 				{
 					if (mysql_errno(&my_sock) != 1062)
 					{
-						Com_Printf("WARNING: CreateScores(ground): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "CreateScores(ground): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 			}
@@ -3749,7 +3752,7 @@ void CreateScores(client_t *client)
 			{
 				if (mysql_errno(&my_sock) != 1062)
 				{
-					Com_Printf("WARNING: CreateScores(ground): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "CreateScores(ground): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 		}
@@ -3757,7 +3760,7 @@ void CreateScores(client_t *client)
 		{
 			if (mysql_errno(&my_sock) != 1062)
 			{
-				Com_Printf("WARNING: CreateScores(bomber): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "CreateScores(bomber): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 		}
 	}
@@ -3765,7 +3768,7 @@ void CreateScores(client_t *client)
 	{
 		if (mysql_errno(&my_sock) != 1062)
 		{
-			Com_Printf("WARNING: CreateScores(fighter): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "CreateScores(fighter): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 }
@@ -3794,7 +3797,7 @@ void ClientHDSerial(u_int8_t *buffer, client_t *client)
 	{
 		if (mysql_errno(&my_sock) != 1062)
 		{
-			Com_Printf("WARNING: ClientHDSerial(id): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "ClientHDSerial(id): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			return;
 		}
 	}
@@ -3809,7 +3812,7 @@ void ClientHDSerial(u_int8_t *buffer, client_t *client)
 	{
 		if (mysql_errno(&my_sock) != 1062)
 		{
-			Com_Printf("WARNING: ClientHDSerial(insert): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "ClientHDSerial(insert): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 }
@@ -3833,7 +3836,7 @@ void ClientIpaddr(client_t *client)
 	{
 		if (mysql_errno(&my_sock) != 1062)
 		{
-			Com_Printf("WARNING: ClientIpaddr(id): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "ClientIpaddr(id): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			return;
 		}
 	}
@@ -3841,7 +3844,7 @@ void ClientIpaddr(client_t *client)
 	ipaddr_id = (u_int32_t)mysql_insert_id(&my_sock);
 
 	if (!ipaddr_id)
-		Com_Printf("DEBUG: ClientIpaddr(ipaddr_id) = 0, IP %s\n", client->ip);
+		Com_Printf(VERBOSE_DEBUG, "ClientIpaddr(ipaddr_id) = 0, IP %s\n", client->ip);
 
 	//	sprintf(my_query, "SELECT id FROM ipaddress WHERE ipaddr = '%s'", client->ip);
 
@@ -3851,7 +3854,7 @@ void ClientIpaddr(client_t *client)
 	{
 		if (mysql_errno(&my_sock) != 1062)
 		{
-			Com_Printf("WARNING: ClientIpaddr(insert): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "ClientIpaddr(insert): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 }
@@ -3868,13 +3871,13 @@ void LogRAWPosition(u_int8_t server, client_t *client)
 	FILE *fp;
 
 	if (server)
-		sprintf(file, "./logs/%s.srv", client->longnick);
+		sprintf(file, "./logs/players/%s.srv", client->longnick);
 	else
-		sprintf(file, "./logs/%s.cli", client->longnick);
+		sprintf(file, "./logs/players/%s.cli", client->longnick);
 
 	if (!(fp = fopen(file, "a")))
 	{
-		Com_Printf("WARNING: Couldn't append file \"%s\"\n", file);
+		Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", file);
 	}
 	else
 	{
@@ -3896,11 +3899,11 @@ void LogPosition(client_t *client)
 	FILE *fp;
 	char filename[128];
 
-	sprintf(filename, "./logs/%s.pos", client->logfile);
+	sprintf(filename, "./logs/players/%s.pos", client->logfile);
 
 	if (!(fp = fopen(filename, "a")))
 	{
-		Com_Printf("WARNING: Couldn't append file \"%s\"\n", filename);
+		Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", filename);
 	}
 	else
 	{
@@ -3920,7 +3923,7 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 {
 	if (munition >= maxmuntype)
 	{
-		Com_Printf("WARNING: HardHit(): Munition ID overflow %d. maxmuntype=%d\n", munition, maxmuntype);
+		Com_Printf(VERBOSE_WARNING, "HardHit(): Munition ID overflow %d. maxmuntype=%d\n", munition, maxmuntype);
 		return;
 	}
 	if (!arena->munition[munition].type)
@@ -3940,7 +3943,7 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 	}
 	else
 	{
-		Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+		Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 		sprintf(my_query, "UPDATE score_fighter SET");
 	}
 
@@ -3997,6 +4000,6 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 
 	if (d_mysql_query(&my_sock, my_query)) // query succeeded
 	{
-		Com_Printf("WARNING: HardHit(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "HardHit(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }

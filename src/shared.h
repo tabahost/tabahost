@@ -25,43 +25,23 @@
   
  compiler settings to gdb: "-fomit-frame-pointer" removed
 
- TODO: Com_Printf(VERBOSE)
- TODO: Verify vital structures
- TODO: test arena->frame = 1 with numer lesser than 4294962000UL
- TODO: Check warehouse in cities
- TODO: change RPS of captured fields
- TODO: change update wingman pos when receive player data
- 
- TODO: abletocapture with linked cities: test it
-	 game.c:363
-  
- TODO: search for "timer = ", correct all clients/drones timer and offset
+ TODO: Misc: test arena->frame = 1 with numer lesser than 4294962000UL
+ TODO: Misc: search for "timer = ", correct all clients/drones timer and offset
+ TODO: DM: Verify vital structures
+ TODO: DM: .saveparts
+ TODO: DM: part = h0, explodir
+ TODO: DM: change FAU explosion
+ TODO: Feature: bail speed limit
+ TODO: Feature: reup economy at field capt
+ TODO: Feature: exclusive armor to special planes
+ TODO: Feature: 2 cities surrender
+ TODO: Feature: spheric/elyptic radar range
+ TODO: Feature: pingtest
+ TODO: Feature: Nuclear Bomb (done, not allowed yet)
+ TODO: Feature: .fieldalt <field> <alt>
 
- UnBeta Jobs:
-
- * testar sink boats tem cada mapa
- * saveparts
- * part = h0, explodir
-
- Primary jobs:
-
- * TODO: bail speed limit
- * TODO: reup economy at field capt
- * TODO: "verbose"
- * TODO: exclusive armor to special planes
-
- Secondary jobs:
- * TODO: 2 cities surrender
- * TODO: spheric/elyptic radar range
- * TODO: change FAU explosion
- * TODO: pingtest
-
- * TODO: Nuclear Bomb (done, not allowed yet)
- * TODO: .fieldalt <field> <alt>
- * TODO: Easter egg
- * TODO: arenas intercommunication
- * TODO: buffer known busy gunner position
- * TODO: free gunner position when player ejects but keep sending 0e00 packet (not needed)
+ TODO: WB2: Check warehouse in cities
+ TODO: WB2: testar sink boats tem cada mapa
 
  ****************************************************
  ****************************************************/
@@ -251,7 +231,27 @@ typedef unsigned int u_int32_t;
 #define EVENT_DESC_MDWHY	60002	// why earned
 #define EVENT_DESC_MDHM		60003	// how much
 
-#define FILE_CONSOLE		"console.log"
+#define VERBOSE_ALWAYS		0		// always prints these messages
+#define VERBOSE_ATTENTION	1		// attention messages
+#define VERBOSE_WARNING		2		// warning messages
+#define VERBOSE_ERROR		3		// error messages
+#define VERBOSE_DEBUG		4		// debug messages
+#define VERBOSE_MAX			4		// max
+#define VERBOSE_SMAX		"4"		// max string
+#define VERBOSE_ONLINE		-5		// always prints these messages
+#define VERBOSE_CHAT		-6		// always prints these messages
+#define VERBOSE_KILL		-7		// always prints these messages
+#define MAX_LOGFILE			8		// maximum of logfiles
+
+#define FILE_CONSOLE		"./logs/console.log"
+#define FILE_ATTENTION		"./logs/attention.log"
+#define FILE_WARNING		"./logs/warning.log"
+#define FILE_ERROR			"./logs/error.log"
+#define FILE_DEBUG			"./logs/debug.log"
+#define FILE_ONLINE			"./logs/online.log"
+#define FILE_CHAT			"./logs/chat.log"
+#define FILE_KILL			"./logs/kill.log"
+
 #define FILE_ARNASETTINGS	"./arenas/settings.txt"
 #define FILE_DRONENICKS		"./players/drones.txt"
 #define FILE_DRONENICKS_LOCK "./players/drones.txt.LOCK"
@@ -791,8 +791,8 @@ typedef struct client_s
 	u_int16_t	killstod;		// kills in this TOD
 	u_int16_t	structstod;		// structures in this TOD
 	float		lastscore;		// score in last flight
-	float		streakscore;	// score accumulated in the streak // TODO: unused????
-	u_int8_t	nummedals;		// num of medals received // TODO: unused????
+	float		streakscore;	// score accumulated in the streak // TODO: Misc: unused????
+	u_int8_t	nummedals;		// num of medals received // TODO: Misc: unused????
 	int16_t		rank;			// Elo rating
 	u_int8_t	ranking;		// pilot ranking
 
@@ -1965,7 +1965,7 @@ void	ConnError(int n);
 int		Com_Read(FILE *fp, u_int8_t *buffer, u_int32_t num);
 void	Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id);
 void	Com_LogDescription(u_int32_t type, float value, char *string);
-void	Com_Printf(char *fmt, ...);
+void	Com_Printf(int8_t verb, char *fmt, ...);
 char	*Com_TimeSeconds(u_int32_t seconds);
 char	*Com_Padloc(int32_t x, int32_t y);
 int		d_mysql_query(MYSQL *mysql, const char *query);
@@ -2477,6 +2477,7 @@ extern	var_t		*teamkillstructs;	// Allow to damage friendly structures
 extern	var_t		*thskins;		// enable force TH Skins
 extern	var_t		*timemult;		// arena time multiplier
 extern	var_t		*timeout;		// away timer
+extern	var_t		*verbose;		// printf messages priority
 extern	var_t		*wb3;			// enable WB3 protocol
 extern	var_t		*weather;		// configure weather
 extern	var_t		*whitelist;		// white list
@@ -2484,4 +2485,4 @@ extern	var_t		*xwindvelocity;	//
 extern	var_t		*ywindvelocity;	//
 extern	var_t		*zwindvelocity;	//
 
-extern	FILE		*logfile;		// general logfile
+extern	FILE		*logfile[MAX_LOGFILE];		// general logfile

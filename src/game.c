@@ -362,7 +362,7 @@ void CheckArenaRules(void)
 	
 							if (arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
 							{
-								Com_Printf("DEBUG: Reup TOWER f%d\n", i+1);
+								Com_Printf(VERBOSE_DEBUG, "Reup TOWER f%d\n", i+1);
 								//							close = arena->fields[i].abletocapture;
 								Cmd_Capt(i, arena->fields[i].country, NULL);
 								//							arena->fields[i].abletocapture = close;
@@ -851,7 +851,7 @@ void CheckArenaRules(void)
 		/*			if(GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]) > 70)
 		 {
 		 CPrintf(arena->fields[arena->cv[i].field].country, RADIO_GREEN, "CV F%d got stuck", arena->cv[i].field+1);
-		 Com_Printf("DEBUG: CV[%u] stuck at X%d Y%d Z%d\n", i, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]));
+		 Com_Printf(VERBOSE_DEBUG, "CV[%u] stuck at X%d Y%d Z%d\n", i, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]));
 		 arena->cv[i].speed = 0.01;
 		 arena->cv[i].stuck = 1;
 		 SetCVSpeed(&(arena->cv[i]));
@@ -929,7 +929,7 @@ void CheckArenaRules(void)
 			{
 				if (arena->cv[i].field >= fields->value)
 				{
-					Com_Printf("WARNING: CheckArenaRules() CV %d not field declared\n", i);
+					Com_Printf(VERBOSE_WARNING, "CheckArenaRules() CV %d not field declared\n", i);
 				}
 				else
 				{
@@ -1061,7 +1061,7 @@ void CheckArenaRules(void)
 
 				if (d_mysql_query(&my_sock, my_query)) // query succeeded
 				{
-					Com_Printf("WARNING: MapChange: couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "MapChange: couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 
@@ -1137,7 +1137,7 @@ void CheckArenaRules(void)
 
 		if (!(arena->frame % 30000)) // 5 min
 		{
-			Com_Printf("Online Players: %.3f\n", (float) players_num / players_count);
+			Com_Printf(FILE_ONLINE, "Online Players: %.3f\n", (float) players_num / players_count);
 			players_num = players_count = 0;
 		}
 	}
@@ -1170,7 +1170,7 @@ void ProcessMetarWeather(void)
 	{
 		if (!fgets(buffer, sizeof(buffer), fp))
 		{
-			Com_Printf("WARNING: Unexpected end of weather.cfg\n");
+			Com_Printf(VERBOSE_WARNING, "Unexpected end of weather.cfg\n");
 			fclose(fp);
 			return;
 		}
@@ -1202,7 +1202,7 @@ void ProcessMetarWeather(void)
 	}
 	else
 	{
-		Com_Printf("WARNING: Error openning metar file\n");
+		Com_Printf(VERBOSE_WARNING, "Error openning metar file\n");
 		return;
 	}
 }
@@ -1446,11 +1446,11 @@ void ProcessCommands(char *command, client_t *client)
 				{
 					if (client->shanghai) // start shanghai flight
 					{
-						Com_Printf("DEBUG: Client have Shanghai\n");
+						Com_Printf(VERBOSE_DEBUG, "Client have Shanghai\n");
 						if (client->shanghai->ready && !client->shanghai->infly)
 						{
 							client->shanghai->attached = client;
-							Com_Printf("DEBUG: Start Shanghai Fly\n");
+							Com_Printf(VERBOSE_DEBUG, "Start Shanghai Fly\n");
 							Cmd_Fly(2, client->shanghai);
 						}
 					}
@@ -1483,7 +1483,7 @@ void ProcessCommands(char *command, client_t *client)
 
 			if ((fp = fopen(file, "r")) == NULL)
 			{
-				Com_Printf("WARNING: Couldn't open \"%s\"\n", file);
+				Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", file);
 				sprintf(file, "motd.txt");
 			}
 			else
@@ -1879,7 +1879,7 @@ void ProcessCommands(char *command, client_t *client)
 			Cmd_Disband(client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "test")) // TODO: debug dot commands
+		else if (!Com_Stricmp(command, "test")) // TODO: Misc: debug dot commands
 		{
 			WB3ConfigFM(client);
 
@@ -2282,7 +2282,7 @@ void ProcessCommands(char *command, client_t *client)
 	
 	if(permission & (FLAG_ADMIN | FLAG_OP) && arena && arena->frame > 100)
 	{
-		Com_Printf("OPCMD: %s(%s) - .%s %s %s %s %s %s %s\n", client?client->longnick:"-HOST-", client?client->ip:"", command, argv[0]?argv[0]:"", argv[1]?argv[1]:"", argv[2]?argv[2]:"", argv[3]?argv[3]:"", argv[4]?argv[4]:"", argv[5]?argv[5]:"");
+		Com_Printf(VERBOSE_ALWAYS, "OPCMD: %s(%s) - .%s %s %s %s %s %s %s\n", client?client->longnick:"-HOST-", client?client->ip:"", command, argv[0]?argv[0]:"", argv[1]?argv[1]:"", argv[2]?argv[2]:"", argv[3]?argv[3]:"", argv[4]?argv[4]:"", argv[5]?argv[5]:"");
 	}
 
 	if (permission & FLAG_ADMIN) // commands that only ADMIN's can execute
@@ -2619,7 +2619,7 @@ void ProcessCommands(char *command, client_t *client)
 
 			PPrintf(client, RADIO_YELLOW, "Scenario Timeline Started");
 			if(client)
-			Com_Printf("Scenario Timeline Started\n");
+			Com_Printf(VERBOSE_ALWAYS, "Scenario Timeline Started\n");
 			arena->scenario = arena->frame;
 
 			sprintf(file, "./arenas/%s/t0", dirname->string);
@@ -2631,7 +2631,7 @@ void ProcessCommands(char *command, client_t *client)
 		{
 			PPrintf(client, RADIO_YELLOW, "Scenario Timeline Stopped");
 			if(client)
-			Com_Printf("Scenario Timeline Stopped\n");
+			Com_Printf(VERBOSE_ALWAYS, "Scenario Timeline Stopped\n");
 			arena->scenario = 0;
 			sprintf(file, "./arenas/%s/t999", dirname->string);
 			Cmd_LoadConfig(file, NULL);
@@ -2719,7 +2719,7 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			else if(!Com_Stricmp(argv[0], "all"))
 			{
-				Com_Printf("ATTENTION: All users were kicked out by %s\n", client?client->longnick:"-HOST-");
+				Com_Printf(VERBOSE_ATTENTION, "All users were kicked out by %s\n", client?client->longnick:"-HOST-");
 				BPrintf(RADIO_YELLOW, "ATTENTION: All users were kicked out by %s\n", client?client->longnick:"-HOST-");
 				
 				for(i = 0; i < maxentities->value; i++)
@@ -2732,7 +2732,7 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			else
 			{
-				Com_Printf("ATTENTION: %s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
+				Com_Printf(VERBOSE_ATTENTION, "%s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
 				BPrintf(RADIO_YELLOW, "ATTENTION: %s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
 				
 				RemoveClient(FindLClient(argv[0]));
@@ -3077,7 +3077,7 @@ void SendFileSeq1(char *file, char *clifile, client_t *client)
 
 	if (filesize > sizeof(client->file))
 	{
-		Com_Printf("WARNING: filename overflowed\n");
+		Com_Printf(VERBOSE_WARNING, "filename overflowed\n");
 		return;
 	}
 
@@ -3133,7 +3133,7 @@ void SendFileSeq3(client_t *client)
 
 	if (!(fp = fopen(client->file, "r")))
 	{
-		Com_Printf("Error opening file %s\n", client->file);
+		Com_Printf(VERBOSE_ALWAYS, "Error opening file %s\n", client->file);
 		Sys_UnlockFile(strcat(client->file, ".LOCK"));
 		client->file[strlen(client->file)-5] = '\0';
 		return;
@@ -3147,7 +3147,7 @@ void SendFileSeq3(client_t *client)
 		size = ftell(fp);
 		if (size <= 0)
 		{
-			Com_Printf("Error getting size of file %s\n", client->file);
+			Com_Printf(VERBOSE_ALWAYS, "Error getting size of file %s\n", client->file);
 			return;
 		}
 	}
@@ -3213,7 +3213,7 @@ void SendFileSeq5(u_int16_t seek, client_t *client)
 
 	if (!(fp = fopen(client->file, "r")))
 	{
-		Com_Printf("Error opening file %s\n", client->file);
+		Com_Printf(VERBOSE_ALWAYS, "Error opening file %s\n", client->file);
 		Sys_UnlockFile(strcat(client->file, ".LOCK"));
 		client->file[strlen(client->file)-5] = '\0';
 		return;
@@ -3221,7 +3221,7 @@ void SendFileSeq5(u_int16_t seek, client_t *client)
 
 	if (fseek(fp, 512*seek, SEEK_SET))
 	{
-		Com_Printf("WARNING: Couldn't fseek() file \"%s\"\n", client->file);
+		Com_Printf(VERBOSE_WARNING, "Couldn't fseek() file \"%s\"\n", client->file);
 		fclose(fp);
 
 		Sys_UnlockFile(strcat(client->file, ".LOCK"));
@@ -3286,7 +3286,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		{
 			if (debug->value)
 			{
-				Com_Printf("DEBUG: <<<--- ");
+				Com_Printf(VERBOSE_DEBUG, "<<<--- ");
 				Com_Printfhex(buffer, len+1);
 			}
 
@@ -3299,7 +3299,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		if (debug->value)
 		{
-			Com_Printf("DEBUG: <<<--- ");
+			Com_Printf(VERBOSE_DEBUG, "<<<--- ");
 			Com_Printfhex(buffer, len+1);
 		}
 	}
@@ -3317,7 +3317,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		if (!client->drone)
 		{
-			if (n != 0x0E00) // TODO: FRANZ verificar
+			if (n != 0x0E00) // TODO: Bug: THAI still being kicked
 				client->awaytimer = 0;
 		}
 
@@ -3348,7 +3348,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				{
 					if(debug->value)
 					{
-						PPrintf(client, RADIO_RED, "DEBUG: 0x0406: Request Available list (%d)", buffer[2]); // TODO:
+						PPrintf(client, RADIO_RED, "DEBUG: 0x0406: Request Available list (%d)", buffer[2]); // TODO: Otto: fly as otto feature
 					}
 					PReqBomberList(client);
 				}
@@ -3569,7 +3569,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					if((fp = fopen(file, "r")) == NULL)
 					{
-						Com_Printf("WARNING: Couldn't open \"%s\"\n", file);
+						Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", file);
 						sprintf(file, "motd.txt");
 					}
 					else
@@ -3598,7 +3598,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 							{
 								if(!strcmp(clients[i].ip, client->ip))
 								{
-									Com_Printf("%s and %s are sharing the same IP (%s)\n", client->longnick, clients[i].longnick, client->ip);
+									Com_Printf(VERBOSE_ALWAYS, "%s and %s are sharing the same IP (%s)\n", client->longnick, clients[i].longnick, client->ip);
 									BPrintf(RADIO_YELLOW, "%s and %s are sharing the same IP (%s)\n", client->longnick, clients[i].longnick, client->ip);
 									break;
 								}
@@ -3615,7 +3615,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					{
 						if(mysql_errno(&my_sock) != 1062)
-						Com_Printf("WARNING: LOGIN: couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "LOGIN: couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 				else
@@ -3636,9 +3636,9 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x0D04:
 				if(!setjmp(debug_buffer))
 				{
-					Com_Printf("Printing request disco packet:\n");
+					Com_Printf(VERBOSE_DEBUG, "Printing request disco packet:\n");
 					Com_Printfhex(buffer, len);
-					//client->disconnect = 1;
+					client->disconnect = 1;
 				}
 				else
 				{
@@ -3956,7 +3956,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(debug->value)
-					Com_Printf("160A\n");
+					Com_Printf(VERBOSE_DEBUG, "160A\n");
 					memset(buffer+2, 0, 8);
 					buffer[1] = 0x0B; // FRANZ verificar WB2008
 					SendPacket(buffer, 10, client);
@@ -3971,7 +3971,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				{
 					if(client->ready && client->attr & (FLAG_ADMIN | FLAG_OP))
 					PPrintf(client, RADIO_LIGHTYELLOW, "Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
-					Com_Printf("WARNING: Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
+					Com_Printf(VERBOSE_WARNING, "Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
 					Com_Printfhex(buffer, len);
 				}
 				else
@@ -3983,7 +3983,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	}
 	else
 	{
-		Com_Printf("WARNING: %s(%s) invalid checksum\n", client->longnick, client->ip);
+		Com_Printf(VERBOSE_WARNING, "%s(%s) invalid checksum\n", client->longnick, client->ip);
 		return -1;
 	}
 	return 0;
@@ -4150,7 +4150,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					Com_LogDescription(EVENT_DESC_FIELD, land, NULL);
 
-					Com_Printf("%s landed at %s\n", client->longnick, field);
+					Com_Printf(VERBOSE_ALWAYS, "%s landed at %s\n", client->longnick, field);
 					PPrintf(client, RADIO_YELLOW, "%s landed %s", client->longnick, field);
 
 					if (landingcapture->value && IsBomber(client))
@@ -4228,13 +4228,13 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					sprintf(field, "f%d", land);
 
-					Com_Printf("%s landed out of runway at %s\n", client->longnick, field);
+					Com_Printf(VERBOSE_ALWAYS, "%s landed out of runway at %s\n", client->longnick, field);
 					PPrintf(client, RADIO_YELLOW, "%s landed out of %s runway", client->longnick, field);
 				}
 				break;
 			case 0x02:
 				client->status1 |= STATUS_PILOT;
-				Com_Printf("%s is killed in flight at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				Com_Printf(VERBOSE_ALWAYS, "%s is killed in flight at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				PPrintf(client, RADIO_YELLOW, "%s is killed in flight", client->longnick);
 				CheckKiller(client);
 				Kamikase(client);
@@ -4242,12 +4242,12 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x04:
 				if (client->chute)
 				{
-					Com_Printf("%s's plane crashed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "%s's plane crashed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					PPrintf(client, RADIO_YELLOW, "%s's plane crashed", client->longnick);
 				}
 				else
 				{
-					Com_Printf("%s crashed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "%s crashed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					PPrintf(client, RADIO_YELLOW, "%s crashed", client->longnick);
 				}
 
@@ -4258,13 +4258,13 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					client->infly = 0;
 				break;
 			case 0x05:
-				Com_Printf("%s failed to ditch at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				Com_Printf(VERBOSE_ALWAYS, "%s failed to ditch at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				PPrintf(client, RADIO_YELLOW, "%s failed to ditch", client->longnick);
 				CheckKiller(client);
 				Kamikase(client);
 				break;
 			case 0x07:
-				Com_Printf("%s sucessfully bailed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				Com_Printf(VERBOSE_ALWAYS, "%s sucessfully bailed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 				Com_LogEvent(EVENT_BAIL, client->id, 0);
 				Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4273,7 +4273,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				CheckKiller(client);
 				break;
 			case 0x08:
-				Com_Printf("%s ditched at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				Com_Printf(VERBOSE_ALWAYS, "%s ditched at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 				Com_LogEvent(EVENT_DITCH, client->id, 0);
 				Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4290,7 +4290,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 				if (!emulatecollision->value || arcade->value)
 				{
-					Com_Printf("%s collided at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "%s collided at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 					Com_LogEvent(EVENT_COLLIDED, client->id, 0);
 					Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4304,7 +4304,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					if (nearplane)
 					{
-						Com_Printf("%s collided with %s at %s\n", client->longnick, nearplane->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+						Com_Printf(VERBOSE_ALWAYS, "%s collided with %s at %s\n", client->longnick, nearplane->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 						Com_LogEvent(EVENT_COLLIDED, client->id, nearplane->id);
 						Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4330,7 +4330,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 							}
 							else
 							{
-								Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 								sprintf(my_query, "UPDATE score_fighter");
 							}
 
@@ -4338,7 +4338,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 							if (d_mysql_query(&my_sock, my_query)) // query succeeded
 							{
-								Com_Printf("WARNING: Collided(near): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Collided(near): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 
@@ -4362,12 +4362,12 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				}
 				break;
 			case 0x0C:
-				Com_Printf("%s became a pancake at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				Com_Printf(VERBOSE_ALWAYS, "%s became a pancake at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				PPrintf(client, RADIO_YELLOW, "%s became pancake", client->longnick);
 				CheckKiller(client);
 				break;
 			default:
-				Com_Printf("WARNING: %s(%s) 0x0202 type unknown (0x%2X)\n", client->longnick, client->ip, end);
+				Com_Printf(VERBOSE_WARNING, "%s(%s) 0x0202 type unknown (0x%2X)\n", client->longnick, client->ip, end);
 				break;
 		}
 	}
@@ -4383,7 +4383,6 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		}
 	}
 
-	// TODO: Make a new function to handle Scores after end flight
 	if (!client->chute || (client->chute && ((end == 0x02) || (end == 0x07) || (end == 0x0C))))
 	{
 		PEndflightScores(end, land, gunused, totalhits, client);
@@ -4528,7 +4527,7 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 			}
 			else
 			{
-				Com_Printf("WARNING: Curr_Streak: Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "Curr_Streak: Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			mysql_free_result(my_result);
@@ -4537,12 +4536,12 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 		}
 		else
 		{
-			Com_Printf("WARNING: Curr_Streak: my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Curr_Streak: my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: Curr_Streak: couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Curr_Streak: couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	if (IsFighter(client))
@@ -4636,7 +4635,7 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 	}
 	else
 	{
-		Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+		Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 		sprintf(my_query, "UPDATE score_fighter SET");
 	}
 
@@ -4805,7 +4804,7 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 	}
 	else
 	{
-		Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+		Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 		if (client->score.airscore)
 			sprintf(my_query, "%s, fighter_score = fighter_score + '%.3f'", my_query, client->score.airscore);
 		if (client->score.groundscore)
@@ -4821,8 +4820,8 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 
 	if (d_mysql_query(&my_sock, my_query)) // query succeeded
 	{
-		Com_Printf("WARNING: PEndFlight(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-		Com_Printf("WARNING: Query: %s\n", my_query);
+		Com_Printf(VERBOSE_WARNING, "PEndFlight(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Query: %s\n", my_query);
 	}
 
 	if (client->score.penaltyscore)
@@ -4831,7 +4830,7 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: PEndFlight(penalty): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "PEndFlight(penalty): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 
@@ -4853,7 +4852,7 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 
 	if (d_mysql_query(&my_sock, my_query)) // query succeeded
 	{
-		Com_Printf("WARNING: PEndFlight(updplayer): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "PEndFlight(updplayer): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	PPrintf(client, RADIO_WHITE, "==================================================");
@@ -4888,7 +4887,6 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 	}
 	PPrintf(client, RADIO_WHITE, "==================================================");
 
-	/////////// TODO: if client is chute and not that end-flight?
 	if ((i = CheckMedals(client)))
 	{
 		PPrintf(client, RADIO_GREEN, "You are awarded with %u medal%s!", i, i > 1 ? "s" : "");
@@ -5053,7 +5051,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				}
 			}
 			else // remove contrail if night
-			{ // TODO: remove fuel leak at night
+			{ // TODO: WB2: remove fuel leak at night
 				if (client->armor.points[PLACE_LFUEL] > 0) // 0x4000
 				{
 					client->status1 &= 0xFFFFBFFF;
@@ -5137,7 +5135,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 							}
 							else
 							{
-								if(IsBomber(client) || IsCargo(client)) // TODO: this is a temporary fix to wings collision
+								if(IsBomber(client) || IsCargo(client)) // TODO: Collision: this is a temporary fix to wings collision
 									WB3DotCommand(client, ".midairs_frndly 1");
 							}
 						}
@@ -5487,7 +5485,7 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 			}
 			else
 			{
-				Com_Printf("%s ejected at %s\n", client->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				Com_Printf(VERBOSE_ALWAYS, "%s ejected at %s\n", client->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			}
 
 			client->chute = 1;
@@ -5635,7 +5633,7 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 	{
 		status = (planestatus1_t *)buffer;
 
-		if(client->status1 != htonl(status->status1)) // TODO: check when new damage from client, possible collision detection
+		if(client->status1 != htonl(status->status1)) // TODO: Collision: check when new damage from client, possible collision detection
 		{
 			client->status1 = htonl(status->status1);
 		}
@@ -5946,7 +5944,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 		}
 		else
 		{
-			Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+			Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 			sprintf(my_query, "UPDATE score_fighter SET");
 		}
 
@@ -5978,7 +5976,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: PDropItem(): couldn't query UPDATE error %d: %s Query = \"%s\"\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
+			Com_Printf(VERBOSE_WARNING, "PDropItem(): couldn't query UPDATE error %d: %s Query = \"%s\"\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
 		}
 	}
 }
@@ -6013,7 +6011,7 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 	}
 	else
 	{
-		Com_Printf("WARNING: WB3TonnageOnTarget() unknown munition %d from plane %d", wb3tonnage->ammo, client->plane);
+		Com_Printf(VERBOSE_WARNING, "WB3TonnageOnTarget() unknown munition %d from plane %d", wb3tonnage->ammo, client->plane);
 	}
 }
 
@@ -6099,7 +6097,7 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 	if (killer >= 0)
 		pvictim->damby[killer] += munition->he;
 
-	Com_Printf("-HOST- hit %s with %s\n", pvictim->longnick, munition->abbrev);
+	Com_Printf(VERBOSE_ALWAYS, "-HOST- hit %s with %s\n", pvictim->longnick, munition->abbrev);
 
 	if (gunstats->value)// || client->gunstat || pvictim->gunstat)
 	{
@@ -6173,7 +6171,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 		if (gunstats->value)
 			PPrintf(client, RADIO_LIGHTYELLOW, "Building %d not declared", htons(hitstructure->build));
 
-		Com_Printf("WARNING: Building %d not declared", htons(hitstructure->build));
+		Com_Printf(VERBOSE_WARNING, "Building %d not declared", htons(hitstructure->build));
 
 		return;
 	}
@@ -6195,7 +6193,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 			}
 		}
 
-		Com_Printf("%s hit friendly %s\n", client->longnick, GetBuildingType(building->type));
+		Com_Printf(VERBOSE_ALWAYS, "%s hit friendly %s\n", client->longnick, GetBuildingType(building->type));
 	}
 
 	if (building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE)
@@ -6208,7 +6206,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (distance < 0)
 	{
-		Com_Printf("WARNING: PHitStructure(): %s(%s) sent invalid distance\n", client->longnick, client->ip);
+		Com_Printf(VERBOSE_WARNING, "PHitStructure(): %s(%s) sent invalid distance\n", client->longnick, client->ip);
 		distance = 0;
 	}
 
@@ -6234,7 +6232,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 		if (j == hits)
 		{
-			Com_Printf("%s %shit %u rounds at %s with %s\n", client->longnick, building->country==client->country ? "friendly " : "", hits, GetBuildingType(building->type), munition->abbrev);
+			Com_Printf(VERBOSE_ALWAYS, "%s %shit %u rounds at %s with %s\n", client->longnick, building->country==client->country ? "friendly " : "", hits, GetBuildingType(building->type), munition->abbrev);
 			j = 0;
 		}
 
@@ -6290,7 +6288,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (hardhitstructure->munition >= maxmuntype)
 	{
-		Com_Printf("WARNING: PHardHitStructure(): Munition ID overflow %d. maxmuntype=%d\n", hardhitstructure->munition, MAX_MUNTYPE);
+		Com_Printf(VERBOSE_WARNING, "PHardHitStructure(): Munition ID overflow %d. maxmuntype=%d\n", hardhitstructure->munition, MAX_MUNTYPE);
 		return;
 	}
 
@@ -6301,7 +6299,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 		if (gunstats->value)
 			PPrintf(client, RADIO_LIGHTYELLOW, "Building %d not declared", htons(hardhitstructure->build));
 
-		Com_Printf("WARNING: Building %d not declared", htons(hardhitstructure->build));
+		Com_Printf(VERBOSE_WARNING, "Building %d not declared", htons(hardhitstructure->build));
 
 		tempbuild.id = htons(hardhitstructure->build);
 		SetBuildingStatus(&tempbuild, 1, NULL);
@@ -6387,7 +6385,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 //	else if (client->gunstat)
 //		PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 
-	Com_Printf("%s %shit %s with %s\n", client->longnick, client->country ==building->country ? "friendly " : "", GetBuildingType(building->type), munition->abbrev);
+	Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client->longnick, client->country ==building->country ? "friendly " : "", GetBuildingType(building->type), munition->abbrev);
 
 	if (building->field <= fields->value)
 	{
@@ -6439,7 +6437,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		else
 		{
 			distance = 0;
-			Com_Printf("WARNING: PHitPlane(): couldn't calculate distance from ack hit (val = %d, dist = %u)\n", val, dist);
+			Com_Printf(VERBOSE_WARNING, "PHitPlane(): couldn't calculate distance from ack hit (val = %d, dist = %u)\n", val, dist);
 		}
 	}
 	else
@@ -6454,7 +6452,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 	if (distance < 0)
 	{
-		Com_Printf("WARNING: PHitPlane(): %s(%s) sent invalid distance\n", client->longnick, client->ip);
+		Com_Printf(VERBOSE_WARNING, "PHitPlane(): %s(%s) sent invalid distance\n", client->longnick, client->ip);
 		distance = 0;
 	}
 
@@ -6494,7 +6492,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		pvictim->hitstakenstat[munition->caliber - 1] += hits;
 	}
 
-	Com_Printf("%s %shit %u rounds at %s with %s\n", client!=pvictim ? client->longnick : "-HOST", (client!=pvictim && client->country==pvictim->country) ? "friendly " : "", hits, pvictim->longnick,
+	Com_Printf(VERBOSE_ALWAYS, "%s %shit %u rounds at %s with %s\n", client!=pvictim ? client->longnick : "-HOST", (client!=pvictim && client->country==pvictim->country) ? "friendly " : "", hits, pvictim->longnick,
 			munition->abbrev);
 
 	if (!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
@@ -6569,14 +6567,14 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			if (hitplane->place[j] >= MAX_PLACE)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "invalid place %d", hitplane->place[j]);
-				Com_Printf("WARNING: PHitPlane(): invalid place\n");
+				Com_Printf(VERBOSE_WARNING, "PHitPlane(): invalid place\n");
 				continue;
 			}
 
 			if (pvictim->armor.points[hitplane->place[j]] < 0)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "unused place %d, plane %s(%d)", hitplane->place[j], GetSmallPlaneName(pvictim->plane), pvictim->plane);
-				Com_Printf("WARNING: PHitPlane(): unused place %d plane %d\n", hitplane->place[j], pvictim->plane);
+				Com_Printf(VERBOSE_WARNING, "PHitPlane(): unused place %d plane %d\n", hitplane->place[j], pvictim->plane);
 				continue; // unused part
 			}
 
@@ -6715,7 +6713,7 @@ void WB3FuelConsumed(u_int8_t *buffer, client_t *client)
 
 	fuelconsumed = (wb3fuelconsumed_t *)buffer;
 
-	if (client->attr)
+	if (client->attr) // TODO: Scores: debite fuel consumed from scores
 		PPrintf(client, RADIO_RED, "fuel = %u", ntohl(fuelconsumed->amount));
 }
 
@@ -6839,7 +6837,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		pvictim->hitstakenstat[munition->caliber - 1]++;
 	}
 
-	Com_Printf("%s %shit %s with %s\n", client->longnick, client->country == pvictim->country ? "friendly " : "", pvictim->longnick, munition->abbrev);
+	Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client->longnick, client->country == pvictim->country ? "friendly " : "", pvictim->longnick, munition->abbrev);
 
 	HardHit(hardhitplane->munition, !((pvictim->country != client->country) || pvictim->tkstatus), client);
 
@@ -7086,7 +7084,7 @@ munition_t *GetMunition(u_int8_t id)
 	{
 		if (arena->munition[id].he < 0)
 		{
-			Com_Printf("WARNING: GetMunition(): Unused weapon (he = -1) ID %u\n", id);
+			Com_Printf(VERBOSE_WARNING, "GetMunition(): Unused weapon (he = -1) ID %u\n", id);
 
 			return NULL;
 		}
@@ -7110,7 +7108,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 	//	if(++depth > 10)
 	//	{
-	//		Com_Printf("DEBUG: AddPlaneDamage() Possible Infinite Loop, %s - %d\n", client, client->armor.parent[place]);
+	//		Com_Printf(VERBOSE_DEBUG, "AddPlaneDamage() Possible Infinite Loop, %s - %d\n", client, client->armor.parent[place]);
 	//		PPrintf(client, RADIO_YELLOW, "Damage Model error, please inform admins");
 	//		depth--;
 	//		return 0;
@@ -7291,7 +7289,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 								}
 								else
 								{
-									Com_Printf("DEBUG: Main Ship (%d) destroyed (F%d) by %s %s\n", building->id, building->field, client ? (client->drone ? "drone" : "player") : "-HOST-",
+									Com_Printf(VERBOSE_DEBUG, "Main Ship (%d) destroyed (F%d) by %s %s\n", building->id, building->field, client ? (client->drone ? "drone" : "player") : "-HOST-",
 											client ? client->longnick : "");
 									break;
 								}
@@ -7346,7 +7344,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 				{
 					//debug
 					if (building->country != arena->fields[building->field - 1].country)
-						Com_Printf("DEBUG: structure at field %d differ country value (b%d;f%d;p%d)\n", building->field, building->country, arena->fields[building->field - 1].country, client->country);
+						Com_Printf(VERBOSE_DEBUG, "structure at field %d differ country value (b%d;f%d;p%d)\n", building->field, building->country, arena->fields[building->field - 1].country, client->country);
 	
 					client->structstod--;
 	
@@ -7391,7 +7389,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 						}
 						else
 						{
-							Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 							sprintf(my_query, "UPDATE score_fighter SET");
 						}
 					}
@@ -7466,7 +7464,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 						{
 							PPrintf(client, 
 							RADIO_YELLOW, "AddBuildingDamage(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-							Com_Printf("WARNING: AddBuildingDamage(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "AddBuildingDamage(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 				}
@@ -7479,13 +7477,13 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 					SinkBoat(FALSE, building, NULL);
 					PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
 
-					Com_Printf("%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
+					Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
 				}
 				else if (IsVitalBuilding(building))
 				{
 					PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s", GetBuildingType(building->type), Com_TimeSeconds(building->timer/100));
 
-					Com_Printf("%s destroyed %s at F%d for %s\n", client->longnick, GetBuildingType(building->type), building->field, Com_TimeSeconds(building->timer /100));
+					Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d for %s\n", client->longnick, GetBuildingType(building->type), building->field, Com_TimeSeconds(building->timer /100));
 				}
 
 				if (!arcade->value)
@@ -7505,7 +7503,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 			{
 				factorybuildingsup[building->country - 1]--;
 				PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
-				Com_Printf("%s destroyed %s at C%d\n", client->longnick, GetBuildingType(building->type), building->field);
+				Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at C%d\n", client->longnick, GetBuildingType(building->type), building->field);
 			}
 		}
 
@@ -7774,7 +7772,7 @@ void SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client)
 	{
 		if(status1 & (1 << i))
 		{
-			Com_Printf("%s lost %s\n", client->longnick, GetHitSite(i));
+			Com_Printf(VERBOSE_ALWAYS, "%s lost %s\n", client->longnick, GetHitSite(i));
 		}
 	}
 
@@ -7948,13 +7946,13 @@ void PRadioMessage(u_int8_t *buffer, client_t *client)
 
 	if (!size)
 	{
-		Com_Printf("WARNING: %s(%s) sent message with size Zero\n", client->longnick, client->ip);
+		Com_Printf(VERBOSE_WARNING, "%s(%s) sent message with size Zero\n", client->longnick, client->ip);
 		return;
 	}
 
 	if (msgfrom < 1000)
 	{
-		Com_Printf("WARNING: %s(%s) invalid nick (%X)\n", client->longnick, client->ip, msgfrom);
+		Com_Printf(VERBOSE_WARNING, "%s(%s) invalid nick (%X)\n", client->longnick, client->ip, msgfrom);
 		return;
 	}
 
@@ -8001,7 +7999,7 @@ void PRadioMessage(u_int8_t *buffer, client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: %s(%s) message nick (%X) doesnt match with ingame nick (%X)\n", client->longnick, client->ip, msgfrom, client->shortnick);
+			Com_Printf(VERBOSE_WARNING, "%s(%s) message nick (%X) doesnt match with ingame nick (%X)\n", client->longnick, client->ip, msgfrom, client->shortnick);
 		}
 	}
 
@@ -8101,7 +8099,7 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 
 			message[msgsize] = '\0';
 
-			Com_Printf("%s:(%s)%s\n", client->longnick, toClient->longnick, message);
+			Com_Printf(VERBOSE_CHAT, "%s:(%s)%s\n", client->longnick, toClient->longnick, message);
 		}
 		else
 		{
@@ -8197,7 +8195,7 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 		if (n >= 0)
 		{
 			message[msgsize] = '\0';
-			Com_Printf("%s:(%d)%s\n", client->longnick, msgto, message);
+			Com_Printf(VERBOSE_CHAT, "%s:(%d)%s\n", client->longnick, msgto, message);
 		}
 	}
 }
@@ -8226,14 +8224,14 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 	memcpy(loginname, buffer+1, buffer[0]);
 	loginname[31] = '\0';
 
-	Com_Printf("DEBUG: LOGINNAME %s\n", loginname);
+	Com_Printf(VERBOSE_DEBUG, "LOGINNAME %s\n", loginname);
 
 	memset(nickname, 0, sizeof(nickname));
 	memcpy(nickname, buffer+2+buffer[0], 6);
 
 	strncpy(nickname, wbnick2ascii(ascii2wbnick(nickname, 0)), 6);
 
-	Com_Printf("DEBUG: NICK %s\n", nickname);
+	Com_Printf(VERBOSE_DEBUG, "NICK %s\n", nickname);
 
 	nickpacket->packetid = htons(Com_WBhton(0x2001));
 
@@ -8302,7 +8300,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 											}
 											else
 											{
-												Com_Printf("WARNING: PNewNick(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+												Com_Printf(VERBOSE_WARNING, "PNewNick(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 												nickpacket->msgsize = 23;
 												memcpy( &(nickpacket->msg), "SQL Error query(update)", 23);
 											}
@@ -8312,14 +8310,14 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 											mysql_free_result(my_result);
 											my_result = NULL;
 
-											Com_Printf("WARNING: PNewNick(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+											Com_Printf(VERBOSE_WARNING, "PNewNick(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 											nickpacket->msgsize = 19;
 											memcpy(&(nickpacket->msg), "SQL Error fetch(id)", 19);
 										}
 									}
 									else
 									{
-										Com_Printf("WARNING: PNewNick(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+										Com_Printf(VERBOSE_WARNING, "PNewNick(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
 										nickpacket->msgsize = 20;
 										memcpy(&(nickpacket->msg), "SQL Error result(id)", 20);
@@ -8327,7 +8325,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 								}
 								else
 								{
-									Com_Printf("WARNING: PNewNick(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "PNewNick(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
 									nickpacket->msgsize = 19;
 									memcpy(&(nickpacket->msg), "SQL Error query(id)", 19);
@@ -8341,7 +8339,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 						}
 						else
 						{
-							Com_Printf("WARNING: Couldn't open file \"%s\"\n", 
+							Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", 
 							FILE_DRONENICKS);
 							Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 
@@ -8351,7 +8349,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 					}
 					else
 					{
-						Com_Printf("WARNING: Couldn't lock file \"%s\"\n", 
+						Com_Printf(VERBOSE_WARNING, "Couldn't lock file \"%s\"\n", 
 						FILE_DRONENICKS);
 
 						nickpacket->msgsize = 21;
@@ -8369,7 +8367,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 			}
 			else
 			{
-				Com_Printf("WARNING: PNewNick(nick): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "PNewNick(nick): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
 				nickpacket->msgsize = 22;
 				memcpy(&(nickpacket->msg), "SQL Error result(nick)", 22);
@@ -8377,7 +8375,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: PNewNick(nick): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "PNewNick(nick): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
 			nickpacket->msgsize = 21;
 			memcpy(&(nickpacket->msg), "SQL Error query(nick)", 21);
@@ -8493,7 +8491,7 @@ void UpdateIngameClients(u_int8_t attr)
 
 	if (!(fp = fopen(file, "wb")))
 	{
-		Com_Printf("WARNING: Couldn't create file \"%s\"\n", file);
+		Com_Printf(VERBOSE_WARNING, "Couldn't create file \"%s\"\n", file);
 	}
 	else
 	{
@@ -9114,13 +9112,13 @@ void SendScreenUpdates(client_t *client)
 	updateplane->posy = htonl(((client->posxy[1][0] >> 11) << 11));
 	updateplane->alt = htonl(((client->posalt[0] >> 9) << 9));
 
-	sprintf(file, "./logs/%s.screen", client->longnick);
+	sprintf(file, "./logs/players/%s.screen", client->longnick);
 
 	if ((client->lograwdata || lograwposition->value) && client->infly)
 	{
 		if (!(fp = fopen(file, "a")))
 		{
-			Com_Printf("WARNING: Couldn't append file \"%s\"\n", file);
+			Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", file);
 		}
 	}
 
@@ -9618,7 +9616,7 @@ void PFileCheck(u_int8_t *buffer, client_t *client)
 			{
 				PPrintf(client, RADIO_BLUE, "Invalid Executable CRC, error logged");
 				ForceEndFlight(TRUE, client);
-				Com_Printf("WARNING: Invalid Executable CRC: %X (%s)\n", crc, client->longnick);
+				Com_Printf(VERBOSE_WARNING, "Invalid Executable CRC: %X (%s)\n", crc, client->longnick);
 			}
 			break;
 		case 0x02:
@@ -9629,7 +9627,7 @@ void PFileCheck(u_int8_t *buffer, client_t *client)
 
 				if (strcmp(client->longnick, "-exec-") || strcmp(client->longnick, "franz-"))
 					ForceEndFlight(TRUE, client);
-				Com_Printf("WARNING: Invalid MISC.BIN CRC: %X (%s)\n", crc, client->longnick);
+				Com_Printf(VERBOSE_WARNING, "Invalid MISC.BIN CRC: %X (%s)\n", crc, client->longnick);
 			}
 			break;
 		case 0x05:
@@ -9659,12 +9657,12 @@ void PFileCheck(u_int8_t *buffer, client_t *client)
 
 			if (crcview->value)
 			{
-				Com_Printf("Cockpit CRC:0x%0X, %s\n", crc, message);
+				Com_Printf(VERBOSE_ALWAYS, "Cockpit CRC:0x%0X, %s\n", crc, message);
 				PPrintf(client, RADIO_GREEN, "Cockpit CRC:0x%0X, %s", crc, message);
 			}
 			break;
 		default:
-			Com_Printf("WARNING: packet 0x1801 invalid value (%X)\n", ntohl(check->exemiscview));
+			Com_Printf(VERBOSE_WARNING, "packet 0x1801 invalid value (%X)\n", ntohl(check->exemiscview));
 			break;
 	}
 }
@@ -10323,7 +10321,7 @@ void CheckCockpitCRC(char *path, u_int32_t crc, client_t *client)
 			RADIO_BLUE, "Invalid Cockpit CRC (%s.VEW) please download correct file", name);
 			ForceEndFlight(TRUE, client);
 		}
-		Com_Printf("WARNING: Invalid Cockpit CRC: %X %s.VEW (%s)\n", crc, name, client->longnick);
+		Com_Printf(VERBOSE_WARNING, "Invalid Cockpit CRC: %X %s.VEW (%s)\n", crc, name, client->longnick);
 	}
 }
 
@@ -10569,7 +10567,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 						}
 						else
 						{
-							Com_Printf("WARNING: PClientMedals(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "PClientMedals(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 					else
@@ -10589,14 +10587,14 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: PClientMedals(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "PClientMedals(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
 				if (mysql_errno(&my_sock))
 				{
-					Com_Printf("WARNING: PClientMedals(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "PClientMedals(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			client->lastsql = 0;
@@ -10640,7 +10638,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 
 						if (!(fp = fopen(filename, "wb")))
 						{
-							Com_Printf("WARNING: PClientMedals(): Couldn't open file \"%s\"\n", filename);
+							Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't open file \"%s\"\n", filename);
 							PPrintf(client, 
 							RADIO_YELLOW, "PClientMedals(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
 							Sys_UnlockFile(strcat(filename, ".LOCK"));
@@ -10704,7 +10702,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 						}
 						else
 						{
-							Com_Printf("WARNING: PClientMedals(): Couldn't Fetch Row(%u), error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't Fetch Row(%u), error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 							break;
 						}
 					}
@@ -10730,7 +10728,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 			}
 			else
 			{
-				Com_Printf("WARNING: PClientMedals(): Error num_rows, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "PClientMedals(): Error num_rows, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			mysql_free_result(my_result);
@@ -10739,14 +10737,14 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: PClientMedals(): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "PClientMedals(): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
 		if (mysql_errno(&my_sock))
 		{
-			Com_Printf("WARNING: PClientMedals(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "PClientMedals(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 }
@@ -10832,11 +10830,11 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 	{
 		if (client->shanghai) // start shanghai flight
 		{
-			Com_Printf("DEBUG: Client have Shanghai\n");
+			Com_Printf(VERBOSE_DEBUG, "Client have Shanghai\n");
 			if (client->shanghai->ready && !client->shanghai->infly)
 			{
 				client->shanghai->attached = client;
-				Com_Printf("DEBUG: Start Shanghai Fly\n");
+				Com_Printf(VERBOSE_DEBUG, "Start Shanghai Fly\n");
 				SendGunnerStatusChange(client, 2, client->shanghai); // define position to be attached in client
 				SendAttachList(NULL, client->shanghai);
 				client->shanghai->visible[MAX_SCREEN - 1].client = client;
@@ -11212,7 +11210,7 @@ void PSquadInfo(char *nick, client_t *client)
 						}
 						else
 						{
-							Com_Printf("WARNING: PSquadInfo(find): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "PSquadInfo(find): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 
@@ -11225,14 +11223,14 @@ void PSquadInfo(char *nick, client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: PSquadInfo(find): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "PSquadInfo(find): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
 				if (mysql_errno(&my_sock))
 				{
-					Com_Printf("WARNING: PSquadInfo(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "PSquadInfo(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 				else
 					return; // SQL Flood
@@ -11298,7 +11296,7 @@ void PSquadInfo(char *nick, client_t *client)
 								{
 									mysql_free_result(my_result);
 									my_result = NULL;
-									Com_Printf("WARNING: PSquadInfo(members): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "PSquadInfo(members): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 									break;
 								}
 							}
@@ -11306,7 +11304,7 @@ void PSquadInfo(char *nick, client_t *client)
 						else
 						{
 							squad1->nicks = htons(1);
-							Com_Printf("WARNING: PSquadInfo(members): num_rows = %u\n", num_rows);
+							Com_Printf(VERBOSE_WARNING, "PSquadInfo(members): num_rows = %u\n", num_rows);
 						}
 
 						mysql_free_result(my_result);
@@ -11341,11 +11339,11 @@ void PSquadInfo(char *nick, client_t *client)
 									if (!mysql_errno(&my_sock))
 									{
 										PPrintf(client, RADIO_LIGHTYELLOW, "Squadron info not found, contact admin");
-										Com_Printf("PSquadInfo(name): Squadron info not found, owner = %u", squadowner);
+										Com_Printf(VERBOSE_ATTENTION, "PSquadInfo(name): Squadron info not found, owner = %u", squadowner);
 									}
 									else
 									{
-										Com_Printf("WARNING: PSquadInfo(name): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+										Com_Printf(VERBOSE_WARNING, "PSquadInfo(name): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 									}
 								}
 
@@ -11355,22 +11353,22 @@ void PSquadInfo(char *nick, client_t *client)
 							}
 							else
 							{
-								Com_Printf("WARNING: PSquadInfo(name): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "PSquadInfo(name): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 						else
 						{
-							Com_Printf("WARNING: PSquadInfo(name): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "PSquadInfo(name): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 					else
 					{
-						Com_Printf("WARNING: PSquadInfo(members): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "PSquadInfo(members): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 				else
 				{
-					Com_Printf("WARNING: PSquadInfo(members): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "PSquadInfo(members): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
@@ -11381,7 +11379,7 @@ void PSquadInfo(char *nick, client_t *client)
 				}
 				else
 				{
-					Com_Printf("WARNING: PSquadInfo(owner): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "PSquadInfo(owner): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 
 				mysql_free_result(my_result);
@@ -11391,14 +11389,14 @@ void PSquadInfo(char *nick, client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: PSquadInfo(owner): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "PSquadInfo(owner): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
 		if (mysql_errno(&my_sock))
 		{
-			Com_Printf("WARNING: PSquadInfo(owner): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "PSquadInfo(owner): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 		else
 			return;
@@ -11461,7 +11459,7 @@ void CheckCaptured(client_t *client)
 			}
 			else
 			{
-				Com_Printf("WARNING: Plane not classified (N%d)\n", client->plane);
+				Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 				sprintf(my_query, "UPDATE score_fighter SET");
 			}
 
@@ -11469,7 +11467,7 @@ void CheckCaptured(client_t *client)
 
 			if (d_mysql_query(&my_sock, my_query))
 			{
-				Com_Printf("WARNING: CheckCaptured(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "CheckCaptured(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			client->score.airscore /= 2;
@@ -11708,7 +11706,7 @@ void BackupScores(u_int8_t collect_type)
 
 	if (d_mysql_query(&my_sock, my_query))
 	{
-		Com_Printf("WARNING: BackupScores(): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "BackupScores(): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	fp = fopen("./cron/scores.cfg", "w");
@@ -11768,14 +11766,14 @@ void ResetScores(void)
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: ResetScores(): couldn't query CREATE(%u) error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "ResetScores(): couldn't query CREATE(%u) error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
 		sprintf(my_query, "TRUNCATE %s", tables[i]);
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: ResetScores(): couldn't query TRUNCATE(%u) error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "ResetScores(): couldn't query TRUNCATE(%u) error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 

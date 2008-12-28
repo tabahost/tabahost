@@ -997,7 +997,7 @@ void SetCVSpeed(cv_t *cv)
 
 	// debug
 
-	Com_Printf("DEBUG: CV%u %u;%u;%u;%d;%d;%d;%d\n", cv->id, cv->wpnum, arena->time, cv->timebase, cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], GetCVPos(cv, 0), GetCVPos(cv, 1));
+	Com_Printf(VERBOSE_DEBUG, "CV%u %u;%u;%u;%d;%d;%d;%d\n", cv->id, cv->wpnum, arena->time, cv->timebase, cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], GetCVPos(cv, 0), GetCVPos(cv, 1));
 
 	//	BPrintf(RADIO_RED, "DEBUG: timebase CV %d - %u", cv->field+1, cv->timebase);
 	cv->outofport = 1;
@@ -1015,7 +1015,7 @@ u_int32_t GetCVTimebase(cv_t *cv)
 
 	if (cv->wpnum >= cv->wptotal)
 	{
-		Com_Printf("WARNING: GetCVTimebase() CV%d wpnum >= wptotal\n", cv->id);
+		Com_Printf(VERBOSE_WARNING, "GetCVTimebase() CV%d wpnum >= wptotal\n", cv->id);
 		timebase = (u_int32_t) arena->time + 10000; // return 10 seconds ahead
 	}
 	else
@@ -1025,14 +1025,14 @@ u_int32_t GetCVTimebase(cv_t *cv)
 
 		if (timebase == arena->time)
 		{
-			Com_Printf("WARNING: GetCVTimebase() CV%d timebase is zero (%u) X' %d X'' %d\n", cv->id, cv->wp[cv->wpnum][0], arena->fields[cv->field].posxyz[0]); // If stills this message, change == to aprox in SetCVSpeed()
+			Com_Printf(VERBOSE_WARNING, "GetCVTimebase() CV%d timebase is zero (%u) X' %d X'' %d\n", cv->id, cv->wp[cv->wpnum][0], arena->fields[cv->field].posxyz[0]); // If stills this message, change == to aprox in SetCVSpeed()
 			timebase = (u_int32_t) arena->time + 10000; // return 10 seconds ahead
 		}
 	}
 
 	if (timebase < arena->time)
 	{
-		Com_Printf("DEBUG: error setting timebase t %u; a %u CV%u %d;%d;%d;%d\n", timebase, arena->time, cv->id, cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], arena->fields[cv->field].posxyz[0],
+		Com_Printf(VERBOSE_DEBUG, "error setting timebase t %u; a %u CV%u %d;%d;%d;%d\n", timebase, arena->time, cv->id, cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], arena->fields[cv->field].posxyz[0],
 				arena->fields[cv->field].posxyz[1]);
 	}
 
@@ -1080,7 +1080,7 @@ void ChangeCVRoute(cv_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, c
 
 	if (cv->wpnum >= cv->wptotal)
 	{
-		Com_Printf("WARNING: ChangeCVRoute() wpnum >= wptotal\n");
+		Com_Printf(VERBOSE_WARNING, "ChangeCVRoute() wpnum >= wptotal\n");
 		cv->wpnum = 1;
 	}
 
@@ -1160,7 +1160,7 @@ int32_t GetCVPos(cv_t *cv, u_int8_t xy)
 
 	if (cv->wpnum >= cv->wptotal)
 	{
-		Com_Printf("WARNING: GetCVPos() wpnum >= wptotal\n");
+		Com_Printf(VERBOSE_WARNING, "GetCVPos() wpnum >= wptotal\n");
 		cv->wpnum = 1;
 	}
 
@@ -1186,7 +1186,7 @@ void SendCVRoute(client_t *client, u_int8_t cvnum)
 
 	/*	if(!client->arenafieldsok)
 	 {
-	 Com_Printf("DEBUG: %s CV%u %u;%u;%u;%d;%d;%d;%d\n",
+	 Com_Printf(VERBOSE_DEBUG, "%s CV%u %u;%u;%u;%d;%d;%d;%d\n",
 	 client->longnick,
 	 cvnum,
 	 arena->cv[cvnum].wpnum,
@@ -1268,11 +1268,11 @@ void LogCVsPosition(void)
 
 	for (i = 0; i < cvs->value; i++)
 	{
-		sprintf(filename, "./logs/%s.cvl", arena->cv[i].logfile);
+		sprintf(filename, "./logs/players/%s.cvl", arena->cv[i].logfile);
 
 		if (!(fp = fopen(filename, "a")))
 		{
-			Com_Printf("WARNING: Couldn't append file \"%s\"\n", filename);
+			Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", filename);
 		}
 		else
 		{
@@ -1595,11 +1595,11 @@ void AddBomb(u_int16_t id, int32_t destx, int32_t desty, u_int8_t type, int16_t 
 		}
 	}
 	else
-		Com_Printf("WARNING: AddBomb() timer > 120 sec (%d)\n, timer/100");
+		Com_Printf(VERBOSE_WARNING, "AddBomb() timer > 120 sec (%d)\n, timer/100");
 
 	if (i == MAX_BOMBS)
 	{
-		Com_Printf("WARNING: AddBomb() no slot available\n");
+		Com_Printf(VERBOSE_WARNING, "AddBomb() no slot available\n");
 		PPrintf(client, RADIO_LIGHTYELLOW, "AddBomb() Couldn't create a new bomb");
 	}
 }
@@ -1714,7 +1714,7 @@ void SaveRPS(char *path, client_t *client)
 
 	if (!(fp = fopen(file, "w")))
 	{
-		Com_Printf("WARNING: Error opening %s\n", path);
+		Com_Printf(VERBOSE_WARNING, "Error opening %s\n", path);
 		strcat(file, ".LOCK");
 		Sys_UnlockFile(file);
 		return;
@@ -1858,7 +1858,7 @@ int8_t IsFighter(client_t *client, ...)
 
 		if (!plane) // possible error
 		{
-			Com_Printf("WARNING: IsFighter() plane = 0\n");
+			Com_Printf(VERBOSE_WARNING, "IsFighter() plane = 0\n");
 			return 0;
 		}
 		else if (plane < maxplanes)
@@ -1918,7 +1918,7 @@ int8_t IsBomber(client_t *client, ...)
 
 		if (!plane) // possible error
 		{
-			Com_Printf("WARNING: IsBomber() plane = 0\n");
+			Com_Printf(VERBOSE_WARNING, "IsBomber() plane = 0\n");
 			return 0;
 		}
 		else if (plane < maxplanes)
@@ -1971,7 +1971,7 @@ int8_t IsCargo(client_t *client, ...)
 
 		if (!plane) // possible error
 		{
-			Com_Printf("WARNING: IsCargo() plane = 0\n");
+			Com_Printf(VERBOSE_WARNING, "IsCargo() plane = 0\n");
 			return 0;
 		}
 		else if (plane < maxplanes)
@@ -2059,7 +2059,7 @@ int8_t IsGround(client_t *client, ...)
 
 		if (!plane) // possible error
 		{
-			Com_Printf("WARNING: IsGround() plane = 0\n");
+			Com_Printf(VERBOSE_WARNING, "IsGround() plane = 0\n");
 			return 0;
 		}
 		else if (plane < maxplanes)
@@ -2175,13 +2175,13 @@ void LoadAmmo(client_t *client)
 					}
 					else
 					{
-						Com_Printf("WARNING: LoadAmmo(): Unexpected end of table 'munition'\n");
+						Com_Printf(VERBOSE_WARNING, "LoadAmmo(): Unexpected end of table 'munition'\n");
 					}
 				}
 
 				maxmuntype = i; // external variable
 
-				Com_Printf("Loading Munition Table. %d mun loaded\n", i);
+				Com_Printf(VERBOSE_ALWAYS, "Loading Munition Table. %d mun loaded\n", i);
 			}
 
 			mysql_free_result(my_result);
@@ -2190,12 +2190,12 @@ void LoadAmmo(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: CheckUserPasswd(): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "CheckUserPasswd(): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: LoadAmmo(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "LoadAmmo(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		return;
 	}
 }
@@ -2233,17 +2233,17 @@ void LoadDamageModel(client_t *client)
 					}
 					else
 					{
-						Com_Printf("WARNING: LoadDamageModel(planes): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "LoadDamageModel(planes): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 
 				maxplanes = i + 1;
 
-				Com_Printf("Loading Damage Model. %d planes loaded\n", i);
+				Com_Printf(VERBOSE_ALWAYS, "Loading Damage Model. %d planes loaded\n", i);
 			}
 			else
 			{
-				Com_Printf("WARNING: LoadDamageModel(planes): num_rows = %u\n", num_rows);
+				Com_Printf(VERBOSE_WARNING, "LoadDamageModel(planes): num_rows = %u\n", num_rows);
 			}
 
 			mysql_free_result(my_result);
@@ -2252,12 +2252,12 @@ void LoadDamageModel(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: LoadDamageModel(planes): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "LoadDamageModel(planes): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: LoadDamageModel(planes): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "LoadDamageModel(planes): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	sprintf(my_query, "SELECT * FROM dm_hitpoints ORDER BY plane");
@@ -2288,13 +2288,13 @@ void LoadDamageModel(client_t *client)
 					}
 					else
 					{
-						Com_Printf("WARNING: LoadDamageModel(hitpoints): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "LoadDamageModel(hitpoints): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: LoadDamageModel(hitpoints): num_rows = %u\n", num_rows);
+				Com_Printf(VERBOSE_WARNING, "LoadDamageModel(hitpoints): num_rows = %u\n", num_rows);
 			}
 
 			mysql_free_result(my_result);
@@ -2303,13 +2303,13 @@ void LoadDamageModel(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: LoadDamageModel(hitpoints): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "LoadDamageModel(hitpoints): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
 		if (mysql_errno(&my_sock))
-			Com_Printf("WARNING: LoadDamageModel(hitpoints): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "LoadDamageModel(hitpoints): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		else
 			return;
 	}
@@ -2339,13 +2339,13 @@ void LoadDamageModel(client_t *client)
 					}
 					else
 					{
-						Com_Printf("WARNING: LoadDamageModel(apstops): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "LoadDamageModel(apstops): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: LoadDamageModel(apstops): num_rows = %u\n", num_rows);
+				Com_Printf(VERBOSE_WARNING, "LoadDamageModel(apstops): num_rows = %u\n", num_rows);
 			}
 
 			mysql_free_result(my_result);
@@ -2354,12 +2354,12 @@ void LoadDamageModel(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: LoadDamageModel(apstops): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "LoadDamageModel(apstops): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: LoadDamageModel(apstops): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "LoadDamageModel(apstops): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	sprintf(my_query, "SELECT * FROM dm_imunities ORDER BY plane");
@@ -2387,13 +2387,13 @@ void LoadDamageModel(client_t *client)
 					}
 					else
 					{
-						Com_Printf("WARNING: LoadDamageModel(imunities): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "LoadDamageModel(imunities): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: LoadDamageModel(imunities): num_rows = %u\n", num_rows);
+				Com_Printf(VERBOSE_WARNING, "LoadDamageModel(imunities): num_rows = %u\n", num_rows);
 			}
 
 			mysql_free_result(my_result);
@@ -2402,12 +2402,12 @@ void LoadDamageModel(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: LoadDamageModel(imunities): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "LoadDamageModel(imunities): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: LoadDamageModel(imunities): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "LoadDamageModel(imunities): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	sprintf(my_query, "SELECT * FROM dm_parents ORDER BY plane");
@@ -2435,13 +2435,13 @@ void LoadDamageModel(client_t *client)
 					}
 					else
 					{
-						Com_Printf("WARNING: LoadDamageModel(parents): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "LoadDamageModel(parents): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: LoadDamageModel(parents): num_rows = %u\n", num_rows);
+				Com_Printf(VERBOSE_WARNING, "LoadDamageModel(parents): num_rows = %u\n", num_rows);
 			}
 
 			mysql_free_result(my_result);
@@ -2450,12 +2450,12 @@ void LoadDamageModel(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: LoadDamageModel(parents): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "LoadDamageModel(parents): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: LoadDamageModel(parents): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "LoadDamageModel(parents): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	sprintf(my_query, "SELECT * FROM grounddm ORDER BY type");
@@ -2500,22 +2500,22 @@ void LoadDamageModel(client_t *client)
 						}
 						else
 						{
-							Com_Printf("WARNING: LoadDamageModel(grounddm-im): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm-im): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 						}
 					}
 					else
 					{
-						Com_Printf("WARNING: LoadDamageModel(grounddm-ap): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+						Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm-ap): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 				else
 				{
-					Com_Printf("WARNING: LoadDamageModel(grounddm-hp): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm-hp): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 			}
 			else
 			{
-				Com_Printf("WARNING: LoadDamageModel(grounddm): num_rows = %u\n", num_rows);
+				Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm): num_rows = %u\n", num_rows);
 			}
 
 			mysql_free_result(my_result);
@@ -2524,12 +2524,12 @@ void LoadDamageModel(client_t *client)
 		}
 		else
 		{
-			Com_Printf("WARNING: LoadDamageModel(grounddm): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
 	{
-		Com_Printf("WARNING: LoadDamageModel(grounddm): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
 
@@ -2563,7 +2563,7 @@ void SaveDamageModel(client_t *client, char *row)
 		if (Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 		{
 			if (mysql_errno(&my_sock))
-				Com_Printf("WARNING: SaveDamageModel(hitpoint): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "SaveDamageModel(hitpoint): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			else
 				return;
 		}
@@ -2578,7 +2578,7 @@ void SaveDamageModel(client_t *client, char *row)
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: SaveDamageModel(apstop): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "SaveDamageModel(apstop): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
 		// imunity
@@ -2591,7 +2591,7 @@ void SaveDamageModel(client_t *client, char *row)
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: SaveDamageModel(imunity): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "SaveDamageModel(imunity): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
 		// parents
@@ -2604,7 +2604,7 @@ void SaveDamageModel(client_t *client, char *row)
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: SaveDamageModel(parent): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "SaveDamageModel(parent): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 	else
@@ -2620,7 +2620,7 @@ void SaveDamageModel(client_t *client, char *row)
 		if (Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 		{
 			if (mysql_errno(&my_sock))
-				Com_Printf("WARNING: SaveDamageModel(gdmpoints): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+				Com_Printf(VERBOSE_WARNING, "SaveDamageModel(gdmpoints): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			else
 				return;
 		}
@@ -2635,7 +2635,7 @@ void SaveDamageModel(client_t *client, char *row)
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: SaveDamageModel(gdmapstop): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "SaveDamageModel(gdmapstop): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
 		// imunity
@@ -2648,7 +2648,7 @@ void SaveDamageModel(client_t *client, char *row)
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf("WARNING: SaveDamageModel(gdmimunity): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "SaveDamageModel(gdmimunity): couldn't query REPLACE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 }
@@ -2668,7 +2668,7 @@ void CheckBoatDamage(building_t *building, client_t *client)
 
 	if (!building)
 	{
-		Com_Printf("WARNING: CheckBoatDamage(): no building\n");
+		Com_Printf(VERBOSE_WARNING, "CheckBoatDamage(): no building\n");
 		return;
 	}
 
@@ -2998,7 +2998,7 @@ void CaptureField(u_int8_t field, client_t *client)
 	if (d_mysql_query(&my_sock, my_query))
 	{
 		PPrintf(client, RADIO_YELLOW, "CaptureField(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-		Com_Printf("WARNING: CaptureField(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "CaptureField(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	for (i = 0; i < MAX_BUILDINGS; i++) // Get minimum time
@@ -3091,7 +3091,7 @@ u_int16_t TimetoNextArena(void)
 
 	if (difftime < 0)
 	{
-		Com_Printf("WARNING: TimetoNextArena() returned invalid time calculation\n");
+		Com_Printf(VERBOSE_WARNING, "TimetoNextArena() returned invalid time calculation\n");
 		return -1;
 	}
 
@@ -3124,7 +3124,7 @@ void InitArena(void)
 
 	if (d_mysql_query(&my_sock, my_query)) // query succeeded
 	{
-		Com_Printf("WARNING: InitArena(): couldn't query TRUNCATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "InitArena(): couldn't query TRUNCATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
 	//LoadArenaStatus(mapname->string, NULL, 0);
@@ -3169,7 +3169,7 @@ void ChangeArena(char *map, client_t *client)
 			{
 				if (clients[i].inuse && clients[i].infly)
 				{
-					PEndflightScores(1, 0, 0, 0, &clients[i]); // TODO: force client to land or just simulate land scores
+					PEndflightScores(1, 0, 0, 0, &clients[i]); // TODO: Misc: force client to land or just simulate land scores
 				}
 
 				Com_Close(&(clients[i].socket));
@@ -3607,7 +3607,7 @@ u_int32_t GetTonnageToClose(u_int8_t fieldtype)
 		case FIELD_WB3PORT:
 			return 6000;
 		default:
-			Com_Printf("WARNING: GetTonnageToClose() Invalid Field Type %d\n", fieldtype);
+			Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() Invalid Field Type %d\n", fieldtype);
 			return 0;
 	}
 }
@@ -3631,7 +3631,7 @@ int32_t GetFieldRadius(u_int8_t fieldtype)
 		case FIELD_WB3PORT:
 			return 7900;
 		default:
-			Com_Printf("WARNING: GetFieldRadius() Invalid Field Type %d\n", fieldtype);
+			Com_Printf(VERBOSE_WARNING, "GetFieldRadius() Invalid Field Type %d\n", fieldtype);
 			return 3700;
 	}
 }
@@ -3752,7 +3752,7 @@ void WB3Mapper(client_t *client)
 
 	if (x < 0 || x >= MWIDTH || y < 0 || y >= MHEIGHT)
 	{
-		Com_Printf("WARNING: WB3Mapper() %s out of scale X %d, Y %d\n", client->longnick, x, y);
+		Com_Printf(VERBOSE_WARNING, "WB3Mapper() %s out of scale X %d, Y %d\n", client->longnick, x, y);
 		return;
 	}
 
@@ -3760,14 +3760,14 @@ void WB3Mapper(client_t *client)
 	{
 		PPrintf(client, RADIO_GREEN, "TOPO: X %d Y %d Z %d", x, y, z);
 
-		Com_Printf("TOPO: %s - X %d Y %d Z %d\n", client->longnick, x, y, z);
+		Com_Printf(VERBOSE_DEBUG, "TOPO: %s - X %d Y %d Z %d\n", client->longnick, x, y, z);
 		earthMap[(y * MWIDTH) + x] = z;
 	}
 	else
 	{
 		PPrintf(client, RADIO_GREEN, "TOPO OK: X %d Y %d Z %d", x, y, z);
 
-		Com_Printf("TOPO OK: %s - X %d Y %d Z %d\n", client->longnick, x, y, z);
+		Com_Printf(VERBOSE_DEBUG, "TOPO OK: %s - X %d Y %d Z %d\n", client->longnick, x, y, z);
 		earthMap[(y * MWIDTH) + x] = z;
 		//		if (earthMap[(y * MWIDTH) + x] != z)
 		//		{
@@ -3914,7 +3914,7 @@ u_int32_t GetHeightAt(int32_t x, int32_t y)
 //		}
 //		else
 //		{
-//			Com_Printf("DEBUG: GetHeightAt() got no topography information\n");
+//			Com_Printf(VERBOSE_DEBUG, "GetHeightAt() got no topography information\n");
 //			z = arena->fields[tx[0]].posxyz[2];
 //		}
 //
@@ -3932,19 +3932,19 @@ u_int8_t LoadEarthMap(char *FileName)
 
 	if (fp == NULL)
 	{
-		Com_Printf("WARNING: LoadEarthMap() Cannot open file \"%s\"\n", FileName);
+		Com_Printf(VERBOSE_WARNING, "LoadEarthMap() Cannot open file \"%s\"\n", FileName);
 		return 0;
 	}
 
 	if (fread(earthMap, MWIDTH, MHEIGHT, fp) != MHEIGHT) // error on read some value from file
 	{
 		fclose(fp);
-		Com_Printf("WARNING: LoadEarthMap() Error reading \"%s\"\n", FileName);
+		Com_Printf(VERBOSE_WARNING, "LoadEarthMap() Error reading \"%s\"\n", FileName);
 		return 0;
 	}
 	fclose(fp);
 
-	Com_Printf("Loading elevations from \"%s\"\n", FileName);
+	Com_Printf(VERBOSE_ALWAYS, "Loading elevations from \"%s\"\n", FileName);
 
 	mapLevels[0] = -176 - 26; // ???
 
@@ -3961,18 +3961,18 @@ u_int8_t SaveEarthMap(char *FileName)
 
 	if (fp == NULL)
 	{
-		Com_Printf("WARNING: SaveEarthMap() Cannot open file \"%s\"\n", FileName);
+		Com_Printf(VERBOSE_WARNING, "SaveEarthMap() Cannot open file \"%s\"\n", FileName);
 		return 0;
 	}
 
 	if (fwrite(earthMap, MWIDTH, MHEIGHT, fp) != MHEIGHT) // error on write some value from file
 	{
 		fclose(fp);
-		Com_Printf("WARNING: SaveEarthMap() Error saving \"%s\"\n", FileName);
+		Com_Printf(VERBOSE_WARNING, "SaveEarthMap() Error saving \"%s\"\n", FileName);
 		return 0;
 	}
 
-	Com_Printf("Saving elevations into \"%s\"\n", FileName);
+	Com_Printf(VERBOSE_ALWAYS, "Saving elevations into \"%s\"\n", FileName);
 
 	fclose(fp);
 	return 1;
@@ -4251,7 +4251,7 @@ void NoopArenalist(void)
 
 	if (UdpSock < 0)
 	{
-		Com_Printf("WARNING: NoopArenalist(): Couldn't create UDP socket\n");
+		Com_Printf(VERBOSE_WARNING, "NoopArenalist(): Couldn't create UDP socket\n");
 		return;
 	}
 
@@ -4439,7 +4439,7 @@ void DebugArena(char *file, u_int32_t line)
 
 	if (Sys_LockFile(filename) < 0)
 	{
-		Com_Printf("WARNING: Couldn't open file \"%s\"\n", filename);
+		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
 		return;
 	}
 
@@ -4447,7 +4447,7 @@ void DebugArena(char *file, u_int32_t line)
 
 	if ((fp = fopen(filename, "wb")) == NULL)
 	{
-		Com_Printf("WARNING: Couldn't open file \"%s\"\n", filename);
+		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
 	}
 	else
 	{
@@ -4496,5 +4496,5 @@ void DebugArena(char *file, u_int32_t line)
 
 	Sys_UnlockFile(strcat(filename, ".LOCK"));
 
-	Com_Printf("WARNING: Arena Bugged - Error at %s, line %d\n", file, line);
+	Com_Printf(VERBOSE_WARNING, "Arena Bugged - Error at %s, line %d\n", file, line);
 }

@@ -121,9 +121,9 @@ void Sys_Init(void)
 
 #ifdef _WIN32
 	if(!FreeConsole())
-	Com_Printf("WARNING: Couldn't detach console (%u)\n", GetLastError());
+	Com_Printf(VERBOSE_WARNING, "Couldn't detach console (%u)\n", GetLastError());
 	if(!AllocConsole())
-	Com_Printf("WARNING: Couldn't create dedicated server console (%u)\n", GetLastError());
+	Com_Printf(VERBOSE_WARNING, "Couldn't create dedicated server console (%u)\n", GetLastError());
 
 	hinput = GetStdHandle(STD_INPUT_HANDLE);
 	houtput = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -141,6 +141,8 @@ void Sys_Init(void)
 	signal(SIGILL, Sys_SigHandler); /* illegal instruction. (Bug in the code generator) */
 	signal(SIGTERM, Sys_SigHandler); /* termination signal from kill */
 	signal(SIGINT, Sys_SigHandler); /* Interrupt, normally Ctrl-C */
+	
+	memset(logfile, 0, sizeof(logfile));
 }
 
 /*************
@@ -164,7 +166,7 @@ void Sys_RemoveFiles(char *pathfile)
 
 	if (!temp)
 	{
-		Com_Printf("WARNING: RemoveFiles(): Invalid pointer\n");
+		Com_Printf(VERBOSE_WARNING, "RemoveFiles(): Invalid pointer\n");
 		return;
 	}
 
@@ -179,7 +181,7 @@ void Sys_RemoveFiles(char *pathfile)
 		{
 			if (strstr(ep->d_name, file))
 			{
-				Com_Printf("Deleting file %s/%s\n", path, ep->d_name);
+				Com_Printf(VERBOSE_ALWAYS, "Deleting file %s/%s\n", path, ep->d_name);
 				sprintf(temp, "/%s", ep->d_name);
 				unlink(path);
 				*temp = 0;
@@ -188,7 +190,7 @@ void Sys_RemoveFiles(char *pathfile)
 		closedir(dp);
 	}
 	else
-		Com_Printf("WARNING: RemoveFiles(): Couldn't open the directory\n");
+		Com_Printf(VERBOSE_WARNING, "RemoveFiles(): Couldn't open the directory\n");
 }
 
 /*************
@@ -206,25 +208,25 @@ void Sys_SQL_Init(void)
 
 	if (!mysql_init(&my_sock))
 	{
-		Com_Printf("ERROR: Sys_SQL_Init(): Error initializing my_sock\n");
+		Com_Printf(VERBOSE_ERROR, "Sys_SQL_Init(): Error initializing my_sock\n");
 		ExitServer(1);
 	}
 	else
 	{
-		Com_Printf("MySQL Initialized\n");
+		Com_Printf(VERBOSE_ALWAYS, "MySQL Initialized\n");
 	}
 
 	if (mysql_options(&my_sock, MYSQL_OPT_RECONNECT, "1"))
-		Com_Printf("WARNING: Sys_SQL_Init(): MYSQL_OPT_RECONNECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "Sys_SQL_Init(): MYSQL_OPT_RECONNECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
 	if (!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, port, NULL /*unix_socket*/, flags))
 	{
-		Com_Printf("ERROR: Sys_SQL_Init(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
+		Com_Printf(VERBOSE_ERROR, "Sys_SQL_Init(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
 		ExitServer(1);
 	}
 	else
 	{
-		Com_Printf("MySQL connected successfully to %s:%s\n", sqlserver->string, database->string);
+		Com_Printf(VERBOSE_ALWAYS, "MySQL connected successfully to %s:%s\n", sqlserver->string, database->string);
 	}
 }
 
@@ -236,7 +238,7 @@ void Sys_SQL_Init(void)
 
 void Sys_SQL_Close(void)
 {
-	Com_Printf("Closing mySQL System\n");
+	Com_Printf(VERBOSE_ALWAYS, "Closing mySQL System\n");
 
 	mysql_close(&my_sock);
 
@@ -253,12 +255,12 @@ void Sys_GeoIP_Init(void)
 {
 	if (!(gi = GeoIP_open("GeoIP.dat", GEOIP_MEMORY_CACHE)))//GEOIP_STANDARD)))
 	{
-		Com_Printf("ERROR: Sys_GeoIP_Init(): Error initializing gi\n");
+		Com_Printf(VERBOSE_ERROR, "Sys_GeoIP_Init(): Error initializing gi\n");
 		ExitServer(1);
 	}
 	else
 	{
-		Com_Printf("GeoIP Module Initialized\n");
+		Com_Printf(VERBOSE_ALWAYS, "GeoIP Module Initialized\n");
 	}
 }
 
@@ -266,7 +268,7 @@ void Sys_GeoIP_Close(void)
 {
 	if (gi)
 	{
-		Com_Printf("Closing GeoIP Module\n");
+		Com_Printf(VERBOSE_ALWAYS, "Closing GeoIP Module\n");
 
 		GeoIP_delete(gi);
 	}
@@ -287,30 +289,30 @@ void Sys_SigHandler(int s)
 #ifdef _WIN32
 		case SIGBREAK:
 		signal(SIGBREAK, Sys_SigHandler);
-		Com_Printf("WARNING: Got signal SIGBREAK\n");
+		Com_Printf(VERBOSE_WARNING, "Got signal SIGBREAK\n");
 		break;
 #else
 		case SIGQUIT:
 			signal(SIGQUIT, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGQUIT\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGQUIT\n");
 			break;
 		case SIGKILL:
 			signal(SIGKILL, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGKILL\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGKILL\n");
 			n = 1;
 			break;
 		case SIGHUP:
 			signal(SIGHUP, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGHUP\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGHUP\n");
 			return;
 		case SIGPIPE:
 			signal(SIGPIPE, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGPIPE\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGPIPE\n");
 			return;
 #endif
 		case SIGFPE:
 			signal(SIGFPE, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGFPE\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGFPE\n");
 
 #ifdef _WIN32
 			//		    _fpreset(); //we can clear math proc state with this function under Win32,
@@ -322,28 +324,28 @@ void Sys_SigHandler(int s)
 			break;
 		case SIGSEGV:
 			signal(SIGSEGV, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGSEGV\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGSEGV\n");
 			longjmp(debug_buffer, 1);
 			n = 1;
 			break;
 		case SIGABRT:
 			signal(SIGABRT, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGABRT\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGABRT\n");
 			n = 1;
 			break;
 		case SIGILL:
 			signal(SIGILL, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGILL\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGILL\n");
 			n = 1;
 			break;
 		case SIGTERM:
 			signal(SIGTERM, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGTERM\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGTERM\n");
 			n = 1;
 			break;
 		case SIGINT:
 			signal(SIGINT, Sys_SigHandler);
-			Com_Printf("WARNING: Got signal SIGINT\n");
+			Com_Printf(VERBOSE_WARNING, "Got signal SIGINT\n");
 			if (!consoleinput->value)
 			{
 				Var_Set("consoleinput", "1");
@@ -352,7 +354,7 @@ void Sys_SigHandler(int s)
 			break;
 	}
 
-	Com_Printf("Got signal (%d), shutting down...\n", s);
+	Com_Printf(VERBOSE_ERROR, "Got signal (%d), shutting down...\n", s);
 
 	ExitServer(n);
 
@@ -376,7 +378,7 @@ char *Sys_ConsoleInput (void)
 	{
 		if(!GetNumberOfConsoleInputEvents (hinput, &numevents))
 		{
-			Com_Printf("WARNING: Error getting # of console events\n");
+			Com_Printf(VERBOSE_WARNING, "Error getting # of console events\n");
 			ExitServer(1);
 		}
 
@@ -384,10 +386,10 @@ char *Sys_ConsoleInput (void)
 		break;
 
 		if(!ReadConsoleInput(hinput, records, 1, &numread))
-		Com_Printf("WARNING: Error reading console input\n");
+		Com_Printf(VERBOSE_WARNING, "Error reading console input\n");
 
 		if(numread != 1)
-		Com_Printf("WARNING: Couldn't read console input\n");
+		Com_Printf(VERBOSE_WARNING, "Couldn't read console input\n");
 
 		if(records[0].EventType == KEY_EVENT)
 		{
@@ -478,7 +480,7 @@ int8_t Sys_LockFile(char *file)
 
 	if (!(fp = fopen(file, "w")))
 	{
-		Com_Printf("WARNING: Couldn't create file \"%s\"\n", file);
+		Com_Printf(VERBOSE_WARNING, "Couldn't create file \"%s\"\n", file);
 		return -1;
 	}
 	else
@@ -577,7 +579,7 @@ void Sys_Printfile(char *file)
  }
  else
  {
- Com_Printf("WARNING: UNNAMED: Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));						
+ Com_Printf(VERBOSE_WARNING, "UNNAMED: Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));						
  }
  
  mysql_free_result(my_result);
@@ -586,11 +588,11 @@ void Sys_Printfile(char *file)
  }
  else
  {
- Com_Printf("WARNING: UNNAMED: my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+ Com_Printf(VERBOSE_WARNING, "UNNAMED: my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
  }				
  }
  else
  {
- Com_Printf("WARNING: UNNAMED: couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+ Com_Printf(VERBOSE_WARNING, "UNNAMED: couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
  }
  */

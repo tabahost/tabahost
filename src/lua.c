@@ -895,7 +895,7 @@ static int Lua_printf(lua_State *L) {
 	}
 	value[255] = '\0';
 
-	Com_Printf(value);
+	Com_Printf(VERBOSE_ALWAYS, value);
 
 	return 0;
 }
@@ -914,12 +914,12 @@ int Lua_Init(void) {
 #endif
 
 	if (!hLibLua) {
-		Com_Printf("ERROR: Lua_Init(): Error opening Lua Library\n");
+		Com_Printf(VERBOSE_ERROR, "Lua_Init(): Error opening Lua Library\n");
 		return 1;
 	}
 
 	if (!luaL_loadfunctions(hLibLua, &LuaFunctions, sizeof(LuaFunctions))) {
-		Com_Printf("ERROR: Lua_Init(): Error initializing luaL_loadfunctions\n");
+		Com_Printf(VERBOSE_ERROR, "Lua_Init(): Error initializing luaL_loadfunctions\n");
 		return 1;
 	}
 
@@ -928,7 +928,7 @@ int Lua_Init(void) {
 	lua_register(LuaState, "printf", Lua_printf);
 	luaL_dofile(LuaState, "scripts/oninit.lc");
 
-	Com_Printf("Lua Module Initialized\n");
+	Com_Printf(VERBOSE_ALWAYS, "Lua Module Initialized\n");
 	LuaLoaded = TRUE;
 	return 0;
 }
@@ -940,7 +940,7 @@ void Lua_Close(void) {
 	if (!LuaLoaded)
 		return;
 
-	Com_Printf("Closing Lua Module\n");
+	Com_Printf(VERBOSE_ALWAYS, "Closing Lua Module\n");
 	luaL_dofile(LuaState, "scripts/onclose.lc");
 	lua_close(LuaState);
 
@@ -956,12 +956,12 @@ void Lua_Close(void) {
 void Lua_TestLua(void) {
 	lua_State* L;
 
-	Com_Printf("Lua test...\n");
+	Com_Printf(VERBOSE_ALWAYS, "Lua test...\n");
 	if (!LuaLoaded) {
 		Lua_Init();
 	}
 	if (!LuaLoaded) {
-		Com_Printf("Lua test failed!\n");
+		Com_Printf(VERBOSE_WARNING, "Lua test failed!\n");
 		return;
 	}
 	L = lua_open();
@@ -969,7 +969,7 @@ void Lua_TestLua(void) {
 	lua_register(L, "printf", Lua_printf);
 	luaL_dostring(L, "printf('Hello World\\n')");
 	lua_close(L);
-	Com_Printf("Lua test passed!\n");
+	Com_Printf(VERBOSE_ALWAYS, "Lua test passed!\n");
 }
 
 void Lua_RunMainFrame(void) {

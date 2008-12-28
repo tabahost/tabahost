@@ -127,14 +127,14 @@ int main(int argc, char *argv[])
 	clisize = sizeof(cli_addr);
 	ioctlv = 1;
 
-	Com_Printf("***************************************************************\n");
-	Com_Printf("Tabajara Host Copyright (C) 2004-2008 Francisco Bischoff\n");
-	Com_Printf("This program comes with ABSOLUTELY NO WARRANTY;\n");
-	Com_Printf("This is free software, and you are welcome to redistribute\n");
-	Com_Printf("it under certain conditions; For details type 'license' command\n");
-	Com_Printf("***************************************************************\n");
-	Com_Printf("Starting Server. Version: %s - Build %s\n", VERSION,__DATE__ ); //BUILD);
-	Com_Printf("***************************************************************\n");
+	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
+	Com_Printf(VERBOSE_ALWAYS, "Tabajara Host Copyright (C) 2004-2008 Francisco Bischoff\n");
+	Com_Printf(VERBOSE_ALWAYS, "This program comes with ABSOLUTELY NO WARRANTY;\n");
+	Com_Printf(VERBOSE_ALWAYS, "This is free software, and you are welcome to redistribute\n");
+	Com_Printf(VERBOSE_ALWAYS, "it under certain conditions; For details type 'license' command\n");
+	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
+	Com_Printf(VERBOSE_ALWAYS, "Starting Server. Version: %s - Build %s\n", VERSION,__DATE__ ); //BUILD);
+	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
 
 	Sys_SQL_Init(); // startting SQL after InitTCPNet 'cause WSAStartup() in windows
 	Sys_GeoIP_Init(); // Starts GeoIP module
@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
 
 #ifdef _WIN32
 	SetPriorityClass(GetCurrentProcess() , DEBUG_PROCESS);//REALTIME_PRIORITY_CLASS);
-	Com_Printf("Process priority set to REAL TIME\n");
+	Com_Printf(VERBOSE_ALWAYS, "Process priority set to REAL TIME\n");
 #else
 	setpriority(PRIO_PROCESS, 0, -10); // Set priority to above normal
 #endif
@@ -191,7 +191,7 @@ int main(int argc, char *argv[])
 #endif
 				arena->time = Sys_Milliseconds();
 				if(oldtime> arena->time)
-				Com_Printf("WARNING: oldtime > arena->time (%u, %u)\n", oldtime, arena->time);
+				Com_Printf(VERBOSE_WARNING, "oldtime > arena->time (%u, %u)\n", oldtime, arena->time);
 
 				time = arena->time - oldtime;
 			}while (time < sync); // server fps = 100
@@ -206,7 +206,7 @@ int main(int argc, char *argv[])
 				arena->frame = 1; // reset frames when max divisible by one minute (600 decasecs)
 				oldtime = Sys_ResetMilliseconds();
 				arena->time = Sys_Milliseconds();
-				Com_Printf("DEBUG: Time Reset\n");
+				Com_Printf(VERBOSE_DEBUG, "Time Reset\n");
 			}
 
 			checksync = FloorDiv(arena->time, 10);
@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 				sync = 0;
 				if((checksync - arena->frame)> 30000)
 				{
-					Com_Printf("WARNING: clock warp\n");
+					Com_Printf(VERBOSE_WARNING, "clock warp\n");
 					arena->frame= checksync;
 				}
 			}
@@ -227,13 +227,13 @@ int main(int argc, char *argv[])
 
 			if(arena->frame> checksync)
 			{
-				Com_Printf("WARNING: server frame unsynchronized\n");
+				Com_Printf(VERBOSE_WARNING, "server frame unsynchronized\n");
 				arena->frame = checksync;
 			}
 
 			if(time> overload->value)
 			{
-				Com_Printf("WARNING: possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
+				Com_Printf(VERBOSE_WARNING, "possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
 			}
 		}
 		else
@@ -254,11 +254,11 @@ int main(int argc, char *argv[])
 		 sync = 10;
 
 		 if(arena->frame > (arena->time/10)) // change: floor()
-		 Com_Printf("WARNING: server frame unsynchronized\n");
+		 Com_Printf(VERBOSE_WARNING, "server frame unsynchronized\n");
 
 		 if(time > overload->value) // change: || < 0
 		 {
-		 Com_Printf("WARNING: possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
+		 Com_Printf(VERBOSE_WARNING, "possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
 		 }*/
 
 		if(!setjmp(debug_buffer))
@@ -268,14 +268,14 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 				if ((err = WSAGetLastError()) != WSAEWOULDBLOCK)
 				{
-					Com_Printf("ERROR: accept()\n");
+					Com_Printf(VERBOSE_ERROR, "accept()\n");
 					//				ConnError(err);
 					ExitServer(1);
 				}
 #else
 				if (errno != EWOULDBLOCK)
 				{
-					Com_Printf("ERROR: accept()\n");
+					Com_Printf(VERBOSE_ERROR, "accept()\n");
 					//				ConnError(errno);
 					ExitServer(1);
 				}
@@ -286,14 +286,14 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
 				if (ioctlsocket(newsocket, FIONBIO, &ioctlv) == SOCKET_ERROR)
 				{
-					Com_Printf("ERROR: setting nonblocking socket (newsocket) (code %d)\n", (err = WSAGetLastError()));
+					Com_Printf(VERBOSE_ERROR, "setting nonblocking socket (newsocket) (code %d)\n", (err = WSAGetLastError()));
 					ConnError(err);
 					ExitServer(1);
 				}
 #else
 				if (ioctl(newsocket, FIONBIO, &ioctlv) == -1)
 				{
-					Com_Printf("ERROR: setting nonblocking socket (newsocket) (code %d)\n", errno);
+					Com_Printf(VERBOSE_ERROR, "setting nonblocking socket (newsocket) (code %d)\n", errno);
 					ConnError(errno);
 					ExitServer(1);
 				}
@@ -432,9 +432,9 @@ void RunFrame(void)
 	{
 		if (mysql_ping(&my_sock))
 		{
-			Com_Printf("WARNING: RunFrame(): mysql_ping() error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "RunFrame(): mysql_ping() error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
-			Com_Printf("WARNING: RunFrame(): Resseting MySQL connection\n");
+			Com_Printf(VERBOSE_WARNING, "RunFrame(): Resseting MySQL connection\n");
 
 			sqlserver->modified = 1;
 
@@ -442,11 +442,11 @@ void RunFrame(void)
 			//			{
 			//				if(!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, 3306, NULL /*unix_socket*/, 0))
 			//				{
-			//					Com_Printf("ERROR: RunFrame(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
+			//					Com_Printf(VERBOSE_ERROR, "RunFrame(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
 			//				}
 			//				else
 			//				{
-			//					Com_Printf("MySQL connection successfully restored\n");
+			//					Com_Printf(VERBOSE_ALWAYS, "MySQL connection successfully restored\n");
 			//				}
 			//			}
 		}
@@ -503,7 +503,7 @@ void RunFrame(void)
 							sprintf(my_query, "UPDATE score_ground");
 							else
 							{
-								Com_Printf("WARNING: Plane not classified (N%d)\n", clients[i].plane);
+								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", clients[i].plane);
 								sprintf(my_query, "UPDATE score_fighter");
 							}
 
@@ -512,7 +512,7 @@ void RunFrame(void)
 							if(d_mysql_query(&my_sock, my_query))
 							{
 								PPrintf(&clients[i], RADIO_YELLOW, "Disco: SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-								Com_Printf("WARNING: Disco: couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Disco: couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 
 							Com_LogEvent(EVENT_DISCO, clients[i].id, 0);
@@ -523,7 +523,7 @@ void RunFrame(void)
 						if(strlen(clients[i].longnick))
 						{
 							UpdateClientFile(&clients[i]);
-							Com_Printf("%s ProcessClient() returned -1\n", clients[i].longnick);
+							Com_Printf(VERBOSE_WARNING, "%s ProcessClient() returned -1\n", clients[i].longnick);
 						}
 							
 						RemoveClient(&clients[i]);
@@ -616,9 +616,9 @@ void ExitServer(int status)
 	else
 		return;
 
-	Com_Printf("Beginning shutdown sequence\n"); /*****************/
+	Com_Printf(VERBOSE_ALWAYS, "Beginning shutdown sequence\n"); /*****************/
 
-	Com_Printf("Writing variables table\n"); /*********/
+	Com_Printf(VERBOSE_ALWAYS, "Writing variables table\n"); /*********/
 
 	BackupArenaStatus();
 
@@ -629,7 +629,7 @@ void ExitServer(int status)
 	
 	Sys_SQL_Close();
 
-	Com_Printf("Closing server socket\n"); /*********/
+	Com_Printf(VERBOSE_ALWAYS, "Closing server socket\n"); /*********/
 
 	if (sockfd)
 		Com_Close(&sockfd);
@@ -638,7 +638,7 @@ void ExitServer(int status)
 	WSACleanup();
 #endif
 
-	Com_Printf("Closing clients sockets\n"); /*********/
+	Com_Printf(VERBOSE_ALWAYS, "Closing clients sockets\n"); /*********/
 
 	if (clients)
 	{
@@ -651,7 +651,7 @@ void ExitServer(int status)
 		}
 	}
 
-	Com_Printf("Freeing Memory\n"); /*********/
+	Com_Printf(VERBOSE_ALWAYS, "Freeing Memory\n"); /*********/
 
 	// free clients
 	free(clients);
@@ -681,13 +681,16 @@ void ExitServer(int status)
 
 	/////////////
 
-	Com_Printf("Closing opened files\n"); /*********/
-	Com_Printf("Exiting Server\n");
+	Com_Printf(VERBOSE_ALWAYS, "Closing opened files\n"); /*********/
+	Com_Printf(VERBOSE_ALWAYS, "Exiting Server\n");
 
-	if (logfile)
+	for(i = 0; i < MAX_LOGFILE; i++)
 	{
-		fclose(logfile);
-		logfile = NULL; // duh
+		if(logfile[i])
+		{
+			fclose(logfile[i]);
+			logfile[i] = NULL;
+		}
 	}
 
 	printf("Server sucessfuly closed\n"); /*****************/
