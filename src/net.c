@@ -311,9 +311,7 @@ int GetPacket(client_t *client)
 
 		if (len > MAX_RECVDATA)
 		{
-			Com_Printf(
-					"WARNING: %s(%s) GetPacket(): mainbuffer oversized, packet skipped\n",
-					client->longnick, client->ip);
+			Com_Printf(VERBOSE_WARNING, "%s(%s) GetPacket(): mainbuffer oversized, packet skipped\n", client->longnick, client->ip);
 			FlushSocket(client->socket);
 			return 0;
 		}
@@ -332,9 +330,7 @@ int GetPacket(client_t *client)
 
 					if (m < 0) // invalid checksum
 					{
-						Com_Printf(
-								"WARNING: %s(%s) - Invalid Packet Checksum\n",
-								client->longnick, client->ip);
+						Com_Printf(VERBOSE_WARNING, "%s(%s) - Invalid Packet Checksum\n", client->longnick, client->ip);
 						FlushSocket(client->socket);
 						return 0;
 					}
