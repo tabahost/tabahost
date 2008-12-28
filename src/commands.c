@@ -1556,7 +1556,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 					break;
 			}
 
-			if (arcade->value) // set available planes w/o capture enemy planes
+			if (arcade->value && rps->value) // set available planes w/o capture enemy planes
 				UpdateRPS(0);
 		}
 

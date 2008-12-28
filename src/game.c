@@ -570,7 +570,8 @@ void CheckArenaRules(void)
 				arena->month = initmonth->value;
 				arena->day = initday->value;
 
-				UpdateRPS(0);
+				if(rps->value)
+					UpdateRPS(0);
 			}
 		}
 
@@ -4472,6 +4473,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client)
 {
 	u_int16_t i;
+	u_int8_t j;
+	char buffer[100];
 
 	if (land && end == 0x01 && arena->fields[land - 1].rps[client->plane] > -1 && client->plane < maxplanes && !client->tkstatus && !(client->plane >= 131 && client->plane <= 134))
 		arena->fields[land - 1].rps[client->plane]++;
@@ -4716,7 +4719,7 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 				client->score.rescuescore /= 2;
 		}
 	}
-	else if ((end == 2 && !client->chute) || (end == 4 && !client->chute) || (end == 5 && !client->chute) || (end == 9) || (end == 12))
+	else if ((end == 2 && !client->chute) || (end == 4 && !client->chute) || (end == 5 && !client->chute) || (end == 9) || (end == 12)) // TODO: remove kill + 1 when collided
 	{
 		if (end == 9)
 		{
@@ -4861,28 +4864,52 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 	PPrintf(client, RADIO_WHITE, "You've shot %d rounds, hit %d (acc:%.3f%%)", gunused, totalhits, gunused ? (float)totalhits*100/gunused : 0);
 	if(totalhits)
 	{
-		for(i = 0; i < 6; i++)
+		memset(buffer, 0, sizeof(buffer));
+
+		for(i = 0, j = 0; i < 6; i++)
 		{
-			PPrintf(client, RADIO_WHITE, "         %3d [%s]", client->hits[i],
-								i == 0?"7mm":
-								i == 1?"13mm":
-								i == 2?"20mm":
-								i == 3?"30-37mm":
-								i == 4?"40-57mm":"75-88mm");
+			if(client->hits[i])
+			{
+				sprintf(buffer, "%s%4d [%s]", buffer, client->hits[i],
+									i == 0?"7mm":
+									i == 1?"13mm":
+									i == 2?"20mm":
+									i == 3?"30-37mm":
+									i == 4?"40-57mm":"75-88mm");
+
+				if(++j >= 3)
+				{
+					PPrintf(client, RADIO_WHITE, "%s", buffer);
+					memset(buffer, 0, sizeof(buffer));
+					j = 0;
+				}
+			}
 		}
 	}
 	totalhits = client->hitstaken[0] + client->hitstaken[1] + client->hitstaken[2] + client->hitstaken[3] + client->hitstaken[4] + client->hitstaken[5];
 	PPrintf(client, RADIO_WHITE, "You've got %d shots", totalhits);
 	if(totalhits)
 	{
-		for(i = 0; i < 6; i++)
+		memset(buffer, 0, sizeof(buffer));
+
+		for(i = 0, j = 0; i < 6; i++)
 		{
-			PPrintf(client, RADIO_WHITE, "         %3d [%s]", client->hitstaken[i],
-								i == 0?"7mm":
-								i == 1?"13mm":
-								i == 2?"20mm":
-								i == 3?"30-37mm":
-								i == 4?"40-57mm":"75-88mm");
+			if(client->hitstaken[i])
+			{
+				sprintf(buffer, "%s%4d [%s]", buffer, client->hitstaken[i],
+									i == 0?"7mm":
+									i == 1?"13mm":
+									i == 2?"20mm":
+									i == 3?"30-37mm":
+									i == 4?"40-57mm":"75-88mm");
+
+				if(++j >= 3)
+				{
+					PPrintf(client, RADIO_WHITE, "%s", buffer);
+					memset(buffer, 0, sizeof(buffer));
+					j = 0;
+				}
+			}
 		}
 	}
 	PPrintf(client, RADIO_WHITE, "==================================================");

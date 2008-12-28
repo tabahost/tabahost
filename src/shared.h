@@ -27,6 +27,7 @@
 
  TODO: Misc: test arena->frame = 1 with numer lesser than 4294962000UL
  TODO: Misc: search for "timer = ", correct all clients/drones timer and offset
+ TODO: Score: Convert score values to MySQL
  TODO: DM: Verify vital structures
  TODO: DM: .saveparts
  TODO: DM: part = h0, explodir
