@@ -577,6 +577,7 @@ void RunFrame(void)
 
 void BackupArenaStatus(void)
 {
+	u_int8_t i;
 	char date[8];
 
 	if (arena)
@@ -592,11 +593,14 @@ void BackupArenaStatus(void)
 
 	Var_WriteVariables("config", NULL);
 
-	if (logfile)
+	for(i = 0; i < MAX_LOGFILE; i++)
 	{
-		fflush(logfile);
-		//		fclose(logfile);
-		//		logfile = NULL;
+		if (logfile[i])
+		{
+			fflush(logfile[i]);
+			//		fclose(logfile);
+			//		logfile = NULL;
+		}
 	}
 }
 
@@ -683,11 +687,12 @@ void ExitServer(int status)
 
 	Com_Printf(VERBOSE_ALWAYS, "Closing opened files\n"); /*********/
 	Com_Printf(VERBOSE_ALWAYS, "Exiting Server\n");
-
+	
 	for(i = 0; i < MAX_LOGFILE; i++)
 	{
 		if(logfile[i])
 		{
+			fflush(stdout);
 			fclose(logfile[i]);
 			logfile[i] = NULL;
 		}

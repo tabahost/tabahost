@@ -103,7 +103,7 @@ static int console_textlen;
 
 void Sys_Init(void)
 {
-
+	u_int8_t i;
 	//remove LOCK files
 #ifndef _WIN32
 	Sys_RemoveFiles("./.LOCK");
@@ -142,7 +142,10 @@ void Sys_Init(void)
 	signal(SIGTERM, Sys_SigHandler); /* termination signal from kill */
 	signal(SIGINT, Sys_SigHandler); /* Interrupt, normally Ctrl-C */
 	
-	memset(logfile, 0, sizeof(logfile));
+	for(i = 0; i < MAX_LOGFILE; i++)
+	{
+		logfile[i] = NULL;
+	}
 }
 
 /*************

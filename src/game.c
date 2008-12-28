@@ -1137,7 +1137,7 @@ void CheckArenaRules(void)
 
 		if (!(arena->frame % 30000)) // 5 min
 		{
-			Com_Printf(FILE_ONLINE, "Online Players: %.3f\n", (float) players_num / players_count);
+			Com_Printf(VERBOSE_ONLINE, "Online Players: %.3f\n", (float) players_num / players_count);
 			players_num = players_count = 0;
 		}
 	}
@@ -2282,7 +2282,7 @@ void ProcessCommands(char *command, client_t *client)
 	
 	if(permission & (FLAG_ADMIN | FLAG_OP) && arena && arena->frame > 100)
 	{
-		Com_Printf(VERBOSE_ALWAYS, "OPCMD: %s(%s) - .%s %s %s %s %s %s %s\n", client?client->longnick:"-HOST-", client?client->ip:"", command, argv[0]?argv[0]:"", argv[1]?argv[1]:"", argv[2]?argv[2]:"", argv[3]?argv[3]:"", argv[4]?argv[4]:"", argv[5]?argv[5]:"");
+		Com_Printf(VERBOSE_ATTENTION, "OPCMD: %s(%s) - .%s %s %s %s %s %s %s\n", client?client->longnick:"-HOST-", client?client->ip:"", command, argv[0]?argv[0]:"", argv[1]?argv[1]:"", argv[2]?argv[2]:"", argv[3]?argv[3]:"", argv[4]?argv[4]:"", argv[5]?argv[5]:"");
 	}
 
 	if (permission & FLAG_ADMIN) // commands that only ADMIN's can execute

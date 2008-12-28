@@ -762,44 +762,44 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 		switch(verb)
 		{
 			case VERBOSE_ATTENTION:
-				printf("ATTENTION:");
+				printf("ATTENTION: ");
 				if (logfile[0])
-					fprintf(logfile[0], "ATTENTION:");
+					fprintf(logfile[0], "ATTENTION: ");
 				if (tverb && logfile[tverb])
-					fprintf(logfile[tverb], "ATTENTION:");
+					fprintf(logfile[tverb], "ATTENTION: ");
 				break;
 			case VERBOSE_WARNING:
-				printf("WARNING:");
+				printf("WARNING: ");
 				if (logfile[0])
-					fprintf(logfile[0], "WARNING:");
+					fprintf(logfile[0], "WARNING: ");
 				if (tverb && logfile[tverb])
-					fprintf(logfile[tverb], "WARNING:");
+					fprintf(logfile[tverb], "WARNING: ");
 				break;
 			case VERBOSE_ERROR:
-				printf("ERROR:");
+				printf("ERROR: ");
 				if (logfile[0])
-					fprintf(logfile[0], "ERROR:");
+					fprintf(logfile[0], "ERROR: ");
 				if (tverb && logfile[tverb])
-					fprintf(logfile[tverb], "ERROR:");
+					fprintf(logfile[tverb], "ERROR: ");
 				break;
 			case VERBOSE_DEBUG:
-				printf("DEBUG:");
+				printf("DEBUG: ");
 				if (logfile[0])
-					fprintf(logfile[0], "DEBUG:");
+					fprintf(logfile[0], "DEBUG: ");
 				if (tverb && logfile[tverb])
-					fprintf(logfile[tverb], "DEBUG:");
+					fprintf(logfile[tverb], "DEBUG: ");
 				break;
 		}
-		printf(" %s", msg);
+		printf("%s", msg);
 		fflush(stdout);
 		if (logfile[0])
 		{
-			fprintf(logfile[0], " %s", msg);
+			fprintf(logfile[0], "%s", msg);
 			fflush(logfile[0]); // forces data to be writed
 		}
 		if (tverb && logfile[tverb])
 		{
-			fprintf(logfile[tverb], " %s", msg);
+			fprintf(logfile[tverb], "%s", msg);
 			fflush(logfile[tverb]); // forces data to be writed
 		}
 	}
