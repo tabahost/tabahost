@@ -986,6 +986,8 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			rules |= FLAG_AIRSHOWSMOKE;
 		if (client->easymode)
 			rules |= FLAG_EASYMODE;
+		if (client->easymode > 1)
+			rules |= FLAG_EASYMODE2;
 		if (enemynames->value)
 			rules |= FLAG_ENEMYNAMES;
 		if (enemyplanes->value)
