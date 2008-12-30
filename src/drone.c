@@ -96,8 +96,8 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].dronedistance = 1;
 					clients[i].plane = plane;
 					clients[i].posalt[0] = posz;
-					//clients[i].status1 = client->status1;
-					clients[i].status2 = client->status2;
+					//clients[i].status_damage = client->status_damage;
+					clients[i].status_status = client->status_status;
 					clients[i].shortnick = NewDroneName(client);
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
 					break;
@@ -107,8 +107,8 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].dronedistance = 1;
 					clients[i].plane = plane;
 					clients[i].posalt[0] = posz;
-					//clients[i].status1 = client->status1;
-					clients[i].status2 = client->status2;
+					//clients[i].status_damage = client->status_damage;
+					clients[i].status_status = client->status_status;
 					clients[i].shortnick = NewDroneName(client);
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
 					break;
@@ -140,7 +140,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					}
 					clients[i].ord = 0;
 					clients[i].posalt[0] = 0;
-					clients[i].status1 = clients[i].status2 = 0;
+					clients[i].status_damage = clients[i].status_status = 0;
 					clients[i].shortnick = NewDroneName(client);
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
 					break;
@@ -161,7 +161,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 						clients[i].posxy[1][0] = posy + (Com_Pow(-1, rand()%2) * (rand()%1000));
 					}
 					clients[i].posalt[0] = posz;
-					clients[i].status1 = 0;
+					clients[i].status_damage = 0;
 					clients[i].shortnick = shortnick;
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
 					break;
@@ -171,8 +171,8 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].posxy[1][0] = posy;
 					clients[i].posalt[0] = posz;
 					clients[i].country = country;
-					clients[i].status1 = 0;
-					clients[i].status2 = 0;
+					clients[i].status_damage = 0;
+					clients[i].status_status = 0;
 					clients[i].shortnick = shortnick;
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
 					break;
@@ -183,7 +183,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].posalt[0] = posz;
 					//					clients[i].atradar = 0x10; // not seen
 					clients[i].country = country;
-					clients[i].status1 = 0;
+					clients[i].status_damage = 0;
 					clients[i].shortnick = shortnick;
 					clients[i].dronelasttarget = MAX_BUILDINGS; // to avoid unrandomized first target at DroneGetTarget()
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
@@ -505,10 +505,10 @@ int ProcessDrone(client_t *drone)
 
 					drone->posalt[0] = drone->related[0]->posalt[0];
 
-					if ((drone->status2 != drone->related[0]->status2))// || (drone->status1 != drone->related[0]->status1))
+					if ((drone->status_status != drone->related[0]->status_status))// || (drone->status_damage != drone->related[0]->status_damage))
 					{
-						//drone->status1 = drone->related[0]->status1;
-						drone->status2 = drone->related[0]->status2;
+						//drone->status_damage = drone->related[0]->status_damage;
+						drone->status_status = drone->related[0]->status_status;
 						PPlaneStatus(NULL, drone);
 					}
 					//					drone->atradar = drone->related[0]->atradar;
@@ -646,10 +646,10 @@ int ProcessDrone(client_t *drone)
 					drone->posxy[1][0] = drone->related[0]->posxy[1][0] + ((DRONE_DIST * drone->dronedistance) * cos(Com_Rad(angle)));
 					drone->posalt[0] = drone->related[0]->posalt[0];
 
-					if ((drone->status2 != drone->related[0]->status2))// || (drone->status1 != drone->related[0]->status1))
+					if ((drone->status_status != drone->related[0]->status_status))// || (drone->status_damage != drone->related[0]->status_damage))
 					{
-						//drone->status1 = drone->related[0]->status1;
-						drone->status2 = drone->related[0]->status2;
+						//drone->status_damage = drone->related[0]->status_damage;
+						drone->status_status = drone->related[0]->status_status;
 						PPlaneStatus(NULL, drone);
 					}
 					//					drone->atradar = drone->related[0]->atradar;

@@ -396,7 +396,7 @@ typedef unsigned int u_int32_t;
 #define	STATUS_FLAPS		0x80000000 // explodes everything!!!!
 //#define CV_SPEED			50	// ft/s
 #define DRONE_FAU_SPEED		500	// Fau Speed
-#define DRONE_TANK_SPEED    50	// ft/s
+#define DRONE_TANK_SPEED	50	// ft/s
 #define DRONE_DIST			150	// Wingman distance
 #define DRONE_KATYSALVO		16  // katy salvo
 #define	DRONE_FAU			1	// FAU
@@ -750,8 +750,8 @@ typedef struct client_s
 	u_int8_t	ackstar;		// flag to check ackstar rules (below 1000ft, in friendlyfield range, with wingmen, buffer, have otto disabled).
 	u_int8_t	contrail;		// plane is above contrail->value
 	u_int8_t	damaged;		// is plane was damaged by attacker
-	u_int32_t	status1;		// plane's status (gun, fuselage, etc)
-	u_int32_t	status2;		// plane's status (engine, baydoor, smoke, etc)
+	u_int32_t	status_damage;		// plane's status (gun, fuselage, etc)
+	u_int32_t	status_status;		// plane's status (engine, baydoor, smoke, etc)
 	int32_t		reldist;		// relative distance between 2 players
 	u_int8_t	mapdots;
 	visible_t	visible[MAX_SCREEN]; // array with visible entities
@@ -1463,8 +1463,8 @@ typedef struct wb3planeposition_s	// 0E 00
 typedef struct planestatus1_s	// 0E 01 // 0E 02
 {
 	u_int16_t	packetid;
-	u_int32_t	status1;
-	u_int32_t	status2;
+	u_int32_t	status_damage;
+	u_int32_t	status_status;
 } planestatus1_t;
 
 typedef struct planeposition2_s	// 0E 04
@@ -1847,8 +1847,8 @@ typedef struct planestatus2_s	// 21 02
 {
 	u_int16_t	packetid;
 	u_int8_t	slot;
-	u_int32_t	status1;
-	u_int32_t	status2;
+	u_int32_t	status_damage;
+	u_int32_t	status_status;
 } planestatus2_t;
 
 typedef struct radardot1_s		// 21 05
@@ -2068,7 +2068,7 @@ void	SetBuildingStatus(building_t *building, u_int8_t status, client_t *client);
 void	SetPlaneDamage(u_int16_t plane, client_t *client);
 void	PFireMG(u_int8_t *buffer, u_int8_t len, client_t *client);
 void	POttoFiring(u_int8_t *buffer, u_int8_t len, client_t *client);
-void	SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client);
+void	SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t *client);
 void	SendPlaneStatus(client_t *plane, client_t *client);
 void	WB3DotCommand(client_t *client, char *fmt, ...);
 void	PRadioMessage(u_int8_t *buffer, client_t *client);

@@ -250,7 +250,7 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 		fprintf(fp, "shortnick         = %10u  longnick      = %10s  chute          = %10u\n", client->shortnick, client->longnick, client->chute);
 		fprintf(fp, "arenabuildsok     = %10u  arenafieldsok = %10u  contrail       = %10u\n", client->arenabuildsok, client->arenafieldsok, client->contrail);
 		fprintf(fp, "posxy[0]          = %10d  posxy[1]      = %10d  posalt         = %10d\n", client->posxy[0][0], client->posxy[1][0], client->posalt[0]);
-		fprintf(fp, "status1           = %10u  status2       = %10u  reldist        = %10d\n", client->status1, client->status2, client->reldist);
+		fprintf(fp, "status_damage           = %10u  status_status       = %10u  reldist        = %10d\n", client->status_damage, client->status_status, client->reldist);
 		fprintf(fp, "speedxyz[0]       = %10d  speedxyz[1]   = %10d  speedxyz[2]    = %10d\n", client->speedxyz[0][0], client->speedxyz[1][0], client->speedxyz[2][0]);
 		fprintf(fp, "accelxyz[0]       = %10d  accelxyz[1]   = %10d  accelxyz[2]    = %10d\n", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
 		fprintf(fp, "angles[0]         = %10d  angles[1]     = %10d  angles[2]      = %10d\n", client->angles[0][0], client->angles[1][0], client->angles[2][0]);
@@ -2209,7 +2209,7 @@ void CheckKiller(client_t *client)
 				}
 				else // enemy kill
 				{
-					if ((client->status1 & STATUS_PILOT) && client->chute)
+					if ((client->status_damage & STATUS_PILOT) && client->chute)
 						sprintf(buffer, "Chutekill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j] == client ? "Ack Weenies" : client->hitby[j]->longnick);
 					else if (client->cancollide < 0)
 						sprintf(buffer, "Collision kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j] == client ? "Ack Weenies" : client->hitby[j]->longnick);
@@ -2546,7 +2546,7 @@ void CheckKiller(client_t *client)
 //				{
 //					Com_Printf(VERBOSE_DEBUG, "Found nearest player (%s)\n", nearplane->longnick);
 //					j = 1;
-//					client->status1 = 0;
+//					client->status_damage = 0;
 //					client->cancollide = 0;
 //					client->hitby[0] = nearplane;
 //					client->damby[0] = MAX_UINT32; // ignore compiler warning
@@ -2701,11 +2701,11 @@ void CheckKiller(client_t *client)
 //			}
 //			else// if((client->hitby[j]->country != client->country) || (client->hitby[j] == client)) // enemy kill
 //			{
-//				if ((client->status1 & STATUS_PILOT) && client->chute)
+//				if ((client->status_damage & STATUS_PILOT) && client->chute)
 //					sprintf(buffer, "Chutekill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j] == client ? "Ack Weenies" : client->hitby[j]->longnick);
 //				else if (client->cancollide < 0)
 //					sprintf(buffer, "Collision kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j] == client ? "Ack Weenies" : client->hitby[j]->longnick);
-//				else if ((client->status1 & 0x18163F0F) || client->chute || client->drone)
+//				else if ((client->status_damage & 0x18163F0F) || client->chute || client->drone)
 //					sprintf(buffer, "Kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j] == client ? "Ack Weenies" : client->hitby[j]->longnick);
 //				else
 //				{
@@ -3210,7 +3210,7 @@ u_int8_t CheckMedals(client_t *client)
 	// streak kills
 	sprintf(
 			my_query,
-			"SELECT t1.curr_streak as fighter_streak,	t2.curr_streak as bomber_streak, (t1.kills + t2.kills + t3.kills + t1.killfau) as kills, (t1.acks + t1.buildings + t1.ships + t1.cvs + t2.acks + t2.buildings + t2.ships + t2.cvs + t3.acks + t3.buildings + t3.ships + t3.cvs) as buildings, (t2.fieldscapt + t3.fieldscapt) as fieldscapt FROM score_fighter as t1, score_bomber as t2, score_ground as t3 WHERE t1.player_id = '%u' AND t1.player_id = t2.player_id AND t2.player_id = t3.player_id",
+			"SELECT t1.curr_streak as fighter_streak, t2.curr_streak as bomber_streak, (t1.kills + t2.kills + t3.kills + t1.killfau) as kills, (t1.acks + t1.buildings + t1.ships + t1.cvs + t2.acks + t2.buildings + t2.ships + t2.cvs + t3.acks + t3.buildings + t3.ships + t3.cvs) as buildings, (t2.fieldscapt + t3.fieldscapt) as fieldscapt FROM score_fighter as t1, score_bomber as t2, score_ground as t3 WHERE t1.player_id = '%u' AND t1.player_id = t2.player_id AND t2.player_id = t3.player_id",
 			client->id);
 
 	if (!d_mysql_query(&my_sock, my_query)) // query succeeded
@@ -3544,7 +3544,7 @@ void ForceEndFlight(u_int8_t remdron, client_t *client)
 		}
 	}
 
-	client->status1 = client->status2 = client->infly = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = 0;
+	client->status_damage = client->status_status = client->infly = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = 0;
 
 	for (i = 0; i < MAX_HITBY; i++)
 	{

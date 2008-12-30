@@ -4170,7 +4170,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 							}
 							
 							// dont capture field if plane is damaged
-							if (client->status1 & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE | STATUS_LGEAR | STATUS_RGEAR))
+							if (client->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE | STATUS_LGEAR | STATUS_RGEAR))
 							{
 								i = 0;
 							}
@@ -4234,7 +4234,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				}
 				break;
 			case 0x02:
-				client->status1 |= STATUS_PILOT;
+				client->status_damage |= STATUS_PILOT;
 				Com_Printf(VERBOSE_ALWAYS, "%s is killed in flight at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				PPrintf(client, RADIO_YELLOW, "%s is killed in flight", client->longnick);
 				CheckKiller(client);
@@ -4417,7 +4417,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			}
 		}
 
-		client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status1 = client->status2 = client->infly
+		client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status_damage = client->status_status = client->infly
 				= client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2]
 				= client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer
 				= client->score.penaltyscore = client->commandos = client->damaged = 0;
@@ -4885,6 +4885,9 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 				}
 			}
 		}
+
+		if(j)
+			PPrintf(client, RADIO_WHITE, "%s", buffer);
 	}
 	totalhits = client->hitstaken[0] + client->hitstaken[1] + client->hitstaken[2] + client->hitstaken[3] + client->hitstaken[4] + client->hitstaken[5];
 	PPrintf(client, RADIO_WHITE, "You've got %d shots", totalhits);
@@ -4911,6 +4914,9 @@ void PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t t
 				}
 			}
 		}
+
+		if(j)
+			PPrintf(client, RADIO_WHITE, "%s", buffer);
 	}
 	PPrintf(client, RADIO_WHITE, "==================================================");
 
@@ -5068,7 +5074,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		{
 			if ((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value)) // allow contrail during day
 			{
-				client->status1 |= (STATUS_LFUEL | STATUS_RFUEL);
+				client->status_damage |= (STATUS_LFUEL | STATUS_RFUEL);
 
 				if (!client->contrail)
 				{
@@ -5081,12 +5087,12 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			{ // TODO: WB2: remove fuel leak at night
 				if (client->armor.points[PLACE_LFUEL] > 0) // 0x4000
 				{
-					client->status1 &= 0xFFFFBFFF;
+					client->status_damage &= 0xFFFFBFFF;
 				}
 
 				if (client->armor.points[PLACE_RFUEL] > 0) // 0x8000
 				{
-					client->status1 &= 0xFFFF7FFF;
+					client->status_damage &= 0xFFFF7FFF;
 				}
 
 				if (client->contrail)
@@ -5298,12 +5304,12 @@ void CheckMaxG(client_t *client)
 
 	g = 0;
 
-	if (!(client->status1 & STATUS_LWING) || !(client->status1 & STATUS_RWING))
+	if (!(client->status_damage & STATUS_LWING) || !(client->status_damage & STATUS_RWING))
 	{
 		g = ClientG(client);
 	}
 	
-	if (!(client->status1 & STATUS_LWING))
+	if (!(client->status_damage & STATUS_LWING))
 	{
 		maxg = (double)(arena->planedamage[client->plane].positiveG * client->armor.points[PLACE_LWING] / arena->planedamage[client->plane].points[PLACE_LWING]) + 1.5;
 		ming = (double)((arena->planedamage[client->plane].negativeG * client->armor.points[PLACE_LWING] / arena->planedamage[client->plane].points[PLACE_LWING]) * -1) - 1.5;
@@ -5314,7 +5320,7 @@ void CheckMaxG(client_t *client)
 		{
 			if (client->armor.points[PLACE_LWING] > 0)
 				PPrintf(client, RADIO_DARKGREEN, "Your left wing blown off due G overload");
-			SendForceStatus((client->status1 | STATUS_LWING), client->status2, client);
+			SendForceStatus((client->status_damage | STATUS_LWING), client->status_status, client);
 			client->damaged = 1;
 		}
 		else
@@ -5330,7 +5336,7 @@ void CheckMaxG(client_t *client)
 		}
 	}
 
-	if (!(client->status1 & STATUS_RWING))
+	if (!(client->status_damage & STATUS_RWING))
 	{
 		maxg = (double)(arena->planedamage[client->plane].positiveG * client->armor.points[PLACE_RWING] / arena->planedamage[client->plane].points[PLACE_RWING]) + 1.5;
 		ming = (double)((arena->planedamage[client->plane].negativeG * client->armor.points[PLACE_RWING] / arena->planedamage[client->plane].points[PLACE_RWING]) * -1) - 1.5;
@@ -5341,7 +5347,7 @@ void CheckMaxG(client_t *client)
 		{
 			if (client->armor.points[PLACE_RWING] > 0)
 				PPrintf(client, RADIO_DARKGREEN, "Your right wing blown off due G overload");
-			SendForceStatus((client->status1 | STATUS_RWING), client->status2, client);
+			SendForceStatus((client->status_damage | STATUS_RWING), client->status_status, client);
 			client->damaged = 1;
 		}
 		else
@@ -5541,7 +5547,7 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 									AddRemovePlaneScreen(client, &clients[i], TRUE);
 									num = client->country;
 									client->country = 0; // neutral
-									//client->status1 = client->status2 = 0;
+									//client->status_damage = client->status_status = 0;
 									AddRemovePlaneScreen(client, &clients[i], FALSE);
 									client->country = num;
 									break;
@@ -5660,16 +5666,16 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 	{
 		status = (planestatus1_t *)buffer;
 
-		if(client->status1 != htonl(status->status1)) // TODO: Collision: check when new damage from client, possible collision detection
+		if(client->status_damage != htonl(status->status_damage)) // TODO: Collision: check when new damage from client, possible collision detection
 		{
-			client->status1 = htonl(status->status1);
+			client->status_damage = htonl(status->status_damage);
 		}
 		
-		client->status2 = htonl(status->status2);
+		client->status_status = htonl(status->status_status);
 	}
 
 	if ((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value) && !wb3->value)
-		client->status1 |= (STATUS_LFUEL | STATUS_RFUEL);
+		client->status_damage |= (STATUS_LFUEL | STATUS_RFUEL);
 
 	for (i = 0; i < maxentities->value; i++)
 	{
@@ -6725,7 +6731,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		pvictim->score.airscore -= SCORE_BULLETHIT;
 	}
 
-	if (killer >=0 && pvictim->chute && (pvictim->status1 & (1 << PLACE_PILOT)))
+	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 		pvictim->damby[killer] = MAX_UINT32;
 }
 
@@ -6937,7 +6943,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		AddPlaneDamage(hardhitplane->place, he, 0, NULL, NULL, pvictim);
 	}
 
-	if (killer >= 0 && pvictim->chute && (pvictim->status1 & (1 << PLACE_PILOT)))
+	if (killer >= 0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 		pvictim->damby[killer] = MAX_UINT32;
 }
 
@@ -7783,7 +7789,7 @@ void POttoFiring(u_int8_t *buffer, u_int8_t len, client_t *client)
  Force client plane status
  *************/
 
-void SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client)
+void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t *client)
 {
 	u_int8_t buffer[10];
 	u_int8_t i;
@@ -7797,65 +7803,65 @@ void SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client)
 
 	for(i = 0; i < 32; i++)
 	{
-		if(status1 & (1 << i))
+		if(status_damage & (1 << i))
 		{
 			Com_Printf(VERBOSE_ALWAYS, "%s lost %s\n", client->longnick, GetHitSite(i));
 		}
 	}
 
-	// Begin parse status1
-	if (status1 & STATUS_REARFUSE)
+	// Begin parse status_damage
+	if (status_damage & STATUS_REARFUSE)
 	{
-		status1 |= STATUS_HSTAB | STATUS_VSTAB;
+		status_damage |= STATUS_HSTAB | STATUS_VSTAB;
 
 		client->armor.points[PLACE_HSTAB] = 0;
 		client->armor.points[PLACE_VSTAB] = 0;
 	}
 
-	if (status1 & STATUS_HSTAB)
+	if (status_damage & STATUS_HSTAB)
 	{
-		status1 |= STATUS_ELEVATOR;
+		status_damage |= STATUS_ELEVATOR;
 
 		client->armor.points[PLACE_ELEVATOR] = 0;
 	}
 
-	if (status1 & STATUS_VSTAB)
+	if (status_damage & STATUS_VSTAB)
 	{
-		status1 |= STATUS_RUDDER;
+		status_damage |= STATUS_RUDDER;
 
 		client->armor.points[PLACE_RUDDER] = 0;
 	}
 
-	if (status1 & STATUS_LWING)
+	if (status_damage & STATUS_LWING)
 	{
-		status1 |= STATUS_LAILERON;
+		status_damage |= STATUS_LAILERON;
 
 		client->armor.points[PLACE_LAILERON] = 0;
 	}
 
-	if (status1 & STATUS_RWING)
+	if (status_damage & STATUS_RWING)
 	{
-		status1 |= STATUS_RAILERON;
+		status_damage |= STATUS_RAILERON;
 
 		client->armor.points[PLACE_RAILERON] = 0;
 	}
-	// End parse status1
+	// End parse status_damage
 
 	if (client->drone)
 	{
 		if (client->drone & DRONE_FAU)
 		{
-			if (status1 & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			if (status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
 				client->dronetimer = 0;
 				CheckKiller(client);
 			}
 			else
-				client->status1 |= (status1 | STATUS_LFUEL | STATUS_RFUEL | STATUS_ENGINE1 | STATUS_ENGINE2);
+				client->status_damage |= (status_damage | STATUS_LFUEL | STATUS_RFUEL | STATUS_ENGINE1 | STATUS_ENGINE2);
 		}
 		else if (client->drone & (DRONE_HMACK | DRONE_HTANK))
 		{
-			if (status1)
+			if (status_damage)
 			{
 				CheckKiller(client);
 
@@ -7884,25 +7890,25 @@ void SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client)
 		}
 		else if (client->drone & (DRONE_COMMANDOS | DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY | DRONE_EJECTED))
 		{
-			if (status1)
+			if (status_damage)
 			{
 				CheckKiller(client);
 				RemoveDrone(client);
 				return;
 			}
 			else
-				client->status1 |= status1;
+				client->status_damage |= status_damage;
 		}
 		else if (client->drone & (DRONE_WINGS1 | DRONE_WINGS2 | DRONE_DEBUG))
 		{
-			if (status1 & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			if (status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
 				CheckKiller(client);
 				RemoveDrone(client);
 				return;
 			}
 			else
-				client->status1 |= status1;
+				client->status_damage |= status_damage;
 		}
 
 		PPlaneStatus(NULL, client);
@@ -7914,11 +7920,11 @@ void SendForceStatus(u_int32_t status1, u_int32_t status2, client_t *client)
 		status = (planestatus1_t *)buffer;
 
 		status->packetid = htons(Com_WBhton(0x0E02));
-		status->status1 = htonl(status1);
-		status->status2 = htonl(status2);
+		status->status_damage = htonl(status_damage);
+		status->status_status = htonl(status_status);
 
-		client->status1 |= status1;
-		client->status2 |= status2;
+		client->status_damage |= status_damage;
+		client->status_status |= status_status;
 
 		SendPacket(buffer, sizeof(buffer), client);
 	}
@@ -7942,8 +7948,8 @@ void SendPlaneStatus(client_t *plane, client_t *client)
 	status->packetid = htons(Com_WBhton(0x0002));
 	status->slot = GetSlot(plane, client);
 
-	status->status1 = ntohl(plane->status1);
-	status->status2 = ntohl(plane->status2);
+	status->status_damage = ntohl(plane->status_damage);
+	status->status_status = ntohl(plane->status_status);
 
 	SendPacket(buffer, sizeof(buffer), client);
 }
@@ -10958,7 +10964,7 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 	client->plane = ntohl(reqack->plane);
 	client->dronetimer = arena->time; // stores time when client started flight
 	client->infly = 1;
-	client->status1 = 0; // to force player not appear damaged after takeoff
+	client->status_damage = 0; // to force player not appear damaged after takeoff
 	client->chute = 0; // to assure client is not flagged as chute
 	client->obradar = 0;
 

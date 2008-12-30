@@ -1206,7 +1206,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		client->commandos = 5;
 	}
 
-	client->status1 = 0; // to force player not appear damaged after takeoff
+	client->status_damage = 0; // to force player not appear damaged after takeoff
 	client->chute = 0; // to assure client is not flagged as chute
 
 	sprintf(client->logfile, "%s,%s,%s,%s,%u", mapname->string, client->longnick, GetSmallPlaneName(client->plane), GetCountry(client->country), (u_int32_t)time(NULL));
@@ -2819,7 +2819,7 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 	Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
 	Com_LogDescription(EVENT_DESC_FIELD, client->field, NULL);
 
-	drone->status1 = 0xC003;
+	drone->status_damage = 0xC003;
 
 	drone->speedxyz[0][0] = DRONE_FAU_SPEED * sin(Com_Rad(angle)) * -1;
 	drone->speedxyz[1][0] = DRONE_FAU_SPEED * cos(Com_Rad(angle));
@@ -5797,7 +5797,7 @@ void Cmd_Reload(client_t *client)
 			{
 				if (distance < GetFieldRadius(arena->fields[field].type))
 				{
-					if (!(client->status1))
+					if (!(client->status_damage))
 					{
 						client->field = field + 1;
 
