@@ -1,1 +1,1 @@
-mapper Red FIELD F3 ((null))
+There is no player online
