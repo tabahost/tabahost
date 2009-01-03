@@ -575,6 +575,7 @@ typedef struct damage_s
 	char		name[33];
 	char		abbrev[11];
 	u_int8_t	type;
+	u_int16_t	cost;
 	int32_t		points[32]; // -1 unused part
 	int32_t		apstop[32];
 	int32_t		imunity[32];
@@ -629,6 +630,7 @@ typedef struct arena_s
 				int32_t	points;
 				int32_t	apstop;
 				int32_t	imunity;
+				u_int16_t cost;
 			} buildarmor[BUILD_MAX];
 	int16_t		numplayers;		// number of current playing players
 	int16_t		numdrones;		// number of current playing drones

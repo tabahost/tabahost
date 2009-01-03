@@ -2230,6 +2230,7 @@ void LoadDamageModel(client_t *client)
 						strcpy(arena->planedamage[i + 1].name, Com_MyRow("name"));
 						strcpy(arena->planedamage[i + 1].abbrev, Com_MyRow("abbrev"));
 						arena->planedamage[i + 1].type = Com_Atoi(Com_MyRow("plane_type"));
+						arena->planedamage[i + 1].cost = Com_Atoi(Com_MyRow("cost"));
 					}
 					else
 					{
@@ -2496,6 +2497,21 @@ void LoadDamageModel(client_t *client)
 							for (i = 1; i < num_fields /*BUILD_MAX*/; i++)
 							{
 								arena->buildarmor[i].imunity = Com_Atoi(my_row[i]);
+							}
+							
+							if ((my_row = mysql_fetch_row(my_result)))
+							{
+								if (num_fields > BUILD_MAX)
+									num_fields = BUILD_MAX;
+
+								for (i = 1; i < num_fields /*BUILD_MAX*/; i++)
+								{
+									arena->buildarmor[i].cost = Com_Atoi(my_row[i]);
+								}
+							}
+							else
+							{
+								Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm-cost): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 						else
