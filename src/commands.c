@@ -1293,6 +1293,9 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		PPrintf(client, RADIO_YELLOW, "%d li%s left", client->lives, client->lives == 1 ? "fe" : "ves");
 	}
 
+	ScoresEvent(SCORE_TAKEOFF, client);
+
+	/* TODO: SCORE
 	if (!(client->attached && client->attached->drone & DRONE_FAU))
 	{
 		if (position != 100)
@@ -1346,6 +1349,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	}
 
 	client->lastscore = 0;
+	*/
 
 	if (position != 100)
 	{

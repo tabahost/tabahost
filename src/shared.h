@@ -233,6 +233,24 @@ typedef unsigned int u_int32_t;
 #define EVENT_DESC_MDWHY	60002	// why earned
 #define EVENT_DESC_MDHM		60003	// how much
 
+#define ENDFLIGHT_LANDED		1	// landed
+#define ENDFLIGHT_PILOTKILL		2	// killed in flight
+#define ENDFLIGHT_CRASHED		4	// plane crashed
+#define ENDFLIGHT_DITCHFAILED	5	// failed to ditch
+#define ENDFLIGHT_BAILED		7	// sucessfully bailed
+#define ENDFLIGHT_DITCHED		8	// ditched
+#define ENDFLIGHT_COLLIDED		9	// collided
+#define ENDFLIGHT_PANCAKE		12	// became a pancake
+
+#define SCORE_TAKEOFF		0x0001	// takeoff
+#define SCORE_LANDED		0x0002	// landed
+#define SCORE_DITCHED		0x0004	// ditched
+#define SCORE_BAILED		0x0008	// bailed
+#define SCORE_CAPTURED		0x0010	// captured
+#define SCORE_KILLED		0x0020	// killed
+#define SCORE_STRUCTURE		0x0040	// structure destroyed
+#define SCORE_FIELDCAPT		0x0080	// field capture
+
 #define VERBOSE_ALWAYS		0		// always prints these messages
 #define VERBOSE_ATTENTION	1		// attention messages
 #define VERBOSE_WARNING		2		// warning messages
@@ -795,12 +813,11 @@ typedef struct client_s
 	u_int16_t	killstod;		// kills in this TOD
 	u_int16_t	structstod;		// structures in this TOD
 	float		lastscore;		// score in last flight
-	float		streakscore;	// score accumulated in the streak // TODO: Misc: unused????
 	u_int8_t	nummedals;		// num of medals received // TODO: Misc: unused????
 	int16_t		rank;			// Elo rating
 	u_int8_t	ranking;		// pilot ranking
 
-	u_int8_t	tklimit;		// FIXME: add limit for friendly buildings/planes kills till be kicked
+	u_int8_t	tklimit;		// TODO: FIXME: add limit for friendly buildings/planes kills till be kicked
 	u_int8_t	tkstatus;		//
 
 	struct client_s	*hitby[MAX_HITBY]; // players who hit client
@@ -2039,7 +2056,6 @@ int		ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client);
 void	PingTest(u_int8_t *buffer, client_t *client);
 void	PReqBomberList(client_t *client);
 void	PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client);
-void	PEndflightScores(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client);
 void	PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached);
 void	CheckMaxG(client_t *client);
 float	ClientG(client_t *client);
@@ -2116,7 +2132,6 @@ void	PAcceptGunner(u_int8_t *buffer, client_t *client);
 void	PSwitchOttoPos(u_int8_t *buffer, client_t *client);
 void	PClientMedals(u_int8_t *buffer, client_t *client);
 void	PSquadInfo(char *nick, client_t *client);
-void	CheckCaptured(client_t *client);
 double	CalcDamage(u_int32_t mass, u_int16_t vel);
 void	Kamikase(client_t *client);
 void	SinkBoat(u_int8_t raise, building_t* building, client_t *client);
@@ -2219,17 +2234,13 @@ u_int8_t CheckTK(client_t *client);
 u_int8_t GetClientInfo(client_t *client);
 void	UpdateClientFile(client_t *client);
 int8_t	AddKiller(client_t *victim, client_t *client);
-void	CheckKiller(client_t *client);
 void	CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags);
 client_t *NearPlane(client_t *client, u_int8_t country, int32_t limit);
-u_int8_t CheckMedals(client_t *client);
-u_int8_t AddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
 void	ForceEndFlight(u_int8_t remdron, client_t *client);
 void	ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client);
 void	WB3ClientSkin(u_int8_t *buffer, client_t *client);
 char	*CreateSkin(client_t *client, u_int8_t number);
 void	WB3OverrideSkin(u_int8_t slot, client_t *client);
-void	CreateScores(client_t *client);
 void	ClientHDSerial(u_int8_t *buffer, client_t *client);
 void	ClientIpaddr(client_t *client);
 void	LogRAWPosition(u_int8_t server, client_t *client);
@@ -2319,6 +2330,16 @@ void	Cmd_Flare(client_t *client);
 void	Cmd_Rocket(int32_t y, double angle, double angle2, client_t *client); // debug
 void	Cmd_Sink(u_int16_t a, u_int16_t b, client_t *client); // debug
 void	Cmd_CheckBuildings(client_t *client); // debug
+
+// scores.c
+
+void	ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client);
+void	ScoresEvent();
+void	ScoresCheckKiller(client_t *client);
+u_int8_t ScoresCheckMedals(client_t *client);
+u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
+void	ScoresCheckCaptured(client_t *client);
+void	ScoresCreate(client_t *client);
 
 // Variables
 

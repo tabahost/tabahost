@@ -622,7 +622,7 @@ void ConnError(int n)
  Com_Read
 
  Read from given input
- // FIXME: function not used yet in TabaHost, should this be used??
+ // TODO: FIXME: function not used yet in TabaHost, should this be used??
  *************/
 
 int Com_Read(FILE *fp, u_int8_t *buffer, u_int32_t num)

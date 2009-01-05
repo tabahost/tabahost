@@ -1405,7 +1405,7 @@ void SendDronePos(client_t *drone, client_t *client)
 		wb3pos = (wb3planeposition_t *)buffer;
 
 		wb3pos->packetid = htons(Com_WBhton(0x0E00));
-		wb3pos->timer = htonl(arena->time); // FIXME: drone->timer?
+		wb3pos->timer = htonl(arena->time); // TODO: FIXME: drone->timer?
 		wb3pos->radar = htons(0); // htons(0x30);
 		wb3pos->plane = htons(drone->plane); // 0;
 		wb3pos->posx = htonl(drone->posxy[0][0]);
@@ -1444,7 +1444,7 @@ void SendDronePos(client_t *drone, client_t *client)
 		pos->pitchangspeed = htons(drone->aspeeds[0][0]);
 		pos->rollangspeed = htons(drone->aspeeds[1][0]);
 		pos->yawangspeed = htons(drone->aspeeds[2][0]);
-		pos->timer = htonl(arena->time); // FIXME: drone->timer?
+		pos->timer = htonl(arena->time); // TODO: FIXME: drone->timer?
 		pos->radar = htons(0x30);
 		pos->plane = 0;
 	}

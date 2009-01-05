@@ -1691,7 +1691,7 @@ void LoadRPS(char *path, client_t *client)
  SaveRPS
 
  Save curren RPS in file
- FIXME: Function not used for a while
+ TODO: FIXME: Function not used for a while
  *************/
 
 void SaveRPS(char *path, client_t *client)
@@ -3185,7 +3185,7 @@ void ChangeArena(char *map, client_t *client)
 			{
 				if (clients[i].inuse && clients[i].infly)
 				{
-					PEndflightScores(1, 0, 0, 0, &clients[i]); // TODO: Misc: force client to land or just simulate land scores
+					ScoresEndFlight(ENDFLIGHT_LANDED, 0, 0, 0, &clients[i]); // TODO: Misc: force client to land or just simulate land scores
 				}
 
 				Com_Close(&(clients[i].socket));
