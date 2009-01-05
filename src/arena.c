@@ -2230,7 +2230,7 @@ void LoadDamageModel(client_t *client)
 						strcpy(arena->planedamage[i + 1].name, Com_MyRow("name"));
 						strcpy(arena->planedamage[i + 1].abbrev, Com_MyRow("abbrev"));
 						arena->planedamage[i + 1].type = Com_Atoi(Com_MyRow("plane_type"));
-						arena->planedamage[i + 1].cost = Com_Atoi(Com_MyRow("cost"));
+						arena->planedamage[i + 1].cost = Com_Atof(Com_MyRow("cost"));
 					}
 					else
 					{
@@ -2506,7 +2506,7 @@ void LoadDamageModel(client_t *client)
 
 								for (i = 1; i < num_fields /*BUILD_MAX*/; i++)
 								{
-									arena->buildarmor[i].cost = Com_Atoi(my_row[i]);
+									arena->buildarmor[i].cost = Com_Atof(my_row[i]);
 								}
 							}
 							else
@@ -2982,40 +2982,8 @@ void CaptureField(u_int8_t field, client_t *client)
 	arena->fields[field - 1].abletocapture = 0;
 
 	//score
-	switch (arena->fields[field - 1].type)
-	{
-		case FIELD_LITTLE:
-			client->score.captscore += SCORE_CAPTURE_FS;
-			break;
-		case FIELD_MEDIUM:
-			client->score.captscore += SCORE_CAPTURE_FM;
-			break;
-		case FIELD_MAIN:
-			client->score.captscore += SCORE_CAPTURE_FL;
-			break;
-		case FIELD_WB3POST:
-			client->score.captscore += SCORE_CAPTURE_P;
-			break;
-		case FIELD_WB3VILLAGE:
-			client->score.captscore += SCORE_CAPTURE_V;
-			break;
-		case FIELD_WB3TOWN:
-			client->score.captscore += SCORE_CAPTURE_P;
-			break;
-		default:
-			client->score.captscore += SCORE_CAPTURE;
-	}
 
-	if (IsBomber(client))
-		sprintf(my_query, "UPDATE score_bomber SET fieldscapt = fieldscapt + '1' WHERE player_id = '%u'", client->id);
-	else if (wb3->value && IsGround(client))
-		sprintf(my_query, "UPDATE score_ground SET fieldscapt = fieldscapt + '1' WHERE player_id = '%u'", client->id);
-
-	if (d_mysql_query(&my_sock, my_query))
-	{
-		PPrintf(client, RADIO_YELLOW, "CaptureField(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-		Com_Printf(VERBOSE_WARNING, "CaptureField(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-	}
+	ScoreEvent(SCORE_FIELDCAPT, client, arena->fields[field - 1].type)
 
 	for (i = 0; i < MAX_BUILDINGS; i++) // Get minimum time
 	{
@@ -3185,7 +3153,7 @@ void ChangeArena(char *map, client_t *client)
 			{
 				if (clients[i].inuse && clients[i].infly)
 				{
-					ScoresEndFlight(ENDFLIGHT_LANDED, 0, 0, 0, &clients[i]); // TODO: Misc: force client to land or just simulate land scores
+					ScoresEndFlight(ENDFLIGHT_LANDED, 0, 0, 0, &clients[i]); // force client to land and simulate land scores
 				}
 
 				Com_Close(&(clients[i].socket));
@@ -3384,7 +3352,11 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 		return j;
 	}
 	else
+	{
+		if (pdist)
+			*pdist = 0;
 		return -1;
+	}
 }
 
 /*************

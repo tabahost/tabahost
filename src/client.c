@@ -2155,6 +2155,8 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 	if (!arena->munition[munition].type)
 		return;
 
+	ScoreEvent(SCORE_HARDHIT, client, 0); // TODO: fix
+
 	if (IsFighter(client))
 	{
 		sprintf(my_query, "UPDATE score_fighter SET");

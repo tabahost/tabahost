@@ -593,7 +593,7 @@ typedef struct damage_s
 	char		name[33];
 	char		abbrev[11];
 	u_int8_t	type;
-	u_int16_t	cost;
+	float		cost;
 	int32_t		points[32]; // -1 unused part
 	int32_t		apstop[32];
 	int32_t		imunity[32];
@@ -648,7 +648,7 @@ typedef struct arena_s
 				int32_t	points;
 				int32_t	apstop;
 				int32_t	imunity;
-				u_int16_t cost;
+				float cost;
 			} buildarmor[BUILD_MAX];
 	int16_t		numplayers;		// number of current playing players
 	int16_t		numdrones;		// number of current playing drones
@@ -2138,7 +2138,6 @@ void	SinkBoat(u_int8_t raise, building_t* building, client_t *client);
 u_int32_t GetFactoryReupTime(u_int8_t country);
 u_int32_t GetRPSLag(u_int8_t country);
 void	BackupScores(u_int8_t collect_type);
-void	ResetScores(void);
 
 //arena.c
 building_t *GetBuilding(u_int16_t id);
@@ -2340,6 +2339,7 @@ u_int8_t ScoresCheckMedals(client_t *client);
 u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
 void	ScoresCheckCaptured(client_t *client);
 void	ScoresCreate(client_t *client);
+void	ResetScores(void);
 
 // Variables
 

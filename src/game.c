@@ -4304,7 +4304,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						Com_LogDescription(EVENT_DESC_VCPLANE, nearplane->plane, NULL);
 						Com_LogDescription(EVENT_DESC_VCCTRY, nearplane->country, NULL);
 
-						if (!nearplane->drone)
+						if (!nearplane->drone) // TODO: Score fix
 						{
 							PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
 
@@ -7385,6 +7385,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 			{
 				client->dronetimer = 0;
 				ScoresCheckKiller(client);
+				ClearKillers(client);
 			}
 			else
 				client->status_damage |= (status_damage | STATUS_LFUEL | STATUS_RFUEL | STATUS_ENGINE1 | STATUS_ENGINE2);
@@ -7394,6 +7395,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 			if (status_damage)
 			{
 				ScoresCheckKiller(client);
+				ClearKillers(client);
 
 				if (client->related[0])
 				{
@@ -7423,6 +7425,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 			if (status_damage)
 			{
 				ScoresCheckKiller(client);
+				ClearKillers(client);
 				RemoveDrone(client);
 				return;
 			}
@@ -7434,6 +7437,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 			if (status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
 				ScoresCheckKiller(client);
+				ClearKillers(client);
 				RemoveDrone(client);
 				return;
 			}
@@ -11229,49 +11233,4 @@ vdate_tod_end=%04.0f-%02.0f-%02.0f\n",
 	fclose(fp);
 
 	system("php -f ./cron/cron.php &");
-}
-
-/*************
- ResetScores
-
- Backup log_ and score_ tables;
- Truncate log_ and score_ tables
- Clear all .score files
- *************/
-void ResetScores(void)
-{
-	u_int8_t i;
-	time_t ltime;
-	struct tm *timeptr;
-	char temp[16];
-	char tables[9][18] =
-	{ "log_descriptions", "log_events", "score_fighter", "score_bomber", "score_ground", "score_penalty", "score_common", "score_kills", "medals" };
-
-	time(&ltime);
-	timeptr = gmtime(&ltime);
-
-	sprintf(temp, "%d-%02d-%02d", 1900 + timeptr->tm_year, timeptr->tm_mon + 1, timeptr->tm_mday);
-
-	for (i = 0; i < 9; i++)
-	{
-		sprintf(my_query, "CREATE TABLE `bkp-%s-%s` SELECT * FROM `%s`", tables[i], temp, tables[i]);
-
-		if (d_mysql_query(&my_sock, my_query)) // query succeeded
-		{
-			Com_Printf(VERBOSE_WARNING, "ResetScores(): couldn't query CREATE(%u) error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
-		}
-
-		sprintf(my_query, "TRUNCATE %s", tables[i]);
-
-		if (d_mysql_query(&my_sock, my_query)) // query succeeded
-		{
-			Com_Printf(VERBOSE_WARNING, "ResetScores(): couldn't query TRUNCATE(%u) error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
-		}
-	}
-
-#ifdef _WIN32
-	system("del .\\players\\*.score");
-#else
-	Sys_RemoveFiles("./players/.score");
-#endif
 }
