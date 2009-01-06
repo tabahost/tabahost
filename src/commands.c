@@ -1293,9 +1293,6 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		PPrintf(client, RADIO_YELLOW, "%d li%s left", client->lives, client->lives == 1 ? "fe" : "ves");
 	}
 
-	ScoresEvent(SCORE_TAKEOFF, client); // TODO: fix
-
-	/*
 	if (!(client->attached && client->attached->drone & DRONE_FAU))
 	{
 		if (position != 100)
@@ -1308,48 +1305,11 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			Com_LogDescription(EVENT_DESC_PLORD, client->ord, NULL);
 			Com_LogDescription(EVENT_DESC_FIELD, client->field, NULL);
 
-			//score
-			if (IsFighter(client))
-			{
-				sprintf(my_query, "UPDATE score_fighter SET");
-			}
-			else if (IsBomber(client))
-			{
-				sprintf(my_query, "UPDATE score_bomber SET");
-			}
-			else if (IsGround(client))
-			{
-				sprintf(my_query, "UPDATE score_ground SET");
-			}
-			else
-			{
-				Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-				sprintf(my_query, "UPDATE score_fighter SET");
-			}
-
-			sprintf(my_query, "%s sorties = sorties + '1' WHERE player_id = '%u'", my_query, client->id);
-
-			if (d_mysql_query(&my_sock, my_query)) // query succeeded
-			{
-				Com_Printf(VERBOSE_WARNING, "Cmd_Fly(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-			}
-
-			sprintf(my_query, "UPDATE score_common SET");
-
-			if (client->country == 1)
-				sprintf(my_query, "%s flyred = flyred + '1' WHERE player_id = '%u'", my_query, client->id);
-			else if (client->country == 3)
-				sprintf(my_query, "%s flygold = flygold + '1' WHERE player_id = '%u'", my_query, client->id);
-
-			if (d_mysql_query(&my_sock, my_query)) // query succeeded
-			{
-				Com_Printf(VERBOSE_WARNING, "Cmd_Fly(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-			}
+			ScoresEvent(SCORE_TAKEOFF, client, 0);
 		}
 	}
 
-	client->lastscore = 0;
-	*/
+	client->lastscore = 0; // TODO: score, position fix?
 
 	if (position != 100)
 	{

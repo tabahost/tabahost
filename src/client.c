@@ -2155,79 +2155,21 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 	if (!arena->munition[munition].type)
 		return;
 
-	ScoreEvent(SCORE_HARDHIT, client, 0); // TODO: fix
+	ScoreEvent(SCORE_HARDHIT, client, arena->munition[munition].type);
 
-	if (IsFighter(client))
-	{
-		sprintf(my_query, "UPDATE score_fighter SET");
-	}
-	else if (IsBomber(client))
-	{
-		sprintf(my_query, "UPDATE score_bomber SET");
-	}
-	else if (IsGround(client))
-	{
-		sprintf(my_query, "UPDATE score_ground SET");
-	}
-	else
-	{
-		Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-		sprintf(my_query, "UPDATE score_fighter SET");
-	}
-
-	if (arena->munition[munition].type == MUNTYPE_ROCKET) // rocket
-	{
-		if (client->infly)
-		{
-			if (penalty)
-				client->score.groundscore += (SCORE_ROCKETHIT * -20);
-			else
-				client->score.groundscore += SCORE_ROCKETHIT;
-		}
-
-		strcat(my_query, " rockethits = rockethits + '1'");
-	}
-	else if (arena->munition[munition].type == MUNTYPE_BOMB) // bomb
-	{
-		if (client->infly)
-		{
-			if (penalty)
-				client->score.groundscore += (SCORE_BOMBHIT * -20);
-			else
-				client->score.groundscore += SCORE_BOMBHIT;
-		}
-
-		strcat(my_query, " bombhits = bombhits + '1'");
-	}
-	else if (arena->munition[munition].type == MUNTYPE_TORPEDO) // torpedo
-	{
-		if (client->infly)
-		{
-			if (penalty)
-				client->score.groundscore += (SCORE_TORPEDOHIT * -20);
-			else
-				client->score.groundscore += SCORE_TORPEDOHIT;
-		}
-
-		strcat(my_query, " torphits = torphits + '1'");
-	}
-	else if (arena->munition[munition].type == MUNTYPE_BULLET) // bullet
-	{
-		if (client->infly)
-		{
-			if (penalty)
-				client->score.groundscore += (SCORE_BULLETHIT * -20);
-			else
-				client->score.groundscore += SCORE_BULLETHIT;
-		}
-
-		strcat(my_query, " gunhits = gunhits + '1'");
-	}
-
-	sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
-
-	if (d_mysql_query(&my_sock, my_query)) // query succeeded
-	{
-		Com_Printf(VERBOSE_WARNING, "HardHit(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-	}
+	if(penalty)
+		client->score.groundscore -= ;
+		
+//	if (arena->munition[munition].type == MUNTYPE_ROCKET) // rocket
+//	{
+//		if (client->infly)
+//		{
+//			if (penalty)
+//				client->score.groundscore += (SCORE_ROCKETHIT * -20);
+//			else
+//				client->score.groundscore += SCORE_ROCKETHIT;
+//		}
+//
+//		strcat(my_query, " rockethits = rockethits + '1'");
+//	}
 }

@@ -74,8 +74,22 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 	switch (event)
 	{
 		case SCORE_TAKEOFF:
+				client->lastscore = 0;
 				event_cost += takeoff_cost;
-				strcat(my_query, " sortie = sortie + '1'");
+				strcat(my_query, " sorties = sorties + '1'");
+			break;
+		case SCORE_HARDHIT:
+			switch (type)
+			{
+				case MUNTYPE_ROCKET:
+					strcat(my_query, " rockethits = rockethits + '1'");
+				case MUNTYPE_BOMB:
+					strcat(my_query, " bombhits = bombhits + '1'");
+				case MUNTYPE_TORPEDO:
+					strcat(my_query, " torphits = torphits + '1'");
+				default: // case MUNTYPE_BULLET:
+					strcat(my_query, " gunhits = gunhits + '1'");
+			}
 			break;
 		case SCORE_FIELDCAPT:
 				switch (type)
@@ -163,7 +177,7 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 
 	if(!(event & SCORE_TAKEOFF))
 	{
-		client->lastscore = client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore - client->score.penaltyscore;
+		client->lastscore += client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore - client->score.penaltyscore;
 
 		if (IsFighter(client))
 		{
@@ -209,7 +223,20 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 	}
 
 	if(event & SCORE_TAKEOFF)
+	{
+		sprintf(my_query, "UPDATE score_common SET");
+
+		if (client->country == 1)
+			sprintf(my_query, "%s flyred = flyred + '1' WHERE player_id = '%u'", my_query, client->id);
+		else if (client->country == 3)
+			sprintf(my_query, "%s flygold = flygold + '1' WHERE player_id = '%u'", my_query, client->id);
+
+		if (d_mysql_query(&my_sock, my_query)) // query succeeded
+		{
+			Com_Printf(VERBOSE_WARNING, "ScoresEvent(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		}
 		return;
+	}
 
 	if (client->score.penaltyscore)
 	{
