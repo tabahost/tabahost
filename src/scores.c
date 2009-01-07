@@ -82,47 +82,35 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	{
 		case SCORE_TAKEOFF:
 				client->lastscore = 0;
-				event_cost += takeoff_cost;
+				event_cost += arena->costs.takeoff;
 				strcat(my_query, " sorties = sorties + '1'");
 			break;
 		case SCORE_DROPITEM:
-			if (misc == MUNTYPE_ROCKET) // rocket
+			client->score.groundscore -= arena->costs.ammotype[misc];
+
+			switch (misc)
 			{
-				strcat(my_query, " rocketused = rocketused + '1'");
-				client->score.groundscore -= rocket_cost;
-			}
-			else if (misc == MUNTYPE_BOMB) // bomb
-			{
-				strcat(my_query, " bombused = bombused + '1'");
-				client->score.groundscore -= bomb_cost;
-			}
-			else if (misc == MUNTYPE_TORPEDO) // torpedo
-			{
-				strcat(my_query, " torpused = torpused + '1'");
-				client->score.groundscore -= torpedo_cost;
-			}
-			else // unknown, probably gun
-			{
-				strcat(my_query, " gunused = gunused + '1'");
-				client->score.groundscore -= bullet_cost;
+				case MUNTYPE_ROCKET:
+					strcat(my_query, " rocketused = rocketused + '1'");
+				case MUNTYPE_BOMB:
+					strcat(my_query, " bombused = bombused + '1'");
+				case MUNTYPE_TORPEDO:
+					strcat(my_query, " torpused = torpused + '1'");
+				default:
+					strcat(my_query, " gunused = gunused + '1'");
 			}
 			break;
 		case SCORE_HARDHIT:
-			if (misc == MUNTYPE_ROCKET) // rocket
+			switch (misc)
 			{
-				strcat(my_query, " rockethits = rockethits + '1'");
-			}
-			else if (misc == MUNTYPE_BOMB) // bomb
-			{
-				strcat(my_query, " bombhits = bombhits + '1'");
-			}
-			else if (misc == MUNTYPE_TORPEDO) // torpedo
-			{
-				strcat(my_query, " torphits = torphits + '1'");
-			}
-			else // unknown, probably gun
-			{
-				strcat(my_query, " gunhits = gunhits + '1'");
+				case MUNTYPE_ROCKET:
+					strcat(my_query, " rockethits = rockethits + '1'");
+				case MUNTYPE_BOMB:
+					strcat(my_query, " bombhits = bombhits + '1'");
+				case MUNTYPE_TORPEDO:
+					strcat(my_query, " torphits = torphits + '1'");
+				default:
+					strcat(my_query, " gunhits = gunhits + '1'");
 			}
 			break;
 		case SCORE_STRUCTDAMAGE:
@@ -196,35 +184,15 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			}
 			break;
 		case SCORE_FIELDCAPT:
-				switch (misc)
-				{
-					case FIELD_LITTLE:
-						client->score.captscore += field_small_cost;
-						break;
-					case FIELD_MEDIUM:
-						client->score.captscore += field_medium_cost;
-						break;
-					case FIELD_MAIN:
-						client->score.captscore += field_large_cost;
-						break;
-					case FIELD_WB3POST:
-						client->score.captscore += field_post_cost;
-						break;
-					case FIELD_WB3VILLAGE:
-						client->score.captscore += field_village_cost;
-						break;
-					case FIELD_WB3TOWN:
-						client->score.captscore += field_town_cost;
-						break;
-					default:
-						client->score.captscore += field_default_cost;
-				}
+				client->score.captscore += arena->costs.fieldtype[misc];
 				strcat(my_query, " fieldscapt = fieldscapt + '1'");
 			break;
 		case SCORE_LANDED: ///////// HERE BEGINS EVENTS THAT MAY HAVE KILLERS /////////
 				if(captured)
-					event_cost += ScorePlaneCost(client) - newpilot_cost - informationlost_cost - ScoreTecnologyCost(client);
+				{
+					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTecnologyCost(client);
 					strcat(my_query, " captured = captured + '1'");
+				}
 				else
 				{
 					event_cost += ScoreDamageCost(client);
@@ -234,7 +202,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		case SCORE_DITCHED:
 				if(captured)
 				{
-					event_cost += ScorePlaneCost(client) - newpilot_cost - informationlost_cost - ScoreTecnologyCost(client);
+					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTecnologyCost(client);
 					strcat(my_query, " captured = captured + '1'");
 				}
 				else
@@ -246,9 +214,10 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			break;
 		case SCORE_DISCO:
 				strcat(my_query, " disco = disco + '1'");
+
 				if(ScorePlaneLife(client) < 0.5)
 				{ // kill
-					event_cost += ScorePlaneCost(client) - newpilot_cost - life_cost;
+					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.life;
 
 					strcat(my_query, " killed = killed + '1', curr_streak = '0'");
 
@@ -265,7 +234,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		case SCORE_BAILED:
 				if(captured)
 				{
-					event_cost += ScorePlaneCost(client) - newpilot_cost - informationlost_cost - ScoreTecnologyCost(client);
+					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTecnologyCost(client);
 					strcat(my_query, " captured = captured + '1'");
 				}
 				else
@@ -283,7 +252,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				}
 			break;
 		case SCORE_KILLED:
-				event_cost += ScorePlaneCost(client) - newpilot_cost - life_cost;
+				event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.life;
 
 				strcat(my_query, " killed = killed + '1', curr_streak = '0'");
 
@@ -593,7 +562,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 						Com_Printf(VERBOSE_KILL, "%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
 
-						client->hitby[i]->score.airscore += assist_cost;
+						client->hitby[i]->score.airscore += arena->costs.assist;
 
 						if (IsFighter(NULL, client->planeby[i]))
 						{
@@ -628,7 +597,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 							Com_Printf(VERBOSE_KILL, "%s got a piece of his friend %s\n", client->hitby[i]->longnick, client->longnick);
 						}
 
-						client->hitby[i]->score.penaltyscore += (2 * assist_cost);
+						client->hitby[i]->score.penaltyscore += arena->costs.assist;
 					}
 				}
 			}
@@ -729,7 +698,7 @@ float ScorePlaneTransportCost(client_t *client)
 
 	if(field >= 0)
 	{
-		return distance * planetransport_cost;
+		return distance * arena->costs.planetransport;
 	}
 }
 
@@ -748,7 +717,7 @@ float ScorePilotTransportCost(client_t *client)
 
 	if(field >= 0)
 	{
-		return distance * pilottransport_cost;
+		return distance * arena->costs.pilottransport;
 	}
 }
 
@@ -778,7 +747,7 @@ float ScoreFlightTimeCost(client_t *client)
 
 	flighttime /= 3600; // convert to hours
 
-	return flighttime * flighthour_cost;
+	return flighttime * arena->costs.flighthour;
 }
 
 /*************
@@ -889,11 +858,11 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 	
 	if (IsGround(client))
 	{
-		client->score.groundscore += (float)(bullet_cost * gunused);
+		client->score.groundscore += (float)(arena->costs.ammotype[MUNTYPE_BULLET] * gunused);
 	}
 	else
 	{
-		client->score.airscore += (float)(bullet_cost * gunused);
+		client->score.airscore += (float)(arena->costs.ammotype[MUNTYPE_BULLET] * gunused);
 	}
 
 	switch (end)

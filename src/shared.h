@@ -383,6 +383,7 @@ typedef unsigned int u_int32_t;
 #define FIELD_WB3VILLAGE	17
 #define FIELD_WB3TOWN		18
 #define FIELD_WB3PORT		19
+#define MAX_FIELDTYPE		20
 #define	PLACE_ENGINE1		0x00 // engine
 #define	PLACE_ENGINE2		0x01 // drive-train
 #define	PLACE_ENGINE3		0x02 // gear box
@@ -579,6 +580,7 @@ typedef struct field_s
 	cv_t		*cv; // linked CV
 	struct city_s *city[MAX_CITYFIELD]; // linked city
 	float		rps[MAX_PLANES];
+	float		cost;
 	building_t	buildings[MAX_BUILDINGS]; // 1st building is radar
 } field_t;
 
@@ -654,10 +656,21 @@ typedef struct arena_s
 	char		*address;		// Arena address (e.g.: wb.chph.ras.ru)
 	damage_t	planedamage[MAX_PLANES]; // Set plane armor
 	struct	{
+				float takeoff;
+				float ammotype[MAX_MUNTYPE];
+				float fieldtype[MAX_FIELDTYPE];
+				float newpilot;
+				float informationlost;
+				float life;
+				float assist;
+				float planetransport;
+				float pilottransport;
+				float flighthour;
+			} cost;
+	struct	{
 				int32_t	points;
 				int32_t	apstop;
 				int32_t	imunity;
-				float cost;
 			} buildarmor[BUILD_MAX];
 	int16_t		numplayers;		// number of current playing players
 	int16_t		numdrones;		// number of current playing drones
