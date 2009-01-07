@@ -2983,7 +2983,7 @@ void CaptureField(u_int8_t field, client_t *client)
 
 	//score
 
-	ScoreEvent(SCORE_FIELDCAPT, client, arena->fields[field - 1].type)
+	ScoreEvent(SCORE_FIELDCAPT, client, arena->fields[field - 1].type);
 
 	for (i = 0; i < MAX_BUILDINGS; i++) // Get minimum time
 	{

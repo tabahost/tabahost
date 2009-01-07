@@ -50,13 +50,13 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 	if(event & SCORE_CAPTURED)
 	{
-		event ^ SCORE_CAPTURED
+		event ^ SCORE_CAPTURED;
 		captured = 1;
 	}
 
 	if(event & SCORE_COLLIDED)
 	{
-		event ^ SCORE_COLLIDED
+		event ^ SCORE_COLLIDED;
 		collided = 1;
 	}
 
@@ -709,7 +709,7 @@ float ScorePlaneCost(client_t *client)
  Returns the cost to fix a damaged plane
  *************/
 
-float ScoreFixPlaneCost()
+float ScoreFixPlaneCost(float plane_life, float plane_cost)
 {
 
 }
@@ -742,6 +742,7 @@ float ScorePlaneTransportCost(client_t *client)
 float ScorePilotTransportCost(client_t *client)
 {
 	int16_t field;
+	u_int32_t distance;
 
 	field = NearestField(client->posxy[0][0], client->posxy[1][0], (client->country == 1) ? 3 : 1, FALSE, FALSE, &distance);
 
@@ -804,7 +805,7 @@ float ScoreDamageCost(client_t *client)
 
 	plane_life = ScorePlaneLife(client);
 	plane_cost = ScorePlaneCost(client);
-	plane_recover = plane_life <= 0.5 ? plane_cost : (ScoreFixPlaneCost() + ScorePlaneTransportCost(client));
+	plane_recover = plane_life <= 0.5 ? plane_cost : (ScoreFixPlaneCost(plane_life, plane_cost) + ScorePlaneTransportCost(client));
 
 	return (plane_cost < plane_recover) ? plane_cost : plane_recover;
 }
@@ -817,6 +818,7 @@ float ScoreDamageCost(client_t *client)
 
 float ScorePlaneLife(client_t *client)
 {
+	u_int8_t i;
 	float totaldamage = 0.0;
 	float totalpoints = 0.0;
 	float pointsleft = 0.0;
@@ -851,11 +853,11 @@ float ScorePlaneLife(client_t *client)
 			{
 				if (client->hitby[i]->country != client->country) // if enemy
 				{
-					client->hitby[i]->score.airscore += (client->damby[i]/totaldamage) * (pointsleft/totalpoints) * preço;
+					client->hitby[i]->score.airscore += (client->damby[i]/totaldamage) * (pointsleft/totalpoints) * plane_cost;
 				}
 				else // friendly hit... tsc, tsc, tsc...
 				{
-					client->hitby[i]->score.penaltyscore -= (client->damby[i]/totaldamage) * (pointsleft/totalpoints) * preço;
+					client->hitby[i]->score.penaltyscore -= (client->damby[i]/totaldamage) * (pointsleft/totalpoints) * plane_cost;
 				}
 			}
 		}
@@ -899,38 +901,38 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 		case ENDFLIGHT_LANDED:
 			if(ScoresCheckCaptured(client))
 			{
-				ScoresEvent((SCORE_LANDED | SCORE_CAPTURED));
+				ScoresEvent((SCORE_LANDED | SCORE_CAPTURED), client, 0);
 			}
 			else
 			{
-				ScoresEvent(SCORE_LANDED);
+				ScoresEvent(SCORE_LANDED, client, 0);
 			}
 			break;
 		case ENDFLIGHT_DITCHED:
 			if(ScoresCheckCaptured(client))
 			{
-				ScoresEvent((SCORE_DITCHED | SCORE_CAPTURED));
+				ScoresEvent((SCORE_DITCHED | SCORE_CAPTURED), client, 0);
 			}
 			else
 			{
-				ScoresEvent(SCORE_DITCHED);
+				ScoresEvent(SCORE_DITCHED, client, 0);
 			}
 			break;
 		case ENDFLIGHT_BAILED:
 			if(ScoresCheckCaptured(client))
 			{
-				ScoresEvent((SCORE_BAILED | SCORE_CAPTURED));
+				ScoresEvent((SCORE_BAILED | SCORE_CAPTURED), client, 0);
 			}
 			else
 			{
-				ScoresEvent(SCORE_BAILED);
+				ScoresEvent(SCORE_BAILED, client, 0);
 			}
 			break;
 		case ENDFLIGHT_PILOTKILL:
 		case ENDFLIGHT_CRASHED:
 		case ENDFLIGHT_DITCHFAILED:
 		case ENDFLIGHT_PANCAKE:
-			ScoresEvent(SCORE_KILLED);
+			ScoresEvent(SCORE_KILLED, client, 0);
 			break;
 //		case ENDFLIGHT_COLLIDED:
 	}

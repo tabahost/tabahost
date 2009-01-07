@@ -281,7 +281,9 @@ typedef unsigned int u_int32_t;
 #define SCORE_BAILED		0x0080	// bailed
 #define SCORE_CAPTURED		0x0100	// captured
 #define SCORE_KILLED		0x0200	// killed
-#define SCORE_FIELDCAPT		0x0400	// field capture
+#define SCORE_COLLIDED		0x0400	// collided
+#define SCORE_FIELDCAPT		0x0800	// field capture
+#define SCORE_DISCO			0x1000	// disconnected
 
 #define VERBOSE_ALWAYS		0		// always prints these messages
 #define VERBOSE_ATTENTION	1		// attention messages
@@ -820,6 +822,7 @@ typedef struct client_s
 	u_int16_t	killstod;		// kills in this TOD
 	u_int16_t	structstod;		// structures in this TOD
 	float		lastscore;		// score in last flight
+	float		streakscore;	// score in last streak
 	u_int8_t	nummedals;		// num of medals received // TODO: Misc: unused????
 	int16_t		rank;			// Elo rating
 	u_int8_t	ranking;		// pilot ranking
@@ -2340,17 +2343,17 @@ void	Cmd_CheckBuildings(client_t *client); // debug
 
 void	ScoresEvent(u_int16_t event, client_t *client, int32_t misc);
 float	ScorePlaneCost(client_t *client);
-float	ScoreFixPlaneCost(xxxx);
+float	ScoreFixPlaneCost(float plane_life, float plane_cost);
 float	ScorePlaneTransportCost(client_t *client);
 float	ScorePilotTransportCost(client_t *client);
 float	ScoreFlightTimeCost(client_t *client);
 float	ScoreDamageCost(client_t *client);
 float	ScorePlaneLife(client_t *client);
 void	ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client);
-void	ScoresCheckKiller(client_t *client);
+client_t *ScoresCheckKiller(client_t *client);
 u_int8_t ScoresCheckMedals(client_t *client);
 u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
-void	ScoresCheckCaptured(client_t *client);
+u_int8_t ScoresCheckCaptured(client_t *client);
 void	ScoresCreate(client_t *client);
 void	ResetScores(void);
 void	BackupScores(u_int8_t collect_type);

@@ -4257,7 +4257,6 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case ENDFLIGHT_DITCHFAILED:
 				Com_Printf(VERBOSE_ALWAYS, "%s failed to ditch at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				PPrintf(client, RADIO_YELLOW, "%s failed to ditch", client->longnick);
-				ScoresEvent(SCORE_KILLED, client);
 				break;
 			case ENDFLIGHT_BAILED:
 				Com_Printf(VERBOSE_ALWAYS, "%s sucessfully bailed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
