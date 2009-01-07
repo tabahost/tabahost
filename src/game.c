@@ -4307,7 +4307,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						if (!nearplane->drone) // TODO: Score fix
 						{
 							PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
-
+							/*
 							if (IsFighter(client))
 							{
 								sprintf(my_query, "UPDATE score_fighter");
@@ -4332,6 +4332,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 							{
 								Com_Printf(VERBOSE_WARNING, "Collided(near): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
+							*/
 						}
 
 						nearplane->cancollide = -1;
@@ -5492,55 +5493,8 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 		Com_LogEvent(EVENT_DROP, client->id, 0);
 		Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
 		Com_LogDescription(EVENT_DESC_AMMO, drop->item, NULL);
-
-		if (IsFighter(client))
-		{
-			sprintf(my_query, "UPDATE score_fighter SET");
-		}
-		else if (IsBomber(client))
-		{
-			sprintf(my_query, "UPDATE score_bomber SET");
-		}
-		else if (IsGround(client))
-		{
-			sprintf(my_query, "UPDATE score_ground SET");
-		}
-		else
-		{
-			Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-			sprintf(my_query, "UPDATE score_fighter SET");
-		}
-
-		if (drop->item >= 57 && drop->item <= 64) // rocket
-		{
-			sprintf(my_query, "%s rocketused = rocketused + '1'", my_query);
-
-			client->score.groundscore += SCORE_ROCKET;
-		}
-		else if (drop->item >= 65 && drop->item <= 112) // bomb
-		{
-			sprintf(my_query, "%s bombused = bombused + '1'", my_query);
-
-			client->score.groundscore += SCORE_BOMB;
-		}
-		else if (drop->item >= 137 && drop->item <= 140) // torpedo
-		{
-			sprintf(my_query, "%s torpused = torpused + '1'", my_query);
-
-			client->score.groundscore += SCORE_TORPEDO;
-		}
-		else // unknown, probably gun
-		{
-			sprintf(my_query, "%s gunused = gunused + '1'", my_query);
-			client->score.groundscore += SCORE_BULLET;
-		}
-
-		sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
-
-		if (d_mysql_query(&my_sock, my_query)) // query succeeded
-		{
-			Com_Printf(VERBOSE_WARNING, "PDropItem(): couldn't query UPDATE error %d: %s Query = \"%s\"\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
-		}
+		
+		ScoreEvent(SCORE_DROPITEM, client, arena->munition[drop->item].type);
 	}
 }
 
@@ -6069,11 +6023,6 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				break;
 		}
 
-		if (pvictim->country != client->country)
-			client->score.airscore += (float)(SCORE_BULLETHIT * hits);
-		else
-			client->score.airscore += (float)(SCORE_BULLETHIT * hits * -20);
-
 		if (i < MAX_RELATED)
 			pvictim = pvictim->related[i]; // send damage to first wingman
 		//	return; // dont hit plane if with wingmans
@@ -6257,8 +6206,6 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 //			if (gunstats->value || pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 		}
-
-		pvictim->score.airscore -= SCORE_BULLETHIT;
 	}
 
 	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
@@ -6357,15 +6304,6 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	if (!(pvictim = FindSClient(ntohl(hardhitplane->victim))))
 		return;
 
-	/*	if(pvictim != client)
-	 {
-	 if((pvictim->country != client->country) || pvictim->tkstatus)
-	 client->score.airscore += (float)(SCORE_BULLETHIT * 2.5);
-	 else
-	 client->score.airscore += (float)(SCORE_BULLETHIT * 2.5 * -20);
-	 }
-	 */
-
 	if (arcade->value || !friendlyfire->value || client->tkstatus)// && pvictim != client)
 	{
 		if (pvictim->country == client->country)
@@ -6419,8 +6357,6 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(clients[i].armor.points[hardhitplane->place] + 1.0)));
 		}
 	}
-
-	pvictim->score.airscore -= (SCORE_BULLETHIT * 2.5);
 
 	for (i = 0; i < MAX_RELATED; i++)
 	{
@@ -6933,103 +6869,16 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 				{
 					client->structstod++;
 				}
-	
-				if (client->infly)
+
+				// TODO: SCORE: 
+					
+				if (client->country != building->country)  // TODO: dmgprobe or current armor???????
 				{
-					if (client->country != building->country)
-					{
-						if (IsFighter(client))
-						{
-							sprintf(my_query, "UPDATE score_fighter SET");
-						}
-						else if (IsBomber(client))
-						{
-							sprintf(my_query, "UPDATE score_bomber SET");
-						}
-						else if (IsGround(client))
-						{
-							sprintf(my_query, "UPDATE score_ground SET");
-						}
-						else
-						{
-							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-							sprintf(my_query, "UPDATE score_fighter SET");
-						}
-					}
-					else
-					{
-						sprintf(my_query, "UPDATE score_penalty SET");
-					}
-	
-					if (building->type == BUILD_CV)
-					{
-						if (client->country != building->country)
-						{
-							if (IsBomber(client))
-								client->score.captscore += SCORE_CAPTURE;
-							else
-								client->score.groundscore += SCORE_CV;
-						}
-						else
-						{
-							if (IsBomber(client))
-								client->score.penaltyscore += 2* SCORE_CAPTURE;
-							else
-								client->score.penaltyscore += 2 * SCORE_CV;
-						}
-	
-						strcat(my_query, " cvs = cvs + '1'");
-					}
-					else if (building->type >= BUILD_50CALACK && building->type <= BUILD_88MMFLAK)
-					{
-						if (client->country != building->country)
-							client->score.groundscore += SCORE_ACK;
-						else
-							client->score.penaltyscore += 2 * SCORE_ACK;
-	
-						strcat(my_query, " acks = acks + '1'");
-					}
-					else if (building->type >= BUILD_DESTROYER && building->type <= BUILD_CARGO)
-					{
-						if (client->country != building->country)
-							client->score.groundscore += SCORE_SHIP;
-						else
-							client->score.penaltyscore += 2 * SCORE_SHIP;
-	
-						strcat(my_query, " ships = ships + '1'");
-					}
-					else
-					{
-						if ((building->type != BUILD_TREE) && (building->type != BUILD_ROCK) && (building->type != BUILD_FENCE))
-						{
-							if (client->country != building->country)
-							{
-								client->score.groundscore += SCORE_BUILDING;
-							}
-							else
-							{
-								client->score.penaltyscore += 2 * SCORE_BUILDING;
-							}
-	
-							strcat(my_query, " buildings = buildings + '1'");
-						}
-						else
-						{
-							my_query[0] = '\0';
-						}
-					}
-	
-					if (strlen(my_query))
-					{
-						sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
-	
-						if (d_mysql_query(&my_sock, my_query))
-						{
-							PPrintf(client, 
-							RADIO_YELLOW, "AddBuildingDamage(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-							Com_Printf(VERBOSE_WARNING, "AddBuildingDamage(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-						}
-					}
+					ScoreEvent(SCORE_STRUCTURE, client, (int32_t)(100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+				}
+				else
+				{
+					ScoreEvent(SCORE_STRUCTURE, client, (int32_t)(-100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
 				}
 			}
 
@@ -7073,7 +6922,18 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		SetBuildingStatus(building, building->status, NULL);
 	}
 	else
+	{
+		if (client->country != building->country)
+		{
+			ScoreEvent(SCORE_STRUCTDAMAGE, client, (int32_t)(100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+		}
+		else
+		{
+			ScoreEvent(SCORE_STRUCTDAMAGE, client, (int32_t)(-100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+		}
+
 		building->armor -= dmgprobe;
+	}
 
 	// radio alert
 
@@ -11155,82 +11015,4 @@ u_int32_t GetRPSLag(u_int8_t country)
 	RPSlag = (double)RPScoeff * 365 * 2;
 
 	return RPSlag > 365 ? 365 : RPSlag;
-}
-
-/*************
- BackupScores
-
- Runs a PHP script that makes a backup of scores to allow compare with next call
- *************/
-
-void BackupScores(u_int8_t collect_type)
-{
-	FILE *fp;
-	u_int16_t s_year, s_month, s_day;
-	u_int16_t e_year, e_month, e_day;
-	char *pnextmap;
-
-	if (!arena->mapnum)
-	{ // first map of cycle
-		s_day = initday->value;
-		s_month = initmonth->value;
-		s_year = inityear->value;
-	}
-	else
-	{
-		s_day = (arena->mapcycle[arena->mapnum - 1].date - ((arena->mapcycle[arena->mapnum - 1].date / 100) * 100)); /* day of the month (1 to 31) */
-		s_month = ((arena->mapcycle[arena->mapnum - 1].date - ((arena->mapcycle[arena->mapnum - 1].date / 10000) * 10000)) / 100); /* months (1 to 12) */
-		s_year = (arena->mapcycle[arena->mapnum - 1].date / 10000); /* years */
-	}
-
-	if ((arena->mapnum + 1) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum + 1)].date)
-	{ // last map of cycle
-		e_day = endday->value;
-		e_month = endmonth->value;
-		e_year = endyear->value;
-		pnextmap = NULL;
-	}
-	else
-	{
-		e_day = (arena->mapcycle[arena->mapnum].date - ((arena->mapcycle[arena->mapnum].date / 100) * 100)); /* day of the month (1 to 31) */
-		e_month = ((arena->mapcycle[arena->mapnum].date - ((arena->mapcycle[arena->mapnum].date / 10000) * 10000)) / 100); /* months (1 to 12) */
-		e_year = (arena->mapcycle[arena->mapnum].date / 10000); /* years */
-		pnextmap = arena->mapcycle[arena->mapnum + 1].mapname;
-	}
-
-	sprintf(my_query, "DELETE FROM players WHERE longnick IS NULL");
-
-	if (d_mysql_query(&my_sock, my_query))
-	{
-		Com_Printf(VERBOSE_WARNING, "BackupScores(): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-	}
-
-	fp = fopen("./cron/scores.cfg", "w");
-	fprintf(fp, "actual_map=%s\n\
-next_map=%s\n\
-vdate_tod_start=%04.0f-%02.0f-%02.0f\n\
-vdate_map_start=%04u-%02u-%02u\n\
-vdate_map_end=%04u-%02u-%02u\n\
-vdate_tod_end=%04.0f-%02.0f-%02.0f\n",
-			dirname->string, pnextmap, inityear->value, initmonth->value, initday->value, s_year, s_month, s_day, e_year, e_month, e_day, endyear->value, endmonth->value, endday->value);
-
-	switch (collect_type)
-	{
-		case COLLECT_CYCLE:
-			fprintf(fp, "collect_type=cycle\n");
-			break;
-		case COLLECT_MAP:
-			fprintf(fp, "collect_type=map\n");
-			break;
-		case COLLECT_EVENT:
-			fprintf(fp, "collect_type=special\nspecial_name=%s\n", dirname->string);
-			break;
-		default:
-			fprintf(fp, "collect_type=default\n");
-			break;
-	}
-
-	fclose(fp);
-
-	system("php -f ./cron/cron.php &");
 }

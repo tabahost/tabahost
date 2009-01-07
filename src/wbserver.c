@@ -495,25 +495,7 @@ void RunFrame(void)
 					{
 						if(clients[i].infly)
 						{
-							if(IsFighter(&clients[i]))
-							sprintf(my_query, "UPDATE score_fighter");
-							else if(IsBomber(&clients[i]))
-							sprintf(my_query, "UPDATE score_bomber");
-							else if(IsGround(&clients[i]))
-							sprintf(my_query, "UPDATE score_ground");
-							else
-							{
-								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", clients[i].plane);
-								sprintf(my_query, "UPDATE score_fighter");
-							}
-
-							sprintf(my_query, "%s SET disco = disco + '1' WHERE player_id = '%u'", my_query, clients[i].id);
-
-							if(d_mysql_query(&my_sock, my_query))
-							{
-								PPrintf(&clients[i], RADIO_YELLOW, "Disco: SQL Error (%d), please contact admin", mysql_errno(&my_sock));
-								Com_Printf(VERBOSE_WARNING, "Disco: couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-							}
+							ScoresEvent(SCORE_DISCO, client, 0);
 
 							Com_LogEvent(EVENT_DISCO, clients[i].id, 0);
 							Com_LogDescription(EVENT_DESC_PLIP, 0, clients[i].ip);

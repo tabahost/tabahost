@@ -28,17 +28,24 @@
  nononono
  *************/
 
-void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
+void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 {
 	client_t *killer;
 	u_int8_t captured = 0;
 	u_int8_t collided = 0;
+	int8_t penalty = 1;
 	u_int32_t flighttime;
 	float event_cost = 0.0;
 
 	if(!client)
 	{
 		return;
+	}
+
+	if(misc < 0)
+	{
+		misc *= -1;
+		penalty = -1;
 	}
 
 	if(event & SCORE_CAPTURED)
@@ -78,21 +85,118 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 				event_cost += takeoff_cost;
 				strcat(my_query, " sorties = sorties + '1'");
 			break;
-		case SCORE_HARDHIT:
-			switch (type)
+		case SCORE_DROPITEM:
+			if (misc == MUNTYPE_ROCKET) // rocket
 			{
-				case MUNTYPE_ROCKET:
-					strcat(my_query, " rockethits = rockethits + '1'");
-				case MUNTYPE_BOMB:
-					strcat(my_query, " bombhits = bombhits + '1'");
-				case MUNTYPE_TORPEDO:
-					strcat(my_query, " torphits = torphits + '1'");
-				default: // case MUNTYPE_BULLET:
-					strcat(my_query, " gunhits = gunhits + '1'");
+				strcat(my_query, " rocketused = rocketused + '1'");
+				client->score.groundscore -= rocket_cost;
+			}
+			else if (misc == MUNTYPE_BOMB) // bomb
+			{
+				strcat(my_query, " bombused = bombused + '1'");
+				client->score.groundscore -= bomb_cost;
+			}
+			else if (misc == MUNTYPE_TORPEDO) // torpedo
+			{
+				strcat(my_query, " torpused = torpused + '1'");
+				client->score.groundscore -= torpedo_cost;
+			}
+			else // unknown, probably gun
+			{
+				strcat(my_query, " gunused = gunused + '1'");
+				client->score.groundscore -= bullet_cost;
+			}
+			break;
+		case SCORE_HARDHIT:
+			if (misc == MUNTYPE_ROCKET) // rocket
+			{
+				strcat(my_query, " rockethits = rockethits + '1'");
+			}
+			else if (misc == MUNTYPE_BOMB) // bomb
+			{
+				strcat(my_query, " bombhits = bombhits + '1'");
+			}
+			else if (misc == MUNTYPE_TORPEDO) // torpedo
+			{
+				strcat(my_query, " torphits = torphits + '1'");
+			}
+			else // unknown, probably gun
+			{
+				strcat(my_query, " gunhits = gunhits + '1'");
+			}
+			break;
+		case SCORE_STRUCTDAMAGE:
+		case SCORE_STRUCTURE:
+			if (misc == BUILD_CV)
+			{
+				if(penalty > 0)
+				{
+					if (IsBomber(client))
+						client->score.captscore += (float)misc / 100;
+					else
+						client->score.groundscore += (float)misc / 100;
+				}
+				else
+				{
+					client->score.penaltyscore += (float)misc / 100;
+				}
+
+				if(event & SCORE_STRUCTURE)
+					strcat(my_query, " cvs = cvs + '1'");
+			}
+			else if (misc >= BUILD_50CALACK && misc <= BUILD_88MMFLAK)
+			{
+				if(penalty > 0)
+				{
+					client->score.groundscore += (float)misc / 100;
+				}
+				else
+				{
+					client->score.penaltyscore += (float)misc / 100;
+				}
+				
+				if(event & SCORE_STRUCTURE)
+					strcat(my_query, " acks = acks + '1'");
+			}
+			else if (misc >= BUILD_DESTROYER && misc <= BUILD_CARGO)
+			{
+				if(penalty > 0)
+				{
+					client->score.groundscore += (float)misc / 100;
+				}
+				else
+				{
+					client->score.penaltyscore += (float)misc / 100;
+				}
+
+				if(event & SCORE_STRUCTURE)
+					strcat(my_query, " ships = ships + '1'");
+			}
+			else
+			{
+				if ((misc != BUILD_TREE) && (misc != BUILD_ROCK) && (misc != BUILD_FENCE))
+				{
+					if(penalty > 0)
+					{
+						client->score.groundscore += (float)misc / 100;
+					}
+					else
+					{
+						client->score.penaltyscore += (float)misc / 100;
+					}
+	
+					if(event & SCORE_STRUCTURE)
+						strcat(my_query, " buildings = buildings + '1'");
+				}
+				else
+				{
+					my_query[0] = '\0';
+					return; // return if hit tree or rock or fence
+				}
 			}
 			break;
 		case SCORE_FIELDCAPT:
-				switch (type)
+				switch (misc)
 				{
 					case FIELD_LITTLE:
 						client->score.captscore += field_small_cost;
@@ -117,7 +221,7 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 				}
 				strcat(my_query, " fieldscapt = fieldscapt + '1'");
 			break;
-		case SCORE_LANDED:
+		case SCORE_LANDED: ///////// HERE BEGINS EVENTS THAT MAY HAVE KILLERS /////////
 				if(captured)
 					event_cost += ScorePlaneCost(client) - newpilot_cost - informationlost_cost - ScoreTecnologyCost(client);
 					strcat(my_query, " captured = captured + '1'");
@@ -140,6 +244,24 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 
 				strcat(my_query, " ditched = ditched + '1'");
 			break;
+		case SCORE_DISCO:
+				strcat(my_query, " disco = disco + '1'");
+				if(ScorePlaneLife(client) < 0.5)
+				{ // kill
+					event_cost += ScorePlaneCost(client) - newpilot_cost - life_cost;
+
+					strcat(my_query, " killed = killed + '1', curr_streak = '0'");
+
+					if (client->lives > 0)
+					{
+						client->lives--;
+						Cmd_Lives(client->longnick, client->lives, NULL);
+					}
+				}
+				else // bail
+				{
+					event_cost += ScorePlaneCost(client) - ScorePilotTransportCost(client);
+				}
 		case SCORE_BAILED:
 				if(captured)
 				{
@@ -178,6 +300,9 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 	if(!(event & SCORE_TAKEOFF))
 	{
 		client->lastscore += client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore - client->score.penaltyscore;
+
+		if(event & SCORE_DISCO)
+			sprintf(my_query, "%s, disco_score = disco_score + '%.3f'", my_query, client->lastscore);
 
 		if (IsFighter(client))
 		{
@@ -238,6 +363,9 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 		return;
 	}
 
+	if(event & (SCORE_DROPITEM | SCORE_HARDHIT | SCORE_STRUCTDAMAGE | SCORE_STRUCTURE | SCORE_FIELDCAPT))
+		return; 
+
 	if (client->score.penaltyscore)
 	{
 		sprintf(my_query, "UPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'", client->score.penaltyscore, client->id);
@@ -247,6 +375,7 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 			Com_Printf(VERBOSE_WARNING, "ScoresEvent(penalty): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
+
 	client->streakscore += client->lastscore;
 
 	if (client->dronetimer < arena->time)
@@ -271,6 +400,8 @@ void ScoresEvent(u_int16_t event, client_t *client, u_int16_t type)
 		ClearKillers(client);
 		return;
 	}
+
+///////////////////// KILLER SCORE ///////////////////
 
 	killer = ScoresCheckKiller(client);
 
@@ -659,8 +790,6 @@ float ScoreDamageCost(client_t *client)
 {
 	u_int8_t i;
 	float plane_cost, plane_recover, plane_life;
-	float totaldamage = 0.0;
-	float totalpoints, pointsleft;
 
 	if(!client)
 	{
@@ -672,6 +801,25 @@ float ScoreDamageCost(client_t *client)
 		Com_Printf(VERBOSE_WARNING, "ScoreDamageCost() %s invalid plane %d\n", client->longnick, client->plane);
 		return;
 	}
+
+	plane_life = ScorePlaneLife(client);
+	plane_cost = ScorePlaneCost(client);
+	plane_recover = plane_life <= 0.5 ? plane_cost : (ScoreFixPlaneCost() + ScorePlaneTransportCost(client));
+
+	return (plane_cost < plane_recover) ? plane_cost : plane_recover;
+}
+
+/*************
+ ScorePlaneLife
+
+ Returns the percentage of life from plane (including flight time usage)
+ *************/
+
+float ScorePlaneLife(client_t *client)
+{
+	float totaldamage = 0.0;
+	float totalpoints = 0.0;
+	float pointsleft = 0.0;
 
 	for(pointsleft = totalpoints = i = 0; i < 32; i++)
 	{
@@ -715,11 +863,7 @@ float ScoreDamageCost(client_t *client)
 
 	pointsleft -= ScoreFlightTimeCost(client);
 
-	plane_life = pointsleft/totalpoints;
-	plane_cost = ScorePlaneCost(client);
-	plane_recover = plane_life <= 0.5 ? plane_cost : (ScoreFixPlaneCost() + ScorePlaneTransportCost(client));
-
-	return (plane_cost < plane_recover) ? plane_cost : plane_recover;
+	return pointsleft/totalpoints;
 }
 
 /*************
@@ -1765,4 +1909,82 @@ void ResetScores(void)
 #else
 	Sys_RemoveFiles("./players/.score");
 #endif
+}
+
+/*************
+ BackupScores
+
+ Runs a PHP script that makes a backup of scores to allow compare with next call
+ *************/
+
+void BackupScores(u_int8_t collect_type)
+{
+	FILE *fp;
+	u_int16_t s_year, s_month, s_day;
+	u_int16_t e_year, e_month, e_day;
+	char *pnextmap;
+
+	if (!arena->mapnum)
+	{ // first map of cycle
+		s_day = initday->value;
+		s_month = initmonth->value;
+		s_year = inityear->value;
+	}
+	else
+	{
+		s_day = (arena->mapcycle[arena->mapnum - 1].date - ((arena->mapcycle[arena->mapnum - 1].date / 100) * 100)); /* day of the month (1 to 31) */
+		s_month = ((arena->mapcycle[arena->mapnum - 1].date - ((arena->mapcycle[arena->mapnum - 1].date / 10000) * 10000)) / 100); /* months (1 to 12) */
+		s_year = (arena->mapcycle[arena->mapnum - 1].date / 10000); /* years */
+	}
+
+	if ((arena->mapnum + 1) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum + 1)].date)
+	{ // last map of cycle
+		e_day = endday->value;
+		e_month = endmonth->value;
+		e_year = endyear->value;
+		pnextmap = NULL;
+	}
+	else
+	{
+		e_day = (arena->mapcycle[arena->mapnum].date - ((arena->mapcycle[arena->mapnum].date / 100) * 100)); /* day of the month (1 to 31) */
+		e_month = ((arena->mapcycle[arena->mapnum].date - ((arena->mapcycle[arena->mapnum].date / 10000) * 10000)) / 100); /* months (1 to 12) */
+		e_year = (arena->mapcycle[arena->mapnum].date / 10000); /* years */
+		pnextmap = arena->mapcycle[arena->mapnum + 1].mapname;
+	}
+
+	sprintf(my_query, "DELETE FROM players WHERE longnick IS NULL");
+
+	if (d_mysql_query(&my_sock, my_query))
+	{
+		Com_Printf(VERBOSE_WARNING, "BackupScores(): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+	}
+
+	fp = fopen("./cron/scores.cfg", "w");
+	fprintf(fp, "actual_map=%s\n\
+next_map=%s\n\
+vdate_tod_start=%04.0f-%02.0f-%02.0f\n\
+vdate_map_start=%04u-%02u-%02u\n\
+vdate_map_end=%04u-%02u-%02u\n\
+vdate_tod_end=%04.0f-%02.0f-%02.0f\n",
+			dirname->string, pnextmap, inityear->value, initmonth->value, initday->value, s_year, s_month, s_day, e_year, e_month, e_day, endyear->value, endmonth->value, endday->value);
+
+	switch (collect_type)
+	{
+		case COLLECT_CYCLE:
+			fprintf(fp, "collect_type=cycle\n");
+			break;
+		case COLLECT_MAP:
+			fprintf(fp, "collect_type=map\n");
+			break;
+		case COLLECT_EVENT:
+			fprintf(fp, "collect_type=special\nspecial_name=%s\n", dirname->string);
+			break;
+		default:
+			fprintf(fp, "collect_type=default\n");
+			break;
+	}
+
+	fclose(fp);
+
+	system("php -f ./cron/cron.php &");
 }

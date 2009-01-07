@@ -2156,20 +2156,4 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 		return;
 
 	ScoreEvent(SCORE_HARDHIT, client, arena->munition[munition].type);
-
-	if(penalty)
-		client->score.groundscore -= ;
-		
-//	if (arena->munition[munition].type == MUNTYPE_ROCKET) // rocket
-//	{
-//		if (client->infly)
-//		{
-//			if (penalty)
-//				client->score.groundscore += (SCORE_ROCKETHIT * -20);
-//			else
-//				client->score.groundscore += SCORE_ROCKETHIT;
-//		}
-//
-//		strcat(my_query, " rockethits = rockethits + '1'");
-//	}
 }

@@ -242,14 +242,46 @@ typedef unsigned int u_int32_t;
 #define ENDFLIGHT_COLLIDED		9	// collided
 #define ENDFLIGHT_PANCAKE		12	// became a pancake
 
+/*
+#define SCORE_KILL			100.0
+#define SCORE_ASSIST		30.0
+#define SCORE_FAU			50.0
+#define SCORE_HMACK			50.0
+#define SCORE_TANK			50.0
+#define SCORE_KATY			50.0
+#define SCORE_COMMANDO		10.0
+#define SCORE_ACK			10.0
+#define SCORE_BUILDING		25.0
+#define SCORE_SHIP			50.0
+#define SCORE_CV			100.0
+#define SCORE_CAPTURE_FL	200.0
+#define SCORE_CAPTURE_FM	150.0 
+#define SCORE_CAPTURE_FS	100.0
+#define SCORE_CAPTURE_T		200.0 
+#define SCORE_CAPTURE_V		70.0 
+#define SCORE_CAPTURE_P		50.0
+#define SCORE_CAPTURE		100.0
+#define SCORE_BULLET		-0.001
+#define SCORE_BULLETHIT		0.03
+#define SCORE_BOMB			-0.01
+#define SCORE_BOMBHIT		0.1
+#define SCORE_ROCKET		-0.01
+#define SCORE_ROCKETHIT		0.1
+#define SCORE_TORPEDO		-0.01
+#define SCORE_TORPEDOHIT	0.1
+*/
+
 #define SCORE_TAKEOFF		0x0001	// takeoff
-#define SCORE_LANDED		0x0002	// landed
-#define SCORE_DITCHED		0x0004	// ditched
-#define SCORE_BAILED		0x0008	// bailed
-#define SCORE_CAPTURED		0x0010	// captured
-#define SCORE_KILLED		0x0020	// killed
-#define SCORE_STRUCTURE		0x0040	// structure destroyed
-#define SCORE_FIELDCAPT		0x0080	// field capture
+#define SCORE_DROPITEM		0x0002	// drop bomb/rocket
+#define SCORE_HARDHIT		0x0004	// hit bomb/rocket
+#define SCORE_STRUCTURE		0x0008	// destroyed structure
+#define SCORE_STRUCTDAMAGE	0x0010	// damaged structure
+#define SCORE_LANDED		0x0020	// landed
+#define SCORE_DITCHED		0x0040	// ditched
+#define SCORE_BAILED		0x0080	// bailed
+#define SCORE_CAPTURED		0x0100	// captured
+#define SCORE_KILLED		0x0200	// killed
+#define SCORE_FIELDCAPT		0x0400	// field capture
 
 #define VERBOSE_ALWAYS		0		// always prints these messages
 #define VERBOSE_ATTENTION	1		// attention messages
@@ -448,32 +480,7 @@ typedef unsigned int u_int32_t;
 #define ELO_WINNER			1
 #define ELO_LOOSER			2
 #define ELO_BOTH			3
-#define SCORE_KILL			100.0
-#define SCORE_ASSIST		30.0
-#define SCORE_FAU			50.0
-#define SCORE_HMACK			50.0
-#define SCORE_TANK			50.0
-#define SCORE_KATY			50.0
-#define SCORE_COMMANDO		10.0
-#define SCORE_ACK			10.0
-#define SCORE_BUILDING		25.0
-#define SCORE_SHIP			50.0
-#define SCORE_CV			100.0
-#define SCORE_CAPTURE_FL	200.0
-#define SCORE_CAPTURE_FM	150.0 
-#define SCORE_CAPTURE_FS	100.0
-#define SCORE_CAPTURE_T		200.0 
-#define SCORE_CAPTURE_V		70.0 
-#define SCORE_CAPTURE_P		50.0
-#define SCORE_CAPTURE		100.0
-#define SCORE_BULLET		-0.001
-#define SCORE_BULLETHIT		0.03
-#define SCORE_BOMB			-0.01
-#define SCORE_BOMBHIT		0.1
-#define SCORE_ROCKET		-0.01
-#define SCORE_ROCKETHIT		0.1
-#define SCORE_TORPEDO		-0.01
-#define SCORE_TORPEDOHIT	0.1
+
 #define	SQUADRON_REMOVE		1
 #define	SQUADRON_INVITE		2
 #define MEDAL_GRANDSTAR		0
@@ -2137,7 +2144,6 @@ void	Kamikase(client_t *client);
 void	SinkBoat(u_int8_t raise, building_t* building, client_t *client);
 u_int32_t GetFactoryReupTime(u_int8_t country);
 u_int32_t GetRPSLag(u_int8_t country);
-void	BackupScores(u_int8_t collect_type);
 
 //arena.c
 building_t *GetBuilding(u_int16_t id);
@@ -2332,14 +2338,22 @@ void	Cmd_CheckBuildings(client_t *client); // debug
 
 // scores.c
 
+void	ScoresEvent(u_int16_t event, client_t *client, int32_t misc);
+float	ScorePlaneCost(client_t *client);
+float	ScoreFixPlaneCost(xxxx);
+float	ScorePlaneTransportCost(client_t *client);
+float	ScorePilotTransportCost(client_t *client);
+float	ScoreFlightTimeCost(client_t *client);
+float	ScoreDamageCost(client_t *client);
+float	ScorePlaneLife(client_t *client);
 void	ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client);
-void	ScoresEvent();
 void	ScoresCheckKiller(client_t *client);
 u_int8_t ScoresCheckMedals(client_t *client);
 u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
 void	ScoresCheckCaptured(client_t *client);
 void	ScoresCreate(client_t *client);
 void	ResetScores(void);
+void	BackupScores(u_int8_t collect_type);
 
 // Variables
 
