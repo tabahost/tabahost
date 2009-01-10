@@ -25,7 +25,7 @@
 /*************
  ScoresEvent
 
- nononono
+ Calculate the score based on events
  *************/
 
 void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
@@ -86,7 +86,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				strcat(my_query, " sorties = sorties + '1'");
 			break;
 		case SCORE_DROPITEM:
-			client->score.groundscore -= arena->costs.ammotype[misc];
+			client->score.groundscore -= GetAmmoCost(misc);
 
 			switch (misc)
 			{
@@ -114,67 +114,48 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			}
 			break;
 		case SCORE_STRUCTDAMAGE:
+			if(penalty > 0)
+			{
+				if (IsBomber(client))
+					client->score.captscore += (float)misc / 100;
+				else
+					client->score.groundscore += (float)misc / 100;
+			}
+			else
+			{
+				client->score.penaltyscore += (float)misc / 100;
+			}
+			break;
 		case SCORE_STRUCTURE:
+			if(penalty > 0)
+			{
+				if (IsBomber(client))
+					client->score.captscore += GetBuildingCost(misc);
+				else
+					client->score.groundscore += GetBuildingCost(misc);
+			}
+			else
+			{
+				client->score.penaltyscore += GetBuildingCost(misc);
+			}
+
 			if (misc == BUILD_CV)
 			{
-				if(penalty > 0)
-				{
-					if (IsBomber(client))
-						client->score.captscore += (float)misc / 100;
-					else
-						client->score.groundscore += (float)misc / 100;
-				}
-				else
-				{
-					client->score.penaltyscore += (float)misc / 100;
-				}
-
-				if(event & SCORE_STRUCTURE)
-					strcat(my_query, " cvs = cvs + '1'");
+				strcat(my_query, " cvs = cvs + '1'");
 			}
 			else if (misc >= BUILD_50CALACK && misc <= BUILD_88MMFLAK)
 			{
-				if(penalty > 0)
-				{
-					client->score.groundscore += (float)misc / 100;
-				}
-				else
-				{
-					client->score.penaltyscore += (float)misc / 100;
-				}
-				
-				if(event & SCORE_STRUCTURE)
-					strcat(my_query, " acks = acks + '1'");
+				strcat(my_query, " acks = acks + '1'");
 			}
 			else if (misc >= BUILD_DESTROYER && misc <= BUILD_CARGO)
 			{
-				if(penalty > 0)
-				{
-					client->score.groundscore += (float)misc / 100;
-				}
-				else
-				{
-					client->score.penaltyscore += (float)misc / 100;
-				}
-
-				if(event & SCORE_STRUCTURE)
-					strcat(my_query, " ships = ships + '1'");
+				strcat(my_query, " ships = ships + '1'");
 			}
 			else
 			{
 				if ((misc != BUILD_TREE) && (misc != BUILD_ROCK) && (misc != BUILD_FENCE))
 				{
-					if(penalty > 0)
-					{
-						client->score.groundscore += (float)misc / 100;
-					}
-					else
-					{
-						client->score.penaltyscore += (float)misc / 100;
-					}
-	
-					if(event & SCORE_STRUCTURE)
-						strcat(my_query, " buildings = buildings + '1'");
+					strcat(my_query, " buildings = buildings + '1'");
 				}
 				else
 				{
@@ -184,13 +165,13 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			}
 			break;
 		case SCORE_FIELDCAPT:
-				client->score.captscore += arena->costs.fieldtype[misc];
+				client->score.captscore += GetFieldCost(misc);
 				strcat(my_query, " fieldscapt = fieldscapt + '1'");
 			break;
 		case SCORE_LANDED: ///////// HERE BEGINS EVENTS THAT MAY HAVE KILLERS /////////
 				if(captured)
 				{
-					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTecnologyCost(client);
+					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTechnologyCost(client);
 					strcat(my_query, " captured = captured + '1'");
 				}
 				else
@@ -202,7 +183,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		case SCORE_DITCHED:
 				if(captured)
 				{
-					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTecnologyCost(client);
+					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTechnologyCost(client);
 					strcat(my_query, " captured = captured + '1'");
 				}
 				else
@@ -234,7 +215,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		case SCORE_BAILED:
 				if(captured)
 				{
-					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTecnologyCost(client);
+					event_cost += ScorePlaneCost(client) - arena->costs.newpilot - arena->costs.informationlost - ScoreTechnologyCost(client);
 					strcat(my_query, " captured = captured + '1'");
 				}
 				else
@@ -858,11 +839,11 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 	
 	if (IsGround(client))
 	{
-		client->score.groundscore += (float)(arena->costs.ammotype[MUNTYPE_BULLET] * gunused);
+		client->score.groundscore += (float)(GetAmmoCost(MUNTYPE_BULLET) * gunused);
 	}
 	else
 	{
-		client->score.airscore += (float)(arena->costs.ammotype[MUNTYPE_BULLET] * gunused);
+		client->score.airscore += (float)(GetAmmoCost(MUNTYPE_BULLET) * gunused);
 	}
 
 	switch (end)
@@ -1958,4 +1939,89 @@ vdate_tod_end=%04.0f-%02.0f-%02.0f\n",
 	fclose(fp);
 
 	system("php -f ./cron/cron.php &");
+}
+
+/*************
+ ScoreTehcnologyCost
+
+ Return the cost of plane technology lost based in plane damage
+ *************/
+
+float ScoreTechnologyCost(client_t *client)
+{
+	return 0.0;
+}
+
+/*************
+ GetBuildingCost
+
+ Return the cost of a building type
+ *************/
+
+float GetBuildingCost(u_int8_t type)
+{
+	if(type < BUILD_MAX)
+	{
+		return arena->costs.buildtype[type];
+	}
+	else
+		return 0.0;
+}
+
+/*************
+ GetAmmoCost
+
+ Return the cost of a munition type
+ *************/
+
+float GetAmmoCost(u_int8_t type)
+{
+	if(type < MAX_MUNTYPE)
+	{
+		return arena->costs.ammotype[type];
+	}
+	else
+		return 0.0;
+}
+
+/*************
+ GetFieldCost
+
+ Return the cost of a field type
+ *************/
+
+float GetFieldCost(u_int8_t type)
+{
+	if(type < MAX_FIELDTYPE)
+	{
+		return arena->costs.fieldtype[type];
+	}
+	else
+		return 0.0;
+}
+
+/*************
+ ScoreLoadCosts
+
+ Load current costs
+ *************/
+
+void ScoreLoadCosts(void)
+{
+	arena->costs.takeoff = 1.0;
+	arena->costs.ammotype[MUNTYPE_MAX] = {0.0, 1.0, 1.0, 1.0, 1.0};
+	arena->costs.buildtype[BUILD_MAX] = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+											  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+											  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+											  1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+	arena->costs.fieldtype[MAX_FIELDTYPE] = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
+												  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+	// arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
+	arena->costs.newpilot = 1.0;
+	arena->costs.informationlost = 1.0;
+	arena->costs.life = 1.0;
+	arena->costs.assist = 1.0;
+	arena->costs.planetransport = 1.0;
+	arena->costs.pilottransport = 1.0;
+	arena->costs.flighthour = 1.0;
 }

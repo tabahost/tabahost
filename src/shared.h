@@ -144,6 +144,7 @@ typedef unsigned int u_int32_t;
 #define MUNTYPE_TORPEDO		2		// munition type
 #define MUNTYPE_BOMB		3		// munition type
 #define MUNTYPE_ROCKET		4		// munition type
+#define MUNTYPE_MAX			5		// max
 #define MUNCAL_7MM			1		// munition caliber
 #define MUNCAL_13MM			2		// munition caliber
 #define MUNCAL_20MM			3		// munition caliber
@@ -580,7 +581,6 @@ typedef struct field_s
 	cv_t		*cv; // linked CV
 	struct city_s *city[MAX_CITYFIELD]; // linked city
 	float		rps[MAX_PLANES];
-	float		cost;
 	building_t	buildings[MAX_BUILDINGS]; // 1st building is radar
 } field_t;
 
@@ -604,7 +604,6 @@ typedef struct damage_s
 	char		name[33];
 	char		abbrev[11];
 	u_int8_t	type;
-	float		cost;
 	int32_t		points[32]; // -1 unused part
 	int32_t		apstop[32];
 	int32_t		imunity[32];
@@ -657,16 +656,18 @@ typedef struct arena_s
 	damage_t	planedamage[MAX_PLANES]; // Set plane armor
 	struct	{
 				float takeoff;
-				float ammotype[MAX_MUNTYPE];
-				float fieldtype[MAX_FIELDTYPE];
-				float newpilot;
-				float informationlost;
-				float life;
-				float assist;
-				float planetransport;
-				float pilottransport;
-				float flighthour;
-			} cost;
+				float ammotype[MUNTYPE_MAX];	// 
+				float buildtype[BUILD_MAX];		// 
+				float fieldtype[MAX_FIELDTYPE];	// 
+				float planemodel[MAX_PLANES];	// LoadDamageModel():24
+				float newpilot;					// 
+				float informationlost;			// 
+				float life;						// 
+				float assist;					// 
+				float planetransport;			// 
+				float pilottransport;			// 
+				float flighthour;				// 
+			} costs;
 	struct	{
 				int32_t	points;
 				int32_t	apstop;
@@ -2370,6 +2371,11 @@ u_int8_t ScoresCheckCaptured(client_t *client);
 void	ScoresCreate(client_t *client);
 void	ResetScores(void);
 void	BackupScores(u_int8_t collect_type);
+float	ScoreTechnologyCost(client_t *client);
+float	GetBuildingCost(u_int8_t type);
+float	GetAmmoCost(u_int8_t type);
+float	GetFieldCost(u_int8_t type);
+void	ScoreLoadCosts(void);
 
 // Variables
 

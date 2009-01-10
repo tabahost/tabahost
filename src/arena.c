@@ -2223,14 +2223,14 @@ void LoadDamageModel(client_t *client)
 				if ((num_rows + 1) > MAX_PLANES)
 					num_rows = MAX_PLANES;
 
-				for (i = 0; i < num_rows; i++)
+				for (i = 1; i <= num_rows; i++)
 				{
 					if ((my_row = mysql_fetch_row(my_result)))
 					{
-						strcpy(arena->planedamage[i + 1].name, Com_MyRow("name"));
-						strcpy(arena->planedamage[i + 1].abbrev, Com_MyRow("abbrev"));
-						arena->planedamage[i + 1].type = Com_Atoi(Com_MyRow("plane_type"));
-						arena->planedamage[i + 1].cost = Com_Atof(Com_MyRow("cost"));
+						strcpy(arena->planedamage[i].name, Com_MyRow("name"));
+						strcpy(arena->planedamage[i].abbrev, Com_MyRow("abbrev"));
+						arena->planedamage[i].type = Com_Atoi(Com_MyRow("plane_type"));
+						arena->costs.planemodel[i] = Com_Atof(Com_MyRow("cost"));
 					}
 					else
 					{
@@ -2238,7 +2238,7 @@ void LoadDamageModel(client_t *client)
 					}
 				}
 
-				maxplanes = i + 1;
+				maxplanes = i;
 
 				Com_Printf(VERBOSE_ALWAYS, "Loading Damage Model. %d planes loaded\n", i);
 			}

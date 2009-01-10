@@ -6871,13 +6871,13 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 				// TODO: SCORE: 
 					
-				if (client->country != building->country)  // TODO: dmgprobe or current armor???????
+				if (client->country != building->country)  // TODO: if credit only damage, ScoreEvent(SCORE_STRUCTDAMAGE, client, .....
 				{
-					ScoreEvent(SCORE_STRUCTURE, client, (int32_t)(100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+					ScoreEvent(SCORE_STRUCTURE, client, building->type);
 				}
 				else
 				{
-					ScoreEvent(SCORE_STRUCTURE, client, (int32_t)(-100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+					ScoreEvent(SCORE_STRUCTURE, client, building->type);
 				}
 			}
 
