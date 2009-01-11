@@ -663,7 +663,6 @@ typedef struct arena_s
 				float newpilot;					// 
 				float informationlost;			// 
 				float life;						// 
-				float assist;					// 
 				float planetransport;			// 
 				float pilottransport;			// 
 				float flighthour;				// 
@@ -2364,7 +2363,7 @@ float	ScoreFlightTimeCost(client_t *client);
 float	ScoreDamageCost(client_t *client);
 float	ScorePlaneLife(client_t *client);
 void	ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client);
-client_t *ScoresCheckKiller(client_t *client);
+int8_t	ScoresCheckKiller(client_t *client, int32_t *maneuver);
 u_int8_t ScoresCheckMedals(client_t *client);
 u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
 u_int8_t ScoresCheckCaptured(client_t *client);
@@ -2375,6 +2374,7 @@ float	ScoreTechnologyCost(client_t *client);
 float	GetBuildingCost(u_int8_t type);
 float	GetAmmoCost(u_int8_t type);
 float	GetFieldCost(u_int8_t type);
+float	ScorePieceDamage(int8_t killer, float event_cost, client_t *client);
 void	ScoreLoadCosts(void);
 
 // Variables

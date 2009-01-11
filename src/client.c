@@ -596,13 +596,13 @@ int ProcessClient(client_t *client)
 								if(near_en)
 								{
 									client->hitby[0] = near_en;
-									client->damby[0] = MAX_UINT32; // ignore compiler warning
+									client->damby[0] = MAX_UINT32; // TODO: Score: change this
 
 									if(nearplane == near_en)
 									near_en = client;
 
 									nearplane->hitby[0] = near_en;
-									nearplane->damby[0] = MAX_UINT32; // ignore compiler warning
+									nearplane->damby[0] = MAX_UINT32; // TODO: Score: change this
 								}
 
 								client->cancollide = -1;
@@ -2155,5 +2155,5 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 	if (!arena->munition[munition].type)
 		return;
 
-	ScoreEvent(SCORE_HARDHIT, client, arena->munition[munition].type);
+	ScoresEvent(SCORE_HARDHIT, client, arena->munition[munition].type);
 }

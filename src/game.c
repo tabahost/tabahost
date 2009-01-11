@@ -4337,9 +4337,9 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						nearplane->cancollide = -1;
 
 						nearplane->hitby[0] = client;
-						nearplane->damby[0] = MAX_UINT32;
+						nearplane->damby[0] = MAX_UINT32;  // TODO: Score: change this
 						client->hitby[0] = nearplane;
-						client->damby[0] = MAX_UINT32;
+						client->damby[0] = MAX_UINT32;  // TODO: Score: change this
 						
 						client->damaged = 1;
 						nearplane->damaged = 1;
@@ -5493,7 +5493,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 		Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
 		Com_LogDescription(EVENT_DESC_AMMO, drop->item, NULL);
 		
-		ScoreEvent(SCORE_DROPITEM, client, arena->munition[drop->item].type);
+		ScoresEvent(SCORE_DROPITEM, client, arena->munition[drop->item].type);
 	}
 }
 
@@ -6208,7 +6208,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	}
 
 	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
-		pvictim->damby[killer] = MAX_UINT32;
+		pvictim->damby[killer] = MAX_UINT32; // TODO: Score: change this
 }
 
 /*************
@@ -6409,7 +6409,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	}
 
 	if (killer >= 0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
-		pvictim->damby[killer] = MAX_UINT32;
+		pvictim->damby[killer] = MAX_UINT32; // TODO: Score: change this
 }
 
 /*************
@@ -6871,13 +6871,13 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 				// TODO: SCORE: 
 					
-				if (client->country != building->country)  // TODO: if credit only damage, ScoreEvent(SCORE_STRUCTDAMAGE, client, .....
+				if (client->country != building->country)  // TODO: if credit only damage, ScoresEvent(SCORE_STRUCTDAMAGE, client, .....
 				{
-					ScoreEvent(SCORE_STRUCTURE, client, building->type);
+					ScoresEvent(SCORE_STRUCTURE, client, building->type);
 				}
 				else
 				{
-					ScoreEvent(SCORE_STRUCTURE, client, building->type);
+					ScoresEvent(SCORE_STRUCTURE, client, building->type);
 				}
 			}
 
@@ -6924,11 +6924,11 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	{
 		if (client->country != building->country)
 		{
-			ScoreEvent(SCORE_STRUCTDAMAGE, client, (int32_t)(100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+			ScoresEvent(SCORE_STRUCTDAMAGE, client, (int32_t)(100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
 		}
 		else
 		{
-			ScoreEvent(SCORE_STRUCTDAMAGE, client, (int32_t)(-100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+			ScoresEvent(SCORE_STRUCTDAMAGE, client, (int32_t)(-100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
 		}
 
 		building->armor -= dmgprobe;
@@ -7243,7 +7243,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 			if (status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
 				client->dronetimer = 0;
-				ScoresCheckKiller(client);
+				ScoresCheckKiller(client, NULL);
 				ClearKillers(client);
 			}
 			else
@@ -7253,7 +7253,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 		{
 			if (status_damage)
 			{
-				ScoresCheckKiller(client);
+				ScoresCheckKiller(client, NULL);
 				ClearKillers(client);
 
 				if (client->related[0])
@@ -7283,7 +7283,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 		{
 			if (status_damage)
 			{
-				ScoresCheckKiller(client);
+				ScoresCheckKiller(client, NULL);
 				ClearKillers(client);
 				RemoveDrone(client);
 				return;
@@ -7295,7 +7295,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 		{
 			if (status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
-				ScoresCheckKiller(client);
+				ScoresCheckKiller(client, NULL);
 				ClearKillers(client);
 				RemoveDrone(client);
 				return;

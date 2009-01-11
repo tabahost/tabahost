@@ -150,6 +150,7 @@ int main(int argc, char *argv[])
 	arena->year = curryear->value;
 
 	LoadDamageModel(NULL);
+	ScoreLoadCosts();
 
 	if(rps->value)
 	{
@@ -495,7 +496,7 @@ void RunFrame(void)
 					{
 						if(clients[i].infly)
 						{
-							ScoresEvent(SCORE_DISCO, client, 0);
+							ScoresEvent(SCORE_DISCO, &clients[i], 0);
 
 							Com_LogEvent(EVENT_DISCO, clients[i].id, 0);
 							Com_LogDescription(EVENT_DESC_PLIP, 0, clients[i].ip);

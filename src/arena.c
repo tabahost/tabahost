@@ -2240,7 +2240,7 @@ void LoadDamageModel(client_t *client)
 
 				maxplanes = i;
 
-				Com_Printf(VERBOSE_ALWAYS, "Loading Damage Model. %d planes loaded\n", i);
+				Com_Printf(VERBOSE_ALWAYS, "Loading Damage Model. %d planes loaded\n", i-1);
 			}
 			else
 			{
@@ -2506,12 +2506,12 @@ void LoadDamageModel(client_t *client)
 
 								for (i = 1; i < num_fields /*BUILD_MAX*/; i++)
 								{
-									arena->buildarmor[i].cost = Com_Atof(my_row[i]);
+									arena->costs.buildtype[i] = Com_Atoi(my_row[i]);
 								}
 							}
 							else
 							{
-								Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm-cost): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "LoadDamageModel(grounddm-costs): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 							}
 						}
 						else
@@ -2983,7 +2983,7 @@ void CaptureField(u_int8_t field, client_t *client)
 
 	//score
 
-	ScoreEvent(SCORE_FIELDCAPT, client, arena->fields[field - 1].type);
+	ScoresEvent(SCORE_FIELDCAPT, client, arena->fields[field - 1].type);
 
 	for (i = 0; i < MAX_BUILDINGS; i++) // Get minimum time
 	{
