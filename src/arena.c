@@ -2231,6 +2231,7 @@ void LoadDamageModel(client_t *client)
 						strcpy(arena->planedamage[i].abbrev, Com_MyRow("abbrev"));
 						arena->planedamage[i].type = Com_Atoi(Com_MyRow("plane_type"));
 						arena->costs.planemodel[i] = Com_Atof(Com_MyRow("cost"));
+						arena->costs.planeweight[i] = Com_Atof(Com_MyRow("weight"));
 					}
 					else
 					{

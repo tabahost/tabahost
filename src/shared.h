@@ -660,7 +660,9 @@ typedef struct arena_s
 				float buildtype[BUILD_MAX];		// 
 				float fieldtype[MAX_FIELDTYPE];	// 
 				float planemodel[MAX_PLANES];	// LoadDamageModel():24
+				float planeweight[MAX_PLANES];	// LoadDamageModel():25
 				float newpilot;					// 
+				float technologylost;			//
 				float informationlost;			// 
 				float life;						// 
 				float planetransport;			// 

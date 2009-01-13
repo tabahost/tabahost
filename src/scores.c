@@ -485,7 +485,7 @@ float ScorePlaneCost(client_t *client)
 
 float ScoreFixPlaneCost(float plane_life, float plane_cost)
 {
-	return 0.0;
+	return plane_cost * (0.02 + (1.0 - plane_life) * 0.98);
 }
 
 /*************
@@ -498,15 +498,23 @@ float ScorePlaneTransportCost(client_t *client)
 {
 	u_int32_t distance;
 	int16_t field;
-
-	field = NearestField(client->posxy[0][0], client->posxy[1][0], (client->country == 1) ? 3 : 1, TRUE, FALSE, &distance);
-
-	if(field >= 0)
+	
+	if(client->plane < maxplanes)
 	{
-		if(distance > 3600)
-			return distance * arena->costs.planetransport;
-		else
-			return 0.0;
+		field = NearestField(client->posxy[0][0], client->posxy[1][0], (client->country == 1) ? 3 : 1, TRUE, FALSE, &distance);
+	
+		if(field >= 0)
+		{
+			if(distance > 3280) // 1 km
+				return ((float)(distance - 3280)/3280) * arena->costs.planeweight[client->plane] * arena->costs.planetransport;
+			else
+				return 0.0;
+		}
+	}
+	else
+	{
+		Com_Printf(VERBOSE_WARNING, "ScorePlaneTransportCost() %s invalid plane %d\n", client->longnick, client->plane);
+		return 0.0;
 	}
 }
 
@@ -525,8 +533,8 @@ float ScorePilotTransportCost(client_t *client)
 
 	if(field >= 0)
 	{
-		if(distance > 3600)
-			return distance * arena->costs.pilottransport;
+		if(distance > 32808) // 10 km
+			return ((float)(distance - 32808)/3280) * arena->costs.pilottransport;
 		else
 			return 0.0;
 	}
@@ -1973,7 +1981,7 @@ vdate_tod_end=%04.0f-%02.0f-%02.0f\n",
 
 float ScoreTechnologyCost(client_t *client)
 {
-	return 1.0;
+	return ScorePlaneLife(client) * ScorePlaneCost(client) * arena->costs.technologylost;
 }
 
 /*************
@@ -2038,13 +2046,34 @@ void ScoreLoadCosts(void)
 	//										  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 	//										  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 	//										  1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+	arena->costs.fieldtype[FIELD_LITTLE] =
+	arena->costs.fieldtype[FIELD_MEDIUM] =
+	arena->costs.fieldtype[FIELD_MAIN] =
+	arena->costs.fieldtype[FIELD_CV] =
+	arena->costs.fieldtype[FIELD_CARGO] =
+	arena->costs.fieldtype[FIELD_DD] =
+	arena->costs.fieldtype[FIELD_SUBMARINE] =
+	arena->costs.fieldtype[FIELD_RADAR] =
+	arena->costs.fieldtype[FIELD_BRIDGE] =
+	arena->costs.fieldtype[FIELD_CITY] =
+	arena->costs.fieldtype[FIELD_PORT] =
+	arena->costs.fieldtype[FIELD_CONVOY] =
+	arena->costs.fieldtype[FIELD_FACTORY] =
+	arena->costs.fieldtype[FIELD_REFINERY] =
+	arena->costs.fieldtype[FIELD_OPENFIELD] =
+	arena->costs.fieldtype[FIELD_WB3POST] =
+	arena->costs.fieldtype[FIELD_WB3VILLAGE] =
+	arena->costs.fieldtype[FIELD_WB3TOWN] =
+	arena->costs.fieldtype[FIELD_WB3PORT] =
 	//arena->costs.fieldtype[MAX_FIELDTYPE] = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 	//											  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+	// arena->costs.planeweight[MAX_PLANES];	// LoadDamageModel():25
 	// arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
-	arena->costs.newpilot = 1.0;
+	arena->costs.newpilot = 150.0;
+	arena->costs.technologylost = 0.5;
 	arena->costs.informationlost = 1.0;
-	arena->costs.life = 1.0;
-	arena->costs.planetransport = 0.1;
-	arena->costs.pilottransport = 0.01;
-	arena->costs.flighthour = 1.0;
+	arena->costs.life = 100.0;
+	arena->costs.planetransport = 0.333; // plane_price / (distance (km) * weight (ton))
+	arena->costs.pilottransport = 0.066; // * 0.07
+	arena->costs.flighthour = 0.1;
 }
