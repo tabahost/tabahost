@@ -371,8 +371,10 @@ void ScoreFieldCapture(u_int8_t field)
 	if(field < fields->value)
 	{
 		fieldcost = GetFieldCost(arena->fields[field].type);
-
-		for(totaldamage = numbombers = numcargos = i = 0; i < MAX_HITBY; i++) // account bombers and cargos
+		
+		bomberdamage = cargodamage = numbombers = numcargos = 0;
+		
+		for(i = 0; i < MAX_HITBY; i++) // account bombers and cargos
 		{
 			if(IsCargo(NULL, arena->fields[field].planeby[i]))
 			{
@@ -2051,11 +2053,11 @@ float GetBuildingCost(u_int8_t type)
  Return the cost of a munition type
  *************/
 
-float GetAmmoCost(u_int8_t type)
+float GetAmmoCost(u_int8_t ammo)
 {
-	if(type < MAX_MUNTYPE)
+	if(ammo < MAX_MUNTYPE)
 	{
-		return arena->costs.ammotype[type];
+		return arena->costs.ammocost[ammo];
 	}
 	else
 		return 0.0;

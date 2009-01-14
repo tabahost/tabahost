@@ -578,7 +578,7 @@ typedef struct field_s
 	u_int8_t	paras;
 	u_int32_t	alert;
 	u_int32_t	warehouse;
-	client_t	*hitby[MAX_HITBY]; // players who hit field
+	struct client_s	*hitby[MAX_HITBY]; // players who hit field
 	u_int32_t	damby[MAX_HITBY]; // damage get from any player above
 	u_int16_t	planeby[MAX_HITBY]; // last plane used by killer
 	cv_t		*cv; // linked CV
@@ -2379,8 +2379,9 @@ void	ResetScores(void);
 void	BackupScores(u_int8_t collect_type);
 float	ScoreTechnologyCost(client_t *client);
 float	GetBuildingCost(u_int8_t type);
-float	GetAmmoCost(u_int8_t type);
+float	GetAmmoCost(u_int8_t ammo);
 float	GetFieldCost(u_int8_t type);
+void	ScoreFieldCapture(u_int8_t field);
 float	ScorePieceDamage(int8_t killer, float event_cost, client_t *client);
 void	ScoreLoadCosts(void);
 
