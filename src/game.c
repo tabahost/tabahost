@@ -5514,20 +5514,26 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 	if (client->attr)
 		PPrintf(client, RADIO_GREEN, "DEBUG: tonnage ammoID: %d, field: %d, distance: %d", wb3tonnage->ammo, ntohs(wb3tonnage->field), ntohs(wb3tonnage->distance));
 	
-	if(ammo = GetMunition(wb3tonnage->ammo))
+	if(!oldcapt->value)
 	{
-		field = ntohs(wb3tonnage->field);
-		distance = ntohs(wb3tonnage->distance);
-		
-		if(field && field <= fields->value && distance < GetFieldRadius(arena->fields[field-1].type))
+		if(ammo = GetMunition(wb3tonnage->ammo))
 		{
-			if(client->country != arena->fields[field-1].country)
-				arena->fields[field-1].tonnage += (ammo->he / 50);
+			field = ntohs(wb3tonnage->field);
+			distance = ntohs(wb3tonnage->distance);
+			
+			if(field && field <= fields->value && distance < GetFieldRadius(arena->fields[field-1].type))
+			{
+				if(client->country != arena->fields[field-1].country)
+				{
+					AddFieldDamage(field-1, ammo->he, client);
+					arena->fields[field-1].tonnage += (ammo->he / 50);
+				}
+			}
 		}
-	}
-	else
-	{
-		Com_Printf(VERBOSE_WARNING, "WB3TonnageOnTarget() unknown munition %d from plane %d", wb3tonnage->ammo, client->plane);
+		else
+		{
+			Com_Printf(VERBOSE_WARNING, "WB3TonnageOnTarget() unknown munition %d from plane %d", wb3tonnage->ammo, client->plane);
+		}
 	}
 }
 
@@ -6740,6 +6746,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, client_t *client)
 {
 	int32_t apabsorb, dmgprobe, armor;
+	int32_t score;
 	u_int16_t i;
 
 	if (!building)
@@ -6802,6 +6809,16 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 			}
 		}
 	}
+
+	if (!oldcapt->value /*ToT*/ || IsVitalBuilding(building))
+	{
+		if(oldcapt->value || (ap)) // TODO: Score: DM: add AP to all type 1 guns
+		{
+			AddFieldDamage(building->field-1, dmgprobe, client);
+		}
+	}
+
+	score = (100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL));
 
 	if ((int32_t)building->armor <= dmgprobe)
 	{
@@ -6869,15 +6886,15 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 					client->structstod++;
 				}
 
-				// TODO: SCORE: 
-					
-				if (client->country != building->country)  // TODO: if credit only damage, ScoresEvent(SCORE_STRUCTDAMAGE, client, .....
+				if (client->country != building->country)
 				{
+					ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
 					ScoresEvent(SCORE_STRUCTURE, client, building->type);
 				}
 				else
 				{
-					ScoresEvent(SCORE_STRUCTURE, client, building->type);
+					ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
+					ScoresEvent(SCORE_STRUCTURE, client, (int32_t)(-1 * building->type));
 				}
 			}
 
@@ -6924,11 +6941,11 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	{
 		if (client->country != building->country)
 		{
-			ScoresEvent(SCORE_STRUCTDAMAGE, client, (int32_t)(100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+			ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
 		}
 		else
 		{
-			ScoresEvent(SCORE_STRUCTDAMAGE, client, (int32_t)(-100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL)));
+			ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
 		}
 
 		building->armor -= dmgprobe;

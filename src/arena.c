@@ -2172,6 +2172,7 @@ void LoadAmmo(client_t *client)
 							strcpy(arena->munition[i].name, Com_MyRow("name"));
 						if (Com_MyRow("abbrev"))
 							strcpy(arena->munition[i].abbrev, Com_MyRow("abbrev"));
+						arena->costs.ammocost[i] = Com_Atof(Com_MyRow("cost"));
 					}
 					else
 					{
@@ -2984,7 +2985,7 @@ void CaptureField(u_int8_t field, client_t *client)
 
 	//score
 
-	ScoresEvent(SCORE_FIELDCAPT, client, arena->fields[field - 1].type);
+	ScoresEvent(SCORE_FIELDCAPT, client, field - 1);
 
 	for (i = 0; i < MAX_BUILDINGS; i++) // Get minimum time
 	{
@@ -4305,6 +4306,78 @@ void NoopArenalist(void)
 	}
 
 	Com_Close(&UdpSock);
+}
+
+/*************
+ AddFieldDamage
+
+ Add damage to a field from a player
+ *************/
+
+void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
+{
+	int8_t bomber;
+
+	if(field < fields->value)
+	{
+		bomber = AddBomber(field, client);
+
+		if(!(bomber < 0))
+		{
+			arena->fields[field].damby[bomber] += damage;
+		}
+	}
+}
+
+/*************
+ AddBomber
+
+ Add a new bober assist and return its location or just return its location if already exists (added clean disconnected players)
+ *************/
+
+int8_t AddBomber(u_int8_t field, client_t *client)
+{
+	u_int8_t i;
+	int8_t found, empty;
+
+	found = empty = -1;
+
+	if(field < fields->value)
+	{
+		for (i = 0; i < MAX_HITBY; i++)
+		{
+			if (arena->fields[field].hitby[i])
+			{
+				if (arena->fields[field].hitby[i] == client && arena->fields[field].hitby[i]->inuse)
+					found = i;
+
+				if (!arena->fields[field].hitby[i]->inuse) // player had disconnected
+				{
+					arena->fields[field].hitby[i] = NULL; // remove disconnected players
+					arena->fields[field].damby[i] = 0;
+					arena->fields[field].planeby[i] = 0;
+					empty = i;
+				}
+			}
+			else
+			{
+				empty = i;
+			}
+		}
+
+		if (!(found < 0)) // if found, update killer plane
+		{
+			arena->fields[field].planeby[found] = client->attached ? client->attached->plane : client->plane;
+		}
+		else if (!(empty < 0)) // if not found, add to array if slot available
+		{
+			arena->fields[field].hitby[empty] = client;
+			arena->fields[field].planeby[empty] = client->attached ? client->attached->plane : client->plane;
+			found = empty;
+		}
+	}
+
+	return found;
 }
 
 /*************

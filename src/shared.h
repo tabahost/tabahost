@@ -578,6 +578,9 @@ typedef struct field_s
 	u_int8_t	paras;
 	u_int32_t	alert;
 	u_int32_t	warehouse;
+	client_t	*hitby[MAX_HITBY]; // players who hit field
+	u_int32_t	damby[MAX_HITBY]; // damage get from any player above
+	u_int16_t	planeby[MAX_HITBY]; // last plane used by killer
 	cv_t		*cv; // linked CV
 	struct city_s *city[MAX_CITYFIELD]; // linked city
 	float		rps[MAX_PLANES];
@@ -656,7 +659,7 @@ typedef struct arena_s
 	damage_t	planedamage[MAX_PLANES]; // Set plane armor
 	struct	{
 				float takeoff;
-				float ammotype[MUNTYPE_MAX];	// 
+				float ammocost[MAX_MUNTYPE];	// LoadAmmo():29
 				float buildtype[BUILD_MAX];		// 
 				float fieldtype[MAX_FIELDTYPE];	// 
 				float planemodel[MAX_PLANES];	// LoadDamageModel():24
@@ -2228,6 +2231,8 @@ u_int8_t LoadEarthMap(char *FileName);
 u_int8_t SaveEarthMap(char *FileName);
 int32_t IsVisible(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2);
 void	NoopArenalist(void);
+void	AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client);
+int8_t	AddBomber(u_int8_t field, client_t *client);
 void	SetBFieldType(building_t *buildings, u_int16_t type);
 void	CalcFactoryBuildings(void);
 void	DebiteFactoryBuildings(city_t *city);

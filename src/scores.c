@@ -125,15 +125,6 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			}
 			break;
 		case SCORE_STRUCTURE:
-			if(penalty > 0)
-			{
-				client->score.groundscore += GetBuildingCost(misc);
-			}
-			else
-			{
-				client->score.penaltyscore += GetBuildingCost(misc);
-			}
-
 			if (misc == BUILD_CV)
 			{
 				strcat(my_query, " cvs = cvs + '1'");
@@ -160,7 +151,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			}
 			break;
 		case SCORE_FIELDCAPT:
-				client->score.captscore += GetFieldCost(misc);
+				ScoreFieldCapture(misc);
+				//client->score.captscore += GetFieldCost(misc); // TODO: Score field capt
 				strcat(my_query, " fieldscapt = fieldscapt + '1'");
 			break;
 		case SCORE_LANDED: ///////// HERE BEGINS EVENTS THAT MAY HAVE KILLERS /////////
@@ -361,6 +353,59 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		ScorePieceDamage(-1, event_cost, client);
 	
 	ClearKillers(client);
+}
+
+/*************
+ ScoreFieldCapture
+
+ Give score to all capture bombers
+ *************/
+
+void ScoreFieldCapture(u_int8_t field)
+{
+	char sql_query[1024];
+	float fieldcost;
+	u_int8_t numbombers, numcargos, i;
+	u_int32_t bomberdamage, cargodamage;
+
+	if(field < fields->value)
+	{
+		fieldcost = GetFieldCost(arena->fields[field].type);
+
+		for(totaldamage = numbombers = numcargos = i = 0; i < MAX_HITBY; i++) // account bombers and cargos
+		{
+			if(IsCargo(NULL, arena->fields[field].planeby[i]))
+			{
+				cargodamage += arena->fields[field].damby[i];
+				numcargos++;
+			}
+			else
+			{
+				bomberdamage += arena->fields[field].damby[i];
+				numbombers++;
+			}
+		}
+
+		for(i = 0; i < MAX_HITBY; i++) // give points
+		{
+			if(arena->fields[field].hitby[i] && arena->fields[field].hitby[i]->inuse)
+			{
+				if(IsCargo(NULL, arena->fields[field].planeby[i]))
+				{
+					arena->fields[field].hitby[i]->score.captscore += fieldcost * (arena->fields[field].damby[i] / bomberdamage) * (numbombers / (numcargos + numbombers));
+				}
+				else
+				{
+					arena->fields[field].hitby[i]->score.captscore += fieldcost * (arena->fields[field].damby[i] /cargodamage) * (numcargos / (numcargos + numbombers));
+				}
+			}
+
+			// clear list
+			arena->fields[field].hitby[i] = NULL;
+			arena->fields[field].damby[i] = 0;
+			arena->fields[field].planeby[i] = 0;
+		}
+	}
 }
 
 /*************
@@ -2041,32 +2086,67 @@ float GetFieldCost(u_int8_t type)
 void ScoreLoadCosts(void)
 {
 	arena->costs.takeoff = 1.0;
-	//arena->costs.ammotype[MUNTYPE_MAX] = {0.0, 1.0, 1.0, 1.0, 1.0};
-	//arena->costs.buildtype[BUILD_MAX] = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-	//										  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-	//										  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-	//										  1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-	arena->costs.fieldtype[FIELD_LITTLE] =
-	arena->costs.fieldtype[FIELD_MEDIUM] =
-	arena->costs.fieldtype[FIELD_MAIN] =
-	arena->costs.fieldtype[FIELD_CV] =
-	arena->costs.fieldtype[FIELD_CARGO] =
-	arena->costs.fieldtype[FIELD_DD] =
-	arena->costs.fieldtype[FIELD_SUBMARINE] =
-	arena->costs.fieldtype[FIELD_RADAR] =
-	arena->costs.fieldtype[FIELD_BRIDGE] =
-	arena->costs.fieldtype[FIELD_CITY] =
-	arena->costs.fieldtype[FIELD_PORT] =
-	arena->costs.fieldtype[FIELD_CONVOY] =
-	arena->costs.fieldtype[FIELD_FACTORY] =
-	arena->costs.fieldtype[FIELD_REFINERY] =
-	arena->costs.fieldtype[FIELD_OPENFIELD] =
-	arena->costs.fieldtype[FIELD_WB3POST] =
-	arena->costs.fieldtype[FIELD_WB3VILLAGE] =
-	arena->costs.fieldtype[FIELD_WB3TOWN] =
-	arena->costs.fieldtype[FIELD_WB3PORT] =
-	//arena->costs.fieldtype[MAX_FIELDTYPE] = {0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
-	//											  1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+
+//	arena->costs.ammocost[MUNTYPE_BULLET] = 0.001;  // LoadAmmo():29
+//	arena->costs.ammotype[MUNTYPE_TORPEDO] = 10.0;
+//	arena->costs.ammotype[MUNTYPE_BOMB] = 10.0;
+//	arena->costs.ammotype[MUNTYPE_ROCKET] = 1.0;
+
+	arena->costs.buildtype[BUILD_50CALACK] = 1.0;
+	arena->costs.buildtype[BUILD_20MMACK] = 2.0;
+	arena->costs.buildtype[BUILD_40MMACK] = 3.0;
+	arena->costs.buildtype[BUILD_88MMFLAK] = 4.0;
+	arena->costs.buildtype[BUILD_TOWER] = 10.0;
+	arena->costs.buildtype[BUILD_HANGAR] = 100.0;
+	arena->costs.buildtype[BUILD_FUEL] = 50.0;
+	arena->costs.buildtype[BUILD_AMMO] = 50.0;
+	arena->costs.buildtype[BUILD_RADAR] = 50.0;
+	arena->costs.buildtype[BUILD_WARE] = 70.0;
+	arena->costs.buildtype[BUILD_RADIOHUT] = 50.0;
+	arena->costs.buildtype[BUILD_ANTENNA] = 10.0;
+	arena->costs.buildtype[BUILD_CV] = 200.0;
+	arena->costs.buildtype[BUILD_DESTROYER] = 100.0;
+	arena->costs.buildtype[BUILD_CRUISER] = 100.0;
+	arena->costs.buildtype[BUILD_CARGO] = 70.0;
+	arena->costs.buildtype[BUILD_SUBMARINE] = 70.0;
+	arena->costs.buildtype[BUILD_BRIDGE] = 50.0;
+	arena->costs.buildtype[BUILD_SPECIALBUILD] = 70.0;
+	arena->costs.buildtype[BUILD_FACTORY] = 70.0;
+	arena->costs.buildtype[BUILD_BARRACKS] = 1.0;
+	arena->costs.buildtype[BUILD_STATICS] = 10.0;
+	arena->costs.buildtype[BUILD_REFINERY] = 70.0;
+	arena->costs.buildtype[BUILD_PLANEFACTORY] = 90.0;
+	arena->costs.buildtype[BUILD_BUILDING] = 30.0;
+	arena->costs.buildtype[BUILD_CRANE] = 50.0;
+	arena->costs.buildtype[BUILD_STRATEGIC] = 30.0;
+	arena->costs.buildtype[BUILD_ARTILLERY] = 3.0;
+	arena->costs.buildtype[BUILD_HUT] = 10.0;
+	arena->costs.buildtype[BUILD_TRUCK] = 10.0;
+	arena->costs.buildtype[BUILD_TREE] = 0.0;
+	arena->costs.buildtype[BUILD_SPAWNPOINT] = 1.0;
+	arena->costs.buildtype[BUILD_HOUSE] = 10.0;
+	arena->costs.buildtype[BUILD_ROCK] = 0.0;
+	arena->costs.buildtype[BUILD_FENCE] = 0.0;
+
+	arena->costs.fieldtype[FIELD_CV] = 200.0;
+	arena->costs.fieldtype[FIELD_CARGO] = 150.0;
+	arena->costs.fieldtype[FIELD_DD] = 150.0;
+	arena->costs.fieldtype[FIELD_SUBMARINE] = 100.0;
+	arena->costs.fieldtype[FIELD_RADAR] = 20.0;
+	arena->costs.fieldtype[FIELD_BRIDGE] = 50.0;
+	arena->costs.fieldtype[FIELD_CITY] = 150.0;
+	arena->costs.fieldtype[FIELD_PORT] = 150.0;
+	arena->costs.fieldtype[FIELD_CONVOY] = 200.0;
+	arena->costs.fieldtype[FIELD_FACTORY] = 100.0;
+	arena->costs.fieldtype[FIELD_REFINERY] = 100.0;
+	arena->costs.fieldtype[FIELD_OPENFIELD] = 50.0;
+	arena->costs.fieldtype[FIELD_LITTLE] = 200.0;
+	arena->costs.fieldtype[FIELD_MEDIUM] = 300.0;
+	arena->costs.fieldtype[FIELD_MAIN] = 400.0;
+	arena->costs.fieldtype[FIELD_WB3POST] = 20.0;
+	arena->costs.fieldtype[FIELD_WB3VILLAGE] = 70.0;
+	arena->costs.fieldtype[FIELD_WB3TOWN] = 150.0;
+	arena->costs.fieldtype[FIELD_WB3PORT] = 150.0;
 	// arena->costs.planeweight[MAX_PLANES];	// LoadDamageModel():25
 	// arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
 	arena->costs.newpilot = 150.0;
