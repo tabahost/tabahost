@@ -154,6 +154,7 @@ typedef unsigned int u_int32_t;
 #define VAR_ARCHIVE			1		// set to cause it to be saved to config.cfg
 #define VAR_NOSET			2		// block variable from change value
 #define VAR_ADMIN			4		// only admins can change this variable
+#define MORTAR_BOMB			88		// 250Kg AP
 #define MORTAR				585.0	// mortar velocity (ft/s) (492, range= 10697; 585, range = 15072)
 #define TONNAGE_RECOVER		5		// Amount of Kg field will recover per second
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s²)
@@ -659,7 +660,7 @@ typedef struct arena_s
 	damage_t	planedamage[MAX_PLANES]; // Set plane armor
 	struct	{
 				float takeoff;
-				float ammocost[MAX_MUNTYPE];	// LoadAmmo():29
+				float ammotype[MAX_MUNTYPE];	// LoadAmmo():29
 				float buildtype[BUILD_MAX];		// 
 				float fieldtype[MAX_FIELDTYPE];	// 
 				float planemodel[MAX_PLANES];	// LoadDamageModel():24
@@ -2019,7 +2020,7 @@ char	*Com_TimeSeconds(u_int32_t seconds);
 char	*Com_Padloc(int32_t x, int32_t y);
 int		d_mysql_query(MYSQL *mysql, const char *query);
 int		Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query);
-void	Com_MySQL_Flush(client_t *client, MYSQL *mysql, char *file, u_int32_t line);
+void	Com_MySQL_Flush(MYSQL *mysql, char *file, u_int32_t line);
 void	Com_Printfhex(unsigned char *buffer, int len);
 int		Com_Stricmp (char *s1, char *s2);
 u_int8_t Com_CheckAphaNum(char *string);
@@ -2379,7 +2380,7 @@ void	ResetScores(void);
 void	BackupScores(u_int8_t collect_type);
 float	ScoreTechnologyCost(client_t *client);
 float	GetBuildingCost(u_int8_t type);
-float	GetAmmoCost(u_int8_t ammo);
+float	GetAmmoCost(u_int8_t type);
 float	GetFieldCost(u_int8_t type);
 void	ScoreFieldCapture(u_int8_t field);
 float	ScorePieceDamage(int8_t killer, float event_cost, client_t *client);

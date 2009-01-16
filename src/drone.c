@@ -1280,11 +1280,11 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 				client->countrytime = (float) 200 * velz / GRAVITY;
 
 				if (wb3->value)
-					mun = 88; // 250kg AP
+					mun = MORTAR_BOMB; // 250kg AP
 				else
 					mun = 113; // Flare
 
-				AddBomb(0x01F9, destx, desty, mun/*Mortar*/, MORTAR, client->countrytime, client->related[0]);
+				AddBomb(0x01F9, destx, desty, mun/*Mortar*/, MORTAR, client->countrytime, client); // TODO: Scores: Check side effects of not relate this with player
 
 				client->countrytime += 100; // give one second to commandos change target.
 			}

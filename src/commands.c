@@ -222,12 +222,13 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 				if (d_mysql_query(&my_sock, my_query))
 				{
 					Com_Printf(VERBOSE_WARNING, "Cmd_Saveammo(): couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+					// TODO: FIXME: add sleep here?
 					mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 					return;
 				}
 				else
 				{
-					Com_MySQL_Flush(client, &my_sock,__FILE__ , __LINE__);
+					Com_MySQL_Flush(&my_sock,__FILE__ , __LINE__);
 				}
 
 				my_query[0] = '\0';
@@ -3810,7 +3811,7 @@ void Cmd_Clear(client_t *client)
 	{
 		client->lastscore = client->streakscore = client->killstod = client->structstod = client->ranking = 0;
 
-		Com_MySQL_Flush(client, &my_sock, __FILE__, __LINE__);
+		Com_MySQL_Flush(&my_sock, __FILE__, __LINE__);
 
 		PPrintf(client, RADIO_LIGHTYELLOW, "Your score is cleared");
 		Com_Printf(VERBOSE_DEBUG, "Score cleared\n");
@@ -3989,7 +3990,7 @@ void Cmd_Jsquad(client_t *client)
 					client->squadron = client->invite->id;
 					client->squad_flag = SQUADRON_INVITE;
 
-					Com_MySQL_Flush(client, &my_sock, __FILE__, __LINE__);
+					Com_MySQL_Flush(&my_sock, __FILE__, __LINE__);
 
 					PPrintf(client->invite, RADIO_YELLOW,"%s joined your squadron" , client->longnick);
 					PPrintf(client, RADIO_YELLOW, "You have joined a squadron");

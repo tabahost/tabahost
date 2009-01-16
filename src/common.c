@@ -910,7 +910,7 @@ int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
  This function flushes multiple statements results
  *************/
 
-void Com_MySQL_Flush(client_t *client, MYSQL *mysql, char *file, u_int32_t line)
+void Com_MySQL_Flush(MYSQL *mysql, char *file, u_int32_t line)
 {
 	MYSQL_RES *result= NULL;
 	int16_t status = 0;

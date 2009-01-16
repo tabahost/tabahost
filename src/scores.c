@@ -371,7 +371,7 @@ void ScoreFieldCapture(u_int8_t field)
 	if(field < fields->value)
 	{
 		fieldcost = GetFieldCost(arena->fields[field].type);
-		
+
 		bomberdamage = cargodamage = numbombers = numcargos = 0;
 		
 		for(i = 0; i < MAX_HITBY; i++) // account bombers and cargos
@@ -388,17 +388,22 @@ void ScoreFieldCapture(u_int8_t field)
 			}
 		}
 
+		if (mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
+		Com_Printf(VERBOSE_ERROR, "%d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+
+		sql_query[0] = '\0';
+
 		for(i = 0; i < MAX_HITBY; i++) // give points
 		{
-			if(arena->fields[field].hitby[i] && arena->fields[field].hitby[i]->inuse)
+			if(arena->fields[field].hitby[i] && arena->fields[field].hitby[i]->inuse && !arena->fields[field].hitby[i]->drone)
 			{
 				if(IsCargo(NULL, arena->fields[field].planeby[i]))
 				{
-					arena->fields[field].hitby[i]->score.captscore += fieldcost * (arena->fields[field].damby[i] / bomberdamage) * (numbombers / (numcargos + numbombers));
+					arena->fields[field].hitby[i]->score.captscore += fieldcost * (arena->fields[field].damby[i] / cargodamage) * (numcargos / (numcargos + numbombers));
 				}
 				else
 				{
-					arena->fields[field].hitby[i]->score.captscore += fieldcost * (arena->fields[field].damby[i] /cargodamage) * (numcargos / (numcargos + numbombers));
+					arena->fields[field].hitby[i]->score.captscore += fieldcost * (arena->fields[field].damby[i] / bomberdamage) * (numbombers / (numcargos + numbombers));
 				}
 			}
 
@@ -407,7 +412,71 @@ void ScoreFieldCapture(u_int8_t field)
 			arena->fields[field].damby[i] = 0;
 			arena->fields[field].planeby[i] = 0;
 		}
+
+		if(sql_query[0] != '\0')
+		{
+			if (d_mysql_query(&my_sock, sql_query))
+			{
+				Com_Printf(VERBOSE_WARNING, "ScoreFieldCapture(): couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+				// TODO: FIXME: add sleep here?
+				mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
+				return;
+			}
+			else
+			{
+				Com_MySQL_Flush(&my_sock,__FILE__ , __LINE__);
+			}
+		}
+		
+#ifdef  _WIN32
+		sleep(140);
+#else			
+		usleep(140000);
+#endif
+		mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 	}
+
+////////////////***** ////
+
+//	for (i = 0; i < MAX_HITBY; i++) // check who hit player
+//	{
+//		if (client->hitby[i] && client->damby[i] && !client->hitby[i]->drone && client->hitby[i]->inuse)
+//		{
+//			if ((client->hitby[i] != client)) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
+//			{
+//				score = (client->damby[i]/totaldamage) * event_cost;
+//				
+//				if(killer == i)
+//					score += event_cost;
+//				
+//				if (client->hitby[i]->country != client->country) // if enemy
+//				{
+//					if (IsFighter(NULL, client->planeby[i]))
+//					{
+//						sprintf(sql_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
+//					}
+//					else if (IsBomber(NULL, client->planeby[i]))
+//					{
+//						sprintf(sql_query, "%sUPDATE score_bomber SET bomber_score = bomber_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
+//					}
+//					else if (IsGround(NULL, client->planeby[i]))
+//					{
+//						sprintf(sql_query, "%sUPDATE score_ground SET ground_score = ground_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
+//					}
+//					else
+//					{
+//						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+//						sprintf(sql_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
+//					}
+//				}
+//				else // friendly hit... tsc, tsc, tsc...
+//				{
+//					sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
+//				}
+//			}
+//		}
+//	}
+	
 }
 
 /*************
@@ -483,12 +552,13 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 			if (d_mysql_query(&my_sock, my_query))
 			{
 				Com_Printf(VERBOSE_WARNING, "ScorePieceDamage(): couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+				// TODO: FIXME: add sleep here?
 				mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 				return;
 			}
 			else
 			{
-				Com_MySQL_Flush(client, &my_sock,__FILE__ , __LINE__);
+				Com_MySQL_Flush(&my_sock,__FILE__ , __LINE__);
 			}
 		}
 		
@@ -497,6 +567,7 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 #else			
 		usleep(140000);
 #endif
+		mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 	}
 	
 	return totaldamage;
@@ -2053,11 +2124,11 @@ float GetBuildingCost(u_int8_t type)
  Return the cost of a munition type
  *************/
 
-float GetAmmoCost(u_int8_t ammo)
+float GetAmmoCost(u_int8_t type)
 {
-	if(ammo < MAX_MUNTYPE)
+	if(type < MAX_MUNTYPE)
 	{
-		return arena->costs.ammocost[ammo];
+		return arena->costs.ammotype[type];
 	}
 	else
 		return 0.0;
@@ -2087,48 +2158,45 @@ float GetFieldCost(u_int8_t type)
 
 void ScoreLoadCosts(void)
 {
-	arena->costs.takeoff = 1.0;
+//	arena->costs.buildtype[BUILD_50CALACK] = 1.0; // LoadDamageModel
+//	arena->costs.buildtype[BUILD_20MMACK] = 2.0;
+//	arena->costs.buildtype[BUILD_40MMACK] = 3.0;
+//	arena->costs.buildtype[BUILD_88MMFLAK] = 4.0;
+//	arena->costs.buildtype[BUILD_TOWER] = 10.0;
+//	arena->costs.buildtype[BUILD_HANGAR] = 100.0;
+//	arena->costs.buildtype[BUILD_FUEL] = 50.0;
+//	arena->costs.buildtype[BUILD_AMMO] = 50.0;
+//	arena->costs.buildtype[BUILD_RADAR] = 50.0;
+//	arena->costs.buildtype[BUILD_WARE] = 70.0;
+//	arena->costs.buildtype[BUILD_RADIOHUT] = 50.0;
+//	arena->costs.buildtype[BUILD_ANTENNA] = 10.0;
+//	arena->costs.buildtype[BUILD_CV] = 200.0;
+//	arena->costs.buildtype[BUILD_DESTROYER] = 100.0;
+//	arena->costs.buildtype[BUILD_CRUISER] = 100.0;
+//	arena->costs.buildtype[BUILD_CARGO] = 70.0;
+//	arena->costs.buildtype[BUILD_SUBMARINE] = 70.0;
+//	arena->costs.buildtype[BUILD_BRIDGE] = 50.0;
+//	arena->costs.buildtype[BUILD_SPECIALBUILD] = 70.0;
+//	arena->costs.buildtype[BUILD_FACTORY] = 70.0;
+//	arena->costs.buildtype[BUILD_BARRACKS] = 1.0;
+//	arena->costs.buildtype[BUILD_STATICS] = 10.0;
+//	arena->costs.buildtype[BUILD_REFINERY] = 70.0;
+//	arena->costs.buildtype[BUILD_PLANEFACTORY] = 90.0;
+//	arena->costs.buildtype[BUILD_BUILDING] = 30.0;
+//	arena->costs.buildtype[BUILD_CRANE] = 50.0;
+//	arena->costs.buildtype[BUILD_STRATEGIC] = 30.0;
+//	arena->costs.buildtype[BUILD_ARTILLERY] = 3.0;
+//	arena->costs.buildtype[BUILD_HUT] = 10.0;
+//	arena->costs.buildtype[BUILD_TRUCK] = 10.0;
+//	arena->costs.buildtype[BUILD_TREE] = 0.0;
+//	arena->costs.buildtype[BUILD_SPAWNPOINT] = 1.0;
+//	arena->costs.buildtype[BUILD_HOUSE] = 10.0;
+//	arena->costs.buildtype[BUILD_ROCK] = 0.0;
+//	arena->costs.buildtype[BUILD_FENCE] = 0.0;
 
-//	arena->costs.ammocost[MUNTYPE_BULLET] = 0.001;  // LoadAmmo():29
-//	arena->costs.ammotype[MUNTYPE_TORPEDO] = 10.0;
-//	arena->costs.ammotype[MUNTYPE_BOMB] = 10.0;
-//	arena->costs.ammotype[MUNTYPE_ROCKET] = 1.0;
-
-	arena->costs.buildtype[BUILD_50CALACK] = 1.0;
-	arena->costs.buildtype[BUILD_20MMACK] = 2.0;
-	arena->costs.buildtype[BUILD_40MMACK] = 3.0;
-	arena->costs.buildtype[BUILD_88MMFLAK] = 4.0;
-	arena->costs.buildtype[BUILD_TOWER] = 10.0;
-	arena->costs.buildtype[BUILD_HANGAR] = 100.0;
-	arena->costs.buildtype[BUILD_FUEL] = 50.0;
-	arena->costs.buildtype[BUILD_AMMO] = 50.0;
-	arena->costs.buildtype[BUILD_RADAR] = 50.0;
-	arena->costs.buildtype[BUILD_WARE] = 70.0;
-	arena->costs.buildtype[BUILD_RADIOHUT] = 50.0;
-	arena->costs.buildtype[BUILD_ANTENNA] = 10.0;
-	arena->costs.buildtype[BUILD_CV] = 200.0;
-	arena->costs.buildtype[BUILD_DESTROYER] = 100.0;
-	arena->costs.buildtype[BUILD_CRUISER] = 100.0;
-	arena->costs.buildtype[BUILD_CARGO] = 70.0;
-	arena->costs.buildtype[BUILD_SUBMARINE] = 70.0;
-	arena->costs.buildtype[BUILD_BRIDGE] = 50.0;
-	arena->costs.buildtype[BUILD_SPECIALBUILD] = 70.0;
-	arena->costs.buildtype[BUILD_FACTORY] = 70.0;
-	arena->costs.buildtype[BUILD_BARRACKS] = 1.0;
-	arena->costs.buildtype[BUILD_STATICS] = 10.0;
-	arena->costs.buildtype[BUILD_REFINERY] = 70.0;
-	arena->costs.buildtype[BUILD_PLANEFACTORY] = 90.0;
-	arena->costs.buildtype[BUILD_BUILDING] = 30.0;
-	arena->costs.buildtype[BUILD_CRANE] = 50.0;
-	arena->costs.buildtype[BUILD_STRATEGIC] = 30.0;
-	arena->costs.buildtype[BUILD_ARTILLERY] = 3.0;
-	arena->costs.buildtype[BUILD_HUT] = 10.0;
-	arena->costs.buildtype[BUILD_TRUCK] = 10.0;
-	arena->costs.buildtype[BUILD_TREE] = 0.0;
-	arena->costs.buildtype[BUILD_SPAWNPOINT] = 1.0;
-	arena->costs.buildtype[BUILD_HOUSE] = 10.0;
-	arena->costs.buildtype[BUILD_ROCK] = 0.0;
-	arena->costs.buildtype[BUILD_FENCE] = 0.0;
+//	arena->costs.ammotype[MUNTYPE_BULLET];  // LoadAmmo():29
+//	arena->costs.planeweight[MAX_PLANES];	// LoadDamageModel():25
+//	arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
 
 	arena->costs.fieldtype[FIELD_CV] = 200.0;
 	arena->costs.fieldtype[FIELD_CARGO] = 150.0;
@@ -2149,8 +2217,8 @@ void ScoreLoadCosts(void)
 	arena->costs.fieldtype[FIELD_WB3VILLAGE] = 70.0;
 	arena->costs.fieldtype[FIELD_WB3TOWN] = 150.0;
 	arena->costs.fieldtype[FIELD_WB3PORT] = 150.0;
-	// arena->costs.planeweight[MAX_PLANES];	// LoadDamageModel():25
-	// arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
+
+	arena->costs.takeoff = 1.0;
 	arena->costs.newpilot = 150.0;
 	arena->costs.technologylost = 0.5;
 	arena->costs.informationlost = 1.0;

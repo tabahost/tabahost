@@ -3587,7 +3587,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						if(client->loginkey)
 						BPrintf(RADIO_YELLOW, "%s entered the game", client->longnick);
 						else
-						BPrintf(RADIO_YELLOW, "%s entered the game using WBChat", client->longnick);
+						BPrintf(RADIO_YELLOW, "%s entered the game using THChat", client->longnick);
 
 						Com_LogEvent(EVENT_LOGIN, client->id, 0);
 						Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);

@@ -1329,8 +1329,16 @@ int PPrintf(client_t *client, u_int8_t radio, char *fmt, ...)
 	{
 		Com_Printf(VERBOSE_ALWAYS, "%s\n", message);
 	}
-	else if (client->ready && !client->drone)
+	else if (client->ready)
 	{
+		if(client->drone)
+		{
+			if(!client->related[0])
+				return -1;
+			else
+				client = client->related[0];
+		}
+
 		do
 		{
 			memset(buffer, 0, sizeof(buffer));
