@@ -152,7 +152,6 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			break;
 		case SCORE_FIELDCAPT:
 				ScoreFieldCapture(misc);
-				//client->score.captscore += GetFieldCost(misc); // TODO: Score field capt
 				strcat(my_query, " fieldscapt = fieldscapt + '1'");
 			break;
 		case SCORE_LANDED: ///////// HERE BEGINS EVENTS THAT MAY HAVE KILLERS /////////
@@ -364,7 +363,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 void ScoreFieldCapture(u_int8_t field)
 {
 	char sql_query[1024];
-	float fieldcost;
+	float fieldcost, score;
 	u_int8_t numbombers, numcargos, i;
 	u_int32_t bomberdamage, cargodamage;
 
@@ -399,11 +398,36 @@ void ScoreFieldCapture(u_int8_t field)
 			{
 				if(IsCargo(NULL, arena->fields[field].planeby[i]))
 				{
-					arena->fields[field].hitby[i]->score.captscore += fieldcost * (arena->fields[field].damby[i] / cargodamage) * (numcargos / (numcargos + numbombers));
+					score = fieldcost * (arena->fields[field].damby[i] / cargodamage) * (numcargos / (numcargos + numbombers));
 				}
 				else
 				{
-					arena->fields[field].hitby[i]->score.captscore += fieldcost * (arena->fields[field].damby[i] / bomberdamage) * (numbombers / (numcargos + numbombers));
+					score = fieldcost * (arena->fields[field].damby[i] / bomberdamage) * (numbombers / (numcargos + numbombers));
+				}
+
+				if (arena->fields[field].hitby[i]->country != arena->fields[field].country) // if enemy
+				{
+					if (IsFighter(NULL, arena->fields[field].planeby[i]))
+					{
+						sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+					}
+					else if (IsBomber(NULL, arena->fields[field].planeby[i]))
+					{
+						sprintf(sql_query, "%sUPDATE score_bomber SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+					}
+					else if (IsGround(NULL, arena->fields[field].planeby[i]))
+					{
+						sprintf(sql_query, "%sUPDATE score_ground SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+					}
+					else
+					{
+						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", arena->fields[field].planeby[i]);
+						sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+					}
+				}
+				else // friendly hit... tsc, tsc, tsc...
+				{
+					sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
 				}
 			}
 

@@ -596,13 +596,13 @@ int ProcessClient(client_t *client)
 								if(near_en)
 								{
 									client->hitby[0] = near_en;
-									client->damby[0] = MAX_UINT32; // TODO: Score: change this
+									client->damby[0] = MAX_UINT32; // TODO: Score: collision: change this
 
 									if(nearplane == near_en)
 									near_en = client;
 
 									nearplane->hitby[0] = near_en;
-									nearplane->damby[0] = MAX_UINT32; // TODO: Score: change this
+									nearplane->damby[0] = MAX_UINT32; // TODO: Score: collision: change this
 								}
 
 								client->cancollide = -1;
@@ -1248,18 +1248,22 @@ int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client)
 	}
 	else// if(!Com_Strcmp((char*)buffer, dirname->string) || !Com_Strcmp((char*)buffer, mapname->string))// login in arena
 	{
-		client->loginkey = 1;
-
-		for (i = 31; i > 25; i--)
+		if(!Com_Strcmp((char*)buffer, "thchat"))
 		{
-			if (buffer[i])
-			{
-				client->loginkey = 0;
-				break;
-			}
+			client->loginkey = 1;
 		}
+		else if(!Com_Strcmp((char*)buffer, "thclient"))
+		{
+			client->loginkey = 2;
+		}
+		else
+		{
+			client->loginkey = 3;
+		}
+
 		return 0;
 	}
+
 	//	else
 	//		return -1;
 }

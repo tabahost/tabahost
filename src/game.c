@@ -3584,10 +3584,10 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					if(!(client->attr == 1 && hideadmin->value))
 					{
-						if(client->loginkey)
-						BPrintf(RADIO_YELLOW, "%s entered the game", client->longnick);
+						if(client->loginkey == 1)
+							BPrintf(RADIO_YELLOW, "%s entered the game using THChat", client->longnick);
 						else
-						BPrintf(RADIO_YELLOW, "%s entered the game using THChat", client->longnick);
+							BPrintf(RADIO_YELLOW, "%s entered the game", client->longnick);
 
 						Com_LogEvent(EVENT_LOGIN, client->id, 0);
 						Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);
@@ -4303,7 +4303,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						Com_LogDescription(EVENT_DESC_VCPLANE, nearplane->plane, NULL);
 						Com_LogDescription(EVENT_DESC_VCCTRY, nearplane->country, NULL);
 
-						if (!nearplane->drone) // TODO: Score fix
+						if (!nearplane->drone) // TODO: collision: Score fix
 						{
 							PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
 							/*
@@ -4337,9 +4337,9 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						nearplane->cancollide = -1;
 
 						nearplane->hitby[0] = client;
-						nearplane->damby[0] = MAX_UINT32;  // TODO: Score: change this
+						nearplane->damby[0] = MAX_UINT32;  // TODO: Score: collision: change this
 						client->hitby[0] = nearplane;
-						client->damby[0] = MAX_UINT32;  // TODO: Score: change this
+						client->damby[0] = MAX_UINT32;  // TODO: Score: collision: change this
 						
 						client->damaged = 1;
 						nearplane->damaged = 1;
@@ -6214,7 +6214,9 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	}
 
 	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
-		pvictim->damby[killer] = MAX_UINT32; // TODO: Score: change this
+	{
+		pvictim->damby[killer] = MAX_UINT32; // TODO: Score: unbeta
+	}
 }
 
 /*************
@@ -6415,7 +6417,9 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	}
 
 	if (killer >= 0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
-		pvictim->damby[killer] = MAX_UINT32; // TODO: Score: change this
+	{
+		pvictim->damby[killer] = MAX_UINT32; // TODO: Score: unbeta
+	}
 }
 
 /*************
@@ -6812,7 +6816,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if (!oldcapt->value /*ToT*/ || IsVitalBuilding(building))
 	{
-		if(oldcapt->value || (ap)) // TODO: Score: DM: add AP to all type 1 guns
+		if(oldcapt->value || (ap)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
 		{
 			AddFieldDamage(building->field-1, dmgprobe, client);
 		}
@@ -10451,9 +10455,11 @@ void THAIWatchDog(u_int8_t *buffer, client_t *client)
 {
 	thaiwatchdog_t *watchdog;
 
-	watchdog = (thaiwatchdog_t *) buffer;
-
-	client->thai = watchdog->group;
+	if(client->loginkey == 1)
+	{
+		watchdog = (thaiwatchdog_t *) buffer;
+		client->thai = watchdog->group;
+	}
 }
 
 
