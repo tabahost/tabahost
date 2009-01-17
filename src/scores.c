@@ -248,6 +248,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		{
 			if (client->score.airscore)
 				sprintf(my_query, "%s, fighter_score = fighter_score + '%.3f'", my_query, client->score.airscore);
+			if (client->score.captscore)
+				sprintf(my_query, "%s, capt_score = capt_score + '%.3f'", my_query, client->score.captscore);
 			if (client->score.groundscore)
 				sprintf(my_query, "%s, jabo_score = jabo_score + '%.3f'", my_query, client->score.groundscore);
 		}
@@ -274,6 +276,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 			if (client->score.airscore)
 				sprintf(my_query, "%s, fighter_score = fighter_score + '%.3f'", my_query, client->score.airscore);
+			if (client->score.captscore)
+				sprintf(my_query, "%s, capt_score = capt_score + '%.3f'", my_query, client->score.captscore);
 			if (client->score.groundscore)
 				sprintf(my_query, "%s, jabo_score = jabo_score + '%.3f'", my_query, client->score.groundscore);
 		}

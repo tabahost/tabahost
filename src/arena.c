@@ -4338,9 +4338,9 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 int8_t AddBomber(u_int8_t field, client_t *client)
 {
 	u_int8_t i;
-	int8_t found, empty;
+	int8_t found, empty, removed;
 
-	found = empty = -1;
+	removed = found = empty = -1;
 
 	if(field < fields->value)
 	{
@@ -4351,17 +4351,20 @@ int8_t AddBomber(u_int8_t field, client_t *client)
 				if (arena->fields[field].hitby[i] == client && arena->fields[field].hitby[i]->inuse)
 					found = i;
 
-				if (!arena->fields[field].hitby[i]->inuse) // player had disconnected
+				if (!arena->fields[field].hitby[i]->inuse) // player had disconnected or removed drone
 				{
-					arena->fields[field].hitby[i] = NULL; // remove disconnected players
-					arena->fields[field].damby[i] = 0;
-					arena->fields[field].planeby[i] = 0;
-					empty = i;
+					arena->fields[field].hitby[i] = NULL; // remove it from array
+					// arena->fields[field].damby[i] = 0; // but let damage here
+					// arena->fields[field].planeby[i] = 0;
+					removed = i;
 				}
 			}
 			else
 			{
-				empty = i;
+				if(arena->fields[field].damby[i]) // someone was here
+					removed = i;
+				else
+					empty = i;
 			}
 		}
 
@@ -4373,7 +4376,15 @@ int8_t AddBomber(u_int8_t field, client_t *client)
 		{
 			arena->fields[field].hitby[empty] = client;
 			arena->fields[field].planeby[empty] = client->attached ? client->attached->plane : client->plane;
+			arena->fields[field].damby[empty] = 0;
 			found = empty;
+		}
+		else if (!(removed < 0)) // if no slot available but there are removed players, use it
+		{
+			arena->fields[field].hitby[removed] = client;
+			arena->fields[field].planeby[removed] = client->attached ? client->attached->plane : client->plane;
+			arena->fields[field].damby[removed] = 0;
+			found = removed;
 		}
 	}
 

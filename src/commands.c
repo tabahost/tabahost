@@ -4540,6 +4540,8 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 	u_int8_t i, j;
 	u_int32_t time;
 	u_int32_t rpsreplace;
+	FILE *fp;
+	char buffer[32];
 
 	if (field > fields->value)
 	{
@@ -4558,41 +4560,59 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 		}
 	}
 
-	for (i = 1; i < maxplanes; i++)
+	memset(buffer, 0, sizeof(buffer));
+
+	sprintf(buffer, "./fields/availf%d.txt", field);
+
+	if (!(fp = fopen(buffer, "wb")))
 	{
-		if (arena->fields[j].rps[i])
+		PPrintf(client, RADIO_YELLOW, "WARNING: Cmd_Listavail() Couldn't open file \"%s\"", buffer);
+	}
+	else
+	{
+		fprintf(fp, "            Available planes for F%d\n", field);
+		fprintf(fp, "===================================================\n");
+
+		for (i = 1; i < maxplanes; i++)
 		{
-			if (GetPlaneName(i))
+			if (arena->fields[j].rps[i])
 			{
-				if (rps->value && !arcade->value)
+				if (GetPlaneName(i))
 				{
-					rpsreplace = (rps->value * 6000) / arena->rps[i].pool[arena->fields[j].type - 1];
-
-					if(!((arena->fields[j].country == 1 && arena->rps[i].country & 0x01) ||
-						(arena->fields[j].country == 2 && arena->rps[i].country & 0x02) ||
-						(arena->fields[j].country == 3 && arena->rps[i].country & 0x04) ||
-						(arena->fields[j].country == 4 && arena->rps[i].country & 0x08)))
+					if (rps->value && !arcade->value)
 					{
-						rpsreplace = 0 ;
-					}
+						rpsreplace = (rps->value * 6000) / arena->rps[i].pool[arena->fields[j].type - 1];
 
-					if(rpsreplace)
-					{
-						rpsreplace -= (arena->frame % rpsreplace);
+						if(!((arena->fields[j].country == 1 && arena->rps[i].country & 0x01) ||
+							(arena->fields[j].country == 2 && arena->rps[i].country & 0x02) ||
+							(arena->fields[j].country == 3 && arena->rps[i].country & 0x04) ||
+							(arena->fields[j].country == 4 && arena->rps[i].country & 0x08)))
+						{
+							rpsreplace = 0 ;
+						}
 
-						PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available (%s to replace)", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i], Com_TimeSeconds(rpsreplace/100));
+						if(rpsreplace)
+						{
+							rpsreplace -= (arena->frame % rpsreplace);
+
+							fprintf(fp, "%s (N%d), %d available (%s to replace)\n", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i], Com_TimeSeconds(rpsreplace/100));
+						}
+						else if (arena->fields[j].rps[i] >= 1)
+						{
+							fprintf(fp, "%s (N%d), %d available (no replacement)\n", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i]);
+						}
 					}
-					else
+					else if (arena->fields[j].rps[i] >= 1)
 					{
-						PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available (no replacement)", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i]);
+						fprintf(fp, "%s (N%d), %d available\n", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i]);
 					}
-				}
-				else
-				{
-					PPrintf(client, RADIO_YELLOW, "%s (N%d), %d available", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i]);
 				}
 			}
 		}
+
+		fclose(fp);
+
+		SendFileSeq1(buffer, "avail.asc", client);
 	}
 
 //	if (rps->value)

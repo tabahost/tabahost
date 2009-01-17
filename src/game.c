@@ -2218,7 +2218,7 @@ void ProcessCommands(char *command, client_t *client)
 			if(!argv[0])
 			{
 				if(client)
-				Cmd_Listavail(client->field, client);
+					Cmd_Listavail(client->field, client);
 				PPrintf(client, RADIO_YELLOW, "usage: .listavail <fieldnumber>");
 			}
 			else
@@ -5871,8 +5871,12 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 			PPrintf(client, RADIO_YELLOW, "Paras count: %d", arena->fields[building->field - 1].paras);
 			if (arena->fields[building->field - 1].paras >= paratroopers->value)
 			{
-				AddBuildingDamage(building, GetBuildingArmor(BUILD_TOWER, client), 0, client);
+				AddBuildingDamage(building, GetBuildingArmor(BUILD_TOWER, client), 1, client);
 				CaptureField(building->field, client);
+			}
+			else
+			{
+				AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
 			}
 			return;
 		}
@@ -5932,7 +5936,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	u_int16_t he, ap;
 	int8_t needle[5];
 	u_int32_t dist;
-	float distance;
+	float distance, totaldamage;
 	int8_t killer = 0;
 	u_int32_t damage;
 	munition_t *munition;
@@ -6215,7 +6219,15 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 	{
-		pvictim->damby[killer] = MAX_UINT32; // TODO: Score: unbeta
+		for (i = 0; i < MAX_HITBY; i++) // check who hit player
+		{
+			if (pvictim->hitby[i] && pvictim->damby[i] && !pvictim->hitby[i]->drone && pvictim->hitby[i]->inuse)
+			{
+				totaldamage += client->damby[i];
+			}
+		}
+
+		pvictim->damby[killer] += totaldamage * 0.25;
 	}
 }
 
@@ -6301,6 +6313,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	u_int8_t i;
 	int8_t killer = 0;
 	int32_t he;
+	float totaldamage;
 	munition_t *munition;
 	char header[128];
 	char heb[128];
@@ -6416,9 +6429,17 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		AddPlaneDamage(hardhitplane->place, he, 0, NULL, NULL, pvictim);
 	}
 
-	if (killer >= 0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
+	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 	{
-		pvictim->damby[killer] = MAX_UINT32; // TODO: Score: unbeta
+		for (i = 0; i < MAX_HITBY; i++) // check who hit player
+		{
+			if (pvictim->hitby[i] && pvictim->damby[i] && !pvictim->hitby[i]->drone && pvictim->hitby[i]->inuse)
+			{
+				totaldamage += client->damby[i];
+			}
+		}
+
+		pvictim->damby[killer] += totaldamage * 0.25;
 	}
 }
 
@@ -6814,9 +6835,9 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		}
 	}
 
-	if (!oldcapt->value /*ToT*/ || IsVitalBuilding(building))
+	if (!oldcapt->value /*ToT*/ || IsVitalBuilding(building)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
 	{
-		if(oldcapt->value || (ap)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
+		if(oldcapt->value || (ap)) // this adds damage by bombs if oldcapt or by bullets if ToT enabled
 		{
 			AddFieldDamage(building->field-1, dmgprobe, client);
 		}
