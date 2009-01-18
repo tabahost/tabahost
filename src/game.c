@@ -61,7 +61,7 @@ u_int8_t mainbuffer[MAX_RECVDATA]; //extern
 
  */
 
-u_int16_t packets_tab[209][3] =
+u_int16_t packets_tab[210][3] =
 {
 // WB2   WB2007  WB2008
 		{ 0x0200, 0x0400, 0xFFFF }, // pcNEW_USER
@@ -150,6 +150,7 @@ u_int16_t packets_tab[209][3] =
 		{ 0xFFFF, 0x1D10, 0xFFFF }, // utilPLANECOUNTS2
 		{ 0xFFFF, 0x1D11, 0xFFFF }, // utilACKSPAWN
 		{ 0xFFFF, 0x1D12, 0x3A28 }, // utilACKSPAWNS *
+		{ 0xFFFF, 0x1D13, 0x3A29 }, // utilHD_SERIAL *
 
 		{ 0x0C00, 0x0D00, 0x1A1A }, // cnVERSION_DATA *
 		{ 0x0C01, 0x0D01, 0x1A1B }, // cnCLIENT_IS_READY =
@@ -3535,7 +3536,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					DebugClient(__FILE__, __LINE__, TRUE, client);
 				}
 				break;
-			case 0x1D0E:
+			case 0x1D13:
 				if(!setjmp(debug_buffer))
 				{
 					ClientHDSerial(buffer, client);
@@ -7972,7 +7973,12 @@ void UpdateIngameClients(u_int8_t attr)
 			{
 				j++;
 				fprintf(fp, "%s %s ", clients[i].longnick, GetCountry(clients[i].country));
-				if (clients[i].infly)
+				
+				if(clients[i].loginkey == 1)
+				{
+					fprintf(fp, "In Chat");
+				}
+				else if (clients[i].infly)
 				{
 					if (IsGround(&clients[i]))
 						fprintf(fp, "In Ground");

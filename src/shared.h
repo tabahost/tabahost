@@ -2404,7 +2404,7 @@ extern	MYSQL_RES	*my_result;		// mysql results' main pointer
 extern	MYSQL_ROW	my_row;			// mysql main row
 extern	u_int32_t	my_id;			// mysql main id from AUTO_INCREMENT
 extern	char		my_query[MAX_QUERY]; // main query buffer
-extern	u_int16_t packets_tab[209][3];
+extern	u_int16_t packets_tab[210][3];
 extern	var_t		*airshowsmoke;	// enable air show smoke
 extern	var_t		*allowtakeoff;	// allow players to takeoff
 extern	var_t		*altv;			//
