@@ -310,114 +310,128 @@ void CheckArenaRules(void)
 
 	// Emulated Bombs tick
 
-	for (i = 0; i < MAX_BOMBS; i++)
+	if (!setjmp(debug_buffer))
 	{
-		if (arena->bombs[i].id)
+		for (i = 0; i < MAX_BOMBS; i++)
 		{
-			if (arena->bombs[i].timer > 0)
+			if (arena->bombs[i].id)
 			{
-				arena->bombs[i].timer--;
-			}
-			else
-			{
-				HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, 0, arena->bombs[i].from);
-				arena->bombs[i].id = 0;
+				if (arena->bombs[i].timer > 0)
+				{
+					arena->bombs[i].timer--;
+				}
+				else
+				{
+					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, 0, arena->bombs[i].from);
+					arena->bombs[i].id = 0;
+				}
 			}
 		}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
 	}
 
 	// buildings tick
 
-	for (i = 0; i < fields->value; i++)
+	if (!setjmp(debug_buffer))
 	{
-		if(rebuildtime->value < 9999)
+		for (i = 0; i < fields->value; i++)
 		{
-			if(!oldcapt->value && wb3->value && !(arena->frame % 100))
+			if(rebuildtime->value < 9999)
 			{
-				if(arena->fields[i].tonnage)
-					arena->fields[i].tonnage -= TONNAGE_RECOVER;
-				
-				if(arena->fields[i].tonnage < 0)
-					arena->fields[i].tonnage = 0;
-			}
-			
-			for (j = 0; j < MAX_BUILDINGS; j++)
-			{
-				if (arena->fields[i].buildings[j].field)
+				if(!oldcapt->value && wb3->value && !(arena->frame % 100))
 				{
-					if (arena->fields[i].buildings[j].status)
+					if(arena->fields[i].tonnage)
+						arena->fields[i].tonnage -= TONNAGE_RECOVER;
+					
+					if(arena->fields[i].tonnage < 0)
+						arena->fields[i].tonnage = 0;
+				}
+				
+				for (j = 0; j < MAX_BUILDINGS; j++)
+				{
+					if (arena->fields[i].buildings[j].field)
 					{
-						if (arena->fields[i].buildings[j].type < BUILD_CV || arena->fields[i].buildings[j].type > BUILD_SUBMARINE)
-							arena->fields[i].buildings[j].timer--;
-	
-						if (arena->fields[i].buildings[j].timer <= 0)
+						if (arena->fields[i].buildings[j].status)
 						{
-							arena->fields[i].buildings[j].timer = 0;
-							arena->fields[i].buildings[j].status = 0;
-							arena->fields[i].buildings[j].armor = GetBuildingArmor(arena->fields[i].buildings[j].type, NULL);
-	
-							if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
-								SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
-	
-							SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status, NULL);
-	
-							if (arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
+							if (arena->fields[i].buildings[j].type < BUILD_CV || arena->fields[i].buildings[j].type > BUILD_SUBMARINE)
+								arena->fields[i].buildings[j].timer--;
+		
+							if (arena->fields[i].buildings[j].timer <= 0)
 							{
-								Com_Printf(VERBOSE_DEBUG, "Reup TOWER f%d\n", i+1);
-								//							close = arena->fields[i].abletocapture;
-								Cmd_Capt(i, arena->fields[i].country, NULL);
-								//							arena->fields[i].abletocapture = close;
+								arena->fields[i].buildings[j].timer = 0;
+								arena->fields[i].buildings[j].status = 0;
+								arena->fields[i].buildings[j].armor = GetBuildingArmor(arena->fields[i].buildings[j].type, NULL);
+		
+								if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
+									SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
+		
+								SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status, NULL);
+		
+								if (arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
+								{
+									Com_Printf(VERBOSE_DEBUG, "Reup TOWER f%d\n", i+1);
+									//							close = arena->fields[i].abletocapture;
+									Cmd_Capt(i, arena->fields[i].country, NULL);
+									//							arena->fields[i].abletocapture = close;
+								}
+								else if (arena->fields[i].buildings[j].type == BUILD_WARE) // to cancel warehouse effect
+								{
+									arena->fields[i].warehouse = 0;
+								}
 							}
-							else if (arena->fields[i].buildings[j].type == BUILD_WARE) // to cancel warehouse effect
+							//					else if(arena->fields[i].buildings[j].status == 1 && arena->fields[i].buildings[j].timer < (u_int32_t)(rebuildtime->value/2))
+							//					{
+							//						arena->fields[i].buildings[j].status = 2;
+							//						SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status);
+							//					}
+						}
+					}
+					else
+						break;
+				}
+			}
+		}
+
+		if (!(arena->frame % 100))
+		{
+			for (i = 0; i < cities->value; i++)
+			{
+				for (j = 0; j < MAX_BUILDINGS; j++)
+				{
+					if (arena->cities[i].buildings[j].field)
+					{
+						if (arena->cities[i].buildings[j].status)
+						{
+							dist = GetFactoryReupTime(arena->cities[i].buildings[j].country);
+
+							if (arena->frame < arena->cities[i].buildings[j].timer)
+								posx = MAX_UINT32 - arena->cities[i].buildings[j].timer + arena->frame;
+							else
+								posx = arena->frame - arena->cities[i].buildings[j].timer;
+
+							if ((u_int32_t)posx > dist)
 							{
-								arena->fields[i].warehouse = 0;
+								factorybuildingsup[arena->cities[i].buildings[j].country - 1]++;
+								arena->cities[i].buildings[j].status = 0;
+								arena->cities[i].buildings[j].armor = GetBuildingArmor(arena->cities[i].buildings[j].type, 
+								NULL);
+
+								SetBuildingStatus(&arena->cities[i].buildings[j], arena->cities[i].buildings[j].status, NULL);
 							}
 						}
-						//					else if(arena->fields[i].buildings[j].status == 1 && arena->fields[i].buildings[j].timer < (u_int32_t)(rebuildtime->value/2))
-						//					{
-						//						arena->fields[i].buildings[j].status = 2;
-						//						SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status);
-						//					}
 					}
+					else
+						break;
 				}
-				else
-					break;
 			}
 		}
 	}
-
-	if (!(arena->frame % 100))
+	else
 	{
-		for (i = 0; i < cities->value; i++)
-		{
-			for (j = 0; j < MAX_BUILDINGS; j++)
-			{
-				if (arena->cities[i].buildings[j].field)
-				{
-					if (arena->cities[i].buildings[j].status)
-					{
-						dist = GetFactoryReupTime(arena->cities[i].buildings[j].country);
-
-						if (arena->frame < arena->cities[i].buildings[j].timer)
-							posx = MAX_UINT32 - arena->cities[i].buildings[j].timer + arena->frame;
-						else
-							posx = arena->frame - arena->cities[i].buildings[j].timer;
-
-						if ((u_int32_t)posx > dist)
-						{
-							factorybuildingsup[arena->cities[i].buildings[j].country - 1]++;
-							arena->cities[i].buildings[j].status = 0;
-							arena->cities[i].buildings[j].armor = GetBuildingArmor(arena->cities[i].buildings[j].type, 
-							NULL);
-
-							SetBuildingStatus(&arena->cities[i].buildings[j], arena->cities[i].buildings[j].status, NULL);
-						}
-					}
-				}
-				else
-					break;
-			}
-		}
+		DebugArena(__FILE__, __LINE__);
 	}
 
 	// weather
@@ -426,223 +440,223 @@ void CheckArenaRules(void)
 	{
 		if (!(arena->frame % 30000)) // 5 minutes
 		{
-			ProcessMetarWeather();
+			if (!setjmp(debug_buffer))
+			{
+				ProcessMetarWeather();
+			}
+			else
+			{
+				DebugArena(__FILE__, __LINE__);
+			}
 		}
 	}
 	else if (!(arena->frame % 60000)) // 10 minutes
 	{
-		switch ((int)weather->value)
+		if (!setjmp(debug_buffer))
 		{
-			case 0: // clouded
-				if (rand()%3) // 66.6% keep clouded
-					break;
+			switch ((int)weather->value)
+			{
+				case 0: // clouded
+					if (rand()%3) // 66.6% keep clouded
+						break;
 
-				if (rand()%2) // change weather
-					Var_Set("weather", "3"); // partialy clouded
-				else
-					Var_Set("weather", "2"); // rain
-				break;
-			case 1: // clear
-				if (!rand()%3) // 66.6% keep clear
-					Var_Set("weather", "3"); // partialy clouded
-				break;
-			case 2: // rain
-				if (rand()%3) // 33.3% keep raining
-					Var_Set("weather", "0"); // clouded
-				break;
-			case 3: // partialy clouded
-				if (rand()%3) // 66.6% keep partialy clouded
+					if (rand()%2) // change weather
+						Var_Set("weather", "3"); // partialy clouded
+					else
+						Var_Set("weather", "2"); // rain
 					break;
+				case 1: // clear
+					if (!rand()%3) // 66.6% keep clear
+						Var_Set("weather", "3"); // partialy clouded
+					break;
+				case 2: // rain
+					if (rand()%3) // 33.3% keep raining
+						Var_Set("weather", "0"); // clouded
+					break;
+				case 3: // partialy clouded
+					if (rand()%3) // 66.6% keep partialy clouded
+						break;
 
-				if (rand()%2) // change weather
-					Var_Set("weather", "1"); // clear
-				else
-					Var_Set("weather", "0"); // clouded
-				break;
-			default:
-				Var_Set("weather", "3"); // partialy clouded
-				break;
+					if (rand()%2) // change weather
+						Var_Set("weather", "1"); // clear
+					else
+						Var_Set("weather", "0"); // clouded
+					break;
+				default:
+					Var_Set("weather", "3"); // partialy clouded
+					break;
+			}
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
 		}
 	}
 
+
 	// time
+
 	if (!(arena->frame % (int)(6000/arena->multiplier)))
 	{
-
-		if (arena->minute == 59) // check minutes
+		if (!setjmp(debug_buffer))
 		{
-			arena->minute = 0;
-			if (arena->hour == 23)
-				arena->hour = 0;
-			else
-				arena->hour++;
+			if (arena->minute == 59) // check minutes
+			{
+				arena->minute = 0;
+				if (arena->hour == 23)
+					arena->hour = 0;
+				else
+					arena->hour++;
 
+			}
+			else
+				arena->minute++;
+
+			if (arena->hour - (7 - ((int)dayhours->value%10)/2) == dayhours->value) // check hours
+			{
+				arena->hour = (7 - ((int)dayhours->value%10)/2);
+				arena->day++;
+				Cmd_Time((arena->hour*100)+arena->minute, NULL, NULL);
+			}
+
+			if (arena->minute == 0)
+			{
+				if ((arena->hour - (7 - ((int)dayhours->value%10)/2)) == (dayhours->value - 1)) // change timemult 1h before next day
+				{
+					CalcTimemultBasedOnTime();
+				}
+				else if (((7 - ((int)dayhours->value%10)/2) + 1) == arena->hour) // change timemult 1h after a new day
+				{
+					CalcTimemultBasedOnTime();
+				}
+			}
+
+			if (arena->minute == 30 && (arena->hour == 5 || arena->hour == 18)) // time to change iconrange
+			{
+				for (i = 0; i < maxentities->value; i++)
+				{
+					if (clients[i].inuse && clients[i].ready && !clients[i].drone)
+					{
+						SendArenaRules(&clients[i]);
+					}
+				}
+			}
+
+			if (arena->day > 28) // check days
+			{
+				if (arena->month == 2 && (arena->year % 4))
+				{
+					arena->day = 1;
+					arena->month++;
+				}
+
+				if (arena->day >= 30)
+				{
+					if (arena->month == 2)
+					{
+						arena->day = 1;
+						arena->month++;
+					}
+					else if ((arena->month == 4 || arena->month == 6 || arena->month == 9 || arena->month == 11) && arena->day == 31)
+					{
+						arena->day = 1;
+						arena->month++;
+					}
+					else if (arena->day == 32)
+					{
+						arena->day = 1;
+						arena->month++;
+					}
+				}
+			}
+
+			if (arena->month > 12)
+			{
+				arena->month = 1;
+				arena->year++;
+			}
+
+			if (wb3->value && !(arena->frame % (int)((360000 * dayhours->value) /timemult->value))) // set date and dayhours every day
+			{
+				if (arena->month >= 1 && arena->month <= 3) // winter
+				{
+					Var_Set("dayhours", "10");
+				}
+				else if (arena->month >= 7 && arena->month <= 9) // summer
+				{
+					Var_Set("dayhours", "14");
+				}
+				else // autumn / spring
+				{
+					Var_Set("dayhours", "12");
+				}
+
+				WB3DotCommand(NULL, ".date %u %u %u", arena->month, arena->day, arena->year);
+			}
+
+			if (!mapcycle->value)
+			{
+				if ((arena->year >= endyear->value) && (arena->month >= endmonth->value) && (arena->day >= endday->value))
+				{
+					arena->year = inityear->value;
+					arena->month = initmonth->value;
+					arena->day = initday->value;
+
+					if(rps->value)
+						UpdateRPS(0);
+				}
+			}
+
+			if ((arena->hour == 5 && arena->minute == 30) || (arena->hour == 18 && arena->minute == 31))
+			{
+				planerangelimit->modified = enemyidlim->modified = friendlyidlim->modified = 1;
+			}
 		}
 		else
-			arena->minute++;
-
-		if (arena->hour - (7 - ((int)dayhours->value%10)/2) == dayhours->value) // check hours
 		{
-			arena->hour = (7 - ((int)dayhours->value%10)/2);
-			arena->day++;
-			Cmd_Time((arena->hour*100)+arena->minute, NULL, NULL);
-		}
-
-		if (arena->minute == 0)
-		{
-			if ((arena->hour - (7 - ((int)dayhours->value%10)/2)) == (dayhours->value - 1)) // change timemult 1h before next day
-			{
-				CalcTimemultBasedOnTime();
-			}
-			else if (((7 - ((int)dayhours->value%10)/2) + 1) == arena->hour) // change timemult 1h after a new day
-			{
-				CalcTimemultBasedOnTime();
-			}
-		}
-
-		if (arena->minute == 30 && (arena->hour == 5 || arena->hour == 18)) // time to change iconrange
-		{
-			for (i = 0; i < maxentities->value; i++)
-			{
-				if (clients[i].inuse && clients[i].ready && !clients[i].drone)
-				{
-					SendArenaRules(&clients[i]);
-				}
-			}
-		}
-
-		if (arena->day > 28) // check days
-		{
-			if (arena->month == 2 && (arena->year % 4))
-			{
-				arena->day = 1;
-				arena->month++;
-			}
-
-			if (arena->day >= 30)
-			{
-				if (arena->month == 2)
-				{
-					arena->day = 1;
-					arena->month++;
-				}
-				else if ((arena->month == 4 || arena->month == 6 || arena->month == 9 || arena->month == 11) && arena->day == 31)
-				{
-					arena->day = 1;
-					arena->month++;
-				}
-				else if (arena->day == 32)
-				{
-					arena->day = 1;
-					arena->month++;
-				}
-			}
-		}
-
-		if (arena->month > 12)
-		{
-			arena->month = 1;
-			arena->year++;
-		}
-
-		if (wb3->value && !(arena->frame % (int)((360000 * dayhours->value) /timemult->value))) // set date and dayhours every day
-		{
-			if (arena->month >= 1 && arena->month <= 3) // winter
-			{
-				Var_Set("dayhours", "10");
-			}
-			else if (arena->month >= 7 && arena->month <= 9) // summer
-			{
-				Var_Set("dayhours", "14");
-			}
-			else // autumn / spring
-			{
-				Var_Set("dayhours", "12");
-			}
-
-			WB3DotCommand(NULL, ".date %u %u %u", arena->month, arena->day, arena->year);
-		}
-
-		if (!mapcycle->value)
-		{
-			if ((arena->year >= endyear->value) && (arena->month >= endmonth->value) && (arena->day >= endday->value))
-			{
-				arena->year = inityear->value;
-				arena->month = initmonth->value;
-				arena->day = initday->value;
-
-				if(rps->value)
-					UpdateRPS(0);
-			}
-		}
-
-		if ((arena->hour == 5 && arena->minute == 30) || (arena->hour == 18 && arena->minute == 31))
-		{
-			planerangelimit->modified = enemyidlim->modified = friendlyidlim->modified = 1;
+			DebugArena(__FILE__, __LINE__);
 		}
 	}
 
 	if (wb3->value && !(arena->frame % 12000))
 	{
-		Cmd_Time((arena->hour*100)+arena->minute, NULL, NULL);
+		if (!setjmp(debug_buffer))
+		{
+			Cmd_Time((arena->hour*100)+arena->minute, NULL, NULL);
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
+		}
 	}
+
 
 	// Scenario Tick
 
 	if (arena->scenario)
 	{
-		if (!((arena->frame - arena->scenario) % 6000)) // every minute
+		if (!setjmp(debug_buffer))
 		{
-			// try to execute tX.cfg files
-			sprintf(file, "./arenas/%s/t%u", dirname->string, (arena->frame - arena->scenario) / 6000);
-			Cmd_LoadConfig(file, NULL);
+			if (!((arena->frame - arena->scenario) % 6000)) // every minute
+			{
+				// try to execute tX.cfg files
+				sprintf(file, "./arenas/%s/t%u", dirname->string, (arena->frame - arena->scenario) / 6000);
+				Cmd_LoadConfig(file, NULL);
+			}
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
 		}
 	}
 
 	// field closed, enabletocapture, radioalert, etc...
 
-	for (i = 0; i < fields->value; i++)
+	if (!setjmp(debug_buffer))
 	{
-
-		if (!(arena->frame % 3000) && !arcade->value) // tank alert
+		for (i = 0; i < fields->value; i++)
 		{
-			for (j = 0; j < MAX_BUILDINGS; j++)
-			{
-				if (!arena->fields[i].buildings[j].field)
-				{
-					break;
-				}
-				else if (arena->fields[i].buildings[j].type == BUILD_RADIOHUT || arena->fields[i].buildings[j].type == BUILD_ANTENNA)
-				{
-					if (arena->fields[i].buildings[j].status)
-					{
-						arena->fields[i].alert = 0;
-						j = -1;
-						break;
-					}
-				}
-			}
-
-			if (j > 0)
-			{
-				for (j = 0; j < maxentities->value; j++)
-				{
-					if (clients[j].inuse && clients[j].country != arena->fields[i].country &&(clients[j].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY)))
-					{
-						if (sqrt(Com_Pow(clients[j].posxy[0][0] - arena->fields[i].posxyz[0], 2) + Com_Pow(clients[j].posxy[1][0] - arena->fields[i].posxyz[1], 2)) < 9000)
-						{
-							CPrintf(arena->fields[i].country, 
-							RADIO_GREEN, "ALERT!!! ALERT!!! Enemy column has been seen near F%d", i+1);
-							break;
-						}
-					}
-				}
-			}
-		}
-
-		if (arena->fields[i].alert && !arcade->value) // attack alert
-		{
-			if (arena->fields[i].alert + 3000 <= arena->frame)
+			if (!(arena->frame % 3000) && !arcade->value) // tank alert
 			{
 				for (j = 0; j < MAX_BUILDINGS; j++)
 				{
@@ -655,63 +669,181 @@ void CheckArenaRules(void)
 						if (arena->fields[i].buildings[j].status)
 						{
 							arena->fields[i].alert = 0;
+							j = -1;
 							break;
 						}
 					}
 				}
 
-				if (arena->fields[i].alert)
+				if (j > 0)
 				{
-					CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d is under attack!!!", i+1);
-					arena->fields[i].alert = 0;
+					for (j = 0; j < maxentities->value; j++)
+					{
+						if (clients[j].inuse && clients[j].country != arena->fields[i].country &&(clients[j].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY)))
+						{
+							if (sqrt(Com_Pow(clients[j].posxy[0][0] - arena->fields[i].posxyz[0], 2) + Com_Pow(clients[j].posxy[1][0] - arena->fields[i].posxyz[1], 2)) < 9000)
+							{
+								CPrintf(arena->fields[i].country, 
+								RADIO_GREEN, "ALERT!!! ALERT!!! Enemy column has been seen near F%d", i+1);
+								break;
+							}
+						}
+					}
 				}
 			}
-		}
 
-		if (arena->fields[i].warehouse && !arcade->value) // warehouse effect
-		{
-			if ((arena->fields[i].warehouse + 60000) <= arena->frame)
+			if (arena->fields[i].alert && !arcade->value) // attack alert
 			{
+				if (arena->fields[i].alert + 3000 <= arena->frame)
+				{
+					for (j = 0; j < MAX_BUILDINGS; j++)
+					{
+						if (!arena->fields[i].buildings[j].field)
+						{
+							break;
+						}
+						else if (arena->fields[i].buildings[j].type == BUILD_RADIOHUT || arena->fields[i].buildings[j].type == BUILD_ANTENNA)
+						{
+							if (arena->fields[i].buildings[j].status)
+							{
+								arena->fields[i].alert = 0;
+								break;
+							}
+						}
+					}
+
+					if (arena->fields[i].alert)
+					{
+						CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d is under attack!!!", i+1);
+						arena->fields[i].alert = 0;
+					}
+				}
+			}
+
+			if (arena->fields[i].warehouse && !arcade->value) // warehouse effect
+			{
+				if ((arena->fields[i].warehouse + 60000) <= arena->frame)
+				{
+					for (j = 0; j < MAX_BUILDINGS; j++)
+					{
+						if (!arena->fields[i].buildings[j].field)
+						{
+							break;
+						}
+						else if ((arena->fields[i].buildings[j].type >= BUILD_50CALACK && arena->fields[i].buildings[j].type <= BUILD_88MMFLAK) || (arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
+						{
+							//						if(!arena->fields[i].buildings[j].status) // obsolete
+							//						{
+							arena->fields[i].buildings[j].status = 2;
+							arena->fields[i].buildings[j].timer += 60000; // 10min // changed = to +=
+
+							// added this "if"
+							if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
+							{
+								arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
+							}
+							//						}
+						}
+					}
+
+					SendFieldStatus(i, NULL);
+					arena->fields[i].warehouse = 0;
+				}
+			}
+
+			// Check field closed
+			if ((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) //!= FIELD_CV && arena->fields[i].type != FIELD_CARGO && arena->fields[i].type != FIELD_DD && arena->fields[i].type != FIELD_SUBMARINE)
+			{
+				close = 1;
+				vitals = arena->fields[i].vitals;
+				arena->fields[i].vitals = 0;
 				for (j = 0; j < MAX_BUILDINGS; j++)
 				{
-					if (!arena->fields[i].buildings[j].field)
+					if (arena->fields[i].buildings[j].field)
 					{
-						break;
-					}
-					else if ((arena->fields[i].buildings[j].type >= BUILD_50CALACK && arena->fields[i].buildings[j].type <= BUILD_88MMFLAK) || (arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
-					{
-						//						if(!arena->fields[i].buildings[j].status) // obsolete
-						//						{
-						arena->fields[i].buildings[j].status = 2;
-						arena->fields[i].buildings[j].timer += 60000; // 10min // changed = to +=
-
-						// added this "if"
-						if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
+						if (!arena->fields[i].buildings[j].status && IsVitalBuilding(&(arena->fields[i].buildings[j]))) // Vital building UP, field not closed
 						{
-							arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
+							arena->fields[i].vitals = 1;
+							close = 0;
+							break;
 						}
-						//						}
+					}
+					else
+						break;
+				}
+				
+				if(vitals && !arena->fields[i].vitals)
+				{
+					if(!oldcapt->value && wb3->value)
+					{
+						CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i+1);
+						CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
 					}
 				}
+				
+				if(!oldcapt->value && wb3->value)
+				{
+					if(arena->fields[i].tonnage < GetTonnageToClose(arena->fields[i].type))
+						close = 0;
+				}
 
-				SendFieldStatus(i, NULL);
-				arena->fields[i].warehouse = 0;
+				if (!arena->fields[i].closed && close)
+				{
+					arena->fields[i].closed = 1;
+					BPrintf(RADIO_YELLOW, "Field %d closed", i+1);
+
+					for (j = 0; j < MAX_BUILDINGS; j++)
+					{
+						if (arena->fields[i].buildings[j].field)
+						{
+							arena->fields[i].buildings[j].timer += 6000;
+
+							if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
+							{
+								arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
+							}
+						}
+						else
+							break;
+					}
+				}
+				else if (arena->fields[i].closed && !close)
+				{
+					for (j = 0; j < MAX_CITYFIELD; j++)
+					{
+						if (arena->fields[i].city[j] && arena->fields[i].city[j]->needtoclose)
+						{
+							if (!arena->fields[i].city[j]->closed)
+								break;
+						}
+					}
+
+					if (j == MAX_CITYFIELD)
+						arena->fields[i].abletocapture = 1;
+
+					arena->fields[i].closed = 0;
+					arena->fields[i].warehouse = 0; // to avoid field be reclosed by warehouse effect
+					BPrintf(RADIO_YELLOW, "Field %d reopened", i+1);
+				}
 			}
+			else
+				arena->fields[i].closed = 0;
 		}
 
-		// Check field closed
-		if ((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) //!= FIELD_CV && arena->fields[i].type != FIELD_CARGO && arena->fields[i].type != FIELD_DD && arena->fields[i].type != FIELD_SUBMARINE)
+		for (i = 0; i < cities->value; i++)
 		{
 			close = 1;
-			vitals = arena->fields[i].vitals;
-			arena->fields[i].vitals = 0;
+
 			for (j = 0; j < MAX_BUILDINGS; j++)
 			{
-				if (arena->fields[i].buildings[j].field)
+				if (arena->cities[i].buildings[j].field)
 				{
-					if (!arena->fields[i].buildings[j].status && IsVitalBuilding(&(arena->fields[i].buildings[j]))) // Vital building UP, field not closed
+					/*				if(!arena->cities[i].buildings[j].status &&
+					 arena->cities[i].buildings[j].type >= BUILD_BRIDGE && arena->cities[i].buildings[j].type <= BUILD_CRANE)
+					 */
+					if (!arena->cities[i].buildings[j].status && IsVitalBuilding(&(arena->cities[i].buildings[j]))) // Vital building UP, field not closed
+
 					{
-						arena->fields[i].vitals = 1;
 						close = 0;
 						break;
 					}
@@ -719,271 +851,203 @@ void CheckArenaRules(void)
 				else
 					break;
 			}
-			
-			if(vitals && !arena->fields[i].vitals)
-			{
-				if(!oldcapt->value && wb3->value)
-				{
-					CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i+1);
-					CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
-				}
-			}
-			
-			if(!oldcapt->value && wb3->value)
-			{
-				if(arena->fields[i].tonnage < GetTonnageToClose(arena->fields[i].type))
-					close = 0;
-			}
 
-			if (!arena->fields[i].closed && close)
+			if (close)
 			{
-				arena->fields[i].closed = 1;
-				BPrintf(RADIO_YELLOW, "Field %d closed", i+1);
-
-				for (j = 0; j < MAX_BUILDINGS; j++)
+				if (!arena->cities[i].closed)
 				{
-					if (arena->fields[i].buildings[j].field)
+					BPrintf(RADIO_YELLOW, "%s closed (c%d) (f%d)", arena->cities[i].name, i+1, arena->cities[i].field?arena->cities[i].field->number:-1);
+					arena->cities[i].closed = 1;
+
+					if (arena->cities[i].field)
 					{
-						arena->fields[i].buildings[j].timer += 6000;
-
-						if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
+						for (j = 0; j < MAX_CITYFIELD; j++)
 						{
-							arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
+							if (arena->cities[i].field->city[j] && arena->cities[i].field->city[j]->needtoclose)
+							{
+								if (!arena->cities[i].field->city[j]->closed)
+									break;
+							}
 						}
+
+						if (j == MAX_CITYFIELD)
+							arena->cities[i].field->abletocapture = 1;
 					}
-					else
-						break;
-				}
-			}
-			else if (arena->fields[i].closed && !close)
-			{
-				for (j = 0; j < MAX_CITYFIELD; j++)
-				{
-					if (arena->fields[i].city[j] && arena->fields[i].city[j]->needtoclose)
-					{
-						if (!arena->fields[i].city[j]->closed)
-							break;
-					}
-				}
-
-				if (j == MAX_CITYFIELD)
-					arena->fields[i].abletocapture = 1;
-
-				arena->fields[i].closed = 0;
-				arena->fields[i].warehouse = 0; // to avoid field be reclosed by warehouse effect
-				BPrintf(RADIO_YELLOW, "Field %d reopened", i+1);
-			}
-		}
-		else
-			arena->fields[i].closed = 0;
-	}
-
-	for (i = 0; i < cities->value; i++)
-	{
-		close = 1;
-
-		for (j = 0; j < MAX_BUILDINGS; j++)
-		{
-			if (arena->cities[i].buildings[j].field)
-			{
-				/*				if(!arena->cities[i].buildings[j].status &&
-				 arena->cities[i].buildings[j].type >= BUILD_BRIDGE && arena->cities[i].buildings[j].type <= BUILD_CRANE)
-				 */
-				if (!arena->cities[i].buildings[j].status && IsVitalBuilding(&(arena->cities[i].buildings[j]))) // Vital building UP, field not closed
-
-				{
-					close = 0;
-					break;
 				}
 			}
 			else
-				break;
-		}
-
-		if (close)
-		{
-			if (!arena->cities[i].closed)
 			{
-				BPrintf(RADIO_YELLOW, "%s closed (c%d) (f%d)", arena->cities[i].name, i+1, arena->cities[i].field?arena->cities[i].field->number:-1);
-				arena->cities[i].closed = 1;
-
-				if (arena->cities[i].field)
+				if (arena->cities[i].closed)
 				{
-					for (j = 0; j < MAX_CITYFIELD; j++)
+					BPrintf(RADIO_YELLOW, "%s reopened (c%d) (f%d)", arena->cities[i].name, i+1, arena->cities[i].field?arena->cities[i].field->number:-1);
+					arena->cities[i].closed = 0;
+
+					if (arena->cities[i].field)
 					{
-						if (arena->cities[i].field->city[j] && arena->cities[i].field->city[j]->needtoclose)
-						{
-							if (!arena->cities[i].field->city[j]->closed)
-								break;
-						}
+						if (arena->cities[i].needtoclose)
+							arena->cities[i].field->abletocapture = 0;
 					}
-
-					if (j == MAX_CITYFIELD)
-						arena->cities[i].field->abletocapture = 1;
 				}
 			}
 		}
-		else
-		{
-			if (arena->cities[i].closed)
-			{
-				BPrintf(RADIO_YELLOW, "%s reopened (c%d) (f%d)", arena->cities[i].name, i+1, arena->cities[i].field?arena->cities[i].field->number:-1);
-				arena->cities[i].closed = 0;
-
-				if (arena->cities[i].field)
-				{
-					if (arena->cities[i].needtoclose)
-						arena->cities[i].field->abletocapture = 0;
-				}
-			}
-		}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
 	}
 
 	// CV tick
 
-	if (!(arena->frame % 6000)) // Log CVs position every 60sec
-		LogCVsPosition();
-
-	for (i = 0; i < cvs->value; i++)
+	if (!setjmp(debug_buffer))
 	{
-		// CV Route
+		if (!(arena->frame % 6000)) // Log CVs position every 60sec
+			LogCVsPosition();
 
-		//		if(!arena->cv[i].stuck)
-		//		{
-		/*			if(GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]) > 70)
-		 {
-		 CPrintf(arena->fields[arena->cv[i].field].country, RADIO_GREEN, "CV F%d got stuck", arena->cv[i].field+1);
-		 Com_Printf(VERBOSE_DEBUG, "CV[%u] stuck at X%d Y%d Z%d\n", i, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]));
-		 arena->cv[i].speed = 0.01;
-		 arena->cv[i].stuck = 1;
-		 SetCVSpeed(&(arena->cv[i]));
-		 }
-		 else*/if (arena->cv[i].wptotal) // if CV have waypoints
+		for (i = 0; i < cvs->value; i++)
 		{
-			if (arena->cv[i].outofport && !arena->cv[i].threatened && !(arena->frame % 600)) // check if there are enemies around
+			// CV Route
+
+			//		if(!arena->cv[i].stuck)
+			//		{
+			/*			if(GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]) > 70)
+			 {
+			 CPrintf(arena->fields[arena->cv[i].field].country, RADIO_GREEN, "CV F%d got stuck", arena->cv[i].field+1);
+			 Com_Printf(VERBOSE_DEBUG, "CV[%u] stuck at X%d Y%d Z%d\n", i, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]));
+			 arena->cv[i].speed = 0.01;
+			 arena->cv[i].stuck = 1;
+			 SetCVSpeed(&(arena->cv[i]));
+			 }
+			 else*/if (arena->cv[i].wptotal) // if CV have waypoints
 			{
-				for (j = 0; j < maxentities->value; j++)
+				if (arena->cv[i].outofport && !arena->cv[i].threatened && !(arena->frame % 600)) // check if there are enemies around
 				{
-					if (clients[j].inuse && clients[j].ready && clients[j].infly && clients[j].country != arena->fields[arena->cv[i].field].country)
+					for (j = 0; j < maxentities->value; j++)
 					{
-						if (DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0], arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1],
-								arena->fields[arena->cv[i].field].posxyz[2], 15000) >= 0)
+						if (clients[j].inuse && clients[j].ready && clients[j].infly && clients[j].country != arena->fields[arena->cv[i].field].country)
 						{
-							ChangeCVRoute(&(arena->cv[i]), 0, 0, NULL);
-							break;
+							if (DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0], arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1],
+									arena->fields[arena->cv[i].field].posxyz[2], 15000) >= 0)
+							{
+								ChangeCVRoute(&(arena->cv[i]), 0, 0, NULL);
+								break;
+							}
 						}
 					}
 				}
-			}
 
-			if (arena->time >= arena->cv[i].timebase) // if reach next waypoint
-			{
-				ReadCVWaypoints(i); // reset waypoints
-
-				if (arena->cv[i].threatened)
+				if (arena->time >= arena->cv[i].timebase) // if reach next waypoint
 				{
-					arena->cv[i].threatened = 0;
+					ReadCVWaypoints(i); // reset waypoints
 
-					// set cv next waypoint based on current position
-					// this algorithm shall be futurely enhanced when re-reoute is done near last-2nd WP
-
-					dist = MAX_UINT32;
-
-					for (j = 1; j < arena->cv[i].wptotal; j++)
+					if (arena->cv[i].threatened)
 					{
-						tempdist = DistBetween(arena->cv[i].wp[j][0], arena->cv[i].wp[j][1], 0, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], 0, 60000);
+						arena->cv[i].threatened = 0;
 
-						if (tempdist < dist)
+						// set cv next waypoint based on current position
+						// this algorithm shall be futurely enhanced when re-reoute is done near last-2nd WP
+
+						dist = MAX_UINT32;
+
+						for (j = 1; j < arena->cv[i].wptotal; j++)
 						{
-							dist = tempdist;
-							arena->cv[i].wpnum = j;
+							tempdist = DistBetween(arena->cv[i].wp[j][0], arena->cv[i].wp[j][1], 0, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], 0, 60000);
+
+							if (tempdist < dist)
+							{
+								dist = tempdist;
+								arena->cv[i].wpnum = j;
+							}
 						}
 					}
-				}
-				else
-					dist = 0;
+					else
+						dist = 0;
 
-				arena->cv[i].wpnum++;
+					arena->cv[i].wpnum++;
 
-				if (!arena->cv[i].outofport)
-				{
-					arena->fields[arena->cv[i].field].posxyz[0] = arena->cv[i].wp[0][0];
-					arena->fields[arena->cv[i].field].posxyz[1] = arena->cv[i].wp[0][1];
+					if (!arena->cv[i].outofport)
+					{
+						arena->fields[arena->cv[i].field].posxyz[0] = arena->cv[i].wp[0][0];
+						arena->fields[arena->cv[i].field].posxyz[1] = arena->cv[i].wp[0][1];
+					}
+
+					if (arena->cv[i].wpnum == arena->cv[i].wptotal) // reset waypoint index
+					{
+						arena->cv[i].wpnum = 1;
+					}
+
+					if (dist < MAX_UINT32)
+					{
+						SetCVSpeed(&(arena->cv[i]));
+					}
+					else
+					{
+						CPrintf(arena->fields[arena->cv[i].field].country, 
+						RADIO_RED, "CV (F%d) is out of route", arena->cv[i].field+1);
+					}
 				}
 
-				if (arena->cv[i].wpnum == arena->cv[i].wptotal) // reset waypoint index
+				if (!(arena->frame % 100))
 				{
-					arena->cv[i].wpnum = 1;
-				}
+					if (arena->cv[i].field >= fields->value)
+					{
+						Com_Printf(VERBOSE_WARNING, "CheckArenaRules() CV %d not field declared\n", i);
+					}
+					else
+					{
+						// adjust field and CV pos, based on route
+						arena->fields[arena->cv[i].field].posxyz[0] = GetCVPos( &(arena->cv[i]), 0);
+						arena->fields[arena->cv[i].field].posxyz[1] = GetCVPos( &(arena->cv[i]), 1);
 
-				if (dist < MAX_UINT32)
-				{
-					SetCVSpeed(&(arena->cv[i]));
-				}
-				else
-				{
-					CPrintf(arena->fields[arena->cv[i].field].country, 
-					RADIO_RED, "CV (F%d) is out of route", arena->cv[i].field+1);
+						arena->fields[arena->cv[i].field].buildings[0].posx = arena->fields[arena->cv[i].field].posxyz[0];
+						arena->fields[arena->cv[i].field].buildings[0].posy = arena->fields[arena->cv[i].field].posxyz[1];
+					}
 				}
 			}
+			//		}
 
-			if (!(arena->frame % 100))
+			// CV Attack
+			if (arena->cv[i].speed > 1 && !(arena->frame % ((u_int32_t) cvdelay->value * 100)) && !(arena->cv[i].field >= fields->value))
 			{
-				if (arena->cv[i].field >= fields->value)
-				{
-					Com_Printf(VERBOSE_WARNING, "CheckArenaRules() CV %d not field declared\n", i);
-				}
-				else
-				{
-					// adjust field and CV pos, based on route
-					arena->fields[arena->cv[i].field].posxyz[0] = GetCVPos( &(arena->cv[i]), 0);
-					arena->fields[arena->cv[i].field].posxyz[1] = GetCVPos( &(arena->cv[i]), 1);
+				dist = 0;
 
-					arena->fields[arena->cv[i].field].buildings[0].posx = arena->fields[arena->cv[i].field].posxyz[0];
-					arena->fields[arena->cv[i].field].buildings[0].posy = arena->fields[arena->cv[i].field].posxyz[1];
+				j = NearestField(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].country, TRUE, TRUE, &dist);
+
+				if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cv[i].field)
+				{
+					if (j < fields->value)
+					{
+						if (!arena->fields[j].closed)
+						{
+							if (arena->fields[arena->cv[i].field].type == FIELD_SUBMARINE)
+							{
+								ThrowBomb(FALSE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+								ThrowBomb(TRUE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+							}
+							else
+								CVFire(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0],
+										arena->fields[j].posxyz[1], arena->fields[j].posxyz[2]);
+						}
+					}
+					else
+					{
+						if (!arena->cities[j - (int16_t)fields->value].closed)
+						{
+							if (arena->fields[arena->cv[i].field].type == FIELD_SUBMARINE)
+							{
+								ThrowBomb(FALSE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+								ThrowBomb(TRUE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+							}
+							else
+								CVFire(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2]);
+						}
+					}
 				}
 			}
 		}
-		//		}
-
-		// CV Attack
-		if (arena->cv[i].speed > 1 && !(arena->frame % ((u_int32_t) cvdelay->value * 100)) && !(arena->cv[i].field >= fields->value))
-		{
-			dist = 0;
-
-			j = NearestField(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].country, TRUE, TRUE, &dist);
-
-			if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cv[i].field)
-			{
-				if (j < fields->value)
-				{
-					if (!arena->fields[j].closed)
-					{
-						if (arena->fields[arena->cv[i].field].type == FIELD_SUBMARINE)
-						{
-							ThrowBomb(FALSE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-							ThrowBomb(TRUE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-						}
-						else
-							CVFire(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0],
-									arena->fields[j].posxyz[1], arena->fields[j].posxyz[2]);
-					}
-				}
-				else
-				{
-					if (!arena->cities[j - (int16_t)fields->value].closed)
-					{
-						if (arena->fields[arena->cv[i].field].type == FIELD_SUBMARINE)
-						{
-							ThrowBomb(FALSE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
-							ThrowBomb(TRUE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
-						}
-						else
-							CVFire(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2]);
-					}
-				}
-			}
-		}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
 	}
 
 	// RPS Tick
@@ -992,83 +1056,109 @@ void CheckArenaRules(void)
 	{
 		if (!(arena->frame % 6000)) // every minute
 		{
-			UpdateRPS(1);
+			if (!setjmp(debug_buffer))
+			{
+				UpdateRPS(1);
+			}
+			else
+			{
+				DebugArena(__FILE__, __LINE__);
+			}
 		}
 	}
 
+	// Map dots
+
 	if (!(arena->frame % 200))
-		SendMapDots();
+	{
+		if (!setjmp(debug_buffer))
+		{
+			SendMapDots();
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
+		}
+	}
+
 
 	// Change Arena
 
-	if (arena->mapnum >= 0 && mapcycle->value)
+	if (!setjmp(debug_buffer))
 	{
-		dist = (arena->year * 10000)+(arena->month * 100) + arena->day;
-
-		if (arena->mapcycle[arena->mapnum].date == dist) // this is the changemap day!
+		if (arena->mapnum >= 0 && mapcycle->value)
 		{
-			if (!arena->countdown)
+			dist = (arena->year * 10000)+(arena->month * 100) + arena->day;
+
+			if (arena->mapcycle[arena->mapnum].date == dist) // this is the changemap day!
 			{
-				arena->countdown = 18001; // 3 minutes
-			}
-		}
-	}
-
-	if (mapcycle->value && !(arena->frame % 60000)) // Warn players time left to change arena every 10 minutes
-	{
-		i = TimetoNextArena();
-
-		if (i > 0 && i < 3)
-		{
-			if (i > 1)
-				BPrintf(RADIO_YELLOW, "Next arena will be loaded in %u virtual days", i);
-			else
-				BPrintf(RADIO_YELLOW, "Next arena will be loaded next virtual day", i);
-		}
-	}
-
-	if (arena->countdown)
-	{
-		arena->countdown--;
-
-		if (!(arena->countdown % 6000)) // each minute
-		{
-			BPrintf(RADIO_YELLOW, "Arena will be changed in %s", Com_TimeSeconds(arena->countdown/100));
-			BPrintf(RADIO_YELLOW, "Your don't need to land, your score will be saved");
-		}
-
-		if (arena->countdown < 6000)
-		{
-			if (!(arena->countdown % 1000)) // each 10 secs
-			{
-				BPrintf(RADIO_YELLOW, "Arena will be changed in %u seconds", arena->countdown / 100);
-			}
-		}
-
-		if (arena->countdown == 1)
-		{
-
-			arena->mapnum++;
-			arena->countdown = 0;
-
-			if ((arena->mapnum) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum)].date)
-			{
-				BackupScores(COLLECT_CYCLE);
-				NewWar(); // set mapnum to zero, etc
-			}
-			else
-			{
-				BackupScores(COLLECT_MAP);
-				sprintf(my_query, "UPDATE score_common SET killstod = '0', structstod = '0'");
-
-				if (d_mysql_query(&my_sock, my_query)) // query succeeded
+				if (!arena->countdown)
 				{
-					Com_Printf(VERBOSE_WARNING, "MapChange: couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					arena->countdown = 18001; // 3 minutes
+				}
+			}
+		}
+
+		if (mapcycle->value && !(arena->frame % 60000)) // Warn players time left to change arena every 10 minutes
+		{
+			i = TimetoNextArena();
+
+			if (i > 0 && i < 3)
+			{
+				if (i > 1)
+					BPrintf(RADIO_YELLOW, "Next arena will be loaded in %u virtual days", i);
+				else
+					BPrintf(RADIO_YELLOW, "Next arena will be loaded next virtual day", i);
+			}
+		}
+
+		if (arena->countdown)
+		{
+			arena->countdown--;
+
+			if (!(arena->countdown % 6000)) // each minute
+			{
+				BPrintf(RADIO_YELLOW, "Arena will be changed in %s", Com_TimeSeconds(arena->countdown/100));
+				BPrintf(RADIO_YELLOW, "Your don't need to land, your score will be saved");
+			}
+
+			if (arena->countdown < 6000)
+			{
+				if (!(arena->countdown % 1000)) // each 10 secs
+				{
+					BPrintf(RADIO_YELLOW, "Arena will be changed in %u seconds", arena->countdown / 100);
 				}
 			}
 
-			ChangeArena(arena->mapcycle[arena->mapnum].mapname, NULL);
+			if (arena->countdown == 1)
+			{
+
+				arena->mapnum++;
+				arena->countdown = 0;
+
+				if ((arena->mapnum) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum)].date)
+				{
+					BackupScores(COLLECT_CYCLE);
+					NewWar(); // set mapnum to zero, etc
+				}
+				else
+				{
+					BackupScores(COLLECT_MAP);
+					sprintf(my_query, "UPDATE score_common SET killstod = '0', structstod = '0'");
+
+					if (d_mysql_query(&my_sock, my_query)) // query succeeded
+					{
+						Com_Printf(VERBOSE_WARNING, "MapChange: couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+					}
+				}
+
+				ChangeArena(arena->mapcycle[arena->mapnum].mapname, NULL);
+			}
 		}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
 	}
 
 	// Tatical drones tick
@@ -1077,48 +1167,55 @@ void CheckArenaRules(void)
 	{
 		if (!(arena->frame % 100))
 		{
-			if (rand() % 2)
-				close = 1; // red
-			else
-				close = 3; // gold
-
-			// check all arena for total of drones
-			for (i = 0, j = 0; i < maxentities->value; i++)
+			if (!setjmp(debug_buffer))
 			{
-				if (clients[i].inuse && (clients[i].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY)) && clients[i].country == close)
+				if (rand() % 2)
+					close = 1; // red
+				else
+					close = 3; // gold
+
+				// check all arena for total of drones
+				for (i = 0, j = 0; i < maxentities->value; i++)
 				{
-					j++;
+					if (clients[i].inuse && (clients[i].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY)) && clients[i].country == close)
+					{
+						j++;
+					}
+				}
+
+				dist = 20;
+
+				if (j < 6)
+				{
+					while (close)
+					{
+						i = rand() % (u_int16_t)fields->value;
+
+						if (((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) && arena->fields[i].country == close)
+						{
+							j = NearestField(arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], close, FALSE, 
+							FALSE, NULL);
+
+							if (j >= 0)
+								LaunchTanks(i, j, close, NULL); //close -> country
+
+							close = 0;
+						}
+
+						if (dist)
+						{
+							dist--;
+						}
+						else
+						{
+							close = 0;
+						}
+					}
 				}
 			}
-
-			dist = 20;
-
-			if (j < 6)
+			else
 			{
-				while (close)
-				{
-					i = rand() % (u_int16_t)fields->value;
-
-					if (((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) && arena->fields[i].country == close)
-					{
-						j = NearestField(arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], close, FALSE, 
-						FALSE, NULL);
-
-						if (j >= 0)
-							LaunchTanks(i, j, close, NULL); //close -> country
-
-						close = 0;
-					}
-
-					if (dist)
-					{
-						dist--;
-					}
-					else
-					{
-						close = 0;
-					}
-				}
+				DebugArena(__FILE__, __LINE__);
 			}
 		}
 	}
@@ -1127,29 +1224,51 @@ void CheckArenaRules(void)
 
 	if (!(arena->frame % 500)) // 5 sec
 	{
-		NoopArenalist();
+		if (!setjmp(debug_buffer))
+		{
+			NoopArenalist();
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
+		}
 	}
 
 	// Online Players
 
 	if (!(arena->frame % 100)) // 1 sec
 	{
-		players_num += arena->numplayers;
-		players_count++;
-
-		if (!(arena->frame % 30000)) // 5 min
+		if (!setjmp(debug_buffer))
 		{
-			Com_Printf(VERBOSE_ONLINE, "Online Players: %.3f\n", (float) players_num / players_count);
-			players_num = players_count = 0;
+			players_num += arena->numplayers;
+			players_count++;
+
+			if (!(arena->frame % 30000)) // 5 min
+			{
+				Com_Printf(VERBOSE_ONLINE, "Online Players: %.3f\n", (float) players_num / players_count);
+				players_num = players_count = 0;
+			}
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
 		}
 	}
+
 
 	// Backup Tick
 
 	if (!(arena->frame % 90000)) // 15 min
 	{
-		BackupArenaStatus();
-		Cmd_CheckBuildings(NULL); // DEBUG
+		if (!setjmp(debug_buffer))
+		{
+			BackupArenaStatus();
+			Cmd_CheckBuildings(NULL); // DEBUG
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
+		}
 	}
 }
 
