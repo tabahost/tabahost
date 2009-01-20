@@ -2110,6 +2110,7 @@ char	*GetHitSite(u_int8_t id);
 char	*GetSmallHitSite(u_int8_t id);
 munition_t *GetMunition(u_int8_t id);
 u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, char *pap, client_t *client);
+u_int32_t RebuildTime(building_t *building);
 u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, client_t *client);
 void	SendFieldStatus(u_int16_t field, client_t *client);
 void	SetBuildingStatus(building_t *building, u_int8_t status, client_t *client);

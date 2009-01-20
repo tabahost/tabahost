@@ -4318,6 +4318,8 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 {
 	int8_t bomber;
 
+	Com_Printf(VERBOSE_DEBUG, "Field Damage: %u\n", damage);
+	
 	if(field < fields->value)
 	{
 		bomber = AddBomber(field, client);

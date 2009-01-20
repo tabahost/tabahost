@@ -5989,14 +5989,13 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 			arena->fields[building->field - 1].paras++;
 
 			PPrintf(client, RADIO_YELLOW, "Paras count: %d", arena->fields[building->field - 1].paras);
+			
+			AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
+			
 			if (arena->fields[building->field - 1].paras >= paratroopers->value)
 			{
 				AddBuildingDamage(building, GetBuildingArmor(BUILD_TOWER, client), 1, client);
 				CaptureField(building->field, client);
-			}
-			else
-			{
-				AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
 			}
 			return;
 		}
@@ -6883,6 +6882,73 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 }
 
 /*************
+ RebuildTime
+
+ Calculate the rebuiding time
+ *************/
+
+u_int32_t RebuildTime(building_t *building)
+{
+	static u_int8_t villages, towns, ports;
+	static float const_v, const_t, const_p;
+	static u_int8_t calc = 0;
+	float c_villages, c_towns, c_ports;
+	u_int16_t total;
+	u_int8_t i;
+	u_int32_t rebuild;
+	
+	if(!building)
+	{
+		calc = 0;
+		return 0;
+	}
+	
+	if(building->type >= BUILD_MAX)
+		return 0;
+	
+	if(!calc)
+	{
+		villages = towns = ports = 0;
+		
+		for(i = 0; i < fields->value; i++)
+		{
+			if(arena->fields[i].type == FIELD_WB3PORT)
+				ports++;
+			else if(arena->fields[i].type == FIELD_WB3TOWN)
+				towns++;
+			else if(arena->fields[i].type == FIELD_WB3VILLAGE)
+				villages++;
+		}
+		
+		total = ports * 3 + towns * 5 + villages * 1;
+		const_v = 0.6 * villages * 1 / total;
+		const_t = 0.6 * towns * 5 / total;
+		const_p = 0.6 * ports * 3 / total;
+		
+		calc = 1;
+	}
+	
+	c_villages = c_towns = c_ports = 0;
+	
+	for(i = 0; i < fields->value; i++)
+	{
+		if(arena->fields[i].country == building->country)
+		{
+			if(arena->fields[i].type == FIELD_WB3PORT)
+				c_ports++;
+			else if(arena->fields[i].type == FIELD_WB3TOWN)
+				c_towns++;
+			else if(arena->fields[i].type == FIELD_WB3VILLAGE)
+				c_villages++;
+		}
+	}
+	
+	rebuild = 6000 * rebuildtime->value * Com_Log(GetBuildingArmor(building->type, NULL), 40) * (1 - (ports?(const_p * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0));
+	
+	return rebuild;
+}
+
+/*************
  AddBuildingDamage
 
  Set the max damage all structure can support in selected airplane
@@ -6955,7 +7021,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		}
 	}
 
-	if (!oldcapt->value /*ToT*/ || IsVitalBuilding(building)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
+	if (!oldcapt->value /*ToT enabled*/ || IsVitalBuilding(building)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
 	{
 		if(oldcapt->value || (ap)) // this adds damage by bombs if oldcapt or by bullets if ToT enabled
 		{
@@ -6963,7 +7029,17 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		}
 	}
 
-	score = (100 * dmgprobe * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL));
+	score = dmgprobe < building->armor ? dmgprobe : building->armor;
+	score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
+	
+	if (client->country != building->country)
+	{
+		ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
+	}
+	else
+	{
+		ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
+	}
 
 	if ((int32_t)building->armor <= dmgprobe)
 	{
@@ -6978,10 +7054,10 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 		if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
 		{
-			armor = GetBuildingArmor(building->type, client);
-			building->timer = (u_int32_t) (Com_Log(dmgprobe, 17) * Com_Log(armor, 17) * (rebuildtime->value * 100)); // (double)((double)(armor + dmgprobe - building->armor)/(double)armor) * (double)(rebuildtime->value * 100);
-			if (building->timer > (u_int32_t)(rebuildtime->value * 1200))
-				building->timer = (rebuildtime->value * 1200);
+			//armor = GetBuildingArmor(building->type, client);
+			building->timer = RebuildTime(building);//(u_int32_t) (Com_Log(dmgprobe, 17) * Com_Log(armor, 17) * (rebuildtime->value * 100)); // (double)((double)(armor + dmgprobe - building->armor)/(double)armor) * (double)(rebuildtime->value * 100);
+			//if (building->timer > (u_int32_t)(rebuildtime->value * 1200))
+			//	building->timer = (rebuildtime->value * 1200);
 			building->armor = 0;
 		}
 		else
@@ -7033,12 +7109,10 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 				if (client->country != building->country)
 				{
-					ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
 					ScoresEvent(SCORE_STRUCTURE, client, building->type);
 				}
 				else
 				{
-					ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
 					ScoresEvent(SCORE_STRUCTURE, client, (int32_t)(-1 * building->type));
 				}
 			}
@@ -7084,15 +7158,6 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		if (client->country != building->country)
-		{
-			ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
-		}
-		else
-		{
-			ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
-		}
-
 		building->armor -= dmgprobe;
 	}
 

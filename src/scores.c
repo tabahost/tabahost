@@ -93,10 +93,13 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			{
 				case MUNTYPE_ROCKET:
 					strcat(my_query, " rocketused = rocketused + '1'");
+					break;
 				case MUNTYPE_BOMB:
 					strcat(my_query, " bombused = bombused + '1'");
+					break;
 				case MUNTYPE_TORPEDO:
 					strcat(my_query, " torpused = torpused + '1'");
+					break;
 				default:
 					strcat(my_query, " gunused = gunused + '1'");
 			}
@@ -106,10 +109,13 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			{
 				case MUNTYPE_ROCKET:
 					strcat(my_query, " rockethits = rockethits + '1'");
+					break;
 				case MUNTYPE_BOMB:
 					strcat(my_query, " bombhits = bombhits + '1'");
+					break;
 				case MUNTYPE_TORPEDO:
 					strcat(my_query, " torphits = torphits + '1'");
+					break;
 				default:
 					strcat(my_query, " gunhits = gunhits + '1'");
 			}
@@ -194,11 +200,14 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 						client->lives--;
 						Cmd_Lives(client->longnick, client->lives, NULL);
 					}
+					break;
 				}
-				else // bail
-				{
-					event_cost += ScorePlaneCost(client) + ScorePilotTransportCost(client);
-				}
+				else
+					strcat(my_query, ","); // let it go to SCORE_BAILED
+//				else // bail
+//				{
+//					event_cost += ScorePlaneCost(client) + ScorePilotTransportCost(client);
+//				}
 		case SCORE_BAILED:
 				if (IsFighter(client) || IsBomber(client))
 				{
@@ -233,11 +242,11 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			break;
 	}
 	
-	PPrintf(client, RADIO_DARKGREEN, "EVENT: %d. Cost: %f", event, event_cost);
+	PPrintf(client, RADIO_DARKGREEN, "EVENT: %d. Cost: %f. Misc: %d", event, event_cost, misc);
 
 	client->score.airscore -= event_cost;
 
-	if(!(event & SCORE_TAKEOFF))
+	if(event & (SCORE_BAILED | SCORE_CAPTURED | SCORE_DISCO | SCORE_DITCHED | SCORE_KILLED | SCORE_LANDED))
 	{
 		client->lastscore += client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore - client->score.penaltyscore;
 
@@ -284,6 +293,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	}
 
 	sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
+	
+	Com_Printf(VERBOSE_DEBUG, "Event Query: %s\n", my_query);
 
 	if (d_mysql_query(&my_sock, my_query)) // query succeeded
 	{
@@ -373,21 +384,32 @@ void ScoreFieldCapture(u_int8_t field)
 
 	if(field < fields->value)
 	{
+		Com_Printf(VERBOSE_DEBUG, "Field %d\n", field+1);
+		Com_Printf(VERBOSE_DEBUG, "Country %d\n", arena->fields[field].country);
+		Com_Printf(VERBOSE_DEBUG, "Type %d\n", arena->fields[field].type);
+		
 		fieldcost = GetFieldCost(arena->fields[field].type);
 
 		bomberdamage = cargodamage = numbombers = numcargos = 0;
 		
+		Com_Printf(VERBOSE_DEBUG, "Start search capturers\n");
+		
 		for(i = 0; i < MAX_HITBY; i++) // account bombers and cargos
 		{
-			if(IsCargo(NULL, arena->fields[field].planeby[i]))
+			if(arena->fields[field].damby[i])
 			{
-				cargodamage += arena->fields[field].damby[i];
-				numcargos++;
-			}
-			else
-			{
-				bomberdamage += arena->fields[field].damby[i];
-				numbombers++;
+				if(IsCargo(NULL, arena->fields[field].planeby[i]))
+				{
+					Com_Printf(VERBOSE_DEBUG, "Found Cargo damage %d\n", arena->fields[field].damby[i]);
+					cargodamage += arena->fields[field].damby[i];
+					numcargos++;
+				}
+				else
+				{
+					Com_Printf(VERBOSE_DEBUG, "Found Bomber damage %d\n", arena->fields[field].damby[i]);
+					bomberdamage += arena->fields[field].damby[i];
+					numbombers++;
+				}
 			}
 		}
 
@@ -396,42 +418,64 @@ void ScoreFieldCapture(u_int8_t field)
 
 		sql_query[0] = '\0';
 
+		Com_Printf(VERBOSE_DEBUG, "Start giving points\n");
+		
 		for(i = 0; i < MAX_HITBY; i++) // give points
 		{
 			if(arena->fields[field].hitby[i] && arena->fields[field].hitby[i]->inuse && !arena->fields[field].hitby[i]->drone)
 			{
 				if(IsCargo(NULL, arena->fields[field].planeby[i]))
 				{
-					score = fieldcost * (arena->fields[field].damby[i] / cargodamage) * (numcargos / (numcargos + numbombers));
+					score = fieldcost * ((float)arena->fields[field].damby[i] / cargodamage) * ((float)numcargos / (numcargos + numbombers));
+					Com_Printf(VERBOSE_DEBUG, "Cargo: %f\n", score);
 				}
 				else
 				{
-					score = fieldcost * (arena->fields[field].damby[i] / bomberdamage) * (numbombers / (numcargos + numbombers));
+					score = fieldcost * ((float)arena->fields[field].damby[i] / bomberdamage) * ((float)numbombers / (numcargos + numbombers));
+					Com_Printf(VERBOSE_DEBUG, "Bomber: %f\n", score);
 				}
 
-				if (arena->fields[field].hitby[i]->country != arena->fields[field].country) // if enemy
+				if (arena->fields[field].hitby[i]->country == arena->fields[field].country) // if it WAS enemy
 				{
-					if (IsFighter(NULL, arena->fields[field].planeby[i]))
+					if(arena->fields[field].hitby[i]->infly)
 					{
-						sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
-					}
-					else if (IsBomber(NULL, arena->fields[field].planeby[i]))
-					{
-						sprintf(sql_query, "%sUPDATE score_bomber SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
-					}
-					else if (IsGround(NULL, arena->fields[field].planeby[i]))
-					{
-						sprintf(sql_query, "%sUPDATE score_ground SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+						Com_Printf(VERBOSE_DEBUG, "InFlight\n");
+						arena->fields[field].hitby[i]->score.captscore += score;
 					}
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", arena->fields[field].planeby[i]);
-						sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+						Com_Printf(VERBOSE_DEBUG, "Not InFlight\n");
+						if (IsFighter(NULL, arena->fields[field].planeby[i]))
+						{
+							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+						}
+						else if (IsBomber(NULL, arena->fields[field].planeby[i]))
+						{
+							sprintf(sql_query, "%sUPDATE score_bomber SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+						}
+						else if (IsGround(NULL, arena->fields[field].planeby[i]))
+						{
+							sprintf(sql_query, "%sUPDATE score_ground SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+						}
+						else
+						{
+							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", arena->fields[field].planeby[i]);
+							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+						}
 					}
 				}
 				else // friendly hit... tsc, tsc, tsc...
 				{
-					sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+					if(arena->fields[field].hitby[i]->infly)
+					{
+						Com_Printf(VERBOSE_DEBUG, "Penalty InFlight\n");
+						arena->fields[field].hitby[i]->score.penaltyscore += score;
+					}
+					else
+					{
+						Com_Printf(VERBOSE_DEBUG, "Penalty Not InFlight\n");
+						sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+					}
 				}
 			}
 
@@ -549,27 +593,41 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 					
 					if (client->hitby[i]->country != client->country) // if enemy
 					{
-						if (IsFighter(NULL, client->planeby[i]))
+						if(client->hitby[i]->infly)
 						{
-							sprintf(my_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
-						}
-						else if (IsBomber(NULL, client->planeby[i]))
-						{
-							sprintf(my_query, "%sUPDATE score_bomber SET bomber_score = bomber_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
-						}
-						else if (IsGround(NULL, client->planeby[i]))
-						{
-							sprintf(my_query, "%sUPDATE score_ground SET ground_score = ground_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+							client->hitby[i]->score.airscore += score;
 						}
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-							sprintf(my_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+							if (IsFighter(NULL, client->planeby[i]))
+							{
+								sprintf(my_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+							}
+							else if (IsBomber(NULL, client->planeby[i]))
+							{
+								sprintf(my_query, "%sUPDATE score_bomber SET bomber_score = bomber_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+							}
+							else if (IsGround(NULL, client->planeby[i]))
+							{
+								sprintf(my_query, "%sUPDATE score_ground SET ground_score = ground_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+							}
+							else
+							{
+								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+								sprintf(my_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+							}
 						}
 					}
 					else // friendly hit... tsc, tsc, tsc...
 					{
-						sprintf(my_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+						if(client->hitby[i]->infly)
+						{
+							client->hitby[i]->score.penaltyscore += score;
+						}
+						else
+						{
+							sprintf(my_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+						}
 					}
 				}
 			}
@@ -884,9 +942,14 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 	if(gunused || totalhits)
 	{
 		if (gunused)
-			sprintf(my_query, "%s, gunused = gunused + '%u'", my_query, gunused);
+		{
+			if(totalhits)
+				sprintf(my_query, "%s gunused = gunused + '%u',", my_query, gunused);
+			else
+				sprintf(my_query, "%s gunused = gunused + '%u'", my_query, gunused);
+		}
 		if (totalhits)
-			sprintf(my_query, "%s, gunhits = gunhits + '%u'", my_query, totalhits);
+			sprintf(my_query, "%s gunhits = gunhits + '%u'", my_query, totalhits);
 	
 		sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
 	
@@ -2187,41 +2250,6 @@ float GetFieldCost(u_int8_t type)
 void ScoreLoadCosts(void)
 {
 //	arena->costs.buildtype[BUILD_50CALACK] = 1.0; // LoadDamageModel
-//	arena->costs.buildtype[BUILD_20MMACK] = 2.0;
-//	arena->costs.buildtype[BUILD_40MMACK] = 3.0;
-//	arena->costs.buildtype[BUILD_88MMFLAK] = 4.0;
-//	arena->costs.buildtype[BUILD_TOWER] = 10.0;
-//	arena->costs.buildtype[BUILD_HANGAR] = 100.0;
-//	arena->costs.buildtype[BUILD_FUEL] = 50.0;
-//	arena->costs.buildtype[BUILD_AMMO] = 50.0;
-//	arena->costs.buildtype[BUILD_RADAR] = 50.0;
-//	arena->costs.buildtype[BUILD_WARE] = 70.0;
-//	arena->costs.buildtype[BUILD_RADIOHUT] = 50.0;
-//	arena->costs.buildtype[BUILD_ANTENNA] = 10.0;
-//	arena->costs.buildtype[BUILD_CV] = 200.0;
-//	arena->costs.buildtype[BUILD_DESTROYER] = 100.0;
-//	arena->costs.buildtype[BUILD_CRUISER] = 100.0;
-//	arena->costs.buildtype[BUILD_CARGO] = 70.0;
-//	arena->costs.buildtype[BUILD_SUBMARINE] = 70.0;
-//	arena->costs.buildtype[BUILD_BRIDGE] = 50.0;
-//	arena->costs.buildtype[BUILD_SPECIALBUILD] = 70.0;
-//	arena->costs.buildtype[BUILD_FACTORY] = 70.0;
-//	arena->costs.buildtype[BUILD_BARRACKS] = 1.0;
-//	arena->costs.buildtype[BUILD_STATICS] = 10.0;
-//	arena->costs.buildtype[BUILD_REFINERY] = 70.0;
-//	arena->costs.buildtype[BUILD_PLANEFACTORY] = 90.0;
-//	arena->costs.buildtype[BUILD_BUILDING] = 30.0;
-//	arena->costs.buildtype[BUILD_CRANE] = 50.0;
-//	arena->costs.buildtype[BUILD_STRATEGIC] = 30.0;
-//	arena->costs.buildtype[BUILD_ARTILLERY] = 3.0;
-//	arena->costs.buildtype[BUILD_HUT] = 10.0;
-//	arena->costs.buildtype[BUILD_TRUCK] = 10.0;
-//	arena->costs.buildtype[BUILD_TREE] = 0.0;
-//	arena->costs.buildtype[BUILD_SPAWNPOINT] = 1.0;
-//	arena->costs.buildtype[BUILD_HOUSE] = 10.0;
-//	arena->costs.buildtype[BUILD_ROCK] = 0.0;
-//	arena->costs.buildtype[BUILD_FENCE] = 0.0;
-
 //	arena->costs.ammotype[MUNTYPE_BULLET];  // LoadAmmo():29
 //	arena->costs.planeweight[MAX_PLANES];	// LoadDamageModel():25
 //	arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
