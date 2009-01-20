@@ -1206,7 +1206,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	}
 	else
 	{
-		client->commandos = 5;
+		client->commandos = 4;
 	}
 
 	client->status_damage = 0; // to force player not appear damaged after takeoff
@@ -2538,7 +2538,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				if (!arena->fields[field].buildings[i].field)
 					break;
 
-				if (arena->fields[field].buildings[i].status && arena->fields[field].buildings[i].timer < reup && IsVitalBuilding(&(arena->fields[field].buildings[i])))
+				if (arena->fields[field].buildings[i].status && arena->fields[field].buildings[i].timer < reup && IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
 				{
 					reup = arena->fields[field].buildings[i].timer;
 				}
@@ -2598,7 +2598,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 			{
 				if (arena->fields[field].buildings[i].field)
 				{
-					if (IsVitalBuilding(&(arena->fields[field].buildings[i])))
+					if (IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
 					{
 						fprintf(fp, "%s %s", GetBuildingType(arena->fields[field].buildings[i].type), arena->fields[field].buildings[i].timer ? "DESTROYED" : "LIVES");
 

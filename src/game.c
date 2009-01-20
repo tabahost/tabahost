@@ -761,7 +761,7 @@ void CheckArenaRules(void)
 				{
 					if (arena->fields[i].buildings[j].field)
 					{
-						if (!arena->fields[i].buildings[j].status && IsVitalBuilding(&(arena->fields[i].buildings[j]))) // Vital building UP, field not closed
+						if (!arena->fields[i].buildings[j].status && IsVitalBuilding(&(arena->fields[i].buildings[j]), oldcapt->value)) // Vital building UP, field not closed
 						{
 							arena->fields[i].vitals = 1;
 							close = 0;
@@ -798,10 +798,10 @@ void CheckArenaRules(void)
 						{
 							arena->fields[i].buildings[j].timer += 6000;
 
-							if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
-							{
-								arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
-							}
+//							if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
+//							{
+//								arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
+//							}
 						}
 						else
 							break;
@@ -841,7 +841,7 @@ void CheckArenaRules(void)
 					/*				if(!arena->cities[i].buildings[j].status &&
 					 arena->cities[i].buildings[j].type >= BUILD_BRIDGE && arena->cities[i].buildings[j].type <= BUILD_CRANE)
 					 */
-					if (!arena->cities[i].buildings[j].status && IsVitalBuilding(&(arena->cities[i].buildings[j]))) // Vital building UP, field not closed
+					if (!arena->cities[i].buildings[j].status && IsVitalBuilding(&(arena->cities[i].buildings[j]), oldcapt->value)) // Vital building UP, field not closed
 
 					{
 						close = 0;
@@ -7021,7 +7021,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		}
 	}
 
-	if (!oldcapt->value /*ToT enabled*/ || IsVitalBuilding(building)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
+	if (!oldcapt->value /*ToT enabled*/ || IsVitalBuilding(building, oldcapt->value)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
 	{
 		if(oldcapt->value || (ap)) // this adds damage by bombs if oldcapt or by bullets if ToT enabled
 		{
@@ -7126,7 +7126,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 					Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
 				}
-				else if (IsVitalBuilding(building))
+				else if (IsVitalBuilding(building, oldcapt->value))
 				{
 					PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s", GetBuildingType(building->type), Com_TimeSeconds(building->timer/100));
 

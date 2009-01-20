@@ -2223,7 +2223,7 @@ void	NewWar(void);
 int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city, u_int8_t cvs, u_int32_t *pdist);
 void	ReducePlanes(u_int8_t field);
 void	IncreaseAcksReup(u_int8_t field);
-u_int8_t IsVitalBuilding(building_t *building);
+u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot);
 u_int32_t GetTonnageToClose(u_int8_t fieldtype);
 u_int8_t Alt2Index(int32_t alt);
 void	WB3MapTopography(client_t *client);

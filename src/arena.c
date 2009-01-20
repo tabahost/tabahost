@@ -3418,7 +3418,7 @@ void IncreaseAcksReup(u_int8_t field)
  Returns true if building is essential to close a field
  *************/
 
-u_int8_t IsVitalBuilding(building_t *building)
+u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 {
 	if (arcade->value)
 	{
@@ -3465,7 +3465,7 @@ u_int8_t IsVitalBuilding(building_t *building)
 	}
 	else
 	{
-		if(oldcapt->value || !wb3->value)
+		if(notot || !wb3->value)
 		{
 			if ((building->type == BUILD_50CALACK) ||
 				(building->type == BUILD_20MMACK) ||

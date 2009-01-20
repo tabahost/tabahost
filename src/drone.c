@@ -187,7 +187,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].shortnick = shortnick;
 					clients[i].dronelasttarget = MAX_BUILDINGS; // to avoid unrandomized first target at DroneGetTarget()
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
-					clients[i].dronetimer = 360*100;
+					clients[i].dronetimer = 170*100;
 					clients[i].ready = 0;
 					clients[i].countrytime = 100;
 					break;
@@ -733,7 +733,7 @@ int ProcessDrone(client_t *drone)
 							{
 								break;
 							}
-							else if (!buildings[i].status && IsVitalBuilding(&(buildings[i])))
+							else if (!buildings[i].status && IsVitalBuilding(&(buildings[i]), TRUE))
 							{
 								x = drone->posxy[0][0] - buildings[i].posx;
 								y = drone->posxy[1][0] - buildings[i].posy;
@@ -1036,7 +1036,7 @@ void DroneGetTarget(client_t *drone)
 		{
 			break; // end of array
 		}
-		else if (!arena->fields[drone->dronefield].buildings[i].status && IsVitalBuilding(&(arena->fields[drone->dronefield].buildings[i])))
+		else if (!arena->fields[drone->dronefield].buildings[i].status && IsVitalBuilding(&(arena->fields[drone->dronefield].buildings[i]), TRUE))
 		{
 			x = drone->posxy[0][0] - arena->fields[drone->dronefield].buildings[i].posx;
 			y = drone->posxy[1][0] - arena->fields[drone->dronefield].buildings[i].posy;

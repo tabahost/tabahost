@@ -2266,13 +2266,13 @@ void ScoreLoadCosts(void)
 	arena->costs.fieldtype[FIELD_FACTORY] = 100.0;
 	arena->costs.fieldtype[FIELD_REFINERY] = 100.0;
 	arena->costs.fieldtype[FIELD_OPENFIELD] = 50.0;
-	arena->costs.fieldtype[FIELD_LITTLE] = 200.0;
-	arena->costs.fieldtype[FIELD_MEDIUM] = 300.0;
-	arena->costs.fieldtype[FIELD_MAIN] = 400.0;
-	arena->costs.fieldtype[FIELD_WB3POST] = 20.0;
-	arena->costs.fieldtype[FIELD_WB3VILLAGE] = 70.0;
-	arena->costs.fieldtype[FIELD_WB3TOWN] = 150.0;
-	arena->costs.fieldtype[FIELD_WB3PORT] = 150.0;
+	arena->costs.fieldtype[FIELD_LITTLE] = 10000.0;
+	arena->costs.fieldtype[FIELD_MEDIUM] = 20000.0;
+	arena->costs.fieldtype[FIELD_MAIN] = 80000.0;
+	arena->costs.fieldtype[FIELD_WB3POST] = 6400.0;
+	arena->costs.fieldtype[FIELD_WB3VILLAGE] = 32000.0;
+	arena->costs.fieldtype[FIELD_WB3TOWN] = 160000.0;
+	arena->costs.fieldtype[FIELD_WB3PORT] = 96000.0;
 
 	arena->costs.takeoff = 1.0;
 	arena->costs.newpilot = 150.0;
