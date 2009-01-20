@@ -796,7 +796,7 @@ void CheckArenaRules(void)
 					{
 						if (arena->fields[i].buildings[j].field)
 						{
-							arena->fields[i].buildings[j].timer += 6000;
+							arena->fields[i].buildings[j].timer += 60000;
 
 //							if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
 //							{
@@ -5613,7 +5613,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 		Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
 		Com_LogDescription(EVENT_DESC_AMMO, drop->item, NULL);
 		
-		ScoresEvent(SCORE_DROPITEM, client, arena->munition[drop->item].type);
+		ScoresEvent(SCORE_DROPITEM, client, drop->item);
 	}
 }
 
@@ -6006,15 +6006,18 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	}
 	else
 	{
-		HardHit(hardhitstructure->munition, (client->country == building->country), client);
-
-		if (client->country == building->country && !client->msgtimer)
+		if(GetBuildingCost(building->type))
 		{
-			CPrintf(client->country, 
-			RADIO_GREEN, "ALERT!!! ALERT!!! %s hit friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
-					building->field);
-
-			// client->msgtimer = 1000;
+			HardHit(hardhitstructure->munition, (client->country == building->country), client);
+	
+			if (client->country == building->country && !client->msgtimer)
+			{
+				CPrintf(client->country, 
+				RADIO_GREEN, "ALERT!!! ALERT!!! %s hit friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
+						building->field);
+	
+				// client->msgtimer = 1000;
+			}
 		}
 	}
 
@@ -7032,13 +7035,16 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	score = dmgprobe < building->armor ? dmgprobe : building->armor;
 	score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
 	
-	if (client->country != building->country)
+	if(score)
 	{
-		ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
-	}
-	else
-	{
-		ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
+		if (client->country != building->country)
+		{
+			ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
+		}
+		else
+		{
+			ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
+		}
 	}
 
 	if ((int32_t)building->armor <= dmgprobe)
