@@ -1112,7 +1112,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 
 			j = AddKiller(dest, source);
 			if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
-				dest->damby[j] += (float)(10.0 * logf(1.0 + 100.0 * 40.0 / (float)(dest->armor.points[part] + 1.0)));
+				dest->damby[j] += (float)(10.0 * logf(1.0 + 100.0 * 40.0 / (float)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
 			
 			SendPings(1, 143, dest);
 		}
@@ -1675,7 +1675,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 							killer = AddKiller(&clients[i], client);
 
 							if (killer >= 0 && killer < MAX_HITBY)
-								clients[i].damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)munition->he / (float)(clients[i].armor.points[PLACE_CENTERFUSE] + 1.0)));
+								clients[i].damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)munition->he / (float)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
 						}
 
 						AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, NULL, NULL, &clients[i]);

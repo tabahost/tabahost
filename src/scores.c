@@ -1963,9 +1963,11 @@ u_int8_t ScoresCheckCaptured(client_t *client)
 	int16_t i, field;
 	u_int32_t radar, distance;
 
+	return 0; // TODO: fix this
+
 	if(!client)
 	{
-		return;
+		return 0;
 	}
 
 	field = NearestField(client->posxy[0][0], client->posxy[1][0], client->country, TRUE, TRUE, &distance);
