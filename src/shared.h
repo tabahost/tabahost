@@ -662,7 +662,6 @@ typedef struct arena_s
 				float takeoff;
 				float ammotype[MAX_MUNTYPE];	// LoadAmmo():29
 				float buildtype[BUILD_MAX];		// 
-				float fieldtype[MAX_FIELDTYPE];	// 
 				float planemodel[MAX_PLANES];	// LoadDamageModel():24
 				float planeweight[MAX_PLANES];	// LoadDamageModel():25
 				float newpilot;					// 
@@ -2382,7 +2381,7 @@ void	BackupScores(u_int8_t collect_type);
 float	ScoreTechnologyCost(client_t *client);
 float	GetBuildingCost(u_int8_t type);
 float	GetAmmoCost(u_int8_t type);
-float	GetFieldCost(u_int8_t type);
+float	GetFieldCost(u_int8_t field);
 void	ScoreFieldCapture(u_int8_t field);
 float	ScorePieceDamage(int8_t killer, float event_cost, client_t *client);
 void	ScoreLoadCosts(void);

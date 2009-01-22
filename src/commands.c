@@ -3167,9 +3167,9 @@ void Cmd_Score(char *player, client_t *client)
 						fprintf(fp, "======================\n");
 						fprintf(fp, "Game ID: %s\nFlying for: %s (%.2f%% of sorties)\n\nSquad: %s\n\n", nickname, GetCountry(Com_Atoi(Com_MyRow("country"))), csortie,
 								Com_MyRow("name") ? Com_MyRow("name") : "None");
-						fprintf(fp, "FLIGHT TIME: %uh %um %us\nTOTAL SCORE: %16.3f\n\n", h, m, s, Com_Atof(Com_MyRow("totalscore")));
+						fprintf(fp, "FLIGHT TIME: %uh %um %us\nTOTAL SCORE: %10.3f\n\n", h, m, s, Com_Atof(Com_MyRow("totalscore")));
 						fprintf(fp, "Last mission: %8.3f\n", Com_Atof(Com_MyRow("lastscore")));
-						fprintf(fp, "Elo Rating: %u\n", Com_Atof(Com_MyRow("rank")));
+						fprintf(fp, "Elo Rating: %u\n", Com_Atou(Com_MyRow("rank")));
 						fprintf(fp, "======================\n\n");
 					}
 

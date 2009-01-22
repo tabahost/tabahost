@@ -395,7 +395,7 @@ void ScoreFieldCapture(u_int8_t field)
 		Com_Printf(VERBOSE_DEBUG, "Country %d\n", arena->fields[field].country);
 		Com_Printf(VERBOSE_DEBUG, "Type %d\n", arena->fields[field].type);
 		
-		fieldcost = GetFieldCost(arena->fields[field].type);
+		fieldcost = GetFieldCost(field);
 
 		bomberdamage = cargodamage = numbombers = numcargos = 0;
 		
@@ -2238,17 +2238,33 @@ float GetAmmoCost(u_int8_t type)
 /*************
  GetFieldCost
 
- Return the cost of a field type
+ Return the cost of a field
  *************/
 
-float GetFieldCost(u_int8_t type)
+float GetFieldCost(u_int8_t field)
 {
-	if(type < MAX_FIELDTYPE)
+	u_int16_t i;
+	float cost = 0.0;
+	
+	if(field < fields->value)
 	{
-		return arena->costs.fieldtype[type];
+		for(i = 0; i < MAX_BUILDINGS; i++)
+		{
+			if(!arena->fields[field].buildings[i].field)
+				break;
+			
+			if(IsVitalBuilding(&(arena->fields[field].buildings[i]), TRUE))
+			{
+				cost += GetBuildingCost(arena->fields[field].buildings[i].type);
+			}
+		}
 	}
 	else
+	{
 		return 0.0;
+	}
+	
+	return (1.5 * cost);
 }
 
 /*************
@@ -2263,26 +2279,6 @@ void ScoreLoadCosts(void)
 //	arena->costs.ammotype[MUNTYPE_BULLET];  // LoadAmmo():29
 //	arena->costs.planeweight[MAX_PLANES];	// LoadDamageModel():25
 //	arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
-
-	arena->costs.fieldtype[FIELD_CV] = 200.0;
-	arena->costs.fieldtype[FIELD_CARGO] = 150.0;
-	arena->costs.fieldtype[FIELD_DD] = 150.0;
-	arena->costs.fieldtype[FIELD_SUBMARINE] = 100.0;
-	arena->costs.fieldtype[FIELD_RADAR] = 20.0;
-	arena->costs.fieldtype[FIELD_BRIDGE] = 50.0;
-	arena->costs.fieldtype[FIELD_CITY] = 150.0;
-	arena->costs.fieldtype[FIELD_PORT] = 150.0;
-	arena->costs.fieldtype[FIELD_CONVOY] = 200.0;
-	arena->costs.fieldtype[FIELD_FACTORY] = 100.0;
-	arena->costs.fieldtype[FIELD_REFINERY] = 100.0;
-	arena->costs.fieldtype[FIELD_OPENFIELD] = 50.0;
-	arena->costs.fieldtype[FIELD_LITTLE] = 10000.0;
-	arena->costs.fieldtype[FIELD_MEDIUM] = 20000.0;
-	arena->costs.fieldtype[FIELD_MAIN] = 80000.0;
-	arena->costs.fieldtype[FIELD_WB3POST] = 6400.0;
-	arena->costs.fieldtype[FIELD_WB3VILLAGE] = 32000.0;
-	arena->costs.fieldtype[FIELD_WB3TOWN] = 160000.0;
-	arena->costs.fieldtype[FIELD_WB3PORT] = 96000.0;
 
 	arena->costs.takeoff = 1.0;
 	arena->costs.newpilot = 150.0;
