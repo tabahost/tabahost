@@ -91,7 +91,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				strcat(my_query, " sorties = sorties + '1'");
 			break;
 		case SCORE_DROPITEM:
-			client->score.groundscore -= GetAmmoCost(misc);
+			client->score.costscore += GetAmmoCost(misc);
 
 			switch (misc)
 			{
@@ -127,11 +127,11 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		case SCORE_STRUCTDAMAGE:
 			if(penalty > 0)
 			{
-				client->score.groundscore += (float)misc / 100;
+				client->score.groundscore += (double)misc / 100;
 			}
 			else
 			{
-				client->score.penaltyscore += (float)misc / 100;
+				client->score.penaltyscore += (double)misc / 100;
 			}
 			return; // dont do queries
 			break;
@@ -248,11 +248,11 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 	Com_Printf(VERBOSE_DEBUG, "COST: %f\n", event_cost);
 	
-	client->score.airscore -= event_cost;
+	client->score.costscore += event_cost;
 
 	if(event & (SCORE_BAILED | SCORE_CAPTURED | SCORE_DISCO | SCORE_DITCHED | SCORE_KILLED | SCORE_LANDED))
 	{
-		client->lastscore += client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore - client->score.penaltyscore;
+		client->lastscore += client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore - client->score.penaltyscore - client->score.costscore;
 
 		if(event & SCORE_DISCO)
 			sprintf(my_query, "%s, disco_score = disco_score + '%.3f'", my_query, client->lastscore);
@@ -265,6 +265,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				sprintf(my_query, "%s, capt_score = capt_score + '%.3f'", my_query, client->score.captscore);
 			if (client->score.groundscore)
 				sprintf(my_query, "%s, jabo_score = jabo_score + '%.3f'", my_query, client->score.groundscore);
+			if (client->score.costscore)
+				sprintf(my_query, "%s, cost_score = cost_score + '%.3f'", my_query, client->score.costscore);
 		}
 		else if (IsBomber(client))
 		{
@@ -274,6 +276,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				sprintf(my_query, "%s, capt_score = capt_score + '%.3f'", my_query, client->score.captscore);
 			if (client->score.rescuescore)
 				sprintf(my_query, "%s, resc_score = resc_score + '%.3f'", my_query, client->score.rescuescore);
+			if (client->score.costscore)
+				sprintf(my_query, "%s, cost_score = cost_score + '%.3f'", my_query, client->score.costscore);
 		}
 		else if (IsGround(client))
 		{
@@ -283,6 +287,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				sprintf(my_query, "%s, capt_score = capt_score + '%.3f'", my_query, client->score.captscore);
 			if (client->score.rescuescore)
 				sprintf(my_query, "%s, resc_score = resc_score + '%.3f'", my_query, client->score.rescuescore);
+			if (client->score.costscore)
+				sprintf(my_query, "%s, cost_score = cost_score + '%.3f'", my_query, client->score.costscore);
 		}
 		else
 		{
@@ -293,6 +299,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				sprintf(my_query, "%s, capt_score = capt_score + '%.3f'", my_query, client->score.captscore);
 			if (client->score.groundscore)
 				sprintf(my_query, "%s, jabo_score = jabo_score + '%.3f'", my_query, client->score.groundscore);
+			if (client->score.costscore)
+				sprintf(my_query, "%s, cost_score = cost_score + '%.3f'", my_query, client->score.costscore);
 		}
 	}
 
@@ -862,14 +870,7 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 
 	// debite guns used from client
 	
-	if (IsGround(client))
-	{
-		client->score.groundscore += (float)(GetAmmoCost(0) * gunused);
-	}
-	else
-	{
-		client->score.airscore += (float)(GetAmmoCost(0) * gunused);
-	}
+	client->score.costscore += (double)(GetAmmoCost(0) * gunused);
 
 	switch (end)
 	{

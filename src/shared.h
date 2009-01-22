@@ -714,11 +714,12 @@ typedef union nick_s
 
 typedef struct score_s
 {
-	float		airscore;
-	float		groundscore;
-	float		rescuescore;
-	float		captscore;
-	float		penaltyscore;
+	double		airscore;
+	double		groundscore;
+	double		rescuescore;
+	double		captscore;
+	double		costscore;
+	double		penaltyscore;
 } score_t;
 
 typedef struct medals_s

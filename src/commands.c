@@ -3191,10 +3191,13 @@ void Cmd_Score(char *player, client_t *client)
 							{
 								if ((my_row = mysql_fetch_row(my_result)))
 								{
-									if (Com_Atof(Com_MyRow("fighter_score")) || Com_Atof(Com_MyRow("jabo_score")))
+									if (Com_Atof(Com_MyRow("fighter_score")) || Com_Atof(Com_MyRow("jabo_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow("cost_score")))
 									{
-										fprintf(fp, "FIGHTER     score: %10.3f\n", Com_Atof(Com_MyRow("fighter_score")));
-										fprintf(fp, " |_JABO     score: %10.3f\n", Com_Atof(Com_MyRow("jabo_score")));
+										fprintf(fp, "(+) FIGHTER score: %10.3f\n", Com_Atof(Com_MyRow("fighter_score")));
+										fprintf(fp, "(+) JABO    score: %10.3f\n", Com_Atof(Com_MyRow("jabo_score")));
+										fprintf(fp, "(+) CAPTURE score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
+										fprintf(fp, "(-) COSTS   score: %10.3f\n", Com_Atof(Com_MyRow("cost_score")));
+										fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("fighter_score")) + Com_Atof(Com_MyRow("jabo_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
 
 										debug_querytime = Sys_Milliseconds();
 										sprintf(
@@ -3344,11 +3347,13 @@ void Cmd_Score(char *player, client_t *client)
 										{
 											if ((my_row = mysql_fetch_row(my_result)))
 											{
-												if (Com_Atof(Com_MyRow("bomber_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow("rescue_score")))
+												if (Com_Atof(Com_MyRow("bomber_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow("rescue_score")) || Com_Atof(Com_MyRow("cost_score")))
 												{
-													fprintf(fp, "BOMBER      score: %10.3f\n", Com_Atof(Com_MyRow("bomber_score")));
-													fprintf(fp, " |_CAPTURE  score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
-													fprintf(fp, " |_RESCUE   score: %10.3f\n", Com_Atof(Com_MyRow("rescue_score")));
+													fprintf(fp, "(+) BOMBER  score: %10.3f\n", Com_Atof(Com_MyRow("bomber_score")));
+													fprintf(fp, "(+) CAPTURE score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
+													fprintf(fp, "(+) RESCUE  score: %10.3f\n", Com_Atof(Com_MyRow("rescue_score")));
+													fprintf(fp, "(-) COSTS   score: %10.3f\n", Com_Atof(Com_MyRow("cost_score")));
+													fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("bomber_score")) + Com_Atof(Com_MyRow("rescue_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
 
 													debug_querytime = Sys_Milliseconds();
 
@@ -3508,13 +3513,15 @@ void Cmd_Score(char *player, client_t *client)
 													{
 														if ((my_row = mysql_fetch_row(my_result)))
 														{
-															if (Com_Atof(Com_MyRow("ground_score")))
+															if (Com_Atof(Com_MyRow("ground_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow("cost_score")) || Com_Atof(Com_MyRow("rescue_score")))
 															{
-																fprintf(fp, "GROUND      score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")));
+																fprintf(fp, "(+) GROUND  score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")));
 																if (wb3->value)
 																{
-																	fprintf(fp, " |_CAPTURE  score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
-																	fprintf(fp, " |_RESCUE   score: %10.3f\n", Com_Atof(Com_MyRow("rescue_score")));
+																	fprintf(fp, "(+) CAPTURE score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
+																	fprintf(fp, "(+) RESCUE  score: %10.3f\n", Com_Atof(Com_MyRow("rescue_score")));
+																	fprintf(fp, "(-) COSTS   score: %10.3f\n", Com_Atof(Com_MyRow("cost_score")));
+																	fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")) + Com_Atof(Com_MyRow("rescue_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
 																}
 
 																debug_querytime = Sys_Milliseconds();
