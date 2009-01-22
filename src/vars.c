@@ -135,7 +135,13 @@ var_t *ottorange; // set otto max range
 var_t *ottoretarget; // set otto retarget rime
 var_t *ottooverrides; // set parameters client can override
 var_t *overload; // extern
-var_t *paratroopers; // extern
+var_t *parassmall; // extern
+var_t *parasmedium; // extern
+var_t *paraslarge; // extern
+var_t *paraspost; // extern
+var_t *parasvillage; // extern
+var_t *parasport; // extern
+var_t *parastown; // extern
 var_t *planeatradar; // extern
 var_t *planerangelimit; // extern
 var_t *planerangelimitbomber; // extern
@@ -298,7 +304,13 @@ void InitVars(void)
 	ottorange = Var_Get("ottorange", "10", VAR_ARCHIVE);
 	ottoretarget = Var_Get("ottoretarget", "0.20", VAR_ARCHIVE);
 	overload = Var_Get("overload", "500", VAR_ARCHIVE | VAR_ADMIN);
-	paratroopers = Var_Get("paratroopers", "4", VAR_ARCHIVE);
+	parassmall = Var_Get("parassmall", "4", VAR_ARCHIVE);
+	parasmedium = Var_Get("parasmedium", "4", VAR_ARCHIVE);
+	paraslarge = Var_Get("paraslarge", "4", VAR_ARCHIVE);
+	paraspost = Var_Get("paraspost", "4", VAR_ARCHIVE);
+	parasvillage = Var_Get("parasvillage", "4", VAR_ARCHIVE);
+	parasport = Var_Get("parasport", "4", VAR_ARCHIVE);
+	parastown = Var_Get("parastown", "4", VAR_ARCHIVE);
 	planeatradar = Var_Get("planeatradar", "0", VAR_ARCHIVE);
 	planerangelimit = Var_Get("planerangelimit", "1500", VAR_ARCHIVE);
 	planerangelimitbomber = Var_Get("planerangelimitbomber", "1500", VAR_ARCHIVE);
@@ -743,11 +755,11 @@ void Var_WriteVariables(char *path, client_t *client)
 void UpdateArenaStatus(u_int8_t uptime)
 {
 	u_int8_t i, j;
-	var_t *upvars[52] =
+	var_t *upvars[51] =
 	{ airshowsmoke, blackout, contrail, countrytime, currday, currmonth, curryear, cvcapture, cvdelay, cvradarrange1, cvradarrange3, cvrange, cvs, cvsalvo, cvspeed, dayhours, easymode,
 			emulatecollision, enemyidlim, enemynames, enemyplanes, flakmax, flypenalty, friendlyfire, friendlyidlim, fueldiv, gunstats, iff, katyrange, mapname, midairs, mortars, mview, ottoaccuracy,
-			ottoadjust, ottoburstoff, ottoburston, ottoburstonmax, ottorange, ottoretarget, ottooverrides, paratroopers, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
-			tanksrange, timemult, timeout, whitelist };
+			ottoadjust, ottoburstoff, ottoburston, ottoburstonmax, ottorange, ottoretarget, ottooverrides, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
+			tanksrange, timemult, timeout, whitelist }; // TODO: remove paratroopers from DB
 
 	sprintf(my_query, "UPDATE arena_status SET");
 

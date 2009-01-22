@@ -1322,7 +1322,7 @@ char *GetPlaneDir(u_int16_t plane)
 	static char *directories[MAX_PLANES] = {NULL, /* 0 */ "f6f5", /* 1 */ "f4f4", /* 2 */ "fm2", /* 3 */ "f4u1d", /* 4 */ "zero?", /* 5 */
 		"zero21?", /* 6 */ "zero52?", /* 7 */ "ki43", /* 8 */ "ki84", /* 9 */ "bf109e", /* 10 */ "bf109f", /* 11 */ "bf109g", /* 12 */ "109gr6", /* 13 */
 		"bf109k", /* 14 */ "bf110c", /* 15 */ "bf110g", /* 16 */ "fw1904", /* 17 */ "fw1908", /* 18 */ "fw190d", /* 19 */ "hurri1", /* 20 */
-		"hurri2", /* 21 */ "spit1?", /* 22 */ "spit5", /* 23 */ "spit9", /* 24 */ "p38f", /* 25 */ "p38?", /* 26 */ "p38l", /* 27 */
+		"hurri2", /* 21 */ "spit1", /* 22 */ "spit5", /* 23 */ "spit9", /* 24 */ "p38f", /* 25 */ "p38?", /* 26 */ "p38l", /* 27 */
 		"p39d", /* 28 */ "p40e", /* 29 */ "p47d", /* 30 */ "p51", /* 31 */ "d3a", /* 32 */ "b5n", /* 33 */ "sbd", /* 34 */ "ju88a", /* 35 */
 		"b25h", /* 36 */ "b25j?", /* 37 */ "b17", /* 38 */ NULL, /* 39 */ "b17f", /* 40 */ "b25c", /* 41 */ "p40b", /* 42 */ "p47c", /* 43 */
 		"p51b", /* 44 */ "seaf2", /* 45 */ "spit14", /* 46 */ "f4u4", /* 47 */ "me262", /* 48 */ "yak3", /* 49 */ "yak9d", /* 50 */ "ju87d", /* 51 */
@@ -3144,6 +3144,8 @@ void ChangeArena(char *map, client_t *client)
 	if ((fp = fopen(file, "r")))
 	{
 		fclose(fp);
+		
+		RebuildTime(NULL); // reset rebuildtime
 
 		// kick all clients & drones
 		for (i = 0; i < maxentities->value; i++)
@@ -3370,13 +3372,31 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 void ReducePlanes(u_int8_t field)
 {
 	u_int8_t i;
+	float reduce;
+	
+	switch(arena->fields[field - 1].type)
+	{
+		case FIELD_LITTLE:
+			reduce = 0.2;
+			break;
+		case FIELD_MEDIUM:
+			reduce = 0.6;
+			break;
+		case FIELD_MAIN:
+			reduce = 0.8;
+			break;
+		case FIELD_WB3TOWN:
+			reduce = 0.2;
+			break;
+		default:
+			reduce = 0.5;
+	}
 
 	for (i = 0; i < maxplanes; i++)
 	{
 		if (arena->fields[field - 1].rps[i] > 0)
-			arena->fields[field - 1].rps[i] *= 0.8;
+			arena->fields[field - 1].rps[i] *= reduce;
 	}
-
 }
 
 /*************

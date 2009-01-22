@@ -296,7 +296,7 @@ void Cmd_VarList(client_t *client, char *string)
 
 	for (var = var_vars; var; var = var->next)
 	{
-		if((var->flags & VAR_ADMIN) && client->attr == FLAG_OP)
+		if(client && (var->flags & VAR_ADMIN) && client->attr == FLAG_OP)
 			continue;
 
 		if (!string)
@@ -313,8 +313,6 @@ void Cmd_VarList(client_t *client, char *string)
 			}
 		}
 	}
-
-	PPrintf(client, RADIO_LIGHTYELLOW, "%d variables", i);
 }
 
 /*************
@@ -2441,7 +2439,7 @@ void Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client)
 
 void Cmd_Field(u_int8_t field, client_t *client)
 {
-	u_int8_t country, type, status;
+	u_int8_t country, type, status, build_alive, build_total;
 	u_int16_t i;
 	u_int32_t reup, treup;
 	FILE *fp;
@@ -2557,6 +2555,26 @@ void Cmd_Field(u_int8_t field, client_t *client)
 			}
 
 			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup/100), arena->fields[field].abletocapture ? "Yes" : "No");
+		}
+		else
+		{
+			build_total = build_alive = 0;
+			
+			for (i = 0; i < MAX_BUILDINGS; i++)
+			{
+				if (!arena->fields[field].buildings[i].field)
+					break;
+
+				if (IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
+				{
+					if(!arena->fields[field].buildings[i].status)
+						build_alive++;
+					
+					build_total++;
+				}
+			}
+			
+			PPrintf(client, RADIO_YELLOW, "%.2f%% of vital structures alive", (float)build_alive*100/build_total);
 		}
 	}
 	else
@@ -2983,7 +3001,6 @@ void Cmd_Show(client_t *client)
 		fprintf(fp, "ottorange        %8s\n", ottorange->string);
 		fprintf(fp, "ottoretarget     %8s\n", ottoretarget->string);
 		fprintf(fp, "ottooverrides    %8s\n", ottooverrides->string);
-		fprintf(fp, "paratroopers     %8s\n", paratroopers->string);
 		fprintf(fp, "planerangelimit  %8s\n", planerangelimit->string);
 		fprintf(fp, "radaralt         %8s\n", radaralt->string);
 		fprintf(fp, "radarrange1      %8s\n", radarrange1->string);
@@ -3102,7 +3119,7 @@ void Cmd_Score(char *player, client_t *client)
 
 			sprintf(
 					my_query,
-					"SELECT players.country, score_common.flyred, score_common.flygold, score_common.flighttime, score_common.totalscore, score_common.lastscore, squads.name FROM players INNER JOIN score_common ON players.id = score_common.player_id LEFT JOIN squads ON players.squad_owner = squads.owner WHERE players.id = '%u'",
+					"SELECT players.country, players.rank, score_common.flyred, score_common.flygold, score_common.flighttime, score_common.totalscore, score_common.lastscore, squads.name FROM players INNER JOIN score_common ON players.id = score_common.player_id LEFT JOIN squads ON players.squad_owner = squads.owner WHERE players.id = '%u'",
 					player_id);
 
 			if (!(player_id == client->id ? Com_MySQL_Query(client, &my_sock, my_query) : d_mysql_query(&my_sock, my_query)))
@@ -3152,6 +3169,7 @@ void Cmd_Score(char *player, client_t *client)
 								Com_MyRow("name") ? Com_MyRow("name") : "None");
 						fprintf(fp, "FLIGHT TIME: %uh %um %us\nTOTAL SCORE: %16.3f\n\n", h, m, s, Com_Atof(Com_MyRow("totalscore")));
 						fprintf(fp, "Last mission: %8.3f\n", Com_Atof(Com_MyRow("lastscore")));
+						fprintf(fp, "Elo Rating: %u\n", Com_Atof(Com_MyRow("rank")));
 						fprintf(fp, "======================\n\n");
 					}
 

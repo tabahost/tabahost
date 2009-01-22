@@ -5920,6 +5920,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 void PHardHitStructure(u_int8_t *buffer, client_t *client)
 {
 	hardhitstructure_t *hardhitstructure;
+	u_int8_t paras;
 	int16_t i;
 	int32_t he;
 	munition_t *munition;
@@ -5992,7 +5993,34 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 			
 			AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
 			
-			if (arena->fields[building->field - 1].paras >= paratroopers->value)
+			switch(arena->fields[building->field - 1].type)
+			{
+				case FIELD_LITTLE:
+					paras = parassmall->value;
+					break;
+				case FIELD_MEDIUM:
+					paras = parasmedium->value;
+					break;
+				case FIELD_MAIN:
+					paras = paraslarge->value;
+					break;
+				case FIELD_WB3POST:
+					paras = paraspost->value;
+					break;
+				case FIELD_WB3PORT:
+					paras = parasport->value;
+					break;
+				case FIELD_WB3TOWN:
+					paras = parastown->value;
+					break;
+				case FIELD_WB3VILLAGE:
+					paras = parasvillage->value;
+					break;
+				default:
+					paras = parassmall->value;
+			}
+			
+			if (arena->fields[building->field - 1].paras >= paras)
 			{
 				AddBuildingDamage(building, GetBuildingArmor(BUILD_TOWER, client), 1, client);
 				CaptureField(building->field, client);

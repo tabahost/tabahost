@@ -2520,7 +2520,13 @@ extern	var_t		*ottorange;		// set otto max range
 extern	var_t		*ottoretarget;	// set otto retarget rime
 extern	var_t		*ottooverrides;	// set parameters client can override
 extern	var_t		*overload;		// set value for overload msg
-extern	var_t		*paratroopers;	// paratroopers needed to capture a field
+extern	var_t		*parassmall;	// paratroopers needed to capture a small field
+extern	var_t		*parasmedium;	// paratroopers needed to capture a medium field
+extern	var_t		*paraslarge;	// paratroopers needed to capture a large field
+extern	var_t		*paraspost;		// paratroopers needed to capture a Post
+extern	var_t		*parasvillage;	// paratroopers needed to capture a Village
+extern	var_t		*parasport;		// paratroopers needed to capture a Port
+extern	var_t		*parastown;		// paratroopers needed to capture a Town
 extern	var_t		*planeatradar;	// show planes models at radar range
 extern	var_t		*planerangelimit;	//
 extern	var_t		*planerangelimitbomber;	//

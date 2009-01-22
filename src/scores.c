@@ -79,10 +79,14 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		sprintf(my_query, "UPDATE score_fighter SET player_id = player_id");
 	}
 
+	Com_Printf(VERBOSE_DEBUG, "EVENT: %d. Misc: %d\n", event, misc);
+	
 	switch (event)
 	{
 		case SCORE_TAKEOFF:
-				client->lastscore = 0;
+				 client->lastscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie
+						= client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2]
+						= client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->score.penaltyscore = client->damaged = 0;
 				event_cost += arena->costs.takeoff;
 				strcat(my_query, " sorties = sorties + '1'");
 			break;
@@ -129,6 +133,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			{
 				client->score.penaltyscore += (float)misc / 100;
 			}
+			return; // dont do queries
 			break;
 		case SCORE_STRUCTURE:
 			if (misc == BUILD_CV)
@@ -220,7 +225,6 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				
 				if(captured)
 				{
-					PPrintf(client, RADIO_DARKGREEN, "captured");
 					event_cost += ScorePlaneCost(client) + arena->costs.newpilot + arena->costs.informationlost + ScoreTechnologyCost(client);
 					strcat(my_query, ", captured = captured + '1'");
 				}
@@ -241,9 +245,9 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				}
 			break;
 	}
-	
-	PPrintf(client, RADIO_DARKGREEN, "EVENT: %d. Cost: %f. Misc: %d", event, event_cost, misc);
 
+	Com_Printf(VERBOSE_DEBUG, "COST: %f\n", event_cost);
+	
 	client->score.airscore -= event_cost;
 
 	if(event & (SCORE_BAILED | SCORE_CAPTURED | SCORE_DISCO | SCORE_DITCHED | SCORE_KILLED | SCORE_LANDED))
@@ -318,7 +322,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		return;
 	}
 
-	if(event & (SCORE_DROPITEM | SCORE_HARDHIT | SCORE_STRUCTDAMAGE | SCORE_STRUCTURE | SCORE_FIELDCAPT))
+	if(event & (SCORE_DROPITEM | SCORE_HARDHIT | SCORE_STRUCTURE | SCORE_FIELDCAPT))
 		return; 
 
 	if (client->score.penaltyscore)
@@ -364,7 +368,10 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	if(misc) // maneuver kill
 		ScorePieceDamage(killer, (event_cost/2), client);
 	else
+	{
+		Com_Printf(VERBOSE_DEBUG, "Piece event cost %f, killed %s\n", event_cost, client->longnick);
 		ScorePieceDamage(-1, event_cost, client);
+	}
 	
 	ClearKillers(client);
 }
@@ -573,6 +580,8 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 		}
 	}
 	
+	Com_Printf(VERBOSE_DEBUG, "Total damage %f\n", totaldamage);
+	
 	if(event_cost)
 	{
 		my_query[0] = '\0';
@@ -587,6 +596,8 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 				if ((client->hitby[i] != client)) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
 				{
 					score = (client->damby[i]/totaldamage) * event_cost;
+					
+					Com_Printf(VERBOSE_DEBUG, "Score %f, killer %s\n", score, client->hitby[i]->longnick);
 					
 					if(killer == i)
 						score += event_cost;
@@ -797,7 +808,6 @@ float ScoreDamageCost(client_t *client)
 
 	plane_life = ScorePlaneLife(client);
 	plane_cost = ScorePlaneCost(client);
-	PPrintf(client, RADIO_DARKGREEN, "plane_life = %f, plane_cost = %f, transp = %f", plane_life, plane_cost, ScorePlaneTransportCost(client));
 	plane_recover = plane_life < 0.5 ? plane_cost : (ScoreFixPlaneCost(plane_life, plane_cost) + ScorePlaneTransportCost(client));
 
 	return (plane_cost < plane_recover) ? plane_cost : plane_recover;
@@ -854,11 +864,11 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 	
 	if (IsGround(client))
 	{
-		client->score.groundscore += (float)(GetAmmoCost(MUNTYPE_BULLET) * gunused);
+		client->score.groundscore += (float)(GetAmmoCost(0) * gunused);
 	}
 	else
 	{
-		client->score.airscore += (float)(GetAmmoCost(MUNTYPE_BULLET) * gunused);
+		client->score.airscore += (float)(GetAmmoCost(0) * gunused);
 	}
 
 	switch (end)
@@ -1162,7 +1172,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						if (client->damby[i] > damage) // if damage > current damage
 						{
 							damage = client->damby[i]; // set current damage as attacker damage
-							client->damby[i] = 0; // clear damby value
+							//client->damby[i] = 0; // clear damby value
 							j = i; // set j as index of max damage
 						}
 					}
@@ -1178,7 +1188,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 			if(!(j < 0)) // found a killer
 			{
 				killer = client->hitby[j];
-				client->hitby[j] = NULL; // clear killer from list
+				//client->hitby[j] = NULL; // clear killer from list
 
 				Com_Printf(VERBOSE_DEBUG, "Server has chosen %s as killer!!!\n", killer->longnick);
 				
