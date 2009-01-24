@@ -303,6 +303,8 @@ void CheckArenaRules(void)
 	static u_int16_t players_count = 0;
 	u_int8_t close, vitals;
 	int16_t i, j;
+	u_int32_t tonnage_recover;
+	u_int8_t c_cities, totalcities;
 	u_int32_t dist, tempdist;
 	int32_t posx;
 	char file[128];
@@ -341,10 +343,27 @@ void CheckArenaRules(void)
 		{
 			if(rebuildtime->value < 9999)
 			{
-				if(!oldcapt->value && wb3->value && !(arena->frame % 100))
+				if(!oldcapt->value && wb3->value && !(arena->frame % 6000))
 				{
+					c_cities = totalcities = 0;
+
+					for(j = 0; j < fields->value; j++)
+					{
+						if((arena->fields[j].type >= FIELD_WB3POST) && (arena->fields[j].type <= FIELD_WB3PORT))
+						{
+							if(arena->fields[j].country == arena->fields[i].country)
+							{
+								c_cities++;
+							}
+							
+							totalcities++;
+						}
+					}
+
+					tonnage_recover = (u_int32_t)(1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * (float)GetTonnageToClose(i+1) / (10.0 * 9.0 / rebuildtime->value);
+
 					if(arena->fields[i].tonnage)
-						arena->fields[i].tonnage -= TONNAGE_RECOVER;
+						arena->fields[i].tonnage -= tonnage_recover;
 					
 					if(arena->fields[i].tonnage < 0)
 						arena->fields[i].tonnage = 0;
@@ -783,7 +802,7 @@ void CheckArenaRules(void)
 				
 				if(!oldcapt->value && wb3->value)
 				{
-					if(arena->fields[i].tonnage < GetTonnageToClose(arena->fields[i].type))
+					if(arena->fields[i].tonnage < GetTonnageToClose(i+1))
 						close = 0;
 				}
 
@@ -3668,6 +3687,17 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x0D01:
 				if(!setjmp(debug_buffer))
 				{
+					if(!strlen(client->longnick))
+					{
+						PPrintf(client, RADIO_RED, "ERROR: This account has no registered callsign");
+						PPrintf(client, RADIO_RED, "If this is a new account, please login using");
+						PPrintf(client, RADIO_RED, "warbirds to register a callsign");
+
+						Com_Printf(VERBOSE_WARNING, "Client tried to login without a callsign\n");
+						RemoveClient(client);
+						return 0;
+					}
+
 					client->ready = 1;
 
 					SendArenaRules(client);

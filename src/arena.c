@@ -3145,8 +3145,6 @@ void ChangeArena(char *map, client_t *client)
 	{
 		fclose(fp);
 		
-		RebuildTime(NULL); // reset rebuildtime
-
 		// kick all clients & drones
 		for (i = 0; i < maxentities->value; i++)
 		{
@@ -3240,6 +3238,9 @@ void ChangeArena(char *map, client_t *client)
 				j++;
 			}
 		}
+
+		RebuildTime(NULL); // reset rebuildtime
+		GetTonnageToClose(NULL); // reset Tonnage To Close
 	}
 	else
 	{
@@ -3574,8 +3575,50 @@ u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 	}
 }
 
-u_int32_t GetTonnageToClose(u_int8_t fieldtype)
+u_int32_t GetTonnageToClose(u_int8_t field)
 {
+	static u_int32_t ttc[MAX_FIELDTYPE];
+	u_int16_t i;
+
+	if(!field)
+	{
+		memset(ttc, 0, sizeof(ttc));
+		return 0;
+	}
+	else
+	{
+		field--;
+	}
+
+	if(field >= fields->value)
+		return 0;
+
+	if(arena->fields[field].type >= MAX_FIELDTYPE)
+		return 0;
+
+	if(ttc[arena->fields[field].type])
+	{
+		return ttc[arena->fields[field].type];
+	}
+	else
+	{
+		for(i = 0; i < MAX_BUILDINGS; i++)
+		{
+			if(!arena->fields[field].buildings[i].field)
+				break;
+
+			if((arena->fields[field].buildings[i].type != BUILD_TREE) && (arena->fields[field].buildings[i].type != BUILD_FENCE) && (arena->fields[field].buildings[i].type != BUILD_ROCK))
+			{
+				ttc[arena->fields[field].type] += GetBuildingArmor(arena->fields[field].buildings[i].type, NULL);
+			}
+		}
+
+		ttc[arena->fields[field].type] *= 0.9;
+		ttc[arena->fields[field].type] /= 50; // converts armor to kg
+
+		return ttc[arena->fields[field].type];
+	}
+/*
 	switch(fieldtype)
 	{
 		case FIELD_LITTLE:
@@ -3620,6 +3663,7 @@ u_int32_t GetTonnageToClose(u_int8_t fieldtype)
 			Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() Invalid Field Type %d\n", fieldtype);
 			return 0;
 	}
+*/
 }
 
 int32_t GetFieldRadius(u_int8_t fieldtype)
@@ -4339,6 +4383,9 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 	int8_t bomber;
 
 	Com_Printf(VERBOSE_DEBUG, "Field Damage: %u\n", damage);
+
+	if(!client)
+		return;
 	
 	if(field < fields->value)
 	{

@@ -2442,6 +2442,8 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	u_int8_t country, type, status, build_alive, build_total;
 	u_int16_t i;
 	u_int32_t reup, treup;
+	u_int32_t tonnage_recover;
+	u_int8_t c_cities, totalcities;
 	FILE *fp;
 	char buffer[32];
 
@@ -2485,7 +2487,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 				if(!oldcapt->value && wb3->value)
 				{
-					fprintf(fp, "   %5d   %5d\n", arena->fields[i].tonnage, GetTonnageToClose(arena->fields[i].type));
+					fprintf(fp, "   %5d   %5d\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
 				}
 				else
 				{
@@ -2524,7 +2526,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		
 		if(!oldcapt->value && wb3->value)
 		{
-			PPrintf(client, RADIO_YELLOW, "ToT: %d, TTC: %d", arena->fields[field].tonnage, GetTonnageToClose(arena->fields[field].type));
+			PPrintf(client, RADIO_YELLOW, "ToT: %d, TTC: %d", arena->fields[field].tonnage, GetTonnageToClose(field+1));
 		}
 
 		if (status)
@@ -2544,7 +2546,24 @@ void Cmd_Field(u_int8_t field, client_t *client)
 			
 			if(!oldcapt->value && wb3->value)
 			{
-				treup = ((arena->fields[field].tonnage - GetTonnageToClose(arena->fields[field].type)) * 100) / TONNAGE_RECOVER;
+				c_cities = totalcities = 0;
+
+				for(i = 0; i < fields->value; i++)
+				{
+					if((arena->fields[i].type >= FIELD_WB3POST) && (arena->fields[i].type <= FIELD_WB3PORT))
+					{
+						if(arena->fields[i].country == arena->fields[field].country)
+						{
+							c_cities++;
+						}
+						
+						totalcities++;
+					}
+				}
+
+				tonnage_recover = (u_int32_t)(1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * (float)GetTonnageToClose(field+1) / (10.0 * 9.0 / rebuildtime->value);
+
+				treup = ((arena->fields[field].tonnage - GetTonnageToClose(field+1)) * 100) / tonnage_recover;
 			
 				if(treup < reup)
 				{
@@ -2592,7 +2611,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\n", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
 			if(!oldcapt->value && wb3->value)
 			{
-				fprintf(fp, "TONNAGE ON TARGET: %d\nTONNAGE TO CLOSE: %d\n", arena->fields[field].tonnage, GetTonnageToClose(arena->fields[field].type));
+				fprintf(fp, "TONNAGE ON TARGET: %d\nTONNAGE TO CLOSE: %d\n", arena->fields[field].tonnage, GetTonnageToClose(field+1));
 			}
 
 			if (status)

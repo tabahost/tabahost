@@ -76,7 +76,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	else
 	{
 		Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-		sprintf(my_query, "UPDATE score_fighter SET player_id = player_id");
+		sprintf(my_query, "UPDATE score_fighter SET");
 	}
 
 	Com_Printf(VERBOSE_DEBUG, "EVENT: %d. Misc: %d\n", event, misc);
@@ -246,7 +246,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			break;
 	}
 
-	Com_Printf(VERBOSE_DEBUG, "COST: %f\n", event_cost);
+	Com_Printf(VERBOSE_DEBUG, "EVENT COST: %f\n", event_cost);
 	
 	client->score.costscore += event_cost;
 
@@ -1299,6 +1299,9 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 		
 					if(IsFighter(killer) && IsFighter(client))
 						CalcEloRating(killer /*winner*/, client /*looser*/, ELO_BOTH);
+
+					if(killer != client)
+						sprintf(buffer, "(%s)", GetSmallPlaneName(client->planeby[j]));
 		
 					if (printkills->value)
 					{
@@ -1424,6 +1427,8 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 		
 				sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->hitby[j]->id);
 		
+				Com_Printf(VERBOSE_DEBUG, "Kill Query: %s\n", my_query);
+
 				if (d_mysql_query(&my_sock, my_query))
 				{
 					PPrintf(client, RADIO_YELLOW, "ScoresCheckKiller(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
@@ -1960,32 +1965,33 @@ u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t
 
 u_int8_t ScoresCheckCaptured(client_t *client)
 {
-	int16_t i, field;
+	int16_t i, closed, field;
 	u_int32_t radar, distance;
-
-	return 0; // TODO: fix this
 
 	if(!client)
 	{
 		return 0;
 	}
 
-	field = NearestField(client->posxy[0][0], client->posxy[1][0], client->country, TRUE, TRUE, &distance);
+	field = NearestField(client->posxy[0][0], client->posxy[1][0], FALSE, TRUE, TRUE, &distance);
 
 	if (field >= 0)
 	{
 		if (field < fields->value)
 		{
 			i = arena->fields[field].country;
+			closed = arena->fields[field].closed;
 		}
 		else
 		{
 			i = arena->cities[field - (int16_t)fields->value].country;
+			closed = arena->cities[field - (int16_t)fields->value].closed;
 		}
 
 		radar = i == 1 ? radarrange1->value : i == 2 ? radarrange2->value : i == 3 ? radarrange3->value : i == 4 ? radarrange4->value : 0;
+		radar /= 2;
 
-		if (distance < radar)
+		if (distance < radar && !closed)
 		{
 			Com_LogEvent(EVENT_CAPTURED, client->id, 0);
 			Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -2232,7 +2238,10 @@ float GetAmmoCost(u_int8_t type)
 {
 	if(type < MAX_MUNTYPE)
 	{
-		return arena->costs.ammotype[type];
+		if(arena->costs.ammotype[type] >= 0)
+			return arena->costs.ammotype[type];
+		else
+			return 0.0;
 	}
 	else
 		return 0.0;

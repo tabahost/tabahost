@@ -187,7 +187,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].shortnick = shortnick;
 					clients[i].dronelasttarget = MAX_BUILDINGS; // to avoid unrandomized first target at DroneGetTarget()
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
-					clients[i].dronetimer = 170*100;
+					clients[i].dronetimer = 180*100;
 					clients[i].ready = 0;
 					clients[i].countrytime = 100;
 					break;
@@ -952,9 +952,9 @@ int ProcessDrone(client_t *drone)
 
 						if (drone->dronelasttarget < MAX_BUILDINGS)
 						{
-							if (drone->related[0] && drone->related[0]->attr)
+							if (drone->related[0])
 							{
-								PPrintf(drone->related[0], RADIO_DARKGREEN, "DEBUG: Commandos aiming at %s, F%d",
+								PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos aiming at %s, F%d",
 										GetBuildingType(arena->fields[drone->dronefield].buildings[drone->dronelasttarget].type), drone->dronefield+1);
 							}
 							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
@@ -974,7 +974,8 @@ int ProcessDrone(client_t *drone)
 
 				if (drone->countrytime > 36000) // remove drone if throw time is more than 6 minutes (bug)
 				{
-					PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos has finished his mission");
+					PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos has finished his bugged mission");
+					Com_Printf(VERBOSE_DEBUG, "Commandos throw time %u\n", drone->countrytime);
 					RemoveDrone(drone);
 				}
 
@@ -1511,6 +1512,11 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 
 	munition = GetMunition(type);
 
+	if(client && !client->inuse) // player removed
+	{
+		client = NULL;
+	}
+
 	if (!munition)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Unknown munition ID %d, plane %d", type, client ? client->plane : 0);
@@ -1566,7 +1572,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 					wb3tonnage->ammo = type;
 					wb3tonnage->distance = htons(c);
 					wb3tonnage->field = htons(field+1);
-					WB3TonnageOnTarget(buffer, client);
+					WB3TonnageOnTarget(buffer, client); // this add tonnage effect for emulated bombs
 					
 					for (i = 0; i < MAX_BUILDINGS; i++)
 					{

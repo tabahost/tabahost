@@ -156,7 +156,6 @@ typedef unsigned int u_int32_t;
 #define VAR_ADMIN			4		// only admins can change this variable
 #define MORTAR_BOMB			88		// 250Kg AP
 #define MORTAR				585.0	// mortar velocity (ft/s) (492, range= 10697; 585, range = 15072)
-#define TONNAGE_RECOVER		5		// Amount of Kg field will recover per second
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s²)
 #define MODULUS(a) (a > 0 ? a : a * -1)
 #define PLANE_FAU			180	// ME262 48, Predator 180
@@ -2224,7 +2223,7 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 void	ReducePlanes(u_int8_t field);
 void	IncreaseAcksReup(u_int8_t field);
 u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot);
-u_int32_t GetTonnageToClose(u_int8_t fieldtype);
+u_int32_t GetTonnageToClose(u_int8_t field);
 u_int8_t Alt2Index(int32_t alt);
 void	WB3MapTopography(client_t *client);
 void	WB3Mapper(client_t *client);
