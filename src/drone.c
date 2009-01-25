@@ -187,7 +187,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].shortnick = shortnick;
 					clients[i].dronelasttarget = MAX_BUILDINGS; // to avoid unrandomized first target at DroneGetTarget()
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
-					clients[i].dronetimer = 180*100;
+					clients[i].dronetimer = 190*100;
 					clients[i].ready = 0;
 					clients[i].countrytime = 100;
 					break;

@@ -2223,6 +2223,7 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 void	ReducePlanes(u_int8_t field);
 void	IncreaseAcksReup(u_int8_t field);
 u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot);
+u_int8_t GetFieldParas(u_int8_t type);
 u_int32_t GetTonnageToClose(u_int8_t field);
 u_int8_t Alt2Index(int32_t alt);
 void	WB3MapTopography(client_t *client);
@@ -2553,6 +2554,7 @@ extern	var_t		*teamkillstructs;	// Allow to damage friendly structures
 extern	var_t		*thskins;		// enable force TH Skins
 extern	var_t		*timemult;		// arena time multiplier
 extern	var_t		*timeout;		// away timer
+extern	var_t		*ttc;			// tonnage to close
 extern	var_t		*verbose;		// printf messages priority
 extern	var_t		*wb3;			// enable WB3 protocol
 extern	var_t		*weather;		// configure weather

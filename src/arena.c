@@ -3239,8 +3239,8 @@ void ChangeArena(char *map, client_t *client)
 			}
 		}
 
-		RebuildTime(NULL); // reset rebuildtime
-		GetTonnageToClose(NULL); // reset Tonnage To Close
+		RebuildTime(FALSE); // reset rebuildtime
+		GetTonnageToClose(FALSE); // reset Tonnage To Close
 	}
 	else
 	{
@@ -3420,11 +3420,6 @@ void IncreaseAcksReup(u_int8_t field)
 						== BUILD_ARTILLERY))
 				{
 					arena->fields[field - 1].buildings[i].timer += 60000;
-
-					if (arena->fields[field - 1].buildings[i].timer > (u_int32_t)(rebuildtime->value * 1200))
-					{
-						arena->fields[field - 1].buildings[i].timer = (rebuildtime->value * 1200);
-					}
 				}
 			}
 		}
@@ -3575,14 +3570,51 @@ u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 	}
 }
 
+
+/*************
+ GetFieldParas
+
+ Get numer of paras needed to capture by field type
+ *************/
+
+u_int8_t GetFieldParas(u_int8_t type)
+{
+	switch(type)
+	{
+		case FIELD_LITTLE:
+			return parassmall->value;
+			break;
+		case FIELD_MEDIUM:
+			return parasmedium->value;
+			break;
+		case FIELD_MAIN:
+			return paraslarge->value;
+			break;
+		case FIELD_WB3POST:
+			return paraspost->value;
+			break;
+		case FIELD_WB3PORT:
+			return parasport->value;
+			break;
+		case FIELD_WB3TOWN:
+			return parastown->value;
+			break;
+		case FIELD_WB3VILLAGE:
+			return parasvillage->value;
+			break;
+		default:
+			return parassmall->value;
+	}
+}
+
 u_int32_t GetTonnageToClose(u_int8_t field)
 {
-	static u_int32_t ttc[MAX_FIELDTYPE];
+	static u_int32_t ttc_buf[MAX_FIELDTYPE];
 	u_int16_t i;
 
 	if(!field)
 	{
-		memset(ttc, 0, sizeof(ttc));
+		memset(ttc_buf, 0, sizeof(ttc_buf));
 		return 0;
 	}
 	else
@@ -3596,9 +3628,9 @@ u_int32_t GetTonnageToClose(u_int8_t field)
 	if(arena->fields[field].type >= MAX_FIELDTYPE)
 		return 0;
 
-	if(ttc[arena->fields[field].type])
+	if(ttc_buf[arena->fields[field].type])
 	{
-		return ttc[arena->fields[field].type];
+		return ttc_buf[arena->fields[field].type];
 	}
 	else
 	{
@@ -3609,14 +3641,14 @@ u_int32_t GetTonnageToClose(u_int8_t field)
 
 			if((arena->fields[field].buildings[i].type != BUILD_TREE) && (arena->fields[field].buildings[i].type != BUILD_FENCE) && (arena->fields[field].buildings[i].type != BUILD_ROCK))
 			{
-				ttc[arena->fields[field].type] += GetBuildingArmor(arena->fields[field].buildings[i].type, NULL);
+				ttc_buf[arena->fields[field].type] += GetBuildingArmor(arena->fields[field].buildings[i].type, NULL);
 			}
 		}
 
-		ttc[arena->fields[field].type] *= 0.9;
-		ttc[arena->fields[field].type] /= 50; // converts armor to kg
+		ttc_buf[arena->fields[field].type] *= ttc->value;
+		ttc_buf[arena->fields[field].type] /= 50; // converts armor to kg
 
-		return ttc[arena->fields[field].type];
+		return ttc_buf[arena->fields[field].type];
 	}
 /*
 	switch(fieldtype)

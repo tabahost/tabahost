@@ -84,7 +84,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	switch (event)
 	{
 		case SCORE_TAKEOFF:
-				 client->lastscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie
+				 client->score.costscore = client->lastscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie
 						= client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2]
 						= client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->score.penaltyscore = client->damaged = 0;
 				event_cost += arena->costs.takeoff;
@@ -620,7 +620,7 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 						{
 							if (IsFighter(NULL, client->planeby[i]))
 							{
-								sprintf(my_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+								sprintf(my_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
 							}
 							else if (IsBomber(NULL, client->planeby[i]))
 							{
@@ -633,7 +633,7 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 							else
 							{
 								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-								sprintf(my_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+								sprintf(my_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
 							}
 						}
 					}
@@ -1301,7 +1301,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						CalcEloRating(killer /*winner*/, client /*looser*/, ELO_BOTH);
 
 					if(killer != client)
-						sprintf(buffer, "(%s)", GetSmallPlaneName(client->planeby[j]));
+						sprintf(buffer, "%s(%s)", buffer, GetSmallPlaneName(client->planeby[j]));
 		
 					if (printkills->value)
 					{
@@ -1979,11 +1979,17 @@ u_int8_t ScoresCheckCaptured(client_t *client)
 	{
 		if (field < fields->value)
 		{
+			if(client->country == arena->fields[field].country)
+				return 0;
+			
 			i = arena->fields[field].country;
 			closed = arena->fields[field].closed;
 		}
 		else
 		{
+			if(client->country == arena->cities[field - (int16_t)fields->value].country)
+				return 0;
+			
 			i = arena->cities[field - (int16_t)fields->value].country;
 			closed = arena->cities[field - (int16_t)fields->value].closed;
 		}

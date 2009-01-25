@@ -170,6 +170,7 @@ var_t *teamkillstructs; // extern
 var_t *thskins; // extern
 var_t *timemult; // extern
 var_t *timeout; // extern
+var_t *ttc; // tonnage to close
 var_t *verbose; // extern
 var_t *wb3; // extern
 var_t *weather; // extern
@@ -324,7 +325,7 @@ void InitVars(void)
 	radarrange2 = Var_Get("radarrange2", "121500", VAR_ARCHIVE);
 	radarrange3 = Var_Get("radarrange3", "121500", VAR_ARCHIVE);
 	radarrange4 = Var_Get("radarrange4", "121500", VAR_ARCHIVE);
-	rebuildtime = Var_Get("rebuildtime", "360", VAR_ARCHIVE);
+	rebuildtime = Var_Get("rebuildtime", "12", VAR_ARCHIVE);
 	respawncvs = Var_Get("respawncvs", "1", VAR_ARCHIVE);
 	rps = Var_Get("rps", "60", VAR_ARCHIVE);
 	server_speeds = Var_Get("server_speeds", "0", VAR_ARCHIVE | VAR_ADMIN);
@@ -337,6 +338,7 @@ void InitVars(void)
 	thskins = Var_Get("thskins", "0", VAR_ARCHIVE);
 	timemult = Var_Get("timemult", "6", VAR_ARCHIVE);
 	timeout = Var_Get("timeout", "120", VAR_ARCHIVE);
+	ttc = Var_Get("ttc", "1.2", VAR_ARCHIVE);
 	verbose = Var_Get("verbose", VERBOSE_SMAX, VAR_ARCHIVE | VAR_ADMIN);
 	wb3 = Var_Get("wb3", "0", VAR_ARCHIVE | VAR_ADMIN);
 	weather = Var_Get("weather", "0", VAR_ARCHIVE);
@@ -378,7 +380,7 @@ void CheckVars(void)
 			}
 		}
 	}
-
+	
 	if (database->modified || sqlserver->modified)
 	{
 		mysql_close(&my_sock);

@@ -360,7 +360,7 @@ void CheckArenaRules(void)
 						}
 					}
 
-					tonnage_recover = (u_int32_t)(1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * (float)GetTonnageToClose(i+1) / (10.0 * 9.0 / rebuildtime->value);
+					tonnage_recover = (u_int32_t)(1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * (float)GetTonnageToClose(i+1) / (24.0 * rebuildtime->value / 9.0);
 
 					if(arena->fields[i].tonnage)
 						arena->fields[i].tonnage -= tonnage_recover;
@@ -751,17 +751,8 @@ void CheckArenaRules(void)
 						}
 						else if ((arena->fields[i].buildings[j].type >= BUILD_50CALACK && arena->fields[i].buildings[j].type <= BUILD_88MMFLAK) || (arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
 						{
-							//						if(!arena->fields[i].buildings[j].status) // obsolete
-							//						{
 							arena->fields[i].buildings[j].status = 2;
 							arena->fields[i].buildings[j].timer += 60000; // 10min // changed = to +=
-
-							// added this "if"
-							if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
-							{
-								arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
-							}
-							//						}
 						}
 					}
 
@@ -816,11 +807,6 @@ void CheckArenaRules(void)
 						if (arena->fields[i].buildings[j].field)
 						{
 							arena->fields[i].buildings[j].timer += 60000;
-
-//							if (arena->fields[i].buildings[j].timer > (u_int32_t)(rebuildtime->value * 1200))
-//							{
-//								arena->fields[i].buildings[j].timer = (rebuildtime->value * 1200);
-//							}
 						}
 						else
 							break;
@@ -4560,7 +4546,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			}
 		}
 
-		client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status_damage = client->status_status = client->infly
+		client->score.costscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status_damage = client->status_status = client->infly
 				= client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2]
 				= client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer
 				= client->score.penaltyscore = client->commandos = client->damaged = 0;
@@ -5661,6 +5647,9 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 	
 	wb3tonnage = (wb3tonnage_t *)buffer;
 
+	if(!client)
+		return;
+	
 	if (client->attr)
 		PPrintf(client, RADIO_GREEN, "DEBUG: tonnage ammoID: %d, field: %d, distance: %d", wb3tonnage->ammo, ntohs(wb3tonnage->field), ntohs(wb3tonnage->distance));
 	
@@ -5677,6 +5666,9 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 				{
 					AddFieldDamage(field-1, ammo->he, client);
 					arena->fields[field-1].tonnage += (ammo->he / 50);
+
+					if(arena->fields[field-1].tonnage >= (arena->fields[field-1].tonnage * 2.4))
+						arena->fields[field-1].tonnage = (arena->fields[field-1].tonnage * 2.4);
 				}
 			}
 		}
@@ -6023,34 +6015,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 			
 			AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
 			
-			switch(arena->fields[building->field - 1].type)
-			{
-				case FIELD_LITTLE:
-					paras = parassmall->value;
-					break;
-				case FIELD_MEDIUM:
-					paras = parasmedium->value;
-					break;
-				case FIELD_MAIN:
-					paras = paraslarge->value;
-					break;
-				case FIELD_WB3POST:
-					paras = paraspost->value;
-					break;
-				case FIELD_WB3PORT:
-					paras = parasport->value;
-					break;
-				case FIELD_WB3TOWN:
-					paras = parastown->value;
-					break;
-				case FIELD_WB3VILLAGE:
-					paras = parasvillage->value;
-					break;
-				default:
-					paras = parassmall->value;
-			}
-			
-			if (arena->fields[building->field - 1].paras >= paras)
+			if (arena->fields[building->field - 1].paras >= GetFieldParas(arena->fields[building->field - 1].type))
 			{
 				AddBuildingDamage(building, GetBuildingArmor(BUILD_TOWER, client), 1, client);
 				CaptureField(building->field, client);
@@ -6953,10 +6918,10 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 u_int32_t RebuildTime(building_t *building)
 {
-	static u_int8_t villages, towns, ports;
-	static float const_v, const_t, const_p;
+	static u_int8_t villages, towns, ports, posts;
+	static float const_v, const_t, const_por, const_pos;
 	static u_int8_t calc = 0;
-	float c_villages, c_towns, c_ports;
+	float c_villages, c_towns, c_ports, c_posts;
 	u_int16_t total;
 	u_int8_t i;
 	u_int32_t rebuild;
@@ -6982,12 +6947,15 @@ u_int32_t RebuildTime(building_t *building)
 				towns++;
 			else if(arena->fields[i].type == FIELD_WB3VILLAGE)
 				villages++;
+			else if(arena->fields[i].type == FIELD_WB3POST)
+				posts++;
 		}
 		
-		total = ports * 3 + towns * 5 + villages * 1;
-		const_v = 0.6 * villages * 1 / total;
-		const_t = 0.6 * towns * 5 / total;
-		const_p = 0.6 * ports * 3 / total;
+		total = ports * 9 + towns * 15 + villages * 3 + posts * 1;
+		const_v = 0.6 * villages * 3 / total;
+		const_t = 0.6 * towns * 15 / total;
+		const_por = 0.6 * ports * 9 / total;
+		const_pos = 0.6 * posts * 1 / total;
 		
 		calc = 1;
 	}
@@ -7004,10 +6972,13 @@ u_int32_t RebuildTime(building_t *building)
 				c_towns++;
 			else if(arena->fields[i].type == FIELD_WB3VILLAGE)
 				c_villages++;
+			else if(arena->fields[i].type == FIELD_WB3POST)
+				c_posts++;
 		}
 	}
 	
-	rebuild = 6000 * rebuildtime->value * Com_Log(GetBuildingArmor(building->type, NULL), 40) * (1 - (ports?(const_p * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0));
+	rebuild = 6000 * rebuildtime->value * Com_Log(GetBuildingArmor(building->type, NULL), 40) *
+		(1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0));
 	
 	return rebuild;
 }
@@ -7032,7 +7003,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 	{
-		if ((client->country == building->country) && !teamkillstructs->value)
+		if (client && (client->country == building->country) && !teamkillstructs->value)
 			return 0;
 	}
 
@@ -7096,7 +7067,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	score = dmgprobe < building->armor ? dmgprobe : building->armor;
 	score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
 	
-	if(score)
+	if(score && client)
 	{
 		if (client->country != building->country)
 		{

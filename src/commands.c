@@ -2440,7 +2440,7 @@ void Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client)
 void Cmd_Field(u_int8_t field, client_t *client)
 {
 	u_int8_t country, type, status, build_alive, build_total;
-	u_int16_t i;
+	u_int16_t i, j;
 	u_int32_t reup, treup;
 	u_int32_t tonnage_recover;
 	u_int8_t c_cities, totalcities;
@@ -2456,15 +2456,15 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		}
 		else
 		{
-			fprintf(fp, "FIELD   COUNTRY     TYPE    STATUS");
+			fprintf(fp, "FIELD   COUNTRY     TYPE    STATUS      UP      PARAS");
 			
 			if(!oldcapt->value && wb3->value)
 			{
-				fprintf(fp, "     ToT     TTC\n---------------------------------------------------\n");
+				fprintf(fp, "     ToT     TTC\n------------------------------------------------------------------\n");
 			}
 			else
 			{
-				fprintf(fp, "\n----------------------------------\n");
+				fprintf(fp, "\n-------------------------------------------------\n");
 			}
 
 			for(i = 0; i < fields->value; i++)
@@ -2474,16 +2474,32 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 				{
 					if (arena->fields[field].cv)
-						sprintf(buffer, "%.3f ft/s", arena->fields[field].cv->speed);
+						fprintf(fp, "%.3f ft/s", arena->fields[field].cv->speed);
 					else
 						Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
 				}
 				else
 				{
-					sprintf(buffer, "%10s", arena->fields[i].closed ? "Closed" : "Open");
+					fprintf(fp, "%10s", arena->fields[i].closed ? "Closed" : "Open");
+				}
+				
+				build_total = build_alive = 0;
+				
+				for (j = 0; j < MAX_BUILDINGS; j++)
+				{
+					if (!arena->fields[i].buildings[j].field)
+						break;
+
+					if (IsVitalBuilding(&(arena->fields[i].buildings[j]), oldcapt->value))
+					{
+						if(!arena->fields[i].buildings[j].status)
+							build_alive++;
+						build_total++;
+					}
 				}
 
-				fprintf(fp, "%s", buffer);
+				fprintf(fp, "   %6.2f%%%5d/%d", (float)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
+				//fprintf(fp, "%s", buffer);
 
 				if(!oldcapt->value && wb3->value)
 				{
@@ -2519,6 +2535,22 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	country = arena->fields[field].country;
 	type = arena->fields[field].type;
 	status = arena->fields[field].closed;
+
+	build_total = build_alive = 0;
+	
+	for (i = 0; i < MAX_BUILDINGS; i++)
+	{
+		if (!arena->fields[field].buildings[i].field)
+			break;
+
+		if (IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
+		{
+			if(!arena->fields[field].buildings[i].status)
+				build_alive++;
+			
+			build_total++;
+		}
+	}
 
 	if (!client || client->infly)
 	{
@@ -2561,7 +2593,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					}
 				}
 
-				tonnage_recover = (u_int32_t)(1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * (float)GetTonnageToClose(field+1) / (10.0 * 9.0 / rebuildtime->value);
+				tonnage_recover = (u_int32_t)(1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * (float)GetTonnageToClose(field+1) / (24.0 * rebuildtime->value / 9.0);
 
 				treup = ((arena->fields[field].tonnage - GetTonnageToClose(field+1)) * 100) / tonnage_recover;
 			
@@ -2577,23 +2609,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		}
 		else
 		{
-			build_total = build_alive = 0;
-			
-			for (i = 0; i < MAX_BUILDINGS; i++)
-			{
-				if (!arena->fields[field].buildings[i].field)
-					break;
-
-				if (IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
-				{
-					if(!arena->fields[field].buildings[i].status)
-						build_alive++;
-					
-					build_total++;
-				}
-			}
-			
-			PPrintf(client, RADIO_YELLOW, "%.2f%% of vital structures alive", (float)build_alive*100/build_total);
+			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras", (float)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
 		}
 	}
 	else
@@ -2608,7 +2624,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		}
 		else
 		{
-			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\n", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
+			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\nPARAS: %d/%d\n\n", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open", arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
 			if(!oldcapt->value && wb3->value)
 			{
 				fprintf(fp, "TONNAGE ON TARGET: %d\nTONNAGE TO CLOSE: %d\n", arena->fields[field].tonnage, GetTonnageToClose(field+1));
