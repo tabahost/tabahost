@@ -3639,7 +3639,8 @@ u_int32_t GetTonnageToClose(u_int8_t field)
 			if(!arena->fields[field].buildings[i].field)
 				break;
 
-			if((arena->fields[field].buildings[i].type != BUILD_TREE) && (arena->fields[field].buildings[i].type != BUILD_FENCE) && (arena->fields[field].buildings[i].type != BUILD_ROCK))
+			//if((arena->fields[field].buildings[i].type != BUILD_TREE) && (arena->fields[field].buildings[i].type != BUILD_FENCE) && (arena->fields[field].buildings[i].type != BUILD_ROCK))
+			if(IsVitalBuilding(&(arena->fields[field].buildings[i]), TRUE))
 			{
 				ttc_buf[arena->fields[field].type] += GetBuildingArmor(arena->fields[field].buildings[i].type, NULL);
 			}

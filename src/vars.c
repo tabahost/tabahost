@@ -398,6 +398,11 @@ void CheckVars(void)
 		LoadAmmo(NULL);
 	}
 
+	if(ttc->modified)
+	{
+		GetTonnageToClose(FALSE);
+	}
+
 	if (dirname->modified)
 	{
 		arena->mapnum = -1;

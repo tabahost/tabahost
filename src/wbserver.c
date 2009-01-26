@@ -191,14 +191,16 @@ int main(int argc, char *argv[])
 				usleep(1);
 #endif
 				arena->time = Sys_Milliseconds();
-				if(oldtime> arena->time)
-				Com_Printf(VERBOSE_WARNING, "oldtime > arena->time (%u, %u)\n", oldtime, arena->time);
+				if(oldtime > arena->time)
+				{
+					Com_Printf(VERBOSE_WARNING, "Clock Backwards oldtime > arena->time (%u, %u)\n", oldtime, arena->time);
+					oldtime = arena->time;
+				}
 
 				time = arena->time - oldtime;
 			}while (time < sync); // server fps = 100
 
 			if(arena->frame < (u_int32_t) 429496200UL /*49 days*/) // change: reset Sys_Milliseconds and frame, every changearena
-
 			{
 				arena->frame++;
 			}
@@ -217,7 +219,7 @@ int main(int argc, char *argv[])
 				sync = 0;
 				if((checksync - arena->frame)> 30000)
 				{
-					Com_Printf(VERBOSE_WARNING, "clock warp\n");
+					Com_Printf(VERBOSE_WARNING, "Clock Forwards\n");
 					arena->frame= checksync;
 				}
 			}

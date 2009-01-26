@@ -2069,6 +2069,8 @@ void ClientIpaddr(client_t *client)
 {
 	u_int32_t ipaddr_id;
 
+	Com_Printf(VERBOSE_DEBUG, "Registering IP in DB\n");
+
 	if (!client || !strlen(client->ip))
 		return;
 
@@ -2082,6 +2084,8 @@ void ClientIpaddr(client_t *client)
 			return;
 		}
 	}
+
+	Com_Printf(VERBOSE_DEBUG, "Inserted in ip table (%s)\n", client->ip);
 
 	ipaddr_id = (u_int32_t)mysql_insert_id(&my_sock);
 
@@ -2099,6 +2103,8 @@ void ClientIpaddr(client_t *client)
 			Com_Printf(VERBOSE_WARNING, "ClientIpaddr(insert): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
+
+	Com_Printf(VERBOSE_DEBUG, "Inserted in ip-client table (%s - %s) (%d - %d)\n", client->ip, client->longnick, client->id, ipaddr_id);
 }
 
 /*************

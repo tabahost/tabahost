@@ -703,7 +703,7 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 		if (logfile_active->value)
 		{
 			if (!logfile[0])
-				logfile[0] = fopen(FILE_CONSOLE, "a");
+				logfile[0] = fopen(FILE_CONSOLE, "a+");
 			if(!logfile[0])
 				printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_CONSOLE);
 
@@ -714,37 +714,37 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 					switch (verb)
 					{
 						case VERBOSE_ATTENTION:
-							logfile[tverb] = fopen(FILE_ATTENTION, "a");
+							logfile[tverb] = fopen(FILE_ATTENTION, "a+");
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_ATTENTION);
 							break;
 						case VERBOSE_WARNING:
-							logfile[tverb] = fopen(FILE_WARNING, "a");
+							logfile[tverb] = fopen(FILE_WARNING, "a+");
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_WARNING);
 							break;
 						case VERBOSE_ERROR:
-							logfile[tverb] = fopen(FILE_ERROR, "a");
+							logfile[tverb] = fopen(FILE_ERROR, "a+");
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_ERROR);
 							break;
 						case VERBOSE_DEBUG:
-							logfile[tverb] = fopen(FILE_DEBUG, "a");
+							logfile[tverb] = fopen(FILE_DEBUG, "a+");
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_DEBUG);
 							break;
 						case VERBOSE_ONLINE:
-							logfile[tverb] = fopen(FILE_ONLINE, "a");
+							logfile[tverb] = fopen(FILE_ONLINE, "a+");
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_ONLINE);
 							break;
 						case VERBOSE_CHAT:
-							logfile[tverb] = fopen(FILE_CHAT, "a");
+							logfile[tverb] = fopen(FILE_CHAT, "a+");
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_CHAT);
 							break;
 						case VERBOSE_KILL:
-							logfile[tverb] = fopen(FILE_KILL, "a");
+							logfile[tverb] = fopen(FILE_KILL, "a+");
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_KILL);
 							break;
@@ -965,7 +965,7 @@ void Com_Printfhex(unsigned char *buffer, int len)
 		{
 			if (!logfile[0]) // TODO: Misc: Change this to FILE_DEBUG?
 			{
-				logfile[0] = fopen(FILE_CONSOLE, "a");
+				logfile[0] = fopen(FILE_CONSOLE, "a+");
 			}
 
 			if (logfile[0])
@@ -984,7 +984,7 @@ void Com_Printfhex(unsigned char *buffer, int len)
 		{
 			if (!logfile[0])
 			{
-				logfile[0] = fopen(FILE_CONSOLE, "a");
+				logfile[0] = fopen(FILE_CONSOLE, "a+");
 			}
 
 			if (logfile[0])

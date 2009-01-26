@@ -196,9 +196,13 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 				if(ScorePlaneLife(client) < 0.5)
 				{ // kill
+					misc = SCORE_KILLED;
+
 					event_cost += ScorePlaneCost(client) + arena->costs.newpilot + arena->costs.life;
 
 					strcat(my_query, ", killed = killed + '1', curr_streak = '0'");
+
+					client->streakscore = 0;
 
 					if (client->lives > 0)
 					{
@@ -208,7 +212,10 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 					break;
 				}
 				else
+				{
+					misc = SCORE_BAILED;
 					strcat(my_query, ","); // let it go to SCORE_BAILED
+				}
 //				else // bail
 //				{
 //					event_cost += ScorePlaneCost(client) + ScorePilotTransportCost(client);
@@ -237,6 +244,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				event_cost += ScorePlaneCost(client) + arena->costs.newpilot + arena->costs.life;
 
 				strcat(my_query, " killed = killed + '1', curr_streak = '0'");
+
+				client->streakscore = 0;
 
 				if (client->lives > 0)
 				{
@@ -343,7 +352,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		}
 	}
 
-	client->streakscore += client->lastscore;
+	if(misc != SCORE_KILLED)
+		client->streakscore += client->lastscore;
 
 	if (client->dronetimer < arena->time)
 	{
@@ -708,7 +718,7 @@ float ScorePlaneCost(client_t *client)
 
 float ScoreFixPlaneCost(float plane_life, float plane_cost)
 {
-	return plane_cost * (0.02 + (1.0 - plane_life) * 0.98);
+	return plane_cost * (0.01 + (1.0 - plane_life) * 0.99);
 }
 
 /*************

@@ -1360,6 +1360,12 @@ void ProcessCommands(char *command, client_t *client)
 
 	size = strlen(command);
 
+	if(size > 100)
+	{
+		Com_Printf(VERBOSE_DEBUG, "ProcessCommands(size) > 100 (%d)\n", size);
+		return;
+	}
+
 	while (command[--size] == ' ' || command[size] == '\n' || command[size] == '\t' || command[size] == '\r')
 		//Remove ending spaces
 		;
@@ -1661,8 +1667,7 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			else
 			{
-				PPrintf(client, RADIO_YELLOW, "Current flight score: %.3f", client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore
-						- client->score.penaltyscore);
+				PPrintf(client, RADIO_YELLOW, "Current flight score: %.3f", client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore - client->score.penaltyscore - client->score.costscore);
 			}
 			return;
 		}
@@ -3673,6 +3678,8 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x0D01:
 				if(!setjmp(debug_buffer))
 				{
+					client->ready = 1;
+
 					if(!strlen(client->longnick))
 					{
 						PPrintf(client, RADIO_RED, "ERROR: This account has no registered callsign");
@@ -3683,8 +3690,6 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						RemoveClient(client);
 						return 0;
 					}
-
-					client->ready = 1;
 
 					SendArenaRules(client);
 					if(wb3->value)
