@@ -36,6 +36,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	u_int8_t collided = 0;
 	int8_t penalty = 1;
 	u_int32_t flighttime;
+	munition_t *munition;
 	float event_cost = 0.0;
 
 	if(!client)
@@ -93,35 +94,45 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		case SCORE_DROPITEM:
 			client->score.costscore += GetAmmoCost(misc);
 
-			switch (misc)
+			munition = GetMunition(misc);
+
+			if(munition)
 			{
-				case MUNTYPE_ROCKET:
-					strcat(my_query, " rocketused = rocketused + '1'");
-					break;
-				case MUNTYPE_BOMB:
-					strcat(my_query, " bombused = bombused + '1'");
-					break;
-				case MUNTYPE_TORPEDO:
-					strcat(my_query, " torpused = torpused + '1'");
-					break;
-				default:
-					strcat(my_query, " gunused = gunused + '1'");
+				switch (munition->type)
+				{
+					case MUNTYPE_ROCKET:
+						strcat(my_query, " rocketused = rocketused + '1'");
+						break;
+					case MUNTYPE_BOMB:
+						strcat(my_query, " bombused = bombused + '1'");
+						break;
+					case MUNTYPE_TORPEDO:
+						strcat(my_query, " torpused = torpused + '1'");
+						break;
+					default:
+						strcat(my_query, " gunused = gunused + '1'");
+				}
 			}
 			break;
 		case SCORE_HARDHIT:
-			switch (misc)
+			munition = GetMunition(misc);
+
+			if(munition)
 			{
-				case MUNTYPE_ROCKET:
-					strcat(my_query, " rockethits = rockethits + '1'");
-					break;
-				case MUNTYPE_BOMB:
-					strcat(my_query, " bombhits = bombhits + '1'");
-					break;
-				case MUNTYPE_TORPEDO:
-					strcat(my_query, " torphits = torphits + '1'");
-					break;
-				default:
-					strcat(my_query, " gunhits = gunhits + '1'");
+				switch (munition->type)
+				{
+					case MUNTYPE_ROCKET:
+						strcat(my_query, " rockethits = rockethits + '1'");
+						break;
+					case MUNTYPE_BOMB:
+						strcat(my_query, " bombhits = bombhits + '1'");
+						break;
+					case MUNTYPE_TORPEDO:
+						strcat(my_query, " torphits = torphits + '1'");
+						break;
+					default:
+						strcat(my_query, " gunhits = gunhits + '1'");
+				}
 			}
 			break;
 		case SCORE_STRUCTDAMAGE:

@@ -303,7 +303,7 @@ void CheckArenaRules(void)
 	static u_int16_t players_count = 0;
 	u_int8_t close, vitals;
 	int16_t i, j;
-	u_int32_t tonnage_recover;
+	float tonnage_recover;
 	u_int8_t c_cities, totalcities;
 	u_int32_t dist, tempdist;
 	int32_t posx;
@@ -343,7 +343,7 @@ void CheckArenaRules(void)
 		{
 			if(rebuildtime->value < 9999)
 			{
-				if(!oldcapt->value && wb3->value && !(arena->frame % 6000))
+				if(!oldcapt->value && wb3->value && arena->fields[i].tonnage && !(arena->frame % 6000))
 				{
 					c_cities = totalcities = 0;
 
@@ -360,10 +360,14 @@ void CheckArenaRules(void)
 						}
 					}
 
-					tonnage_recover = (u_int32_t)(1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * (float)GetTonnageToClose(i+1) / (24.0 * rebuildtime->value / 9.0);
+					tonnage_recover = (1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(i+1) / (24.0 * rebuildtime->value / 9.0);
 
-					if(arena->fields[i].tonnage)
-						arena->fields[i].tonnage -= tonnage_recover;
+					if(!tonnage_recover)
+					{
+						Com_Printf(VERBOSE_DEBUG, "CheckArenaRules() tonnage_recover = 0\n");
+					}
+
+					arena->fields[i].tonnage -= tonnage_recover;
 					
 					if(arena->fields[i].tonnage < 0)
 						arena->fields[i].tonnage = 0;

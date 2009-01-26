@@ -159,6 +159,14 @@ void RemoveClient(client_t *client)
 		}
 	}
 
+	for (i = 0; i < MAX_BOMBS; i++)
+	{
+		if (arena->bombs[i].from == client)
+		{
+			arena->bombs[i].from = NULL;
+		}
+	}
+
 	if (strlen(client->longnick))
 	{
 		if (client->ready)
@@ -2174,8 +2182,6 @@ void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 		Com_Printf(VERBOSE_WARNING, "HardHit(): Munition ID overflow %d. maxmuntype=%d\n", munition, maxmuntype);
 		return;
 	}
-	if (!arena->munition[munition].type)
-		return;
 
-	ScoresEvent(SCORE_HARDHIT, client, arena->munition[munition].type);
+	ScoresEvent(SCORE_HARDHIT, client, munition);
 }

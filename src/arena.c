@@ -3607,13 +3607,14 @@ u_int8_t GetFieldParas(u_int8_t type)
 	}
 }
 
-u_int32_t GetTonnageToClose(u_int8_t field)
+float GetTonnageToClose(u_int8_t field)
 {
-	static u_int32_t ttc_buf[MAX_FIELDTYPE];
+	static float ttc_buf[MAX_FIELDTYPE];
 	u_int16_t i;
 
 	if(!field)
 	{
+		Com_Printf(VERBOSE_ALWAYS, "Reseting Tonnage to Close\n");
 		memset(ttc_buf, 0, sizeof(ttc_buf));
 		return 0;
 	}
@@ -3623,10 +3624,16 @@ u_int32_t GetTonnageToClose(u_int8_t field)
 	}
 
 	if(field >= fields->value)
+	{
+		Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() field(%d) >= fields->value\n", field);
 		return 0;
+	}
 
 	if(arena->fields[field].type >= MAX_FIELDTYPE)
+	{
+		Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() field[%d]->type(%d) >= MAX_FIELDTYPE\n", field, arena->fields[field].type);
 		return 0;
+	}
 
 	if(ttc_buf[arena->fields[field].type])
 	{
@@ -3649,7 +3656,16 @@ u_int32_t GetTonnageToClose(u_int8_t field)
 		ttc_buf[arena->fields[field].type] *= ttc->value;
 		ttc_buf[arena->fields[field].type] /= 50; // converts armor to kg
 
-		return ttc_buf[arena->fields[field].type];
+		if(ttc_buf[arena->fields[field].type])
+		{
+			return ttc_buf[arena->fields[field].type];
+		}
+		else
+		{
+			Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() ttc_buf[%d] returned zero\n", arena->fields[field].type);
+			return 0;
+		}
+
 	}
 /*
 	switch(fieldtype)

@@ -572,7 +572,7 @@ typedef struct field_s
 	int32_t		posxyz[3];
 	u_int8_t	abletocapture;
 	u_int8_t	closed;
-	int32_t		tonnage;
+	float		tonnage;
 	u_int8_t	vitals;
 	u_int8_t	paras;
 	u_int32_t	alert;
@@ -2223,7 +2223,7 @@ void	ReducePlanes(u_int8_t field);
 void	IncreaseAcksReup(u_int8_t field);
 u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot);
 u_int8_t GetFieldParas(u_int8_t type);
-u_int32_t GetTonnageToClose(u_int8_t field);
+float	GetTonnageToClose(u_int8_t field);
 u_int8_t Alt2Index(int32_t alt);
 void	WB3MapTopography(client_t *client);
 void	WB3Mapper(client_t *client);

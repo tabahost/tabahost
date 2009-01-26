@@ -2442,7 +2442,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	u_int8_t country, type, status, build_alive, build_total;
 	u_int16_t i, j;
 	u_int32_t reup, treup;
-	u_int32_t tonnage_recover;
+	float tonnage_recover;
 	u_int8_t c_cities, totalcities;
 	FILE *fp;
 	char buffer[32];
@@ -2498,12 +2498,12 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					}
 				}
 
-				fprintf(fp, "   %6.2f%%%5d/%d", (float)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
+				fprintf(fp, "   %6.2f%%%5d/%02d", (float)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
 				//fprintf(fp, "%s", buffer);
 
 				if(!oldcapt->value && wb3->value)
 				{
-					fprintf(fp, "   %5d   %5d\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
+					fprintf(fp, "   %7.2f   %7.2f\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
 				}
 				else
 				{
@@ -2558,7 +2558,11 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		
 		if(!oldcapt->value && wb3->value)
 		{
-			PPrintf(client, RADIO_YELLOW, "ToT: %d, TTC: %d", arena->fields[field].tonnage, GetTonnageToClose(field+1));
+			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras, ToT: %.2f, TTC: %.2f", (float)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type), arena->fields[field].tonnage, GetTonnageToClose(field+1));
+		}
+		else
+		{
+			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras", (float)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
 		}
 
 		if (status)
@@ -2593,23 +2597,19 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					}
 				}
 
-				tonnage_recover = (u_int32_t)(1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * (float)GetTonnageToClose(field+1) / (24.0 * rebuildtime->value / 9.0);
+				tonnage_recover = (1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(field+1) / (24.0 * rebuildtime->value / 9.0);
 
-				treup = ((arena->fields[field].tonnage - GetTonnageToClose(field+1)) * 100) / tonnage_recover;
+				treup = ((arena->fields[field].tonnage - GetTonnageToClose(field+1)) * 6000) / tonnage_recover;
 			
 				if(treup < reup)
 				{
-					if(client->attr)
+					if(!client || client->attr)
 						PPrintf(client, RADIO_RED, "DEBUG: Reup: %u, ToT Reup = %u", reup, treup);
 					reup = treup;
 				}
 			}
 
 			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup/100), arena->fields[field].abletocapture ? "Yes" : "No");
-		}
-		else
-		{
-			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras", (float)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
 		}
 	}
 	else
@@ -2627,7 +2627,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\nPARAS: %d/%d\n\n", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open", arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
 			if(!oldcapt->value && wb3->value)
 			{
-				fprintf(fp, "TONNAGE ON TARGET: %d\nTONNAGE TO CLOSE: %d\n", arena->fields[field].tonnage, GetTonnageToClose(field+1));
+				fprintf(fp, "TONNAGE ON TARGET: %.2f\nTONNAGE TO CLOSE: %.2f\n", arena->fields[field].tonnage, GetTonnageToClose(field+1));
 			}
 
 			if (status)

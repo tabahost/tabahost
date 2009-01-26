@@ -261,6 +261,14 @@ void RemoveDrone(client_t *drone)
 			break;
 	}
 
+	for (i = 0; i < MAX_BOMBS; i++)
+	{
+		if (arena->bombs[i].from == drone)
+		{
+			arena->bombs[i].from = NULL;
+		}
+	}
+
 	if (i == MAX_RELATED)
 		Com_Printf(VERBOSE_ALWAYS, "Server didnt find relationship between %s and his drone\n", drone->related[0] ? drone->related[0]->longnick : "(null)");
 
