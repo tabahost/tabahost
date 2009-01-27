@@ -2995,14 +2995,17 @@ void CaptureField(u_int8_t field, client_t *client)
 		}
 		else
 		{
-			if (timer > arena->fields[field - 1].buildings[i].timer)
+			if(IsVitalBuilding(&(arena->fields[field - 1].buildings[i]), oldcapt->value))
 			{
-				timer = arena->fields[field - 1].buildings[i].timer;
+				if (timer > arena->fields[field - 1].buildings[i].timer)
+				{
+					timer = arena->fields[field - 1].buildings[i].timer;
+				}
 			}
 		}
 	}
 
-	for (i = 0; i < MAX_BUILDINGS; i++)
+	for (hangar = i = 0; i < MAX_BUILDINGS; i++)
 	{
 		if (!arena->fields[field - 1].buildings[i].field)
 		{
@@ -3013,7 +3016,7 @@ void CaptureField(u_int8_t field, client_t *client)
 			if(!oldcapt->value && wb3->value)
 			{
 				if (arena->fields[field - 1].buildings[i].type == BUILD_HANGAR && !arena->fields[field - 1].buildings[i].status)
-					hangar = 1;
+					hangar++;
 			}
 			else
 				hangar = 1;
@@ -3028,7 +3031,7 @@ void CaptureField(u_int8_t field, client_t *client)
 		if (arena->fields[field - 1].rps[i] >= 1)
 		{
 			if (hangar)
-				arena->fields[field - 1].rps[i] = 1;
+				arena->fields[field - 1].rps[i] = hangar;
 			else
 				arena->fields[field - 1].rps[i] = 0;
 		}

@@ -2503,7 +2503,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 				if(!oldcapt->value && wb3->value)
 				{
-					fprintf(fp, "   %7.2f   %7.2f\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
+					fprintf(fp, "  %8.2f  %8.2f\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
 				}
 				else
 				{

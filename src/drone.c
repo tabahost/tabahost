@@ -35,12 +35,15 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 
 	if (client && !((client->attr & FLAG_ADMIN) && (type & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY))))
 	{
-		for (i = 0; i < MAX_RELATED; i++)
+		if(type != DRONE_COMMANDOS)
 		{
-			if (client->related[i] && (client->related[i]->drone & type)) //	if(client->related[i]->drone & (DRONE_FAU | DRONE_WINGS2 | DRONE_HMACK))
+			for (i = 0; i < MAX_RELATED; i++)
 			{
-				PPrintf(client, RADIO_YELLOW, "You have such kind of drone already flying");
-				return NULL;
+				if (client->related[i] && (client->related[i]->drone & type)) //	if(client->related[i]->drone & (DRONE_FAU | DRONE_WINGS2 | DRONE_HMACK))
+				{
+					PPrintf(client, RADIO_YELLOW, "You have such kind of drone already flying");
+					return NULL;
+				}
 			}
 		}
 
@@ -235,7 +238,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 
 void RemoveDrone(client_t *drone)
 {
-	u_int8_t i; //, slot;
+	u_int16_t i; //, slot;
 
 	if (!drone || !drone->inuse)
 		return;
@@ -1524,16 +1527,16 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	{
 		client = NULL;
 	}
-
+Com_Printf(VERBOSE_DEBUG, "HitStructsNear(1)\n");
 	if (!munition)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Unknown munition ID %d, plane %d", type, client ? client->plane : 0);
 		return 0;
 	}
-
+	Com_Printf(VERBOSE_DEBUG, "HitStructsNear(2)\n");
 	min = GetMunition(81);
 	max = GetMunition(87);
-
+	Com_Printf(VERBOSE_DEBUG, "HitStructsNear(3)\n");
 	if (max->he == min->he)
 	{
 		Com_Printf(VERBOSE_WARNING, "HitStructsNear(): min->he == max->he\n");
@@ -1541,7 +1544,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	}
 	else
 		radius = (munition->he - min->he) * (MAX_BOMBRADIUS - MIN_BOMBRADIUS) / (max->he - min->he);
-
+	Com_Printf(VERBOSE_DEBUG, "HitStructsNear(4)\n");
 	radius += MIN_BOMBRADIUS;
 
 	if (!nuke)
@@ -1550,7 +1553,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 
 	if (gunstats->value)
 		PPrintf(client, RADIO_RED, "Radius %d", radius);
-
+	Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5)\n");
 	j = 0;
 	k = fields->value + cities->value;
 
@@ -1568,20 +1571,21 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 			b = y - arena->cities[field - (int16_t)fields->value].posxyz[1];
 			fieldtype = arena->cities[field - (int16_t)fields->value].type;
 		}
-
+		Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.1)\n");
 		if ((a >= (-1 * GetFieldRadius(fieldtype)) && a <= GetFieldRadius(fieldtype)) && (b >= (-1 * GetFieldRadius(fieldtype)) && b <= GetFieldRadius(fieldtype)))
 		{
 			c = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2));
 			
 			if (c < GetFieldRadius(fieldtype))
 			{
+				Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.2)\n");
 				if (field < fields->value)
 				{
 					wb3tonnage->ammo = type;
 					wb3tonnage->distance = htons(c);
 					wb3tonnage->field = htons(field+1);
 					WB3TonnageOnTarget(buffer, client); // this add tonnage effect for emulated bombs
-					
+					Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.3)\n");
 					for (i = 0; i < MAX_BUILDINGS; i++)
 					{
 						if (!arena->fields[field].buildings[i].field)
@@ -1623,9 +1627,11 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 							}
 						}
 					}
+					Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.4)\n");
 				}
 				else // destroying cities
 				{
+					Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.5)\n");
 					city = field - fields->value;
 
 					for (i = 0; i < MAX_BUILDINGS; i++)
@@ -1640,12 +1646,13 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 							b = y - arena->cities[city].buildings[i].posy;
 							if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
 							{
+								Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.5.1)\n");
 								if (gunstats->value)
 									PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->cities[city].buildings[i].type), munition->he);
 
 								Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->cities[city].buildings[i].country) ? "friendly " : "",
 										GetBuildingType(arena->cities[city].buildings[i].type), munition->abbrev);
-
+								Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.5.2)\n");
 								if (client)
 								{
 									Com_LogEvent(EVENT_HITSTRUCT, client->id, 0);
@@ -1655,21 +1662,24 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 									Com_LogDescription(EVENT_DESC_FIELD, arena->cities[city].buildings[i].field, NULL);
 									Com_LogDescription(EVENT_DESC_AMMO, type, NULL);
 								}
-
+								Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.5.3)\n");
 								AddBuildingDamage(&arena->cities[city].buildings[i], munition->he, munition->ap, client);
 								j++;
+								Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.5.4)\n");
 							}
 						}
 					}
+					Com_Printf(VERBOSE_DEBUG, "HitStructsNear(5.6)\n");
 				}
 			}
 		}
 	}
-
+	Com_Printf(VERBOSE_DEBUG, "HitStructsNear(6)\n");
 	for (i = 0; i < maxentities->value; i++) // check players near explosion
 	{
 		if (clients[i].inuse && clients[i].infly)
 		{
+			Com_Printf(VERBOSE_DEBUG, "HitStructsNear(6.1)\n");
 			if (clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
 				radius = 50;
 			else
@@ -1677,13 +1687,14 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 
 			a = x - clients[i].posxy[0][0];
 			b = y - clients[i].posxy[1][0];
-
+			Com_Printf(VERBOSE_DEBUG, "HitStructsNear(6.2)\n");
 			if (a > -200 && a < 200 && b > -200 && b < 200)
 			{
 				if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
 				{
 					if ((clients[i].posalt[0] - GetHeightAt(clients[i].posxy[0][0], clients[i].posxy[1][0])) < radius)
 					{
+						Com_Printf(VERBOSE_DEBUG, "HitStructsNear(6.2.1)\n");
 						if (!(clients[i].drone && clients[i].related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 						{
 							killer = AddKiller(&clients[i], client);
@@ -1691,14 +1702,16 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 							if (killer >= 0 && killer < MAX_HITBY)
 								clients[i].damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)munition->he / (float)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
 						}
-
+						Com_Printf(VERBOSE_DEBUG, "HitStructsNear(6.2.2)\n");
 						AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, NULL, NULL, &clients[i]);
+						Com_Printf(VERBOSE_DEBUG, "HitStructsNear(6.2.3)\n");
 					}
 				}
 			}
+			Com_Printf(VERBOSE_DEBUG, "HitStructsNear(6.3)\n");
 		}
 	}
-
+	Com_Printf(VERBOSE_DEBUG, "HitStructsNear(7)\n");
 	return j;
 }
 

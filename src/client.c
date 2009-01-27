@@ -100,7 +100,7 @@ void AddClient(int socket, struct sockaddr_in *cli_addr)
 
 void RemoveClient(client_t *client)
 {
-	u_int8_t i, j;
+	u_int16_t i, j;
 
 	if (!client || !client->inuse)
 		return;

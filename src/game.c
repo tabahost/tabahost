@@ -1795,19 +1795,19 @@ void ProcessCommands(char *command, client_t *client)
 				return;
 			}
 
-			for (i = 0; i < MAX_RELATED; i++)
-			{
-				/*				if(client->related[i] && (client->related[i]->drone & DRONE_FAU))
-				 {
-				 PPrintf(client, RADIO_YELLOW, "You can't start commandos with a V-1 flying");
-				 return;
-				 }*/
-				if (client->related[i] && (client->related[i]->drone & DRONE_COMMANDOS))
-				{
-					PPrintf(client, RADIO_YELLOW, "You have a Commandos already dropped");
-					return;
-				}
-			}
+//			for (i = 0; i < MAX_RELATED; i++)
+//			{
+//				/*				if(client->related[i] && (client->related[i]->drone & DRONE_FAU))
+//				 {
+//				 PPrintf(client, RADIO_YELLOW, "You can't start commandos with a V-1 flying");
+//				 return;
+//				 }*/
+//				if (client->related[i] && (client->related[i]->drone & DRONE_COMMANDOS))
+//				{
+//					PPrintf(client, RADIO_YELLOW, "You have a Commandos already dropped");
+//					return;
+//				}
+//			}
 			Cmd_Commandos(client, GetHeightAt(client->posxy[0][0], client->posxy[1][0]));
 			return;
 		}
@@ -5676,8 +5676,8 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 					AddFieldDamage(field-1, ammo->he, client);
 					arena->fields[field-1].tonnage += (ammo->he / 50);
 
-					if(arena->fields[field-1].tonnage >= (arena->fields[field-1].tonnage * 2.4))
-						arena->fields[field-1].tonnage = (arena->fields[field-1].tonnage * 2.4);
+					if(arena->fields[field-1].tonnage >= (GetTonnageToClose(field) * 2.4))
+						arena->fields[field-1].tonnage = (GetTonnageToClose(field) * 2.4);
 				}
 			}
 		}
