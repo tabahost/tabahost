@@ -6389,6 +6389,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 					sprintf(header, "%s(%u)[%de%dp]%s%s", munition->abbrev, hitplane->type, munition->he, ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
 					memset(gunstatsb, 0, sizeof(gunstatsb));
 					sprintf(gunstatsb, "%s;%s;%s%s", header, heb, ign, apb);
+					Com_Printf(VERBOSE_DEBUG, "DM: %s\n", gunstatsb);
 //				}
 //				else
 //				{
@@ -6414,7 +6415,6 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 //			}
 //			if (gunstats->value || pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
-				Com_Printf(VERBOSE_DEBUG, "DM: %s\n", gunstatsb);
 		}
 	}
 
