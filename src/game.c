@@ -303,6 +303,7 @@ void CheckArenaRules(void)
 	static u_int16_t players_count = 0;
 	u_int8_t close, vitals;
 	int16_t i, j;
+	u_int8_t reds, golds;
 	float tonnage_recover;
 	u_int8_t c_cities, totalcities;
 	u_int32_t dist, tempdist;
@@ -1264,6 +1265,34 @@ void CheckArenaRules(void)
 		}
 	}
 
+	// Country index tick
+
+	if (!(arena->frame % 6000)) // 1 min
+	{
+		if (!setjmp(debug_buffer))
+		{
+			reds = golds = 0;
+
+			for(i = 0; i < maxentities->value; i++)
+			{
+				if (clients[i].inuse && !clients[i].drone)
+				{
+					if(clients[i].country == COUNTRY_RED)
+						reds++;
+
+					if(clients[i].country == COUNTRY_GOLD)
+						golds++;
+				}
+			}
+
+			arena->redindex = 1 + (0.4 * (golds > 10?10:golds) / 10);
+			arena->goldindex = 1 + (0.4 * (reds > 10?10:reds) / 10);
+		}
+		else
+		{
+			DebugArena(__FILE__, __LINE__);
+		}
+	}
 
 	// Backup Tick
 
@@ -1345,7 +1374,7 @@ void ProcessMetarWeather(void)
 
 void ProcessCommands(char *command, client_t *client)
 {
-	int32_t i, size, permission;
+	int32_t i, j, size, permission;
 	u_int32_t temp;
 	FILE *fp;
 	var_t *var;
@@ -1795,19 +1824,25 @@ void ProcessCommands(char *command, client_t *client)
 				return;
 			}
 
-//			for (i = 0; i < MAX_RELATED; i++)
-//			{
-//				/*				if(client->related[i] && (client->related[i]->drone & DRONE_FAU))
-//				 {
-//				 PPrintf(client, RADIO_YELLOW, "You can't start commandos with a V-1 flying");
-//				 return;
-//				 }*/
-//				if (client->related[i] && (client->related[i]->drone & DRONE_COMMANDOS))
-//				{
-//					PPrintf(client, RADIO_YELLOW, "You have a Commandos already dropped");
-//					return;
-//				}
-//			}
+			for (j = i = 0; i < MAX_RELATED; i++)
+			{
+				/*				if(client->related[i] && (client->related[i]->drone & DRONE_FAU))
+				 {
+				 PPrintf(client, RADIO_YELLOW, "You can't start commandos with a V-1 flying");
+				 return;
+				 }*/
+				if (client->related[i] && (client->related[i]->drone & DRONE_COMMANDOS))
+				{
+					j++;
+
+					if(j >= 2)
+					{
+						PPrintf(client, RADIO_YELLOW, "You have 2 Commandos already dropped");
+						return;
+					}
+				}
+			}
+
 			Cmd_Commandos(client, GetHeightAt(client->posxy[0][0], client->posxy[1][0]));
 			return;
 		}
@@ -6296,7 +6331,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			if (needle[j] < 0)
 				break;
 
-			if (clients[i].armor.points[needle[j]] <= 0)
+			if (needle[j] >= MAX_PLACE || pvictim->armor.points[needle[j]] <= 0)
 				continue;
 
 			if (!pvictim->inuse)
@@ -6304,19 +6339,27 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			damage = (he + ap);
 
-			if (gunstats->value)
+			if (!setjmp(debug_buffer))
 			{
-				ap = AddPlaneDamage(needle[j], he, ap, (heb + strlen(heb)), (apb + strlen(apb)), pvictim);
+				if (gunstats->value)
+				{
+					ap = AddPlaneDamage(needle[j], he, ap, (heb + strlen(heb)), (apb + strlen(apb)), pvictim);
+				}
+				else
+				{
+					ap = AddPlaneDamage(needle[j], he, ap, NULL, NULL, pvictim);
+				}
 			}
 			else
 			{
-				ap = AddPlaneDamage(needle[j], he, ap, NULL, NULL, pvictim);
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+				return;
 			}
 
 			damage -= ap;
 			
 			if(needle[j] >= 0 && needle[j] < 32 && killer >= 0 && killer < MAX_HITBY)
-				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(clients[i].armor.points[needle[j]] + 1.0)));
+				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(pvictim->armor.points[needle[j]] + 1.0)));
 
 			if (ap == 0)
 				break;
@@ -6371,6 +6414,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 //			}
 //			if (gunstats->value || pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
+				Com_Printf(VERBOSE_DEBUG, "DM: %s\n", gunstatsb);
 		}
 	}
 
@@ -6531,7 +6575,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 			killer = AddKiller(pvictim, client);
 
 			if (hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
-				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(((clients[i].armor.points[hardhitplane->place] <= 0) ? 0 : clients[i].armor.points[hardhitplane->place]) + 1.0)));
+				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]) + 1.0)));
 		}
 	}
 
@@ -6807,8 +6851,16 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		return 0;
 	}
 
-	apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place] : ap;
-	dmgprobe = he + apabsorb;
+	if (!setjmp(debug_buffer))
+	{
+		apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place] : ap;
+		dmgprobe = he + apabsorb;
+	}
+	else
+	{
+		DebugClient(__FILE__, __LINE__, TRUE, client);
+		return;
+	}
 
 	if (dmgprobe > client->armor.imunity[place]) // hit makes damage
 	{
@@ -6821,94 +6873,134 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 			if (client->armor.points[place])
 			{
-				if (place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL) // fuel will leak
+				if (!setjmp(debug_buffer))
 				{
-					if (!client->fueltimer)
-						client->fueltimer = 1;
+					if (place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL) // fuel will leak
+					{
+						if (!client->fueltimer)
+							client->fueltimer = 1;
+					}
+
+					client->damaged = 1;
+					client->armor.points[place] = 0;
+					SendForceStatus((1 << place), 0, client);
+
+					if (!client->inuse || !client->infly) // drone killed
+					{
+						// depth--;
+						return 0;
+					}
 				}
-
-				client->damaged = 1;
-				client->armor.points[place] = 0;
-				SendForceStatus((1 << place), 0, client);
-
-				if (!client->inuse || !client->infly) // drone killed
+				else
 				{
-					// depth--;
-					return 0;
+					DebugClient(__FILE__, __LINE__, TRUE, client);
+					return;
 				}
 			}
 			else if (place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL && (dmgprobe - apabsorb)) // fuel is leaking
 			{
-				if (client->fueltimer && client->fueltimer > 1000)
+				if (!setjmp(debug_buffer))
 				{
-					client->damaged = 1;
-					
-					if (place == PLACE_LFUEL)
+					if (client->fueltimer && client->fueltimer > 1000)
 					{
-						client->armor.points[PLACE_LWING] = 0;
-						SendForceStatus((1 << PLACE_LWING), 0, client);
-					}
-					else if (place == PLACE_RFUEL)
-					{
-						client->armor.points[PLACE_RWING] = 0;
-						SendForceStatus((1 << PLACE_RWING), 0, client);
-					}
-					else if (place == PLACE_CENTERFUEL)
-					{
-						client->armor.points[PLACE_CENTERFUSE] = 0;
-						SendForceStatus((1 << PLACE_CENTERFUSE), 0, client);
-					}
+						client->damaged = 1;
+						
+						if (place == PLACE_LFUEL)
+						{
+							client->armor.points[PLACE_LWING] = 0;
+							SendForceStatus((1 << PLACE_LWING), 0, client);
+						}
+						else if (place == PLACE_RFUEL)
+						{
+							client->armor.points[PLACE_RWING] = 0;
+							SendForceStatus((1 << PLACE_RWING), 0, client);
+						}
+						else if (place == PLACE_CENTERFUEL)
+						{
+							client->armor.points[PLACE_CENTERFUSE] = 0;
+							SendForceStatus((1 << PLACE_CENTERFUSE), 0, client);
+						}
 
-					PPrintf(client, RADIO_YELLOW, "Your %s exploded", GetHitSite(place));
+						PPrintf(client, RADIO_YELLOW, "Your %s exploded", GetHitSite(place));
 
-					client->fueltimer = he = 0;
+						client->fueltimer = he = 0;
+					}
+				}
+				else
+				{
+					DebugClient(__FILE__, __LINE__, TRUE, client);
+					return;
 				}
 			}
 		}
 		else // hit damage part but not destroy it
 		{
-			client->armor.points[place] -= dmgprobe;
+			if (!setjmp(debug_buffer))
+			{
+				client->armor.points[place] -= dmgprobe;
 
+				if (gunstats->value)
+				{
+					if (he && phe)
+						sprintf(phe, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
+				}
+
+				he = 0;
+			}
+			else
+			{
+				DebugClient(__FILE__, __LINE__, TRUE, client);
+				return;
+			}
+		}
+
+		if (!setjmp(debug_buffer))
+		{
 			if (gunstats->value)
 			{
+				if (ap && pap)
+					sprintf(pap, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
+
 				if (he && phe)
 					sprintf(phe, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
 			}
-
-			he = 0;
+		}
+		else
+		{
+			DebugClient(__FILE__, __LINE__, TRUE, client);
+			return;
 		}
 
-		if (gunstats->value)
+		if (!setjmp(debug_buffer))
 		{
-			if (ap && pap)
-				sprintf(pap, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
-
-			if (he && phe)
-				sprintf(phe, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
-		}
-
-		if (he)
-		{
-			if (client->armor.parent[place] >= 0)
+			if (he)
 			{
-				if (client->armor.parent[place] >= MAX_PLACE)
-					BPrintf(RADIO_RED, "DEBUG: invalid parent %d, place %d", client->armor.parent[place], place);
-				else
+				if (client->armor.parent[place] >= 0)
 				{
-					if (gunstats->value)
-					{
-						if (phe)
-							AddPlaneDamage(client->armor.parent[place], he, 0, (phe + strlen(phe)), 0, client);
-					}
+					if (client->armor.parent[place] >= MAX_PLACE)
+						BPrintf(RADIO_RED, "DEBUG: invalid parent %d, place %d", client->armor.parent[place], place);
 					else
 					{
-						AddPlaneDamage(client->armor.parent[place], he, 0, NULL, NULL, client);
+						if (gunstats->value)
+						{
+							if (phe)
+								AddPlaneDamage(client->armor.parent[place], he, 0, (phe + strlen(phe)), 0, client);
+						}
+						else
+						{
+							AddPlaneDamage(client->armor.parent[place], he, 0, NULL, NULL, client);
+						}
 					}
 				}
 			}
-		}
 
-		ap -= apabsorb;
+			ap -= apabsorb;
+		}
+		else
+		{
+			DebugClient(__FILE__, __LINE__, TRUE, client);
+			return;
+		}
 	}
 	else
 	{
@@ -6925,7 +7017,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
  Calculate the rebuiding time
  *************/
 
-u_int32_t RebuildTime(building_t *building)
+float RebuildTime(building_t *building)
 {
 	static u_int8_t villages, towns, ports, posts;
 	static float const_v, const_t, const_por, const_pos;
@@ -6933,7 +7025,7 @@ u_int32_t RebuildTime(building_t *building)
 	float c_villages, c_towns, c_ports, c_posts;
 	u_int16_t total;
 	u_int8_t i;
-	u_int32_t rebuild;
+	float rebuild;
 	
 	if(!building)
 	{
@@ -6943,7 +7035,7 @@ u_int32_t RebuildTime(building_t *building)
 	
 	if(building->type >= BUILD_MAX)
 		return 0;
-	
+//	Com_Printf(VERBOSE_DEBUG, "RebuildTime(1)\n");
 	if(!calc)
 	{
 		villages = towns = ports = 0;
@@ -6961,14 +7053,22 @@ u_int32_t RebuildTime(building_t *building)
 		}
 		
 		total = ports * 9 + towns * 15 + villages * 3 + posts * 1;
-		const_v = 0.6 * villages * 3 / total;
-		const_t = 0.6 * towns * 15 / total;
-		const_por = 0.6 * ports * 9 / total;
-		const_pos = 0.6 * posts * 1 / total;
+		
+		if(total)
+		{
+			const_v = 0.6 * villages * 3 / total;
+			const_t = 0.6 * towns * 15 / total;
+			const_por = 0.6 * ports * 9 / total;
+			const_pos = 0.6 * posts * 1 / total;
+		}
+		else
+		{
+			Com_Printf(VERBOSE_DEBUG, "RebuildTime(total) == 0\n");
+		}
 		
 		calc = 1;
 	}
-	
+//	Com_Printf(VERBOSE_DEBUG, "RebuildTime(2)\n");
 	c_villages = c_towns = c_ports = 0;
 	
 	for(i = 0; i < fields->value; i++)
@@ -6985,10 +7085,10 @@ u_int32_t RebuildTime(building_t *building)
 				c_posts++;
 		}
 	}
-	
+//	Com_Printf(VERBOSE_DEBUG, "RebuildTime(3) Log %f, %f\n", Com_Log(GetBuildingArmor(building->type, NULL), 40), (1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0)));
 	rebuild = 6000 * rebuildtime->value * Com_Log(GetBuildingArmor(building->type, NULL), 40) *
 		(1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0));
-	
+//	Com_Printf(VERBOSE_DEBUG, "RebuildTime(4) rebuild %f\n", rebuild);
 	return rebuild;
 }
 
@@ -7015,16 +7115,17 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		if (client && (client->country == building->country) && !teamkillstructs->value)
 			return 0;
 	}
-
+//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(1)\n");
 	dmgprobe = GetBuildingAPstop(building->type, NULL);
 	apabsorb = (ap > dmgprobe) ? dmgprobe : ap;
 	dmgprobe = he + apabsorb;
 
 	if (dmgprobe <= (int32_t)GetBuildingImunity(building->type, NULL))
 		return 0;
-
+//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(2)\n");
 	if (building->type == BUILD_CARGO || building->type == BUILD_DESTROYER || building->type == BUILD_SUBMARINE)
 	{
+//		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(2.1)\n");
 		if (building->fieldtype >= FIELD_CARGO && building->fieldtype <= FIELD_SUBMARINE) // if is cargo, dd or submarine convoy
 		{
 			for (i = 0; i < MAX_BUILDINGS; i++)
@@ -7064,7 +7165,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 			}
 		}
 	}
-
+//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(3)\n");
 	if (!oldcapt->value /*ToT enabled*/ || IsVitalBuilding(building, oldcapt->value)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
 	{
 		if(oldcapt->value || (ap)) // this adds damage by bombs if oldcapt or by bullets if ToT enabled
@@ -7072,7 +7173,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 			AddFieldDamage(building->field-1, dmgprobe, client);
 		}
 	}
-
+//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(4)\n");
 	score = dmgprobe < building->armor ? dmgprobe : building->armor;
 	score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
 	
@@ -7087,9 +7188,11 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 			ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
 		}
 	}
-
+//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5) redindex %f, goldindex %f\n", arena->redindex, arena->goldindex);
+//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5)\n");
 	if ((int32_t)building->armor <= dmgprobe)
 	{
+//		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.1)\n");
 		if ((building->type == BUILD_FENCE) || (building->type == BUILD_ROCK) || (building->type == BUILD_TREE))
 		{
 			building->status = 2;
@@ -7098,29 +7201,34 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		{
 			building->status = 1;
 		}
-
+//		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.2)\n");
 		if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
 		{
+//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.3) type %d, id %d, status %d, armor %d, country %d, field %d, fieldtype %d\n", building->type, building->id, building->status, building->armor, building->country, building->field, building->fieldtype);
+//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.3.1) redindex %f, goldindex %f, rebuild %f, index %f, time %f\n", arena->redindex, arena->goldindex, RebuildTime(building), (building->country == COUNTRY_RED)?arena->redindex:arena->goldindex, (RebuildTime(building) / ((building->country == COUNTRY_RED)?arena->redindex:arena->goldindex)));
 			//armor = GetBuildingArmor(building->type, client);
-			building->timer = RebuildTime(building);//(u_int32_t) (Com_Log(dmgprobe, 17) * Com_Log(armor, 17) * (rebuildtime->value * 100)); // (double)((double)(armor + dmgprobe - building->armor)/(double)armor) * (double)(rebuildtime->value * 100);
+			building->timer = (int32_t)(RebuildTime(building) / ((building->country == COUNTRY_RED)?arena->redindex:arena->goldindex));//(u_int32_t) (Com_Log(dmgprobe, 17) * Com_Log(armor, 17) * (rebuildtime->value * 100)); // (double)((double)(armor + dmgprobe - building->armor)/(double)armor) * (double)(rebuildtime->value * 100);
 			//if (building->timer > (u_int32_t)(rebuildtime->value * 1200))
 			//	building->timer = (rebuildtime->value * 1200);
 			building->armor = 0;
+//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.4)\n");
 		}
 		else
 		{
+//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.5)\n");
 			building->armor = 0;
 			building->timer = arena->frame;
 		}
 
 		if (client && !client->drone)
 		{
+//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.6)\n");
 			Com_LogEvent(EVENT_KILLSTRUCT, client->id, 0);
 			Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
 			Com_LogDescription(EVENT_DESC_COUNTRY, building->country, NULL);
 			Com_LogDescription(EVENT_DESC_STRUCT, building->type, NULL);
 			Com_LogDescription(EVENT_DESC_FIELD, building->field, NULL);
-
+//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.7)\n");
 			if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 			{
 				if (client->country == building->country)
@@ -7163,7 +7271,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 					ScoresEvent(SCORE_STRUCTURE, client, (int32_t)(-1 * building->type));
 				}
 			}
-
+//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.8)\n");
 			if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
 			{
 				if (building->type >= BUILD_CV && building->type <= BUILD_CARGO)
@@ -7200,21 +7308,21 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 				Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at C%d\n", client->longnick, GetBuildingType(building->type), building->field);
 			}
 		}
-
+//		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.9)\n");
 		SetBuildingStatus(building, building->status, NULL);
 	}
 	else
 	{
 		building->armor -= dmgprobe;
 	}
-
+//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(6)\n");
 	// radio alert
 
 	if (((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST)) && !arena->fields[building->field - 1].alert)
 	{
 		arena->fields[building->field - 1].alert = arena->frame;
 	}
-
+//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(7)\n");
 	return 1;
 }
 

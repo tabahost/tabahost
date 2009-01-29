@@ -3168,6 +3168,8 @@ void ChangeArena(char *map, client_t *client)
 		UpdateIngameClients(0);
 		arena->numplayers = 0;
 		arena->numdrones = 0;
+		arena->goldindex = 1.0;
+		arena->redindex = 1.0;
 
 		// execute "map".cfg
 		Var_Get("fields", fields->string, VAR_ARCHIVE | VAR_ADMIN);
@@ -3661,7 +3663,7 @@ float GetTonnageToClose(u_int8_t field)
 
 		if(ttc_buf[arena->fields[field].type])
 		{
-			return ttc_buf[arena->fields[field].type];
+			return (ttc_buf[arena->fields[field].type] * (arena->fields[field].country == COUNTRY_RED)?arena->redindex:arena->goldindex);
 		}
 		else
 		{

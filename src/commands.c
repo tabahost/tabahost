@@ -2460,7 +2460,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 			
 			if(!oldcapt->value && wb3->value)
 			{
-				fprintf(fp, "     ToT     TTC\n------------------------------------------------------------------\n");
+				fprintf(fp, "    ToT      TTC\n------------------------------------------------------------------------\n");
 			}
 			else
 			{
