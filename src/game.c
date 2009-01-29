@@ -7115,214 +7115,262 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		if (client && (client->country == building->country) && !teamkillstructs->value)
 			return 0;
 	}
-//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(1)\n");
-	dmgprobe = GetBuildingAPstop(building->type, NULL);
-	apabsorb = (ap > dmgprobe) ? dmgprobe : ap;
-	dmgprobe = he + apabsorb;
 
-	if (dmgprobe <= (int32_t)GetBuildingImunity(building->type, NULL))
-		return 0;
-//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(2)\n");
-	if (building->type == BUILD_CARGO || building->type == BUILD_DESTROYER || building->type == BUILD_SUBMARINE)
+	if (!setjmp(debug_buffer))
 	{
-//		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(2.1)\n");
-		if (building->fieldtype >= FIELD_CARGO && building->fieldtype <= FIELD_SUBMARINE) // if is cargo, dd or submarine convoy
-		{
-			for (i = 0; i < MAX_BUILDINGS; i++)
-			{
-				if (arena->fields[building->field - 1].buildings[i].field)
-				{
-					if (arena->fields[building->field - 1].buildings[i].type == BUILD_CARGO || arena->fields[building->field - 1].buildings[i].type == BUILD_DESTROYER
-							|| arena->fields[building->field - 1].buildings[i].type == BUILD_SUBMARINE)
-					{ // found the 1st ship (that carries the number)
-						if (building == &(arena->fields[building->field - 1].buildings[i]))
-						{
-							for (i++; i < MAX_BUILDINGS; i++)
-							{
-								if (arena->fields[building->field - 1].buildings[i].field)
-								{
-									if (arena->fields[building->field - 1].buildings[i].type == BUILD_CARGO || arena->fields[building->field - 1].buildings[i].type == BUILD_DESTROYER
-											|| arena->fields[building->field - 1].buildings[i].type == BUILD_SUBMARINE)
-									{
-										if (!arena->fields[building->field - 1].buildings[i].status) // check if another ship is alive, so 1st ship cannot be sunk
-											return 0;
-									}
-								}
-								else
-								{
-									Com_Printf(VERBOSE_DEBUG, "Main Ship (%d) destroyed (F%d) by %s %s\n", building->id, building->field, client ? (client->drone ? "drone" : "player") : "-HOST-",
-											client ? client->longnick : "");
-									break;
-								}
-							}
-						}
-						else
-							break;
-					}
-				}
-				else
-					break;
-			}
-		}
-	}
-//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(3)\n");
-	if (!oldcapt->value /*ToT enabled*/ || IsVitalBuilding(building, oldcapt->value)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
-	{
-		if(oldcapt->value || (ap)) // this adds damage by bombs if oldcapt or by bullets if ToT enabled
-		{
-			AddFieldDamage(building->field-1, dmgprobe, client);
-		}
-	}
-//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(4)\n");
-	score = dmgprobe < building->armor ? dmgprobe : building->armor;
-	score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
-	
-	if(score && client)
-	{
-		if (client->country != building->country)
-		{
-			ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
-		}
-		else
-		{
-			ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
-		}
-	}
-//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5) redindex %f, goldindex %f\n", arena->redindex, arena->goldindex);
-//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5)\n");
-	if ((int32_t)building->armor <= dmgprobe)
-	{
-//		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.1)\n");
-		if ((building->type == BUILD_FENCE) || (building->type == BUILD_ROCK) || (building->type == BUILD_TREE))
-		{
-			building->status = 2;
-		}
-		else
-		{
-			building->status = 1;
-		}
-//		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.2)\n");
-		if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
-		{
-//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.3) type %d, id %d, status %d, armor %d, country %d, field %d, fieldtype %d\n", building->type, building->id, building->status, building->armor, building->country, building->field, building->fieldtype);
-//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.3.1) redindex %f, goldindex %f, rebuild %f, index %f, time %f\n", arena->redindex, arena->goldindex, RebuildTime(building), (building->country == COUNTRY_RED)?arena->redindex:arena->goldindex, (RebuildTime(building) / ((building->country == COUNTRY_RED)?arena->redindex:arena->goldindex)));
-			//armor = GetBuildingArmor(building->type, client);
-			building->timer = (int32_t)(RebuildTime(building) / ((building->country == COUNTRY_RED)?arena->redindex:arena->goldindex));//(u_int32_t) (Com_Log(dmgprobe, 17) * Com_Log(armor, 17) * (rebuildtime->value * 100)); // (double)((double)(armor + dmgprobe - building->armor)/(double)armor) * (double)(rebuildtime->value * 100);
-			//if (building->timer > (u_int32_t)(rebuildtime->value * 1200))
-			//	building->timer = (rebuildtime->value * 1200);
-			building->armor = 0;
-//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.4)\n");
-		}
-		else
-		{
-//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.5)\n");
-			building->armor = 0;
-			building->timer = arena->frame;
-		}
-
-		if (client && !client->drone)
-		{
-//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.6)\n");
-			Com_LogEvent(EVENT_KILLSTRUCT, client->id, 0);
-			Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
-			Com_LogDescription(EVENT_DESC_COUNTRY, building->country, NULL);
-			Com_LogDescription(EVENT_DESC_STRUCT, building->type, NULL);
-			Com_LogDescription(EVENT_DESC_FIELD, building->field, NULL);
-//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.7)\n");
-			if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
-			{
-				if (client->country == building->country)
-				{
-					//debug
-					if (building->country != arena->fields[building->field - 1].country)
-						Com_Printf(VERBOSE_DEBUG, "structure at field %d differ country value (b%d;f%d;p%d)\n", building->field, building->country, arena->fields[building->field - 1].country, client->country);
-	
-					client->structstod--;
-	
-					CPrintf(client->country, 
-					RADIO_GREEN, "ALERT!!! ALERT!!! %s destroyed friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
-							building->field);
-	
-					if (!client->tkstatus) // if player is not TK yet, increase tklimit
-					{
-						if (teamkiller->value)
-							client->tklimit++;
-					}
-	
-					if (client->tklimit > 5)
-					{
-						if (!client->tkstatus)
-							Cmd_TK(client->longnick, TRUE, NULL);
-						else
-							; // TODO: FIXME: BAN CLIENT UNTIL END OF TOD
-					}
-				}
-				else
-				{
-					client->structstod++;
-				}
-
-				if (client->country != building->country)
-				{
-					ScoresEvent(SCORE_STRUCTURE, client, building->type);
-				}
-				else
-				{
-					ScoresEvent(SCORE_STRUCTURE, client, (int32_t)(-1 * building->type));
-				}
-			}
-//			Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.8)\n");
-			if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
-			{
-				if (building->type >= BUILD_CV && building->type <= BUILD_CARGO)
-				{
-					SinkBoat(FALSE, building, NULL);
-					PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
-
-					Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
-				}
-				else if (IsVitalBuilding(building, oldcapt->value))
-				{
-					PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s", GetBuildingType(building->type), Com_TimeSeconds(building->timer/100));
-
-					Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d for %s\n", client->longnick, GetBuildingType(building->type), building->field, Com_TimeSeconds(building->timer /100));
-				}
-
-				if (!arcade->value)
-				{
-					if (building->type == BUILD_HANGAR)
-					{
-						ReducePlanes(building->field);
-					}
-					else if (building->type == BUILD_WARE)
-					{
-						arena->fields[building->field - 1].warehouse = arena->frame;
-						// IncreaseAcksReup(building->field); // obsolete
-					}
-				}
-			}
-			else
-			{
-				factorybuildingsup[building->country - 1]--;
-				PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
-				Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at C%d\n", client->longnick, GetBuildingType(building->type), building->field);
-			}
-		}
-//		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(5.9)\n");
-		SetBuildingStatus(building, building->status, NULL);
+		dmgprobe = GetBuildingAPstop(building->type, NULL);
+		apabsorb = (ap > dmgprobe) ? dmgprobe : ap;
+		dmgprobe = he + apabsorb;
 	}
 	else
 	{
-		building->armor -= dmgprobe;
+		DebugArena(__FILE__, __LINE__);
 	}
-//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(6)\n");
+
+	if (!setjmp(debug_buffer))
+	{
+		if (dmgprobe <= (int32_t)GetBuildingImunity(building->type, NULL))
+			return 0;
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
+	}
+
+	if (!setjmp(debug_buffer))
+	{
+		if (building->type == BUILD_CARGO || building->type == BUILD_DESTROYER || building->type == BUILD_SUBMARINE)
+		{
+			if (building->fieldtype >= FIELD_CARGO && building->fieldtype <= FIELD_SUBMARINE) // if is cargo, dd or submarine convoy
+			{
+				for (i = 0; i < MAX_BUILDINGS; i++)
+				{
+					if (arena->fields[building->field - 1].buildings[i].field)
+					{
+						if (arena->fields[building->field - 1].buildings[i].type == BUILD_CARGO || arena->fields[building->field - 1].buildings[i].type == BUILD_DESTROYER
+								|| arena->fields[building->field - 1].buildings[i].type == BUILD_SUBMARINE)
+						{ // found the 1st ship (that carries the number)
+							if (building == &(arena->fields[building->field - 1].buildings[i]))
+							{
+								for (i++; i < MAX_BUILDINGS; i++)
+								{
+									if (arena->fields[building->field - 1].buildings[i].field)
+									{
+										if (arena->fields[building->field - 1].buildings[i].type == BUILD_CARGO || arena->fields[building->field - 1].buildings[i].type == BUILD_DESTROYER
+												|| arena->fields[building->field - 1].buildings[i].type == BUILD_SUBMARINE)
+										{
+											if (!arena->fields[building->field - 1].buildings[i].status) // check if another ship is alive, so 1st ship cannot be sunk
+												return 0;
+										}
+									}
+									else
+									{
+										Com_Printf(VERBOSE_DEBUG, "Main Ship (%d) destroyed (F%d) by %s %s\n", building->id, building->field, client ? (client->drone ? "drone" : "player") : "-HOST-",
+												client ? client->longnick : "");
+										break;
+									}
+								}
+							}
+							else
+								break;
+						}
+					}
+					else
+						break;
+				}
+			}
+		}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
+	}
+
+	if (!setjmp(debug_buffer))
+	{
+		if (!oldcapt->value /*ToT enabled*/ || IsVitalBuilding(building, oldcapt->value)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
+		{
+			if(oldcapt->value || (ap)) // this adds damage by bombs if oldcapt or by bullets if ToT enabled
+			{
+				AddFieldDamage(building->field-1, dmgprobe, client);
+			}
+		}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
+	}
+	
+	if (!setjmp(debug_buffer))
+	{
+		score = dmgprobe < building->armor ? dmgprobe : building->armor;
+		score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
+	}
+	
+	if (!setjmp(debug_buffer))
+	{
+		if(score && client)
+		{
+			if (client->country != building->country)
+			{
+				ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
+			}
+			else
+			{
+				ScoresEvent(SCORE_STRUCTDAMAGE, client, -1 * score);
+			}
+		}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
+	}
+
+
+	if (!setjmp(debug_buffer))
+	{
+		if ((int32_t)building->armor <= dmgprobe)
+		{
+			if ((building->type == BUILD_FENCE) || (building->type == BUILD_ROCK) || (building->type == BUILD_TREE))
+			{
+				building->status = 2;
+			}
+			else
+			{
+				building->status = 1;
+			}
+
+			if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
+			{
+				//armor = GetBuildingArmor(building->type, client);
+				building->timer = (int32_t)(RebuildTime(building) / ((building->country == COUNTRY_RED)?arena->redindex:arena->goldindex));//(u_int32_t) (Com_Log(dmgprobe, 17) * Com_Log(armor, 17) * (rebuildtime->value * 100)); // (double)((double)(armor + dmgprobe - building->armor)/(double)armor) * (double)(rebuildtime->value * 100);
+				//if (building->timer > (u_int32_t)(rebuildtime->value * 1200))
+				//	building->timer = (rebuildtime->value * 1200);
+				building->armor = 0;
+			}
+			else
+			{
+				building->armor = 0;
+				building->timer = arena->frame;
+			}
+	
+			if (client && !client->drone)
+			{
+				Com_LogEvent(EVENT_KILLSTRUCT, client->id, 0);
+				Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
+				Com_LogDescription(EVENT_DESC_COUNTRY, building->country, NULL);
+				Com_LogDescription(EVENT_DESC_STRUCT, building->type, NULL);
+				Com_LogDescription(EVENT_DESC_FIELD, building->field, NULL);
+
+				if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
+				{
+					if (client->country == building->country)
+					{
+						//debug
+						if (building->country != arena->fields[building->field - 1].country)
+							Com_Printf(VERBOSE_DEBUG, "structure at field %d differ country value (b%d;f%d;p%d)\n", building->field, building->country, arena->fields[building->field - 1].country, client->country);
+		
+						client->structstod--;
+		
+						CPrintf(client->country, 
+						RADIO_GREEN, "ALERT!!! ALERT!!! %s destroyed friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
+								building->field);
+		
+						if (!client->tkstatus) // if player is not TK yet, increase tklimit
+						{
+							if (teamkiller->value)
+								client->tklimit++;
+						}
+		
+						if (client->tklimit > 5)
+						{
+							if (!client->tkstatus)
+								Cmd_TK(client->longnick, TRUE, NULL);
+							else
+								; // TODO: FIXME: BAN CLIENT UNTIL END OF TOD
+						}
+					}
+					else
+					{
+						client->structstod++;
+					}
+	
+					if (client->country != building->country)
+					{
+						ScoresEvent(SCORE_STRUCTURE, client, building->type);
+					}
+					else
+					{
+						ScoresEvent(SCORE_STRUCTURE, client, (int32_t)(-1 * building->type));
+					}
+				}
+
+				if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
+				{
+					if (building->type >= BUILD_CV && building->type <= BUILD_CARGO)
+					{
+						SinkBoat(FALSE, building, NULL);
+						PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
+	
+						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
+					}
+					else if (IsVitalBuilding(building, oldcapt->value))
+					{
+						PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s", GetBuildingType(building->type), Com_TimeSeconds(building->timer/100));
+	
+						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d for %s\n", client->longnick, GetBuildingType(building->type), building->field, Com_TimeSeconds(building->timer /100));
+					}
+	
+					if (!arcade->value)
+					{
+						if (building->type == BUILD_HANGAR)
+						{
+							ReducePlanes(building->field);
+						}
+						else if (building->type == BUILD_WARE)
+						{
+							arena->fields[building->field - 1].warehouse = arena->frame;
+							// IncreaseAcksReup(building->field); // obsolete
+						}
+					}
+				}
+				else
+				{
+					factorybuildingsup[building->country - 1]--;
+					PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
+					Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at C%d\n", client->longnick, GetBuildingType(building->type), building->field);
+				}
+			}
+
+			SetBuildingStatus(building, building->status, NULL);
+		}
+		else
+		{
+			building->armor -= dmgprobe;
+		}
+	}
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
+	}
 	// radio alert
 
-	if (((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST)) && !arena->fields[building->field - 1].alert)
+	if (!setjmp(debug_buffer))
 	{
-		arena->fields[building->field - 1].alert = arena->frame;
+		if (((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST)) && !arena->fields[building->field - 1].alert)
+		{
+			arena->fields[building->field - 1].alert = arena->frame;
+		}
 	}
-//	Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage(7)\n");
+	else
+	{
+		DebugArena(__FILE__, __LINE__);
+	}
+
 	return 1;
 }
 

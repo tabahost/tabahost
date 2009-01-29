@@ -2456,20 +2456,20 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		}
 		else
 		{
-			fprintf(fp, "FIELD   COUNTRY     TYPE    STATUS      UP      PARAS");
+			fprintf(fp, "FIELD   SIDE    TYPE   STATUS   UP   PARAS");
 			
 			if(!oldcapt->value && wb3->value)
 			{
-				fprintf(fp, "    ToT      TTC\n------------------------------------------------------------------------\n");
+				fprintf(fp, "   ToT   TTC\n-------------------------------------------------------\n");
 			}
 			else
 			{
-				fprintf(fp, "\n-------------------------------------------------\n");
+				fprintf(fp, "\n--------------------------------------------\n");
 			}
 
 			for(i = 0; i < fields->value; i++)
 			{
-				fprintf(fp, "F%d%s%12s%9s", i+1, i < 9 ? " " :"", GetCountry(arena->fields[i].country), GetFieldType(arena->fields[i].type));
+				fprintf(fp, "F%d%s%9s%9s", i+1, i < 9 ? " " :"", GetCountry(arena->fields[i].country), GetFieldType(arena->fields[i].type));
 
 				if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 				{
@@ -2480,7 +2480,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				}
 				else
 				{
-					fprintf(fp, "%10s", arena->fields[i].closed ? "Closed" : "Open");
+					fprintf(fp, "%8s", arena->fields[i].closed ? "Closed" : "Open");
 				}
 				
 				build_total = build_alive = 0;
@@ -2498,12 +2498,12 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					}
 				}
 
-				fprintf(fp, "   %6.2f%%%5d/%02d", (float)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
+				fprintf(fp, "%5.0f%%%4d/%02d", (float)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
 				//fprintf(fp, "%s", buffer);
 
 				if(!oldcapt->value && wb3->value)
 				{
-					fprintf(fp, "  %8.2f  %8.2f\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
+					fprintf(fp, "%6.0f%6.0f\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
 				}
 				else
 				{
