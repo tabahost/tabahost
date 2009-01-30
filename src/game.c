@@ -380,6 +380,12 @@ void CheckArenaRules(void)
 					{
 						if (arena->fields[i].buildings[j].status)
 						{
+							if(arena->fields[i].buildings[j].timer > 360000) // 1 hour
+							{
+								Com_Printf(VERBOSE_DEBUG, "bugged building timer %d, set to 15min\n", arena->fields[i].buildings[j].timer);
+								arena->fields[i].buildings[j].timer = 90000;
+							}
+							
 							if (arena->fields[i].buildings[j].type < BUILD_CV || arena->fields[i].buildings[j].type > BUILD_SUBMARINE)
 								arena->fields[i].buildings[j].timer--;
 		
@@ -412,6 +418,8 @@ void CheckArenaRules(void)
 							//						SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status);
 							//					}
 						}
+						else
+							arena->fields[i].buildings[j].timer = 0;
 					}
 					else
 						break;
@@ -772,6 +780,7 @@ void CheckArenaRules(void)
 				close = 1;
 				vitals = arena->fields[i].vitals;
 				arena->fields[i].vitals = 0;
+				
 				for (j = 0; j < MAX_BUILDINGS; j++)
 				{
 					if (arena->fields[i].buildings[j].field)
@@ -806,12 +815,24 @@ void CheckArenaRules(void)
 				{
 					arena->fields[i].closed = 1;
 					BPrintf(RADIO_YELLOW, "Field %d closed", i+1);
+					
+					Com_Printf(VERBOSE_DEBUG, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
+					for (j = 0; j < MAX_BUILDINGS; j++)
+					{
+						if (arena->fields[i].buildings[j].field)
+						{
+							Com_Printf(VERBOSE_DEBUG, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
+						}
+						else
+							break;
+					}
 
 					for (j = 0; j < MAX_BUILDINGS; j++)
 					{
 						if (arena->fields[i].buildings[j].field)
 						{
-							arena->fields[i].buildings[j].timer += 60000;
+							if(arena->fields[i].buildings[j].status)
+								arena->fields[i].buildings[j].timer += 60000;
 						}
 						else
 							break;
@@ -819,6 +840,17 @@ void CheckArenaRules(void)
 				}
 				else if (arena->fields[i].closed && !close)
 				{
+					Com_Printf(VERBOSE_DEBUG, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
+					for (j = 0; j < MAX_BUILDINGS; j++)
+					{
+						if (arena->fields[i].buildings[j].field)
+						{
+							Com_Printf(VERBOSE_DEBUG, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
+						}
+						else
+							break;
+					}
+					
 					for (j = 0; j < MAX_CITYFIELD; j++)
 					{
 						if (arena->fields[i].city[j] && arena->fields[i].city[j]->needtoclose)
@@ -7035,7 +7067,7 @@ float RebuildTime(building_t *building)
 	
 	if(building->type >= BUILD_MAX)
 		return 0;
-//	Com_Printf(VERBOSE_DEBUG, "RebuildTime(1)\n");
+
 	if(!calc)
 	{
 		villages = towns = ports = 0;
@@ -7068,8 +7100,8 @@ float RebuildTime(building_t *building)
 		
 		calc = 1;
 	}
-//	Com_Printf(VERBOSE_DEBUG, "RebuildTime(2)\n");
-	c_villages = c_towns = c_ports = 0;
+
+	c_posts = c_villages = c_towns = c_ports = 0;
 	
 	for(i = 0; i < fields->value; i++)
 	{
@@ -7085,10 +7117,18 @@ float RebuildTime(building_t *building)
 				c_posts++;
 		}
 	}
-//	Com_Printf(VERBOSE_DEBUG, "RebuildTime(3) Log %f, %f\n", Com_Log(GetBuildingArmor(building->type, NULL), 40), (1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0)));
+
 	rebuild = 6000 * rebuildtime->value * Com_Log(GetBuildingArmor(building->type, NULL), 40) *
 		(1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0));
-//	Com_Printf(VERBOSE_DEBUG, "RebuildTime(4) rebuild %f\n", rebuild);
+
+	if(rebuild < 10000 /*10 seconds*/|| rebuild > 360000 /*50min*/)
+	{
+		Com_Printf(VERBOSE_DEBUG, "RebuildTime(rebuild) rebuild error %d\n", rebuild);
+		Com_Printf(VERBOSE_DEBUG, "RebuildTime(rebuild) post: %d, %f, %f, port: %d, %f, %f, village: %d, %f, %f, town: %d, %f, %f\n", posts, const_pos, c_posts, ports, const_por, c_ports, villages, const_v, c_villages, towns, const_t, c_towns);
+		Com_Printf(VERBOSE_DEBUG, "RebuildTime(rebuild) %f, Log %f, %f\n", rebuildtime->value, Com_Log(GetBuildingArmor(building->type, NULL), 40), (1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0)));
+		rebuild = 90000; // 15min
+	}
+	
 	return rebuild;
 }
 
