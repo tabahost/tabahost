@@ -3615,6 +3615,7 @@ u_int8_t GetFieldParas(u_int8_t type)
 float GetTonnageToClose(u_int8_t field)
 {
 	static float ttc_buf[MAX_FIELDTYPE];
+
 	u_int16_t i;
 
 	if(!field)
@@ -3657,13 +3658,20 @@ float GetTonnageToClose(u_int8_t field)
 				ttc_buf[arena->fields[field].type] += GetBuildingArmor(arena->fields[field].buildings[i].type, NULL);
 			}
 		}
+		
+		switch(arena->fields[field].type)
+		{
+			case FIELD_WB3TOWN:
+				ttc_buf[arena->fields[field].type] *= 0.6; // adjust for difficult town
+				break;
+		}
 
 		ttc_buf[arena->fields[field].type] *= ttc->value;
 		ttc_buf[arena->fields[field].type] /= 50; // converts armor to kg
 
 		if(ttc_buf[arena->fields[field].type])
 		{
-			return (ttc_buf[arena->fields[field].type] * (arena->fields[field].country == COUNTRY_RED)?arena->redindex:arena->goldindex);
+			return (ttc_buf[arena->fields[field].type] * ((arena->fields[field].country == COUNTRY_RED)?arena->redindex:arena->goldindex));
 		}
 		else
 		{
@@ -3672,52 +3680,6 @@ float GetTonnageToClose(u_int8_t field)
 		}
 
 	}
-/*
-	switch(fieldtype)
-	{
-		case FIELD_LITTLE:
-			return 4000;
-		case FIELD_MEDIUM:
-			return 4000;
-		case FIELD_MAIN:
-			return 6000;
-		case FIELD_CV:
-			return 4000;
-		case FIELD_CARGO:
-			return 1000;
-		case FIELD_DD:
-			return 1000;
-		case FIELD_SUBMARINE:
-			return 1000;
-		case FIELD_RADAR:
-			return 1000;
-		case FIELD_BRIDGE:
-			return 1000;
-		case FIELD_CITY:
-			return 6000;
-		case FIELD_PORT:
-			return 6000;
-		case FIELD_CONVOY:
-			return 4000;
-		case FIELD_FACTORY:
-			return 1000;
-		case FIELD_REFINERY:
-			return 1000;
-		case FIELD_OPENFIELD:
-			return 2000;
-		case FIELD_WB3POST:
-			return 1000;
-		case FIELD_WB3VILLAGE:
-			return 4000;
-		case FIELD_WB3TOWN:
-			return 6000;
-		case FIELD_WB3PORT:
-			return 6000;
-		default:
-			Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() Invalid Field Type %d\n", fieldtype);
-			return 0;
-	}
-*/
 }
 
 int32_t GetFieldRadius(u_int8_t fieldtype)
