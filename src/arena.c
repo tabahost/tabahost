@@ -3919,77 +3919,85 @@ void GetTriangleUnder(int32_t x, int32_t y, int32_t *resx, int32_t *resy)
 /* calculating the z of earth in [x, y] */
 u_int32_t GetHeightAt(int32_t x, int32_t y)
 {
-	int32_t tx[3], ty[3], tz[3];
-//	u_int32_t dist;
-	double dx1, dy1, dz1, dx2, dy2, dz2;
-	double a, b, c, z;
-
-	GetTriangleUnder(x, y, tx, ty);
-
-	tz[0] = CalcHeight(tx[0], ty[0]);
-	tx[0] = INDEX2X(tx[0]);
-	ty[0] = INDEX2Y(ty[0]);
-	tz[1] = CalcHeight(tx[1], ty[1]);
-	tx[1] = INDEX2X(tx[1]);
-	ty[1] = INDEX2Y(ty[1]);
-	tz[2] = CalcHeight(tx[2], ty[2]);
-	tx[2] = INDEX2X(tx[2]);
-	ty[2] = INDEX2Y(ty[2]);
-
-	dx1 = tx[1] - tx[0];
-	dy1 = ty[1] - ty[0];
-	dz1 = tz[1] - tz[0];
-	dx2 = tx[2] - tx[0];
-	dy2 = ty[2] - ty[0];
-	dz2 = tz[2] - tz[0];
-
-	a = dy1*dz2 - dz1*dy2;
-	b = dx1*dz2 - dz1*dx2;
-	c = dx1*dy2 - dy1*dx2;
-
-	if (c > -0.5 && c < 0.5)
+	if (!setjmp(debug_buffer))
 	{
-		dx1 = tx[0] - tx[1];
-		dy1 = ty[0] - ty[1];
-		dz1 = tz[0] - tz[1];
-		dx2 = tx[2] - tx[1];
-		dy2 = ty[2] - ty[1];
-		dz2 = tz[2] - tz[1];
+		int32_t tx[3], ty[3], tz[3];
+	//	u_int32_t dist;
+		double dx1, dy1, dz1, dx2, dy2, dz2;
+		double a, b, c, z;
+
+		GetTriangleUnder(x, y, tx, ty);
+
+		tz[0] = CalcHeight(tx[0], ty[0]);
+		tx[0] = INDEX2X(tx[0]);
+		ty[0] = INDEX2Y(ty[0]);
+		tz[1] = CalcHeight(tx[1], ty[1]);
+		tx[1] = INDEX2X(tx[1]);
+		ty[1] = INDEX2Y(ty[1]);
+		tz[2] = CalcHeight(tx[2], ty[2]);
+		tx[2] = INDEX2X(tx[2]);
+		ty[2] = INDEX2Y(ty[2]);
+
+		dx1 = tx[1] - tx[0];
+		dy1 = ty[1] - ty[0];
+		dz1 = tz[1] - tz[0];
+		dx2 = tx[2] - tx[0];
+		dy2 = ty[2] - ty[0];
+		dz2 = tz[2] - tz[0];
 
 		a = dy1*dz2 - dz1*dy2;
 		b = dx1*dz2 - dz1*dx2;
 		c = dx1*dy2 - dy1*dx2;
 
-		if (c == 0)
-			z = tz[0];
+		if (c > -0.5 && c < 0.5)
+		{
+			dx1 = tx[0] - tx[1];
+			dy1 = ty[0] - ty[1];
+			dz1 = tz[0] - tz[1];
+			dx2 = tx[2] - tx[1];
+			dy2 = ty[2] - ty[1];
+			dz2 = tz[2] - tz[1];
+
+			a = dy1*dz2 - dz1*dy2;
+			b = dx1*dz2 - dz1*dx2;
+			c = dx1*dy2 - dy1*dx2;
+
+			if (c == 0)
+				z = tz[0];
+			else
+				z = tz[1] - (a * (x - tx[1]) - b * (y - ty[1])) / c;
+		}
 		else
-			z = tz[1] - (a * (x - tx[1]) - b * (y - ty[1])) / c;
+		{
+			z = tz[0] - (a * (x - tx[0]) - b * (y - ty[0])) / c;
+		}
+
+	//	if (z > 0)
+	//	{
+			return (u_int32_t)(z > 0 ? z : 0);
+	//	}
+	//	else
+	//	{
+	//		tx[0] = NearestField(x, y, 0, TRUE, TRUE, &dist);
+	//
+	//		if (tx[0] < 0)
+	//		{
+	//			z = 0;
+	//		}
+	//		else
+	//		{
+	//			Com_Printf(VERBOSE_DEBUG, "GetHeightAt() got no topography information\n");
+	//			z = arena->fields[tx[0]].posxyz[2];
+	//		}
+	//
+	//		return z;
+	//	}
 	}
 	else
 	{
-		z = tz[0] - (a * (x - tx[0]) - b * (y - ty[0])) / c;
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
+		return 0;
 	}
-
-//	if (z > 0)
-//	{
-		return (u_int32_t)(z > 0 ? z : 0);
-//	}
-//	else
-//	{
-//		tx[0] = NearestField(x, y, 0, TRUE, TRUE, &dist);
-//
-//		if (tx[0] < 0)
-//		{
-//			z = 0;
-//		}
-//		else
-//		{
-//			Com_Printf(VERBOSE_DEBUG, "GetHeightAt() got no topography information\n");
-//			z = arena->fields[tx[0]].posxyz[2];
-//		}
-//
-//		return z;
-//	}
 }
 
 /* loading map */

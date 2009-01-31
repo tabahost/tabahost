@@ -66,6 +66,7 @@ void AddClient(int socket, struct sockaddr_in *cli_addr)
 			clients[i].field = 1;
 			clients[i].plane = 1;
 			clients[i].fuel = 50;
+			clients[i].rain = 1;
 			clients[i].ord = 0;
 			clients[i].conv = 300;
 			clients[i].squadron = 0;
@@ -214,6 +215,12 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 	time_t ltime;
 	u_int16_t len, i;
 	FILE *fp;
+
+	if(!client)
+	{
+		DebugArena(file, line);
+		return;
+	}
 
 	memset(filename, 0, sizeof(filename));
 
@@ -461,7 +468,12 @@ int ProcessClient(client_t *client)
 					if(!((arena->frame - client->frame) % 30000))
 					{
 						if(!metar->value)
-						WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
+						{
+							if((weather->value == 2) && !client->rain)
+								WB3DotCommand(client, ".weather 0"); // cloudy
+							else
+								WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
+						}
 						WB3DotCommand(client, ".clutterdistance 8500");
 					}
 
@@ -1669,37 +1681,39 @@ int8_t AddKiller(client_t *victim, client_t *client)
 
 	found = empty = -1;
 
-
-	for (i = 0; i < MAX_HITBY; i++)
+	if(client && victim)
 	{
-		if (victim->hitby[i])
+		for (i = 0; i < MAX_HITBY; i++)
 		{
-			if (victim->hitby[i] == client && victim->hitby[i]->inuse)
-				found = i;
-
-			if (!victim->hitby[i]->inuse) // player had disconnected
+			if (victim->hitby[i])
 			{
-				victim->hitby[i] = NULL; // remove disconnected players
-				victim->damby[i] = 0;
-				victim->planeby[i] = 0;
+				if (victim->hitby[i] == client && victim->hitby[i]->inuse)
+					found = i;
+
+				if (!victim->hitby[i]->inuse) // player had disconnected
+				{
+					victim->hitby[i] = NULL; // remove disconnected players
+					victim->damby[i] = 0;
+					victim->planeby[i] = 0;
+					empty = i;
+				}
+			}
+			else
+			{
 				empty = i;
 			}
 		}
-		else
-		{
-			empty = i;
-		}
-	}
 
-	if (!(found < 0)) // if found, update killer plane
-	{
-		victim->planeby[found] = client->attached ? client->attached->plane : client->plane;
-	}
-	else if (!(empty < 0)) // if not found, add to array if slot available
-	{
-		victim->hitby[empty] = client;
-		victim->planeby[empty] = client->attached ? client->attached->plane : client->plane;
-		found = empty;
+		if (!(found < 0)) // if found, update killer plane
+		{
+			victim->planeby[found] = client->attached ? client->attached->plane : client->plane;
+		}
+		else if (!(empty < 0)) // if not found, add to array if slot available
+		{
+			victim->hitby[empty] = client;
+			victim->planeby[empty] = client->attached ? client->attached->plane : client->plane;
+			found = empty;
+		}
 	}
 
 	return found;

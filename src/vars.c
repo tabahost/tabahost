@@ -513,7 +513,10 @@ void CheckVars(void)
 						arena->thaisent[clients[i].thai].b = 1;
 				}
 
-				WB3DotCommand(&clients[i], ".weather %u", (u_int8_t)weather->value);
+				if((weather->value == 2) && !clients[i].rain)
+					WB3DotCommand(&clients[i], ".weather 0"); // cloudy
+				else
+					WB3DotCommand(&clients[i], ".weather %u", (u_int8_t)weather->value);
 			}
 		}
 	}

@@ -241,7 +241,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 
 		/*		} while ((u_int8_t)time < sync); // server fps = 100 // change: (int32_t) time
@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 
 		if(!setjmp(debug_buffer))
@@ -315,7 +315,7 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 
 		UpdateLocalArenaslist();
@@ -466,7 +466,7 @@ void RunFrame(void)
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
 	}
 
 	if(server_speeds->value)

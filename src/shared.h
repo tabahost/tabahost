@@ -815,6 +815,7 @@ typedef struct client_s
 	u_int32_t	countrytime;	// time untill can change country (centiseconds)
 	u_int8_t	gunstat;		// enable gunstats printing
 	u_int8_t	ord;			// ordinance
+	u_int8_t	rain;			// enable or disable rain
 	u_int8_t	easymode;		// easy mode
 	int32_t		obradar;		// plane have onboard radar (value == range)
 	u_int8_t	mortars;		// how many mortars user have to fire from plane

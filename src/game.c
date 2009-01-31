@@ -333,7 +333,7 @@ void CheckArenaRules(void)
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
 	}
 
 	// buildings tick
@@ -463,7 +463,7 @@ void CheckArenaRules(void)
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
 	}
 
 	// weather
@@ -478,7 +478,7 @@ void CheckArenaRules(void)
 			}
 			else
 			{
-				DebugArena(__FILE__, __LINE__);
+				DebugClient(__FILE__, __LINE__, TRUE, NULL);
 			}
 		}
 	}
@@ -521,7 +521,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 
@@ -646,7 +646,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 
@@ -658,7 +658,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 
@@ -678,7 +678,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 
@@ -935,7 +935,7 @@ void CheckArenaRules(void)
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
 	}
 
 	// CV tick
@@ -1089,7 +1089,7 @@ void CheckArenaRules(void)
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
 	}
 
 	// RPS Tick
@@ -1104,7 +1104,7 @@ void CheckArenaRules(void)
 			}
 			else
 			{
-				DebugArena(__FILE__, __LINE__);
+				DebugClient(__FILE__, __LINE__, TRUE, NULL);
 			}
 		}
 	}
@@ -1119,7 +1119,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 
@@ -1200,7 +1200,7 @@ void CheckArenaRules(void)
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
 	}
 
 	// Tatical drones tick
@@ -1257,7 +1257,7 @@ void CheckArenaRules(void)
 			}
 			else
 			{
-				DebugArena(__FILE__, __LINE__);
+				DebugClient(__FILE__, __LINE__, TRUE, NULL);
 			}
 		}
 	}
@@ -1272,7 +1272,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 
@@ -1293,7 +1293,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 
@@ -1322,7 +1322,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 
@@ -1337,7 +1337,7 @@ void CheckArenaRules(void)
 		}
 		else
 		{
-			DebugArena(__FILE__, __LINE__);
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 }
@@ -1595,6 +1595,22 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				PPrintf(client, RADIO_YELLOW, "Current ordinance: %u", client->ord);
 				PPrintf(client, RADIO_YELLOW, "usage: .ord <number>");
+			}
+			return;
+		}
+		else if (!Com_Stricmp(command, "rain"))
+		{
+			if(client->rain)
+			{
+				PPrintf(client, RADIO_YELLOW, "Rain disabled");
+				Com_Printf(VERBOSE_ATTENTION, "%s disabled rain\n", client->longnick);
+				client->rain = 0;
+			}
+			else
+			{
+				PPrintf(client, RADIO_YELLOW, "Rain enabled");
+				Com_Printf(VERBOSE_ATTENTION, "%s enabled rain\n", client->longnick);
+				client->rain = 1;
 			}
 			return;
 		}
@@ -3768,7 +3784,10 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						WB3SendGruntConfig(client);
 						//					WB3SendArenaFlags3(client);
 						WB3ArenaConfig2(client);
-						WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
+						if((weather->value == 2) && !client->rain)
+							WB3DotCommand(client, ".weather 0"); // cloudy
+						else
+							WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
 						WB3DotCommand(client, ".date %u %u %u", arena->month, arena->day, arena->year);
 						WB3NWAttachSlot(client);
 					}
@@ -6875,6 +6894,11 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 	//		depth--;
 	//		return 0;
 	//	}
+	if(!client)
+	{
+		Com_Printf(VERBOSE_DEBUG, "AddPlaneDamage(client) == NULL\n");
+		return 0;
+	}
 
 	if (place >= MAX_PLACE)
 	{
@@ -6891,7 +6915,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 	else
 	{
 		DebugClient(__FILE__, __LINE__, TRUE, client);
-		return;
+		return 0;
 	}
 
 	if (dmgprobe > client->armor.imunity[place]) // hit makes damage
@@ -7164,7 +7188,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
 	if (!setjmp(debug_buffer))
@@ -7174,7 +7198,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
 	if (!setjmp(debug_buffer))
@@ -7223,7 +7247,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
 	if (!setjmp(debug_buffer))
@@ -7238,7 +7262,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 	
 	if (!setjmp(debug_buffer))
@@ -7248,7 +7272,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 	
 	if (!setjmp(debug_buffer))
@@ -7267,7 +7291,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
 
@@ -7395,7 +7419,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 	// radio alert
 
@@ -7408,7 +7432,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
 	return 1;

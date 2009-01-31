@@ -347,7 +347,7 @@ int ProcessDrone(client_t *drone)
 
 	if (drone->bugged)
 	{
-		BPrintf(RADIO_YELLOW, "%s bugged, and will be kicked", drone->longnick);
+		BPrintf(RADIO_YELLOW, "Drone %s bugged, and will be removed", drone->longnick);
 		return -1;
 	}
 
@@ -1561,7 +1561,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 	
 	if (!setjmp(debug_buffer))
@@ -1628,7 +1628,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 									}
 									else
 									{
-										DebugArena(__FILE__, __LINE__);
+										DebugClient(__FILE__, __LINE__, TRUE, client);
 									}
 
 									if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE && damaged)
@@ -1680,7 +1680,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 									}
 									else
 									{
-										DebugArena(__FILE__, __LINE__);
+										DebugClient(__FILE__, __LINE__, TRUE, client);
 									}
 									j++;
 								}
@@ -1693,7 +1693,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
 	if (!setjmp(debug_buffer))
@@ -1716,15 +1716,29 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 					{
 						if ((clients[i].posalt[0] - GetHeightAt(clients[i].posxy[0][0], clients[i].posxy[1][0])) < radius)
 						{
-							if (!(clients[i].drone && clients[i].related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+							if (!setjmp(debug_buffer))
 							{
-								killer = AddKiller(&clients[i], client);
-	
-								if (killer >= 0 && killer < MAX_HITBY)
-									clients[i].damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)munition->he / (float)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
+								if (!(clients[i].drone && clients[i].related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+								{
+									killer = AddKiller(&clients[i], client);
+		
+									if (killer >= 0 && killer < MAX_HITBY)
+										clients[i].damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)munition->he / (float)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
+								}
+							}
+							else
+							{
+								DebugClient(__FILE__, __LINE__, TRUE, client);
 							}
 							
-							AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, NULL, NULL, &clients[i]);
+							if (!setjmp(debug_buffer))
+							{
+								AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, NULL, NULL, &clients[i]);
+							}
+							else
+							{
+								DebugClient(__FILE__, __LINE__, TRUE, client);
+							}
 						}
 					}
 				}
@@ -1733,7 +1747,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	}
 	else
 	{
-		DebugArena(__FILE__, __LINE__);
+		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 	
 	return j;
