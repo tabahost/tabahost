@@ -1337,7 +1337,7 @@ client_t *FindLClient(char *longnick)
  Send a message to a player
  *************/
 
-int PPrintf(client_t *client, u_int8_t radio, char *fmt, ...)
+int PPrintf(client_t *client, u_int16_t radio, char *fmt, ...)
 {
 	va_list argptr;
 	u_int8_t buffer[MAX_RADIOMSG]; // 74 is max size of a radio message
@@ -1369,8 +1369,27 @@ int PPrintf(client_t *client, u_int8_t radio, char *fmt, ...)
 			radiomessage = (radiomessage_t *) (buffer);
 
 			radiomessage->packetid = htons(Com_WBhton(0x1200));
-			radiomessage->msgto = htonl(radio);
-			radiomessage->msgfrom = htonl(ascii2wbnick("-HOST-", 1));
+			
+			if(radio < 1000)
+			{
+				radiomessage->msgto = htonl(radio);
+				radiomessage->msgfrom = htonl(ascii2wbnick("-HOST-", 1));
+			}
+			else
+			{
+				switch(radio)
+				{
+					case RADIO_WEATHER:
+						radiomessage->msgto = htonl(RADIO_YELLOW);
+						radiomessage->msgfrom = htonl(ascii2wbnick("-WTHR-", 1));
+						break;
+					default:
+						radiomessage->msgto = htonl(radio);
+						radiomessage->msgfrom = htonl(ascii2wbnick("-HOST-", 1));
+						break;
+				}
+			}
+
 			radiomessage->msgsize = strlen(message+(63*n)) > 63 ? 63 : strlen(message+(63*n));
 			memcpy(&(radiomessage->message), message+(63*n), radiomessage->msgsize);
 
@@ -1398,7 +1417,7 @@ int PPrintf(client_t *client, u_int8_t radio, char *fmt, ...)
  Send a country message
  *************/
 
-void CPrintf(u_int8_t country, u_int8_t radio, char *fmt, ...)
+void CPrintf(u_int8_t country, u_int16_t radio, char *fmt, ...)
 {
 	va_list argptr;
 	char msg[MAX_PRINTMSG];
@@ -1435,7 +1454,7 @@ void CPrintf(u_int8_t country, u_int8_t radio, char *fmt, ...)
  Send a broadcast message
  *************/
 
-void BPrintf(u_int8_t radio, char *fmt, ...)
+void BPrintf(u_int16_t radio, char *fmt, ...)
 {
 	va_list argptr;
 	char msg[MAX_PRINTMSG];

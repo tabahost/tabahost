@@ -1383,7 +1383,7 @@ void ProcessMetarWeather(void)
 			weather = Com_Atoi(value);
 			Var_Set("weather", value);
 
-			BPrintf(RADIO_YELLOW, "Weather: %s, Wind: %.2fKm/h from %s",
+			BPrintf(RADIO_WEATHER, "Weather: %s, Wind: %.2fKm/h from %s",
 			(!weather)?"Cloudy":(weather == 1)?"Clear":(weather == 2)?"Raining":"Partialy Cloudy",
 			(wind * 1.09728),
 			WBRhumb(angle));
@@ -1413,6 +1413,7 @@ void ProcessCommands(char *command, client_t *client)
 	u_int8_t argc = 0;
 	char *argv[10];
 	char file[128];
+	float wind, angle;
 	client_t *pclient;
 
 	memset(argv, 0, sizeof(argv));
@@ -1598,18 +1599,31 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
+		else if (!Com_Stricmp(command, "forecast"))
+		{
+			wind = sqrt(Com_Pow(xwindvelocity->value, 2) + Com_Pow(ywindvelocity->value, 2));
+			angle = Com_Deg(asin(xwindvelocity->value / ywindvelocity->value));
+
+			PPrintf(client, RADIO_WEATHER, "Weather: %s, Wind: %.2fKm/h from %s",
+				(!weather->value)?"Cloudy":(weather->value == 1)?"Clear":(weather->value == 2)?"Raining":"Partialy Cloudy",
+				(wind * 1.09728),
+				WBRhumb(angle));
+			return;
+		}
 		else if (!Com_Stricmp(command, "rain"))
 		{
 			if(client->rain)
 			{
 				PPrintf(client, RADIO_YELLOW, "Rain disabled");
 				Com_Printf(VERBOSE_ATTENTION, "%s disabled rain\n", client->longnick);
+				WB3DotCommand(client, ".weather 0"); // cloudy
 				client->rain = 0;
 			}
 			else
 			{
 				PPrintf(client, RADIO_YELLOW, "Rain enabled");
 				Com_Printf(VERBOSE_ATTENTION, "%s enabled rain\n", client->longnick);
+				WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
 				client->rain = 1;
 			}
 			return;
@@ -3784,7 +3798,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						WB3SendGruntConfig(client);
 						//					WB3SendArenaFlags3(client);
 						WB3ArenaConfig2(client);
-						if((weather->value == 2) && !client->rain)
+						if(((u_int8_t)weather->value == 2) && !client->rain)
 							WB3DotCommand(client, ".weather 0"); // cloudy
 						else
 							WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);

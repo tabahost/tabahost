@@ -480,6 +480,7 @@ typedef unsigned int u_int32_t;
 #define RADIO_WHITE			200
 #define RADIO_BLUE			201
 #define RADIO_YELLOW		202
+#define RADIO_WEATHER		1000
 #define ELO_WINNER			1
 #define ELO_LOOSER			2
 #define ELO_BOTH			3
@@ -2258,9 +2259,9 @@ int8_t	CheckUserPasswd(client_t *client, u_int8_t *userpass);
 int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client);
 client_t *FindSClient(u_int32_t shortnick);
 client_t *FindLClient(char *longnick);
-int		PPrintf(client_t *client, u_int8_t radio, char *fmt, ...);
-void	CPrintf(u_int8_t country, u_int8_t radio, char *fmt, ...);
-void	BPrintf(u_int8_t radio, char *fmt, ...);
+int		PPrintf(client_t *client, u_int16_t radio, char *fmt, ...);
+void	CPrintf(u_int8_t country, u_int16_t radio, char *fmt, ...);
+void	BPrintf(u_int16_t radio, char *fmt, ...);
 u_int8_t CheckBanned(client_t *client);
 u_int8_t CheckTK(client_t *client);
 u_int8_t GetClientInfo(client_t *client);
