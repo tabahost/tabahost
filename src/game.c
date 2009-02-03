@@ -2201,7 +2201,7 @@ void ProcessCommands(char *command, client_t *client)
 	// commands that console can execute
 	if (!Com_Stricmp(command, "version"))
 	{
-		PPrintf(client, RADIO_LIGHTYELLOW, "Tabajara Host version %s, build %s", VERSION,__DATE__ ); //BUILD);
+		PPrintf(client, RADIO_LIGHTYELLOW, "Tabajara Host version %s, build %s", VERSION,__DATE__ );
 		return;
 	}
 	if(!Com_Stricmp(command, "license"))
@@ -3825,7 +3825,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					SendFileSeq1(file, "motd.txt", client);
 
-					PPrintf(client, RADIO_YELLOW, "Warbirds Tabajara Host version %s, build %s", VERSION, __DATE__); //BUILD);
+					PPrintf(client, RADIO_YELLOW, "Warbirds Tabajara Host version %s, build %s", VERSION, __DATE__);
 
 					if(!(client->attr == 1 && hideadmin->value))
 					{
@@ -5724,7 +5724,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 
 
 				//				PPrintf(client, RADIO_WHITE, "Vx %d Vy %d Vz %d speed %d", x, y, z, speed);
-				AddBomb(ntohs(drop->id), destx, desty, drop->item, speed, time, client);
+				AddBomb(ntohs(drop->id), destx, desty, drop->item, speed, time, client->related[i]);
 			}
 			PDropItem(buffer, len, client->related[i]);
 		}
@@ -7302,7 +7302,14 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		{
 			if(oldcapt->value || (ap)) // this adds damage by bombs if oldcapt or by bullets if ToT enabled
 			{
-				AddFieldDamage(building->field-1, dmgprobe, client);
+				if(!client || (client->country != building->country))
+				{
+					AddFieldDamage(building->field-1, dmgprobe, client);
+					arena->fields[building->field-1].tonnage += (dmgprobe / 50);
+
+					if(arena->fields[building->field-1].tonnage >= (GetTonnageToClose(building->field) * 2.4))
+						arena->fields[building->field-1].tonnage = (GetTonnageToClose(building->field) * 2.4);
+				}
 			}
 		}
 	}

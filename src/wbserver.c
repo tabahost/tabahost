@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 	Com_Printf(VERBOSE_ALWAYS, "This is free software, and you are welcome to redistribute\n");
 	Com_Printf(VERBOSE_ALWAYS, "it under certain conditions; For details type 'license' command\n");
 	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
-	Com_Printf(VERBOSE_ALWAYS, "Starting Server. Version: %s - Build %s\n", VERSION,__DATE__ ); //BUILD);
+	Com_Printf(VERBOSE_ALWAYS, "Starting Server. Version: %s - Build %s\n", VERSION,__DATE__ );
 	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
 
 	Sys_SQL_Init(); // startting SQL after InitTCPNet 'cause WSAStartup() in windows

@@ -102,8 +102,7 @@ typedef unsigned int u_int32_t;
 #define FALSE 0
 #endif
 
-#define VERSION				"b3.80"
-#define BUILD 				"Apr-26-2008"
+#define VERSION				"b4.03"
 
 #define V_WB2				0
 #define V_WB2007			1
@@ -271,19 +270,19 @@ typedef unsigned int u_int32_t;
 #define SCORE_TORPEDOHIT	0.1
 */
 
-#define SCORE_TAKEOFF		0x0001	// takeoff
-#define SCORE_DROPITEM		0x0002	// drop bomb/rocket
-#define SCORE_HARDHIT		0x0004	// hit bomb/rocket
-#define SCORE_STRUCTURE		0x0008	// destroyed structure
-#define SCORE_STRUCTDAMAGE	0x0010	// damaged structure
-#define SCORE_LANDED		0x0020	// landed
-#define SCORE_DITCHED		0x0040	// ditched
-#define SCORE_BAILED		0x0080	// bailed
-#define SCORE_CAPTURED		0x0100	// captured
-#define SCORE_KILLED		0x0200	// killed
-#define SCORE_COLLIDED		0x0400	// collided
-#define SCORE_FIELDCAPT		0x0800	// field capture
-#define SCORE_DISCO			0x1000	// disconnected
+#define SCORE_TAKEOFF		0x0001	// 1 takeoff
+#define SCORE_DROPITEM		0x0002	// 2 drop bomb/rocket
+#define SCORE_HARDHIT		0x0004	// 4 hit bomb/rocket
+#define SCORE_STRUCTURE		0x0008	// 8 destroyed structure
+#define SCORE_STRUCTDAMAGE	0x0010	// 16 damaged structure
+#define SCORE_LANDED		0x0020	// 32 landed
+#define SCORE_DITCHED		0x0040	// 64 ditched
+#define SCORE_BAILED		0x0080	// 128 bailed
+#define SCORE_CAPTURED		0x0100	// 256 captured
+#define SCORE_KILLED		0x0200	// 512 killed
+#define SCORE_COLLIDED		0x0400	// 1024 collided
+#define SCORE_FIELDCAPT		0x0800	// 2048 field capture
+#define SCORE_DISCO			0x1000	// 4096 disconnected
 
 #define VERBOSE_ALWAYS		0		// always prints these messages
 #define VERBOSE_ATTENTION	1		// attention messages

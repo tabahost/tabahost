@@ -496,6 +496,40 @@ void SaveArenaStatus(char *filename, client_t *client)
 }
 
 /*************
+ SavePlanesPool
+
+ Save planes pool
+ *************/
+
+void SavePlanesPool(char *filename, client_t *client)
+{
+	u_int8_t i, j;
+	char file[128];
+	FILE *fp;
+
+	strcpy(file, filename);
+	strcat(file, ".pool");
+
+	if (!(fp = fopen(file, "w")))
+	{
+		PPrintf(client, RADIO_YELLOW, "WARNING: SavePlanesPool() Cannot open file \"%s\"", file);
+		return;
+	}
+	else
+	{
+		for (i = 0; i < fields->value; i++)
+		{
+			for (j = 0; j < maxplanes; j++)
+			{
+				fprintf(fp, "%.f;", arena->fields[i].rps[j]);
+			}
+			fprintf(fp, "\n");
+		}
+	}
+	fclose(fp);
+}
+
+/*************
  LoadPlanesPool
 
  Load planes pool
@@ -541,40 +575,6 @@ void LoadPlanesPool(char *filename, client_t *client)
 		}
 		fclose(fp);
 	}
-}
-
-/*************
- SavePlanesPool
-
- Save planes pool
- *************/
-
-void SavePlanesPool(char *filename, client_t *client)
-{
-	u_int8_t i, j;
-	char file[128];
-	FILE *fp;
-
-	strcpy(file, filename);
-	strcat(file, ".pool");
-
-	if (!(fp = fopen(file, "w")))
-	{
-		PPrintf(client, RADIO_YELLOW, "WARNING: SavePlanesPool() Cannot open file \"%s\"", file);
-		return;
-	}
-	else
-	{
-		for (i = 0; i < fields->value; i++)
-		{
-			for (j = 0; j < maxplanes; j++)
-			{
-				fprintf(fp, "%.f;", arena->fields[i].rps[j]);
-			}
-			fprintf(fp, "\n");
-		}
-	}
-	fclose(fp);
 }
 
 /*************

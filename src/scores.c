@@ -30,7 +30,7 @@
 
 void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 {
-	int8_t killer;;
+	int8_t killer;
 	u_int8_t i;
 	u_int8_t captured = 0;
 	u_int8_t collided = 0;
@@ -866,17 +866,26 @@ float ScorePlaneLife(client_t *client)
 		if(arena->planedamage[client->plane - 1].points[i] > 0)
 			totalpoints += arena->planedamage[client->plane - 1].points[i];
 
-		if(client->status_damage & (1 << i))
+		if(!(client->status_damage & (1 << i)))
 		{
 			if(client->armor.points[i] > 0)
 				pointsleft += client->armor.points[i];
 		}
 	}
 
-	pointsleft = totalpoints - pointsleft;
-	pointsleft -= ScoreFlightTimeCost(client);
+//	pointsleft = totalpoints - pointsleft;
+	if((pointsleft -= ScoreFlightTimeCost(client)) < 0.0)
+		return 0;
 
-	return pointsleft/totalpoints;
+	pointsleft /= totalpoints;
+
+	if(pointsleft > 1.0)
+	{
+		Com_Printf(VERBOSE_DEBUG, "ScorePlaneLife(pointsleft) > 100%, %f\n", pointsleft);
+		return 1;
+	}
+	else
+		return pointsleft;
 }
 
 /*************
