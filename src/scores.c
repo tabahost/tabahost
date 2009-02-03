@@ -268,6 +268,11 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 	Com_Printf(VERBOSE_DEBUG, "EVENT COST: %f\n", event_cost);
 	
+	if(event_cost < 0)
+	{
+		Com_Printf(VERBOSE_DEBUG, "ScoresEvent(event_cost) < 0, event = %d, misc = %d\n", event, misc);
+	}
+
 	client->score.costscore += event_cost;
 
 	if(event & (SCORE_BAILED | SCORE_CAPTURED | SCORE_DISCO | SCORE_DITCHED | SCORE_KILLED | SCORE_LANDED))
@@ -395,7 +400,9 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	killer = ScoresCheckKiller(client, &misc);
 	
 	if(misc) // maneuver kill
+	{
 		ScorePieceDamage(killer, (event_cost/2), client);
+	}
 	else
 	{
 		Com_Printf(VERBOSE_DEBUG, "Piece event cost %f, killed %s\n", event_cost, client->longnick);
@@ -561,7 +568,7 @@ void ScoreFieldCapture(u_int8_t field)
 //				{
 //					if (IsFighter(NULL, client->planeby[i]))
 //					{
-//						sprintf(sql_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
+//						sprintf(sql_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
 //					}
 //					else if (IsBomber(NULL, client->planeby[i]))
 //					{
@@ -574,7 +581,7 @@ void ScoreFieldCapture(u_int8_t field)
 //					else
 //					{
 //						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-//						sprintf(sql_query, "%sUPDATE score_fighter SET, fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
+//						sprintf(sql_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
 //					}
 //				}
 //				else // friendly hit... tsc, tsc, tsc...

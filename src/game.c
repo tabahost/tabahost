@@ -6190,7 +6190,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	u_int16_t he, ap;
 	int8_t needle[5];
 	u_int32_t dist;
-	float distance, totaldamage;
+	float distance, sdamage, totaldamage;
 	int8_t killer = 0;
 	u_int32_t damage;
 	munition_t *munition;
@@ -6404,6 +6404,11 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			damage = (he + ap);
 
+			if(damage < 0)
+			{
+				Com_Printf(VERBOSE_DEBUG, "PHitPlane(damage he+ap) < 0, he = %d, ap = %d\n", he, ap);
+			}
+
 			if (!setjmp(debug_buffer))
 			{
 				if (gunstats->value)
@@ -6422,9 +6427,25 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			}
 
 			damage -= ap;
+
+			if(damage < 0)
+			{
+				Com_Printf(VERBOSE_DEBUG, "PHitPlane(damage -= ap) < 0, damage = %d, ap = %d\n", damage, ap);
+			}
 			
 			if(needle[j] >= 0 && needle[j] < 32 && killer >= 0 && killer < MAX_HITBY)
-				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(pvictim->armor.points[needle[j]] + 1.0)));
+			{
+				sdamage = (float)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]) + 1.0)));
+
+				if(sdamage >= 0)
+				{
+					pvictim->damby[killer] += sdamage;
+				}
+				else
+				{
+					Com_Printf(VERBOSE_DEBUG, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage, ((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
+				}
+			}
 
 			if (ap == 0)
 				break;
@@ -6579,7 +6600,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	u_int8_t i;
 	int8_t killer = 0;
 	int32_t he;
-	float totaldamage;
+	float sdamage, totaldamage;
 	munition_t *munition;
 	char header[128];
 	char heb[128];
@@ -6640,7 +6661,18 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 			killer = AddKiller(pvictim, client);
 
 			if (hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
-				pvictim->damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]) + 1.0)));
+			{
+				sdamage = (float)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]) + 1.0)));
+
+				if(sdamage >= 0)
+				{
+					pvictim->damby[killer] += sdamage;
+				}
+				else
+				{
+					Com_Printf(VERBOSE_DEBUG, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he, ((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
+				}
+			}
 		}
 	}
 

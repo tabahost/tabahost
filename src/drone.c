@@ -1092,6 +1092,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 	int16_t velx, vely, velz, part;
 	int32_t dist;
 	ottofiring_t *otto;
+	float sdamage;
 
 	if ((dist = DistBetween(source->posxy[0][0], source->posxy[1][0], source->posalt[0], dest->posxy[0][0], dest->posxy[1][0], dest->posalt[0], -1)) > 3000)
 		return;
@@ -1124,7 +1125,18 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 
 			j = AddKiller(dest, source);
 			if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
-				dest->damby[j] += (float)(10.0 * logf(1.0 + 100.0 * 40.0 / (float)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+			{
+				sdamage = (float)(10.0 * logf(1.0 + 100.0 * 40.0 / (float)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+
+				if(sdamage >= 0)
+				{
+					dest->damby[j] += sdamage;
+				}
+				else
+				{
+					Com_Printf(VERBOSE_DEBUG, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
+				}
+			}
 			
 			SendPings(1, 143, dest);
 		}
@@ -1517,6 +1529,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	u_int8_t fieldtype;
 	int8_t killer = 0;
 	u_int8_t buffer[7];
+	float sdamage;
 	wb3tonnage_t *wb3tonnage;
 	
 	wb3tonnage = (wb3tonnage_t *)buffer;
@@ -1723,7 +1736,18 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 									killer = AddKiller(&clients[i], client);
 		
 									if (killer >= 0 && killer < MAX_HITBY)
-										clients[i].damby[killer] += (float)(10.0 * logf(1.0 + 100.0 * (float)munition->he / (float)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
+									{
+										sdamage = (float)(10.0 * logf(1.0 + 100.0 * (float)munition->he / (float)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
+
+										if(sdamage >= 0)
+										{
+											clients[i].damby[killer] += sdamage;
+										}
+										else
+										{
+											Com_Printf(VERBOSE_DEBUG, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he, ((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
+										}
+									}
 								}
 							}
 							else
