@@ -1972,6 +1972,7 @@ typedef struct debug_s {
 // net.c
 int		InitTCPNet(int portno);
 int32_t	SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client);
+int32_t	SendPacketTHL(u_int8_t *buffer, u_int16_t len, client_t *client);
 int		GetPacket(client_t *client); // recv and process packet (unfinished?)
 void	FlushSocket(int sockfd);
 void	ProtocolError(client_t *client);

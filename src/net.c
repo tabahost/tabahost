@@ -143,6 +143,80 @@ int InitUDPNet(int portno)
 }
 
 /*************
+ SendPacketTHL
+
+ Gets a pre-made packet, encrypt, checksum, and send to THL
+ *************/
+
+int32_t SendPacketTHL(u_int8_t *buffer, u_int16_t len, client_t *client)
+{
+	int i;
+	u_int8_t datagram[MAX_SENDDATA];
+	datagram_t *packet;
+	u_int16_t header;
+
+	memset(datagram, 0, MAX_SENDDATA);
+
+	if (buffer)
+	{
+		if ((buffer[0] == 0xff) && (buffer[1] == 0xff))
+		{
+			Com_Printf(VERBOSE_WARNING, "SendPacketTHL() header 0xffff, Packet not sent\n");
+			Com_Printfhex(datagram, len+4);
+			return 0;
+		}
+	}
+	else
+	{
+		Com_Printf(VERBOSE_WARNING, "SendPacketTHL() buffer points to NULL\n");
+		return 0;
+	}
+
+	if ((len+4) <= MAX_SENDDATA)
+	{
+		packet = (datagram_t *)(datagram+1);
+
+		datagram[0] = 0x10; // THL
+
+		header = (u_int16_t)(datagram[3] << 2) + datagram[4];
+
+		arena->bufferit = 1;
+
+		packet->size = htons(len);
+
+		memcpy(&(packet->data), buffer, len);
+
+		datagram[len+3] = CheckSum(&(packet->data), len); // checksum
+
+		if (debug->value)
+		{
+			Com_Printf(VERBOSE_DEBUG, "--->>> ");
+			Com_Printfhex(datagram, len+4);
+		}
+
+		wbcrypt(&(packet->data), client->key, len, FALSE); // encrypting
+
+		if (client->login || (client->inuse && client->socket))
+		{
+			return Com_Send(client, datagram, (int)len+4);
+		}
+		else
+		{
+			Com_Printf(VERBOSE_WARNING, "client not in use or without socket\n");
+			Com_Printf(VERBOSE_ALWAYS, "%s client not in use or without socket\n", client->longnick);
+			RemoveClient(client);
+			return -1;
+		}
+	}
+	else
+	{
+		Com_Printf(VERBOSE_WARNING, "SendPacketTHL() overflowed (packet to %s - %s)\n", client->longnick, client->ip);
+		RemoveClient(client);
+		return -1;
+	}
+}
+
+/*************
  SendPacket
 
  Gets a pre-made packet, encrypt, checksum, and send to client
@@ -176,17 +250,7 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	{
 		packet = (datagram_t *)(datagram+1);
 
-		if (wb3->value)
-		{
-			if (!client->loginkey)
-				datagram[0] = 0x07;
-			else
-				datagram[0] = 0x09;
-		}
-		else
-		{
-			datagram[0] = 0x07;
-		}
+		datagram[0] = 0x09; // wb3
 
 		header = (u_int16_t)(datagram[3] << 2) + datagram[4];
 
@@ -232,21 +296,6 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		if (client->login || (client->inuse && client->socket))
 		{
 			return Com_Send(client, datagram, (int)len+4);
-//			if ((i = Com_Send(client, datagram, (int)len+4)) == len+4)
-//			{
-//				return 0;
-//			}
-//			else
-//			{
-//				Com_Printf(VERBOSE_DEBUG, "len+4 (%d), Com_Send() (%d)\n", len+4, i);
-//				Com_Printf(
-//						"WARNING: SendPacket() error sending packet to %s (%s)\n",
-//						client->longnick, client->ip);
-//				Com_Printf(VERBOSE_ALWAYS, "%s error in Com_Send()\n", client->longnick);
-//				//				client->timeout = MAX_TIMEOUT;
-//				RemoveClient(client);
-//				return -1;
-//			}
 		}
 		else
 		{
@@ -284,19 +333,7 @@ int GetPacket(client_t *client)
 	if (n <= 0)
 		return n;
 
-	if (wb3->value)
-	{
-		if (!client->loginkey)
-			n = 0x07;
-		else
-			n = 0x09;
-	}
-	else
-	{
-		n = 0x07;
-	}
-
-	if (mainbuffer[0] == n)
+	if ((mainbuffer[0] == 0x09) /*wb3*/ || (mainbuffer[0] == 0x10) /*THL*/)
 	{
 		client->timeout = 0;
 

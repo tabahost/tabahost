@@ -63,6 +63,13 @@ u_int8_t mainbuffer[MAX_RECVDATA]; //extern
 
 u_int16_t packets_tab[210][3] =
 {
+		/*// THL
+		{ 0xFB00, 0xFB00, 0xFB00 }, // thlGET_CRC
+		{ 0xFB01, 0xFB01, 0xFB01 }, // thlGET_CRC_RESPONSE
+		{ 0xFB02, 0xFB02, 0xFB02 }, // thl
+		{ 0xFB03, 0xFB03, 0xFB03 }, // thl
+		*/
+
 // WB2   WB2007  WB2008
 		{ 0x0200, 0x0400, 0xFFFF }, // pcNEW_USER
 		{ 0x0201, 0x0401, 0x0809 }, // pcSTART_FLIGHT *
@@ -3803,6 +3810,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						else
 							WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
 						WB3DotCommand(client, ".date %u %u %u", arena->month, arena->day, arena->year);
+						WB3DotCommand(client, ".weathereffects 1");
 						WB3NWAttachSlot(client);
 					}
 
