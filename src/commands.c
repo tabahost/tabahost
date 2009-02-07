@@ -166,7 +166,7 @@ void Cmd_Ammo(client_t *client, u_int8_t arg, char *arg2)
 		{
 			arg2++;
 			arena->munition[arg].he = Com_Atoi(arg2);
-			PPrintf(client, RADIO_LIGHTYELLOW, "HE of %s(%u) was changed to %u", arena->munition[arg].name, arg, arena->munition[arg].he);
+			PPrintf(client, RADIO_LIGHTYELLOW, "HE of %s(%u) was changed to %d", arena->munition[arg].name, arg, arena->munition[arg].he);
 			Com_Printf(VERBOSE_ATTENTION, "HE of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].he, client ? client->longnick : "-HOST-");
 		}
 		else if (*arg2 == 'a')
@@ -1419,6 +1419,9 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 	{
 		if (arena->fields[field].country != country)
 		{
+			arena->fields[field].ctf = country;
+			arena->fields[field].ctfcount = arena->frame;
+			
 			BPrintf(RADIO_YELLOW, "System: FIELDF%d has been captured by the %s", field+1, GetCountry(country));
 
 			for (/*j = */i = 0; i < MAX_CITYFIELD; i++) // Capture field and it captures the cities
@@ -1495,8 +1498,15 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 
 					for (i = 0; i < maxentities->value; i++)
 					{
+						
 						if (clients[i].inuse)
 						{
+							if(ctf->value)
+							{
+								if(clients[i].ready && clients[i].infly && !clients[i].drone && clients[i].attr != 1)
+									ForceEndFlight(TRUE, &clients[i]);
+							}
+
 							if (clients[i].drone & (DRONE_HMACK | DRONE_HTANK | DRONE_EJECTED))
 								RemoveDrone(&clients[i]);
 
@@ -5700,7 +5710,7 @@ void Cmd_Restore(u_int8_t field, client_t *client)
  Destroy all structured at field for 10 minutes
  *************/
 
-void Cmd_Destroy(u_int8_t field, client_t *client)
+void Cmd_Destroy(u_int8_t field, int32_t time, client_t *client)
 {
 	u_int16_t i;
 
@@ -5710,12 +5720,21 @@ void Cmd_Destroy(u_int8_t field, client_t *client)
 		return;
 	}
 
+	if(time > 0)
+	{
+		time *= 6000; // convert minutes to frames
+	}
+	else
+	{
+		time = 0;
+	}
+	
 	for (i = 0; i < MAX_BUILDINGS; i++)
 	{
 		if (arena->fields[field - 1].buildings[i].field)
 		{
 			arena->fields[field - 1].buildings[i].status = 2;
-			arena->fields[field - 1].buildings[i].timer = 60000;
+			arena->fields[field - 1].buildings[i].timer = time;
 		}
 		else
 		{
