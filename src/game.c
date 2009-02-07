@@ -704,7 +704,7 @@ void CheckArenaRules(void)
 
 				for(j = 0; j < maxentities->value; j++)
 				{
-					if(clients[j].inuse && clients[j].ready && !clients[j].drone && IsGround(&clients[j]))
+					if(clients[j].inuse && clients[j].ready && clients[j].infly && !clients[j].drone && IsGround(&clients[j]))
 					{
 						if(DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], 0, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], 0, ctf->value) >= 0)
 						{ // if client in capture range...
@@ -753,7 +753,7 @@ void CheckArenaRules(void)
 				{
 					if((arena->fields[i].ctf != arena->fields[i].country) && (arena->frame - arena->fields[i].ctfcount) > 100 /*1 sec*/)
 					{
-						BPrintf(RADIO_YELLOW, "F%d capture counter reset 2", i+1);
+						BPrintf(RADIO_YELLOW, "F%d capture counter reset", i+1);
 					}
 
 					arena->fields[i].ctfcount = arena->frame;
