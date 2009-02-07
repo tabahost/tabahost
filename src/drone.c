@@ -1556,7 +1556,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 		{
 			Com_Printf(VERBOSE_WARNING, "HitStructsNear(): min->he == max->he\n");
 			radius = 0;
-		}
+		} 
 		else
 			radius = (munition->he - min->he) * (MAX_BOMBRADIUS - MIN_BOMBRADIUS) / (max->he - min->he);
 

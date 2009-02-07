@@ -2243,7 +2243,7 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 
  Make a Pingtest call
  *************/
-
+ 
 void Cmd_Pingtest(u_int16_t frame, client_t *client)
 {
 	buildstatus_t *buildstatus;

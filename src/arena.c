@@ -118,7 +118,7 @@ char *GetFieldType(u_int8_t type)
 			return "Unknown";
 	}
 }
-
+ 
 /*************
  GetBuildingType
 

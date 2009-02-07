@@ -2207,7 +2207,7 @@ void LogPosition(client_t *client)
 
 /*************
  HardHit
-
+ 
  Make a hardhit query (add hits in DB)
  *************/
 

@@ -941,7 +941,7 @@ void Com_MySQL_Flush(MYSQL *mysql, char *file, u_int32_t line)
 			Com_Printf(VERBOSE_WARNING, "Com_MySQL_Flush(%s, %u): Could not execute statement\n", file, line);
 	} while (status == 0);
 }
-
+ 
 /*************
  Com_Printfhex
 

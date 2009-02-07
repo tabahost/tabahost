@@ -214,7 +214,7 @@ void Sys_SQL_Init(void)
 		Com_Printf(VERBOSE_ERROR, "Sys_SQL_Init(): Error initializing my_sock\n");
 		ExitServer(1);
 	}
-	else
+	else 
 	{
 		Com_Printf(VERBOSE_ALWAYS, "MySQL Initialized\n");
 	}

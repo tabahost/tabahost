@@ -1739,7 +1739,7 @@ void ProcessCommands(char *command, client_t *client)
 			else
 				PPrintf(client, RADIO_YELLOW, "usage: .easy [1|0]");
 			return;
-		}
+		} 
 		else if (!Com_Stricmp(command, "kill"))
 		{
 			if (client->attached && client->attached->drone & (DRONE_HMACK | DRONE_HTANK))

@@ -230,7 +230,7 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	u_int16_t header;
 
 	memset(datagram, 0, MAX_SENDDATA);
-
+ 
 	if (buffer)
 	{
 		if ((buffer[0] == 0xff) && (buffer[1] == 0xff))
