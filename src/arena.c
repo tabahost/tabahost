@@ -3005,38 +3005,41 @@ void CaptureField(u_int8_t field, client_t *client)
 		}
 	}
 
-	for (hangar = i = 0; i < MAX_BUILDINGS; i++)
+	if(rps->value)
 	{
-		if (!arena->fields[field - 1].buildings[i].field)
+		for (hangar = i = 0; i < MAX_BUILDINGS; i++)
 		{
-			break;
-		}
-		else
-		{
-			if(!oldcapt->value && wb3->value)
+			if (!arena->fields[field - 1].buildings[i].field)
 			{
-				if (arena->fields[field - 1].buildings[i].type == BUILD_HANGAR && !arena->fields[field - 1].buildings[i].status)
-					hangar++;
+				break;
 			}
 			else
-				hangar = 1;
-			
-			if (arena->fields[field - 1].buildings[i].type <= BUILD_88MMFLAK)
-				arena->fields[field - 1].buildings[i].timer = timer;
+			{
+				if(!oldcapt->value && wb3->value)
+				{
+					if ((arena->fields[field - 1].buildings[i].type == BUILD_HANGAR) && !arena->fields[field - 1].buildings[i].status)
+						hangar++;
+				}
+				else
+					hangar = 1;
+				
+				if (arena->fields[field - 1].buildings[i].type <= BUILD_88MMFLAK)
+					arena->fields[field - 1].buildings[i].timer = timer;
+			}
 		}
-	}
-
-	for (i = 0; i < maxplanes; i++)
-	{
-		if (arena->fields[field - 1].rps[i] >= 1)
+	
+		for (i = 0; i < maxplanes; i++)
 		{
-			if (hangar)
-				arena->fields[field - 1].rps[i] = hangar;
+			if (arena->fields[field - 1].rps[i] >= 1)
+			{
+				if (hangar)
+					arena->fields[field - 1].rps[i] = hangar;
+				else
+					arena->fields[field - 1].rps[i] = 0;
+			}
 			else
 				arena->fields[field - 1].rps[i] = 0;
 		}
-		else
-			arena->fields[field - 1].rps[i] = 0;
 	}
 }
 
