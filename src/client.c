@@ -1857,12 +1857,15 @@ void ForceEndFlight(u_int8_t remdron, client_t *client)
 	char field[8];
 
 	memset(buffer, 0, sizeof(buffer));
-	buffer[0] = buffer[1] = 2;
-	buffer[3] = 4;
+	buffer[0] = 0x08;
+	buffer[1] = 0x0A;
+	buffer[3] = ENDFLIGHT_LANDED;
+	buffer[5] = client->field;
+	
 	sprintf(field, "f%d", client->field);
 
 	SendPacket(buffer, sizeof(buffer), client);
-	Cmd_Move(field, client->country, client);
+	//Cmd_Move(field, client->country, client);
 
 	if (client->attached)
 	{
