@@ -331,12 +331,15 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 	sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->id);
 	
-	Com_Printf(VERBOSE_DEBUG, "Event Query: %s\n", my_query);
-
-	if (d_mysql_query(&my_sock, my_query)) // query succeeded
+	if(!client->drone)
 	{
-		Com_Printf(VERBOSE_WARNING, "ScoresEvent(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-		Com_Printf(VERBOSE_WARNING, "Query: %s\n", my_query);
+		Com_Printf(VERBOSE_DEBUG, "Event Query: %s\n", my_query);
+	
+		if (d_mysql_query(&my_sock, my_query)) // query succeeded
+		{
+			Com_Printf(VERBOSE_WARNING, "ScoresEvent(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			Com_Printf(VERBOSE_WARNING, "Query: %s\n", my_query);
+		}
 	}
 
 	if(event & SCORE_TAKEOFF)
@@ -383,9 +386,12 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	sprintf(my_query, "UPDATE score_common SET killstod = '%u', structstod = '%u', lastscore = '%.3f', totalscore = totalscore + '%.3f', streakscore = '%.3f', flighttime = flighttime + '%u' WHERE player_id = '%u'",
 			client->killstod, client->structstod, client->lastscore, client->lastscore, client->streakscore, flighttime, client->id);
 
-	if (d_mysql_query(&my_sock, my_query)) // query succeeded
+	if(!client->drone)
 	{
-		Com_Printf(VERBOSE_WARNING, "ScoresEvent(updplayer): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		if (d_mysql_query(&my_sock, my_query)) // query succeeded
+		{
+			Com_Printf(VERBOSE_WARNING, "ScoresEvent(updplayer): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		}
 	}
 
 	if(event & SCORE_LANDED)
@@ -1486,7 +1492,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 		{
 			if (client->hitby[i] && client->damby[i] && !client->hitby[i]->drone && client->hitby[i]->inuse && client->hitby[i]->infly)
 			{
-				if (client->hitby[i] != client) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
+				if (client->hitby[i] != client && client->hitby[i] != killer) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
 				{
 					if (client->hitby[i]->country != client->country) // if enemy
 					{
