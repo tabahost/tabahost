@@ -1545,7 +1545,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	
 		if (!munition)
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "Unknown munition ID %d, plane %d", type, client ? client->plane : 0);
+			Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", type, client ? client->plane : 0);
 			return 0;
 		}
 
