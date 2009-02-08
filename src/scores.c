@@ -186,7 +186,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				}
 				else
 				{
-					event_cost += ScoreDamageCost(client);
+					if((arena->time - client->dronetimer) > 2000) // 20 secs
+						event_cost += ScoreDamageCost(client);
 				}
 			break;
 		case SCORE_DITCHED:

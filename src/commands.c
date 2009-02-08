@@ -4640,14 +4640,14 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 	}
 	else
 	{
-		fprintf(fp, "            Available planes for F%d\n", field);
-		fprintf(fp, "===================================================\n");
+		fprintf(fp, "          Available planes for F%d\n", field);
+		fprintf(fp, "==============================================\n");
 
 		for (i = 1; i < maxplanes; i++)
 		{
 			if (arena->fields[j].rps[i])
 			{
-				if (GetPlaneName(i))
+				if (GetSmallPlaneName(i))
 				{
 					if (rps->value && !arcade->value)
 					{
@@ -4665,16 +4665,16 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 						{
 							rpsreplace -= (arena->frame % rpsreplace);
 
-							fprintf(fp, "%s (N%d), %d available (%s to replace)\n", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i], Com_TimeSeconds(rpsreplace/100));
+							fprintf(fp, "%-11s(N%d)%s %3d avail%8s to replace\n", GetSmallPlaneName(i), i, (i < 10)?"  ":(i < 100)?" ":"",(int16_t)arena->fields[j].rps[i], Com_TimeSeconds(rpsreplace/100));
 						}
 						else if (arena->fields[j].rps[i] >= 1)
 						{
-							fprintf(fp, "%s (N%d), %d available (no replacement)\n", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i]);
+							fprintf(fp, "%-11s(N%d)%s %3d avail  no replacement\n", GetSmallPlaneName(i), i, (i < 10)?"  ":(i < 100)?" ":"", (int16_t)arena->fields[j].rps[i]);
 						}
 					}
-					else if (arena->fields[j].rps[i] >= 1)
+					else if (arena->fields[j].rps[i] >= 1 || arena->fields[j].rps[i] == -1)
 					{
-						fprintf(fp, "%s (N%d), %d available\n", GetPlaneName(i), i, (int16_t)arena->fields[j].rps[i]);
+						fprintf(fp, "%-11s(N%d)%s %3d avail\n", GetSmallPlaneName(i), i, (i < 10)?"  ":(i < 100)?" ":"", (int16_t)arena->fields[j].rps[i]);
 					}
 				}
 			}
@@ -4682,7 +4682,10 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 
 		fclose(fp);
 
-		SendFileSeq1(buffer, "avail.asc", client);
+		if(client)
+			SendFileSeq1(buffer, "avail.asc", client);
+		else
+			Sys_Printfile(buffer);
 	}
 
 //	if (rps->value)
