@@ -343,6 +343,32 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		}
 	}
 
+	if(event & (SCORE_BAILED | SCORE_CAPTURED | SCORE_DISCO | SCORE_DITCHED | SCORE_KILLED | SCORE_LANDED))
+	{
+		if(misc != SCORE_KILLED)
+			client->streakscore += client->lastscore;
+
+		if (client->dronetimer < arena->time)
+		{
+			flighttime = (arena->time - client->dronetimer)/1000;
+		}
+		else
+		{
+			flighttime = (0xFFFFFFFF - (client->dronetimer - arena->time))/1000;
+		}
+
+		sprintf(my_query, "UPDATE score_common SET killstod = '%u', structstod = '%u', lastscore = '%.3f', totalscore = totalscore + '%.3f', streakscore = '%.3f', flighttime = flighttime + '%u' WHERE player_id = '%u'",
+				client->killstod, client->structstod, client->lastscore, client->lastscore, client->streakscore, flighttime, client->id);
+
+		if(!client->drone)
+		{
+			if (d_mysql_query(&my_sock, my_query)) // query succeeded
+			{
+				Com_Printf(VERBOSE_WARNING, "ScoresEvent(updplayer): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			}
+		}
+	}
+
 	if(event & SCORE_TAKEOFF)
 	{
 		sprintf(my_query, "UPDATE score_common SET");
@@ -369,29 +395,6 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
 			Com_Printf(VERBOSE_WARNING, "ScoresEvent(penalty): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-		}
-	}
-
-	if(misc != SCORE_KILLED)
-		client->streakscore += client->lastscore;
-
-	if (client->dronetimer < arena->time)
-	{
-		flighttime = (arena->time - client->dronetimer)/1000;
-	}
-	else
-	{
-		flighttime = (0xFFFFFFFF - (client->dronetimer - arena->time))/1000;
-	}
-
-	sprintf(my_query, "UPDATE score_common SET killstod = '%u', structstod = '%u', lastscore = '%.3f', totalscore = totalscore + '%.3f', streakscore = '%.3f', flighttime = flighttime + '%u' WHERE player_id = '%u'",
-			client->killstod, client->structstod, client->lastscore, client->lastscore, client->streakscore, flighttime, client->id);
-
-	if(!client->drone)
-	{
-		if (d_mysql_query(&my_sock, my_query)) // query succeeded
-		{
-			Com_Printf(VERBOSE_WARNING, "ScoresEvent(updplayer): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 	}
 
@@ -518,12 +521,12 @@ void ScoreFieldCapture(u_int8_t field)
 				{
 					if(arena->fields[field].hitby[i]->infly)
 					{
-						Com_Printf(VERBOSE_DEBUG, "Penalty InFlight\n");
+						Com_Printf(VERBOSE_DEBUG, "Field Penalty InFlight\n");
 						arena->fields[field].hitby[i]->score.penaltyscore += score;
 					}
 					else
 					{
-						Com_Printf(VERBOSE_DEBUG, "Penalty Not InFlight\n");
+						Com_Printf(VERBOSE_DEBUG, "Field Penalty Not InFlight\n");
 						sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
 					}
 				}
@@ -672,14 +675,16 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 							}
 						}
 					}
-					else // friendly hit... tsc, tsc, tsc...
+					else if (client->hitby[i] != client)// friendly hit... tsc, tsc, tsc...
 					{
 						if(client->hitby[i]->infly)
 						{
+							Com_Printf(VERBOSE_DEBUG, "Kill Penalty InFlight\n");
 							client->hitby[i]->score.penaltyscore += score;
 						}
 						else
 						{
+							Com_Printf(VERBOSE_DEBUG, "Kill Penalty Not InFlight\n");
 							sprintf(my_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
 						}
 					}
