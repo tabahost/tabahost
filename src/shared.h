@@ -504,6 +504,7 @@ typedef struct building_s
 	u_int8_t	status;			// 0-up, 1-destroyed, 2-smoking
 	int32_t		timer;
 	u_int32_t	armor;
+	u_int8_t	infield;
 	int32_t		posx;
 	int32_t		posy;
 	int32_t		posz;
@@ -541,6 +542,7 @@ typedef struct field_s
 	u_int8_t	type;
 	u_int8_t	country;
 	int32_t		posxyz[3];
+	u_int32_t	radius;
 	u_int8_t	abletocapture;
 	u_int8_t	closed;
 	float		tonnage;
@@ -2146,6 +2148,7 @@ u_int32_t GetRPSLag(u_int8_t country);
 
 //arena.c
 building_t *GetBuilding(u_int16_t id);
+int32_t	GetFieldRadius(u_int8_t fieldtype);
 char	*GetFieldType(u_int8_t type);
 char	*GetBuildingType(u_int16_t type);
 void	LoadArenaStatus(char *filename, client_t *client, u_int8_t reset);

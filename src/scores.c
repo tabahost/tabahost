@@ -876,18 +876,23 @@ float ScorePlaneLife(client_t *client)
 	for(pointsleft = totalpoints = i = 0; i < 32; i++)
 	{
 		if(arena->planedamage[client->plane - 1].points[i] > 0)
+		{
 			totalpoints += arena->planedamage[client->plane - 1].points[i];
 
-		if(!(client->status_damage & (1 << i)))
-		{
-			if(client->armor.points[i] > 0)
-				pointsleft += client->armor.points[i];
+			if(!(client->status_damage & (1 << i)))
+			{
+				if(client->armor.points[i] > 0)
+					pointsleft += client->armor.points[i];
+			}
 		}
 	}
 
 //	pointsleft = totalpoints - pointsleft;
 	if((pointsleft -= ScoreFlightTimeCost(client)) < 0.0)
+	{
+		Com_Printf(VERBOSE_DEBUG, "ScorePlaneLife(pointsleft) < 0, %f\n", pointsleft);
 		return 0;
+	}
 
 	pointsleft /= totalpoints;
 

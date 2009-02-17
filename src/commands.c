@@ -1906,29 +1906,36 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 	if (!argv[0])
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "=========B=U=I=L=D=I=N=G=========");
-		PPrintf(client, RADIO_LIGHTYELLOW, "1-50 CAL Ack  17-Submarine");
-		PPrintf(client, RADIO_LIGHTYELLOW, "2-20mm Ack    18-Bridge");
-		PPrintf(client, RADIO_LIGHTYELLOW, "3-40mm Ack    19-Special Building");
-		PPrintf(client, RADIO_LIGHTYELLOW, "4-88mm Flak   20-Factory");
-		PPrintf(client, RADIO_LIGHTYELLOW, "5-Tower       21-Barracks");
-		PPrintf(client, RADIO_LIGHTYELLOW, "6-Hangar      22-Static plane");
-		PPrintf(client, RADIO_LIGHTYELLOW, "7-Fuel        23-Refinery");
-		PPrintf(client, RADIO_LIGHTYELLOW, "8-Ammo Depot  24-Plane Factory");
-		PPrintf(client, RADIO_LIGHTYELLOW, "9-Radar       25-Building");
-		PPrintf(client, RADIO_LIGHTYELLOW, "10-Warehouse  26-Crane");
-		PPrintf(client, RADIO_LIGHTYELLOW, "11-Hut        27-Strategic Target");
-		PPrintf(client, RADIO_LIGHTYELLOW, "12-Antenna    28-Artillery");
-		PPrintf(client, RADIO_LIGHTYELLOW, "13-CV         29-Artillery");
-		PPrintf(client, RADIO_LIGHTYELLOW, "14-Destroyer  30-Truck");
-		PPrintf(client, RADIO_LIGHTYELLOW, "15-Cruiser    31-Tree");
-		PPrintf(client, RADIO_LIGHTYELLOW, "16-Cargo Ship 32-Spawn Point");
+		PPrintf(client, RADIO_LIGHTYELLOW, "1-50 CAL Ack  18-Bridge");
+		PPrintf(client, RADIO_LIGHTYELLOW, "2-20mm Ack    19-Special Building");
+		PPrintf(client, RADIO_LIGHTYELLOW, "3-40mm Ack    20-Factory");
+		PPrintf(client, RADIO_LIGHTYELLOW, "4-88mm Flak   21-Barracks");
+		PPrintf(client, RADIO_LIGHTYELLOW, "5-Tower       22-Static plane");
+		PPrintf(client, RADIO_LIGHTYELLOW, "6-Hangar      23-Refinery");
+		PPrintf(client, RADIO_LIGHTYELLOW, "7-Fuel        24-Plane Factory");
+		PPrintf(client, RADIO_LIGHTYELLOW, "8-Ammo Depot  25-Building");
+		PPrintf(client, RADIO_LIGHTYELLOW, "9-Radar       26-Crane");
+		PPrintf(client, RADIO_LIGHTYELLOW, "10-Warehouse  27-Strategic Target");
+		PPrintf(client, RADIO_LIGHTYELLOW, "11-Radio      28-Artillery");
+		PPrintf(client, RADIO_LIGHTYELLOW, "12-Antenna    29-Hut");
+		PPrintf(client, RADIO_LIGHTYELLOW, "13-CV         30-Truck");
+		PPrintf(client, RADIO_LIGHTYELLOW, "14-Destroyer  31-Tree");
+		PPrintf(client, RADIO_LIGHTYELLOW, "15-Cruiser    32-Spawn Point");
+		PPrintf(client, RADIO_LIGHTYELLOW, "16-Cargo Ship 33-House");
+		PPrintf(client, RADIO_LIGHTYELLOW, "17-Submarine  34-Rock");
 		PPrintf(client, RADIO_LIGHTYELLOW, "usage: .decl <buildID> f<field> [<type>&|x<value>&|y<value>&|z<value>]\nOBS:if already field declared you can change type using only <type>");
 		PPrintf(client, RADIO_LIGHTYELLOW, "============F=I=E=L=D============");
-		PPrintf(client, RADIO_LIGHTYELLOW, "1-Small       5-Cargo");
-		PPrintf(client, RADIO_LIGHTYELLOW, "2-Medium      6-Destroyers");
-		PPrintf(client, RADIO_LIGHTYELLOW, "3-Main        7-Submarine");
-		PPrintf(client, RADIO_LIGHTYELLOW, "4-CV");
-		PPrintf(client, RADIO_LIGHTYELLOW, "usage: .decl f<field> [<type>&|x<value>&|y<value>&|z<value>]");
+		PPrintf(client, RADIO_LIGHTYELLOW, "1-Small       11-Port");
+		PPrintf(client, RADIO_LIGHTYELLOW, "2-Medium      12-Convoy");
+		PPrintf(client, RADIO_LIGHTYELLOW, "3-Main        13-Factory");
+		PPrintf(client, RADIO_LIGHTYELLOW, "4-CV          14-Refinery");
+		PPrintf(client, RADIO_LIGHTYELLOW, "5-Cargo       15-OpenField");
+		PPrintf(client, RADIO_LIGHTYELLOW, "6-Destroyers  16-WB3Post");
+		PPrintf(client, RADIO_LIGHTYELLOW, "7-Submarine   17-WB3Village");
+		PPrintf(client, RADIO_LIGHTYELLOW, "8-Radar       18-WB3Town");
+		PPrintf(client, RADIO_LIGHTYELLOW, "9-Bridge      19-WB3Port");
+		PPrintf(client, RADIO_LIGHTYELLOW, "10-City");
+		PPrintf(client, RADIO_LIGHTYELLOW, "usage: .decl f<field> [<type>&|x<value>&|y<value>&|z<value>&|r<value>]");
 		PPrintf(client, RADIO_LIGHTYELLOW, "=============C=I=T=Y=============");
 		PPrintf(client, RADIO_LIGHTYELLOW, "8-Radar       12-Convoy");
 		PPrintf(client, RADIO_LIGHTYELLOW, "9-Bridge      13-Factory");
@@ -1942,8 +1949,8 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 		{
 			argv[0]++;
 			if ((i = Com_Atoi(argv[0])) <= fields->value)
-				PPrintf(client, RADIO_LIGHTYELLOW, "Field %d, type %s, x=%d, y=%d, z=%d", arena->fields[i-1].number, GetFieldType(arena->fields[i-1].type), arena->fields[i-1].posxyz[0],
-						arena->fields[i-1].posxyz[1], arena->fields[i-1].posxyz[2]);
+				PPrintf(client, RADIO_LIGHTYELLOW, "Field %d, type %s, x=%d, y=%d, z=%d, r=%d", arena->fields[i-1].number, GetFieldType(arena->fields[i-1].type), arena->fields[i-1].posxyz[0],
+						arena->fields[i-1].posxyz[1], arena->fields[i-1].posxyz[2], arena->fields[i-1].radius);
 			else
 				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid Field");
 			return;
@@ -1968,8 +1975,8 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 		}
 		else
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "Type: %s, Field: %c%d, x=%d, y=%d, z=%d", GetBuildingType(build->type),
-					((build->fieldtype <= FIELD_SUBMARINE) || (build->fieldtype >= FIELD_WB3POST)) ? 'f' : 'c', build->field, build->posx, build->posy, build->posz);
+			PPrintf(client, RADIO_LIGHTYELLOW, "Type: %s, Field: %c%d, x=%d, y=%d, z=%d, %s", GetBuildingType(build->type),
+					((build->fieldtype <= FIELD_SUBMARINE) || (build->fieldtype >= FIELD_WB3POST)) ? 'f' : 'c', build->field, build->posx, build->posy, build->posz, build->infield?"IN":"OUT");
 			PPrintf(client, RADIO_LIGHTYELLOW, "Hitpoints: %d, APstop: %d, Imunity: %d", build->armor, GetBuildingAPstop(build->type, client), GetBuildingImunity(build->type, client));
 		}
 	}
@@ -2001,6 +2008,11 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 				{
 					argv[i]++;
 					arena->fields[Com_Atoi(argv[0])-1].posxyz[2] = Com_Atoi(argv[i]);
+				}
+				else if (tolower(*argv[i]) == 'r')
+				{
+					argv[i]++;
+					arena->fields[Com_Atoi(argv[0])-1].radius = Com_Atou(argv[i]);
 				}
 				else if (tolower(*argv[i]) == 'c')
 				{

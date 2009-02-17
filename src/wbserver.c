@@ -186,9 +186,9 @@ int main(int argc, char *argv[])
 			{
 				if(sync)
 #ifdef _WIN32
-				sleep(1);
+				sleep(10);
 #else
-				usleep(1);
+				usleep(10000);
 #endif
 				arena->time = Sys_Milliseconds();
 				if(oldtime > arena->time)
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 
 			checksync = FloorDiv(arena->time, 10);
 
-			if(checksync> arena->frame)
+			if(checksync > arena->frame)
 			{
 				sync = 0;
 				if((checksync - arena->frame)> 30000)

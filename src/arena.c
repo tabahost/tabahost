@@ -258,6 +258,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 				arena->fields[i].posxyz[0] = Com_Atoi((char *)strtok(NULL, ";"));
 				arena->fields[i].posxyz[1] = Com_Atoi((char *)strtok(NULL, ";"));
 				arena->fields[i].posxyz[2] = Com_Atoi((char *)strtok(NULL, ";"));
+				arena->fields[i].radius = Com_Atou((char *)strtok(NULL, ";"));
 				arena->fields[i].country = Com_Atoi((char *)strtok(NULL, ";"));
 				arena->fields[i].abletocapture = Com_Atoi((char *)strtok(NULL, ";"));
 				arena->fields[i].closed = Com_Atoi((char *)strtok(NULL, ";"));
@@ -305,6 +306,15 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 						arena->fields[i].buildings[j].posx = Com_Atoi((char *)strtok(NULL, ";"));
 						arena->fields[i].buildings[j].posy = Com_Atoi((char *)strtok(NULL, ";"));
 						arena->fields[i].buildings[j].posz = Com_Atoi((char *)strtok(NULL, ";"));
+						
+						if(sqrt(Com_Pow(arena->fields[i].buildings[j].posx - arena->fields[i].posxyz[0], 2) + Com_Pow(arena->fields[i].buildings[j].posy - arena->fields[i].posxyz[1], 2)) <= arena->fields[i].radius)
+						{
+							arena->fields[i].buildings[j].infield = 1;
+						}
+						else
+						{
+							arena->fields[i].buildings[j].infield = 0;
+						}
 					}
 				}
 				else
@@ -425,7 +435,7 @@ void SaveArenaStatus(char *filename, client_t *client)
 	{
 		for (i = 0; i < fields->value; i++)
 		{
-			fprintf(fp, "%u;%d;%d;%d;%u;%u;%u;%u", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], arena->fields[i].posxyz[2], arena->fields[i].country,
+			fprintf(fp, "%u;%d;%d;%d;%u;%u;%u;%u;%u", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], arena->fields[i].posxyz[2], arena->fields[i].radius, arena->fields[i].country,
 					arena->fields[i].abletocapture, arena->fields[i].closed, arena->fields[i].paras);
 
 			for (j = k = 0; j < MAX_CITYFIELD; j++)
@@ -3444,6 +3454,11 @@ void IncreaseAcksReup(u_int8_t field)
 
 u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 {
+	if(!(building->infield))
+	{
+		return FALSE;
+	}
+	
 	if (arcade->value)
 	{
 		if ((building->type == BUILD_50CALACK) ||
@@ -3716,8 +3731,8 @@ int32_t GetFieldRadius(u_int8_t fieldtype)
  **********************************/
 
 /* size of the map (number of dots) */
-#define MWIDTH      512
-#define MHEIGHT     512
+#define MWIDTH      1024
+#define MHEIGHT     1024
 
 /* distance between dots (in feets?) */
 #define MHDOT       (wb3->value?2640:2181) // 2640 for WB3 (12.8 squares)
@@ -4045,6 +4060,23 @@ u_int8_t SaveEarthMap(char *FileName)
 		Com_Printf(VERBOSE_WARNING, "SaveEarthMap() Cannot open file \"%s\"\n", FileName);
 		return 0;
 	}
+
+	/* USED TO convert 512 topo to 1024 topo
+	u_int16_t i;
+	u_int8_t teste[1024];
+	
+	memset(teste, 0x13, sizeof(teste));
+	
+	for(i = 0; i < 512; i++)
+	{
+		fwrite(earthMap+(i*512), 512, 1, fp);
+		fwrite(teste, 512, 1, fp);
+	}
+	for(i = 0; i < 512; i++)
+	{
+		fwrite(teste, 1024, 1, fp);
+	}
+	*/
 
 	if (fwrite(earthMap, MWIDTH, MHEIGHT, fp) != MHEIGHT) // error on write some value from file
 	{
