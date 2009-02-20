@@ -2481,6 +2481,7 @@ extern	var_t		*mapflagsfly;	// show circles while flying
 extern	var_t		*mapflagsown;	// show circles of own country
 extern	var_t		*mapflagstwr;	// show circles while in twr
 extern	var_t		*mapname;		// name of current map
+extern	var_t		*mapsize;		// map size in miles
 extern	var_t		*maxclients;	// maximum of incomming connections
 extern	var_t		*maxentities;	// maximum of players + drones in world
 extern	var_t		*maxpilotg;		//

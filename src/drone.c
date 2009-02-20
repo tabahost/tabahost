@@ -1526,7 +1526,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	u_int8_t city, damaged;
 	munition_t *munition, *max, *min;
 	int16_t radius;
-	u_int8_t fieldtype;
+	u_int16_t fieldradius;
 	int8_t killer = 0;
 	u_int8_t buffer[7];
 	float sdamage;
@@ -1585,20 +1585,20 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 			{
 				a = x - arena->fields[field].posxyz[0];
 				b = y - arena->fields[field].posxyz[1];
-				fieldtype = arena->fields[field].type;
+				fieldradius = arena->fields[field].radius;
 			}
 			else
 			{
 				a = x - arena->cities[field - (int16_t)fields->value].posxyz[0];
 				b = y - arena->cities[field - (int16_t)fields->value].posxyz[1];
-				fieldtype = arena->cities[field - (int16_t)fields->value].type;
+				fieldradius = GetFieldRadius(arena->cities[field - (int16_t)fields->value].type);
 			}
 
-			if ((a >= (-1 * GetFieldRadius(fieldtype)) && a <= GetFieldRadius(fieldtype)) && (b >= (-1 * GetFieldRadius(fieldtype)) && b <= GetFieldRadius(fieldtype)))
+			if ((a >= (-1 * fieldradius) && a <= fieldradius) && (b >= (-1 * fieldradius) && b <= fieldradius))
 			{
 				c = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2));
 				
-				if (c < GetFieldRadius(fieldtype))
+				if (c < fieldradius)
 				{
 					if (field < fields->value)
 					{
@@ -1788,7 +1788,7 @@ void PFAUDamage(client_t *fau)
 	u_int8_t i, j, k;
 	int32_t a, b;
 	u_int32_t dist;
-	u_int8_t fieldtype;
+	u_int16_t fieldradius;
 
 	k = fields->value + cities->value;
 
@@ -1799,18 +1799,18 @@ void PFAUDamage(client_t *fau)
 		{
 			a = fau->posxy[0][0] - arena->fields[i].posxyz[0];
 			b = fau->posxy[1][0] - arena->fields[i].posxyz[1];
-			fieldtype = arena->fields[i].type;
+			fieldradius = arena->fields[i].radius;
 		}
 		else
 		{
 			a = fau->posxy[0][0] - arena->cities[i - (int16_t)fields->value].posxyz[0];
 			b = fau->posxy[1][0] - arena->cities[i - (int16_t)fields->value].posxyz[1];
-			fieldtype = arena->cities[i - (int16_t)fields->value].type;
+			fieldradius = GetFieldRadius(arena->cities[i - (int16_t)fields->value].type);
 		}
 
-		if ((a >= (-1 * GetFieldRadius(fieldtype)) && a <= GetFieldRadius(fieldtype)) && (b >= (-1 * GetFieldRadius(fieldtype)) && b <= GetFieldRadius(fieldtype)))
+		if ((a >= (-1 * fieldradius) && a <= fieldradius) && (b >= (-1 * fieldradius) && b <= fieldradius))
 		{
-			if ((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < GetFieldRadius(fieldtype))
+			if ((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < fieldradius)
 				break;
 		}
 	}

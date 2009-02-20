@@ -496,11 +496,13 @@ void SaveArenaStatus(char *filename, client_t *client)
 
 	SavePlanesPool(filename, client);
 
+	/*
 	if (wb3->value)
 	{
 		sprintf(file, "./arenas/%s/arena.topo", dirname->string);
 		SaveEarthMap(file);
 	}
+	*/
 
 	fclose(fp);
 }
@@ -3731,28 +3733,24 @@ int32_t GetFieldRadius(u_int8_t fieldtype)
  **********************************/
 
 /* size of the map (number of dots) */
-#define MWIDTH      1024
-#define MHEIGHT     1024
+#define MWIDTH      2112 // 2112
+#define MHEIGHT     2112 // 2112
 
-/* distance between dots (in feets?) */
-#define MHDOT       (wb3->value?2640:2181) // 2640 for WB3 (12.8 squares)
+/* distance between dots (in feets) */
+#define MHDOT       ((mapsize->value * 5280) / MWIDTH)
 /* level of water */
-#define MWATERMARK  209
+//#define MWATERMARK  209
 /* center of map (num of dots * dist betw dots / 2) */
-#define MXCENTER    558084 //558336?  // original == 558534
-#define MYCENTER    556604 //558336?  // original == 556534
+//#define MXCENTER    558084
+//#define MYCENTER    556604
 /* translating level number to feets */
 #define LEVEL2HEIGHT(Level) (mapLevels[(Level)])
 /* translating dot indexes to coords */
-#define INDEX2X(Index) (wb3->value?(((int)(Index)) * MHDOT):(MXCENTER - ((int)(Index)) * MHDOT))
-#define INDEX2Y(Index) (wb3->value?(((int)(Index)) * MHDOT):(MYCENTER - ((int)(Index)) * MHDOT))
-//#define WB3INDEX2X(Index) (((int)(Index)) * WB3MHDOT)
-//#define WB3INDEX2Y(Index) (((int)(Index)) * WB3MHDOT)
+#define INDEX2X(Index) (((int)(Index)) * MHDOT) //
+#define INDEX2Y(Index) (((int)(Index)) * MHDOT) //
 /* and back */
-#define X2INDEX(xxxx) (wb3->value?((xxxx) / MHDOT):((MXCENTER - (xxxx)) / MHDOT))
-#define Y2INDEX(yyyy) (wb3->value?((yyyy) / MHDOT):((MYCENTER - (yyyy)) / MHDOT))
-//#define WB3X2INDEX(xxxx) ((xxxx) / WB3MHDOT) // square 0,0 = X 21120; Y 21120
-//#define WB3Y2INDEX(yyyy) ((yyyy) / WB3MHDOT) // 
+#define X2INDEX(xxxx) ((xxxx) / MHDOT) //
+#define Y2INDEX(yyyy) ((yyyy) / MHDOT) //
 
 /* terrain levels */
 u_int8_t earthMap[MHEIGHT * MWIDTH];
@@ -3766,23 +3764,14 @@ u_int8_t Alt2Index(int32_t alt)
 	int16_t x;
 	const double A = 0.5333;
 	const double B = 0.4677;
-	const double C = -202;
+	const double C = -38;
 
-	if (alt > 50000)
-		return 254;
+	if (alt > 34761) //(alt > 50000)
+		return 255;
 
 	x = ((B * -1) + sqrt(B * B - (4 * A * (C - alt))) / (2 * A) + 0.5);
 
-	if (x < 0)
-	{
-		x = 0;
-	}
-	else if (x > 254)
-	{
-		x = 254;
-	}
-
-	return (u_int8_t) x;
+	return (x < 0) ? 0 : ((x > 255) ? 255 : (u_int8_t)x);
 }
 
 void WB3MapTopography(client_t *client)
@@ -4042,7 +4031,7 @@ u_int8_t LoadEarthMap(char *FileName)
 
 	Com_Printf(VERBOSE_ALWAYS, "Loading elevations from \"%s\"\n", FileName);
 
-	mapLevels[0] = -176 - 26; // ???
+	mapLevels[0] = -38; // deepest level in topography file (-149)
 
 	for (i = 1; i < 256; i++)
 		mapLevels[i] = mapLevels[i - 1] + i + (i - 1) / 15;

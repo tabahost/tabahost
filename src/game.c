@@ -4434,7 +4434,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			land += 1;
 		}
 		
-		if (land <= fields->value && dist > GetFieldRadius(arena->fields[land-1].type)) // no fields found, or too far
+		if (land <= fields->value && dist > arena->fields[land-1].radius) // no fields found, or too far
 		{
 			if (arena->fields[client->field - 1].country == client->country)
 			{
@@ -4983,7 +4983,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 					{
 						field = NearestField(client->posxy[0][0], client->posxy[1][0], (client->country == 1) ? 3 : 1, FALSE, FALSE, &distance);
 
-						if (field >= 0 && field < fields->value && distance < GetFieldRadius(arena->fields[field].type))
+						if (field >= 0 && field < fields->value && distance < arena->fields[field].radius)
 						{
 							if (!client->ackstar)
 							{
@@ -5780,7 +5780,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 				j = NearestField(client->posxy[0][0], client->posxy[1][0], 0, 
 				TRUE, TRUE, &dist);
 
-				if(j >= 0 && j < fields->value && dist < GetFieldRadius(arena->fields[j].type))
+				if(j >= 0 && j < fields->value && dist < arena->fields[j].radius)
 				{
 					if (j < fields->value)
 						alt = ntohl(drop->alt) - arena->fields[j].posxyz[2]; // TODO: FIXME: calculate destx desty and GetHeightAt()
@@ -5862,7 +5862,7 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 			field = ntohs(wb3tonnage->field);
 			distance = ntohs(wb3tonnage->distance);
 			
-			if(field && field <= fields->value && distance < GetFieldRadius(arena->fields[field-1].type))
+			if(field && field <= fields->value && distance < arena->fields[field-1].radius)
 			{
 				if(client->country != arena->fields[field-1].country)
 				{

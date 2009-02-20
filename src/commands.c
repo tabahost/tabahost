@@ -5047,7 +5047,7 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 			dist = sqrt(Com_Pow(x, 2) + Com_Pow(y, 2));
 
 			if ((arena->fields[i].type == FIELD_WB3POST && dist < 1000) || (arena->fields[i].type == FIELD_WB3VILLAGE && dist < 2700) || (arena->fields[i].type == FIELD_WB3TOWN && dist < 3600)
-					|| (arena->fields[i].type <= FIELD_MAIN && dist < GetFieldRadius(arena->fields[i].type)))
+					|| (arena->fields[i].type <= FIELD_MAIN && dist < arena->fields[i].radius))
 			{
 				PPrintf(client, RADIO_YELLOW, "Too near to field f%d, acks would kill Commandos", i+1);
 				return;
@@ -5876,7 +5876,7 @@ void Cmd_Reload(client_t *client)
 
 			if (field >= 0 && arena->fields[field].country == client->country)
 			{
-				if (distance < GetFieldRadius(arena->fields[field].type))
+				if (distance < arena->fields[field].radius)
 				{
 					if (!(client->status_damage))
 					{

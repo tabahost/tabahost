@@ -116,6 +116,7 @@ var_t *mapflagsfly; // extern
 var_t *mapflagsown; // extern
 var_t *mapflagstwr; // extern
 var_t *mapname; // extern
+var_t *mapsize; // extern
 var_t *maxclients; // extern
 var_t *maxentities; // extern
 var_t *maxpilotg; // extern
@@ -240,7 +241,7 @@ void InitVars(void)
 	dayhours = Var_Get("dayhours", "14", VAR_ARCHIVE);
 	dbpasswd = Var_Get("dbpasswd", "t4b4d4t4b4s3", VAR_ADMIN);
 	dbuser = Var_Get("dbuser", "franz", VAR_ADMIN);
-	dirname = Var_Get("dirname", "wbmed3", VAR_ARCHIVE | VAR_ADMIN);
+	dirname = Var_Get("dirname", "wb3europe", VAR_ARCHIVE | VAR_ADMIN);
 	easymode = Var_Get("easymode", "0", VAR_ARCHIVE);
 	emulatecollision = Var_Get("emulatecollision", "0", VAR_ARCHIVE);
 	enableottos = Var_Get("enableottos", "1", VAR_ARCHIVE);
@@ -288,7 +289,8 @@ void InitVars(void)
 	mapflagsfly = Var_Get("mapflagsfly", "0", VAR_ARCHIVE);
 	mapflagsown = Var_Get("mapflagsown", "1", VAR_ARCHIVE);
 	mapflagstwr = Var_Get("mapflagstwr", "1", VAR_ARCHIVE);
-	mapname = Var_Get("mapname", "wbmed3", VAR_ARCHIVE | VAR_ADMIN);
+	mapname = Var_Get("mapname", "europe", VAR_ARCHIVE | VAR_ADMIN);
+	mapsize = Var_Get("mapsize", "128", VAR_ARCHIVE | VAR_ADMIN);
 	maxpilotg = Var_Get("maxpilotg", "11", VAR_ARCHIVE);
 	metar = Var_Get("metar", "0", VAR_ARCHIVE);
 	midairs = Var_Get("midairs", "1", VAR_ARCHIVE);
