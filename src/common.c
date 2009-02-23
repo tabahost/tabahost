@@ -1788,32 +1788,27 @@ double WBLongitude(double dAbsLongitude)
 	double cdSquare00Longitude;
 	double cdSquareWidth;
 
-	if (wb3->value)
+/*
+	if (!Com_Strncmp(mapname->string, "atoll", 5))
 	{
-		if (!Com_Strncmp(mapname->string, "atoll", 5) || !Com_Strncmp(mapname->string, "ardennes", 8))
-		{
-			if (!Com_Strncmp(mapname->string, "atoll", 5))
-			{
-				cdSquareWidth = 52800.0L;
-				cdSquare00Longitude = 14843.0L;
-			}
-			else
-			{
-				cdSquareWidth = 54400.0L;
-				cdSquare00Longitude = 18162.0L;
-			}
-		}
-		else
-		{
-			cdSquare00Longitude = 21120.0L;
-			cdSquareWidth = 105600.0L;
-		}
+		cdSquareWidth = 52800.0L; // 10 miles
 	}
-	else
+	else if (!Com_Strncmp(mapname->string, "ardennes", 8))
 	{
-		cdSquare00Longitude = 633600.0L;
-		cdSquareWidth = -105600.0L;
+		cdSquareWidth = 52800.0L; // 10 miles
 	}
+	else if (!Com_Strncmp(mapname->string, "tobruk", 6))
+	{
+		cdSquareWidth = 211200.0L; // 40 miles
+	}
+	else // malta, europe
+	{
+		cdSquareWidth = 105600.0L; // 20 miles
+	}
+*/
+
+	cdSquareWidth = (double)mapscale->value * 5280;
+	cdSquare00Longitude = (double)mapsize->value * 165;
 
 	return floor((dAbsLongitude - cdSquare00Longitude) / cdSquareWidth);
 }
@@ -1829,33 +1824,28 @@ double WBLatitude(double dAbsLatitude)
 	double cdSquare00Latitude;
 	double cdSquareHeight;
 
-	if (wb3->value)
-	{
-		if (!Com_Strncmp(mapname->string, "atoll", 5) || !Com_Strncmp(mapname->string, "ardennes", 8))
-		{
-			if (!Com_Strncmp(mapname->string, "atoll", 5))
-			{
-				cdSquare00Latitude = 14843.0L;
-				cdSquareHeight = 52800.0L;
-			}
-			else
-			{
-				cdSquare00Latitude = 18162.0L;
-				cdSquareHeight = 54400.0L;
-			}
 
-		}
-		else
-		{
-			cdSquare00Latitude = 21120.0L;
-			cdSquareHeight = 105600.0L;
-		}
-	}
-	else
+/*
+	if (!Com_Strncmp(mapname->string, "atoll", 5))
 	{
-		cdSquare00Latitude = -633600.0L;
-		cdSquareHeight = 105600.0L;
+		cdSquareHeight = 52800.0L; // 10 miles
 	}
+	else if (!Com_Strncmp(mapname->string, "ardennes", 8))
+	{
+		cdSquareHeight = 52800.0L; // 10 miles
+	}
+	else if (!Com_Strncmp(mapname->string, "tobruk", 6))
+	{
+		cdSquareHeight = 211200.0L; // 40 miles
+	}
+	else // malta, europe
+	{
+		cdSquareHeight = 105600.0L; // 20 miles
+	}
+*/
+
+	cdSquareHeight = (double)mapscale->value * 5280;
+	cdSquare00Latitude = (double)mapsize->value * 165;
 
 	return floor((dAbsLatitude - cdSquare00Latitude) / cdSquareHeight);
 }

@@ -116,6 +116,7 @@ var_t *mapflagsfly; // extern
 var_t *mapflagsown; // extern
 var_t *mapflagstwr; // extern
 var_t *mapname; // extern
+var_t *mapscale; // extern
 var_t *mapsize; // extern
 var_t *maxclients; // extern
 var_t *maxentities; // extern
@@ -290,6 +291,7 @@ void InitVars(void)
 	mapflagsown = Var_Get("mapflagsown", "1", VAR_ARCHIVE);
 	mapflagstwr = Var_Get("mapflagstwr", "1", VAR_ARCHIVE);
 	mapname = Var_Get("mapname", "europe", VAR_ARCHIVE | VAR_ADMIN);
+	mapscale = Var_Get("mapscale", "20", VAR_ARCHIVE | VAR_ADMIN);
 	mapsize = Var_Get("mapsize", "128", VAR_ARCHIVE | VAR_ADMIN);
 	maxpilotg = Var_Get("maxpilotg", "11", VAR_ARCHIVE);
 	metar = Var_Get("metar", "0", VAR_ARCHIVE);

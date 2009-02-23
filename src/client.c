@@ -1948,7 +1948,7 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 
 		ps[clientskin->msgsize] = '\0';
 
-		if (strlen(thskins->string) > 4)
+		if (strlen(thskins->string) > 2)
 		{
 			i = 1;
 
@@ -2012,10 +2012,6 @@ char *CreateSkin(client_t *client, u_int8_t number)
 
 	switch (client->country)
 	{
-
-		//Franz remember
-			// change thskins in blitz and barbarossa to match skins pack
-
 		case COUNTRY_RED:
 			sprintf(buffer, "ppv\\%s\\%sr%dppv.vfc@%sr%d.ppv", GetPlaneDir(client->plane), thskins->string + len, number, thskins->string + len, number);
 			break;
