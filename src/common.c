@@ -1788,25 +1788,6 @@ double WBLongitude(double dAbsLongitude)
 	double cdSquare00Longitude;
 	double cdSquareWidth;
 
-/*
-	if (!Com_Strncmp(mapname->string, "atoll", 5))
-	{
-		cdSquareWidth = 52800.0L; // 10 miles
-	}
-	else if (!Com_Strncmp(mapname->string, "ardennes", 8))
-	{
-		cdSquareWidth = 52800.0L; // 10 miles
-	}
-	else if (!Com_Strncmp(mapname->string, "tobruk", 6))
-	{
-		cdSquareWidth = 211200.0L; // 40 miles
-	}
-	else // malta, europe
-	{
-		cdSquareWidth = 105600.0L; // 20 miles
-	}
-*/
-
 	cdSquareWidth = (double)mapscale->value * 5280;
 	cdSquare00Longitude = (double)mapsize->value * 165;
 
@@ -1823,26 +1804,6 @@ double WBLatitude(double dAbsLatitude)
 {
 	double cdSquare00Latitude;
 	double cdSquareHeight;
-
-
-/*
-	if (!Com_Strncmp(mapname->string, "atoll", 5))
-	{
-		cdSquareHeight = 52800.0L; // 10 miles
-	}
-	else if (!Com_Strncmp(mapname->string, "ardennes", 8))
-	{
-		cdSquareHeight = 52800.0L; // 10 miles
-	}
-	else if (!Com_Strncmp(mapname->string, "tobruk", 6))
-	{
-		cdSquareHeight = 211200.0L; // 40 miles
-	}
-	else // malta, europe
-	{
-		cdSquareHeight = 105600.0L; // 20 miles
-	}
-*/
 
 	cdSquareHeight = (double)mapscale->value * 5280;
 	cdSquare00Latitude = (double)mapsize->value * 165;
@@ -2000,71 +1961,45 @@ int16_t PredictorCorrector16(int16_t *values, u_int8_t degree)
 
 char *PadLoc(char *szBuffer, double dLongitude, double dLatitude)
 {
-	const double cdSquareLongitudeSections = 3.0L;
-	const double cdSquareLatitideSections = 3.0L;
 	double dPad1;
 	double dPad2;
 	double cdSquareWidth;
 	memset(szBuffer, 0, 20);
+
+	cdSquareWidth = (double)mapscale->value * 5280;
+	dLongitude -= (double)mapsize->value * 165;
+	dLatitude -= (double)mapsize->value * 165;
+
 	/*normalisation to 0..105600 range*/
+	while(dLongitude < 0.0L)
+		dLongitude += cdSquareWidth;
 
-	if (wb3->value)
-	{
-		if (!Com_Strncmp(mapname->string, "atoll", 5) || !Com_Strncmp(mapname->string, "ardennes", 8))
-		{
+	dLongitude = ModRange(dLongitude, cdSquareWidth); // returns a number between zero and cdSquareWidth
 
-			if (!Com_Strncmp(mapname->string, "atoll", 5))
-			{
-				cdSquareWidth = 52800.0L;
-				dLongitude -= 14843.0L;
-				dLatitude -= 14843.0L;
-			}
-			else
-			{
-				cdSquareWidth = 54400.0L;
-				dLongitude -= 18162.0L;
-				dLatitude -= 18162.0L;
-			}
-		}
-		else
-		{
-			cdSquareWidth = 105600.0L;
-			dLongitude -= 21120.0L;
-			dLatitude -= 21120.0L;
-		}
+	while(dLatitude < 0.0L)
+		dLatitude += cdSquareWidth;
 
-		dLongitude = dLongitude * -1;
-	}
-	else
-		cdSquareWidth = 105600.0L;
-
-	for (; dLongitude < 0.0L; dLongitude += cdSquareWidth)
-		;
-	dLongitude = ModRange(dLongitude, cdSquareWidth);
-	for (; dLatitude < 0.0L; dLatitude += cdSquareWidth)
-		; // franz-: why sum 105600 if negative if normalization was done?
-	dLatitude = ModRange(dLatitude, cdSquareWidth);
+	dLatitude = ModRange(dLatitude, cdSquareWidth); // returns a number between zero and cdSquareWidth
 
 	/*calculation*/
-	dPad1 = cdSquareLongitudeSections - FloorDiv(dLongitude, (cdSquareWidth/3)) // franz-: gets keypad (1-9) based on lon and lat
-	+ cdSquareLatitideSections * FloorDiv(dLatitude, (cdSquareWidth/3));
+	dPad1 = (FloorDiv(dLongitude, (cdSquareWidth/3)) + 1) + (3 * FloorDiv(dLatitude, (cdSquareWidth/3)));
 
 	/*normalisation to 0..35200 range*/
-	for (; dLatitude < 0.0L; dLatitude += (cdSquareWidth/3))
-		;
-	dLatitude = ModRange(dLatitude, (cdSquareWidth/3));
-	for (; dLongitude < 0.0L; dLongitude += (cdSquareWidth/3))
-		;
-	dLongitude = ModRange(dLongitude, (cdSquareWidth/3));
+	while(dLatitude < 0.0L)
+		dLatitude += (cdSquareWidth/3);
+	dLatitude = ModRange(dLatitude, (cdSquareWidth/3)); // returns a number between zero and cdSquareWidth/3
+
+	while(dLongitude < 0.0L)
+		dLongitude += (cdSquareWidth/3);
+	dLongitude = ModRange(dLongitude, (cdSquareWidth/3)); // returns a number between zero and cdSquareWidth/3
 
 	/*calculation*/
-	dPad2 = cdSquareLongitudeSections - FloorDiv(dLongitude, (cdSquareWidth/9)) + cdSquareLatitideSections * FloorDiv(dLatitude, (cdSquareWidth/9));
+	dPad2 = (FloorDiv(dLongitude, (cdSquareWidth/9)) + 1) + (3 * FloorDiv(dLatitude, (cdSquareWidth/9)));
 
 	sprintf(szBuffer, ".%1.0f.%1.0f", dPad1, dPad2);
 
 	return szBuffer;
 }
-
 
 /*
 char *replace_str(char *str, char *orig, char *rep)
