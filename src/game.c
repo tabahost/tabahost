@@ -5024,7 +5024,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		{
 			if (!client->cancollide && !arcade->value)
 			{
-				if (((arena->time - client->dronetimer)/1000) > 10)
+				if ((FLIGHT_TIME(client)/1000) > 10)
 				{
 					if ((client->posalt[0] - arena->fields[client->field - 1].posxyz[2]) > 15)
 					{
@@ -5773,12 +5773,11 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 
 			drop->id = htons(ntohs(drop->id) + (500 * (i+1)));
 
-			if (drop->item != 114 /*para*/&& (drop->item < 137 || drop->item > 140)/*torpedoes (avoid nuke effect)*/)
+			if (drop->item != 132 /*barrage*/ && drop->item != 114 /*para*/&& (drop->item < 137 || drop->item > 140)/*torpedoes (avoid nuke effect)*/)
 			{
 				dist = 0;
 
-				j = NearestField(client->posxy[0][0], client->posxy[1][0], 0, 
-				TRUE, TRUE, &dist);
+				j = NearestField(client->posxy[0][0], client->posxy[1][0], 0, TRUE, TRUE, &dist);
 
 				if(j >= 0 && j < fields->value && dist < arena->fields[j].radius)
 				{
@@ -7900,16 +7899,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 
 				if (client->related[0])
 				{
-					if (client->related[0]->dronetimer < arena->time)
-					{
-						end = (arena->time - client->related[0]->dronetimer)/10;
-					}
-					else
-					{
-						end = (0xFFFFFFFF - (client->related[0]->dronetimer - arena->time))/10;
-					}
-
-					if (end < (u_int32_t)(flypenalty->value * 100))
+					if ((FLIGHT_TIME(client->related[0])/10) < (u_int32_t)(flypenalty->value * 100))
 					{
 						client->related[0]->hmackpenalty = (flypenalty->value * 100) - end;
 						client->related[0]->hmackpenaltyfield = client->related[0]->field;
@@ -8962,7 +8952,7 @@ void SendPlayersNear(client_t *client)
 
 	for (j = 0; j < MAX_SCREEN; j++) /* check for removing from list */
 	{
-		if ((j != (MAX_SCREEN - 1)) || ((arena->time - client->dronetimer) > 15000))
+		if ((j != (MAX_SCREEN - 1)) || (FLIGHT_TIME(client) > 15000))
 		{
 			if (client->visible[j].client)
 			{

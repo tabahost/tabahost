@@ -286,6 +286,9 @@ typedef unsigned int u_int32_t;
 #define MISC_FILE			"misc.bin"
 #define EXEC_SIZE			0x00115000
 #define EXEC_FILE			"EXEC"
+
+#define FLIGHT_TIME(xxxxx)	(arena->time - (xxxxx)->dronetimer)
+
 #define CRC_WARBIRDS		0x669ACE70
 #define CRC_WBD3D			0x5587583A
 #define CRC_WBD3D_MOD		0xB7599D79

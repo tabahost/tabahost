@@ -5859,16 +5859,7 @@ void Cmd_Reload(client_t *client)
 		return;
 	}
 
-	if (client->dronetimer < arena->time)
-	{
-		distance = (arena->time - client->dronetimer)/1000;
-	}
-	else
-	{
-		distance = (MAX_UINT32 - (client->dronetimer - arena->time))/1000;
-	}
-
-	if (distance < 600)
+	if ((FLIGHT_TIME(client)/1000) < 600)
 	{
 		if (!(client->speedxyz[0][0] + client->speedxyz[1][0] + client->speedxyz[2][0]))
 		{

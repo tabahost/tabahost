@@ -186,7 +186,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				}
 				else
 				{
-					if((arena->time - client->dronetimer) > 2000) // 20 secs
+					if(FLIGHT_TIME(client) > 2000) // 20 secs
 						event_cost += ScoreDamageCost(client);
 				}
 			break;
@@ -348,20 +348,14 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		if(misc != SCORE_KILLED)
 			client->streakscore += client->lastscore;
 
-		if (client->dronetimer < arena->time)
-		{
-			flighttime = (arena->time - client->dronetimer)/1000;
-		}
-		else
-		{
-			flighttime = (0xFFFFFFFF - (client->dronetimer - arena->time))/1000;
-		}
+		flighttime = FLIGHT_TIME(client)/1000;
 
 		sprintf(my_query, "UPDATE score_common SET killstod = '%u', structstod = '%u', lastscore = '%.3f', totalscore = totalscore + '%.3f', streakscore = '%.3f', flighttime = flighttime + '%u' WHERE player_id = '%u'",
 				client->killstod, client->structstod, client->lastscore, client->lastscore, client->streakscore, flighttime, client->id);
 
 		if(!client->drone)
 		{
+			Com_Printf(VERBOSE_DEBUG, "Query: %s\n", my_query);
 			if (d_mysql_query(&my_sock, my_query)) // query succeeded
 			{
 				Com_Printf(VERBOSE_WARNING, "ScoresEvent(updplayer): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
@@ -378,6 +372,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		else if (client->country == 3)
 			sprintf(my_query, "%s flygold = flygold + '1' WHERE player_id = '%u'", my_query, client->id);
 
+		Com_Printf(VERBOSE_DEBUG, "Query: %s\n", my_query);
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
 			Com_Printf(VERBOSE_WARNING, "ScoresEvent(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
@@ -392,6 +387,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	{
 		sprintf(my_query, "UPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'", client->score.penaltyscore, client->id);
 
+		Com_Printf(VERBOSE_DEBUG, "Query: %s\n", my_query);
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
 			Com_Printf(VERBOSE_WARNING, "ScoresEvent(penalty): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
@@ -517,7 +513,7 @@ void ScoreFieldCapture(u_int8_t field)
 						}
 					}
 				}
-				else // friendly hit... tsc, tsc, tsc...
+				else if(friendlyfire->value)// friendly hit... tsc, tsc, tsc...
 				{
 					if(arena->fields[field].hitby[i]->infly)
 					{
@@ -529,6 +525,10 @@ void ScoreFieldCapture(u_int8_t field)
 						Com_Printf(VERBOSE_DEBUG, "Field Penalty Not InFlight\n");
 						sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
 					}
+				}
+				else
+				{
+					Com_Printf(VERBOSE_DEBUG, "Field Penalty filtered '%.3f'\n", score);
 				}
 			}
 
@@ -677,15 +677,22 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 					}
 					else if (client->hitby[i] != client)// friendly hit... tsc, tsc, tsc...
 					{
-						if(client->hitby[i]->infly)
+						if(friendlyfire->value)
 						{
-							Com_Printf(VERBOSE_DEBUG, "Kill Penalty InFlight\n");
-							client->hitby[i]->score.penaltyscore += score;
+							if(client->hitby[i]->infly)
+							{
+								Com_Printf(VERBOSE_DEBUG, "Kill Penalty InFlight\n");
+								client->hitby[i]->score.penaltyscore += score;
+							}
+							else
+							{
+								Com_Printf(VERBOSE_DEBUG, "Kill Penalty Not InFlight\n");
+								sprintf(my_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+							}
 						}
 						else
 						{
-							Com_Printf(VERBOSE_DEBUG, "Kill Penalty Not InFlight\n");
-							sprintf(my_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+							Com_Printf(VERBOSE_DEBUG, "Kill Penalty filtered '%.3f'\n", score);
 						}
 					}
 				}
@@ -818,14 +825,7 @@ float ScoreFlightTimeCost(client_t *client)
 		return;
 	}
 
-	if (client->dronetimer < arena->time)
-	{
-		flighttime = (arena->time - client->dronetimer)/1000;
-	}
-	else
-	{
-		flighttime = (0xFFFFFFFF - (client->dronetimer - arena->time))/1000;
-	}
+	flighttime = FLIGHT_TIME(client)/1000;
 
 	flighttime /= 3600; // convert to hours
 
@@ -970,16 +970,7 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 	// check if time penalized
 	if (!(end == ENDFLIGHT_LANDED || end == ENDFLIGHT_DITCHED) && !(end == ENDFLIGHT_BAILED && client->attached))
 	{
-		if (client->dronetimer < arena->time)
-		{
-			i = (arena->time - client->dronetimer)/10;
-		}
-		else
-		{
-			i = (0xFFFFFFFF - (client->dronetimer - arena->time))/10;
-		}
-
-		if (i < (flypenalty->value * 100))
+		if ((FLIGHT_TIME(client)/10) < (flypenalty->value * 100))
 		{
 			client->flypenalty = (flypenalty->value * 100) - i;
 			client->flypenaltyfield = client->field;
@@ -1028,7 +1019,8 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 	// Print Flight Defrief
 
 	PPrintf(client, RADIO_WHITE, "==================================================");
-	PPrintf(client, RADIO_WHITE, "Flight time: %s", Com_TimeSeconds(end));
+	PPrintf(client, RADIO_WHITE, "Flight time: %s", Com_TimeSeconds(FLIGHT_TIME(client)/1000));
+		Com_Printf(VERBOSE_DEBUG, "Flight Time = %u / 1000\n", FLIGHT_TIME(client));
 	PPrintf(client, RADIO_WHITE, "Last mission score: %11.3f - %s mission.", client->lastscore, IsFighter(client) ? "Fighter" : IsBomber(client) ? "Bomber" : "Ground");
 	PPrintf(client, RADIO_WHITE, "You've shot %d rounds, hit %d (acc:%.3f%%)", gunused, totalhits, gunused ? (float)totalhits*100/gunused : 0);
 	if(totalhits)

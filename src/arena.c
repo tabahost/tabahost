@@ -1661,6 +1661,9 @@ void LoadRPS(char *path, client_t *client)
 		if (!fgets(buffer, sizeof(buffer), fp))
 		{
 			PPrintf(client, RADIO_YELLOW, "WARNING: Unexpected end of %s", file);
+			fclose(fp);
+			strcat(file, ".LOCK");
+			Sys_UnlockFile(file);
 			return;
 		}
 		else
@@ -3780,7 +3783,7 @@ void WB3MapTopography(client_t *client)
 	{
 		if (client->infly)
 		{
-			if (((arena->time - client->dronetimer)/1000) > 2) // 2 seconds flight
+			if ((FLIGHT_TIME(client)/1000) > 2) // 2 seconds flight
 			{
 				WB3Mapper(client);
 
