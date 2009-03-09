@@ -80,6 +80,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 				clients[i].related[0] = NULL;
 
 			clients[i].inuse = 1;
+			clients[i].id = DRONE_DBID_BASE + (rand()%1000);
 			clients[i].ready = 1;
 			clients[i].drone = type;
 			clients[i].country = country;
@@ -1130,7 +1131,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 
 				if(sdamage >= 0)
 				{
-					dest->damby[j] += sdamage;
+					dest->hitby[j].damage += sdamage;
 				}
 				else
 				{
@@ -1741,7 +1742,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 
 										if(sdamage >= 0)
 										{
-											clients[i].damby[killer] += sdamage;
+											clients[i].hitby[killer].damage += sdamage;
 										}
 										else
 										{

@@ -126,7 +126,7 @@ typedef unsigned int u_int32_t;
 #define MAX_MUNTYPE			204 	// = number of munition types
 #define MAX_BUILDINGS		300		// 39?
 #define MAX_CITYFIELD		17		// max cities linked to a field
-#define	MAX_HITBY			32		// max of players can get kill assist
+#define	MAX_HITBY			64		// max of players can get kill assist
 #define MAX_UINT32			(u_int32_t) 0xFFFFFFFF // max value for unsigned int 32 (4294967295UL)
 #define MAX_INT16			(int16_t) 0x7FFF // max valur for signed in 16 (32767)
 #define MAX_RELATED			7		// max of drones user can mantain relationship
@@ -422,6 +422,7 @@ typedef unsigned int u_int32_t;
 #define	STATUS_LGEAR		0x40000000 // left front suspension
 #define	STATUS_FLAPS		0x80000000 // explodes everything!!!!
 //#define CV_SPEED			50	// ft/s
+#define DRONE_DBID_BASE		10000000
 #define DRONE_FAU_SPEED		500	// Fau Speed
 #define DRONE_TANK_SPEED	50	// ft/s
 #define DRONE_DIST			150	// Wingman distance
@@ -539,6 +540,16 @@ typedef struct rps_s
 	int8_t		pool[19];		// -1 = infinite (S,M,B,CV,Cargo, DD, SUB, Radar, Bridge, City, Port, Convoy, Factory, Refinery, Openfield, Post ,Village, Town)
 } rps_t;
 
+typedef struct hitby_s
+{
+	u_int32_t	dbid;
+	u_int8_t	country;
+	char		longnick[10];
+	u_int32_t	squadron;
+	u_int16_t	plane;
+	float		damage;
+} hitby_t;
+
 typedef struct field_s
 {
 	u_int8_t	number;
@@ -556,9 +567,7 @@ typedef struct field_s
 	u_int8_t	ctf;
 	u_int8_t	ctfwho;
 	u_int32_t	ctfcount;
-	struct client_s	*hitby[MAX_HITBY]; // players who hit field
-	u_int32_t	damby[MAX_HITBY]; // damage get from any player above
-	u_int16_t	planeby[MAX_HITBY]; // last plane used by killer
+	struct hitby_s	hitby[MAX_HITBY]; // players who hit field
 	cv_t		*cv; // linked CV
 	struct city_s *city[MAX_CITYFIELD]; // linked city
 	float		rps[MAX_PLANES];
@@ -829,9 +838,7 @@ typedef struct client_s
 	u_int8_t	tklimit;		// TODO: FIXME: add limit for friendly buildings/planes kills till be kicked
 	u_int8_t	tkstatus;		//
 
-	struct client_s	*hitby[MAX_HITBY]; // players who hit client
-	float		damby[MAX_HITBY]; // damage get from any player above
-	u_int16_t	planeby[MAX_HITBY]; // last plane used by killer
+	struct hitby_s	hitby[MAX_HITBY]; // players who hit client
 
 	u_int8_t	lograwdata;		// flag to log raw data
 	char		logfile[64];	// logfile name
@@ -2237,6 +2244,7 @@ void 	DecryptOctet(u_int8_t Octet[8], unsigned long Key);
 void 	DecryptBlock(u_int8_t *Buf, int Len, long Key);
 int8_t	CheckUserPasswd(client_t *client, u_int8_t *userpass);
 int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client);
+client_t *FindDBClient(u_int32_t dbid);
 client_t *FindSClient(u_int32_t shortnick);
 client_t *FindLClient(char *longnick);
 int		PPrintf(client_t *client, u_int16_t radio, char *fmt, ...);

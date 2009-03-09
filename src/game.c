@@ -1687,7 +1687,7 @@ void ProcessCommands(char *command, client_t *client)
 		else if (!Com_Stricmp(command, "forecast"))
 		{
 			wind = sqrt(Com_Pow(xwindvelocity->value, 2) + Com_Pow(ywindvelocity->value, 2));
-			angle = Com_Deg(asin(xwindvelocity->value / ywindvelocity->value));
+			angle = Com_Deg(atan(xwindvelocity->value / ywindvelocity->value));
 
 			PPrintf(client, RADIO_WEATHER, "Weather: %s, Wind: %.2fKm/h from %s",
 				(!weather->value)?"Cloudy":(weather->value == 1)?"Clear":(weather->value == 2)?"Raining":"Partialy Cloudy",
@@ -4674,10 +4674,10 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 						nearplane->cancollide = -1;
 
-						nearplane->hitby[0] = client;
-						nearplane->damby[0] = MAX_UINT32;  // TODO: Score: collision: change this
-						client->hitby[0] = nearplane;
-						client->damby[0] = MAX_UINT32;  // TODO: Score: collision: change this
+						nearplane->hitby[0].dbid = client->id;
+						nearplane->hitby[0].damage = (float)MAX_UINT32;  // TODO: Score: collision: change this
+						client->hitby[0].dbid = nearplane->id;
+						client->hitby[0].damage = (float)MAX_UINT32;  // TODO: Score: collision: change this
 						
 						client->damaged = 1;
 						nearplane->damaged = 1;
@@ -4755,11 +4755,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				
 		memset(client->skin, 0, sizeof(client->skin));
 
-		for (i = 0; i < MAX_HITBY; i++) // TODO: Clear Killers, for debug only 
-		{
-			client->hitby[i] = NULL;
-			client->damby[i] = 0;
-		}
+		ClearKillers(client); // TODO: Clear Killers, for debug only 
 
 		client->view = client->shanghai = client->attached = NULL;
 		client->speedxyz[0][0] = client->speedxyz[1][0] = client->speedxyz[2][0] = 0;
@@ -5960,7 +5956,7 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 		return;
 
 	if (killer >= 0)
-		pvictim->damby[killer] += munition->he;
+		pvictim->hitby[killer].damage += munition->he;
 
 	Com_Printf(VERBOSE_ALWAYS, "-HOST- hit %s with %s\n", pvictim->longnick, munition->abbrev);
 
@@ -6531,7 +6527,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 				if(sdamage >= 0)
 				{
-					pvictim->damby[killer] += sdamage;
+					pvictim->hitby[killer].damage += sdamage;
 				}
 				else
 				{
@@ -6600,13 +6596,13 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	{
 		for (i = 0; i < MAX_HITBY; i++) // check who hit player
 		{
-			if (pvictim->hitby[i] && pvictim->damby[i] && !pvictim->hitby[i]->drone && pvictim->hitby[i]->inuse)
+			if (pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
 			{
-				totaldamage += client->damby[i];
+				totaldamage += pvictim->hitby[i].damage;
 			}
 		}
 
-		pvictim->damby[killer] += totaldamage * 0.25;
+		pvictim->hitby[killer].damage += totaldamage * 0.25;
 	}
 }
 
@@ -6758,7 +6754,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 
 				if(sdamage >= 0)
 				{
-					pvictim->damby[killer] += sdamage;
+					pvictim->hitby[killer].damage += sdamage;
 				}
 				else
 				{
@@ -6823,13 +6819,13 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	{
 		for (i = 0; i < MAX_HITBY; i++) // check who hit player
 		{
-			if (pvictim->hitby[i] && pvictim->damby[i] && !pvictim->hitby[i]->drone && pvictim->hitby[i]->inuse)
+			if (pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
 			{
-				totaldamage += client->damby[i];
+				totaldamage += pvictim->hitby[i].damage;
 			}
 		}
 
-		pvictim->damby[killer] += totaldamage * 0.25;
+		pvictim->hitby[killer].damage += totaldamage * 0.25;
 	}
 }
 

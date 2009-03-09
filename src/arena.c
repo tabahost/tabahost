@@ -4444,7 +4444,7 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 
 		if(!(bomber < 0))
 		{
-			arena->fields[field].damby[bomber] += damage;
+			arena->fields[field].hitby[bomber].damage += (float)damage;
 		}
 	}
 }
@@ -4452,59 +4452,49 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 /*************
  AddBomber
 
- Add a new bober assist and return its location or just return its location if already exists (added clean disconnected players)
+ Add a new bomber assist and return its location or just return its location if already exists (added clean disconnected players)
  *************/
 
 int8_t AddBomber(u_int8_t field, client_t *client)
 {
 	u_int8_t i;
-	int8_t found, empty, removed;
+	int8_t found, empty;
 
-	removed = found = empty = -1;
+	found = empty = -1;
 
 	if(field < fields->value)
 	{
 		for (i = 0; i < MAX_HITBY; i++)
 		{
-			if (arena->fields[field].hitby[i])
+			if (arena->fields[field].hitby[i].dbid)
 			{
-				if (arena->fields[field].hitby[i] == client && arena->fields[field].hitby[i]->inuse)
-					found = i;
-
-				if (!arena->fields[field].hitby[i]->inuse) // player had disconnected or removed drone
+				if (arena->fields[field].hitby[i].dbid == client->id)
 				{
-					arena->fields[field].hitby[i] = NULL; // remove it from array
-					// arena->fields[field].damby[i] = 0; // but let damage here
-					// arena->fields[field].planeby[i] = 0;
-					removed = i;
+					found = i;
+					break;
 				}
 			}
 			else
 			{
-				if(arena->fields[field].damby[i]) // someone was here
-					removed = i;
-				else
-					empty = i;
+				empty = i;
+				break;
 			}
 		}
 
-		if (!(found < 0)) // if found, update killer plane
+		if (!(found < 0)) // if found, update killer plane and country
 		{
-			arena->fields[field].planeby[found] = client->attached ? client->attached->plane : client->plane;
+			arena->fields[field].hitby[found].plane = client->attached ? client->attached->plane : client->plane;
+			arena->fields[field].hitby[found].country = client->country;
+			arena->fields[field].hitby[found].squadron = client->squadron;
 		}
 		else if (!(empty < 0)) // if not found, add to array if slot available
 		{
-			arena->fields[field].hitby[empty] = client;
-			arena->fields[field].planeby[empty] = client->attached ? client->attached->plane : client->plane;
-			arena->fields[field].damby[empty] = 0;
+			arena->fields[field].hitby[empty].dbid = client->id;
+			arena->fields[field].hitby[empty].plane = client->attached ? client->attached->plane : client->plane;
+			arena->fields[field].hitby[found].country = client->country;
+			arena->fields[field].hitby[found].squadron = client->squadron;
+			arena->fields[field].hitby[empty].damage = 0;
 			found = empty;
-		}
-		else if (!(removed < 0)) // if no slot available but there are removed players, use it
-		{
-			arena->fields[field].hitby[removed] = client;
-			arena->fields[field].planeby[removed] = client->attached ? client->attached->plane : client->plane;
-			arena->fields[field].damby[removed] = 0;
-			found = removed;
 		}
 	}
 

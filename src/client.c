@@ -615,14 +615,14 @@ int ProcessClient(client_t *client)
 
 								if(near_en)
 								{
-									client->hitby[0] = near_en;
-									client->damby[0] = MAX_UINT32; // TODO: Score: collision: change this
+									client->hitby[0].dbid = near_en->id;
+									client->hitby[0].damage = (float)MAX_UINT32; // TODO: Score: collision: change this
 
 									if(nearplane == near_en)
 									near_en = client;
 
-									nearplane->hitby[0] = near_en;
-									nearplane->damby[0] = MAX_UINT32; // TODO: Score: collision: change this
+									nearplane->hitby[0].dbid = near_en->id;
+									nearplane->hitby[0].damage = (float)MAX_UINT32; // TODO: Score: collision: change this
 								}
 
 								client->cancollide = -1;
@@ -1289,6 +1289,26 @@ int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client)
 }
 
 /*************
+ FindDBClient
+
+ Find a client in clients array using shortnick
+ *************/
+
+client_t *FindDBClient(u_int32_t dbid)
+{
+	u_int8_t i;
+
+	for (i = 0; i < maxentities->value; i++)
+	{
+		if (clients[i].inuse /*&& !clients[i].drone*/&& (clients[i].id == dbid))
+		{
+			return &clients[i];
+		}
+	}
+	return NULL;
+}
+
+/*************
  FindSClient
 
  Find a client in clients array using shortnick
@@ -1704,33 +1724,34 @@ int8_t AddKiller(client_t *victim, client_t *client)
 	{
 		for (i = 0; i < MAX_HITBY; i++)
 		{
-			if (victim->hitby[i])
+			if (victim->hitby[i].dbid)
 			{
-				if (victim->hitby[i] == client && victim->hitby[i]->inuse)
-					found = i;
-
-				if (!victim->hitby[i]->inuse) // player had disconnected
+				if (victim->hitby[i].dbid == client->id)
 				{
-					victim->hitby[i] = NULL; // remove disconnected players
-					victim->damby[i] = 0;
-					victim->planeby[i] = 0;
-					empty = i;
+					found = i;
+					break;
 				}
 			}
 			else
 			{
 				empty = i;
+				break;
 			}
 		}
 
 		if (!(found < 0)) // if found, update killer plane
 		{
-			victim->planeby[found] = client->attached ? client->attached->plane : client->plane;
+			victim->hitby[found].plane = client->attached ? client->attached->plane : client->plane;
+			victim->hitby[found].country = client->country;
+			victim->hitby[found].squadron = client->squadron;
 		}
 		else if (!(empty < 0)) // if not found, add to array if slot available
 		{
-			victim->hitby[empty] = client;
-			victim->planeby[empty] = client->attached ? client->attached->plane : client->plane;
+			victim->hitby[empty].dbid = client->id;
+			victim->hitby[empty].plane = client->attached ? client->attached->plane : client->plane;
+			victim->hitby[found].country = client->country;
+			victim->hitby[found].squadron = client->squadron;
+			victim->hitby[empty].damage = 0;
 			found = empty;
 		}
 	}
@@ -1746,16 +1767,9 @@ int8_t AddKiller(client_t *victim, client_t *client)
 
 void ClearKillers(client_t *client)
 {
-	u_int8_t i;
-
 	if (client)
 	{
-		for (i = 0; i < MAX_HITBY; i++)
-		{
-			client->hitby[i] = NULL;
-			client->damby[i] = 0;
-			client->planeby[i] = 0;
-		}
+		memset(&(client->hitby), 0, sizeof(hitby_t) * MAX_HITBY);
 	}
 }
 
@@ -1895,11 +1909,7 @@ void ForceEndFlight(u_int8_t remdron, client_t *client)
 
 	client->status_damage = client->status_status = client->infly = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = 0;
 
-	for (i = 0; i < MAX_HITBY; i++)
-	{
-		client->hitby[i] = 0;
-		client->damby[i] = 0;
-	}
+	ClearKillers(client);
 
 	client->speedxyz[0][0] = client->speedxyz[1][0] = client->speedxyz[2][0] = 0;
 

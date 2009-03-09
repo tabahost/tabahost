@@ -428,6 +428,7 @@ void ScoreFieldCapture(u_int8_t field)
 {
 	char sql_query[1024];
 	float fieldcost, score;
+	client_t *dbclient;
 	u_int8_t numbombers, numcargos, i;
 	u_int32_t bomberdamage, cargodamage;
 
@@ -445,18 +446,18 @@ void ScoreFieldCapture(u_int8_t field)
 		
 		for(i = 0; i < MAX_HITBY; i++) // account bombers and cargos
 		{
-			if(arena->fields[field].damby[i])
+			if(arena->fields[field].hitby[i].damage)
 			{
-				if(IsCargo(NULL, arena->fields[field].planeby[i]))
+				if(IsCargo(NULL, arena->fields[field].hitby[i].plane))
 				{
-					Com_Printf(VERBOSE_DEBUG, "Found Cargo damage %d\n", arena->fields[field].damby[i]);
-					cargodamage += arena->fields[field].damby[i];
+					Com_Printf(VERBOSE_DEBUG, "Found Cargo damage %d\n", arena->fields[field].hitby[i].damage);
+					cargodamage += arena->fields[field].hitby[i].damage;
 					numcargos++;
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG, "Found Bomber damage %d\n", arena->fields[field].damby[i]);
-					bomberdamage += arena->fields[field].damby[i];
+					Com_Printf(VERBOSE_DEBUG, "Found Bomber damage %d\n", arena->fields[field].hitby[i].damage);
+					bomberdamage += arena->fields[field].hitby[i].damage;
 					numbombers++;
 				}
 			}
@@ -471,59 +472,59 @@ void ScoreFieldCapture(u_int8_t field)
 		
 		for(i = 0; i < MAX_HITBY; i++) // give points
 		{
-			if(arena->fields[field].hitby[i] && arena->fields[field].hitby[i]->inuse && !arena->fields[field].hitby[i]->drone)
+			if(arena->fields[field].hitby[i].dbid && arena->fields[field].hitby[i].dbid < DRONE_DBID_BASE)
 			{
-				if(IsCargo(NULL, arena->fields[field].planeby[i]))
+				if(IsCargo(NULL, arena->fields[field].hitby[i].plane))
 				{
-					score = fieldcost * ((float)arena->fields[field].damby[i] / cargodamage) * ((float)numcargos / (numcargos + numbombers));
+					score = fieldcost * (arena->fields[field].hitby[i].damage / cargodamage) * ((float)numcargos / (numcargos + numbombers));
 					Com_Printf(VERBOSE_DEBUG, "Cargo: %f\n", score);
 				}
 				else
 				{
-					score = fieldcost * ((float)arena->fields[field].damby[i] / bomberdamage) * ((float)numbombers / (numcargos + numbombers));
+					score = fieldcost * (arena->fields[field].hitby[i].damage / bomberdamage) * ((float)numbombers / (numcargos + numbombers));
 					Com_Printf(VERBOSE_DEBUG, "Bomber: %f\n", score);
 				}
 
-				if (arena->fields[field].hitby[i]->country == arena->fields[field].country) // if it WAS enemy
+				if (arena->fields[field].hitby[i].country == arena->fields[field].country) // if it WAS enemy
 				{
-					if(arena->fields[field].hitby[i]->infly)
+					if((dbclient = FindDBClient(arena->fields[field].hitby[i].dbid)) && dbclient->infly)
 					{
 						Com_Printf(VERBOSE_DEBUG, "InFlight\n");
-						arena->fields[field].hitby[i]->score.captscore += score;
+						dbclient->score.captscore += score;
 					}
 					else
 					{
 						Com_Printf(VERBOSE_DEBUG, "Not InFlight\n");
-						if (IsFighter(NULL, arena->fields[field].planeby[i]))
+						if (IsFighter(NULL, arena->fields[field].hitby[i].plane))
 						{
-							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i].dbid);
 						}
-						else if (IsBomber(NULL, arena->fields[field].planeby[i]))
+						else if (IsBomber(NULL, arena->fields[field].hitby[i].plane))
 						{
-							sprintf(sql_query, "%sUPDATE score_bomber SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+							sprintf(sql_query, "%sUPDATE score_bomber SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i].dbid);
 						}
-						else if (IsGround(NULL, arena->fields[field].planeby[i]))
+						else if (IsGround(NULL, arena->fields[field].hitby[i].plane))
 						{
-							sprintf(sql_query, "%sUPDATE score_ground SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+							sprintf(sql_query, "%sUPDATE score_ground SET capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i].dbid);
 						}
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", arena->fields[field].planeby[i]);
-							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", arena->fields[field].hitby[i].plane);
+							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i].dbid);
 						}
 					}
 				}
 				else if(friendlyfire->value)// friendly hit... tsc, tsc, tsc...
 				{
-					if(arena->fields[field].hitby[i]->infly)
+					if((dbclient = FindDBClient(arena->fields[field].hitby[i].dbid)) && dbclient->infly)
 					{
 						Com_Printf(VERBOSE_DEBUG, "Field Penalty InFlight\n");
-						arena->fields[field].hitby[i]->score.penaltyscore += score;
+						dbclient->score.penaltyscore += score;
 					}
 					else
 					{
 						Com_Printf(VERBOSE_DEBUG, "Field Penalty Not InFlight\n");
-						sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i]->id);
+						sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i].dbid);
 					}
 				}
 				else
@@ -532,10 +533,8 @@ void ScoreFieldCapture(u_int8_t field)
 				}
 			}
 
-			// clear list
-			arena->fields[field].hitby[i] = NULL;
-			arena->fields[field].damby[i] = 0;
-			arena->fields[field].planeby[i] = 0;
+			// clear one entry from list
+			memset(&(arena->fields[field].hitby[i]), 0, sizeof(hitby_t));
 		}
 
 		if(sql_query[0] != '\0')
@@ -565,26 +564,26 @@ void ScoreFieldCapture(u_int8_t field)
 
 //	for (i = 0; i < MAX_HITBY; i++) // check who hit player
 //	{
-//		if (client->hitby[i] && client->damby[i] && !client->hitby[i]->drone && client->hitby[i]->inuse)
+//		if (client->hitby[i] && client->hitby[i].plane && !client->hitby[i]->drone && client->hitby[i]->inuse)
 //		{
 //			if ((client->hitby[i] != client)) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
 //			{
-//				score = (client->damby[i]/totaldamage) * event_cost;
+//				score = (client->hitby[i].damage/totaldamage) * event_cost;
 //				
 //				if(killer == i)
 //					score += event_cost;
 //				
 //				if (client->hitby[i]->country != client->country) // if enemy
 //				{
-//					if (IsFighter(NULL, client->planeby[i]))
+//					if (IsFighter(NULL, client->hitby[i].plane))
 //					{
 //						sprintf(sql_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
 //					}
-//					else if (IsBomber(NULL, client->planeby[i]))
+//					else if (IsBomber(NULL, client->hitby[i].plane))
 //					{
 //						sprintf(sql_query, "%sUPDATE score_bomber SET bomber_score = bomber_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
 //					}
-//					else if (IsGround(NULL, client->planeby[i]))
+//					else if (IsGround(NULL, client->hitby[i].plane))
 //					{
 //						sprintf(sql_query, "%sUPDATE score_ground SET ground_score = ground_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, client->hitby[i]->id);
 //					}
@@ -615,14 +614,15 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 	int8_t i;
 	float totaldamage = 0.0;
 	float score;
+	client_t *dbclient;
 	
 	// calc pieces // enemy damage/totalDamage * planeLife/totalLife * cost
 
 	for (i = 0; i < MAX_HITBY; i++) // check who hit player
 	{
-		if (client->hitby[i] && client->damby[i] && !client->hitby[i]->drone && client->hitby[i]->inuse)
+		if (client->hitby[i].dbid && client->hitby[i].damage && client->hitby[i].dbid < DRONE_DBID_BASE)
 		{
-			totaldamage += client->damby[i];
+			totaldamage += client->hitby[i].damage;
 		}
 	}
 	
@@ -637,57 +637,57 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 		
 		for (i = 0; i < MAX_HITBY; i++) // check who hit player
 		{
-			if (client->hitby[i] && client->damby[i] && !client->hitby[i]->drone && client->hitby[i]->inuse)
+			if (client->hitby[i].dbid && client->hitby[i].damage && client->hitby[i].dbid < DRONE_DBID_BASE)
 			{
-				if ((client->hitby[i] != client)) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
+				if ((client->hitby[i].dbid != client->id)) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
 				{
-					score = (client->damby[i]/totaldamage) * event_cost;
+					score = (client->hitby[i].damage/totaldamage) * event_cost;
 					
-					Com_Printf(VERBOSE_DEBUG, "Score %f, killer %s\n", score, client->hitby[i]->longnick);
+					Com_Printf(VERBOSE_DEBUG, "Score %f, killer %s\n", score, client->hitby[i].longnick);
 					
 					if(killer == i)
 						score += event_cost;
 					
-					if (client->hitby[i]->country != client->country) // if enemy
+					if (client->hitby[i].country != client->country) // if enemy
 					{
-						if(client->hitby[i]->infly)
+						if((dbclient = FindDBClient(client->hitby[i].dbid)) && dbclient->infly)
 						{
-							client->hitby[i]->score.airscore += score;
+							dbclient->score.airscore += score;
 						}
 						else
 						{
-							if (IsFighter(NULL, client->planeby[i]))
+							if (IsFighter(NULL, client->hitby[i].plane))
 							{
-								sprintf(my_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+								sprintf(my_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i].dbid);
 							}
-							else if (IsBomber(NULL, client->planeby[i]))
+							else if (IsBomber(NULL, client->hitby[i].plane))
 							{
-								sprintf(my_query, "%sUPDATE score_bomber SET bomber_score = bomber_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+								sprintf(my_query, "%sUPDATE score_bomber SET bomber_score = bomber_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i].dbid);
 							}
-							else if (IsGround(NULL, client->planeby[i]))
+							else if (IsGround(NULL, client->hitby[i].plane))
 							{
-								sprintf(my_query, "%sUPDATE score_ground SET ground_score = ground_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+								sprintf(my_query, "%sUPDATE score_ground SET ground_score = ground_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i].dbid);
 							}
 							else
 							{
 								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-								sprintf(my_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+								sprintf(my_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i].dbid);
 							}
 						}
 					}
-					else if (client->hitby[i] != client)// friendly hit... tsc, tsc, tsc...
+					else if (client->hitby[i].dbid != client->id)// friendly hit... tsc, tsc, tsc...
 					{
 						if(friendlyfire->value)
 						{
-							if(client->hitby[i]->infly)
+							if((dbclient = FindDBClient(client->hitby[i].dbid)) && dbclient->infly)
 							{
 								Com_Printf(VERBOSE_DEBUG, "Kill Penalty InFlight\n");
-								client->hitby[i]->score.penaltyscore += score;
+								dbclient->score.penaltyscore += score;
 							}
 							else
 							{
 								Com_Printf(VERBOSE_DEBUG, "Kill Penalty Not InFlight\n");
-								sprintf(my_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i]->id);
+								sprintf(my_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i].dbid);
 							}
 						}
 						else
@@ -1099,12 +1099,13 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 
 int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 {
-	int8_t i, j;
+	int8_t i, j, k;
 	char buffer[128];
 	char query_bomber[512];
 	char query_ground[512];
 	float damage;
 	client_t *killer = NULL;
+	client_t *dbclient = NULL;
 
 	if(!client)
 	{
@@ -1122,10 +1123,13 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 			if ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) <= 164) // explosions above 50mts are not maneuver kill
 			{
 				killer = NearPlane(client, client->country, 3000);
-	
+
 				if (killer)
 				{
 					j = AddKiller(client, killer);
+
+					dbclient = killer;
+
 					if(maneuver)
 						*maneuver = 1;
 					
@@ -1150,7 +1154,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 					
 					if(IsFighter(killer) && IsFighter(client))
 						CalcEloRating(killer /*winner*/, client /*looser*/, ELO_BOTH);
-		
+
 					// EVENT LOGS
 					
 					Com_LogEvent(EVENT_KILL, killer->id, client->id);
@@ -1166,7 +1170,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", killer->plane);
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 1, NULL);
 					}
-		
+
 					Com_LogDescription(EVENT_DESC_PLCTRY, killer->country, NULL);
 					Com_LogDescription(EVENT_DESC_PLORD, killer->ord, NULL);
 					Com_LogDescription(EVENT_DESC_VCPLANE, client->plane, NULL);
@@ -1211,56 +1215,46 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 			Com_Printf(VERBOSE_DEBUG, "Now check who did more damage\n");
 			for (i = 0, j = -1, damage = 0; i < MAX_HITBY; i++) // check who inflicted more damage
 			{
-				if (client->hitby[i]) // if client in list
+				if (client->hitby[i].dbid) // if client in list
 				{
-					if (client->hitby[i]->inuse) // if still connected
+					Com_Printf(VERBOSE_DEBUG, "%s - %f\n", client->hitby[i].longnick, client->hitby[i].damage);
+					if (client->hitby[i].damage > damage) // if damage > current damage
 					{
-						Com_Printf(VERBOSE_DEBUG, "%s - %f\n", client->hitby[i]->longnick, client->damby[i]);
-						if (client->damby[i] > damage) // if damage > current damage
-						{
-							damage = client->damby[i]; // set current damage as attacker damage
-							//client->damby[i] = 0; // clear damby value
-							j = i; // set j as index of max damage
-						}
-					}
-					else // else, clear from list
-					{
-						Com_Printf(VERBOSE_DEBUG, "Clearing offline player from array[%u]\n", i);
-						client->hitby[i] = NULL;
-						client->damby[i] = 0;
+						damage = client->hitby[i].damage; // set current damage as attacker damage
+						//client->hitby[i].damage = 0; // clear damage value
+						j = i; // set j as index of max damage
 					}
 				}
 			}
-	
+
 			if(!(j < 0)) // found a killer
 			{
-				killer = client->hitby[j];
 				//client->hitby[j] = NULL; // clear killer from list
+				dbclient = FindDBClient(client->hitby[j].dbid);
 
-				Com_Printf(VERBOSE_DEBUG, "Server has chosen %s as killer!!!\n", killer->longnick);
+				Com_Printf(VERBOSE_DEBUG, "Server has chosen %s as killer!!!\n", client->hitby[j].longnick);
 				
-				Com_LogEvent(EVENT_KILL, killer == client?0:killer->id, client->id);
-				if (killer != client)
+				Com_LogEvent(EVENT_KILL, client->hitby[j].dbid == client->id?0:client->hitby[j].dbid, client->id);
+				if (client->hitby[j].dbid != client->id)
 				{
-					Com_LogDescription(EVENT_DESC_PLPLANE, client->planeby[j], NULL);
-		
-					if (IsFighter(NULL, client->planeby[j]))
+					Com_LogDescription(EVENT_DESC_PLPLANE, client->hitby[j].plane, NULL);
+
+					if (IsFighter(NULL, client->hitby[j].plane))
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 1, NULL);
-					else if (IsBomber(NULL, client->planeby[j]))
+					else if (IsBomber(NULL, client->hitby[j].plane))
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 2, NULL);
-					else if (IsGround(NULL, client->planeby[j]))
+					else if (IsGround(NULL, client->hitby[j].plane))
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 3, NULL);
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->planeby[j]);
+						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->hitby[j].plane);
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 1, NULL);
 					}
-		
-					Com_LogDescription(EVENT_DESC_PLCTRY, killer->country, NULL);
-					Com_LogDescription(EVENT_DESC_PLORD, killer->ord, NULL);
+
+					Com_LogDescription(EVENT_DESC_PLCTRY, client->hitby[j].country, NULL);
 				}
 				Com_LogDescription(EVENT_DESC_VCPLANE, client->plane, NULL);
-		
+
 				if (IsFighter(client))
 					Com_LogDescription(EVENT_DESC_VCPLTYPE, 1, NULL);
 				else if (IsBomber(client))
@@ -1272,119 +1266,124 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 					Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
 					Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 				}
-		
+
 				Com_LogDescription(EVENT_DESC_VCCTRY, client->country, NULL);
-				Com_LogDescription(EVENT_DESC_VCORD, client->ord, NULL);
-		
+
 				/*************************************************
 				 Insert values in score_kills table
 				 
 				 Variables: player_id, player_plane, player_pltype, player_country
 				 victim_id, victim_plane, victim_pltype, victim_country
 				 *************************************************/
-		
+
 				sprintf(my_query, "INSERT INTO score_kills VALUES(");
-		
-				if (killer == client)
+
+				if (client->hitby[j].dbid == client->id)
 				{
 					strcat(my_query, "'', '0', '0', '0', '0',");
 				}
 				else
 				{
-					sprintf(my_query, "%s'', '%u', '%u', '%u', '%u',", my_query, killer->id, client->planeby[j],
-							IsFighter(NULL, client->planeby[j]) ? 1 : IsBomber(NULL, client->planeby[j]) ? 2 : 3, killer->country);
+					sprintf(my_query, "%s'', '%u', '%u', '%u', '%u',", my_query, client->hitby[j].dbid, client->hitby[j].plane,
+							IsFighter(NULL, client->hitby[j].plane) ? 1 : IsBomber(NULL, client->hitby[j].plane) ? 2 : 3, client->hitby[j].country);
 				}
-		
+
 				sprintf(my_query, "%s '%u', '%u', '%u', '%u')", my_query, client->id, client->plane, IsFighter(client) ? 1 : IsBomber(client) ? 2 : 3, client->country);
-		
+
 				if (d_mysql_query(&my_sock, my_query))
 				{
 					Com_Printf(VERBOSE_WARNING, "ScoresCheckKiller(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 				
-				if ((killer->country == client->country) && (killer != client)) // not ack, TK
+				if ((client->hitby[j].country == client->country) && (client->hitby[j].dbid != client->id)) // not ack, TK
 				{
-					sprintf(buffer, "TeamKill of %s(%s) by %s(%s)", client->longnick, GetSmallPlaneName(client->plane), killer->longnick, GetSmallPlaneName(client->planeby[j]));
-		
-					// in TK, winner is the killed pilot.
-					if(IsFighter(killer) && IsFighter(client))
-						CalcEloRating(client /*winner*/, killer /*looser*/, ELO_LOOSER);
-		
-					if (!client->tkstatus) // if victim is not TK, add penalty to killer
+					if(dbclient)
 					{
-						if (teamkiller->value)
-							killer->tklimit++;
+						// in TK, winner is the killed pilot.
+						if(IsFighter(NULL, client->hitby[j].plane) && IsFighter(client))
+							CalcEloRating(client /*winner*/, dbclient /*looser*/, ELO_LOOSER);
+			
+						if (!client->tkstatus) // if victim is not TK, add penalty to killer
+						{
+							if (teamkiller->value)
+								dbclient->tklimit++;
+						}
+			
+						if (dbclient->tklimit > 5)
+						{
+							if (!dbclient->tkstatus)
+								Cmd_TK(dbclient->longnick, TRUE, NULL);
+							else
+								; // TODO: FIXME: BAN CLIENT UNTIL END OF TOD
+						}
 					}
-		
-					if (killer->tklimit > 5)
-					{
-						if (!killer->tkstatus)
-							Cmd_TK(killer->longnick, TRUE, NULL);
-						else
-							; // TODO: FIXME: BAN CLIENT UNTIL END OF TOD
-					}
-		
-					if (killer->squadron)
-						sprintf(buffer, "%s from %s", buffer, Com_SquadronName(killer->squadron));
-		
+
+					sprintf(buffer, "TeamKill of %s(%s) by %s(%s)", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j].longnick, GetSmallPlaneName(client->hitby[j].plane));
+
+					if (client->hitby[j].squadron)
+						sprintf(buffer, "%s from %s", buffer, Com_SquadronName(client->hitby[j].squadron));
+
 					if (printkills->value)
 					{
 						BPrintf(RADIO_GREEN, buffer);
 					}
-		
-					Com_Printf(VERBOSE_KILL, "%s Teamkilled by %s at %s\n", client->longnick, killer->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+
+					Com_Printf(VERBOSE_KILL, "%s Teamkilled by %s at %s\n", client->longnick, client->hitby[j].longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				}
 				else // enemy kill
 				{
-					if ((client->status_damage & STATUS_PILOT) && client->chute)
-						sprintf(buffer, "Chutekill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), killer == client ? "Ack Weenies" : killer->longnick);
-					else if (client->cancollide < 0)
-						sprintf(buffer, "Collision kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), killer == client ? "Ack Weenies" : killer->longnick);
-					else
-						sprintf(buffer, "Kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), killer == client ? "Ack Weenies" : killer->longnick);
-		
-					if(IsFighter(killer) && IsFighter(client))
-						CalcEloRating(killer /*winner*/, client /*looser*/, ELO_BOTH);
+					if(dbclient)
+					{
+						if(IsFighter(NULL, client->hitby[j].plane) && IsFighter(client))
+							CalcEloRating(dbclient /*winner*/, client /*looser*/, ELO_BOTH);
+					}
 
-					if(killer != client)
-						sprintf(buffer, "%s(%s)", buffer, GetSmallPlaneName(client->planeby[j]));
-		
+					if ((client->status_damage & STATUS_PILOT) && client->chute)
+						sprintf(buffer, "Chutekill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j].dbid == client->id ? "Ack Weenies" : client->hitby[j].longnick);
+					else if (client->cancollide < 0)
+						sprintf(buffer, "Collision kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j].dbid == client->id ? "Ack Weenies" : client->hitby[j].longnick);
+					else
+						sprintf(buffer, "Kill of %s(%s) by %s", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j].dbid == client->id ? "Ack Weenies" : client->hitby[j].longnick);
+
+					if(client->hitby[j].dbid != client->id)
+						sprintf(buffer, "%s(%s)", buffer, GetSmallPlaneName(client->hitby[j].plane));
+
 					if (printkills->value)
 					{
 						BPrintf(RADIO_YELLOW, buffer);
 					}
-		
-					Com_Printf(VERBOSE_KILL, "%s Killed by %s at %s\n", client->longnick, killer->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+
+					Com_Printf(VERBOSE_KILL, "%s Killed by %s at %s\n", client->longnick, client->hitby[j].longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				}
 				
-				if ((killer != client) && (killer->country != client->country))
+				if ((client->hitby[j].dbid != client->id) && (client->hitby[j].country != client->country))
 				{
-					if (killer->squadron)
+					if (client->hitby[j].squadron)
 					{
 						if (printkills->value)
-							BPrintf(RADIO_YELLOW, "`-> from %s", Com_SquadronName(killer->squadron));
+							BPrintf(RADIO_YELLOW, "`-> from %s", Com_SquadronName(client->hitby[j].squadron));
 						else
-							Com_Printf(VERBOSE_CHAT, "`-> from %s\n", Com_SquadronName(killer->squadron));
+							Com_Printf(VERBOSE_CHAT, "`-> from %s\n", Com_SquadronName(client->hitby[j].squadron));
 					}
 				}
 			}
 		}
-		
+
 		if(j >= 0)
 		{
-			if(client->hitby[j] && (client->hitby[j] != client) && !client->hitby[j]->drone)
+			if(client->hitby[j].dbid && client->hitby[j].dbid < DRONE_DBID_BASE && (client->hitby[j].dbid != client->id))
 			{
-				if (client->hitby[j]->country == client->country) // not ack, TK
+				if (client->hitby[j].country == client->country) // not ack, TK
 				{
 					if (!client->tkstatus)
 						sprintf(my_query, "UPDATE score_penalty SET");
 					else
 					{
-						if (IsFighter(NULL, client->planeby[j]))
+						if (IsFighter(NULL, client->hitby[j].plane))
 							sprintf(my_query, "UPDATE score_fighter SET");
-						else if (IsBomber(NULL, client->planeby[j]))
+						else if (IsBomber(NULL, client->hitby[j].plane))
 							sprintf(my_query, "UPDATE score_bomber SET");
-						else if (IsGround(NULL, client->planeby[j]))
+						else if (IsGround(NULL, client->hitby[j].plane))
 							sprintf(my_query, "UPDATE score_ground SET");
 						else
 						{
@@ -1395,15 +1394,15 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 				}
 				else // not ack kill
 				{
-					if (IsFighter(NULL, client->planeby[j]))
+					if (IsFighter(NULL, client->hitby[j].plane))
 						sprintf(my_query, "UPDATE score_fighter SET");
-					else if (IsBomber(NULL, client->planeby[j]))
+					else if (IsBomber(NULL, client->hitby[j].plane))
 						sprintf(my_query, "UPDATE score_bomber SET");
-					else if (IsGround(NULL, client->planeby[j]))
+					else if (IsGround(NULL, client->hitby[j].plane))
 						sprintf(my_query, "UPDATE score_ground SET");
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->planeby[j]);
+						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->hitby[j].plane);
 						sprintf(my_query, "UPDATE score_fighter SET");
 					}
 				}
@@ -1448,11 +1447,14 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						if (wb3->value && IsGround(client))
 						{
 							strcat(my_query, " killtank = killtank + '1'");
-	
-							client->hitby[j]->killssortie++;
-							client->hitby[j]->killstod++;
-	
-							if (client->hitby[j]->country != client->country)
+
+							if(dbclient)
+							{
+								dbclient->killssortie++;
+								dbclient->killstod++;
+							}
+
+							if (client->hitby[j].country != client->country)
 							{
 								strcat(my_query, ", curr_streak = curr_streak + '1', long_streak = IF(curr_streak > long_streak, curr_streak, long_streak)");
 							}
@@ -1460,19 +1462,22 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						else
 						{
 							strcat(my_query, " kills = kills + '1'");
-	
-							client->hitby[j]->killssortie++;
-							client->hitby[j]->killstod++;
-	
-							if (client->hitby[j]->country != client->country)
+
+							if(dbclient)
+							{
+								dbclient->killssortie++;
+								dbclient->killstod++;
+							}
+
+							if (client->hitby[j].country != client->country)
 							{
 								strcat(my_query, ", curr_streak = curr_streak + '1', long_streak = IF(curr_streak > long_streak, curr_streak, long_streak)");
 							}
 						}
 				}
-		
-				sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->hitby[j]->id);
-		
+
+				sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->hitby[j].dbid);
+
 				Com_Printf(VERBOSE_DEBUG, "Kill Query: %s\n", my_query);
 
 				if (d_mysql_query(&my_sock, my_query))
@@ -1485,7 +1490,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 		
 		// ASSISTS
 		
-		j = 0;
+		k = 0;
 
 		sprintf(my_query, "UPDATE score_fighter SET assists = assists + '1' WHERE player_id IN(");
 		sprintf(query_bomber, "UPDATE score_bomber SET assists = assists + '1' WHERE player_id IN(");
@@ -1493,57 +1498,61 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 
 		for (i = 0; i < MAX_HITBY; i++) // check who remain in list and give piece score
 		{
-			if (client->hitby[i] && client->damby[i] && !client->hitby[i]->drone && client->hitby[i]->inuse && client->hitby[i]->infly)
+			if (client->hitby[i].dbid && client->hitby[i].damage && client->hitby[i].dbid < DRONE_DBID_BASE)
 			{
-				if (client->hitby[i] != client && client->hitby[i] != killer) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
+				if (client->hitby[i].dbid != client->id && client->hitby[i].dbid != client->hitby[j].dbid /*killer*/) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
 				{
-					if (client->hitby[i]->country != client->country) // if enemy
+					if (client->hitby[i].country != client->country) // if enemy
 					{
 						if (printkills->value)
 						{
-							PPrintf(client->hitby[i], RADIO_YELLOW, "You've got a piece of %s", client->longnick);
+							if(dbclient)
+								PPrintf(dbclient, RADIO_YELLOW, "You've got a piece of %s", client->longnick);
 						}
 
-						Com_Printf(VERBOSE_KILL, "%s got a piece of %s\n", client->hitby[i]->longnick, client->longnick);
+						Com_Printf(VERBOSE_KILL, "%s got a piece of %s\n", client->hitby[i].longnick, client->longnick);
 
-						if (IsFighter(NULL, client->planeby[i]))
+						if (IsFighter(NULL, client->hitby[i].plane))
 						{
-							sprintf(my_query, "%s'%u',", my_query, client->hitby[i]->id);
-							j |= 1;
+							sprintf(my_query, "%s'%u',", my_query, client->hitby[i].dbid);
+							k |= 1;
 						}
-						else if (IsBomber(NULL, client->planeby[i]))
+						else if (IsBomber(NULL, client->hitby[i].plane))
 						{
-							sprintf(query_bomber, "%s'%u',", query_bomber, client->hitby[i]->id);
-							j |= 2;
+							sprintf(query_bomber, "%s'%u',", query_bomber, client->hitby[i].dbid);
+							k |= 2;
 						}
-						else if (IsGround(NULL, client->planeby[i]))
+						else if (IsGround(NULL, client->hitby[i].plane))
 						{
-							sprintf(query_ground, "%s'%u',", query_ground, client->hitby[i]->id);
-							j |= 4;
+							sprintf(query_ground, "%s'%u',", query_ground, client->hitby[i].dbid);
+							k |= 4;
 						}
 						else
 						{
 							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-							sprintf(my_query, "%s'%u',", my_query, client->hitby[i]->id);
-							j |= 1;
+							sprintf(my_query, "%s'%u',", my_query, client->hitby[i].dbid);
+							k |= 1;
 						}
 					}
 					else // friendly kill... tsc, tsc, tsc...
 					{
 						if (printkills->value)
 						{
-							PPrintf(client->hitby[i], RADIO_YELLOW, "You've got a piece of your friend %s", client->longnick);
+							if(dbclient)
+							{
+								PPrintf(dbclient, RADIO_YELLOW, "You've got a piece of your friend %s", client->longnick);
+							}
 						}
 						else
 						{
-							Com_Printf(VERBOSE_KILL, "%s got a piece of his friend %s\n", client->hitby[i]->longnick, client->longnick);
+							Com_Printf(VERBOSE_KILL, "%s got a piece of his friend %s\n", client->hitby[i].longnick, client->longnick);
 						}
 					}
 				}
 			}
 		}
 
-		if (j & 1)
+		if (k & 1)
 		{
 			i = strlen(my_query);
 
@@ -1557,7 +1566,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 				}
 			}
 		}
-		if (j & 2)
+		if (k & 2)
 		{
 			i = strlen(query_bomber);
 
@@ -1571,7 +1580,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 				}
 			}
 		}
-		if (j & 4)
+		if (k & 4)
 		{
 			i = strlen(query_ground);
 
@@ -1587,7 +1596,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 		}
 	}
 
-	return j;
+	return k;
 }
 
 /*************
