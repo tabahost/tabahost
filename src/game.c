@@ -310,7 +310,7 @@ void CheckArenaRules(void)
 	static u_int16_t players_count = 0;
 	u_int8_t close, vitals, dominated;
 	int16_t i, j;
-	u_int8_t reds, golds;
+	u_int8_t reds, golds, k;
 	float tonnage_recover;
 	u_int8_t c_cities, totalcities;
 	u_int32_t dist, tempdist;
@@ -351,7 +351,7 @@ void CheckArenaRules(void)
 		{
 			if(rebuildtime->value < 9999)
 			{
-				if(!oldcapt->value && wb3->value && arena->fields[i].tonnage && !(arena->frame % 6000))
+				if(!oldcapt->value && wb3->value && arena->fields[i].tonnage && !(arena->frame % 6000)) // every minute
 				{
 					c_cities = totalcities = 0;
 
@@ -379,6 +379,30 @@ void CheckArenaRules(void)
 					
 					if(arena->fields[i].tonnage < 0)
 						arena->fields[i].tonnage = 0;
+
+					for(k = 0, j = 0; j < MAX_HITBY; j++) // check the number of bombers
+					{
+						if(arena->fields[i].hitby[j].dbid)
+						{
+							k++;
+						}
+					}
+
+					if(k)
+					{
+						for(j = 0; j < MAX_HITBY; j++) // remove tonnage from bombers
+						{
+							if(arena->fields[i].hitby[j].dbid)
+							{
+								arena->fields[i].hitby[j].damage -= (tonnage_recover / k);
+
+								if(arena->fields[i].hitby[j].damage < 0.0) // remove bomber
+								{
+									memset(&(arena->fields[i].hitby[j]), 0, sizeof(hitby_t));
+								}
+							}
+						}
+					}
 				}
 				
 				for (j = 0; j < MAX_BUILDINGS; j++)
@@ -1243,18 +1267,17 @@ void CheckArenaRules(void)
 		{
 			arena->countdown--;
 
-			if (!(arena->countdown % 6000)) // each minute
-			{
-				BPrintf(RADIO_YELLOW, "Arena will be changed in %s", Com_TimeSeconds(arena->countdown/100));
-				BPrintf(RADIO_YELLOW, "Your don't need to land, your score will be saved");
-			}
-
 			if (arena->countdown < 6000)
 			{
 				if (!(arena->countdown % 1000)) // each 10 secs
 				{
 					BPrintf(RADIO_YELLOW, "Arena will be changed in %u seconds", arena->countdown / 100);
 				}
+			}
+			else if (!(arena->countdown % 6000)) // each minute
+			{
+				BPrintf(RADIO_YELLOW, "Arena will be changed in %s", Com_TimeSeconds(arena->countdown/100), arena->countdown/100);
+				BPrintf(RADIO_YELLOW, "Your don't need to land, your score will be saved");
 			}
 
 			if (arena->countdown == 1)

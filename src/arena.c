@@ -4486,11 +4486,11 @@ int8_t AddBomber(u_int8_t field, client_t *client)
 			arena->fields[field].hitby[found].plane = client->attached ? client->attached->plane : client->plane;
 			arena->fields[field].hitby[found].country = client->country;
 			arena->fields[field].hitby[found].squadron = client->squadron;
-			strncpy(arena->fields[field].hitby[found].longnick, client->longnick, 6);
 		}
 		else if (!(empty < 0)) // if not found, add to array if slot available
 		{
 			arena->fields[field].hitby[empty].dbid = client->id;
+			strncpy(arena->fields[field].hitby[found].longnick, client->longnick, 6);
 			arena->fields[field].hitby[empty].plane = client->attached ? client->attached->plane : client->plane;
 			arena->fields[field].hitby[found].country = client->country;
 			arena->fields[field].hitby[found].squadron = client->squadron;

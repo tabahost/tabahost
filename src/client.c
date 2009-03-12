@@ -1744,11 +1744,11 @@ int8_t AddKiller(client_t *victim, client_t *client)
 			victim->hitby[found].plane = client->attached ? client->attached->plane : client->plane;
 			victim->hitby[found].country = client->country;
 			victim->hitby[found].squadron = client->squadron;
-			strncpy(victim->hitby[found].longnick, client->longnick, 6);
 		}
 		else if (!(empty < 0)) // if not found, add to array if slot available
 		{
 			victim->hitby[empty].dbid = client->id;
+			strncpy(victim->hitby[found].longnick, client->longnick, 6);
 			victim->hitby[empty].plane = client->attached ? client->attached->plane : client->plane;
 			victim->hitby[found].country = client->country;
 			victim->hitby[found].squadron = client->squadron;

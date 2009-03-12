@@ -815,7 +815,7 @@ char *Com_TimeSeconds(u_int32_t seconds)
 {
 	static char buffer[32];
 
-	sprintf(buffer, "%3.0f'%2.0f\"", FloorDiv((double)seconds, 60.0), fmod((double)seconds, 60.0));
+	sprintf(buffer, "%3u'%02u\"", (seconds / 60), (seconds % 60));
 
 	return buffer;
 }
