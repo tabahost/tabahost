@@ -6233,6 +6233,8 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 			PPrintf(client, RADIO_YELLOW, "Paras count: %d", arena->fields[building->field - 1].paras);
 			
+			Com_Printf(VERBOSE_DEBUG, "Paras count F%d = %d\n", building->field, arena->fields[building->field - 1].paras);
+			
 			AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
 			
 			if (arena->fields[building->field - 1].paras >= GetFieldParas(arena->fields[building->field - 1].type))

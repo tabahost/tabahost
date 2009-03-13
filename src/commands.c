@@ -6029,12 +6029,24 @@ void Cmd_CheckBuildings(client_t *client)
 
 	for (i = 0; i < fields->value; i++)
 	{
+		if(arena->fields[i].paras > GetFieldParas(arena->fields[i].type))
+		{
+			Com_Printf(VERBOSE_DEBUG, "Field %d paras bugged %d\n", i+1, arena->fields[i].paras);
+			arena->fields[i].paras = GetFieldParas(arena->fields[i].type);
+		}
+		
+		if(arena->fields[i].tonnage > (GetTonnageToClose(i) * 2.4))
+		{
+			Com_Printf(VERBOSE_DEBUG, "Field %d tonnage bugged %.3f\n", i+1, arena->fields[i].tonnage);
+			arena->fields[i].tonnage = (GetTonnageToClose(i) * 2.4);
+		}
+			
 		for (j = 0; j < MAX_BUILDINGS; j++)
 		{
 			if (arena->fields[i].buildings[j].field)
 			{
 				if (arena->fields[i].buildings[j].field != (i + 1))
-					PPrintf(client, RADIO_LIGHTYELLOW, "Building id %d f%d field %d", arena->fields[i].buildings[j].id, i + 1, arena->fields[i].buildings[j].field);
+					Com_Printf(VERBOSE_DEBUG, "Building id %d f%d field %d\n", arena->fields[i].buildings[j].id, i + 1, arena->fields[i].buildings[j].field);
 			}
 		}
 	}
