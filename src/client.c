@@ -2016,18 +2016,14 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 char *CreateSkin(client_t *client, u_int8_t number)
 {
 	static char buffer[64];
-	u_int8_t len;
-	
-	len = strlen(thskins->string);
-	len -= 6;
 
 	switch (client->country)
 	{
 		case COUNTRY_RED:
-			sprintf(buffer, "ppv\\%s\\%sr%dppv.vfc@%sr%d.ppv", GetPlaneDir(client->plane), thskins->string + len, number, thskins->string + len, number);
+			sprintf(buffer, "ppv\\%s\\%sr%dppv.vfc@%sr%d.ppv", GetPlaneDir(client->plane), thskins->string, number, thskins->string, number);
 			break;
 		case COUNTRY_GOLD:
-			sprintf(buffer, "ppv\\%s\\%sg%dppv.vfc@%sg%d.ppv", GetPlaneDir(client->plane), thskins->string + len, number, thskins->string + len, number);
+			sprintf(buffer, "ppv\\%s\\%sg%dppv.vfc@%sg%d.ppv", GetPlaneDir(client->plane), thskins->string, number, thskins->string, number);
 			break;
 		default:
 			buffer[0] = '\0';
