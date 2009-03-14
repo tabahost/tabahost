@@ -2255,6 +2255,8 @@ u_int8_t CheckTK(client_t *client);
 u_int8_t GetClientInfo(client_t *client);
 void	UpdateClientFile(client_t *client);
 int8_t	AddKiller(client_t *victim, client_t *client);
+void	ClearKillers(client_t *client);
+void	ClearBombers(u_int8_t field);
 void	CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags);
 client_t *NearPlane(client_t *client, u_int8_t country, int32_t limit);
 void	ForceEndFlight(u_int8_t remdron, client_t *client);

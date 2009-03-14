@@ -532,10 +532,9 @@ void ScoreFieldCapture(u_int8_t field)
 					Com_Printf(VERBOSE_DEBUG, "Field Penalty filtered '%.3f'\n", score);
 				}
 			}
-
-			// clear one entry from list
-			memset(&(arena->fields[field].hitby[i]), 0, sizeof(hitby_t));
 		}
+		
+		ClearBombers(field);
 
 		if(sql_query[0] != '\0')
 		{

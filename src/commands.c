@@ -6035,10 +6035,10 @@ void Cmd_CheckBuildings(client_t *client)
 			arena->fields[i].paras = GetFieldParas(arena->fields[i].type);
 		}
 		
-		if(arena->fields[i].tonnage > (GetTonnageToClose(i) * 2.4))
+		if(arena->fields[i].tonnage > (GetTonnageToClose(i+1) * 2.4))
 		{
 			Com_Printf(VERBOSE_DEBUG, "Field %d tonnage bugged %.3f\n", i+1, arena->fields[i].tonnage);
-			arena->fields[i].tonnage = (GetTonnageToClose(i) * 2.4);
+			arena->fields[i].tonnage = (GetTonnageToClose(i+1) * 2.4);
 		}
 			
 		for (j = 0; j < MAX_BUILDINGS; j++)

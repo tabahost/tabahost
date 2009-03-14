@@ -398,6 +398,7 @@ void CheckArenaRules(void)
 
 								if(arena->fields[i].hitby[j].damage < 0.0) // remove bomber
 								{
+									Com_Printf(VERBOSE_DEBUG, "Field damage removed, remove bomber %d from list\n", arena->fields[i].hitby[j].longnick);
 									memset(&(arena->fields[i].hitby[j]), 0, sizeof(hitby_t));
 								}
 							}
@@ -7332,6 +7333,12 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if (building->status)
 		return 0;
+	
+	if(!building->field)
+	{
+		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage() building %d has no field", building->id);
+		return 0;
+	}
 
 	if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 	{

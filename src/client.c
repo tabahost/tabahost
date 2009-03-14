@@ -1770,7 +1770,23 @@ void ClearKillers(client_t *client)
 {
 	if (client)
 	{
+		Com_Printf(VERBOSE_DEBUG, "Remove all killers from list\n");
 		memset(&(client->hitby), 0, sizeof(hitby_t) * MAX_HITBY);
+	}
+}
+
+/*************
+ ClearKillers
+
+ Clear killers list
+ *************/
+
+void ClearBombers(u_int8_t field)
+{
+	if (field < fields->value)
+	{
+		Com_Printf(VERBOSE_DEBUG, "Remove all bombers from list\n");
+		memset(&(arena->fields[field].hitby), 0, sizeof(hitby_t) * MAX_HITBY);
 	}
 }
 
