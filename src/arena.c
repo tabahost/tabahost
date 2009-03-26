@@ -3301,14 +3301,15 @@ void CalcTimemultBasedOnTime(void)
 
 void NewWar(void)
 {
-
-	ResetScores();
-
 	arena->year = inityear->value;
 	arena->month = initmonth->value;
 	arena->day = initday->value;
 
 	arena->mapnum = 0;
+	
+	BackupScores(COLLECT_CYCLE);
+	
+	ResetScores();
 }
 
 /*************

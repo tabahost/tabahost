@@ -1910,6 +1910,17 @@ typedef struct wb3updategunner_s		// 21 07
 	u_int8_t	yaw;
 } wb3updategunner_t;
 
+typedef struct addaiplane_s		// 21 08
+{
+	u_int16_t	packetid;
+	u_int8_t	slot;
+	u_int32_t	shortnick;
+	u_int32_t	country;
+	u_int16_t	plane;
+	u_int16_t	unknown1;			// log show 0x05
+	u_int8_t	unknown2;
+} addaiplane_t;
+
 typedef struct wb3supressfire_s		// 21 22
 {
 	u_int16_t	packetid;

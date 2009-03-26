@@ -539,7 +539,8 @@ int ProcessClient(client_t *client)
 
 				if(!((arena->frame - client->frame) % 10))
 				{
-					SendPlayersNear(client);
+					// if(!((arena->frame - client->frame) % 500)) // debug
+						SendPlayersNear(client);
 
 					if((client->lograwdata || lograwposition->value) && !((arena->frame - client->frame) % 50) && client->infly)
 					{

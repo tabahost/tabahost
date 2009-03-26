@@ -2224,7 +2224,7 @@ void BackupScores(u_int8_t collect_type)
 		pnextmap = arena->mapcycle[arena->mapnum + 1].mapname;
 	}
 
-	sprintf(my_query, "DELETE FROM players WHERE longnick IS NULL");
+	sprintf(my_query, "DELETE FROM players WHERE longnick IS NULL"); // remove all logins without nickname
 
 	if (d_mysql_query(&my_sock, my_query))
 	{
@@ -2232,13 +2232,12 @@ void BackupScores(u_int8_t collect_type)
 	}
 
 	fp = fopen("./cron/scores.cfg", "w");
-	fprintf(fp, "actual_map=%s\n\
-next_map=%s\n\
-vdate_tod_start=%04.0f-%02.0f-%02.0f\n\
-vdate_map_start=%04u-%02u-%02u\n\
-vdate_map_end=%04u-%02u-%02u\n\
-vdate_tod_end=%04.0f-%02.0f-%02.0f\n",
-			dirname->string, pnextmap, inityear->value, initmonth->value, initday->value, s_year, s_month, s_day, e_year, e_month, e_day, endyear->value, endmonth->value, endday->value);
+	fprintf(fp, "actual_map=%s\n", arena->mapcycle[arena->mapnum].mapname);
+	fprintf(fp, "next_map=%s\n", pnextmap);
+	fprintf(fp, "vdate_tod_start=%04.0f-%02.0f-%02.0f\n", inityear->value, initmonth->value, initday->value);
+	fprintf(fp, "vdate_map_start=%04u-%02u-%02u\n", s_year, s_month, s_day);
+	fprintf(fp, "vdate_map_end=%04u-%02u-%02u\n", e_year, e_month, e_day);
+	fprintf(fp, "vdate_tod_end=%04.0f-%02.0f-%02.0f\n", endyear->value, endmonth->value, endday->value);
 
 	switch (collect_type)
 	{

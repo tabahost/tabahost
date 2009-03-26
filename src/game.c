@@ -255,7 +255,7 @@ u_int16_t packets_tab[210][3] =
 		{ 0x2105, 0x0005, 0x0005 }, // bgRADAR_PLANES_UPDATE
 		{ 0x2106, 0x0006, 0x0006 }, // bgCLEAR_RADAR
 		{ 0xFFFF, 0x0007, 0x0007 }, // bgGUNNER_ATT *
-		{ 0xFFFF, 0x0008, 0xFFFF }, // bgAI_FILL_SLOT
+		{ 0xFFFF, 0x0008, 0x0008 }, // bgAI_FILL_SLOT
 		{ 0xFFFF, 0x0009, 0xFFFF }, // bgAI_UPDATE
 		{ 0xFFFF, 0x000A, 0xFFFF }, // bgAI_PLANE_DAMAGE
 		{ 0xFFFF, 0x000B, 0xFFFF }, // bgAI_RESEND_SLOT_INFO
@@ -1289,8 +1289,7 @@ void CheckArenaRules(void)
 
 				if ((arena->mapnum) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum)].date)
 				{
-					BackupScores(COLLECT_CYCLE);
-					NewWar(); // set mapnum to zero, etc
+					NewWar(); // set mapnum to zero, backup scores, reset scores, etc
 				}
 				else
 				{
@@ -5176,8 +5175,12 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				client->view->posalt[0] = client->posalt[0];
 				SendDronePos(client, client->view);
 			}
+			
 		}
 	}
+	
+	u_int8_t teste[31] = {0x00, 0x15, 0x00, 0x00, 0x00, 0x03, 0x17, 0xB0, 0x00, 0x06, 0x61, 0xE7, 0x00, 0x00, 0x0B, 0xB8, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x4E, 0x00, 0x02};
+	SendPacket(teste, sizeof(teste), client);
 }
 
 /*************
@@ -9232,18 +9235,27 @@ void SendScreenUpdates(client_t *client)
 				wb3updateplane2->relposx = htons(client->visible[i].client->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
 				wb3updateplane2->relposy = htons(client->visible[i].client->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
 				wb3updateplane2->relalt = htons(client->visible[i].client->posalt[0] - ((client->posalt[0] >> 9) << 9));
-				wb3updateplane2->pitch = client->visible[i].client->angles[0][0] / 14; // >> 4;
-				wb3updateplane2->xaccel = client->visible[i].client->accelxyz[0][0] >> 2;
-				wb3updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
-				wb3updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-				wb3updateplane2->roll = client->visible[i].client->angles[1][0] / 14; // >> 4;
-				wb3updateplane2->yaccel = client->visible[i].client->accelxyz[1][0] >> 2;
-				wb3updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
-				wb3updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-				wb3updateplane2->yaw = client->visible[i].client->angles[2][0] / 14; //>> 4;
-				wb3updateplane2->zaccel = client->visible[i].client->accelxyz[2][0] >> 2;
-				wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
-				wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+
+				wb3updateplane2->pitch = client->visible[i].client->angles[0][0] / 14; // Pitch Position
+				wb3updateplane2->xaccel = client->visible[i].client->accelxyz[0][0] >> 2; // X Acceleration
+				wb3updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // Pitch Angular Speed // 7
+				wb3updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // X Speed // 9
+				wb3updateplane2->roll = client->visible[i].client->angles[1][0] / 14; // Roll Position
+				wb3updateplane2->yaccel = client->visible[i].client->accelxyz[1][0] >> 2; // Y Acceleration
+				wb3updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // Roll Angular Speed // 7
+				wb3updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // Y Speed // 9
+				wb3updateplane2->yaw = client->visible[i].client->angles[2][0] / 14; // Yaw Position
+				wb3updateplane2->zaccel = client->visible[i].client->accelxyz[2][0] >> 2; // Z Acceleration
+				wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // Yaw Angular Speed // 7
+				wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // Z Speed // 9
+
+				if(IsGround(client->visible[i].client))
+				{
+					wb3updateplane2->prxspeed = htons(0x8000); // zero Pitch Angular Speed
+					wb3updateplane2->bryspeed = htons(0x8000); // zero Roll Angular Speed
+					wb3updateplane2->zaccel = 0; // zero Z Acceleration
+					wb3updateplane2->yrzspeed |= htons(0x0100); // zero Z Speed
+				}
 
 				if (fp)
 				{
