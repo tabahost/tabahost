@@ -42,7 +42,7 @@
 <option id="gnu.c.compiler.option.include.paths.1511659261" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
 <option id="gnu.c.compiler.option.optimization.flags.547923210" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags"/>
 <option id="gnu.c.compiler.option.debugging.other.914648777" name="Other debugging flags" superClass="gnu.c.compiler.option.debugging.other"/>
-<option id="gnu.c.compiler.option.debugging.gprof.1558680137" name="Generate gprof information (-pg)" superClass="gnu.c.compiler.option.debugging.gprof"/>
+<option id="gnu.c.compiler.option.debugging.gprof.1558680137" name="Generate gprof information (-pg)" superClass="gnu.c.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
 <option id="gnu.c.compiler.option.debugging.prof.1379115757" name="Generate prof information (-p)" superClass="gnu.c.compiler.option.debugging.prof"/>
 <option id="gnu.c.compiler.option.warnings.syntax.811138370" name="Check syntax only (-fsyntax-only)" superClass="gnu.c.compiler.option.warnings.syntax"/>
 <option id="gnu.c.compiler.option.warnings.pedantic.2538007" name="Pedantic (-pedantic)" superClass="gnu.c.compiler.option.warnings.pedantic"/>
@@ -66,10 +66,12 @@
 <option id="gnu.c.link.option.noshared.1999492210" name="No shared libraries (-static)" superClass="gnu.c.link.option.noshared"/>
 <option id="gnu.c.link.option.libs.1201870632" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="GeoIP"/>
+<listOptionValue builtIn="false" value="gmon"/>
+<listOptionValue builtIn="false" value="c"/>
 <listOptionValue builtIn="false" value="mysqlclient"/>
 <listOptionValue builtIn="false" value="z"/>
 </option>
-<option id="gnu.c.link.option.ldflags.1482843525" name="Linker flags" superClass="gnu.c.link.option.ldflags"/>
+<option id="gnu.c.link.option.ldflags.1482843525" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-pg" valueType="string"/>
 <option id="gnu.c.link.option.other.1976278441" name="Other options (-Xlinker [option])" superClass="gnu.c.link.option.other"/>
 <option id="gnu.c.link.option.userobjs.1942047529" name="Other objects" superClass="gnu.c.link.option.userobjs"/>
 <option id="gnu.c.link.option.shared.1217590666" name="Shared (-shared)" superClass="gnu.c.link.option.shared"/>
@@ -94,6 +96,7 @@
 
 
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+
 
 
 
@@ -544,8 +547,8 @@
 <option id="gnu.cpp.compiler.cygwin.exe.release.option.debugging.level.365088113" name="Debug Level" superClass="gnu.cpp.compiler.cygwin.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 </tool>
 <tool command="gcc" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.c.compiler.cygwin.exe.release.837614676" name="Cygwin C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.cygwin.exe.release">
-<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.cygwin.exe.release.option.optimization.level.546414389" name="Optimization Level" superClass="gnu.c.compiler.cygwin.exe.release.option.optimization.level" value="gnu.c.optimization.level.none" valueType="enumerated"/>
-<option id="gnu.c.compiler.cygwin.exe.release.option.debugging.level.765089333" name="Debug Level" superClass="gnu.c.compiler.cygwin.exe.release.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.cygwin.exe.release.option.optimization.level.546414389" name="Optimization Level" superClass="gnu.c.compiler.cygwin.exe.release.option.optimization.level" value="gnu.c.optimization.level.most" valueType="enumerated"/>
+<option id="gnu.c.compiler.cygwin.exe.release.option.debugging.level.765089333" name="Debug Level" superClass="gnu.c.compiler.cygwin.exe.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
 <option id="gnu.c.compiler.option.preprocessor.nostdinc.1736730623" name="Do not search system directories (-nostdinc)" superClass="gnu.c.compiler.option.preprocessor.nostdinc"/>
 <option id="gnu.c.compiler.option.preprocessor.preprocess.1914641643" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess"/>
 <option id="gnu.c.compiler.option.preprocessor.def.symbols.325909" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
@@ -553,7 +556,7 @@
 <option id="gnu.c.compiler.option.include.paths.1105825639" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
 <option id="gnu.c.compiler.option.optimization.flags.1318368994" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags"/>
 <option id="gnu.c.compiler.option.debugging.other.1669120496" name="Other debugging flags" superClass="gnu.c.compiler.option.debugging.other"/>
-<option id="gnu.c.compiler.option.debugging.gprof.719988997" name="Generate gprof information (-pg)" superClass="gnu.c.compiler.option.debugging.gprof" value="true" valueType="boolean"/>
+<option id="gnu.c.compiler.option.debugging.gprof.719988997" name="Generate gprof information (-pg)" superClass="gnu.c.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
 <option id="gnu.c.compiler.option.debugging.prof.397653717" name="Generate prof information (-p)" superClass="gnu.c.compiler.option.debugging.prof" value="false" valueType="boolean"/>
 <option id="gnu.c.compiler.option.warnings.syntax.1776763186" name="Check syntax only (-fsyntax-only)" superClass="gnu.c.compiler.option.warnings.syntax"/>
 <option id="gnu.c.compiler.option.warnings.pedantic.1814674993" name="Pedantic (-pedantic)" superClass="gnu.c.compiler.option.warnings.pedantic"/>
@@ -577,12 +580,10 @@
 <option id="gnu.c.link.option.noshared.1966498011" name="No shared libraries (-static)" superClass="gnu.c.link.option.noshared"/>
 <option id="gnu.c.link.option.libs.309382329" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="GeoIP"/>
-<listOptionValue builtIn="false" value="gmon"/>
-<listOptionValue builtIn="false" value="c"/>
 <listOptionValue builtIn="false" value="mysqlclient"/>
 <listOptionValue builtIn="false" value="z"/>
 </option>
-<option id="gnu.c.link.option.ldflags.1952809865" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="-pg" valueType="string"/>
+<option id="gnu.c.link.option.ldflags.1952809865" name="Linker flags" superClass="gnu.c.link.option.ldflags" value="" valueType="string"/>
 <option id="gnu.c.link.option.other.354369948" name="Other options (-Xlinker [option])" superClass="gnu.c.link.option.other"/>
 <option id="gnu.c.link.option.userobjs.1694864488" name="Other objects" superClass="gnu.c.link.option.userobjs"/>
 <option id="gnu.c.link.option.shared.32196029" name="Shared (-shared)" superClass="gnu.c.link.option.shared"/>
@@ -607,6 +608,7 @@
 
 
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+
 
 
 
@@ -1119,6 +1121,7 @@
 
 
 
+
 <storageModule moduleId="scannerConfiguration">
 <autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile"/>
 <profile id="org.eclipse.cdt.make.core.GCCStandardMakePerProjectProfile">
@@ -1623,6 +1626,7 @@
 
 
 <storageModule moduleId="org.eclipse.cdt.core.language.mapping"/>
+
 
 
 

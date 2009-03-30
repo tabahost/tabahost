@@ -2774,6 +2774,7 @@ void ProcessCommands(char *command, client_t *client)
 			if(!argv[1])
 			{
 				PPrintf(client, RADIO_YELLOW, "usage: .alt <x> <y>");
+				PPrintf(client, RADIO_YELLOW, "Altitude: %d", GetHeightAt(client->posxy[0][0], client->posxy[1][0]));
 			}
 			else
 			{
@@ -5179,8 +5180,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		}
 	}
 	
-	u_int8_t teste[31] = {0x00, 0x15, 0x00, 0x00, 0x00, 0x03, 0x17, 0xB0, 0x00, 0x06, 0x61, 0xE7, 0x00, 0x00, 0x0B, 0xB8, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x4E, 0x00, 0x02};
-	SendPacket(teste, sizeof(teste), client);
+// CV Test
+//	u_int8_t teste[31] = {0x00, 0x15, 0x00, 0x00, 0x00, 0x03, 0x17, 0xB0, 0x00, 0x06, 0x61, 0xE7, 0x00, 0x00, 0x0B, 0xB8, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x4E, 0x00, 0x02};
+//	SendPacket(teste, sizeof(teste), client);
 }
 
 /*************
@@ -9249,13 +9251,13 @@ void SendScreenUpdates(client_t *client)
 				wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // Yaw Angular Speed // 7
 				wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // Z Speed // 9
 
-				if(IsGround(client->visible[i].client))
-				{
-					wb3updateplane2->prxspeed = htons(0x8000); // zero Pitch Angular Speed
-					wb3updateplane2->bryspeed = htons(0x8000); // zero Roll Angular Speed
-					wb3updateplane2->zaccel = 0; // zero Z Acceleration
-					wb3updateplane2->yrzspeed |= htons(0x0100); // zero Z Speed
-				}
+//				if(IsGround(client->visible[i].client))
+//				{
+//					wb3updateplane2->prxspeed = htons(0x8000); // zero Pitch Angular Speed
+//					wb3updateplane2->bryspeed = htons(0x8000); // zero Roll Angular Speed
+//					wb3updateplane2->zaccel = 0; // zero Z Acceleration
+//					wb3updateplane2->yrzspeed |= htons(0x0100); // zero Z Speed
+//				}
 
 				if (fp)
 				{
