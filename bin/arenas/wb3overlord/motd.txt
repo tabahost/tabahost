@@ -1,5 +1,8 @@
+Operation Overlord : 1944 - Allied invasion of Normandy, France 
+Terreno Europe128 = 06/6/44 - 10/7/44 = 30 tabadays 
+
+============================================
 [IMG]offln\common\wtg3.tga 0 0 512 185[/IMG]
-Overlord 10/05/44-10/10/44 150 tabadays 12,5RD 
 
 France, 1944. After the disembark in 6/june, The Allies runs over france and Lower Countries. The Germans still not believe that is the main attack and dont oppose its entire forces to block the invasion. The fate of Europe is in the french battlefield.
 
@@ -12,3 +15,4 @@ type .help and .show to get info about arena.
                          Please enjoy!!!
                            --=Ø=--
                          TH DevTeam
+============================================

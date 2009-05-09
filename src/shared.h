@@ -124,7 +124,7 @@ typedef unsigned int u_int32_t;
 #define MAX_SCREEN			64		// max aircrafts you can see on screen (32 wb2, 64, wb3)
 #define MAX_SCREENBUF		800		// buffer of MAX_SCREEN (19+MAX_SCREEN*21)
 #define MAX_MUNTYPE			204 	// = number of munition types
-#define MAX_BUILDINGS		300		// 39?
+#define MAX_BUILDINGS		600		// 39?
 #define MAX_CITYFIELD		17		// max cities linked to a field
 #define	MAX_HITBY			64		// max of players can get kill assist
 #define MAX_UINT32			(u_int32_t) 0xFFFFFFFF // max value for unsigned int 32 (4294967295UL)

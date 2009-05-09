@@ -1534,7 +1534,7 @@ void ProcessCommands(char *command, client_t *client)
 
 	size = strlen(command);
 
-	if(size > 100)
+	if(size > 128)
 	{
 		Com_Printf(VERBOSE_DEBUG, "ProcessCommands(size) > 100 (%d)\n", size);
 		return;

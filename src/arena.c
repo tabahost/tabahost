@@ -214,7 +214,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 {
 	u_int16_t i, j, k, l;
 	char file[128];
-	char buffer[16384];
+	char buffer[25000];
 	FILE *fp;
 	char *token;
 
@@ -289,7 +289,6 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 					//					{
 					//						arena->fields[i].rps[j] = Com_Atoi((char *)strtok(NULL, ";"));
 					//					}
-
 					for (j = 0; j < MAX_BUILDINGS; j++)
 					{
 						if (!(token = strtok(NULL, ";")))
@@ -306,7 +305,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 						arena->fields[i].buildings[j].posx = Com_Atoi((char *)strtok(NULL, ";"));
 						arena->fields[i].buildings[j].posy = Com_Atoi((char *)strtok(NULL, ";"));
 						arena->fields[i].buildings[j].posz = Com_Atoi((char *)strtok(NULL, ";"));
-						
+
 						if(sqrt(Com_Pow(arena->fields[i].buildings[j].posx - arena->fields[i].posxyz[0], 2) + Com_Pow(arena->fields[i].buildings[j].posy - arena->fields[i].posxyz[1], 2)) <= arena->fields[i].radius)
 						{
 							arena->fields[i].buildings[j].infield = 1;
@@ -1516,7 +1515,7 @@ void WB3SendAcks(client_t *client)
 {
 	u_int8_t buffer[3000];
 	u_int16_t i, j;
-	u_int8_t numacks;
+	u_int16_t numacks;
 
 	if (!client->field)
 		return;
