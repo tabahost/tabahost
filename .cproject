@@ -1067,6 +1067,8 @@
 <option id="gnu.c.link.option.noshared.267568081" name="No shared libraries (-static)" superClass="gnu.c.link.option.noshared"/>
 <option id="gnu.c.link.option.libs.1881715731" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="GeoIP"/>
+<listOptionValue builtIn="false" value="z"/>
+<listOptionValue builtIn="false" value="dl"/>
 <listOptionValue builtIn="false" value="mysqlclient"/>
 </option>
 <option id="gnu.c.link.option.ldflags.1671068014" name="Linker flags" superClass="gnu.c.link.option.ldflags"/>
@@ -1552,7 +1554,7 @@
 <option id="gnu.c.compiler.option.warnings.pedantic.223628841" name="Pedantic (-pedantic)" superClass="gnu.c.compiler.option.warnings.pedantic"/>
 <option id="gnu.c.compiler.option.warnings.pedantic.error.818210041" name="Pedantic warnings as errors (-pedantic-errors)" superClass="gnu.c.compiler.option.warnings.pedantic.error"/>
 <option id="gnu.c.compiler.option.warnings.nowarn.2103412173" name="Inhibit all warnings (-w)" superClass="gnu.c.compiler.option.warnings.nowarn"/>
-<option id="gnu.c.compiler.option.warnings.allwarn.499504856" name="All warnings (-Wall)" superClass="gnu.c.compiler.option.warnings.allwarn"/>
+<option id="gnu.c.compiler.option.warnings.allwarn.499504856" name="All warnings (-Wall)" superClass="gnu.c.compiler.option.warnings.allwarn" value="false" valueType="boolean"/>
 <option id="gnu.c.compiler.option.warnings.toerrors.174155304" name="Warnings as errors (-Werror)" superClass="gnu.c.compiler.option.warnings.toerrors"/>
 <option id="gnu.c.compiler.option.misc.other.617807163" name="Other flags" superClass="gnu.c.compiler.option.misc.other" value="-ffast-math -fpack-struct -c -fmessage-length=0" valueType="string"/>
 <option id="gnu.c.compiler.option.misc.verbose.262562338" name="Verbose (-v)" superClass="gnu.c.compiler.option.misc.verbose"/>
@@ -1563,6 +1565,8 @@
 <option id="gnu.c.link.option.paths.1742084114" name="Library search path (-L)" superClass="gnu.c.link.option.paths"/>
 <option id="gnu.c.link.option.libs.1489644067" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="GeoIP"/>
+<listOptionValue builtIn="false" value="z"/>
+<listOptionValue builtIn="false" value="dl"/>
 <listOptionValue builtIn="false" value="mysqlclient"/>
 </option>
 <option id="gnu.c.link.option.nostart.934437086" name="Do not use standard start files (-nostartfiles)" superClass="gnu.c.link.option.nostart"/>
