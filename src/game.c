@@ -5062,6 +5062,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 						}
 
 						client->cancollide = 1;
+						SendArenaRules(client);
 					}
 				}
 			}
@@ -9174,6 +9175,7 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 	SendPacket(buffer, sizeof(buffer), client);
 	WB3SupressFire(addplane->slot, client);
 	SendPlaneStatus(plane, client);
+	Com_Printf(VERBOSE_DEBUG, "WB3OverrideSkin() at AddRemovePlaneScreen()\n");
 	WB3OverrideSkin(addplane->slot, client);
 }
 
@@ -9439,7 +9441,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->unknown1 = 0x2D;
 		wb3arenarules->unknown2 = 0xA0;
 		wb3arenarules->ackmaxtrav = 0x28; // ??
-		wb3arenarules->altv = altv->value ? altv->value : IsBomber(client) ? 1 : 0;
+		wb3arenarules->altv = altv->value ? altv->value : (IsBomber(client) || !client->cancollide) ? 1 : 0;
 		wb3arenarules->fueldiv = htonl(fueldiv->value);
 		wb3arenarules->flakmax = htonl(flakmax->value);
 		wb3arenarules->radarrange0 = htonl(radarrange0->value);

@@ -1978,22 +1978,30 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 
 		if (strlen(thskins->string) > 2)
 		{
-			i = 1;
+			i = 0;
 
-			if(strstr(ps, "2ppv"))
+			if(!strstr(ps, "sqd"))
 			{
-				i = 2;
-			}
-			else if(strstr(ps, "3ppv"))
-			{
-				i = 3;
-			}
-			else if(strstr(ps, "4ppv"))
-			{
-				i = 4;
+				i = 1;
+
+				if(strstr(ps, "2ppv"))
+				{
+					i = 2;
+				}
+				else if(strstr(ps, "3ppv"))
+				{
+					i = 3;
+				}
+				else if(strstr(ps, "4ppv"))
+				{
+					i = 4;
+				}
 			}
 
-			ps = CreateSkin(client, i);
+			if(i)
+			{
+				ps = CreateSkin(client, i);
+			}
 		}
 
 		strcpy(client->skin, ps);
@@ -2009,6 +2017,7 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 
 					if (client == clients[i].visible[j].client)
 					{
+						Com_Printf(VERBOSE_DEBUG, "WB3OverrideSkin() at WB3ClientSkin()\n");
 						WB3OverrideSkin(j, &clients[i]);
 						break;
 					}
