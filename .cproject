@@ -1568,7 +1568,6 @@
 <option id="gnu.c.link.option.paths.1742084114" name="Library search path (-L)" superClass="gnu.c.link.option.paths"/>
 <option id="gnu.c.link.option.libs.1489644067" name="Libraries (-l)" superClass="gnu.c.link.option.libs" valueType="libs">
 <listOptionValue builtIn="false" value="GeoIP"/>
-<listOptionValue builtIn="false" value="z"/>
 <listOptionValue builtIn="false" value="dl"/>
 <listOptionValue builtIn="false" value="mysqlclient"/>
 </option>

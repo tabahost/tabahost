@@ -1,8 +1,8 @@
-/*** 
+/***
  *  Copyright (C) 2004-2008 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
- * 
+ *
  *  This file is part of Tabajara Host.
  *
  *  Tabajara Host is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
- * 
+ *
  ***/
 
 #include "shared.h"
@@ -386,7 +386,7 @@ void CheckVars(void)
 			}
 		}
 	}
-	
+
 	if (database->modified || sqlserver->modified)
 	{
 		mysql_close(&my_sock);
@@ -428,7 +428,7 @@ void CheckVars(void)
 		}
 
 		/*  this area was commented to get current date from config.cfg so we can change arena and start next arena with a gap date
-		 if(mapcycle->value) 
+		 if(mapcycle->value)
 		 {
 		 if(i > 0  && arena->mapcycle[i - 1].date)
 		 {
@@ -779,6 +779,8 @@ void UpdateArenaStatus(u_int8_t uptime)
 
 	sprintf(my_query, "UPDATE arena_status SET");
 
+	Com_Printf(VERBOSE_DEBUG, "UpdateArenaStatus(1) %s\n", my_query);
+
 	for (i = 0, j = 0; i < 49; i++)
 	{
 		if (upvars[i]->modified)
@@ -787,6 +789,8 @@ void UpdateArenaStatus(u_int8_t uptime)
 			j++;
 		}
 	}
+
+	Com_Printf(VERBOSE_DEBUG, "UpdateArenaStatus(2) %s\n", my_query);
 
 	if (uptime || j)
 	{
@@ -797,4 +801,6 @@ void UpdateArenaStatus(u_int8_t uptime)
 			Com_Printf(VERBOSE_WARNING, "UpdateArenaStatus(): couldn't query UPDATE error %d: %s\nquery = %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
 		}
 	}
+
+	Com_Printf(VERBOSE_DEBUG, "UpdateArenaStatus(3) %s\n", my_query);
 }
