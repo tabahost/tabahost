@@ -594,12 +594,17 @@ void CheckVars(void)
 		}
 	}
 
-	UpdateArenaStatus(FALSE);
+	i = UpdateArenaStatus(FALSE);
 
-	for (var = var_vars; var; var = var->next)
+	if(i)
 	{
-		if (var->modified)
-			var->modified = 0;
+		for (var = var_vars; var; var = var->next)
+		{
+			if (var->modified)
+			{
+				var->modified = 0;
+			}
+		}
 	}
 }
 
@@ -768,7 +773,7 @@ void Var_WriteVariables(char *path, client_t *client)
  Update table arena_status
  *************/
 
-void UpdateArenaStatus(u_int8_t uptime)
+u_int8_t UpdateArenaStatus(u_int8_t uptime)
 {
 	u_int8_t i, j;
 	var_t *upvars[51] =
@@ -779,8 +784,6 @@ void UpdateArenaStatus(u_int8_t uptime)
 
 	sprintf(my_query, "UPDATE arena_status SET");
 
-	Com_Printf(VERBOSE_DEBUG, "UpdateArenaStatus(1) %s\n", my_query);
-
 	for (i = 0, j = 0; i < 49; i++)
 	{
 		if (upvars[i]->modified)
@@ -789,8 +792,6 @@ void UpdateArenaStatus(u_int8_t uptime)
 			j++;
 		}
 	}
-
-	Com_Printf(VERBOSE_DEBUG, "UpdateArenaStatus(2) %s\n", my_query);
 
 	if (uptime || j)
 	{
@@ -802,5 +803,5 @@ void UpdateArenaStatus(u_int8_t uptime)
 		}
 	}
 
-	Com_Printf(VERBOSE_DEBUG, "UpdateArenaStatus(3) %s\n", my_query);
+	return j; // return number of vars changed
 }

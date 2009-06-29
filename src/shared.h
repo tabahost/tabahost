@@ -2,7 +2,7 @@
  *  Copyright (C) 2004-2008 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
- * 
+ *
  *  This file is part of Tabajara Host.
  *
  *  Tabajara Host is free software: you can redistribute it and/or modify
@@ -17,12 +17,12 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
- * 
+ *
  ***/
 
 /****************************************************
  ****************************************************
-  
+
  compiler settings to gdb: "-fomit-frame-pointer" removed
 
  TODO: Misc: test arena->frame = 1 with numer lesser than 4294962000UL
@@ -103,7 +103,7 @@ typedef unsigned int u_int32_t;
 #endif
 
 #define VERSION				"b4.03"
- 
+
 #define V_WB2				0
 #define V_WB2007			1
 #define V_WB2008			2
@@ -154,7 +154,7 @@ typedef unsigned int u_int32_t;
 #define VAR_ADMIN			4		// only admins can change this variable
 #define MORTAR_BOMB			88		// 250Kg AP
 #define MORTAR				585.0	// mortar velocity (ft/s) (492, range= 10697; 585, range = 15072)
-#define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s²)
+#define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/sï¿½)
 #define MODULUS(a) (a > 0 ? a : a * -1)
 #define PLANE_FAU			180	// ME262 48, Predator 180
 #define COLLECT_CYCLE		0
@@ -362,9 +362,9 @@ typedef unsigned int u_int32_t;
 #define	PLACE_ENGINE3		0x02 // gear box
 #define	PLACE_ENGINE4		0x03 // right mid suspension
 #define	PLACE_ENGINE1S		0x04 // engine oil
-#define	PLACE_ENGINE2S		0x05 // 
-#define	PLACE_ENGINE3S		0x06 // 
-#define	PLACE_ENGINE4S		0x07 // 
+#define	PLACE_ENGINE2S		0x05 //
+#define	PLACE_ENGINE3S		0x06 //
+#define	PLACE_ENGINE4S		0x07 //
 #define	PLACE_ELEVATOR		0x08 // right rear suspension
 #define	PLACE_HSTAB			0x09 // left rear suspension
 #define	PLACE_RUDDER		0x0A //
@@ -394,12 +394,12 @@ typedef unsigned int u_int32_t;
 #define	STATUS_ENGINE3		0x00000004 // gear box
 #define	STATUS_ENGINE4		0x00000008 // right mid suspension
 #define	STATUS_ENGINE1S		0x00000010 // engine oil
-#define	STATUS_ENGINE2S		0x00000020 // 
-#define	STATUS_ENGINE3S		0x00000040 // 
-#define	STATUS_ENGINE4S		0x00000080 // 
+#define	STATUS_ENGINE2S		0x00000020 //
+#define	STATUS_ENGINE3S		0x00000040 //
+#define	STATUS_ENGINE4S		0x00000080 //
 #define	STATUS_ELEVATOR		0x00000100 // right rear suspension
 #define	STATUS_HSTAB		0x00000200 // left rear suspension
-#define	STATUS_RUDDER		0x00000400 // 
+#define	STATUS_RUDDER		0x00000400 //
 #define	STATUS_VSTAB		0x00000800 // left mid suspension
 #define	STATUS_LAILERON		0x00001000 // left track
 #define	STATUS_RAILERON		0x00002000 // right track
@@ -408,14 +408,14 @@ typedef unsigned int u_int32_t;
 #define	STATUS_CENTERFUEL	0x00010000 // center fuel tank
 #define	STATUS_REARFUSE		0x00020000 // front armor
 #define	STATUS_CENTERFUSE	0x00040000 // chassis -> explodes
-#define	STATUS_PILOTARMOR	0x00080000 // 
+#define	STATUS_PILOTARMOR	0x00080000 //
 #define	STATUS_PILOT		0x00100000 // driver -> killed
 #define	STATUS_TAILGUN		0x00200000 // turret
 #define	STATUS_NOSEGUN		0x00400000 // gunner
-#define	STATUS_LEFTGUN		0x00800000 // 
-#define STATUS_RIGHTGUN		0x01000000 // 
-#define	STATUS_TOPGUN		0x02000000 // 
-#define	STATUS_BOTTOMGUN	0x04000000 // 
+#define	STATUS_LEFTGUN		0x00800000 //
+#define STATUS_RIGHTGUN		0x01000000 //
+#define	STATUS_TOPGUN		0x02000000 //
+#define	STATUS_BOTTOMGUN	0x04000000 //
 #define	STATUS_LWING		0x08000000 // left armor
 #define	STATUS_RWING		0x10000000 // right armor
 #define	STATUS_RGEAR		0x20000000 // right front suspension
@@ -647,16 +647,16 @@ typedef struct arena_s
 	struct	{
 				float takeoff;
 				float ammotype[MAX_MUNTYPE];	// LoadAmmo():29
-				float buildtype[BUILD_MAX];		// 
+				float buildtype[BUILD_MAX];		//
 				float planemodel[MAX_PLANES];	// LoadDamageModel():24
 				float planeweight[MAX_PLANES];	// LoadDamageModel():25
-				float newpilot;					// 
+				float newpilot;					//
 				float technologylost;			//
-				float informationlost;			// 
-				float life;						// 
-				float planetransport;			// 
-				float pilottransport;			// 
-				float flighthour;				// 
+				float informationlost;			//
+				float life;						//
+				float planetransport;			//
+				float pilottransport;			//
+				float flighthour;				//
 			} costs;
 	struct	{
 				int32_t	points;
@@ -762,7 +762,7 @@ typedef struct client_s
 
 //	u_int8_t	slot;			// player's slot
 	int			loginkey;		// used temporarily to store user/password, so, flag arenalist or enter the game
-	char		loginuser[33];	// 
+	char		loginuser[33];	//
 	u_int16_t	packetlen;		// lastpacket lenght
 	u_int32_t	key;			// crypt key
 	u_int8_t	attr;			// player's attributes: Admin/OP
@@ -869,7 +869,7 @@ typedef struct client_s
 	u_int32_t	mapper;			// mapper mode activated
 	u_int16_t	mapperx;		// X index
 	u_int16_t	mappery;		// Y index
-	
+
 	u_int16_t	msgtimer;		// msgtimer (friendly hit)
 	u_int32_t	lastsql;		// last time client made a SQL request;
 	u_int32_t	timer;			// player timer
@@ -941,7 +941,7 @@ typedef struct wb3initflight_s		// 02 01
 	u_int32_t	country;
 	u_int16_t	field;			// -1
 	u_int16_t	unknown1;
-	
+
 	u_int16_t	bulletradius1;
 	u_int16_t	bulletradius2;
 	u_int16_t	gunrad;
@@ -949,7 +949,7 @@ typedef struct wb3initflight_s		// 02 01
 	u_int16_t	unknown2;
 	u_int16_t	unknown3;
 	u_int16_t	unknown4;
-	
+
 	u_int8_t	unknown5;
 	u_int8_t	unknown6;
 	u_int32_t	unknown7;
@@ -962,10 +962,10 @@ typedef struct wb3initflight_s		// 02 01
 	u_int32_t	unknown09; // not confirmed
 	u_int16_t	attached; // not confirmed
 	u_int16_t	plane;
-	
+
 	u_int32_t	unknown12;
 	u_int8_t	numofarrays;
-	
+
 //	u_int32_t	attachedpos;
 //	u_int32_t	attached;
 
@@ -1147,7 +1147,7 @@ typedef struct wb3startack_s	// 02 1F
 	u_int32_t	country;
 	u_int16_t	field; // field - 1
 	u_int16_t	unk2;
-	
+
 	u_int16_t	bulletradius1;
 	u_int16_t	bulletradius2;
 	u_int16_t	gunrad;
@@ -1155,7 +1155,7 @@ typedef struct wb3startack_s	// 02 1F
 	u_int16_t	unk3;
 	u_int16_t	unk4;
 	u_int16_t	unk5;
-	
+
 	u_int32_t	unk6;
 	u_int32_t	rules;
 
@@ -1166,27 +1166,27 @@ typedef struct wb3startack_s	// 02 1F
 	u_int32_t	unk11;
 	u_int16_t	unk12;
 	u_int16_t	plane;
-	
+
 	u_int32_t	unk13;
 	u_int8_t	numofarrays;
-	
+
 	u_int8_t	unk14;
 	u_int32_t	unk15;
 	u_int8_t	ord;
 	u_int32_t	unk16;
 	u_int16_t	unk17;
-	
+
 	u_int32_t	unk18;
 	u_int32_t	unk19;
-	
+
 	int32_t		posx;
 	int32_t		posy;
 	u_int32_t	posz;
-	
+
 	u_int32_t	unk23;
 	u_int32_t	unk24;
 	u_int32_t	unk25;
-	
+
 	u_int32_t	unk26;
 	u_int32_t	unk27;
 	u_int32_t	unk28;
@@ -1367,7 +1367,7 @@ typedef struct wb3arenaconfig2_s	// 03 12
 {
 	u_int16_t	packetid;
 	u_int32_t	arnaflags3;
-	u_int32_t	config2; // WINGSTRIKERNG??	
+	u_int32_t	config2; // WINGSTRIKERNG??
 } wb3arenaconfig2_t;
 
 typedef struct idle_s			// 09 04
@@ -1604,7 +1604,7 @@ typedef struct setradiochannel_s	// 12 01
 typedef struct wb3dotcmd_s	// 12 05
 {
 	u_int16_t	packetid;	//
-	u_int32_t	unk1;	// 
+	u_int32_t	unk1;	//
 	u_int8_t	msgsize;
 	char	message;	// contain the first char of msg, must be used as &(variable->message)
 } wb3dotcmd_t;
@@ -1612,7 +1612,7 @@ typedef struct wb3dotcmd_s	// 12 05
 typedef struct hostvar_s	// 0x1412
 {
 	u_int16_t	packetid;	//
-	u_int32_t	unk1;	// 
+	u_int32_t	unk1;	//
 	u_int8_t	size;
 	char	var;	// contain the first char of msg, must be used as &(variable->var)
 } hostvar_t;
@@ -2069,7 +2069,7 @@ var_t	*Var_Set (char *var_name, char *value);
 float	Var_VariableValue (char *var_name);
 char	*Var_VariableString (char *var_name);
 void	Var_WriteVariables (char *path, client_t *client);
-void	UpdateArenaStatus(u_int8_t uptime);
+u_int8_t UpdateArenaStatus(u_int8_t uptime);
 
 // game.c
 void	CheckArenaRules(void);
