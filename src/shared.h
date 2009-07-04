@@ -2425,6 +2425,7 @@ extern	var_t		*broadcast;		// enable broadcast channel
 extern	var_t		*bulletradius;	// bulletradius value
 extern	var_t		*canreload;		// enable reload airplanes
 extern	var_t		*canreset;		// enable reset
+extern	var_t		*clickrangelim;	// Maximum range for left/right click detect
 extern	var_t		*cities;		// num of cities (radars, ports, cities, refineries...)
 extern	var_t		*changemaponreset;	// enable change map on reset mode
 extern	var_t		*consoleinput;	// enable/disable console input (windows stuffs, arg!)

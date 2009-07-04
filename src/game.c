@@ -2,7 +2,7 @@
  *  Copyright (C) 2004-2008 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
- * 
+ *
  *  This file is part of Tabajara Host.
  *
  *  Tabajara Host is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
- * 
+ *
  ***/
 
 #include "shared.h"
@@ -96,7 +96,7 @@ u_int16_t packets_tab[210][3] =
 		{ 0x0216, 0x0416, 0xFFFF }, // pcSEND_SET_RANKS_MEDALS_DISPLAY
 		{ 0x0217, 0x0417, 0xFFFF }, // pcSEND_SQUAD_MEMBER_REMOVED
 		{ 0x0218, 0x0418, 0xFFFF }, // pcSEND_REQUESTED_TRAINER_HELP
-		{ 0x0219, 0x0419, 0x0811 }, // pcSEND_HL_SQUAD 
+		{ 0x0219, 0x0419, 0x0811 }, // pcSEND_HL_SQUAD
 		{ 0x021A, 0x041A, 0xFFFF }, // pcSEND_SYNC_VIEW ===============================
 		{ 0x021B, 0x041B, 0xFFFF }, // pcSYNC_VIEW *******************************
 		{ 0xFFFF, 0x041C, 0x0814 }, // pcWB3_REQUEST_START_FLIGHT =
@@ -363,7 +363,7 @@ void CheckArenaRules(void)
 							{
 								c_cities++;
 							}
-							
+
 							totalcities++;
 						}
 					}
@@ -376,7 +376,7 @@ void CheckArenaRules(void)
 					}
 
 					arena->fields[i].tonnage -= tonnage_recover;
-					
+
 					if(arena->fields[i].tonnage < 0)
 						arena->fields[i].tonnage = 0;
 
@@ -405,7 +405,7 @@ void CheckArenaRules(void)
 						}
 					}
 				}
-				
+
 				for (j = 0; j < MAX_BUILDINGS; j++)
 				{
 					if (arena->fields[i].buildings[j].field)
@@ -420,21 +420,21 @@ void CheckArenaRules(void)
 									arena->fields[i].buildings[j].timer = 90000;
 								}
 							}
-							
+
 							if (arena->fields[i].buildings[j].type < BUILD_CV || arena->fields[i].buildings[j].type > BUILD_SUBMARINE)
 								arena->fields[i].buildings[j].timer--;
-		
+
 							if (arena->fields[i].buildings[j].timer <= 0)
 							{
 								arena->fields[i].buildings[j].timer = 0;
 								arena->fields[i].buildings[j].status = 0;
 								arena->fields[i].buildings[j].armor = GetBuildingArmor(arena->fields[i].buildings[j].type, NULL);
-		
+
 								if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
 									SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
-		
+
 								SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status, NULL);
-		
+
 								if (arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
 								{
 									Com_Printf(VERBOSE_DEBUG, "Reup TOWER f%d\n", i+1);
@@ -483,7 +483,7 @@ void CheckArenaRules(void)
 							{
 								factorybuildingsup[arena->cities[i].buildings[j].country - 1]++;
 								arena->cities[i].buildings[j].status = 0;
-								arena->cities[i].buildings[j].armor = GetBuildingArmor(arena->cities[i].buildings[j].type, 
+								arena->cities[i].buildings[j].armor = GetBuildingArmor(arena->cities[i].buildings[j].type,
 								NULL);
 
 								SetBuildingStatus(&arena->cities[i].buildings[j], arena->cities[i].buildings[j].status, NULL);
@@ -825,7 +825,7 @@ void CheckArenaRules(void)
 						{
 							if (sqrt(Com_Pow(clients[j].posxy[0][0] - arena->fields[i].posxyz[0], 2) + Com_Pow(clients[j].posxy[1][0] - arena->fields[i].posxyz[1], 2)) < 9000)
 							{
-								CPrintf(arena->fields[i].country, 
+								CPrintf(arena->fields[i].country,
 								RADIO_GREEN, "ALERT!!! ALERT!!! Enemy column has been seen near F%d", i+1);
 								break;
 							}
@@ -890,7 +890,7 @@ void CheckArenaRules(void)
 				close = 1;
 				vitals = arena->fields[i].vitals;
 				arena->fields[i].vitals = 0;
-				
+
 				for (j = 0; j < MAX_BUILDINGS; j++)
 				{
 					if (arena->fields[i].buildings[j].field)
@@ -905,7 +905,7 @@ void CheckArenaRules(void)
 					else
 						break;
 				}
-				
+
 				if(vitals && !arena->fields[i].vitals)
 				{
 					if(!oldcapt->value && wb3->value)
@@ -914,7 +914,7 @@ void CheckArenaRules(void)
 						CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
 					}
 				}
-				
+
 				if(!oldcapt->value && wb3->value)
 				{
 					if(arena->fields[i].tonnage < GetTonnageToClose(i+1))
@@ -925,7 +925,7 @@ void CheckArenaRules(void)
 				{
 					arena->fields[i].closed = 1;
 					BPrintf(RADIO_YELLOW, "Field %d closed", i+1);
-					
+
 					Com_Printf(VERBOSE_DEBUG, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
 					for (j = 0; j < MAX_BUILDINGS; j++)
 					{
@@ -960,7 +960,7 @@ void CheckArenaRules(void)
 						else
 							break;
 					}
-					
+
 					for (j = 0; j < MAX_CITYFIELD; j++)
 					{
 						if (arena->fields[i].city[j] && arena->fields[i].city[j]->needtoclose)
@@ -1133,7 +1133,7 @@ void CheckArenaRules(void)
 					}
 					else
 					{
-						CPrintf(arena->fields[arena->cv[i].field].country, 
+						CPrintf(arena->fields[arena->cv[i].field].country,
 						RADIO_RED, "CV (F%d) is out of route", arena->cv[i].field+1);
 					}
 				}
@@ -1343,7 +1343,7 @@ void CheckArenaRules(void)
 
 						if (((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) && arena->fields[i].country == close)
 						{
-							j = NearestField(arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], close, FALSE, 
+							j = NearestField(arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], close, FALSE,
 							FALSE, NULL);
 
 							if (j >= 0)
@@ -1751,7 +1751,7 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "pingtest"))
 		{
-			PPrintf(client, RADIO_YELLOW, "Command currently disabled"); 
+			PPrintf(client, RADIO_YELLOW, "Command currently disabled");
 			//Cmd_Pingtest(0, client);
 			return;
 		}
@@ -1762,7 +1762,7 @@ void ProcessCommands(char *command, client_t *client)
 			else
 				PPrintf(client, RADIO_YELLOW, "usage: .easy [1|0]");
 			return;
-		} 
+		}
 		else if (!Com_Stricmp(command, "kill"))
 		{
 			if (client->attached && client->attached->drone & (DRONE_HMACK | DRONE_HTANK))
@@ -2456,7 +2456,7 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				if(tolower(*argv[0]) == 'f')
 				argv[0]++; // ignore compiler error
-	
+
 				Cmd_Field(Com_Atoi(argv[0]), client);
 			}
 		}
@@ -2619,7 +2619,7 @@ void ProcessCommands(char *command, client_t *client)
 	}
 
 	//     //     //     //     //     //
-	
+
 	if(permission & (FLAG_ADMIN | FLAG_OP) && arena && arena->frame > 100)
 	{
 		Com_Printf(VERBOSE_ATTENTION, "OPCMD: %s(%s) - .%s %s %s %s %s %s %s\n", client?client->longnick:"-HOST-", client?client->ip:"", command, argv[0]?argv[0]:"", argv[1]?argv[1]:"", argv[2]?argv[2]:"", argv[3]?argv[3]:"", argv[4]?argv[4]:"", argv[5]?argv[5]:"");
@@ -2736,7 +2736,7 @@ void ProcessCommands(char *command, client_t *client)
 			ExitServer(0);
 		}
 	}
-	
+
 	if(permission & (FLAG_ADMIN | FLAG_OP)) // commands that ADMIN's and OP's can execute
 	{
 		if(!Com_Stricmp(command, "dbpasswd"))
@@ -3062,7 +3062,7 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				Com_Printf(VERBOSE_ATTENTION, "All users were kicked out by %s\n", client?client->longnick:"-HOST-");
 				BPrintf(RADIO_YELLOW, "ATTENTION: All users were kicked out by %s\n", client?client->longnick:"-HOST-");
-				
+
 				for(i = 0; i < maxentities->value; i++)
 				{
 					if(clients[i].inuse && !clients[i].drone)
@@ -3075,7 +3075,7 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				Com_Printf(VERBOSE_ATTENTION, "%s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
 				BPrintf(RADIO_YELLOW, "ATTENTION: %s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
-				
+
 				RemoveClient(FindLClient(argv[0]));
 			}
 			return;
@@ -3742,7 +3742,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					{
 						PPrintf(client, RADIO_RED, "DEBUG: 0x0410: Ask for Request/Binded list (0x%0X%0X)", buffer[2], buffer[3]);
 					}
-					
+
 					if(client->gunnerview == client || !client->gunnerview)
 					{
 						SendAttachList(NULL, client);
@@ -3813,7 +3813,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				break; // FIXME
 			case 0x0310:
 				if(!setjmp(debug_buffer))
-				{				
+				{
 				PPrintf(client, RADIO_GREEN, "DEBUG: arnaCONFIG_FLIGHTMODEL()");
 				}
 				else
@@ -4457,7 +4457,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		{
 			land += 1;
 		}
-		
+
 		if (land <= fields->value && dist > arena->fields[land-1].radius) // no fields found, or too far
 		{
 			if (arena->fields[client->field - 1].country == client->country)
@@ -4528,13 +4528,13 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 									break;
 								}
 							}
-							
+
 							// dont capture field if plane is damaged
 							if (client->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE | STATUS_LGEAR | STATUS_RGEAR))
 							{
 								i = 0;
 							}
-							
+
 							for (j = 0; j < MAX_BUILDINGS; j++)
 							{
 								if (arena->fields[land - 1].buildings[j].field)
@@ -4544,12 +4544,12 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 										if (arena->fields[land - 1].buildings[j].type == BUILD_TOWER)
 										{
 											PPrintf(client, RADIO_RED, "Distance %d", DistBetween(client->posxy[0][0], client->posxy[1][0], 0, arena->fields[land - 1].buildings[j].posx, arena->fields[land - 1].buildings[j].posy, 0, 1000));
-											
+
 											j = DistBetween(client->posxy[0][0], client->posxy[1][0], 0, arena->fields[land - 1].buildings[j].posx, arena->fields[land - 1].buildings[j].posy, 0, 1000);
-											
+
 											if(j > 300 /* D1 */)
 												i = 0;
-											
+
 											break;
 										}
 									}
@@ -4557,7 +4557,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 								else
 									break;
 							}
-							
+
 							if (i)
 							{
 								CaptureField(land, client);
@@ -4702,7 +4702,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						nearplane->hitby[0].damage = (float)MAX_UINT32;  // TODO: Score: collision: change this
 						client->hitby[0].dbid = nearplane->id;
 						client->hitby[0].damage = (float)MAX_UINT32;  // TODO: Score: collision: change this
-						
+
 						client->damaged = 1;
 						nearplane->damaged = 1;
 
@@ -4776,10 +4776,10 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				= client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2]
 				= client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer
 				= client->score.penaltyscore = client->commandos = client->damaged = 0;
-				
+
 		memset(client->skin, 0, sizeof(client->skin));
 
-		ClearKillers(client); // TODO: Clear Killers, for debug only 
+		ClearKillers(client); // TODO: Clear Killers, for debug only
 
 		client->view = client->shanghai = client->attached = NULL;
 		client->speedxyz[0][0] = client->speedxyz[1][0] = client->speedxyz[2][0] = 0;
@@ -5177,10 +5177,10 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				client->view->posalt[0] = client->posalt[0];
 				SendDronePos(client, client->view);
 			}
-			
+
 		}
 	}
-	
+
 // CV Test
 //	u_int8_t teste[31] = {0x00, 0x15, 0x00, 0x00, 0x00, 0x03, 0x17, 0xB0, 0x00, 0x06, 0x61, 0xE7, 0x00, 0x00, 0x0B, 0xB8, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x4E, 0x00, 0x02};
 //	SendPacket(teste, sizeof(teste), client);
@@ -5202,7 +5202,7 @@ void CheckMaxG(client_t *client)
 	{
 		g = ClientG(client);
 	}
-	
+
 	if (!(client->status_damage & STATUS_LWING))
 	{
 		maxg = (double)(arena->planedamage[client->plane].positiveG * client->armor.points[PLACE_LWING] / arena->planedamage[client->plane].points[PLACE_LWING]) + 1.5;
@@ -5277,13 +5277,13 @@ float ClientG(client_t *client)
 	Az = Com_Deg(acos(cos(Com_Rad(pitch)) * cos(Com_Rad(MODULUS(roll)))));
 	///////////
 	/////////// Ay
-	
+
 //	PPrintf(client, RADIO_GREEN, "Pitch %.2f, Roll %.2f, Yaw %.2f", pitch, roll, yaw);
 //	PPrintf(client, RADIO_RED, "AccX %d, AccY %d, Accz %d", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
-	
+
 	if(wb3->value)
 		pitch *= -1;
-	
+
 	hyaw = yaw;
 
 	if (yaw > 180)
@@ -5337,7 +5337,7 @@ float ClientG(client_t *client)
 		hyaw = 360 - yaw;
 
 	/// pitch influence
-	
+
 	if (pitch > 0)
 		Ax = ((90 - hyaw) * 2) - Com_Deg(asin(sin(Com_Rad(90+pitch)) * cos(Com_Rad(hyaw))));
 	else
@@ -5374,10 +5374,10 @@ float ClientG(client_t *client)
 	Ax += g;
 
 	///////////
-	
+
 	if(wb3->value)
 		Ay = 180 - Ay;
-	
+
 	g = (((double)client->accelxyz[0][0]/31) * cos(Com_Rad(Ax))) + (((double)client->accelxyz[1][0]/31) * cos(Com_Rad(Ay))) + ((((double)client->accelxyz[2][0]/31) + 1) * cos(Com_Rad(Az)));
 
 //	PPrintf(client, RADIO_WHITE, "Ax %.3f Ay %.3f Az %.3f G %.3f", Ax, Ay, Az, g);
@@ -5564,7 +5564,7 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 		{
 			client->status_damage = htonl(status->status_damage);
 		}
-		
+
 		client->status_status = htonl(status->status_status);
 	}
 
@@ -5649,7 +5649,7 @@ void WB3SupressFire(u_int8_t slot, client_t *client)
 	supressfire->packetid = htons(Com_WBhton(0x0022));
 	supressfire->slot = slot;
 	supressfire->supress = htonl(0);
-	
+
 	SendPacket(packet, sizeof(packet), client);
 }
 
@@ -5728,7 +5728,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 	 */
 
 	drop->packetid = htons(Com_WBhton(0x1900));
-	
+
 	for (i = 0; i < maxentities->value; i++)
 	{
 		if (clients[i].inuse && !clients[i].drone)
@@ -5855,7 +5855,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 		Com_LogEvent(EVENT_DROP, client->id, 0);
 		Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
 		Com_LogDescription(EVENT_DESC_AMMO, drop->item, NULL);
-		
+
 		ScoresEvent(SCORE_DROPITEM, client, drop->item);
 	}
 }
@@ -5871,22 +5871,22 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 	munition_t *ammo;
 	u_int16_t field, distance;
 	wb3tonnage_t *wb3tonnage;
-	
+
 	wb3tonnage = (wb3tonnage_t *)buffer;
 
 	if(!client)
 		return;
-	
+
 	if (client->attr)
 		PPrintf(client, RADIO_GREEN, "DEBUG: tonnage ammoID: %d, field: %d, distance: %d", wb3tonnage->ammo, ntohs(wb3tonnage->field), ntohs(wb3tonnage->distance));
-	
+
 	if(!oldcapt->value)
 	{
 		if(ammo = GetMunition(wb3tonnage->ammo))
 		{
 			field = ntohs(wb3tonnage->field);
 			distance = ntohs(wb3tonnage->distance);
-			
+
 			if(field && field <= fields->value && distance < arena->fields[field-1].radius)
 			{
 				if(client->country != arena->fields[field-1].country)
@@ -6067,7 +6067,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 		return;
 	}
 
-	if (building->country == client->country) 
+	if (building->country == client->country)
 	{
 		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 		{
@@ -6239,11 +6239,11 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 			arena->fields[building->field - 1].paras++;
 
 			PPrintf(client, RADIO_YELLOW, "Paras count: %d", arena->fields[building->field - 1].paras);
-			
+
 			Com_Printf(VERBOSE_DEBUG, "Paras count F%d = %d\n", building->field, arena->fields[building->field - 1].paras);
-			
+
 			AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
-			
+
 			if (arena->fields[building->field - 1].paras >= GetFieldParas(arena->fields[building->field - 1].type))
 			{
 				AddBuildingDamage(building, GetBuildingArmor(BUILD_TOWER, client), 1, client);
@@ -6261,13 +6261,13 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 		if(GetBuildingCost(building->type))
 		{
 			HardHit(hardhitstructure->munition, (client->country == building->country), client);
-	
+
 			if (client->country == building->country && !client->msgtimer)
 			{
-				CPrintf(client->country, 
+				CPrintf(client->country,
 				RADIO_GREEN, "ALERT!!! ALERT!!! %s hit friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
 						building->field);
-	
+
 				// client->msgtimer = 1000;
 			}
 		}
@@ -6552,7 +6552,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			{
 				Com_Printf(VERBOSE_DEBUG, "PHitPlane(damage -= ap) < 0, damage = %d, ap = %d\n", damage, ap);
 			}
-			
+
 			if(needle[j] >= 0 && needle[j] < 32 && killer >= 0 && killer < MAX_HITBY)
 			{
 				sdamage = (float)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]) + 1.0)));
@@ -7126,7 +7126,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 					if (client->fueltimer && client->fueltimer > 1000)
 					{
 						client->damaged = 1;
-						
+
 						if (place == PLACE_LFUEL)
 						{
 							client->armor.points[PLACE_LWING] = 0;
@@ -7248,20 +7248,20 @@ float RebuildTime(building_t *building)
 	u_int16_t total;
 	u_int8_t i;
 	float rebuild;
-	
+
 	if(!building)
 	{
 		calc = 0;
 		return 0;
 	}
-	
+
 	if(building->type >= BUILD_MAX)
 		return 0;
 
 	if(!calc)
 	{
 		villages = towns = ports = 0;
-		
+
 		for(i = 0; i < fields->value; i++)
 		{
 			if(arena->fields[i].type == FIELD_WB3PORT)
@@ -7273,9 +7273,9 @@ float RebuildTime(building_t *building)
 			else if(arena->fields[i].type == FIELD_WB3POST)
 				posts++;
 		}
-		
+
 		total = ports * 9 + towns * 15 + villages * 3 + posts * 1;
-		
+
 		if(total)
 		{
 			const_v = 0.6 * villages * 3 / total;
@@ -7287,12 +7287,12 @@ float RebuildTime(building_t *building)
 		{
 			Com_Printf(VERBOSE_DEBUG, "RebuildTime(total) == 0\n");
 		}
-		
+
 		calc = 1;
 	}
 
 	c_posts = c_villages = c_towns = c_ports = 0;
-	
+
 	for(i = 0; i < fields->value; i++)
 	{
 		if(arena->fields[i].country == building->country)
@@ -7318,7 +7318,7 @@ float RebuildTime(building_t *building)
 		Com_Printf(VERBOSE_DEBUG, "RebuildTime(rebuild) %f, Log %f, %f\n", rebuildtime->value, Com_Log(GetBuildingArmor(building->type, NULL), 40), (1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0)));
 		rebuild = 90000; // 15min
 	}
-	
+
 	return rebuild;
 }
 
@@ -7339,7 +7339,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if (building->status)
 		return 0;
-	
+
 	if(!building->field)
 	{
 		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage() building %d has no field", building->id);
@@ -7443,7 +7443,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	{
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
-	
+
 	if (!setjmp(debug_buffer))
 	{
 		score = dmgprobe < building->armor ? dmgprobe : building->armor;
@@ -7453,7 +7453,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	{
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
-	
+
 	if (!setjmp(debug_buffer))
 	{
 		if(score && client)
@@ -7500,7 +7500,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 				building->armor = 0;
 				building->timer = arena->frame;
 			}
-	
+
 			if (client && !client->drone)
 			{
 				Com_LogEvent(EVENT_KILLSTRUCT, client->id, 0);
@@ -7516,19 +7516,19 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 						//debug
 						if (building->country != arena->fields[building->field - 1].country)
 							Com_Printf(VERBOSE_DEBUG, "structure at field %d differ country value (b%d;f%d;p%d)\n", building->field, building->country, arena->fields[building->field - 1].country, client->country);
-		
+
 						client->structstod--;
-		
-						CPrintf(client->country, 
+
+						CPrintf(client->country,
 						RADIO_GREEN, "ALERT!!! ALERT!!! %s destroyed friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
 								building->field);
-		
+
 						if (!client->tkstatus) // if player is not TK yet, increase tklimit
 						{
 							if (teamkiller->value)
 								client->tklimit++;
 						}
-		
+
 						if (client->tklimit > 5)
 						{
 							if (!client->tkstatus)
@@ -7541,7 +7541,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 					{
 						client->structstod++;
 					}
-	
+
 					if (client->country != building->country)
 					{
 						ScoresEvent(SCORE_STRUCTURE, client, building->type);
@@ -7558,16 +7558,16 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 					{
 						SinkBoat(FALSE, building, NULL);
 						PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
-	
+
 						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
 					}
 					else if (IsVitalBuilding(building, oldcapt->value))
 					{
 						PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s", GetBuildingType(building->type), Com_TimeSeconds(building->timer/100));
-	
+
 						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d for %s\n", client->longnick, GetBuildingType(building->type), building->field, Com_TimeSeconds(building->timer /100));
 					}
-	
+
 					if (!arcade->value)
 					{
 						if (building->type == BUILD_HANGAR)
@@ -8433,7 +8433,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 						}
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", 
+							Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n",
 							FILE_DRONENICKS);
 							Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 
@@ -8443,7 +8443,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 					}
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Couldn't lock file \"%s\"\n", 
+						Com_Printf(VERBOSE_WARNING, "Couldn't lock file \"%s\"\n",
 						FILE_DRONENICKS);
 
 						nickpacket->msgsize = 21;
@@ -8598,7 +8598,7 @@ void UpdateIngameClients(u_int8_t attr)
 			{
 				j++;
 				fprintf(fp, "%s %s ", clients[i].longnick, GetCountry(clients[i].country));
-				
+
 				if(clients[i].loginkey == 1)
 				{
 					fprintf(fp, "In Chat");
@@ -8622,7 +8622,7 @@ void UpdateIngameClients(u_int8_t attr)
 					else
 						fprintf(fp, "CONNECTING");
 				}
-				
+
 				fprintf(fp, " (%s)\n", GeoIP_country_name_by_addr(gi, clients[i].ip));
 
 				for (k = 0; k < maxentities->value; k++) // add sharing IP
@@ -8732,7 +8732,7 @@ int32_t SendArenaNames(client_t *client)
 	 b - country
 	 ----
 
-	 struct 
+	 struct
 	 {
 	 char		mapname[20];
 	 char		hostdomain[40];
@@ -9319,7 +9319,7 @@ void SendScreenUpdates(client_t *client)
 
 	if (fp)
 		fclose(fp);
-	
+
 	if (!j)
 		return;
 
@@ -9454,7 +9454,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->arenaflags2 = arenaflags2->value; // 0x80
 		wb3arenarules->arenaflags1 = arenaflags1->value; // 0x20
 		wb3arenarules->unknown5 = 0x10;
-		wb3arenarules->clickrangelim = htonl(0x5208);
+		wb3arenarules->clickrangelim = htonl(clickrangelim->value);
 		wb3arenarules->unknown6 = 0x05;
 	}
 	else
@@ -9482,7 +9482,7 @@ void SendArenaRules(client_t *client)
 		arenarules->radarrange4 = htonl(radarrange4->value);
 		arenarules->unknown3 = 0x55;
 		arenarules->unknown4 = 0x30;
-		arenarules->arenaflags2 = arenaflags2->value; // 00 
+		arenarules->arenaflags2 = arenaflags2->value; // 00
 		arenarules->arenaflags1 = arenaflags1->value; // 03
 		arenarules->unknown7 = 0x10;
 		arenarules->unknown8 = 0x01;
@@ -9731,7 +9731,7 @@ void PFileCheck(u_int8_t *buffer, client_t *client)
 		case 0x02:
 			if (crc != CRC_MISCBIN)
 			{
-				PPrintf(client, 
+				PPrintf(client,
 				RADIO_BLUE, "Invalid MISC.BIN CRC, please download last FHL version", crc);
 
 				if (strcmp(client->longnick, "-exec-") || strcmp(client->longnick, "franz-"))
@@ -10426,7 +10426,7 @@ void CheckCockpitCRC(char *path, u_int32_t crc, client_t *client)
 		}
 		else
 		{
-			PPrintf(client, 
+			PPrintf(client,
 			RADIO_BLUE, "Invalid Cockpit CRC (%s.VEW) please download correct file", name);
 			ForceEndFlight(TRUE, client);
 		}
@@ -10748,7 +10748,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 						if (!(fp = fopen(filename, "wb")))
 						{
 							Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't open file \"%s\"\n", filename);
-							PPrintf(client, 
+							PPrintf(client,
 							RADIO_YELLOW, "PClientMedals(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
 							Sys_UnlockFile(strcat(filename, ".LOCK"));
 							return;
@@ -11349,7 +11349,7 @@ void PSquadInfo(char *nick, client_t *client)
 
 			if (mysql_errno(&my_sock))
 			{
-				PPrintf(client, 
+				PPrintf(client,
 				RADIO_YELLOW, "PSquadInfo(find): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 				return;
 			}

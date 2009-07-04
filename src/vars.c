@@ -37,6 +37,7 @@ var_t *broadcast; // extern
 var_t *bulletradius; // extern
 var_t *canreload; // extern
 var_t *canreset; // extern
+var_t *clickrangelim; // extern
 var_t *cities; // extern
 var_t *changemaponreset; // extern
 var_t *consoleinput; // extern
@@ -216,6 +217,7 @@ void InitVars(void)
 	bulletradius = Var_Get("bulletradius", "0.1", VAR_ARCHIVE);
 	canreload = Var_Get("canreload", "0", VAR_ARCHIVE);
 	canreset = Var_Get("canreset", "1", VAR_ARCHIVE | VAR_ADMIN);
+	clickrangelim = Var_Get("clickrangelim", "21000", VAR_ARCHIVE);
 	cities = Var_Get("cities", "5", VAR_ARCHIVE | VAR_ADMIN);
 	changemaponreset = Var_Get("changemaponreset", "0", VAR_ARCHIVE | VAR_ADMIN);
 	consoleinput = Var_Get("consoleinput", "1", VAR_ARCHIVE | VAR_ADMIN);
