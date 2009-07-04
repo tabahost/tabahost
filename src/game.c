@@ -5062,7 +5062,12 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 						}
 
 						client->cancollide = 1;
-						SendArenaRules(client);
+						if(IsFighter(client))
+						{
+							WB3DotCommand(client, ".handler toggleexternview");
+							WB3DotCommand(client, ".handler toggleexternview");
+							SendArenaRules(client);
+						}
 					}
 				}
 			}

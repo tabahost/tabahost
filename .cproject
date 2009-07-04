@@ -531,7 +531,7 @@
 <builder autoBuildTarget="all" buildPath="${workspace_loc:/wbserver/Release_with_Cygwin GCC}" cleanBuildTarget="clean" enableAutoBuild="false" enableCleanBuild="true" enabledIncrementalBuild="true" id="cdt.managedbuild.target.gnu.builder.cygwin.exe.release.1523138334" incrementalBuildTarget="all" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.cygwin.exe.release"/>
 <tool id="cdt.managedbuild.tool.gnu.assembler.cygwin.exe.release.1924505784" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.cygwin.exe.release">
 <option id="gnu.both.asm.option.flags.1738117480" name="Assembler flags" superClass="gnu.both.asm.option.flags"/>
-<option id="gnu.both.asm.option.include.paths.1551602259" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths"/>
+<option id="gnu.both.asm.option.include.paths.1551602259" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath"/>
 <option id="gnu.both.asm.option.warnings.nowarn.1313128157" name="Suppress warnings (-W)" superClass="gnu.both.asm.option.warnings.nowarn"/>
 <option id="gnu.both.asm.option.version.551191719" name="Announce version (-v)" superClass="gnu.both.asm.option.version"/>
 <inputType id="cdt.managedbuild.tool.gnu.assembler.input.51538475" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
@@ -548,7 +548,7 @@
 <option id="gnu.c.compiler.option.preprocessor.preprocess.1914641643" name="Preprocess only (-E)" superClass="gnu.c.compiler.option.preprocessor.preprocess"/>
 <option id="gnu.c.compiler.option.preprocessor.def.symbols.325909" name="Defined symbols (-D)" superClass="gnu.c.compiler.option.preprocessor.def.symbols"/>
 <option id="gnu.c.compiler.option.preprocessor.undef.symbol.1018062611" name="Undefined symbols (-U)" superClass="gnu.c.compiler.option.preprocessor.undef.symbol"/>
-<option id="gnu.c.compiler.option.include.paths.1105825639" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths"/>
+<option id="gnu.c.compiler.option.include.paths.1105825639" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath"/>
 <option id="gnu.c.compiler.option.optimization.flags.1318368994" name="Other optimization flags" superClass="gnu.c.compiler.option.optimization.flags"/>
 <option id="gnu.c.compiler.option.debugging.other.1669120496" name="Other debugging flags" superClass="gnu.c.compiler.option.debugging.other"/>
 <option id="gnu.c.compiler.option.debugging.gprof.719988997" name="Generate gprof information (-pg)" superClass="gnu.c.compiler.option.debugging.gprof" value="false" valueType="boolean"/>
