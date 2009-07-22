@@ -2,7 +2,7 @@
  *  Copyright (C) 2004-2008 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
- * 
+ *
  *  This file is part of Tabajara Host.
  *
  *  Tabajara Host is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
- * 
+ *
  ***/
 
 #include "shared.h"
@@ -118,7 +118,7 @@ char *GetFieldType(u_int8_t type)
 			return "Unknown";
 	}
 }
- 
+
 /*************
  GetBuildingType
 
@@ -1377,7 +1377,7 @@ void UpdateRPS(u_int16_t minutes)
 	u_int8_t i, j;
 	float rate;
 	u_int32_t basedate, lagdate[4];
-	
+
 	if(minutes)
 		rate = (float)minutes / rps->value;
 	else
@@ -1415,7 +1415,7 @@ void UpdateRPS(u_int16_t minutes)
 						|| (!arena->rps[j].in && !arena->rps[j].out)))
 				{
 					arena->fields[i].rps[j] += (float)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
-					
+
 					if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
 						arena->fields[i].rps[j] = (float)arena->rps[j].pool[arena->fields[i].type - 1];
 				}
@@ -1432,7 +1432,7 @@ void UpdateRPS(u_int16_t minutes)
 				{
 					arena->rps[j].used = 1;
 					arena->fields[i].rps[j] += (float)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
-					
+
 					if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
 						arena->fields[i].rps[j] = (float)arena->rps[j].pool[arena->fields[i].type - 1];
 				}
@@ -1767,7 +1767,7 @@ void ShowRPS(client_t *client)
 				+ arena->rps[i].pool[10] + arena->rps[i].pool[11] + arena->rps[i].pool[12] + arena->rps[i].pool[13] + arena->rps[i].pool[14] + arena->rps[i].pool[15] + arena->rps[i].pool[16]
 				+ arena->rps[i].pool[17] + arena->rps[i].pool[18])
 		{
-			PPrintf(client, 
+			PPrintf(client,
 			RADIO_LIGHTYELLOW, "%-7s:c%d;i%d;o%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d", GetSmallPlaneName(i), arena->rps[i].country, arena->rps[i].in, arena->rps[i].out,
 					arena->rps[i].pool[0], arena->rps[i].pool[1], arena->rps[i].pool[2], arena->rps[i].pool[3], arena->rps[i].pool[4], arena->rps[i].pool[5], arena->rps[i].pool[6],
 					arena->rps[i].pool[7], arena->rps[i].pool[8], arena->rps[i].pool[9], arena->rps[i].pool[10], arena->rps[i].pool[11], arena->rps[i].pool[12], arena->rps[i].pool[13],
@@ -2514,7 +2514,7 @@ void LoadDamageModel(client_t *client)
 							{
 								arena->buildarmor[i].imunity = Com_Atoi(my_row[i]);
 							}
-							
+
 							if ((my_row = mysql_fetch_row(my_result)))
 							{
 								if (num_fields > BUILD_MAX)
@@ -3036,12 +3036,12 @@ void CaptureField(u_int8_t field, client_t *client)
 				}
 				else
 					hangar = 1;
-				
+
 				if (arena->fields[field - 1].buildings[i].type <= BUILD_88MMFLAK)
 					arena->fields[field - 1].buildings[i].timer = timer;
 			}
 		}
-	
+
 		for (i = 0; i < maxplanes; i++)
 		{
 			if (arena->fields[field - 1].rps[i] >= 1)
@@ -3164,7 +3164,7 @@ void ChangeArena(char *map, client_t *client)
 	if ((fp = fopen(file, "r")))
 	{
 		fclose(fp);
-		
+
 		// kick all clients & drones
 		for (i = 0; i < maxentities->value; i++)
 		{
@@ -3305,9 +3305,9 @@ void NewWar(void)
 	arena->day = initday->value;
 
 	arena->mapnum = 0;
-	
+
 	BackupScores(COLLECT_CYCLE);
-	
+
 	ResetScores();
 }
 
@@ -3397,7 +3397,7 @@ void ReducePlanes(u_int8_t field)
 {
 	u_int8_t i;
 	float reduce;
-	
+
 	switch(arena->fields[field - 1].type)
 	{
 		case FIELD_LITTLE:
@@ -3463,7 +3463,7 @@ u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 	{
 		return FALSE;
 	}
-	
+
 	if (arcade->value)
 	{
 		if ((building->type == BUILD_50CALACK) ||
@@ -3488,7 +3488,7 @@ u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 			(building->type == BUILD_STATICS) ||
 			(building->type == BUILD_REFINERY) ||
 			(building->type == BUILD_PLANEFACTORY) ||
-			(building->type == BUILD_BUILDING) || 
+			(building->type == BUILD_BUILDING) ||
 			(building->type == BUILD_CRANE) ||
 			(building->type == BUILD_ARTILLERY) ||
 			(building->type == BUILD_HUT) ||
@@ -3681,7 +3681,7 @@ float GetTonnageToClose(u_int8_t field)
 				ttc_buf[arena->fields[field].type] += GetBuildingArmor(arena->fields[field].buildings[i].type, NULL);
 			}
 		}
-		
+
 		switch(arena->fields[field].type)
 		{
 			case FIELD_WB3TOWN:
@@ -3698,10 +3698,9 @@ float GetTonnageToClose(u_int8_t field)
 		}
 		else
 		{
-			Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() ttc_buf[%d] returned zero\n", arena->fields[field].type);
+			Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() ttc_buf[%d] returned zero, field %d\n", arena->fields[field].type, field);
 			return 0;
 		}
-
 	}
 }
 
@@ -4056,9 +4055,9 @@ u_int8_t SaveEarthMap(char *FileName)
 	/* USED TO convert 512 topo to 1024 topo
 	u_int16_t i;
 	u_int8_t teste[1024];
-	
+
 	memset(teste, 0x13, sizeof(teste));
-	
+
 	for(i = 0; i < 512; i++)
 	{
 		fwrite(earthMap+(i*512), 512, 1, fp);
@@ -4437,7 +4436,7 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 
 	if(!client)
 		return;
-	
+
 	if(field < fields->value)
 	{
 		bomber = AddBomber(field, client);
