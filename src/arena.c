@@ -296,6 +296,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 
 						arena->fields[i].buildings[j].field = Com_Atoi(token);
 						arena->fields[i].buildings[j].country = Com_Atoi((char *)strtok(NULL, ";"));
+						arena->fields[i].buildings[j].country = arena->fields[i].country; // FIXME: remove building country from .arn files
 						arena->fields[i].buildings[j].id = Com_Atoi((char *)strtok(NULL, ";"));
 						arena->fields[i].buildings[j].type = Com_Atoi((char *)strtok(NULL, ";"));
 						arena->fields[i].buildings[j].fieldtype = arena->fields[i].type;
@@ -462,7 +463,7 @@ void SaveArenaStatus(char *filename, client_t *client)
 			for (j = 0; j < MAX_BUILDINGS; j++)
 			{
 				if (arena->fields[i].buildings[j].field)
-					fprintf(fp, ";%u;%u;%u;%u;%u;%d;%u;%d;%d;%d", arena->fields[i].buildings[j].field, arena->fields[i].buildings[j].country, arena->fields[i].buildings[j].id,
+					fprintf(fp, ";%u;%u;%u;%u;%u;%d;%u;%d;%d;%d", arena->fields[i].buildings[j].field, arena->fields[i].country, arena->fields[i].buildings[j].id,
 							arena->fields[i].buildings[j].type, arena->fields[i].buildings[j].status, arena->fields[i].buildings[j].timer, arena->fields[i].buildings[j].armor,
 							arena->fields[i].buildings[j].posx, arena->fields[i].buildings[j].posy, arena->fields[i].buildings[j].posz);
 				else
