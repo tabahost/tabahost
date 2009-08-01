@@ -6401,19 +6401,21 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			munition->abbrev);
 
 	if (!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
-		killer = AddKiller(pvictim, client);
-
-	if (pvictim != client) //not a ack hit
 	{
-		for (i = 0; i < MAX_RELATED; i++)
+		if (pvictim != client) //not a ack hit
 		{
-			if (pvictim->related[i] && (pvictim->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
-				break;
+			for (i = 0; i < MAX_RELATED; i++)
+			{
+				if (pvictim->related[i] && (pvictim->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+					break;
+			}
+
+			if (i < MAX_RELATED)
+				pvictim = pvictim->related[i]; // send damage to first wingman
+			//	return; // dont hit plane if with wingmans
 		}
 
-		if (i < MAX_RELATED)
-			pvictim = pvictim->related[i]; // send damage to first wingman
-		//	return; // dont hit plane if with wingmans
+		killer = AddKiller(pvictim, client);
 	}
 
 	// Random damage while there are wingmans
