@@ -8161,16 +8161,11 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 	client_t *toClient;
 	radiomessage_t *radiomessage;
 
-	memset(buffer, 0, sizeof(buffer));
-
-	//	buffer[0] = 0x12; // set packet ID
-	radiomessage = (radiomessage_t *)buffer;
-
-	radiomessage->packetid = htons(Com_WBhton(0x1200));
-	radiomessage->msgto = htonl(msgto);
-	radiomessage->msgfrom = htonl(msgfrom);
-	radiomessage->msgsize = ((msgsize>63) ? 63 : msgsize);
-	memcpy(&(radiomessage->message), message, radiomessage->msgsize);
+	if(!msgto)
+	{
+		PPrintf(client, RADIO_YELLOW, "You are talking to radio Zero, please change channel using [.radio X Y]");
+		return;
+	}
 
 	if (msgto == 201 && !(client->attr & (FLAG_ADMIN | FLAG_OP)))
 	{
@@ -8183,6 +8178,17 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 		PPrintf(client, RADIO_YELLOW, "Broadcast channel disabled");
 		return;
 	}
+
+	memset(buffer, 0, sizeof(buffer));
+
+	//	buffer[0] = 0x12; // set packet ID
+	radiomessage = (radiomessage_t *)buffer;
+
+	radiomessage->packetid = htons(Com_WBhton(0x1200));
+	radiomessage->msgto = htonl(msgto);
+	radiomessage->msgfrom = htonl(msgfrom);
+	radiomessage->msgsize = ((msgsize>63) ? 63 : msgsize);
+	memcpy(&(radiomessage->message), message, radiomessage->msgsize);
 
 	if (msgto > 0xFF) // Private Message
 	{
