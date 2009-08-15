@@ -5068,6 +5068,8 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 							WB3DotCommand(client, ".handler toggleexternview");
 							WB3DotCommand(client, ".handler toggleexternview");
 						}
+
+						client->dronetimer = arena->time; // stores time when client took off
 					}
 				}
 			}

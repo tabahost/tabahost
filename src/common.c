@@ -1051,6 +1051,29 @@ u_int8_t Com_CheckAphaNum(char *string)
 }
 
 /*************
+ Com_CheckWBUsername
+
+ Parse string for valid chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
+ *************/
+
+u_int8_t Com_CheckWBUsername(char *string)
+{
+	u_int8_t i, j;
+
+	j = strlen(string);
+
+	for (i = 0; i < j; i++)
+	{
+		string[i] = tolower(string[i]);
+
+		if (!((string[i] >= 'a' && string[i] <= 'z') || string[i] == '-'))
+			return 1;
+	}
+
+	return 0;
+}
+
+/*************
  Com_ParseString
 
  Remove invalid chars: ', ", \, \n, \r, \t

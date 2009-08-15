@@ -2023,6 +2023,7 @@ void	Com_MySQL_Flush(MYSQL *mysql, char *file, u_int32_t line);
 void	Com_Printfhex(unsigned char *buffer, int len);
 int		Com_Stricmp (char *s1, char *s2);
 u_int8_t Com_CheckAphaNum(char *string);
+u_int8_t Com_CheckWBUsername(char *string);
 void	Com_ParseString(char *string);
 u_int8_t GetSlot(client_t *plane, client_t *client);
 u_int8_t CheckSum(u_int8_t *buffer, u_int16_t len);

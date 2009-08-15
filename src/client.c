@@ -1139,7 +1139,7 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 	{ 0x00, 0x00 };
 	char *user;
 	char *pwd;
-	u_int32_t cpwd;
+//	u_int32_t cpwd;
 	int8_t j = -1;
 
 	DecryptBlock(userpass, 96, client->loginkey);
@@ -1149,14 +1149,14 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 	user = (char*)userpass;
 	pwd = (char*)userpass+32;
 
-	if (!Com_CheckAphaNum(user))
+	if (!Com_CheckWBUsername(user))
 	{
-		cpwd = crc32(pwd, strlen(pwd));
+//		cpwd = crc32(pwd, strlen(pwd));
 
 		if (debug->value)
 			Com_Printf(VERBOSE_DEBUG, "User %s, Passwd %s\n", user, pwd);
 
-		sprintf(my_query, "SELECT * FROM players LEFT JOIN score_common ON players.id = score_common.player_id WHERE players.loginuser = '%s' and players.password = '%u'", user, cpwd);
+		sprintf(my_query, "SELECT * FROM players LEFT JOIN score_common ON players.id = score_common.player_id WHERE players.loginuser = '%s' and players.password = MD5('%s')", user, pwd);
 
 		if (!d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
@@ -1193,26 +1193,26 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 				}
 				else // password didnt match, or player doesnt exist
 				{
-					sprintf(my_query, "INSERT INTO players (loginuser, password) VALUES ('%s', '%u')", user, cpwd);
-
-					if (!d_mysql_query(&my_sock, my_query))
-					{
-						strcpy(client->loginuser, user);
-
-						j = 0;
-					}
-					else
-					{
-						if (mysql_errno(&my_sock) != 1062)
-						{
-							Com_Printf(VERBOSE_WARNING, "CheckUserPasswd(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-							buffer[0] = 0x04;
-						}
-						else
-						{
-							buffer[0] = 0xc0;
-						}
-					}
+//					sprintf(my_query, "INSERT INTO players (loginuser, password) VALUES ('%s', '%u')", user, cpwd);
+//
+//					if (!d_mysql_query(&my_sock, my_query))
+//					{
+//						strcpy(client->loginuser, user);
+//
+//						j = 0;
+//					}
+//					else // Could't insert because user already exist
+//					{
+//						if (mysql_errno(&my_sock) != 1062)
+//						{
+//							Com_Printf(VERBOSE_WARNING, "CheckUserPasswd(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+//							buffer[0] = 0x04;
+//						}
+//						else
+//						{
+							buffer[0] = 0xc0; // Access denied
+//						}
+//					}
 				}
 
 				mysql_free_result(my_result);
@@ -1698,13 +1698,21 @@ void UpdateClientFile(client_t *client)
 		return;
 	}
 
-	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', plane_id = '%u', fuel = '%d', ord = '%d', conv = '%d', easymode = '%d', radio = '%d', rank = '%d', lastseen = FROM_UNIXTIME(%u), ipaddr = '%s' WHERE loginuser = '%s' LIMIT 1",
+	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', plane_id = '%u', fuel = '%d', ord = '%d', conv = '%d', easymode = '%d', radio = '%d', rank = '%d', lastseen = FROM_UNIXTIME(%u), ipaddr = '%s' WHERE id = '%u' LIMIT 1",
 			client->countrytime, client->country, client->plane, client->fuel, client->ord, client->conv, client->easymode, client->radio[0], client->rank, // Elo rating
-			(u_int32_t)time(NULL), client->ip, client->loginuser);
+			(u_int32_t)time(NULL), client->ip, client->id);
 
 	if (d_mysql_query(&my_sock, my_query))
 	{
-		Com_Printf(VERBOSE_WARNING, "UpdateClientFile(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+		Com_Printf(VERBOSE_WARNING, "UpdateClientFile(1): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+	}
+
+	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', WHERE parent = '%u'",
+			client->countrytime, client->country, client->id);
+
+	if (d_mysql_query(&my_sock, my_query))
+	{
+		Com_Printf(VERBOSE_WARNING, "UpdateClientFile(2): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
 

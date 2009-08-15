@@ -350,8 +350,8 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 		flighttime = FLIGHT_TIME(client)/1000;
 
-		sprintf(my_query, "UPDATE score_common SET killstod = '%u', structstod = '%u', lastscore = '%.3f', totalscore = totalscore + '%.3f', streakscore = '%.3f', flighttime = flighttime + '%u' WHERE player_id = '%u'",
-				client->killstod, client->structstod, client->lastscore, client->lastscore, client->streakscore, flighttime, client->id);
+		sprintf(my_query, "UPDATE score_common SET killstod = '%u', structstod = '%u', lastscore = '%.3f', totalscore = totalscore + '%.3f', streakscore = '%.3f', flighttime = flighttime + '%u', flighttime_month = flighttime_month + '%u' WHERE player_id = '%u'",
+				client->killstod, client->structstod, client->lastscore, client->lastscore, client->streakscore, flighttime, flighttime, client->id);
 
 		if(!client->drone)
 		{

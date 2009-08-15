@@ -2868,7 +2868,7 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 	drone->speedxyz[2][0] = 100;
 	drone->angles[0][0] = 80;
 
-	PPrintf(client, RADIO_YELLOW, "V-1 launched azimuth: %.1f°, distance: %d fts ", angle, dist);
+	PPrintf(client, RADIO_YELLOW, "V-1 launched azimuth: %.1fï¿½, distance: %d fts ", angle, dist);
 
 	if ((angle *= 10) > 901)
 	{
