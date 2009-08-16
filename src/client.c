@@ -1707,7 +1707,7 @@ void UpdateClientFile(client_t *client)
 		Com_Printf(VERBOSE_WARNING, "UpdateClientFile(1): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
-	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', WHERE parent = '%u'",
+	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d' WHERE parent = '%u'",
 			client->countrytime, client->country, client->id);
 
 	if (d_mysql_query(&my_sock, my_query))
