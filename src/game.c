@@ -9190,8 +9190,12 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 	SendPacket(buffer, sizeof(buffer), client);
 	WB3SupressFire(addplane->slot, client);
 	SendPlaneStatus(plane, client);
-	Com_Printf(VERBOSE_DEBUG, "WB3OverrideSkin() at AddRemovePlaneScreen()\n");
-	WB3OverrideSkin(addplane->slot, client);
+
+	if(skins->value)
+	{
+		Com_Printf(VERBOSE_DEBUG, "WB3OverrideSkin() at AddRemovePlaneScreen()\n");
+		WB3OverrideSkin(addplane->slot, client);
+	}
 }
 
 /*************

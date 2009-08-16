@@ -1976,6 +1976,11 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 	wb3planeskin_t *clientskin;
 	char *ps;
 
+	if(!skins->value)
+	{
+		return;
+	}
+
 	clientskin = (wb3planeskin_t *) buffer;
 
 	if(clientskin->msgsize < 64)

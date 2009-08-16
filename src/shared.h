@@ -2554,6 +2554,7 @@ extern	var_t		*rebuildtime;	// rebuilding time base seconds
 extern	var_t		*respawncvs;	// after killed, cv will respawn
 extern	var_t		*rps;			// enable rps (value = minutes)
 extern	var_t		*server_speeds;	// show server speed
+extern	var_t		*skins;			// enable skins
 extern	var_t		*sqlserver;		// sql server address
 extern	var_t		*startalt;		//
 extern	var_t		*structlim;		//

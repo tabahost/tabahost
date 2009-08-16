@@ -165,6 +165,7 @@ var_t *rebuildtime; // extern
 var_t *respawncvs; // extern
 var_t *rps; // extern
 var_t *server_speeds; // extern
+var_t *skins; // extern
 var_t *sqlserver; // extern
 var_t *startalt; // extern
 var_t *structlim; // extern
@@ -337,6 +338,7 @@ void InitVars(void)
 	respawncvs = Var_Get("respawncvs", "1", VAR_ARCHIVE);
 	rps = Var_Get("rps", "60", VAR_ARCHIVE);
 	server_speeds = Var_Get("server_speeds", "0", VAR_ARCHIVE | VAR_ADMIN);
+	skins = Var_Get("skins", "0", VAR_ADMIN);
 	sqlserver = Var_Get("sqlserver", "localhost", VAR_ADMIN);
 	startalt = Var_Get("startalt", "0", VAR_ARCHIVE);
 	structlim = Var_Get("structlim", "3", VAR_ARCHIVE);
