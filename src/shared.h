@@ -753,6 +753,8 @@ typedef struct client_s
 	char		ip[16];			// player's IP
 	u_int16_t	ctrid;			// player's country ID
 	u_int32_t	hdserial;		// player's HD serial
+	u_int32_t	sendcount[6][2];	// byte count: 1 second / 5 seconds / 10 seconds / 30 seconds / 60 seconds
+	u_int32_t	recvcount[6][2];	// byte count: 1 second / 5 seconds / 10 seconds / 30 seconds / 60 seconds
 
 	u_int8_t	ready;			// if client is ready to play
 	u_int8_t	login;			// if != 0, in login process
@@ -1973,6 +1975,7 @@ int32_t	SendPacketTHL(u_int8_t *buffer, u_int16_t len, client_t *client);
 int		GetPacket(client_t *client); // recv and process packet (unfinished?)
 void	FlushSocket(int sockfd);
 void	ProtocolError(client_t *client);
+void	ConnStatistics(client_t *client, u_int32_t len, u_int8_t type);
 
 // sys.c
 u_int32_t Sys_Milliseconds (void);

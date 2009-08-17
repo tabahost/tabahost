@@ -436,7 +436,19 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 				}
 			}
 		
-			Com_Printf(VERBOSE_WARNING, "Com_Send() %s EWOULDBLOCK\n", client->longnick);
+			Com_Printf(VERBOSE_WARNING, "Com_Send() %s EWOULDBLOCK %d;%d;%d;%d;%d %d;%d;%d;%d;%d\n",
+					client->longnick,
+					client->sendcount[0][0],
+					client->sendcount[1][0]/5,
+					client->sendcount[2][0]/10,
+					client->sendcount[3][0]/30,
+					client->sendcount[4][0]/60,
+					client->recvcount[0][0],
+					client->recvcount[1][0]/5,
+					client->recvcount[2][0]/10,
+					client->recvcount[3][0]/30,
+					client->recvcount[4][0]/60);
+
 			arena->bufferit = 1;
 			return 0;
 		}
@@ -450,6 +462,8 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 		if (server_speeds->value)
 			arena->sent += n;
 		
+		ConnStatistics(client, len, 0 /*send*/);
+
 		if (len != n)
 		{
 			buf += n;
@@ -494,7 +508,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 			// if all data sent from buffer, clear it and send the actual data
 			if(client->buf_offset)
 			{
-				Com_Printf(VERBOSE_WARNING, "%s full buffer sent, not sending the actual data\n", client->longnick);
+				Com_Printf(VERBOSE_WARNING, "%s full buffer sent, now sending the actual data\n", client->longnick);
 				client->buf_offset = 0;
 				return Com_Send(client, tbuf, tlen);
 			}

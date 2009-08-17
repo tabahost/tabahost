@@ -331,7 +331,13 @@ int GetPacket(client_t *client)
 	n = Com_Recv(client->socket, mainbuffer, 3);
 
 	if (n <= 0)
+	{
 		return n;
+	}
+	else
+	{
+		ConnStatistics(client, n, 1 /*recv*/);
+	}
 
 	if ((mainbuffer[0] == 0x09) /*wb3*/ || (mainbuffer[0] == 0x10) /*THL*/)
 	{
@@ -388,6 +394,89 @@ int GetPacket(client_t *client)
 	Com_Printf(VERBOSE_WARNING, "%s(%s) %d - Invalid Packet\n", client->longnick, client->ip, n);
 	FlushSocket(client->socket);
 	return 0;
+}
+
+/*************
+ ConnStatistics
+
+ Record client connection flow statistics
+ *************/
+
+void ConnStatistics(client_t *client, u_int32_t len, u_int8_t type)
+{
+	u_int16_t i;
+
+	if(client)
+	{
+		if(type == 0) // send
+		{
+			client->sendcount[0][1] += len;
+		}
+		else if (type == 1) // recv
+		{
+			client->recvcount[0][1] += len;
+		}
+	}
+	else
+	{
+		switch (type)
+		{
+			case 1 /*second*/:
+				for(i = 0; i < maxentities->value; i++)
+				{
+					if (clients[i].inuse && !clients[i].drone)
+					{
+						clients[i].recvcount[0][0] = clients[i].recvcount[0][1];
+						clients[i].recvcount[0][1] = 0;
+						clients[i].recvcount[1][1] += clients[i].recvcount[0][0];
+					}
+				}
+				break;
+			case 5 /*5 seconds*/:
+				for(i = 0; i < maxentities->value; i++)
+				{
+					if (clients[i].inuse && !clients[i].drone)
+					{
+						clients[i].recvcount[1][0] = clients[i].recvcount[1][1];
+						clients[i].recvcount[1][1] = 0;
+						clients[i].recvcount[2][1] += clients[i].recvcount[1][0];
+					}
+				}
+				break;
+			case 10 /*10 second*/:
+				for(i = 0; i < maxentities->value; i++)
+				{
+					if (clients[i].inuse && !clients[i].drone)
+					{
+						clients[i].recvcount[2][0] = clients[i].recvcount[2][1];
+						clients[i].recvcount[2][1] = 0;
+						clients[i].recvcount[3][1] += clients[i].recvcount[2][0];
+					}
+				}
+				break;
+			case 30 /*30 second*/:
+				for(i = 0; i < maxentities->value; i++)
+				{
+					if (clients[i].inuse && !clients[i].drone)
+					{
+						clients[i].recvcount[3][0] = clients[i].recvcount[3][1];
+						clients[i].recvcount[3][1] = 0;
+						clients[i].recvcount[4][1] += clients[i].recvcount[3][0];
+					}
+				}
+				break;
+			case 60 /*60 second*/:
+				for(i = 0; i < maxentities->value; i++)
+				{
+					if (clients[i].inuse && !clients[i].drone)
+					{
+						clients[i].recvcount[4][0] = clients[i].recvcount[4][1];
+						clients[i].recvcount[4][1] = 0;
+					}
+				}
+				break;
+		}
+	}
 }
 
 /*************

@@ -1448,6 +1448,39 @@ void CheckArenaRules(void)
 			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
+
+	// ConnStatistics tick
+	if (!setjmp(debug_buffer))
+	{
+		if (!(arena->frame % 100)) // 1 sec
+		{
+			ConnStatistics(NULL, 0, 1);
+
+			if (!(arena->frame % 500)) // 5 sec
+			{
+				ConnStatistics(NULL, 0, 5);
+
+				if (!(arena->frame % 1000)) // 10 sec
+				{
+					ConnStatistics(NULL, 0, 10);
+
+					if (!(arena->frame % 3000)) // 30 sec
+					{
+						ConnStatistics(NULL, 0, 30);
+
+						if (!(arena->frame % 6000)) // 60 sec
+						{
+							ConnStatistics(NULL, 0, 60);
+						}
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
+	}
 }
 
 /*************
