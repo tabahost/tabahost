@@ -2049,6 +2049,20 @@ void ProcessCommands(char *command, client_t *client)
 			Cmd_Commandos(client, GetHeightAt(client->posxy[0][0], client->posxy[1][0]));
 			return;
 		}
+		else if (!Com_Stricmp(command, "traffic"))
+		{
+			PPrintf(client, RADIO_YELLOW, "Traffic: %d;%d;%d;%d;%d %d;%d;%d;%d;%d",
+					client->sendcount[0][0],
+					client->sendcount[1][0]/5,
+					client->sendcount[2][0]/10,
+					client->sendcount[3][0]/30,
+					client->sendcount[4][0]/60,
+					client->recvcount[0][0],
+					client->recvcount[1][0]/5,
+					client->recvcount[2][0]/10,
+					client->recvcount[3][0]/30,
+					client->recvcount[4][0]/60);
+		}
 		else if (!Com_Stricmp(command, "minen"))
 		{
 			if (!argv[1])

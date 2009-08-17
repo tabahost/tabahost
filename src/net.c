@@ -426,6 +426,10 @@ void ConnStatistics(client_t *client, u_int32_t len, u_int8_t type)
 				{
 					if (clients[i].inuse && !clients[i].drone)
 					{
+						clients[i].sendcount[0][0] = clients[i].sendcount[0][1];
+						clients[i].sendcount[0][1] = 0;
+						clients[i].sendcount[1][1] += clients[i].sendcount[0][0];
+
 						clients[i].recvcount[0][0] = clients[i].recvcount[0][1];
 						clients[i].recvcount[0][1] = 0;
 						clients[i].recvcount[1][1] += clients[i].recvcount[0][0];
@@ -437,6 +441,10 @@ void ConnStatistics(client_t *client, u_int32_t len, u_int8_t type)
 				{
 					if (clients[i].inuse && !clients[i].drone)
 					{
+						clients[i].sendcount[1][0] = clients[i].sendcount[1][1];
+						clients[i].sendcount[1][1] = 0;
+						clients[i].sendcount[2][1] += clients[i].sendcount[1][0];
+
 						clients[i].recvcount[1][0] = clients[i].recvcount[1][1];
 						clients[i].recvcount[1][1] = 0;
 						clients[i].recvcount[2][1] += clients[i].recvcount[1][0];
@@ -448,6 +456,10 @@ void ConnStatistics(client_t *client, u_int32_t len, u_int8_t type)
 				{
 					if (clients[i].inuse && !clients[i].drone)
 					{
+						clients[i].sendcount[2][0] = clients[i].sendcount[2][1];
+						clients[i].sendcount[2][1] = 0;
+						clients[i].sendcount[3][1] += clients[i].sendcount[2][0];
+
 						clients[i].recvcount[2][0] = clients[i].recvcount[2][1];
 						clients[i].recvcount[2][1] = 0;
 						clients[i].recvcount[3][1] += clients[i].recvcount[2][0];
@@ -459,6 +471,10 @@ void ConnStatistics(client_t *client, u_int32_t len, u_int8_t type)
 				{
 					if (clients[i].inuse && !clients[i].drone)
 					{
+						clients[i].sendcount[3][0] = clients[i].sendcount[3][1];
+						clients[i].sendcount[3][1] = 0;
+						clients[i].sendcount[4][1] += clients[i].sendcount[3][0];
+
 						clients[i].recvcount[3][0] = clients[i].recvcount[3][1];
 						clients[i].recvcount[3][1] = 0;
 						clients[i].recvcount[4][1] += clients[i].recvcount[3][0];
@@ -470,6 +486,9 @@ void ConnStatistics(client_t *client, u_int32_t len, u_int8_t type)
 				{
 					if (clients[i].inuse && !clients[i].drone)
 					{
+						clients[i].sendcount[4][0] = clients[i].sendcount[4][1];
+						clients[i].sendcount[4][1] = 0;
+
 						clients[i].recvcount[4][0] = clients[i].recvcount[4][1];
 						clients[i].recvcount[4][1] = 0;
 					}
