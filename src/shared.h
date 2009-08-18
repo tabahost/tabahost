@@ -113,9 +113,10 @@ typedef unsigned int u_int32_t;
 #define MAX_ARENASLIST		5		// max numer of arenas in arenaslist
 #define MAX_UDPDATA			4096	// max udp packet size
 #define MAX_RECVDATA		1024	// max data recv each recv()
-#define MAX_SENDDATA		1024 	// max data can send
-#define MAX_SENDBUFFER		8192 	// max data can store in send buffer
-#define MAX_QUERY			4096 	// max data can be query
+#define MAX_SENDDATA		1024	// max data can send
+#define MAX_SENDBUFFER		8192	// max data can store in send buffer
+#define MAX_LOGBUFFER		16384	// max data can store in log buffer
+#define MAX_QUERY			4096	// max data can be query
 #define MAX_RETRY			5		// max number of retries
 #define MAX_PREDICT			6		// max number os history for prediction
 #define MAX_TIMEOUT			6000	// 60 seconds of timeout (60x100frames)
@@ -750,11 +751,16 @@ typedef struct client_s
 	int			socket;			// player's socket
 	u_int16_t	buf_offset;		//
 	u_int8_t	buffer[MAX_SENDBUFFER]; // Com_Send() buffer
-	char		ip[16];			// player's IP
-	u_int16_t	ctrid;			// player's country ID
-	u_int32_t	hdserial;		// player's HD serial
+	u_int16_t	logbuf_start;	//
+	u_int16_t	logbuf_end;		//
+	u_int8_t	logbuffer[MAX_LOGBUFFER]; // Com_Send() buffer
 	u_int32_t	sendcount[6][2];	// byte count: 1 second / 5 seconds / 10 seconds / 30 seconds / 60 seconds
 	u_int32_t	recvcount[6][2];	// byte count: 1 second / 5 seconds / 10 seconds / 30 seconds / 60 seconds
+	u_int8_t	wouldblock;		// wouldblock flag
+	char		ip[16];			// player's IP
+
+	u_int16_t	ctrid;			// player's country ID
+	u_int32_t	hdserial;		// player's HD serial
 
 	u_int8_t	ready;			// if client is ready to play
 	u_int8_t	login;			// if != 0, in login process
@@ -2012,6 +2018,8 @@ char	*sqltime(const struct tm *timeptr);
 void	Com_Close(int *fd);
 int		Com_Recv(int s, u_int8_t *buf, int len);
 double	Com_Pow(double x, u_int32_t y);
+void	Com_RecordLogBuffer(client_t * client, u_int8_t *buffer, int len);
+void	Com_PrintLogBuffer(client_t * client);
 int		Com_Send(client_t *client, u_int8_t *buf, int len);
 void	ConnError(int n);
 int		Com_Read(FILE *fp, u_int8_t *buffer, u_int32_t num);

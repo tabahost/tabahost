@@ -382,6 +382,95 @@ double Com_Pow(double x, u_int32_t y)
 }
 
 /*************
+ Com_RecordLogBuffer
+
+ Record a Send Log buffer
+ *************/
+
+void Com_RecordLogBuffer(client_t * client, u_int8_t *buffer, int len)
+{
+	u_int16_t offset;
+	u_int16_t index;
+
+	if(len <= 0)
+		return;
+
+	for(offset = client->logbuf_start, index = 0; index < len; index++, offset++)
+	{
+		if(offset == MAX_LOGBUFFER)
+		{
+			PPrintf(client, RADIO_GREEN, "DEBUG: Record Log Buffer full");
+			offset = 0;
+		}
+
+		client->logbuffer[offset] = buffer[index];
+	}
+
+	client->logbuf_start = offset;
+	if(offset)
+	{
+		client->logbuf_end = client->logbuf_start - 1;
+	}
+	else
+	{
+		client->logbuf_end = MAX_LOGBUFFER;
+	}
+}
+
+/*************
+ Com_PrintLogBuffer
+
+ Print Send Log buffer
+ *************/
+
+void Com_PrintLogBuffer(client_t * client)
+{
+	u_int16_t offset;
+
+	printf("( %u - ", client->key);
+
+	if (logfile_active->value)
+	{
+		if (!logfile[0])
+		{
+			logfile[0] = fopen(FILE_CONSOLE, "a+");
+		}
+
+		if (logfile[0])
+		{
+			fprintf(logfile[0], "( %u - ", client->key);
+		}
+	}
+
+	for (offset = client->logbuf_start; offset != client->logbuf_end; offset++)
+	{
+		if(offset == MAX_LOGBUFFER)
+			offset = 0;
+
+		printf("%02X ", client->logbuffer[offset]);
+
+		if (logfile_active->value)
+		{
+			if (logfile[0])
+			{
+				fprintf(logfile[0], "%02X ", client->logbuffer[offset]);
+			}
+		}
+	}
+	printf(")\n");
+	fflush(stdout);
+
+	if (logfile_active->value)
+	{
+		if (logfile[0])
+		{
+			fprintf(logfile[0], ")\n");
+			fflush(logfile[0]);
+		}
+	}
+}
+
+/*************
  Com_Send
 
  Just a send() with padronized return value
@@ -436,19 +525,25 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 				}
 			}
 		
-			Com_Printf(VERBOSE_WARNING, "Com_Send() %s EWOULDBLOCK %d;%d;%d;%d;%d %d;%d;%d;%d;%d\n",
-					client->longnick,
-					client->sendcount[0][0],
-					client->sendcount[1][0]/5,
-					client->sendcount[2][0]/10,
-					client->sendcount[3][0]/30,
-					client->sendcount[4][0]/60,
-					client->recvcount[0][0],
-					client->recvcount[1][0]/5,
-					client->recvcount[2][0]/10,
-					client->recvcount[3][0]/30,
-					client->recvcount[4][0]/60);
+			if(!client->wouldblock)
+			{
+				Com_Printf(VERBOSE_WARNING, "Com_Send() %s EWOULDBLOCK %d;%d;%d;%d;%d %d;%d;%d;%d;%d\n",
+						client->longnick,
+						client->sendcount[0][0],
+						client->sendcount[1][0]/5,
+						client->sendcount[2][0]/10,
+						client->sendcount[3][0]/30,
+						client->sendcount[4][0]/60,
+						client->recvcount[0][0],
+						client->recvcount[1][0]/5,
+						client->recvcount[2][0]/10,
+						client->recvcount[3][0]/30,
+						client->recvcount[4][0]/60);
 
+				//TODO: Com_PrintLogBuffer(client);
+			}
+			
+			client->wouldblock = 1;
 			arena->bufferit = 1;
 			return 0;
 		}
@@ -462,7 +557,8 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 		if (server_speeds->value)
 			arena->sent += n;
 		
-		ConnStatistics(client, len, 0 /*send*/);
+		//TODO: Com_RecordLogBuffer(client, buf, n);
+		ConnStatistics(client, n, 0 /*send*/);
 
 		if (len != n)
 		{
@@ -509,6 +605,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 			if(client->buf_offset)
 			{
 				Com_Printf(VERBOSE_WARNING, "%s full buffer sent, now sending the actual data\n", client->longnick);
+				client->wouldblock = 0;
 				client->buf_offset = 0;
 				return Com_Send(client, tbuf, tlen);
 			}
@@ -967,21 +1064,26 @@ void Com_Printfhex(unsigned char *buffer, int len)
 	int i;
 
 	printf("( ");
-	fflush(stdout);
-	fprintf(logfile[0], "( "); // TODO: Misc: check logfile active
+
+	if (logfile_active->value)
+	{
+		if (!logfile[0])
+		{
+			logfile[0] = fopen(FILE_CONSOLE, "a+");
+		}
+
+		if (logfile[0])
+		{
+			fprintf(logfile[0], "( ");
+		}
+	}
 
 	if (!((buffer[0] == 7) && (buffer[2] == (len - 1))))
 	{
 		printf("07 00 %02X ", len-1);
-		fflush(stdout);
 
 		if (logfile_active->value)
 		{
-			if (!logfile[0]) // TODO: Misc: Change this to FILE_DEBUG?
-			{
-				logfile[0] = fopen(FILE_CONSOLE, "a+");
-			}
-
 			if (logfile[0])
 			{
 				fprintf(logfile[0], "07 00 %02X ", len-1);
@@ -992,7 +1094,6 @@ void Com_Printfhex(unsigned char *buffer, int len)
 	for (i=0; i<len; i++)
 	{
 		printf("%02X ", buffer[i]);
-		fflush(stdout);
 
 		if (logfile_active->value)
 		{
@@ -1009,8 +1110,15 @@ void Com_Printfhex(unsigned char *buffer, int len)
 	}
 	printf(")\n");
 	fflush(stdout);
-	fprintf(logfile[0], ")\n");
-	fflush(logfile[0]);
+
+	if (logfile_active->value)
+	{
+		if (logfile[0])
+		{
+			fprintf(logfile[0], ")\n");
+			fflush(logfile[0]);
+		}
+	}
 }
 
 /*************
