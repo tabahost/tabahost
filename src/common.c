@@ -399,7 +399,7 @@ void Com_RecordLogBuffer(client_t * client, u_int8_t *buffer, int len)
 	{
 		if(offset == MAX_LOGBUFFER)
 		{
-			PPrintf(client, RADIO_GREEN, "DEBUG: Record Log Buffer full");
+			//PPrintf(client, RADIO_GREEN, "DEBUG: Record Log Buffer full");
 			offset = 0;
 		}
 
@@ -540,7 +540,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 						client->recvcount[3][0]/30,
 						client->recvcount[4][0]/60);
 
-				//TODO: Com_PrintLogBuffer(client);
+				Com_PrintLogBuffer(client);
 			}
 			
 			client->wouldblock = 1;
@@ -557,7 +557,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 		if (server_speeds->value)
 			arena->sent += n;
 		
-		//TODO: Com_RecordLogBuffer(client, buf, n);
+		Com_RecordLogBuffer(client, buf, n);
 		ConnStatistics(client, n, 0 /*send*/);
 
 		if (len != n)
