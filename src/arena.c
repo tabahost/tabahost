@@ -22,11 +22,11 @@
 
 #include "shared.h"
 
-/*************
+/**
  GetBuilding
 
  Returns a pointer to building if found or NULL
- *************/
+ */
 
 building_t *GetBuilding(u_int16_t id)
 {
@@ -66,11 +66,11 @@ building_t *GetBuilding(u_int16_t id)
 	return NULL;
 }
 
-/*************
+/**
  GetFieldType
 
  Returns type of a field
- *************/
+ */
 
 char *GetFieldType(u_int8_t type)
 {
@@ -119,11 +119,11 @@ char *GetFieldType(u_int8_t type)
 	}
 }
 
-/*************
+/**
  GetBuildingType
 
  Returns name of a building
- *************/
+ */
 
 char *GetBuildingType(u_int16_t type)
 {
@@ -204,11 +204,11 @@ char *GetBuildingType(u_int16_t type)
 	}
 }
 
-/*************
+/**
  LoadArenaStatus
 
  Load arena status (fields, CV, city, etc)
- *************/
+ */
 
 void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 {
@@ -411,11 +411,11 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 	}
 }
 
-/*************
+/**
  SaveArenaStatus
 
  Save arena status (fields, CV, city, etc)
- *************/
+ */
 
 void SaveArenaStatus(char *filename, client_t *client)
 {
@@ -507,11 +507,11 @@ void SaveArenaStatus(char *filename, client_t *client)
 	fclose(fp);
 }
 
-/*************
+/**
  LoadPlanesPool
 
  Load planes pool
- *************/
+ */
 
 void LoadPlanesPool(char *filename, client_t *client)
 {
@@ -555,11 +555,11 @@ void LoadPlanesPool(char *filename, client_t *client)
 	}
 }
 
-/*************
+/**
  SavePlanesPool
 
  Save planes pool
- *************/
+ */
 
 void SavePlanesPool(char *filename, client_t *client)
 {
@@ -589,11 +589,11 @@ void SavePlanesPool(char *filename, client_t *client)
 	fclose(fp);
 }
 
-/*************
+/**
  GetBuildingArmor
 
  Get the value of armor for given structure
- *************/
+ */
 
 u_int32_t GetBuildingArmor(u_int8_t type, client_t *client)
 {
@@ -606,11 +606,11 @@ u_int32_t GetBuildingArmor(u_int8_t type, client_t *client)
 	return arena->buildarmor[type].points;
 }
 
-/*************
+/**
  GetBuildingAPstop
 
  Get the value of AP-stop for given structure
- *************/
+ */
 
 u_int32_t GetBuildingAPstop(u_int8_t type, client_t *client)
 {
@@ -623,11 +623,11 @@ u_int32_t GetBuildingAPstop(u_int8_t type, client_t *client)
 	return arena->buildarmor[type].apstop;
 }
 
-/*************
+/**
  GetBuildingImunity
 
  Get the value of imunity for given structure
- *************/
+ */
 
 u_int32_t GetBuildingImunity(u_int8_t type, client_t *client)
 {
@@ -640,11 +640,11 @@ u_int32_t GetBuildingImunity(u_int8_t type, client_t *client)
 	return arena->buildarmor[type].imunity;
 }
 
-/*************
+/**
  SendMapDots
 
  Send dots at radar
- *************/
+ */
 
 void SendMapDots(void)
 {
@@ -723,11 +723,11 @@ void SendMapDots(void)
 	}
 }
 
-/*************
+/**
  SeeEnemyDot
 
  Check if enemy dot is in radar range
- *************/
+ */
 
 u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 {
@@ -877,11 +877,11 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 	return j;
 }
 
-/*************
+/**
  ClearMapDots
 
  Clear dots at radar
- *************/
+ */
 
 void ClearMapDots(client_t *client)
 {
@@ -896,11 +896,11 @@ void ClearMapDots(client_t *client)
 	SendPacket(buffer, 3, client);
 }
 
-/*************
+/**
  SendCVPos
 
  Send Current CV Pos
- *************/
+ */
 
 void SendCVPos(client_t *client, u_int8_t cvnum)
 {
@@ -919,11 +919,11 @@ void SendCVPos(client_t *client, u_int8_t cvnum)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  ResetCVPos
 
  Reset CV back to starting point (port)
- *************/
+ */
 
 void ResetCVPos(cv_t *cv)
 {
@@ -955,11 +955,11 @@ void ResetCVPos(cv_t *cv)
 
 }
 
-/*************
+/**
  SetCVSpeed
 
  Set convoy speeds when some boat is damaged or reached waypoint
- *************/
+ */
 
 void SetCVSpeed(cv_t *cv)
 {
@@ -1015,11 +1015,11 @@ void SetCVSpeed(cv_t *cv)
 	cv->outofport = 1;
 }
 
-/*************
+/**
  GetCVTimebase
 
  Get current timebase to reach next waypoint
- *************/
+ */
 
 u_int32_t GetCVTimebase(cv_t *cv)
 {
@@ -1051,11 +1051,11 @@ u_int32_t GetCVTimebase(cv_t *cv)
 	return timebase;
 }
 
-/*************
+/**
  GetCVSpeeds
 
  Get X or Y speed based on current route (current pos and destiny)
- *************/
+ */
 
 double GetCVSpeeds(cv_t *cv, u_int8_t xy)
 {
@@ -1066,11 +1066,11 @@ double GetCVSpeeds(cv_t *cv, u_int8_t xy)
 	return (double)(cv->wp[cv->wpnum][xy] - arena->fields[cv->field].posxyz[xy]) * prop;
 }
 
-/*************
+/**
  SetCVRoute
 
  Set CV Route (timebase and XY speeds)
- *************/
+ */
 
 void SetCVRoute(cv_t *cv)
 {
@@ -1079,11 +1079,11 @@ void SetCVRoute(cv_t *cv)
 	cv->timebase = GetCVTimebase(cv);
 }
 
-/*************
+/**
  ChangeCVRoute
 
  Change Route of CV, in threathness or by command
- *************/
+ */
 
 void ChangeCVRoute(cv_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client)
 {
@@ -1160,11 +1160,11 @@ void ChangeCVRoute(cv_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, c
 	// coded at threatened = 0;
 }
 
-/*************
+/**
  GetCVPos
 
  Get current XY CV pos based in estimated time to reach next waypoint and current XY speed
- *************/
+ */
 
 int32_t GetCVPos(cv_t *cv, u_int8_t xy)
 {
@@ -1181,11 +1181,11 @@ int32_t GetCVPos(cv_t *cv, u_int8_t xy)
 	return (int32_t)(cv->wp[cv->wpnum][xy] - offset);
 }
 
-/*************
+/**
  SendCVRoute
 
  Send CV Route to client
- *************/
+ */
 
 void SendCVRoute(client_t *client, u_int8_t cvnum)
 {
@@ -1222,11 +1222,11 @@ void SendCVRoute(client_t *client, u_int8_t cvnum)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  ReadCVWaypoints
 
  Read CV waypoints from file
- *************/
+ */
 
 void ReadCVWaypoints(u_int8_t num)
 {
@@ -1266,11 +1266,11 @@ void ReadCVWaypoints(u_int8_t num)
 	fclose(fp);
 }
 
-/*************
+/**
  LogCVsPosition
 
  Log all CVs position
- *************/
+ */
 
 void LogCVsPosition(void)
 {
@@ -1295,11 +1295,11 @@ void LogCVsPosition(void)
 	}
 }
 
-/*************
+/**
  GetPlaneName
 
  Get plane name from given number
- *************/
+ */
 
 char *GetPlaneName(u_int16_t plane)
 {
@@ -1309,11 +1309,11 @@ char *GetPlaneName(u_int16_t plane)
 		return "Invalid Plane";
 }
 
-/*************
+/**
  GetSmallPlaneName
 
  Get plane abreviated name from given number
- *************/
+ */
 
 char *GetSmallPlaneName(u_int16_t plane)
 {
@@ -1323,11 +1323,11 @@ char *GetSmallPlaneName(u_int16_t plane)
 		return "Invalid Plane";
 }
 
-/*************
+/**
  GetPlaneDir
 
  Get plane dir name from given number
- *************/
+ */
 
 char *GetPlaneDir(u_int16_t plane)
 {
@@ -1364,11 +1364,11 @@ char *GetPlaneDir(u_int16_t plane)
 		return NULL;
 }
 
-/*************
+/**
  UpdateRPS
 
  Update field with new planes
- *************/
+ */
 
 void UpdateRPS(u_int16_t minutes)
 {
@@ -1461,11 +1461,11 @@ void UpdateRPS(u_int16_t minutes)
 	 */
 }
 
-/*************
+/**
  SendRPS
 
  Send available planes for actual field
- *************/
+ */
 
 void SendRPS(client_t *client)
 {
@@ -1506,11 +1506,11 @@ void SendRPS(client_t *client)
 	SendPacket(buffer, maxplanes+3, client);
 }
 
-/*************
+/**
  WB3SendAcks
 
  Send available acks for actual field
- *************/
+ */
 
 void WB3SendAcks(client_t *client)
 {
@@ -1576,11 +1576,11 @@ void WB3SendAcks(client_t *client)
 	SendPacket(buffer, (numacks * 9) + 5, client);
 }
 
-/*************
+/**
  AddBomb
 
  Adds a new bomb to bombs array
- *************/
+ */
 
 void AddBomb(u_int16_t id, int32_t destx, int32_t desty, u_int8_t type, int16_t speed, u_int32_t timer, client_t *client)
 {
@@ -1616,11 +1616,11 @@ void AddBomb(u_int16_t id, int32_t destx, int32_t desty, u_int8_t type, int16_t 
 	}
 }
 
-/*************
+/**
  LoadRPS
 
  Load RPS from file
- *************/
+ */
 
 void LoadRPS(char *path, client_t *client)
 {
@@ -1702,12 +1702,12 @@ void LoadRPS(char *path, client_t *client)
 	Sys_UnlockFile(file);
 }
 
-/*************
+/**
  SaveRPS
 
  Save curren RPS in file
  TODO: FIXME: Function not used for a while
- *************/
+ */
 
 void SaveRPS(char *path, client_t *client)
 {
@@ -1751,11 +1751,11 @@ void SaveRPS(char *path, client_t *client)
 	Sys_UnlockFile(file);
 }
 
-/*************
+/**
  ShowRPS
 
  Show RPS configuration
- *************/
+ */
 
 void ShowRPS(client_t *client)
 {
@@ -1778,11 +1778,11 @@ void ShowRPS(client_t *client)
 	}
 }
 
-/*************
+/**
  LoadMapcycle
 
  Load Mapcycle from file
- *************/
+ */
 
 void LoadMapcycle(char *path, client_t *client)
 {
@@ -1854,11 +1854,11 @@ void LoadMapcycle(char *path, client_t *client)
 	Sys_UnlockFile(file);
 }
 
-/*************
+/**
  IsFighter
 
  Check if plane is fighter
- *************/
+ */
 
 int8_t IsFighter(client_t *client, ...)
 {
@@ -1914,11 +1914,11 @@ int8_t IsFighter(client_t *client, ...)
 // 180: FAU
 
 
-/*************
+/**
  IsBomber
 
  Check if plane is Buffer
- *************/
+ */
 
 int8_t IsBomber(client_t *client, ...)
 {
@@ -1967,11 +1967,11 @@ int8_t IsBomber(client_t *client, ...)
 		return 0;
 }
 
-/*************
+/**
  IsCargo
 
  Check if plane is a Cargo Plane / Vehicle
- *************/
+ */
 
 int8_t IsCargo(client_t *client, ...)
 {
@@ -2055,11 +2055,11 @@ int8_t IsCargo(client_t *client, ...)
 	}
 }
 
-/*************
+/**
  IsGround
 
  Check if plane is a Ground Vehicle
- *************/
+ */
 
 int8_t IsGround(client_t *client, ...)
 {
@@ -2108,11 +2108,11 @@ int8_t IsGround(client_t *client, ...)
 		return 0;
 }
 
-/*************
+/**
  HaveGunner
 
  Check if plane is have gunners
- *************/
+ */
 
 int8_t HaveGunner(u_int16_t plane)
 {
@@ -2216,11 +2216,11 @@ void LoadAmmo(client_t *client)
 	}
 }
 
-/*************
+/**
  LoadDamageModel
 
  Load planes/structs model from file
- *************/
+ */
 
 void LoadDamageModel(client_t *client)
 {
@@ -2566,11 +2566,11 @@ void LoadDamageModel(client_t *client)
 	}
 }
 
-/*************
+/**
  SaveDamageModel
 
  Save planes/structs damage model from file
- *************/
+ */
 
 void SaveDamageModel(client_t *client, char *row)
 {
@@ -2686,11 +2686,11 @@ void SaveDamageModel(client_t *client, char *row)
 	}
 }
 
-/*************
+/**
  CheckBoatDamage
 
  Check if boat was damage, set new speed or capture it
- *************/
+ */
 
 void CheckBoatDamage(building_t *building, client_t *client)
 {
@@ -2963,11 +2963,11 @@ void CheckBoatDamage(building_t *building, client_t *client)
 	}
 }
 
-/*************
+/**
  CaptureField
 
  Captures the Field
- *************/
+ */
 
 void CaptureField(u_int8_t field, client_t *client)
 {
@@ -3058,11 +3058,11 @@ void CaptureField(u_int8_t field, client_t *client)
 	}
 }
 
-/*************
+/**
  TimetoNextArena
 
  Returns time left in days to next arena
- *************/
+ */
 
 u_int16_t TimetoNextArena(void)
 {
@@ -3105,11 +3105,11 @@ u_int16_t TimetoNextArena(void)
 	return (u_int16_t) FloorDiv(difftime, 86400);
 }
 
-/*************
+/**
  InitArena
 
  Initializes arena array
- *************/
+ */
 
 void InitArena(void)
 {
@@ -3146,11 +3146,11 @@ void InitArena(void)
 	//	SetCVSpeed(NULL);
 }
 
-/*************
+/**
  ChangeArena
 
  Changes arena, duh :)
- *************/
+ */
 
 void ChangeArena(char *map, client_t *client)
 {
@@ -3271,11 +3271,11 @@ void ChangeArena(char *map, client_t *client)
 	}
 }
 
-/*************
+/**
  CalcTimemultBasedOnTime
 
  Calculate the timemult
- *************/
+ */
 
 void CalcTimemultBasedOnTime(void)
 {
@@ -3291,13 +3291,13 @@ void CalcTimemultBasedOnTime(void)
 	Cmd_Time((arena->hour*100)+arena->minute, NULL, NULL);
 }
 
-/*************
+/**
  NewWar
 
  Reset/Backup Scores
  Reset mapcycle
  Clear all .score files
- *************/
+ */
 
 void NewWar(void)
 {
@@ -3312,11 +3312,11 @@ void NewWar(void)
 	ResetScores();
 }
 
-/*************
+/**
  NearestField
 
  Returns nearest field/city array ID of != country
- *************/
+ */
 
 int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city, u_int8_t cvs, u_int32_t *pdist)
 {
@@ -3388,11 +3388,11 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 	}
 }
 
-/*************
+/**
  ReducePlanes
 
  Reduce plane pool after hangar destruction
- *************/
+ */
 
 void ReducePlanes(u_int8_t field)
 {
@@ -3424,11 +3424,11 @@ void ReducePlanes(u_int8_t field)
 	}
 }
 
-/*************
+/**
  IncreaseAcksReup
 
  Increase Ack Reup time after warehouse destruction
- *************/
+ */
 
 void IncreaseAcksReup(u_int8_t field)
 {
@@ -3452,11 +3452,11 @@ void IncreaseAcksReup(u_int8_t field)
 	}
 }
 
-/*************
+/**
  IsVitalBuilding
 
  Returns true if building is essential to close a field
- *************/
+ */
 
 u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 {
@@ -3600,11 +3600,11 @@ u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 }
 
 
-/*************
+/**
  GetFieldParas
 
  Get numer of paras needed to capture by field type
- *************/
+ */
 
 u_int8_t GetFieldParas(u_int8_t type)
 {
@@ -3729,11 +3729,11 @@ int32_t GetFieldRadius(u_int8_t fieldtype)
 	}
 }
 
-/*********************************
+/**
  These next functions were provided
  to calculate arena Z from given
  X and Y position
- **********************************/
+ */
 
 /* size of the map (number of dots) */
 #define MWIDTH      2112 // 2112
@@ -3755,12 +3755,12 @@ int32_t GetFieldRadius(u_int8_t fieldtype)
 #define X2INDEX(xxxx) ((xxxx) / MHDOT) //
 #define Y2INDEX(yyyy) ((yyyy) / MHDOT) //
 
-/* terrain levels */
+/** terrain levels */
 u_int8_t earthMap[MHEIGHT * MWIDTH];
-/* mapping levels to real height */
+/** mapping levels to real height */
 int32_t mapLevels[256];
 
-/* get client position and map altitude */
+/** get client position and map altitude */
 
 u_int8_t Alt2Index(int32_t alt)
 {
@@ -4083,11 +4083,11 @@ u_int8_t SaveEarthMap(char *FileName)
 	return 1;
 }
 
-/*************
+/**
  IsVisible
 
  is [x2,y2,z2] visible to [x1,y1,z1]? there no mountains between this dots?
- *************/
+ */
 
 int32_t IsVisible(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2)
 {
@@ -4317,11 +4317,11 @@ int32_t IsVisible(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, in
 	return 1;
 }
 
-/*************
+/**
  NoopArenalist
 
  Updates the list of arenas in main server
- *************/
+ */
 /*
 
  Packet layout:
@@ -4423,11 +4423,11 @@ void NoopArenalist(void)
 	Com_Close(&UdpSock);
 }
 
-/*************
+/**
  AddFieldDamage
 
  Add damage to a field from a player
- *************/
+ */
 
 void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 {
@@ -4449,11 +4449,11 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 	}
 }
 
-/*************
+/**
  AddBomber
 
  Add a new bomber assist and return its location or just return its location if already exists (added clean disconnected players)
- *************/
+ */
 
 int8_t AddBomber(u_int8_t field, client_t *client)
 {
@@ -4502,11 +4502,11 @@ int8_t AddBomber(u_int8_t field, client_t *client)
 	return found;
 }
 
-/*************
+/**
  SetBFieldType
 
  Set buildings field type
- *************/
+ */
 
 void SetBFieldType(building_t *buildings, u_int16_t type)
 {
@@ -4523,11 +4523,11 @@ void SetBFieldType(building_t *buildings, u_int16_t type)
 	}
 }
 
-/*************
+/**
  CalcFactoryBuildings
 
  Calculate "city" buildings number and buildings up for each country
- *************/
+ */
 
 void CalcFactoryBuildings(void)
 {
@@ -4545,11 +4545,11 @@ void CalcFactoryBuildings(void)
 	}
 }
 
-/*************
+/**
  DebiteFactoryBuildings
 
  Debite buildings from country
- *************/
+ */
 
 void DebiteFactoryBuildings(city_t *city)
 {
@@ -4573,11 +4573,11 @@ void DebiteFactoryBuildings(city_t *city)
 	}
 }
 
-/*************
+/**
  CrediteFactoryBuildings
 
  Credite buildings from country
- *************/
+ */
 
 void CrediteFactoryBuildings(city_t *city)
 {
@@ -4601,11 +4601,11 @@ void CrediteFactoryBuildings(city_t *city)
 	}
 }
 
-/*************
+/**
  DebugArena
 
  Save Debug information before arena crashes
- *************/
+ */
 
 void DebugArena(char *file, u_int32_t line)
 {

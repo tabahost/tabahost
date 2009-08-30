@@ -22,22 +22,22 @@
 
 #include "shared.h"
 
-/*************
+/**
  InitClients
 
  Create a zeroed clients array with maxentities->value size
- *************/
+ */
 
 void InitClients(void)
 {
 	clients = (client_t *) Z_Malloc((sizeof(client_t) * maxentities->value) + 1);
 }
 
-/*************
+/**
  AddClient
 
  Add a new client in clients array
- *************/
+ */
 
 void AddClient(int socket, struct sockaddr_in *cli_addr)
 {
@@ -93,11 +93,11 @@ void AddClient(int socket, struct sockaddr_in *cli_addr)
 	Com_Printf(VERBOSE_ALWAYS, "Incomming connection from %s - %s\n", clients[i].ip, GeoIP_country_name_by_addr(gi, clients[i].ip));
 }
 
-/*************
+/**
  RemoveClient
 
  Reset client structure
- *************/
+ */
 
 void RemoveClient(client_t *client)
 {
@@ -203,11 +203,11 @@ void RemoveClient(client_t *client)
 	UpdateIngameClients(0);
 }
 
-/*************
+/**
  DebugClient
 
  Save Debug information and kick player
- *************/
+ */
 
 void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 {
@@ -316,11 +316,11 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 		client->bugged = 1;
 }
 
-/*************
+/**
  ProcessClient
 
  Check if client needs processing and do it
- *************/
+ */
 
 int ProcessClient(client_t *client)
 {
@@ -692,11 +692,11 @@ int ProcessClient(client_t *client)
 		}
 	}
 
-/*************
+/**
  BackupPosition
 
  Backup client position, leaving [0] free to predict or to store by PPlanePosition
- *************/
+ */
 
 void BackupPosition(client_t *client, u_int8_t predict)
 {
@@ -873,11 +873,11 @@ void BackupPosition(client_t *client, u_int8_t predict)
 	}
 }
 
-/*************
+/**
  ProcessLogin
 
  Run login sequence
- *************/
+ */
 int32_t ProcessLogin(client_t *client)
 {
 	int32_t n;
@@ -1047,11 +1047,11 @@ int32_t ProcessLogin(client_t *client)
 	return 0;
 }
 
-/*************
+/**
  CalcLoginKey
 
  Calculates login key from a 256 bits array
- *************/
+ */
 
 int CalcLoginKey(u_int8_t *Data, int Len)
 {
@@ -1071,11 +1071,11 @@ int CalcLoginKey(u_int8_t *Data, int Len)
 	return Key;
 }
 
-/*************
+/**
  LoginKey
 
  Send 32 bytes key to client
- *************/
+ */
 
 u_int8_t LoginKey(client_t *client)
 {
@@ -1113,11 +1113,11 @@ void DecryptOctet(u_int8_t Octet[8], unsigned long Key)
 	*(unsigned long *)(Octet + 4) = htonl(l2);
 }
 
-/*************
+/**
  DecryptBlock
 
  Used to uncrypt login array
- *************/
+ */
 
 void DecryptBlock(u_int8_t *Buf, int Len, long Key)
 {
@@ -1127,11 +1127,11 @@ void DecryptBlock(u_int8_t *Buf, int Len, long Key)
 		DecryptOctet(Buf + i, Key);
 }
 
-/*************
+/**
  CheckUserPasswd
 
  Check user and password and se player's nick
- *************/
+ */
 
 int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supposed to have 96 bytes
 {
@@ -1249,11 +1249,11 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 	}
 }
 
-/*************
+/**
  LoginTypeRequest
 
  Checks if client are requesting login list or trying to login arena
- *************/
+ */
 
 int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client)
 {
@@ -1289,11 +1289,11 @@ int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client)
 	//		return -1;
 }
 
-/*************
+/**
  FindDBClient
 
  Find a client in clients array using shortnick
- *************/
+ */
 
 client_t *FindDBClient(u_int32_t dbid)
 {
@@ -1309,11 +1309,11 @@ client_t *FindDBClient(u_int32_t dbid)
 	return NULL;
 }
 
-/*************
+/**
  FindSClient
 
  Find a client in clients array using shortnick
- *************/
+ */
 
 client_t *FindSClient(u_int32_t shortnick)
 {
@@ -1329,11 +1329,11 @@ client_t *FindSClient(u_int32_t shortnick)
 	return NULL;
 }
 
-/*************
+/**
  FindLClient
 
  Find a client in clients array using longnick
- *************/
+ */
 
 client_t *FindLClient(char *longnick)
 {
@@ -1352,11 +1352,11 @@ client_t *FindLClient(char *longnick)
 	return NULL;
 }
 
-/*************
+/**
  PPrintf
 
  Send a message to a player
- *************/
+ */
 
 int PPrintf(client_t *client, u_int16_t radio, char *fmt, ...)
 {
@@ -1432,11 +1432,11 @@ int PPrintf(client_t *client, u_int16_t radio, char *fmt, ...)
 
 }
 
-/*************
+/**
  CPrintf
 
  Send a country message
- *************/
+ */
 
 void CPrintf(u_int8_t country, u_int16_t radio, char *fmt, ...)
 {
@@ -1469,11 +1469,11 @@ void CPrintf(u_int8_t country, u_int16_t radio, char *fmt, ...)
 	Com_Printf(VERBOSE_CHAT, "-HOST-:(%d)%s\n", radio, msg);
 }
 
-/*************
+/**
  BPrintf
 
  Send a broadcast message
- *************/
+ */
 
 void BPrintf(u_int16_t radio, char *fmt, ...)
 {
@@ -1506,11 +1506,11 @@ void BPrintf(u_int16_t radio, char *fmt, ...)
 	Com_Printf(VERBOSE_CHAT, "-HOST-:(%d)%s\n", radio, msg);
 }
 
-/*************
+/**
  CheckBanned
 
  Check if client has an hdserial banned. If does, ban client
- *************/
+ */
 
 u_int8_t CheckBanned(client_t *client) // twin of CheckTK
 {
@@ -1566,11 +1566,11 @@ u_int8_t CheckBanned(client_t *client) // twin of CheckTK
 	return banned;
 }
 
-/*************
+/**
  CheckTK
 
  Check if client was banned
- *************/
+ */
 
 u_int8_t CheckTK(client_t *client) // twin of CheckBanned
 {
@@ -1634,11 +1634,11 @@ u_int8_t CheckTK(client_t *client) // twin of CheckBanned
 	return teamkiller;
 }
 
-/*************
+/**
  GetClientInfo
 
  Get client info from file
- *************/
+ */
 
 u_int8_t GetClientInfo(client_t *client)
 {
@@ -1681,11 +1681,11 @@ u_int8_t GetClientInfo(client_t *client)
 	return 0;
 }
 
-/*************
+/**
  UpdateClientFile
 
  Update client file, creates one if doesn't exist and get user info from file if in login process
- *************/
+ */
 
 void UpdateClientFile(client_t *client)
 {
@@ -1716,11 +1716,11 @@ void UpdateClientFile(client_t *client)
 	}
 }
 
-/*************
+/**
  AddKiller
 
  Add a new killer assist and return its location or just return its location if already exists (added clean disconnected players)
- *************/
+ */
 
 int8_t AddKiller(client_t *victim, client_t *client)
 {
@@ -1769,11 +1769,11 @@ int8_t AddKiller(client_t *victim, client_t *client)
 	return found;
 }
 
-/*************
+/**
  ClearKillers
 
  Clear killers list
- *************/
+ */
 
 void ClearKillers(client_t *client)
 {
@@ -1784,11 +1784,11 @@ void ClearKillers(client_t *client)
 	}
 }
 
-/*************
+/**
  ClearKillers
 
  Clear killers list
- *************/
+ */
 
 void ClearBombers(u_int8_t field)
 {
@@ -1799,11 +1799,11 @@ void ClearBombers(u_int8_t field)
 	}
 }
 
-/*************
+/**
  CalcEloRating
 
  Calc rank based in Elo Rating
- *************/
+ */
 
 void CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags)
 {
@@ -1846,11 +1846,11 @@ void CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags)
 	}
 }
 
-/*************
+/**
  NearPlane
 
  Returns nearest != country plane in visible list
- *************/
+ */
 
 client_t *NearPlane(client_t *client, u_int8_t country, int32_t limit)
 {
@@ -1883,12 +1883,12 @@ client_t *NearPlane(client_t *client, u_int8_t country, int32_t limit)
 		return NULL;
 }
 
-/*************
+/**
  ForceEndFlight
 
  Force client to return to tower
  DEBUG: check this in WB3
- *************/
+ */
 
 void ForceEndFlight(u_int8_t remdron, client_t *client)
 {
@@ -1942,11 +1942,11 @@ void ForceEndFlight(u_int8_t remdron, client_t *client)
 	client->view = client->shanghai = client->attached = NULL;
 }
 
-/*************
+/**
  ReloadWeapon
 
  Reload client weapons
- *************/
+ */
 
 void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
 {
@@ -1964,11 +1964,11 @@ void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  WB3ClientSkin
 
  Set client skin
- *************/
+ */
 
 void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 {
@@ -2046,11 +2046,11 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 	Com_Printf(VERBOSE_DEBUG, "%s skin set to \"%s\"\n", client->longnick, client->skin);
 }
 
-/*************
+/**
  CreateSkin
 
  Generate a padronized skin
- *************/
+ */
 
 char *CreateSkin(client_t *client, u_int8_t number)
 {
@@ -2071,11 +2071,11 @@ char *CreateSkin(client_t *client, u_int8_t number)
 	return buffer;
 }
 
-/*************
+/**
  WB3OverrideSkin
 
  Send skin to client
- *************/
+ */
 
 void WB3OverrideSkin(u_int8_t slot, client_t *client)
 {
@@ -2105,11 +2105,11 @@ void WB3OverrideSkin(u_int8_t slot, client_t *client)
 	}
 }
 
-/*************
+/**
  ClientHDSerial
 
  Get player's hdserial, add it to hdserials table and players_hdserials table
- *************/
+ */
 
 void ClientHDSerial(u_int8_t *buffer, client_t *client)
 {
@@ -2149,11 +2149,11 @@ void ClientHDSerial(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  ClientIpaddr
 
  Get player's ipaddr, add it to ipaddr table and players_ipaddress table
- *************/
+ */
 
 void ClientIpaddr(client_t *client)
 {
@@ -2197,11 +2197,11 @@ void ClientIpaddr(client_t *client)
 	Com_Printf(VERBOSE_DEBUG, "Inserted in ip-client table (%s - %s) (%d - %d)\n", client->ip, client->longnick, client->id, ipaddr_id);
 }
 
-/*************
+/**
  LogRAWPosition
 
  Log client RAW position to later analysis
- *************/
+ */
 
 void LogRAWPosition(u_int8_t server, client_t *client)
 {
@@ -2226,11 +2226,11 @@ void LogRAWPosition(u_int8_t server, client_t *client)
 	}
 }
 
-/*************
+/**
  LogPosition
 
  Log client position to later analysis
- *************/
+ */
 
 void LogPosition(client_t *client)
 {
@@ -2251,11 +2251,11 @@ void LogPosition(client_t *client)
 	}
 }
 
-/*************
+/**
  HardHit
  
  Make a hardhit query (add hits in DB)
- *************/
+ */
 
 void HardHit(u_int8_t munition, u_int8_t penalty, client_t *client)
 {

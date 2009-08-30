@@ -22,11 +22,11 @@
 
 #include "shared.h"
 
-/*************
+/**
  InitTCPNet
 
  Initializes all net stuffs and return a server-side socket
- *************/
+ */
 
 int InitTCPNet(int portno)
 {
@@ -89,11 +89,11 @@ int InitTCPNet(int portno)
 	return isockfd;
 }
 
-/*************
+/**
  InitUDPNet
 
  bind UDP listen socket and return socket descriptor
- *************/
+ */
 
 int InitUDPNet(int portno)
 {
@@ -142,11 +142,11 @@ int InitUDPNet(int portno)
 	return isockfd;
 }
 
-/*************
+/**
  SendPacketTHL
 
  Gets a pre-made packet, encrypt, checksum, and send to THL
- *************/
+ */
 
 int32_t SendPacketTHL(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
@@ -216,11 +216,11 @@ int32_t SendPacketTHL(u_int8_t *buffer, u_int16_t len, client_t *client)
 	}
 }
 
-/*************
+/**
  SendPacket
 
  Gets a pre-made packet, encrypt, checksum, and send to client
- *************/
+ */
 
 int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
@@ -315,11 +315,11 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	}
 }
 
-/*************
+/**
  GetPacket
 
  Receive last wbpacket at socket buffer and process it
- *************/
+ */
 
 int GetPacket(client_t *client)
 {
@@ -396,11 +396,11 @@ int GetPacket(client_t *client)
 	return 0;
 }
 
-/*************
+/**
  ConnStatistics
 
  Record client connection flow statistics
- *************/
+ */
 
 void ConnStatistics(client_t *client, u_int32_t len, u_int8_t type)
 {
@@ -498,11 +498,11 @@ void ConnStatistics(client_t *client, u_int32_t len, u_int8_t type)
 	}
 }
 
-/*************
+/**
  FlushSocket
 
  Flush the client socket
- *************/
+ */
 
 void FlushSocket(int sockfd)
 {
@@ -534,11 +534,11 @@ void FlushSocket(int sockfd)
 	}
 }
 
-/*************
+/**
  ProtocolError
 
  Send back to client the protocol error message code
- *************/
+ */
 
 void ProtocolError(client_t *client)
 {

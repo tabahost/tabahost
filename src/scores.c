@@ -22,11 +22,11 @@
 
 #include "shared.h"
 
-/*************
+/**
  ScoresEvent
 
  Calculate the score based on events
- *************/
+ */
 
 void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 {
@@ -418,11 +418,11 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	ClearKillers(client);
 }
 
-/*************
+/**
  ScoreFieldCapture
 
  Give score to all capture bombers
- *************/
+ */
 
 void ScoreFieldCapture(u_int8_t field)
 {
@@ -602,11 +602,11 @@ void ScoreFieldCapture(u_int8_t field)
 	
 }
 
-/*************
+/**
  ScorePieceDamage
 
  Give piece points to damagers or just return the totaldamage
- *************/
+ */
 
 float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 {
@@ -724,11 +724,11 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 	return totaldamage;
 }
 
-/*************
+/**
  ScorePlaneCost
 
  Returns the cost of a new plane
- *************/
+ */
 
 float ScorePlaneCost(client_t *client)
 {
@@ -746,22 +746,22 @@ float ScorePlaneCost(client_t *client)
 	return arena->costs.planemodel[client->plane];
 }
 
-/*************
+/**
  ScoreFixPlaneCost
 
  Returns the cost to fix a damaged plane
- *************/
+ */
 
 float ScoreFixPlaneCost(float plane_life, float plane_cost)
 {
 	return plane_cost * (0.01 + (1.0 - plane_life) * 0.99);
 }
 
-/*************
+/**
  ScorePlaneTransportCost
 
  Returns the cost to transport a plane to nearest airfield
- *************/
+ */
 
 float ScorePlaneTransportCost(client_t *client)
 {
@@ -787,11 +787,11 @@ float ScorePlaneTransportCost(client_t *client)
 	}
 }
 
-/*************
+/**
  ScorePilotTransportCost
 
  Returns the cost to transport a pilot to nearest airfield
- *************/
+ */
 
 float ScorePilotTransportCost(client_t *client)
 {
@@ -809,11 +809,11 @@ float ScorePilotTransportCost(client_t *client)
 	}
 }
 
-/*************
+/**
  ScoreFlightTimeCost
 
  Returns the cost of flight based in flight time
- *************/
+ */
 
 float ScoreFlightTimeCost(client_t *client)
 {
@@ -831,11 +831,11 @@ float ScoreFlightTimeCost(client_t *client)
 	return flighttime * arena->costs.flighthour;
 }
 
-/*************
+/**
  ScoreDamageCost
 
  Check the cost of damaged plane. If damage > 50%, cost == total plane cost, else cost == plane fix + plane transport
- *************/
+ */
 
 float ScoreDamageCost(client_t *client)
 {
@@ -860,11 +860,11 @@ float ScoreDamageCost(client_t *client)
 	return (plane_cost < plane_recover) ? plane_cost : plane_recover;
 }
 
-/*************
+/**
  ScorePlaneLife
 
  Returns the percentage of life from plane (including flight time usage)
- *************/
+ */
 
 float ScorePlaneLife(client_t *client)
 {
@@ -904,11 +904,11 @@ float ScorePlaneLife(client_t *client)
 		return pointsleft;
 }
 
-/*************
+/**
  ScoresEndFlight
 
  Check the type of end flight, guns used and hit, and credit scores
- *************/
+ */
 
 void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client)
 {
@@ -1088,13 +1088,13 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 //	}
 }
 
-/*************
+/**
  ScoresCheckKiller
 
  Check who killed client
 
  TODO: huh? CHANGE IsFighter and IsBomber for a plane number function
- *************/
+ */
 
 int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 {
@@ -1598,11 +1598,11 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 	return k;
 }
 
-/*************
+/**
  ScoresCheckMedals
 
  Check if client receive a new medal
- *************/
+ */
 
 u_int8_t ScoresCheckMedals(client_t *client)
 {
@@ -1976,11 +1976,11 @@ u_int8_t ScoresCheckMedals(client_t *client)
 	return newmedal;
 }
 
-/*************
+/**
  new = ScoresAddMedal
 
  Add a new medal to client if needed
- *************/
+ */
 
 u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client)
 {
@@ -2011,11 +2011,11 @@ u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t
 	return 1;
 }
 
-/*************
+/**
  ScoresCheckCaptured
 
  Check if clients has been captured on land/ditch/bail
- *************/
+ */
 
 u_int8_t ScoresCheckCaptured(client_t *client)
 {
@@ -2066,11 +2066,11 @@ u_int8_t ScoresCheckCaptured(client_t *client)
 	return 0;
 }
 
-/*************
+/**
  ScoresCreate
 
  Create Score rows
- *************/
+ */
 
 void ScoresCreate(client_t *client)
 {
@@ -2138,13 +2138,13 @@ void ScoresCreate(client_t *client)
 	}
 }
 
-/*************
+/**
  ResetScores
 
  Backup log_ and score_ tables;
  Truncate log_ and score_ tables
  Clear all .score files
- *************/
+ */
 void ResetScores(void)
 {
 	u_int8_t i;
@@ -2183,11 +2183,11 @@ void ResetScores(void)
 #endif
 }
 
-/*************
+/**
  BackupScores
 
  Runs a PHP script that makes a backup of scores to allow compare with next call
- *************/
+ */
 
 void BackupScores(u_int8_t collect_type)
 {
@@ -2260,22 +2260,22 @@ void BackupScores(u_int8_t collect_type)
 	system("php -f ./cron/cron.php &");
 }
 
-/*************
+/**
  ScoreTehcnologyCost
 
  Return the cost of plane technology lost based in plane damage
- *************/
+ */
 
 float ScoreTechnologyCost(client_t *client)
 {
 	return ScorePlaneLife(client) * ScorePlaneCost(client) * arena->costs.technologylost;
 }
 
-/*************
+/**
  GetBuildingCost
 
  Return the cost of a building type
- *************/
+ */
 
 float GetBuildingCost(u_int8_t type)
 {
@@ -2287,11 +2287,11 @@ float GetBuildingCost(u_int8_t type)
 		return 0.0;
 }
 
-/*************
+/**
  GetAmmoCost
 
  Return the cost of a munition type
- *************/
+ */
 
 float GetAmmoCost(u_int8_t type)
 {
@@ -2306,11 +2306,11 @@ float GetAmmoCost(u_int8_t type)
 		return 0.0;
 }
 
-/*************
+/**
  GetFieldCost
 
  Return the cost of a field
- *************/
+ */
 
 float GetFieldCost(u_int8_t field)
 {
@@ -2338,11 +2338,11 @@ float GetFieldCost(u_int8_t field)
 	return (1.5 * cost);
 }
 
-/*************
+/**
  ScoreLoadCosts
 
  Load current costs
- *************/
+ */
 
 void ScoreLoadCosts(void)
 {

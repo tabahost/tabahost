@@ -22,11 +22,11 @@
 
 #include "shared.h"
 
-/*************
+/**
  AddDrone
 
  Add a new drone in clients array
- *************/
+ */
 
 client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_int8_t country, u_int16_t plane, client_t *client)
 {
@@ -231,11 +231,11 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 	}
 }
 
-/*************
+/**
  RemoveDrone
 
  Revove drone from world
- *************/
+ */
 
 void RemoveDrone(client_t *drone)
 {
@@ -281,11 +281,11 @@ void RemoveDrone(client_t *drone)
 	//	drone->slot = slot;
 }
 
-/*************
+/**
  DroneVisibleList
 
  Makes drone visible lists like in SendPlayersNear()
- *************/
+ */
 
 void DroneVisibleList(client_t *drone)
 {
@@ -329,11 +329,11 @@ void DroneVisibleList(client_t *drone)
 	}
 }
 
-/*************
+/**
  ProcessDrone
 
  Make drones live!
- *************/
+ */
 
 int ProcessDrone(client_t *drone)
 {
@@ -1028,11 +1028,11 @@ int ProcessDrone(client_t *drone)
 	return 0;
 }
 
-/*************
+/**
  DroneGetTarget
 
  Get randomized in-range target
- *************/
+ */
 
 void DroneGetTarget(client_t *drone)
 {
@@ -1080,11 +1080,11 @@ void DroneGetTarget(client_t *drone)
 	}
 }
 
-/*************
+/**
  FireAck
 
  Fires ack fire from pos1 to pos2
- *************/
+ */
 
 void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 {
@@ -1172,11 +1172,11 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 	}
 }
 
-/*************
+/**
  CVFire
 
  Fires artillary fire to nearest enemy field
- *************/
+ */
 
 void CVFire(int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz)
 {
@@ -1190,11 +1190,11 @@ void CVFire(int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t 
 	ThrowBomb(TRUE, origx, origy, origz, destx, desty, destz, NULL);
 }
 
-/*************
+/**
  ThrowBomb
 
  Throw a bomb from orig to dest position with some precision
- *************/
+ */
 
 void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz, client_t *client)
 {
@@ -1411,11 +1411,11 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 	}
 }
 
-/*************
+/**
  SendDronePos
 
  Send drone pos to attached player
- *************/
+ */
 
 void SendDronePos(client_t *drone, client_t *client)
 {
@@ -1477,11 +1477,11 @@ void SendDronePos(client_t *drone, client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  SendXBombs
 
  Send a few bombs making a X
- *************/
+ */
 
 void SendXBombs(client_t *drone)
 {
@@ -1513,11 +1513,11 @@ void SendXBombs(client_t *drone)
 	}
 }
 
-/*************
+/**
  HitStructsNear
 
  Check if there are structs near bomb hit and kill them
- *************/
+ */
 
 u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_int8_t nuke, client_t *client)
 {
@@ -1778,11 +1778,11 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	return j;
 }
 
-/*************
+/**
  PFAUDamage
 
  Add damage to hit field if it does
- *************/
+ */
 
 void PFAUDamage(client_t *fau)
 {
@@ -1845,11 +1845,11 @@ void PFAUDamage(client_t *fau)
 		PPrintf(fau->related[0], RADIO_YELLOW, "Hit %d structures", k);
 }
 
-/*************
+/**
  DroneWings
 
  Add wingmans to a client
- *************/
+ */
 
 void DroneWings(client_t *client)
 {
@@ -1857,11 +1857,11 @@ void DroneWings(client_t *client)
 	AddDrone(DRONE_WINGS2, client->posxy[0][0], client->posxy[1][0], client->posalt[0], client->country, client->plane, client);
 }
 
-/*************
+/**
  NewDroneName
 
  Get a new name for drone in drone name file
- *************/
+ */
 
 u_int32_t NewDroneName(client_t *client)
 {

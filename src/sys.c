@@ -32,11 +32,11 @@
 
 GeoIP *gi; //extern
 
-/*************
+/**
  Sys_Milliseconds
 
  Return a relative milliseconds since first call
- *************/
+ */
 #ifndef _WIN32
 static u_int32_t secbase;
 #endif
@@ -95,11 +95,11 @@ static char console_text[256];
 static int console_textlen;
 #endif
 
-/*************
+/**
  Sys_Init
 
  Initializes System functions
- *************/
+ */
 
 void Sys_Init(void)
 {
@@ -148,11 +148,11 @@ void Sys_Init(void)
 	}
 }
 
-/*************
+/**
  Sys_RemoveFiles
 
  Delete files. Syntaxe: "path/file"
- *************/
+ */
 
 void Sys_RemoveFiles(char *pathfile)
 {
@@ -196,11 +196,11 @@ void Sys_RemoveFiles(char *pathfile)
 		Com_Printf(VERBOSE_WARNING, "RemoveFiles(): Couldn't open the directory\n");
 }
 
-/*************
+/**
  Sys_SQL_Init
 
  Init SQL system
- *************/
+ */
 
 void Sys_SQL_Init(void)
 {
@@ -233,11 +233,11 @@ void Sys_SQL_Init(void)
 	}
 }
 
-/*************
+/**
  Sys_SQL_Close
 
  Stops SQL system
- *************/
+ */
 
 void Sys_SQL_Close(void)
 {
@@ -248,11 +248,11 @@ void Sys_SQL_Close(void)
 	mysql_library_end();
 }
 
-/*************
+/**
  Sys_GeoIP_Init
 
  Init GeoIP Module
- *************/
+ */
 
 void Sys_GeoIP_Init(void)
 {
@@ -277,11 +277,11 @@ void Sys_GeoIP_Close(void)
 	}
 }
 
-/*************
+/**
  Sys_SigHandler
 
  Handles every got signal
- *************/
+ */
 
 void Sys_SigHandler(int s)
 {
@@ -363,11 +363,11 @@ void Sys_SigHandler(int s)
 
 }
 
-/*************
+/**
  Sys_ConsoleInput
 
  Get any typed data in stdin and return the string received newline
- *************/
+ */
 
 #ifdef _WIN32
 char *Sys_ConsoleInput (void)
@@ -471,11 +471,11 @@ char *Sys_ConsoleInput(void)
 }
 #endif
 
-/*************
+/**
  LockFile
 
  Create a Lock file
- *************/
+ */
 
 int8_t Sys_LockFile(char *file)
 {
@@ -493,22 +493,22 @@ int8_t Sys_LockFile(char *file)
 	}
 }
 
-/*************
+/**
  UnlockFile
 
  Remove a Lock file
- *************/
+ */
 
 int8_t Sys_UnlockFile(char *file)
 {
 	return unlink(file);
 }
 
-/*************
+/**
  WaitForLock
 
  Waits till LOCK file is gone
- *************/
+ */
 
 void Sys_WaitForLock(char *file)
 {
@@ -525,11 +525,11 @@ void Sys_WaitForLock(char *file)
 	}
 }
 
-/*************
+/**
  Sys_Printfile
 
  Print a file in console
- *************/
+ */
 
 void Sys_Printfile(char *file)
 {

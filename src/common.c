@@ -24,11 +24,11 @@
 
 FILE *logfile[MAX_LOGFILE]; // extern
 
-/*************
+/**
  Z_Malloc
 
  Allocates and returns a Zeroed memory block
- *************/
+ */
 
 void *Z_Malloc(u_int32_t size)
 {
@@ -45,11 +45,11 @@ void *Z_Malloc(u_int32_t size)
 	return z;
 }
 
-/*************
+/**
  ascii2wbnick
 
  Converts 6bytes ascii string to 4bytes wbnick
- *************/
+ */
 
 u_int32_t ascii2wbnick(char *playernick, u_int8_t attr)
 {
@@ -104,12 +104,12 @@ u_int32_t ascii2wbnick(char *playernick, u_int8_t attr)
 	return wbnick.shortnick.value;
 }
 
-/*************
+/**
  wbnick2ascii
 
  Converts 4bytes wbnick to 6bytes ascii string
  Returning value: is a static array. You must use CopyString() to set a value to something
- *************/
+ */
 
 char *wbnick2ascii(u_int32_t shortnick)
 {
@@ -162,11 +162,11 @@ char *wbnick2ascii(u_int32_t shortnick)
 	return playernick;
 }
 
-/*************
+/**
  wbcrypt
 
  Encrypt/decrypt warbirds data. (XOR algorithm)
- *************/
+ */
 
 u_int8_t *wbcrypt(u_int8_t *buffer, u_int32_t key, u_int16_t size, u_int8_t oldcrypt)
 {
@@ -200,11 +200,11 @@ u_int8_t *wbcrypt(u_int8_t *buffer, u_int32_t key, u_int16_t size, u_int8_t oldc
 	return buffer;
 }
 
-/*************
+/**
  memncat
 
  Concatenate memory data
- *************/
+ */
 
 void memncat(u_int8_t **dest, u_int8_t *orig, u_int32_t destsize, u_int32_t origsize)
 {
@@ -227,11 +227,11 @@ void memncat(u_int8_t **dest, u_int8_t *orig, u_int32_t destsize, u_int32_t orig
 	*dest = buffer;
 }
 
-/*************
+/**
  asc2time
 
  Return a formated date (like: Sun Sep 16 01:03:52 1973) but without \n like std asctime()
- *************/
+ */
 
 char *asc2time(const struct tm *timeptr)
 {
@@ -246,11 +246,11 @@ char *asc2time(const struct tm *timeptr)
 	return result;
 }
 
-/*************
+/**
  sqltime
 
  Return a sql-formated date (like: 1973-09-16 01:03:52)
- *************/
+ */
 
 char *sqltime(const struct tm *timeptr)
 {
@@ -261,11 +261,11 @@ char *sqltime(const struct tm *timeptr)
 	return result;
 }
 
-/*************
+/**
  Com_Close
 
  Padronized closing socket function
- *************/
+ */
 
 void Com_Close(int *fd)
 {
@@ -297,11 +297,11 @@ void Com_Close(int *fd)
 		*fd = 0;
 }
 
-/*************
+/**
  Com_Recv
 
  Just a recv() with padronized return value
- *************/
+ */
 
 int Com_Recv(int s, u_int8_t *buf, int len)
 {
@@ -353,11 +353,11 @@ int Com_Recv(int s, u_int8_t *buf, int len)
 	}
 }
 
-/*************
+/**
  Com_Pow
 
  Potency
- *************/
+ */
 
 double Com_Pow(double x, u_int32_t y)
 {
@@ -381,11 +381,11 @@ double Com_Pow(double x, u_int32_t y)
 #endif
 }
 
-/*************
+/**
  Com_RecordLogBuffer
 
  Record a Send Log buffer
- *************/
+ */
 
 void Com_RecordLogBuffer(client_t * client, u_int8_t *buffer, int len)
 {
@@ -417,11 +417,11 @@ void Com_RecordLogBuffer(client_t * client, u_int8_t *buffer, int len)
 	}
 }
 
-/*************
+/**
  Com_PrintLogBuffer
 
  Print Send Log buffer
- *************/
+ */
 
 void Com_PrintLogBuffer(client_t * client)
 {
@@ -470,11 +470,11 @@ void Com_PrintLogBuffer(client_t * client)
 	}
 }
 
-/*************
+/**
  Com_Send
 
  Just a send() with padronized return value
- *************/
+ */
 
 int Com_Send(client_t *client, u_int8_t *buf, int len)
 {
@@ -616,11 +616,11 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 	}
 }
 
-/*************
+/**
  ConnError
 
  Prints the recv/send error
- *************/
+ */
 
 void ConnError(int n)
 {
@@ -729,12 +729,12 @@ void ConnError(int n)
 	}
 }
 
-/*************
+/**
  Com_Read
 
  Read from given input
  // TODO: FIXME: function not used yet in TabaHost, should this be used??
- *************/
+ */
 
 int Com_Read(FILE *fp, u_int8_t *buffer, u_int32_t num)
 {
@@ -747,11 +747,11 @@ int Com_Read(FILE *fp, u_int8_t *buffer, u_int32_t num)
 
 }
 
-/*************
+/**
  Com_LogEvent
 
  Logs an Event
- *************/
+ */
 
 void Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id)
 {
@@ -767,11 +767,11 @@ void Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id)
 	my_id = (u_int32_t)mysql_insert_id(&my_sock);
 }
 
-/*************
+/**
  Com_LogDescription
 
  Logs description of an event
- *************/
+ */
 
 void Com_LogDescription(u_int32_t type, float value, char *string)
 {
@@ -790,11 +790,11 @@ void Com_LogDescription(u_int32_t type, float value, char *string)
 	}
 }
 
-/*************
+/**
  Com_Printf
 
  Prints data in console and in logfile if enabled
- *************/
+ */
 
 void Com_Printf(int8_t verb, char *fmt, ...)
 {
@@ -916,11 +916,11 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 	}
 }
 
-/*************
+/**
  Com_TimeSeconds
 
  Prints time in Minutes and Seconds format: 12'45"
- *************/
+ */
 
 char *Com_TimeSeconds(u_int32_t seconds)
 {
@@ -931,11 +931,11 @@ char *Com_TimeSeconds(u_int32_t seconds)
 	return buffer;
 }
 
-/*************
+/**
  Com_Padloc
 
  Prints coordinates in padloc x.x.x.x format
- *************/
+ */
 
 char *Com_Padloc(int32_t x, int32_t y)
 {
@@ -971,11 +971,11 @@ int d_mysql_query(MYSQL *mysql, const char *query)
 	return i;
 }
 
-/*************
+/**
  Com_MySQL_Query
 
  This function avoid client SQL flooding
- *************/
+ */
 
 int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
 {
@@ -1015,11 +1015,11 @@ int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
 	return 0;
 }
 
-/*************
+/**
  Com_MySQL_Flush
 
  This function flushes multiple statements results
- *************/
+ */
 
 void Com_MySQL_Flush(MYSQL *mysql, char *file, u_int32_t line)
 {
@@ -1053,11 +1053,11 @@ void Com_MySQL_Flush(MYSQL *mysql, char *file, u_int32_t line)
 	} while (status == 0);
 }
  
-/*************
+/**
  Com_Printfhex
 
  Prints a buffer in hexadecimal format
- *************/
+ */
 
 void Com_Printfhex(unsigned char *buffer, int len)
 {
@@ -1121,11 +1121,11 @@ void Com_Printfhex(unsigned char *buffer, int len)
 	}
 }
 
-/*************
+/**
  Com_Stricmp
 
  Compares strings ignoring case
- *************/
+ */
 
 int Com_Stricmp(char *s1, char *s2)
 {
@@ -1151,11 +1151,11 @@ int Com_Stricmp(char *s1, char *s2)
 	}
 }
 
-/*************
+/**
  Com_CheckAphaNum
 
  Parse string for valid chars "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
- *************/
+ */
 
 u_int8_t Com_CheckAphaNum(char *string)
 {
@@ -1172,11 +1172,11 @@ u_int8_t Com_CheckAphaNum(char *string)
 	return 0;
 }
 
-/*************
+/**
  Com_CheckWBUsername
 
  Parse string for valid chars "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-"
- *************/
+ */
 
 u_int8_t Com_CheckWBUsername(char *string)
 {
@@ -1195,11 +1195,11 @@ u_int8_t Com_CheckWBUsername(char *string)
 	return 0;
 }
 
-/*************
+/**
  Com_ParseString
 
  Remove invalid chars: ', ", \, \n, \r, \t
- *************/
+ */
 
 void Com_ParseString(char *string)
 {
@@ -1220,11 +1220,11 @@ void Com_ParseString(char *string)
 	}
 }
 
-/*************
+/**
  GetSlot
 
  Get client's slot in visible list
- *************/
+ */
 
 u_int8_t GetSlot(client_t *plane, client_t *client)
 {
@@ -1245,11 +1245,11 @@ u_int8_t GetSlot(client_t *plane, client_t *client)
 	return MAX_SCREEN;
 }
 
-/*************
+/**
  CheckSum
 
  Returns the wb packet checksum
- *************/
+ */
 
 u_int8_t CheckSum(u_int8_t *buffer, u_int16_t len)
 {
@@ -1264,11 +1264,11 @@ u_int8_t CheckSum(u_int8_t *buffer, u_int16_t len)
 	return sum;
 }
 
-/*************
+/**
  RocketAngle
 
  Calculates the angle of rocket lauching to reach dist
- *************/
+ */
 
 double RocketAngle(u_int16_t dist)
 {
@@ -1288,11 +1288,11 @@ double RocketAngle(u_int16_t dist)
 	return c;
 }
 
-/*************
+/**
  RocketTime
 
  Calculates the time of rocket lauching to reach dist
- *************/
+ */
 
 double RocketTime(double angle)
 {
@@ -1307,11 +1307,11 @@ double RocketTime(double angle)
 	return y;
 }
 
-/*************
+/**
  WBtoHdg
 
  Converts WB yaw angle to compass Heading
- *************/
+ */
 
 double WBtoHdg(int16_t angle)
 {
@@ -1328,11 +1328,11 @@ double WBtoHdg(int16_t angle)
 		return heading;
 }
 
-/*************
+/**
  AngleTo
 
  Calculates the angle from origin to destiny
- *************/
+ */
 
 double AngleTo(int32_t origx, int32_t origy, int32_t destx, int32_t desty)
 {
@@ -1360,11 +1360,11 @@ double AngleTo(int32_t origx, int32_t origy, int32_t destx, int32_t desty)
 	return ang;
 }
 
-/*************
+/**
  CopyString
 
  Reserve memory space and copy
- *************/
+ */
 
 char *CopyString(char *in)
 {
@@ -1375,11 +1375,11 @@ char *CopyString(char *in)
 	return out;
 }
 
-/*************
+/**
  crc32
 
  Generates a 32bytes CRC
- *************/
+ */
 
 static unsigned long int
 		crc_32_tab[] =
@@ -1434,33 +1434,33 @@ u_int32_t crc32(char *buffer, u_int8_t size)
 	return oldcrc;
 }
 
-/*************
+/**
  Com_Rad
 
  Converts Degrees to Radians
- *************/
+ */
 
 double Com_Rad(double angle)
 {
 	return (M_PI * angle / 180);
 }
 
-/*************
+/**
  Com_Deg
 
  Converts Radians to Degrees
- *************/
+ */
 
 double Com_Deg(double angle)
 {
 	return (angle * 180 / M_PI);
 }
 
-/*************
+/**
  Com_Atoi
 
  atoi handling NULL arrays
- *************/
+ */
 
 int Com_Atoi(char *string)
 {
@@ -1473,11 +1473,11 @@ int Com_Atoi(char *string)
 	}
 }
 
-/*************
+/**
  Com_Atou
 
  atou handling NULL arrays
- *************/
+ */
 
 u_int32_t Com_Atou(char *string)
 {
@@ -1509,11 +1509,11 @@ u_int32_t Com_Atou(char *string)
 	}
 }
 
-/*************
+/**
  Com_Atof
 
  atof handling NULL arrays
- *************/
+ */
 
 double Com_Atof(char *string)
 {
@@ -1526,11 +1526,11 @@ double Com_Atof(char *string)
 	}
 }
 
-/*************
+/**
  Com_MyRow
 
  Return the column value from given column name
- *************/
+ */
 
 char *Com_MyRow(char *string)
 {
@@ -1556,11 +1556,11 @@ char *Com_MyRow(char *string)
 	return NULL;
 }
 
-/*************
+/**
  Com_SquadronName
 
  Prints the Squadron name
- *************/
+ */
 
 char *Com_SquadronName(u_int32_t owner)
 {
@@ -1603,11 +1603,11 @@ char *Com_SquadronName(u_int32_t owner)
 	return buffer;
 }
 
-/*************
+/**
  Com_Strncmp
 
  strncmp handling null arrays
- *************/
+ */
 
 int Com_Strncmp(char *s1, char *s2, int n)
 {
@@ -1629,11 +1629,11 @@ int Com_Strncmp(char *s1, char *s2, int n)
 	}
 }
 
-/*************
+/**
  Com_Strcmp
 
  Compares strings case sensitive
- *************/
+ */
 
 int Com_Strcmp(char *s1, char *s2)
 {
@@ -1655,11 +1655,11 @@ int Com_Strcmp(char *s1, char *s2)
 	}
 }
 
-/*************
+/**
  Com_PacketTabIndex
 
  Returns index from packet tab
- *************/
+ */
 
 int16_t Com_PacketTabIndex(u_int16_t packetid, u_int8_t wbv)
 {
@@ -1681,11 +1681,11 @@ int16_t Com_PacketTabIndex(u_int16_t packetid, u_int8_t wbv)
 	return -1;
 }
 
-/*************
+/**
  Com_WBntoh
 
  Converts external packet_id to internal handling
- *************/
+ */
 
 void Com_WBntoh(u_int16_t *packetid)
 {
@@ -1713,11 +1713,11 @@ void Com_WBntoh(u_int16_t *packetid)
 	}
 }
 
-/*************
+/**
  Com_WBhton
 
  Converts internal packet_id to external handling
- *************/
+ */
 
 u_int16_t Com_WBhton(u_int16_t packetid)
 {
@@ -1748,11 +1748,11 @@ u_int16_t Com_WBhton(u_int16_t packetid)
 	return packetid;
 }
 
-/*************
+/**
  Com_WB3ntoh DEBUG: OBSOLETE
 
  Converts packets ID from WB3 to WB2
- *************/
+ */
 
 u_int8_t Com_WB3ntoh(u_int8_t n)
 {
@@ -1790,11 +1790,11 @@ u_int8_t Com_WB3ntoh(u_int8_t n)
 	}
 }
 
-/*************
+/**
  Com_WB3hton DEBUG: OBSOLETE
 
  Converts packets ID from WB2 to WB3
- *************/
+ */
 
 u_int16_t Com_WB3hton(u_int16_t m)
 {
@@ -1850,11 +1850,11 @@ u_int16_t Com_WB3hton(u_int16_t m)
 	return ((n << 8) + o);
 }
 
-/*************
+/**
  DistBetween
 
  Returns the distance between two point in space
- *************/
+ */
 
 int32_t DistBetween(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2, int32_t envelope)
 {
@@ -1889,44 +1889,44 @@ double Com_Log(double number, double base)
 	return log(number) / log(base);
 }
 
-/*************
+/**
  FloorDiv
 
  gets a floor from num/demon
- *************/
+ */
 
 double FloorDiv(double numerator, double denominator)
 {
 	return floor(numerator / denominator);
 }
 
-/*************
+/**
  ModRange
 
  returns the value between 0 and denominator
- *************/
+ */
 
 double ModRange(double numerator, double denominator)
 {
 	return numerator - floor(numerator / denominator) * denominator;
 }
 
-/*************
+/**
  RoundtoBase
 
  rounds value to nearest base multiple
- *************/
+ */
 
 double RoundtoBase(double value, double base)
 {
 	return floor((value + base / 2.0L) / base) * base;
 }
 
-/*************
+/**
  WBLongitude
 
  returns the West-East (X) square position
- *************/
+ */
 
 double WBLongitude(double dAbsLongitude)
 {
@@ -1939,11 +1939,11 @@ double WBLongitude(double dAbsLongitude)
 	return floor((dAbsLongitude - cdSquare00Longitude) / cdSquareWidth);
 }
 
-/*************
+/**
  WBLatitude
 
  returns the North-South (Y) square position
- *************/
+ */
 
 double WBLatitude(double dAbsLatitude)
 {
@@ -1956,33 +1956,33 @@ double WBLatitude(double dAbsLatitude)
 	return floor((dAbsLatitude - cdSquare00Latitude) / cdSquareHeight);
 }
 
-/*************
+/**
  WBAngels
 
  converts feets to Angels
- *************/
+ */
 
 double WBAngels(double dAbsAltitude)
 {
 	return floor((dAbsAltitude + 500.0) / 1000.0L);
 }
 
-/*************
+/**
  WBAltMeters
 
  converts feets to meters, rounding to nearest 100 multiple
- *************/
+ */
 
 double WBAltMeters(double dAbsAltitude)
 {
 	return RoundtoBase(dAbsAltitude * 0.3048, 100.0L);
 }
 
-/*************
+/**
  WBVSI
 
  returns a string with climb situation
- *************/
+ */
 
 char *WBVSI(double dClimbRate, int fIsBomber)
 {
@@ -2009,11 +2009,11 @@ char *WBVSI(double dClimbRate, int fIsBomber)
 		return vszResult[4];
 }
 
-/*************
+/**
  WBRhumb
 
  returns a string with compass notation heading
- *************/
+ */
 
 char *WBRhumb(double dHeading /* in degrees*/)
 {
@@ -2025,22 +2025,22 @@ char *WBRhumb(double dHeading /* in degrees*/)
 	return vszRhumbs[nIdx];
 }
 
-/*************
+/**
  WBHeading
 
  returns heading rounded to 5 unities
- *************/
+ */
 
 double WBHeading(double dHeading)
 {
 	return RoundtoBase(dHeading, 5.0L);
 }
 
-/*******************
+/**
  PredictorCorrector32
 
  Made a predictor-corrector analysis and return next prediction for the value
- ********************/
+ */
 
 int32_t PredictorCorrector32(int32_t *values, u_int8_t degree)
 {
@@ -2067,11 +2067,11 @@ int32_t PredictorCorrector32(int32_t *values, u_int8_t degree)
 	}
 }
 
-/*******************
+/**
  PredictorCorrector16
 
  Made a predictor-corrector analysis and return next prediction for the value
- ********************/
+ */
 
 int16_t PredictorCorrector16(int16_t *values, u_int8_t degree)
 {
@@ -2098,11 +2098,11 @@ int16_t PredictorCorrector16(int16_t *values, u_int8_t degree)
 	}
 }
 
-/*************
+/**
  PadLoc
 
  returns a string with padloc notation
- *************/
+ */
 
 char *PadLoc(char *szBuffer, double dLongitude, double dLatitude)
 {

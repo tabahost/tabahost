@@ -22,11 +22,11 @@
 
 #include "shared.h"
 
-/*************
+/**
  Cmd_LoadBatch
 
  Executes a script file as a personal Batch File (same as Cmd_LoadConfig)
- *************/
+ */
 
 void Cmd_LoadBatch(client_t *client)
 {
@@ -54,11 +54,11 @@ void Cmd_LoadBatch(client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_LoadConfig
 
  Executes a script file
- *************/
+ */
 
 void Cmd_LoadConfig(char *filename, client_t *client)
 {
@@ -92,11 +92,11 @@ void Cmd_LoadConfig(char *filename, client_t *client)
 
 }
 
-/*************
+/**
  Cmd_Ros
 
  Print who is online
- *************/
+ */
 
 void Cmd_Ros(client_t *client)
 {
@@ -142,11 +142,11 @@ void Cmd_Ros(client_t *client)
 	PPrintf(client, RADIO_LIGHTYELLOW, "Reds: %d, Greens: %d, Golds: %d, Purps: %d", red, green, gold, purp);
 }
 
-/*************
+/**
  Cmd_Ammo
 
  Print ammo configuration
- *************/
+ */
 
 void Cmd_Ammo(client_t *client, u_int8_t arg, char *arg2)
 {
@@ -283,11 +283,11 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 	}
 }
 
-/*************
+/**
  Cmd_VarList
 
  Print all variables
- *************/
+ */
 
 void Cmd_VarList(client_t *client, char *string)
 {
@@ -315,11 +315,11 @@ void Cmd_VarList(client_t *client, char *string)
 	}
 }
 
-/*************
+/**
  Cmd_Move
 
  Move to a field or change country
- *************/
+ */
 
 void Cmd_Move(char *field, int country, client_t *client)
 {
@@ -452,11 +452,11 @@ void Cmd_Move(char *field, int country, client_t *client)
 	SendRPS(client);
 }
 
-/*************
+/**
  Cmd_Plane
 
  Change current player`s aircraft
- *************/
+ */
 
 void Cmd_Plane(u_int16_t planenumber, client_t *client)
 {
@@ -546,11 +546,11 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  Cmd_Fuel
 
  Set fuel load
- *************/
+ */
 
 void Cmd_Fuel(int8_t fuel, client_t *client)
 {
@@ -569,11 +569,11 @@ void Cmd_Fuel(int8_t fuel, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Conv
 
  Set convergency distance
- *************/
+ */
 
 void Cmd_Conv(u_int16_t distance, client_t *client)
 {
@@ -590,11 +590,11 @@ void Cmd_Conv(u_int16_t distance, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Ord
 
  Set ordinance
- *************/
+ */
 
 void Cmd_Ord(u_int8_t ord, client_t *client)
 {
@@ -606,11 +606,11 @@ void Cmd_Ord(u_int8_t ord, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Easy
 
  Enable/Disable Easy mode
- *************/
+ */
 
 void Cmd_Easy(u_int8_t easy, client_t *client)
 {
@@ -631,11 +631,11 @@ void Cmd_Easy(u_int8_t easy, client_t *client)
 		PPrintf(client, RADIO_YELLOW, "Easy flight mode disabled");
 }
 
-/*************
+/**
  Cmd_TK
 
  Set player as TK or removes it
- *************/
+ */
 
 void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_Ban
 {
@@ -838,11 +838,11 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 	}
 }
 
-/*************
+/**
  Cmd_Fly
 
  Process the init of flight of a client
- *************/
+ */
 
 u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 {
@@ -1335,11 +1335,11 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	return 0;
 }
 
-/*************
+/**
  Cmd_Capt
 
  Capture a Field
- *************/
+ */
 
 u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field is == Fx -1
 {
@@ -1559,11 +1559,11 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 	return 1;
 }
 
-/*************
+/**
  Cmd_White
 
  Include/exclude player in whitelist
- *************/
+ */
 
 void Cmd_White(char *user, u_int8_t white, client_t *client)
 {
@@ -1644,11 +1644,11 @@ void Cmd_White(char *user, u_int8_t white, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Chmod
 
  Changes user privileges
- *************/
+ */
 
 void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 {
@@ -1752,11 +1752,11 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Part
 
  Configure plane parts
- *************/
+ */
 
 void Cmd_Part(char *argv[], u_int8_t argc, client_t *client)
 {
@@ -1892,11 +1892,11 @@ void Cmd_Part(char *argv[], u_int8_t argc, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Decl
 
  Declares an structure
- *************/
+ */
 
 void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 {
@@ -2250,11 +2250,11 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Pingtest
 
  Make a Pingtest call
- *************/
+ */
  
 void Cmd_Pingtest(u_int16_t frame, client_t *client)
 {
@@ -2278,11 +2278,11 @@ void Cmd_Pingtest(u_int16_t frame, client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  Cmd_Undecl
 
  Remove an structure from declaration list
- *************/
+ */
 
 void Cmd_Undecl(u_int16_t id, client_t *client)
 {
@@ -2358,11 +2358,11 @@ void Cmd_Undecl(u_int16_t id, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Time
 
  Set Arena Time
- *************/
+ */
 
 void Cmd_Time(u_int16_t time, char *mult, client_t *client)
 {
@@ -2407,11 +2407,11 @@ void Cmd_Time(u_int16_t time, char *mult, client_t *client)
 	planerangelimit->modified = enemyidlim->modified = friendlyidlim->modified = 1;
 }
 
-/*************
+/**
  Cmd_Date
 
  Set Arena Date
- *************/
+ */
 
 void Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client)
 {
@@ -2453,11 +2453,11 @@ void Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client)
 		WB3DotCommand(NULL, ".date %u %u %u", arena->month, arena->day, arena->year);
 }
 
-/*************
+/**
  Cmd_Field
 
  Send field info
- *************/
+ */
 
 void Cmd_Field(u_int8_t field, client_t *client)
 {
@@ -2709,11 +2709,11 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_City
 
  Send city info
- *************/
+ */
 
 void Cmd_City(u_int8_t citynum, client_t *client)
 {
@@ -2774,11 +2774,11 @@ void Cmd_City(u_int8_t citynum, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_StartFau
 
  Declares an structure
- *************/
+ */
 
 void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *client)
 {
@@ -2890,11 +2890,11 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 	}
 }
 
-/*************
+/**
  Cmd_Say
 
  -HOST- Message
- *************/
+ */
 
 void Cmd_Say(char *argv[], u_int8_t argc, client_t *client)
 {
@@ -2922,11 +2922,11 @@ void Cmd_Say(char *argv[], u_int8_t argc, client_t *client)
 		PPrintf(client, RADIO_YELLOW, "%s", buffer); // echo
 }
 
-/*************
+/**
  Cmd_Seta
 
  Set amount of planes to a desired field or field type
- *************/
+ */
 
 void Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount)
 {
@@ -2989,11 +2989,11 @@ void Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount)
 	}
 }
 
-/*************
+/**
  Cmd_Show
 
  Show arena settings
- *************/
+ */
 
 void Cmd_Show(client_t *client)
 {
@@ -3078,11 +3078,11 @@ void Cmd_Show(client_t *client)
 	Sys_UnlockFile(strcat(filename, ".LOCK"));
 }
 
-/*************
+/**
  Cmd_Score
 
  Send score to player
- *************/
+ */
 
 void Cmd_Score(char *player, client_t *client)
 {
@@ -3864,11 +3864,11 @@ void Cmd_Score(char *player, client_t *client)
 	Sys_UnlockFile(strcat(filename, ".LOCK"));
 }
 
-/*************
+/**
  Cmd_Clear
 
  Clear client's score
- *************/
+ */
 
 void Cmd_Clear(client_t *client)
 {
@@ -3915,11 +3915,11 @@ void Cmd_Clear(client_t *client)
 	mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 }
 
-/*************
+/**
  Cmd_Whoare
 
  Prints who are hearing given channel
- *************/
+ */
 
 void Cmd_Whoare(u_int8_t radio, client_t *client)
 {
@@ -3955,11 +3955,11 @@ void Cmd_Whoare(u_int8_t radio, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Invite
 
  Invite a player to join client's squadron
- *************/
+ */
 
 void Cmd_Invite(char *nick, client_t *client)
 {
@@ -4010,11 +4010,11 @@ void Cmd_Invite(char *nick, client_t *client)
 	PPrintf(client, RADIO_YELLOW, "You invited %s to join your squadron", invited->longnick);
 }
 
-/*************
+/**
  Cmd_Jsquad
 
  Join to an invited squadron
- *************/
+ */
 
 void Cmd_Jsquad(client_t *client)
 {
@@ -4114,11 +4114,11 @@ void Cmd_Jsquad(client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Name
 
  Assign a name to Squadron
- *************/
+ */
 
 void Cmd_Name(char *name, client_t *client) // twin of Cmd_Slogan
 {
@@ -4147,11 +4147,11 @@ void Cmd_Name(char *name, client_t *client) // twin of Cmd_Slogan
 	}
 }
 
-/*************
+/**
  Cmd_Slogan
 
  Assign a motto to Squadron
- *************/
+ */
 
 void Cmd_Slogan(char *motto, client_t *client) // twin of Cmd_Name
 {
@@ -4180,11 +4180,11 @@ void Cmd_Slogan(char *motto, client_t *client) // twin of Cmd_Name
 	}
 }
 
-/*************
+/**
  Cmd_Remove
 
  Remove a client from squadron
- *************/
+ */
 
 void Cmd_Remove(char *nick, client_t *client)
 {
@@ -4290,11 +4290,11 @@ void Cmd_Remove(char *nick, client_t *client)
 		PPrintf(client, RADIO_YELLOW, "Cmd_Remove(): SQL Error(%d), please contact admin", mysql_errno(&my_sock));
 }
 
-/*************
+/**
  Cmd_Withdraw
 
  Withdraw a client from squadron
- *************/
+ */
 
 void Cmd_Withdraw(client_t *client)
 {
@@ -4329,11 +4329,11 @@ void Cmd_Withdraw(client_t *client)
 		PPrintf(client, RADIO_YELLOW, "Cmd_Withdraw(): SQL Error(%d), please contact admin", mysql_errno(&my_sock));
 }
 
-/*************
+/**
  Cmd_Disband
 
  Disband squadron
- *************/
+ */
 
 void Cmd_Disband(client_t *client)
 {
@@ -4449,11 +4449,11 @@ void Cmd_Disband(client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Psq
 
  Change Squad Members permissions
- *************/
+ */
 
 void Cmd_Psq(char *nick, u_int8_t attr, client_t *client)
 {
@@ -4535,11 +4535,11 @@ void Cmd_Psq(char *nick, u_int8_t attr, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Hls
 
  Send name of squadrons members to show their nicks in white
- *************/
+ */
 
 void Cmd_Hls(client_t *client)
 {
@@ -4611,11 +4611,11 @@ void Cmd_Hls(client_t *client)
 	SendPacket(buffer, 7+(4*j), client);
 }
 
-/*************
+/**
  Cmd_Listavail
 
  List available planes in given airfield
- *************/
+ */
 
 void Cmd_Listavail(u_int8_t field, client_t *client)
 {
@@ -4707,11 +4707,11 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 //	}
 }
 
-/*************
+/**
  Cmd_Wings
 
  Enable/disable wings mode
- *************/
+ */
 
 void Cmd_Wings(u_int8_t mode, client_t *client)
 {
@@ -4810,11 +4810,11 @@ void Cmd_Wings(u_int8_t mode, client_t *client)
 	client->droneformation = mode;
 }
 
-/*************
+/**
  Cmd_Hmack
 
  start hmack
- *************/
+ */
 
 void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 {
@@ -5004,11 +5004,11 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 	}
 }
 
-/*************
+/**
  Cmd_Commandos
 
  Drop Commandos
- *************/
+ */
 
 void Cmd_Commandos(client_t *client, u_int32_t height)
 {
@@ -5091,11 +5091,11 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 
 }
 
-/*************
+/**
  Cmd_Info
 
  Get user info
- *************/
+ */
 
 void Cmd_Info(char *nick, client_t *client)
 {
@@ -5129,11 +5129,11 @@ void Cmd_Info(char *nick, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Ban
 
  Ban someone
- *************/
+ */
 
 void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 {
@@ -5320,11 +5320,11 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 	}
 }
 
-/*************
+/**
  Cmd_Gclear
 
  Clears Gunners list
- *************/
+ */
 
 void Cmd_Gclear(char *nick, client_t *client)
 {
@@ -5372,11 +5372,11 @@ void Cmd_Gclear(char *nick, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Shanghai
 
  Set a client (student) as oberver of trainer's plane
- *************/
+ */
 
 void Cmd_Shanghai(u_int8_t *buffer, client_t *client)
 {
@@ -5415,11 +5415,11 @@ void Cmd_Shanghai(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_View
 
  View what other player is doing
- *************/
+ */
 
 void Cmd_View(client_t *victim, client_t *client)
 {
@@ -5480,11 +5480,11 @@ void Cmd_View(client_t *victim, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_View
 
  View what other player is doing
- *************/
+ */
 
 void Cmd_Minen(u_int32_t dist, float angle, client_t *client)
 {
@@ -5518,11 +5518,11 @@ void Cmd_Minen(u_int32_t dist, float angle, client_t *client)
 	PPrintf(client, RADIO_YELLOW, "Mortar fired dist %u azimuth %.2f (%d left)", dist, angle, client->mortars);
 }
 
-/*************
+/**
  Cmd_Tanks
 
  Send a tank column to field
- *************/
+ */
 
 void Cmd_Tanks(char *field, client_t *client)
 {
@@ -5577,11 +5577,11 @@ void Cmd_Tanks(char *field, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Pos
 
  Send client pos
- *************/
+ */
 
 void Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek)
 {
@@ -5627,11 +5627,11 @@ void Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek)
 	}
 }
 
-/*************
+/**
  Cmd_Thanks
 
  Thanks a friend with 10% of last score owned
- *************/
+ */
 
 void Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client)
 {
@@ -5686,11 +5686,11 @@ void Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Restore
 
  restore field to all up structures
- *************/
+ */
 
 void Cmd_Restore(u_int8_t field, client_t *client)
 {
@@ -5719,11 +5719,11 @@ void Cmd_Restore(u_int8_t field, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Destroy
 
  Destroy all structured at field for 10 minutes
- *************/
+ */
 
 void Cmd_Destroy(u_int8_t field, int32_t time, client_t *client)
 {
@@ -5760,11 +5760,11 @@ void Cmd_Destroy(u_int8_t field, int32_t time, client_t *client)
 	SendFieldStatus(field - 1, NULL);
 }
 
-/*************
+/**
  Cmd_ChangeCVRoute
 
  Changes CV Route by command
- *************/
+ */
 
 void Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client)
 {
@@ -5779,11 +5779,11 @@ void Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client)
 		PPrintf(client, RADIO_LIGHTYELLOW, "You are not in a convoy");
 }
 
-/*************
+/**
  Cmd_UTC
 
  Prints ZULU time
- *************/
+ */
 
 void Cmd_UTC(client_t *client)
 {
@@ -5796,11 +5796,11 @@ void Cmd_UTC(client_t *client)
 	PPrintf(client, RADIO_YELLOW, "%d-%02d-%02d %.2d:%.2d:%.2dZ", 1900 + timeptr->tm_year, timeptr->tm_mon + 1, timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min, timeptr->tm_sec);
 }
 
-/*************
+/**
  Cmd_Lives
 
  Set amount of lives
- *************/
+ */
 
 void Cmd_Lives(char *nick, int8_t amount, client_t *client)
 {
@@ -5842,11 +5842,11 @@ void Cmd_Lives(char *nick, int8_t amount, client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_Reload
 
  Just restart fly to reload fuel and weapons
- *************/
+ */
 
 void Cmd_Reload(client_t *client)
 {
@@ -5902,11 +5902,11 @@ void Cmd_Reload(client_t *client)
 	}
 }
 
-/*************
+/**
  Cmd_CheckWaypoints
 
  Verify CV waypoints for stuck
- *************/
+ */
 
 void Cmd_CheckWaypoints(client_t *client)
 {

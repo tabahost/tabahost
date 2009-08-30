@@ -298,11 +298,11 @@ u_int16_t packets_tab[210][3] =
 jmp_buf debug_buffer; // debug buffer
 
 
-/*************
+/**
  CheckArenaRules
 
  Make arena lives! :)
- *************/
+ */
 
 void CheckArenaRules(void)
 {
@@ -1483,11 +1483,11 @@ void CheckArenaRules(void)
 	}
 }
 
-/*************
+/**
  ProcessMetarWeather
 
  Process METAR code get by a PHP script and use as WB weather
- *************/
+ */
 
 void ProcessMetarWeather(void)
 {
@@ -1539,11 +1539,11 @@ void ProcessMetarWeather(void)
 	}
 }
 
-/*************
+/**
  ProcessCommands
 
  Process console input commands or dot commands from clients
- *************/
+ */
 
 void ProcessCommands(char *command, client_t *client)
 {
@@ -1847,12 +1847,23 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "motd"))
 		{
-			sprintf(file, "./arenas/%s/motd.txt", dirname->string);
+			sprintf(file, "motd.txt");
 
 			if ((fp = fopen(file, "r")) == NULL)
 			{
-				Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", file);
-				sprintf(file, "motd.txt");
+				// Couldn't open general motd.txt, try arena motd
+				sprintf(file, "./arenas/%s/motd.txt", dirname->string);
+
+				if ((fp = fopen(file, "r")) == NULL)
+				{
+					// Couldn't even open arena motd, print error
+					Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", file);
+					return;
+				}
+				else
+				{
+					fclose(fp);
+				}
 			}
 			else
 			{
@@ -3456,11 +3467,11 @@ void ProcessCommands(char *command, client_t *client)
 	PPrintf(client, RADIO_LIGHTYELLOW, "Unknown command \"%s\"", command);
 }
 
-/*************
+/**
  SendFileSeq1
 
  Begin Sending File Sequence
- *************/
+ */
 
 void SendFileSeq1(char *file, char *clifile, client_t *client)
 {
@@ -3666,11 +3677,11 @@ void SendFileSeq7(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  ProcessPacket
 
  Check packet ID and forward to its handler
- *************/
+ */
 
 int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
@@ -4403,11 +4414,11 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	return 0;
 }
 
-/*************
+/**
  PingTest
 
  Calculate PingTest response
- *************/
+ */
 
 void PingTest(u_int8_t *buffer, client_t *client)
 {
@@ -4427,11 +4438,11 @@ void PingTest(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PReqBomberList
 
  Send a list of all players that are with buffer and still in tower
- *************/
+ */
 
 void PReqBomberList(client_t *client)
 {
@@ -4465,11 +4476,11 @@ void PReqBomberList(client_t *client)
 	SendPacket(buffer, (4*j)+4, client);
 }
 
-/*************
+/**
  PEndFlight
 
  Process the end of flight of a client
- *************/
+ */
 
 void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
@@ -4866,11 +4877,11 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 	}
 }
 
-/*************
+/**
  PPlanePosition
 
  Fill client structure with current position
- *************/
+ */
 
 void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 {
@@ -5244,11 +5255,11 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 //	SendPacket(teste, sizeof(teste), client);
 }
 
-/*************
+/**
  CheckMaxG
 
  Check if plane has G overloaded
- *************/
+ */
 
 void CheckMaxG(client_t *client)
 {
@@ -5316,11 +5327,11 @@ void CheckMaxG(client_t *client)
 	}
 }
 
-/*************
+/**
  ClientG
 
  Calculates actual client's plane wings' G load
- *************/
+ */
 
 float ClientG(client_t *client)
 {
@@ -5443,11 +5454,11 @@ float ClientG(client_t *client)
 	return g;
 }
 
-/*************
+/**
  PChutePos
 
  Process chute position
- *************/
+ */
 
 void PChutePos(u_int8_t *buffer, client_t *client)
 {
@@ -5557,11 +5568,11 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  WB3GunnerUpdate
 
  Process client gunner update
- *************/
+ */
 
 void WB3GunnerUpdate(u_int8_t *buffer, client_t *client)
 {
@@ -5600,11 +5611,11 @@ void WB3GunnerUpdate(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PPlaneStatus
 
  Process client plane status
- *************/
+ */
 
 void PPlaneStatus(u_int8_t *buffer, client_t *client)
 {
@@ -5648,11 +5659,11 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  WB3FireSuppression
 
  Some strange WB3 packet
- *************/
+ */
 
 void WB3FireSuppression(u_int8_t *buffer, client_t *client)
 {
@@ -5689,11 +5700,11 @@ void WB3FireSuppression(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  WB3SupressFire
 
  Some strange WB3 packet
- *************/
+ */
 
 void WB3SupressFire(u_int8_t slot, client_t *client)
 {
@@ -5712,11 +5723,11 @@ void WB3SupressFire(u_int8_t slot, client_t *client)
 }
 
 
-/*************
+/**
  WB3ExternalAmmoCnt
 
  Some strange WB3 packet
- *************/
+ */
 
 void WB3ExternalAmmoCnt(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
@@ -5746,11 +5757,11 @@ void WB3ExternalAmmoCnt(u_int8_t *buffer, u_int16_t len, client_t *client)
 	}
 }
 
-/*************
+/**
  PSetRadioChannel
 
  Set which channel client is talking/earing
- *************/
+ */
 
 void PSetRadioChannel(u_int8_t *buffer, client_t *client)
 {
@@ -5761,11 +5772,11 @@ void PSetRadioChannel(u_int8_t *buffer, client_t *client)
 	client->radio[ntohs(radio->radionum) - 1] = ntohs(radio->channel);
 }
 
-/*************
+/**
  PDropItem
 
  Process client informing it dropped some item
- *************/
+ */
 
 void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *client)
 {
@@ -5918,11 +5929,11 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 	}
 }
 
-/*************
+/**
  WB3TonnageOnTarget
 
  misterious packet from ien
- *************/
+ */
 
 void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 {
@@ -5964,11 +5975,11 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PRemoveDropItem
 
  Remove dropped item from screen
- *************/
+ */
 
 void PRemoveDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 {
@@ -5998,11 +6009,11 @@ void PRemoveDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 	}
 }
 
-/*************
+/**
  PFlakHit
 
  Process Flak hits
- *************/
+ */
 
 void PFlakHit(u_int8_t *buffer, client_t *client)
 {
@@ -6094,11 +6105,11 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 	//	}
 }
 
-/*************
+/**
  PHitStructure
 
  Process client information about hit some structure
- *************/
+ */
 
 void PHitStructure(u_int8_t *buffer, client_t *client)
 {
@@ -6218,11 +6229,11 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PHardHitStructure
 
  Process client information about hard hit some structure
- *************/
+ */
 
 void PHardHitStructure(u_int8_t *buffer, client_t *client)
 {
@@ -6354,11 +6365,11 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PHitPlane
 
  Process client information about hit some plane and where
- *************/
+ */
 
 void PHitPlane(u_int8_t *buffer, client_t *client)
 {
@@ -6698,11 +6709,11 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  WB3FuelConsumed
 
  Fuel Consumed by player
- *************/
+ */
 void WB3FuelConsumed(u_int8_t *buffer, client_t *client)
 {
 	wb3fuelconsumed_t *fuelconsumed;
@@ -6713,11 +6724,11 @@ void WB3FuelConsumed(u_int8_t *buffer, client_t *client)
 		PPrintf(client, RADIO_RED, "fuel = %u", ntohl(fuelconsumed->amount));
 }
 
-/*************
+/**
  WB3DelayedFuse
 
  Fire flaks with delayed fuse
- *************/
+ */
 void WB3DelayedFuse(u_int8_t *buffer, client_t *client)
 {
 	wb3delayedfuse_t *wb3delayedfuse;
@@ -6746,11 +6757,11 @@ void WB3DelayedFuse(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  SendPings
 
  Send bullet pings
- *************/
+ */
 void SendPings(u_int8_t hits, u_int8_t type, client_t *client)
 {
 	pings_t *pings;
@@ -6767,11 +6778,11 @@ void SendPings(u_int8_t hits, u_int8_t type, client_t *client)
 	SendPacket(bufferping, sizeof(bufferping), client);
 }
 
-/*************
+/**
  PHardHitPlane
 
  Process client information about hard hit some plane and where
- *************/
+ */
 
 void PHardHitPlane(u_int8_t *buffer, client_t *client)
 {
@@ -6921,11 +6932,11 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  GetHitSite
 
  Returns the name of where client were hit
- *************/
+ */
 
 char *GetHitSite(u_int8_t id)
 {
@@ -7000,11 +7011,11 @@ char *GetHitSite(u_int8_t id)
 	}
 }
 
-/*************
+/**
  GetSmallHitSite
 
  Returns the abreviated name of where client were hit
- *************/
+ */
 
 char *GetSmallHitSite(u_int8_t id)
 {
@@ -7079,11 +7090,11 @@ char *GetSmallHitSite(u_int8_t id)
 	}
 }
 
-/*************
+/**
  GetMunition
 
  Returns the pointer for munition from given ID
- *************/
+ */
 
 munition_t *GetMunition(u_int8_t id)
 {
@@ -7102,11 +7113,11 @@ munition_t *GetMunition(u_int8_t id)
 	return NULL;
 }
 
-/*************
+/**
  AddPlaneDamage
 
  Add damage to given and parent parts, returns AP left
- *************/
+ */
 
 u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, char *pap, client_t *client)
 {
@@ -7293,11 +7304,11 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 	return ap;
 }
 
-/*************
+/**
  RebuildTime
 
  Calculate the rebuiding time
- *************/
+ */
 
 float RebuildTime(building_t *building)
 {
@@ -7382,11 +7393,11 @@ float RebuildTime(building_t *building)
 	return rebuild;
 }
 
-/*************
+/**
  AddBuildingDamage
 
  Set the max damage all structure can support in selected airplane
- *************/
+ */
 
 u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, client_t *client)
 {
@@ -7677,11 +7688,11 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	return 1;
 }
 
-/*************
+/**
  SendFieldStatus
 
  Send status of all buildings in the field/city
- *************/
+ */
 
 void SendFieldStatus(u_int16_t field, client_t *client)
 {
@@ -7735,11 +7746,11 @@ void SendFieldStatus(u_int16_t field, client_t *client)
 	}
 }
 
-/*************
+/**
  SetBuildingStatus
 
  Destroy an structure
- *************/
+ */
 
 void SetBuildingStatus(building_t *building, u_int8_t status, client_t *client)
 {
@@ -7782,11 +7793,11 @@ void SetBuildingStatus(building_t *building, u_int8_t status, client_t *client)
 	}
 }
 
-/*************
+/**
  SetPlaneDamage
 
  Set the max damage all structure can support in selected airplane
- *************/
+ */
 
 void SetPlaneDamage(u_int16_t plane, client_t *client)
 {
@@ -7801,11 +7812,11 @@ void SetPlaneDamage(u_int16_t plane, client_t *client)
 	}
 }
 
-/*************
+/**
  PFireMG
 
  Process client informing he's firing a MG
- *************/
+ */
 
 void PFireMG(u_int8_t *buffer, u_int8_t len, client_t *client)
 {
@@ -7857,11 +7868,11 @@ void PFireMG(u_int8_t *buffer, u_int8_t len, client_t *client)
 	}
 }
 
-/*************
+/**
  POttoFiring
 
  Process client informing its ottos are firing
- *************/
+ */
 
 void POttoFiring(u_int8_t *buffer, u_int8_t len, client_t *client)
 {
@@ -7905,11 +7916,11 @@ void POttoFiring(u_int8_t *buffer, u_int8_t len, client_t *client)
 	}
 }
 
-/*************
+/**
  SendForceStatus
 
  Force client plane status
- *************/
+ */
 
 void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t *client)
 {
@@ -8051,11 +8062,11 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 	}
 }
 
-/*************
+/**
  SendPlaneStatus
 
  Update status of a visible air plane
- *************/
+ */
 
 void SendPlaneStatus(client_t *plane, client_t *client)
 {
@@ -8075,11 +8086,11 @@ void SendPlaneStatus(client_t *plane, client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  PRadioMessage
 
  Process message incomming from radio (that can be a dot command)
- *************/
+ */
 
 void PRadioMessage(u_int8_t *buffer, client_t *client)
 {
@@ -8157,11 +8168,11 @@ void PRadioMessage(u_int8_t *buffer, client_t *client)
 		}
 	}
 
-	/*************
+	/**
 	 WB3DotCommand
 
 	 Send a Dot command to client
-	 *************/
+	 */
 
 void WB3DotCommand(client_t *client, char *fmt, ...)
 {
@@ -8200,11 +8211,11 @@ void WB3DotCommand(client_t *client, char *fmt, ...)
 	}
 }
 
-/*************
+/**
  PrintRadioMessage
 
  Prints the message to all clients on frequency 'msgto' or to a single player
- *************/
+ */
 
 void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8_t msgsize, client_t *client)
 {
@@ -8360,11 +8371,11 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 	}
 }
 
-/*************
+/**
  PNewNick
 
  Get player nick and update user profile
- *************/
+ */
 
 void PNewNick(u_int8_t *buffer, client_t *client)
 {
@@ -8551,11 +8562,11 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 	SendPacket(packet, 4+nickpacket->msgsize, client);
 }
 
-/*************
+/**
  SendCopyright
 
  Sends copyright packet to client
- *************/
+ */
 
 int32_t SendCopyright(client_t *client)
 {
@@ -8615,11 +8626,11 @@ int32_t SendCopyright(client_t *client)
 	return SendPacket(buffer, 78+copyrighta->nicksize+copyrightb->mapnamesize, client);
 }
 
-/*************
+/**
  UpdateIngameClients
 
  Update file with all ingame clients / OP's or Admins
- *************/
+ */
 
 void UpdateIngameClients(u_int8_t attr)
 {
@@ -8717,11 +8728,11 @@ void UpdateIngameClients(u_int8_t attr)
 	Sys_UnlockFile(file);
 }
 
-/*************
+/**
  GetCountry
 
  Return country string using country number
- *************/
+ */
 
 char *GetCountry(u_int8_t country)
 {
@@ -8740,11 +8751,11 @@ char *GetCountry(u_int8_t country)
 	}
 }
 
-/*************
+/**
  GetRanking
 
  Return ranking string using ranking number
- *************/
+ */
 
 char *GetRanking(u_int8_t ranking)
 {
@@ -8765,11 +8776,11 @@ char *GetRanking(u_int8_t ranking)
 	}
 }
 
-/*************
+/**
  SendArenaNames
 
  Sends All opened arena's names
- *************/
+ */
 
 int32_t SendArenaNames(client_t *client)
 {
@@ -8928,11 +8939,11 @@ int32_t SendArenaNames(client_t *client)
 	return n;
 }
 
-/*************
+/**
  SendPlayerNames
 
  Sends players names
- *************/
+ */
 
 void SendPlayersNames(client_t *client)
 {
@@ -8986,11 +8997,11 @@ void SendPlayersNames(client_t *client)
 	Com_Send(client, buffer, offset);
 }
 
-/*************
+/**
  SendIdle
 
  Send a keep alive packet
- *************/
+ */
 
 void SendIdle(client_t *client)
 {
@@ -9006,11 +9017,11 @@ void SendIdle(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  SendPlayersNear
 
  Updates all near planes status
- *************/
+ */
 
 void SendPlayersNear(client_t *client)
 {
@@ -9127,11 +9138,11 @@ void SendPlayersNear(client_t *client)
 	}
 }
 
-/*************
+/**
  SendOttoParams
 
  Send Otto parameters
- *************/
+ */
 
 void SendOttoParams(client_t *client)
 {
@@ -9160,11 +9171,11 @@ void SendOttoParams(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  SendLastConfig
 
  Send player last configuration
- *************/
+ */
 
 void SendLastConfig(client_t *client)
 {
@@ -9209,11 +9220,11 @@ void SendLastConfig(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  AddRemovePlaneScreen
 
  Adds or remove a plane to client screen
- *************/
+ */
 
 void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 {
@@ -9249,11 +9260,11 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 	}
 }
 
-/*************
+/**
  SendScreenUpdates
 
  Update client screen with planes status
- *************/
+ */
 
 void SendScreenUpdates(client_t *client)
 {
@@ -9397,11 +9408,11 @@ void SendScreenUpdates(client_t *client)
 	SendPacket(buffer, 20+(22*j), client);
 }
 
-/*************
+/**
  CanHear
 
  Check if a player can hear another in radio message
- *************/
+ */
 int CanHear(client_t *client1, client_t *client2, u_int32_t msgto)
 {
 
@@ -9448,11 +9459,11 @@ int CanHear(client_t *client1, client_t *client2, u_int32_t msgto)
 	return 0;
 }
 
-/*************
+/**
  SendArenaRules
 
  Send arena rules to client
- *************/
+ */
 
 void SendArenaRules(client_t *client)
 {
@@ -9644,11 +9655,11 @@ void SendArenaRules(client_t *client)
 	SendPacket(buffer, buffersize, client);
 }
 
-/*************
+/**
  WB3SendGruntConfig
 
  Send arena rules to client
- *************/
+ */
 
 void WB3SendGruntConfig(client_t *client)
 {
@@ -9667,11 +9678,11 @@ void WB3SendGruntConfig(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  WB3SendArenaFlags3
 
  Send arena flags 3 to client
- *************/
+ */
 
 void WB3SendArenaFlags3(client_t *client)
 {
@@ -9688,11 +9699,11 @@ void WB3SendArenaFlags3(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  WB3ConfigFM
 
  Send Flight Model Config
- *************/
+ */
 
 void WB3ConfigFM(client_t *client)
 {
@@ -9711,11 +9722,11 @@ void WB3ConfigFM(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  WB3ArenaConfig2
 
  Send arena config 2 to client
- *************/
+ */
 
 void WB3ArenaConfig2(client_t *client)
 {
@@ -9733,11 +9744,11 @@ void WB3ArenaConfig2(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  WB3NWAttachSlot
 
  Send new? attach slot
- *************/
+ */
 
 void WB3NWAttachSlot(client_t *client)
 {
@@ -9754,11 +9765,11 @@ void WB3NWAttachSlot(client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  PRadioCommand
 
  Parse radio command and send to process it
- *************/
+ */
 
 void PRadioCommand(char *message, u_int8_t size, client_t *client)
 {
@@ -9770,10 +9781,10 @@ void PRadioCommand(char *message, u_int8_t size, client_t *client)
 	}
 }
 
-/*************
+/**
  PFileCheck
  Check clients file integrity
- *************/
+ */
 
 void PFileCheck(u_int8_t *buffer, client_t *client)
 {
@@ -9846,11 +9857,11 @@ void PFileCheck(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  CheckCockpitCRC
 
  Check Cockpit CRC
- *************/
+ */
 
 void CheckCockpitCRC(char *path, u_int32_t crc, client_t *client)
 {
@@ -10504,11 +10515,11 @@ void CheckCockpitCRC(char *path, u_int32_t crc, client_t *client)
 	}
 }
 
-/*************
+/**
  SendExecutablesCheck
 
  Send Request of file integrity
- *************/
+ */
 
 void SendExecutablesCheck(u_int32_t exemisc, client_t *client)
 {
@@ -10537,11 +10548,11 @@ void SendExecutablesCheck(u_int32_t exemisc, client_t *client)
 	SendPacket(buffer, 15+check->msgsize, client);
 }
 
-/*************
+/**
  SendFieldCountries
 
  Send all fields' countries
- *************/
+ */
 
 void SendFieldsCountries(client_t *client)
 {
@@ -10553,11 +10564,11 @@ void SendFieldsCountries(client_t *client)
 	}
 }
 
-/*************
+/**
  FirstFieldCountry
 
  Return the number of first field that match with country
- *************/
+ */
 
 int8_t FirstFieldCountry(u_int8_t country)
 {
@@ -10572,11 +10583,11 @@ int8_t FirstFieldCountry(u_int8_t country)
 	return -1;
 }
 
-/*************
+/**
  SendGunnerStatusChange
 
  Send the nick of who client will be gunner
- *************/
+ */
 
 void SendGunnerStatusChange(client_t *gunner, u_int16_t status, client_t *client)
 {
@@ -10592,11 +10603,11 @@ void SendGunnerStatusChange(client_t *gunner, u_int16_t status, client_t *client
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
-/*************
+/**
  SendAttachList
 
  Send to client current gunner list
- *************/
+ */
 
 void SendAttachList(u_int8_t *packet, client_t *client)
 {
@@ -10647,11 +10658,11 @@ void SendAttachList(u_int8_t *packet, client_t *client)
 	SendPacket(buffer, i, client);
 }
 
-/*************
+/**
  PCurrentView
 
  Send current client's view to who is attached on observer position
- *************/
+ */
 
 void PCurrentView(u_int8_t *buffer, client_t *client)
 {
@@ -10681,11 +10692,11 @@ void PCurrentView(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PSquadLookup
 
  Show info from another squad from given nick
- *************/
+ */
 
 void PSquadLookup(u_int8_t *buffer, client_t *client)
 {
@@ -10699,11 +10710,11 @@ void PSquadLookup(u_int8_t *buffer, client_t *client)
 	PSquadInfo(nick, client);
 }
 
-/*************
+/**
  PClientMedals
 
  Send all medals player got
- *************/
+ */
 
 void PClientMedals(u_int8_t *buffer, client_t *client)
 {
@@ -10928,11 +10939,11 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  GunPos
 
  Convert gunner position (a WB stupid thing)
- *************/
+ */
 
 u_int16_t GunPos(u_int16_t pos, u_int8_t reverse)
 {
@@ -10982,11 +10993,11 @@ u_int16_t GunPos(u_int16_t pos, u_int8_t reverse)
 	}
 }
 
-/*************
+/**
  WB3RequestStartFly
 
  Client request start flight
- *************/
+ */
 
 void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 {
@@ -11039,11 +11050,11 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  WB3RequestMannedAck
 
  Client request start flight
- *************/
+ */
 
 void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 {
@@ -11131,11 +11142,11 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 		SendExecutablesCheck(2, client);
 }
 
-/*************
+/**
  PHostVar
 
  Get a HostVar packet
- *************/
+ */
 
 void PHostVar(u_int8_t *buffer, client_t *client)
 {
@@ -11177,11 +11188,11 @@ void PHostVar(u_int8_t *buffer, client_t *client)
 	SendPacket(buffer, buffer[2]+buffer[buffer[2]+3]+4, client);
 }
 
-/*************
+/**
  THAIWatchDog
 
  THAI Watch Dog, used to identify THAI Drones
- *************/
+ */
 
 void THAIWatchDog(u_int8_t *buffer, client_t *client)
 {
@@ -11195,11 +11206,11 @@ void THAIWatchDog(u_int8_t *buffer, client_t *client)
 }
 
 
-/*************
+/**
  PRequestGunner
 
  Request gunner position
- *************/
+ */
 
 void PRequestGunner(u_int8_t *buffer, client_t *client)
 {
@@ -11250,11 +11261,11 @@ void PRequestGunner(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PAcceptGunner
 
  Check if clients has been captured on land/ditch/bail
- *************/
+ */
 
 void PAcceptGunner(u_int8_t *buffer, client_t *client)
 {
@@ -11298,11 +11309,11 @@ void PAcceptGunner(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PSwitchOttoPos
 
  Try to jump to other otto position
- *************/
+ */
 
 void PSwitchOttoPos(u_int8_t *buffer, client_t *client)
 {
@@ -11343,11 +11354,11 @@ void PSwitchOttoPos(u_int8_t *buffer, client_t *client)
 	}
 }
 
-/*************
+/**
  PSquadInfo
 
  Send squad information
- *************/
+ */
 
 void PSquadInfo(char *nick, client_t *client)
 {
@@ -11590,11 +11601,11 @@ void PSquadInfo(char *nick, client_t *client)
 }
 
 
-/*************
+/**
  CalcDamage
 
  Calculate damage
- *************/
+ */
 
 double CalcDamage(u_int32_t mass, u_int16_t vel)
 {
@@ -11607,11 +11618,11 @@ double CalcDamage(u_int32_t mass, u_int16_t vel)
 	return energy;
 }
 
-/*************
+/**
  Kamikase
 
  Checks if client made a kamikase crash
- *************/
+ */
 
 void Kamikase(client_t *client)
 {
@@ -11633,11 +11644,11 @@ void Kamikase(client_t *client)
 	}
 }
 
-/*************
+/**
  SinkBoat
 
  Sink or Raise boats
- *************/
+ */
 
 void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
 {
@@ -11700,11 +11711,11 @@ void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
 	}
 }
 
-/*************
+/**
  GetFactoryReupTime
 
  Returns factory reup time based on numplayers
- *************/
+ */
 
 u_int32_t GetFactoryReupTime(u_int8_t country)
 {
@@ -11731,11 +11742,11 @@ u_int32_t GetFactoryReupTime(u_int8_t country)
 	return delay;
 }
 
-/*************
+/**
  GetRPSLag
 
  Returns RPS lag based on factories health and numplayers
- *************/
+ */
 
 u_int32_t GetRPSLag(u_int8_t country)
 {

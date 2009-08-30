@@ -187,11 +187,11 @@ var_t *zwindvelocity; // extern
 var_t *var_vars; // extern
 
 
-/*************
+/**
  Init_Vars
 
  Initialize variable table
- *************/
+ */
 
 void InitVars(void)
 {
@@ -364,11 +364,11 @@ void InitVars(void)
 	dyaw = Var_Get("dyaw", "0", 0);
 }
 
-/*************
+/**
  CheckVars
 
  Check if vars was modified and make its action
- *************/
+ */
 
 void CheckVars(void)
 {
@@ -612,11 +612,11 @@ void CheckVars(void)
 	}
 }
 
-/*************
+/**
  Var_Get
 
  Put a new variable at vars array or set flags if it already exists
- *************/
+ */
 
 var_t *Var_Get(char *var_name, char *var_value, int flags)
 {
@@ -653,11 +653,11 @@ var_t *Var_Get(char *var_name, char *var_value, int flags)
 	return var;
 }
 
-/*************
+/**
  Var_FindVar
 
  Find a variable at vars array and return a pointed to it
- *************/
+ */
 
 var_t *Var_FindVar(char *var_name)
 {
@@ -672,11 +672,11 @@ var_t *Var_FindVar(char *var_name)
 	return NULL;
 }
 
-/*************
+/**
  Var_Set
 
  Change a variable value or creates a new one if it doesn't exists
- *************/
+ */
 
 var_t *Var_Set(char *var_name, char *value)
 {
@@ -704,12 +704,12 @@ var_t *Var_Set(char *var_name, char *value)
 	return var;
 }
 
-/*************
+/**
  Var_VariableValue
 
  Searches the variable at vars array and return its value
  OBS: do not use it indiscriminately, may cause overprocessing
- *************/
+ */
 
 float Var_VariableValue(char *var_name)
 {
@@ -721,12 +721,12 @@ float Var_VariableValue(char *var_name)
 	return Com_Atof(var->string);
 }
 
-/*************
+/**
  Var_VariableString
 
  Searches the variable at vars array and return its string value
  OBS: do not use it indiscriminately, may cause overprocessing
- *************/
+ */
 
 char *Var_VariableString(char *var_name)
 {
@@ -738,11 +738,11 @@ char *Var_VariableString(char *var_name)
 	return var->string;
 }
 
-/*************
+/**
  Var_WriteVariables
 
  Save all variables set with VAR_ARCHIVE flag in "path" file
- *************/
+ */
 
 void Var_WriteVariables(char *path, client_t *client)
 {
@@ -771,11 +771,11 @@ void Var_WriteVariables(char *path, client_t *client)
 	fclose(fp);
 }
 
-/*************
+/**
  UpdateArenaStatus
 
  Update table arena_status
- *************/
+ */
 
 u_int8_t UpdateArenaStatus(u_int8_t uptime)
 {

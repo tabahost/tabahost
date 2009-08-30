@@ -70,11 +70,11 @@
 int sockfd, udpfd; // local socket
 u_int8_t stop = 0;
 
-/*************
+/**
  main
 
  Here the program begins
- *************/
+ */
 
 int main(int argc, char *argv[])
 {
@@ -329,11 +329,11 @@ int main(int argc, char *argv[])
 	return 0;
 }
 
-/*************
+/**
  UpdateLocalArenaslist
 
  Recv all UDP data and check if there is another arena running in the world
- *************/
+ */
 void UpdateLocalArenaslist(void)
 {
 	struct sockaddr_in cli_addr;
@@ -413,11 +413,11 @@ void UpdateLocalArenaslist(void)
 	}
 }
 
-/*************
+/**
  RunFrame
 
  Run server Frame, processing arena rules and every existing client (must be done in not more than 0.1 sec)
- *************/
+ */
 
 void RunFrame(void)
 {
@@ -554,11 +554,11 @@ void RunFrame(void)
 	}
 }
 
-/*************
+/**
  BackupArenaStatus
 
  Make a backup of arena status for system crashes
- *************/
+ */
 
 void BackupArenaStatus(void)
 {
@@ -589,11 +589,11 @@ void BackupArenaStatus(void)
 	}
 }
 
-/*************
+/**
  ExitServer
 
  Exits program and return status termination
- *************/
+ */
 
 void ExitServer(int status)
 {
@@ -683,7 +683,7 @@ void ExitServer(int status)
 		}
 	}
 
-	printf("Server sucessfuly closed\n"); /*****************/
+	printf("Server s/**ed\n"); /*****************/
 	fflush(stdout);
 
 	exit(status);
