@@ -711,7 +711,7 @@ var_t *Var_Set(char *var_name, char *value)
  OBS: do not use it indiscriminately, may cause overprocessing
  */
 
-float Var_VariableValue(char *var_name)
+double Var_VariableValue(char *var_name)
 {
 	var_t *var;
 

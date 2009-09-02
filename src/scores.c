@@ -37,7 +37,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	int8_t penalty = 1;
 	u_int32_t flighttime;
 	munition_t *munition;
-	float event_cost = 0.0;
+	double event_cost = 0.0;
 
 	if(!client)
 	{
@@ -80,7 +80,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		sprintf(my_query, "UPDATE score_fighter SET");
 	}
 
-	Com_Printf(VERBOSE_DEBUG, "EVENT: %d. Misc: %d\n", event, misc);
+	Com_Printf(VERBOSE_DEBUG_SCORES, "EVENT: %d. Misc: %d\n", event, misc);
 	
 	switch (event)
 	{
@@ -176,7 +176,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 				ScoreFieldCapture(misc);
 				strcat(my_query, " fieldscapt = fieldscapt + '1'");
 			break;
-		case SCORE_LANDED: ///////// HERE BEGINS EVENTS THAT MAY HAVE KILLERS /////////
+		case SCORE_LANDED: //////// HERE BEGINS EVENTS THAT MAY HAVE KILLERS /////////
 				strcat(my_query, " landed = landed + '1'");
 				
 				if(captured)
@@ -267,11 +267,11 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 			break;
 	}
 
-	Com_Printf(VERBOSE_DEBUG, "EVENT COST: %f\n", event_cost);
+	Com_Printf(VERBOSE_DEBUG_SCORES, "EVENT COST: %f\n", event_cost);
 	
 	if(event_cost < 0)
 	{
-		Com_Printf(VERBOSE_DEBUG, "ScoresEvent(event_cost) < 0, event = %d, misc = %d\n", event, misc);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "ScoresEvent(event_cost) < 0, event = %d, misc = %d\n", event, misc);
 	}
 
 	client->score.costscore += event_cost;
@@ -334,7 +334,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	
 	if(!client->drone)
 	{
-		Com_Printf(VERBOSE_DEBUG, "Event Query: %s\n", my_query);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Event Query: %s\n", my_query);
 	
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
@@ -355,7 +355,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 		if(!client->drone)
 		{
-			Com_Printf(VERBOSE_DEBUG, "Query: %s\n", my_query);
+			Com_Printf(VERBOSE_DEBUG_SCORES, "Query: %s\n", my_query);
 			if (d_mysql_query(&my_sock, my_query)) // query succeeded
 			{
 				Com_Printf(VERBOSE_WARNING, "ScoresEvent(updplayer): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
@@ -372,7 +372,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		else if (client->country == 3)
 			sprintf(my_query, "%s flygold = flygold + '1' WHERE player_id = '%u'", my_query, client->id);
 
-		Com_Printf(VERBOSE_DEBUG, "Query: %s\n", my_query);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Query: %s\n", my_query);
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
 			Com_Printf(VERBOSE_WARNING, "ScoresEvent(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
@@ -387,7 +387,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	{
 		sprintf(my_query, "UPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'", client->score.penaltyscore, client->id);
 
-		Com_Printf(VERBOSE_DEBUG, "Query: %s\n", my_query);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Query: %s\n", my_query);
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
 			Com_Printf(VERBOSE_WARNING, "ScoresEvent(penalty): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
@@ -401,7 +401,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		return;
 	}
 
-///////////////////// KILLER SCORE ///////////////////
+//////////////////// KILLER SCORE ///////////////////
 
 	killer = ScoresCheckKiller(client, &misc);
 	
@@ -411,7 +411,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	}
 	else
 	{
-		Com_Printf(VERBOSE_DEBUG, "Piece event cost %f, killed %s\n", event_cost, client->longnick);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Piece event cost %f, killed %s\n", event_cost, client->longnick);
 		ScorePieceDamage(-1, event_cost, client);
 	}
 	
@@ -427,22 +427,22 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 void ScoreFieldCapture(u_int8_t field)
 {
 	char sql_query[1024];
-	float fieldcost, score;
+	double fieldcost, score;
 	client_t *dbclient;
 	u_int8_t numbombers, numcargos, i;
 	u_int32_t bomberdamage, cargodamage;
 
 	if(field < fields->value)
 	{
-		Com_Printf(VERBOSE_DEBUG, "Field %d\n", field+1);
-		Com_Printf(VERBOSE_DEBUG, "Country %d\n", arena->fields[field].country);
-		Com_Printf(VERBOSE_DEBUG, "Type %d\n", arena->fields[field].type);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Field %d\n", field+1);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Country %d\n", arena->fields[field].country);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Type %d\n", arena->fields[field].type);
 		
 		fieldcost = GetFieldCost(field);
 
 		bomberdamage = cargodamage = numbombers = numcargos = 0;
 		
-		Com_Printf(VERBOSE_DEBUG, "Start search capturers\n");
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Start search capturers\n");
 		
 		for(i = 0; i < MAX_HITBY; i++) // account bombers and cargos
 		{
@@ -450,13 +450,13 @@ void ScoreFieldCapture(u_int8_t field)
 			{
 				if(IsCargo(NULL, arena->fields[field].hitby[i].plane))
 				{
-					Com_Printf(VERBOSE_DEBUG, "Found Cargo damage %d\n", arena->fields[field].hitby[i].damage);
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Found Cargo damage %d\n", arena->fields[field].hitby[i].damage);
 					cargodamage += arena->fields[field].hitby[i].damage;
 					numcargos++;
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG, "Found Bomber damage %d\n", arena->fields[field].hitby[i].damage);
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Found Bomber damage %d\n", arena->fields[field].hitby[i].damage);
 					bomberdamage += arena->fields[field].hitby[i].damage;
 					numbombers++;
 				}
@@ -468,7 +468,7 @@ void ScoreFieldCapture(u_int8_t field)
 
 		sql_query[0] = '\0';
 
-		Com_Printf(VERBOSE_DEBUG, "Start giving points\n");
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Start giving points\n");
 		
 		for(i = 0; i < MAX_HITBY; i++) // give points
 		{
@@ -476,25 +476,25 @@ void ScoreFieldCapture(u_int8_t field)
 			{
 				if(IsCargo(NULL, arena->fields[field].hitby[i].plane))
 				{
-					score = fieldcost * (arena->fields[field].hitby[i].damage / cargodamage) * ((float)numcargos / (numcargos + numbombers));
-					Com_Printf(VERBOSE_DEBUG, "Cargo: %f\n", score);
+					score = fieldcost * (arena->fields[field].hitby[i].damage / cargodamage) * ((double)numcargos / (numcargos + numbombers));
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Cargo: %f\n", score);
 				}
 				else
 				{
-					score = fieldcost * (arena->fields[field].hitby[i].damage / bomberdamage) * ((float)numbombers / (numcargos + numbombers));
-					Com_Printf(VERBOSE_DEBUG, "Bomber: %f\n", score);
+					score = fieldcost * (arena->fields[field].hitby[i].damage / bomberdamage) * ((double)numbombers / (numcargos + numbombers));
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Bomber: %f\n", score);
 				}
 
 				if (arena->fields[field].hitby[i].country == arena->fields[field].country) // if it WAS enemy
 				{
 					if((dbclient = FindDBClient(arena->fields[field].hitby[i].dbid)) && dbclient->infly)
 					{
-						Com_Printf(VERBOSE_DEBUG, "InFlight\n");
+						Com_Printf(VERBOSE_DEBUG_SCORES, "InFlight\n");
 						dbclient->score.captscore += score;
 					}
 					else
 					{
-						Com_Printf(VERBOSE_DEBUG, "Not InFlight\n");
+						Com_Printf(VERBOSE_DEBUG_SCORES, "Not InFlight\n");
 						if (IsFighter(NULL, arena->fields[field].hitby[i].plane))
 						{
 							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i].dbid);
@@ -518,18 +518,18 @@ void ScoreFieldCapture(u_int8_t field)
 				{
 					if((dbclient = FindDBClient(arena->fields[field].hitby[i].dbid)) && dbclient->infly)
 					{
-						Com_Printf(VERBOSE_DEBUG, "Field Penalty InFlight\n");
+						Com_Printf(VERBOSE_DEBUG_SCORES, "Field Penalty InFlight\n");
 						dbclient->score.penaltyscore += score;
 					}
 					else
 					{
-						Com_Printf(VERBOSE_DEBUG, "Field Penalty Not InFlight\n");
+						Com_Printf(VERBOSE_DEBUG_SCORES, "Field Penalty Not InFlight\n");
 						sprintf(sql_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score, arena->fields[field].hitby[i].dbid);
 					}
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG, "Field Penalty filtered '%.3f'\n", score);
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Field Penalty filtered '%.3f'\n", score);
 				}
 			}
 		}
@@ -608,11 +608,11 @@ void ScoreFieldCapture(u_int8_t field)
  Give piece points to damagers or just return the totaldamage
  */
 
-float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
+double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 {
 	int8_t i;
-	float totaldamage = 0.0;
-	float score;
+	double totaldamage = 0.0;
+	double score;
 	client_t *dbclient;
 	
 	// calc pieces // enemy damage/totalDamage * planeLife/totalLife * cost
@@ -625,7 +625,7 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 		}
 	}
 	
-	Com_Printf(VERBOSE_DEBUG, "Total damage %f\n", totaldamage);
+	Com_Printf(VERBOSE_DEBUG_SCORES, "Total damage %f\n", totaldamage);
 	
 	if(event_cost)
 	{
@@ -642,7 +642,7 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 				{
 					score = (client->hitby[i].damage/totaldamage) * event_cost;
 					
-					Com_Printf(VERBOSE_DEBUG, "Score %f, killer %s\n", score, client->hitby[i].longnick);
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Score %f, killer %s\n", score, client->hitby[i].longnick);
 					
 					if(killer == i)
 						score += event_cost;
@@ -680,18 +680,18 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
 						{
 							if((dbclient = FindDBClient(client->hitby[i].dbid)) && dbclient->infly)
 							{
-								Com_Printf(VERBOSE_DEBUG, "Kill Penalty InFlight\n");
+								Com_Printf(VERBOSE_DEBUG_SCORES, "Kill Penalty InFlight\n");
 								dbclient->score.penaltyscore += score;
 							}
 							else
 							{
-								Com_Printf(VERBOSE_DEBUG, "Kill Penalty Not InFlight\n");
+								Com_Printf(VERBOSE_DEBUG_SCORES, "Kill Penalty Not InFlight\n");
 								sprintf(my_query, "%sUPDATE score_penalty SET penalty_score = penalty_score + '%.3f' WHERE player_id = '%u'; ", my_query, score, client->hitby[i].dbid);
 							}
 						}
 						else
 						{
-							Com_Printf(VERBOSE_DEBUG, "Kill Penalty filtered '%.3f'\n", score);
+							Com_Printf(VERBOSE_DEBUG_SCORES, "Kill Penalty filtered '%.3f'\n", score);
 						}
 					}
 				}
@@ -730,7 +730,7 @@ float ScorePieceDamage(int8_t killer, float event_cost, client_t *client)
  Returns the cost of a new plane
  */
 
-float ScorePlaneCost(client_t *client)
+double ScorePlaneCost(client_t *client)
 {
 	if(!client)
 	{
@@ -752,7 +752,7 @@ float ScorePlaneCost(client_t *client)
  Returns the cost to fix a damaged plane
  */
 
-float ScoreFixPlaneCost(float plane_life, float plane_cost)
+double ScoreFixPlaneCost(double plane_life, double plane_cost)
 {
 	return plane_cost * (0.01 + (1.0 - plane_life) * 0.99);
 }
@@ -763,7 +763,7 @@ float ScoreFixPlaneCost(float plane_life, float plane_cost)
  Returns the cost to transport a plane to nearest airfield
  */
 
-float ScorePlaneTransportCost(client_t *client)
+double ScorePlaneTransportCost(client_t *client)
 {
 	u_int32_t distance;
 	int16_t field;
@@ -775,7 +775,7 @@ float ScorePlaneTransportCost(client_t *client)
 		if(field >= 0)
 		{
 			if(distance > 3280) // 1 km
-				return ((float)(distance - 3280)/3280) * arena->costs.planeweight[client->plane] * arena->costs.planetransport;
+				return ((double)(distance - 3280)/3280) * arena->costs.planeweight[client->plane] * arena->costs.planetransport;
 			else
 				return 0.0;
 		}
@@ -793,7 +793,7 @@ float ScorePlaneTransportCost(client_t *client)
  Returns the cost to transport a pilot to nearest airfield
  */
 
-float ScorePilotTransportCost(client_t *client)
+double ScorePilotTransportCost(client_t *client)
 {
 	int16_t field;
 	u_int32_t distance;
@@ -803,7 +803,7 @@ float ScorePilotTransportCost(client_t *client)
 	if(field >= 0)
 	{
 		if(distance > 32808) // 10 km
-			return ((float)(distance - 32808)/3280) * arena->costs.pilottransport;
+			return ((double)(distance - 32808)/3280) * arena->costs.pilottransport;
 		else
 			return 0.0;
 	}
@@ -815,9 +815,9 @@ float ScorePilotTransportCost(client_t *client)
  Returns the cost of flight based in flight time
  */
 
-float ScoreFlightTimeCost(client_t *client)
+double ScoreFlightTimeCost(client_t *client)
 {
-	float flighttime;
+	double flighttime;
 
 	if(!client)
 	{
@@ -837,10 +837,10 @@ float ScoreFlightTimeCost(client_t *client)
  Check the cost of damaged plane. If damage > 50%, cost == total plane cost, else cost == plane fix + plane transport
  */
 
-float ScoreDamageCost(client_t *client)
+double ScoreDamageCost(client_t *client)
 {
 	u_int8_t i;
-	float plane_cost, plane_recover, plane_life;
+	double plane_cost, plane_recover, plane_life;
 
 	if(!client)
 	{
@@ -866,11 +866,11 @@ float ScoreDamageCost(client_t *client)
  Returns the percentage of life from plane (including flight time usage)
  */
 
-float ScorePlaneLife(client_t *client)
+double ScorePlaneLife(client_t *client)
 {
 	u_int8_t i;
-	float totalpoints = 0.0;
-	float pointsleft = 0.0;
+	double totalpoints = 0.0;
+	double pointsleft = 0.0;
 
 	for(pointsleft = totalpoints = i = 0; i < 32; i++)
 	{
@@ -889,7 +889,7 @@ float ScorePlaneLife(client_t *client)
 //	pointsleft = totalpoints - pointsleft;
 	if((pointsleft -= ScoreFlightTimeCost(client)) < 0.0)
 	{
-		Com_Printf(VERBOSE_DEBUG, "ScorePlaneLife(pointsleft) < 0, %f\n", pointsleft);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "ScorePlaneLife(pointsleft) < 0, %f\n", pointsleft);
 		return 0;
 	}
 
@@ -897,7 +897,7 @@ float ScorePlaneLife(client_t *client)
 
 	if(pointsleft > 1.0)
 	{
-		Com_Printf(VERBOSE_DEBUG, "ScorePlaneLife(pointsleft) > 100%, %f\n", pointsleft);
+		Com_Printf(VERBOSE_DEBUG_SCORES, "ScorePlaneLife(pointsleft) > 100%, %f\n", pointsleft);
 		return 1;
 	}
 	else
@@ -1019,9 +1019,9 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 
 	PPrintf(client, RADIO_WHITE, "==================================================");
 	PPrintf(client, RADIO_WHITE, "Flight time: %s", Com_TimeSeconds(FLIGHT_TIME(client)/1000));
-		Com_Printf(VERBOSE_DEBUG, "Flight Time = %u / 1000\n", FLIGHT_TIME(client));
+		Com_Printf(VERBOSE_DEBUG_SCORES, "Flight Time = %u / 1000\n", FLIGHT_TIME(client));
 	PPrintf(client, RADIO_WHITE, "Last mission score: %11.3f - %s mission.", client->lastscore, IsFighter(client) ? "Fighter" : IsBomber(client) ? "Bomber" : "Ground");
-	PPrintf(client, RADIO_WHITE, "You've shot %d rounds, hit %d (acc:%.3f%%)", gunused, totalhits, gunused ? (float)totalhits*100/gunused : 0);
+	PPrintf(client, RADIO_WHITE, "You've shot %d rounds, hit %d (acc:%.3f%%)", gunused, totalhits, gunused ? (double)totalhits*100/gunused : 0);
 	if(totalhits)
 	{
 		memset(buffer, 0, sizeof(buffer));
@@ -1102,7 +1102,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 	char buffer[128];
 	char query_bomber[512];
 	char query_ground[512];
-	float damage;
+	double damage;
 	client_t *killer = NULL;
 	client_t *dbclient = NULL;
 
@@ -1118,7 +1118,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 	{
 		if(!client->damaged) // maneuver kill or nothing
 		{
-			Com_Printf(VERBOSE_DEBUG, "Check nearest player (3000 feets radius)\n");
+			Com_Printf(VERBOSE_DEBUG_SCORES, "Check nearest player (3000 feets radius)\n");
 			if ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) <= 164) // explosions above 50mts are not maneuver kill
 			{
 				killer = NearPlane(client, client->country, 3000);
@@ -1132,7 +1132,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 					if(maneuver)
 						*maneuver = 1;
 					
-					Com_Printf(VERBOSE_DEBUG, "Found nearest player (%s)\n", killer->longnick);
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Found nearest player (%s)\n", killer->longnick);
 					
 					if (printkills->value)
 					{
@@ -1211,12 +1211,12 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 		}
 		else // Damaged, valid kill
 		{
-			Com_Printf(VERBOSE_DEBUG, "Now check who did more damage\n");
+			Com_Printf(VERBOSE_DEBUG_SCORES, "Now check who did more damage\n");
 			for (i = 0, j = -1, damage = 0; i < MAX_HITBY; i++) // check who inflicted more damage
 			{
 				if (client->hitby[i].dbid) // if client in list
 				{
-					Com_Printf(VERBOSE_DEBUG, "%s - %f\n", client->hitby[i].longnick, client->hitby[i].damage);
+					Com_Printf(VERBOSE_DEBUG_SCORES, "%s - %f\n", client->hitby[i].longnick, client->hitby[i].damage);
 					if (client->hitby[i].damage > damage) // if damage > current damage
 					{
 						damage = client->hitby[i].damage; // set current damage as attacker damage
@@ -1231,7 +1231,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 				//client->hitby[j] = NULL; // clear killer from list
 				dbclient = FindDBClient(client->hitby[j].dbid);
 
-				Com_Printf(VERBOSE_DEBUG, "Server has chosen %s as killer!!!\n", client->hitby[j].longnick);
+				Com_Printf(VERBOSE_DEBUG_SCORES, "Server has chosen %s as killer!!!\n", client->hitby[j].longnick);
 				
 				Com_LogEvent(EVENT_KILL, client->hitby[j].dbid == client->id?0:client->hitby[j].dbid, client->id);
 				if (client->hitby[j].dbid != client->id)
@@ -1477,7 +1477,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 
 				sprintf(my_query, "%s WHERE player_id = '%u'", my_query, client->hitby[j].dbid);
 
-				Com_Printf(VERBOSE_DEBUG, "Kill Query: %s\n", my_query);
+				Com_Printf(VERBOSE_DEBUG_SCORES, "Kill Query: %s\n", my_query);
 
 				if (d_mysql_query(&my_sock, my_query))
 				{
@@ -2266,7 +2266,7 @@ void BackupScores(u_int8_t collect_type)
  Return the cost of plane technology lost based in plane damage
  */
 
-float ScoreTechnologyCost(client_t *client)
+double ScoreTechnologyCost(client_t *client)
 {
 	return ScorePlaneLife(client) * ScorePlaneCost(client) * arena->costs.technologylost;
 }
@@ -2277,7 +2277,7 @@ float ScoreTechnologyCost(client_t *client)
  Return the cost of a building type
  */
 
-float GetBuildingCost(u_int8_t type)
+double GetBuildingCost(u_int8_t type)
 {
 	if(type < BUILD_MAX)
 	{
@@ -2293,7 +2293,7 @@ float GetBuildingCost(u_int8_t type)
  Return the cost of a munition type
  */
 
-float GetAmmoCost(u_int8_t type)
+double GetAmmoCost(u_int8_t type)
 {
 	if(type < MAX_MUNTYPE)
 	{
@@ -2312,10 +2312,10 @@ float GetAmmoCost(u_int8_t type)
  Return the cost of a field
  */
 
-float GetFieldCost(u_int8_t field)
+double GetFieldCost(u_int8_t field)
 {
 	u_int16_t i;
-	float cost = 0.0;
+	double cost = 0.0;
 	
 	if(field < fields->value)
 	{

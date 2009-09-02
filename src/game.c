@@ -311,7 +311,7 @@ void CheckArenaRules(void)
 	u_int8_t close, vitals, dominated;
 	int16_t i, j;
 	u_int8_t reds, golds, k;
-	float tonnage_recover;
+	double tonnage_recover;
 	u_int8_t c_cities, totalcities;
 	u_int32_t dist, tempdist;
 	int32_t posx;
@@ -368,11 +368,15 @@ void CheckArenaRules(void)
 						}
 					}
 
-					tonnage_recover = (1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(i+1) / (24.0 * rebuildtime->value / 9.0);
+					tonnage_recover = (1.0 + (((double)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(i+1) / (24.0 * rebuildtime->value / 9.0);
 
 					if(!tonnage_recover)
 					{
-						Com_Printf(VERBOSE_DEBUG, "CheckArenaRules() tonnage_recover = 0\n");
+						Com_Printf(VERBOSE_WARNING, "CheckArenaRules(tonnage_recover = 0) (1.0 + (((double)%u / %u) - 0.5) / 2.0) * %u / (24.0 * %.3f / 9.0)\n",
+							c_cities,
+							totalcities,
+							GetTonnageToClose(i+1),
+							rebuildtime->value);
 					}
 
 					arena->fields[i].tonnage -= tonnage_recover;
@@ -398,7 +402,7 @@ void CheckArenaRules(void)
 
 								if(arena->fields[i].hitby[j].damage < 0.0) // remove bomber
 								{
-									Com_Printf(VERBOSE_DEBUG, "Field damage removed, remove bomber %d from list\n", arena->fields[i].hitby[j].longnick);
+									Com_Printf(VERBOSE_DEBUG_DAMAGE, "Field damage removed, remove bomber %d from list\n", arena->fields[i].hitby[j].longnick);
 									memset(&(arena->fields[i].hitby[j]), 0, sizeof(hitby_t));
 								}
 							}
@@ -416,7 +420,7 @@ void CheckArenaRules(void)
 							{
 								if(arena->fields[i].buildings[j].timer > 360000) // 1 hour
 								{
-									Com_Printf(VERBOSE_DEBUG, "bugged building timer %d, set to 15min\n", arena->fields[i].buildings[j].timer);
+									Com_Printf(VERBOSE_DEBUG_DAMAGE, "bugged building timer %d, set to 15min\n", arena->fields[i].buildings[j].timer);
 									arena->fields[i].buildings[j].timer = 90000;
 								}
 							}
@@ -437,7 +441,6 @@ void CheckArenaRules(void)
 
 								if (arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
 								{
-									Com_Printf(VERBOSE_DEBUG, "Reup TOWER f%d\n", i+1);
 									//							close = arena->fields[i].abletocapture;
 									Cmd_Capt(i, arena->fields[i].country, NULL);
 									//							arena->fields[i].abletocapture = close;
@@ -926,12 +929,12 @@ void CheckArenaRules(void)
 					arena->fields[i].closed = 1;
 					BPrintf(RADIO_YELLOW, "Field %d closed", i+1);
 
-					Com_Printf(VERBOSE_DEBUG, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
+					Com_Printf(VERBOSE_DEBUG_DAMAGE, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
 					for (j = 0; j < MAX_BUILDINGS; j++)
 					{
 						if (arena->fields[i].buildings[j].field)
 						{
-							Com_Printf(VERBOSE_DEBUG, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
+							Com_Printf(VERBOSE_DEBUG_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
 						}
 						else
 							break;
@@ -950,12 +953,12 @@ void CheckArenaRules(void)
 				}
 				else if (arena->fields[i].closed && !close)
 				{
-					Com_Printf(VERBOSE_DEBUG, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
+					Com_Printf(VERBOSE_DEBUG_DAMAGE, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
 					for (j = 0; j < MAX_BUILDINGS; j++)
 					{
 						if (arena->fields[i].buildings[j].field)
 						{
-							Com_Printf(VERBOSE_DEBUG, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
+							Com_Printf(VERBOSE_DEBUG_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
 						}
 						else
 							break;
@@ -1059,17 +1062,7 @@ void CheckArenaRules(void)
 		{
 			// CV Route
 
-			//		if(!arena->cv[i].stuck)
-			//		{
-			/*			if(GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]) > 70)
-			 {
-			 CPrintf(arena->fields[arena->cv[i].field].country, RADIO_GREEN, "CV F%d got stuck", arena->cv[i].field+1);
-			 Com_Printf(VERBOSE_DEBUG, "CV[%u] stuck at X%d Y%d Z%d\n", i, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], GetHeightAt(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1]));
-			 arena->cv[i].speed = 0.01;
-			 arena->cv[i].stuck = 1;
-			 SetCVSpeed(&(arena->cv[i]));
-			 }
-			 else*/if (arena->cv[i].wptotal) // if CV have waypoints
+			if (arena->cv[i].wptotal) // if CV have waypoints
 			{
 				if (arena->cv[i].outofport && !arena->cv[i].threatened && !(arena->frame % 600)) // check if there are enemies around
 				{
@@ -1395,7 +1388,7 @@ void CheckArenaRules(void)
 
 			if (!(arena->frame % 30000)) // 5 min
 			{
-				Com_Printf(VERBOSE_ONLINE, "Online Players: %.3f\n", (float) players_num / players_count);
+				Com_Printf(VERBOSE_ONLINE, "Online Players: %.3f\n", (double) players_num / players_count);
 				players_num = players_count = 0;
 			}
 		}
@@ -1493,7 +1486,7 @@ void ProcessMetarWeather(void)
 {
 	FILE* fp;
 	char buffer[64];
-	float wind, angle, xwind, ywind;
+	double wind, angle, xwind, ywind;
 	u_int8_t weather;
 	char *token;
 	char value[8];
@@ -1554,7 +1547,7 @@ void ProcessCommands(char *command, client_t *client)
 	u_int8_t argc = 0;
 	char *argv[10];
 	char file[128];
-	float wind, angle;
+	double wind, angle;
 	client_t *pclient;
 
 	memset(argv, 0, sizeof(argv));
@@ -1569,7 +1562,7 @@ void ProcessCommands(char *command, client_t *client)
 
 	if(size > 128)
 	{
-		Com_Printf(VERBOSE_DEBUG, "ProcessCommands(size) > 100 (%d)\n", size);
+		Com_Printf(VERBOSE_WARNING, "ProcessCommands(size) > 100 (%d)\n", size);
 		return;
 	}
 
@@ -1814,11 +1807,10 @@ void ProcessCommands(char *command, client_t *client)
 				{
 					if (client->shanghai) // start shanghai flight
 					{
-						Com_Printf(VERBOSE_DEBUG, "Client have Shanghai\n");
 						if (client->shanghai->ready && !client->shanghai->infly)
 						{
 							client->shanghai->attached = client;
-							Com_Printf(VERBOSE_DEBUG, "Start Shanghai Fly\n");
+							Com_Printf(VERBOSE_ALWAYS, "%s start flight with %s in shanghai\n", client->longnick, client->shanghai->longnick);
 							Cmd_Fly(2, client->shanghai);
 						}
 					}
@@ -2136,7 +2128,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_YELLOW, "Command disabled in Arcade Mode");
 			}
 
-			//			CPrintf(client->country, RADIO_LIGHTYELLOW, "%s Position: %.2f, %.2f, Alt %d [x %d y %d]", client->longnick, (float)(client->posxy[0][0] - 633157) / -105592, (float)(client->posxy[1][0] + 633157) / 105592, client->posalt[0], client->posxy[0][0], client->posxy[1][0]);
+			//			CPrintf(client->country, RADIO_LIGHTYELLOW, "%s Position: %.2f, %.2f, Alt %d [x %d y %d]", client->longnick, (double)(client->posxy[0][0] - 633157) / -105592, (double)(client->posxy[1][0] + 633157) / 105592, client->posalt[0], client->posxy[0][0], client->posxy[1][0]);
 			return;
 		}
 		else if (!Com_Stricmp(command, "thanks"))
@@ -4761,9 +4753,9 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						nearplane->cancollide = -1;
 
 						nearplane->hitby[0].dbid = client->id;
-						nearplane->hitby[0].damage = (float)MAX_UINT32;  // TODO: Score: collision: change this
+						nearplane->hitby[0].damage = (double)MAX_UINT32;  // TODO: Score: collision: change this
 						client->hitby[0].dbid = nearplane->id;
-						client->hitby[0].damage = (float)MAX_UINT32;  // TODO: Score: collision: change this
+						client->hitby[0].damage = (double)MAX_UINT32;  // TODO: Score: collision: change this
 
 						client->damaged = 1;
 						nearplane->damaged = 1;
@@ -5333,7 +5325,7 @@ void CheckMaxG(client_t *client)
  Calculates actual client's plane wings' G load
  */
 
-float ClientG(client_t *client)
+double ClientG(client_t *client)
 {
 	double Ax, Ay, Az, g, pitch, roll, yaw, hyaw;
 
@@ -5342,10 +5334,10 @@ float ClientG(client_t *client)
 
 	yaw = WBtoHdg(client->angles[2][0]);
 
-	/////////// Az
+	////////// Az
 	Az = Com_Deg(acos(cos(Com_Rad(pitch)) * cos(Com_Rad(MODULUS(roll)))));
 	///////////
-	/////////// Ay
+	////////// Ay
 
 //	PPrintf(client, RADIO_GREEN, "Pitch %.2f, Roll %.2f, Yaw %.2f", pitch, roll, yaw);
 //	PPrintf(client, RADIO_RED, "AccX %d, AccY %d, Accz %d", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
@@ -5358,7 +5350,7 @@ float ClientG(client_t *client)
 	if (yaw > 180)
 		hyaw = 360 - yaw;
 
-	/// pitch influence
+	// pitch influence
 	if (pitch > 0)
 		Ay = ((90 - hyaw) * 2) - Com_Deg(asin(sin(Com_Rad(90+pitch)) * cos(Com_Rad(hyaw))));
 	else
@@ -5374,7 +5366,7 @@ float ClientG(client_t *client)
 		Ay = MODULUS((90 - hyaw) * 2) - Ay;
 	}
 	///
-	/// roll influence
+	// roll influence
 
 	if (roll > 0)
 		if (hyaw > 90)
@@ -5394,7 +5386,7 @@ float ClientG(client_t *client)
 
 	Ay += g;
 	///////////
-	/////////// Ax
+	////////// Ax
 	hyaw = yaw + 90;
 
 	if (hyaw >= 360)
@@ -5405,7 +5397,7 @@ float ClientG(client_t *client)
 	if (yaw > 180)
 		hyaw = 360 - yaw;
 
-	/// pitch influence
+	// pitch influence
 
 	if (pitch > 0)
 		Ax = ((90 - hyaw) * 2) - Com_Deg(asin(sin(Com_Rad(90+pitch)) * cos(Com_Rad(hyaw))));
@@ -5422,7 +5414,7 @@ float ClientG(client_t *client)
 		Ax = MODULUS((90 - hyaw) * 2) - Ax;
 	}
 	///
-	/// roll influence
+	// roll influence
 
 	if (roll > 0)
 		if (hyaw > 90)
@@ -6116,7 +6108,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 	hitstructure_t *hitstructure;
 	u_int8_t i = 0, j = 0, hits = 0, damaged = 0;
 	u_int16_t ap;
-	float distance;
+	double distance;
 	munition_t *munition;
 	building_t *building;
 
@@ -6186,7 +6178,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 			return;
 		}
 
-		ap = ((float)munition->decay * distance) + munition->ap;
+		ap = ((double)munition->decay * distance) + munition->ap;
 
 		damaged = AddBuildingDamage(building, munition->he, ap, client);
 
@@ -6308,8 +6300,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 			arena->fields[building->field - 1].paras++;
 
 			PPrintf(client, RADIO_YELLOW, "Paras count: %d", arena->fields[building->field - 1].paras);
-
-			Com_Printf(VERBOSE_DEBUG, "Paras count F%d = %d\n", building->field, arena->fields[building->field - 1].paras);
+			Com_Printf(VERBOSE_ALWAYS, "%s paras count f%d = %d\n", client->longnick, building->field, arena->fields[building->field - 1].paras);
 
 			AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
 
@@ -6379,7 +6370,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	u_int16_t he, ap;
 	int8_t needle[5];
 	u_int32_t dist;
-	float distance, sdamage, totaldamage;
+	double distance, sdamage, totaldamage;
 	int8_t killer = 0;
 	u_int32_t damage;
 	munition_t *munition;
@@ -6399,7 +6390,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	{
 		if ((val = NearestField(client->posxy[0][0], client->posxy[1][0], 0, TRUE, TRUE, &dist)) >= 0)
 		{
-			distance = (float) dist;
+			distance = (double) dist;
 			distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], (client->posxy[0][0] > 0 ? client->posxy[0][0] - distance : client->posxy[0][0] + distance),
 					client->posxy[1][0], 0, -1);
 		}
@@ -6574,7 +6565,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		// End Needle pre-processing
 
 		he = munition->he;
-		ap = ((float)munition->decay * distance) + munition->ap;
+		ap = ((double)munition->decay * distance) + munition->ap;
 
 		if (gunstats->value)
 		{
@@ -6597,7 +6588,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if(damage < 0)
 			{
-				Com_Printf(VERBOSE_DEBUG, "PHitPlane(damage he+ap) < 0, he = %d, ap = %d\n", he, ap);
+				Com_Printf(VERBOSE_DEBUG_DAMAGE, "PHitPlane(damage he+ap) < 0, he = %d, ap = %d\n", he, ap);
 			}
 
 			if (!setjmp(debug_buffer))
@@ -6621,12 +6612,12 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if(damage < 0)
 			{
-				Com_Printf(VERBOSE_DEBUG, "PHitPlane(damage -= ap) < 0, damage = %d, ap = %d\n", damage, ap);
+				Com_Printf(VERBOSE_DEBUG_DAMAGE, "PHitPlane(damage -= ap) < 0, damage = %d, ap = %d\n", damage, ap);
 			}
 
 			if(needle[j] >= 0 && needle[j] < 32 && killer >= 0 && killer < MAX_HITBY)
 			{
-				sdamage = (float)(10.0 * logf(1.0 + 100.0 * (float)damage / (float)(((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]) + 1.0)));
+				sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)damage / (double)(((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]) + 1.0)));
 
 				if(sdamage >= 0)
 				{
@@ -6634,7 +6625,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage, ((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
+					Com_Printf(VERBOSE_DEBUG_DAMAGE, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage, ((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
 				}
 			}
 
@@ -6656,7 +6647,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				return;
 			}
 
-			ap = ((float)munition->decay * distance) + munition->ap;
+			ap = ((double)munition->decay * distance) + munition->ap;
 
 			if (client != pvictim)
 			{
@@ -6666,7 +6657,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 					sprintf(header, "%s(%u)[%de%dp]%s%s", munition->abbrev, hitplane->type, munition->he, ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
 					memset(gunstatsb, 0, sizeof(gunstatsb));
 					sprintf(gunstatsb, "%s;%s;%s%s", header, heb, ign, apb);
-					Com_Printf(VERBOSE_DEBUG, "DM: %s\n", gunstatsb);
+					Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s\n", gunstatsb);
 //				}
 //				else
 //				{
@@ -6791,7 +6782,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	u_int8_t i;
 	int8_t killer = 0;
 	int32_t he;
-	float sdamage, totaldamage;
+	double sdamage, totaldamage;
 	munition_t *munition;
 	char header[128];
 	char heb[128];
@@ -6853,7 +6844,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 
 			if (hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
 			{
-				sdamage = (float)(10.0 * logf(1.0 + 100.0 * (float)he / (float)(((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]) + 1.0)));
+				sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)he / (double)(((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]) + 1.0)));
 
 				if(sdamage >= 0)
 				{
@@ -6861,7 +6852,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he, ((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
+					Com_Printf(VERBOSE_DEBUG_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he, ((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
 				}
 			}
 		}
@@ -7133,7 +7124,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 	//	}
 	if(!client)
 	{
-		Com_Printf(VERBOSE_DEBUG, "AddPlaneDamage(client) == NULL\n");
+		Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(client) == NULL\n");
 		return 0;
 	}
 
@@ -7310,15 +7301,15 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
  Calculate the rebuiding time
  */
 
-float RebuildTime(building_t *building)
+double RebuildTime(building_t *building)
 {
 	static u_int8_t villages, towns, ports, posts;
-	static float const_v, const_t, const_por, const_pos;
+	static double const_v, const_t, const_por, const_pos;
 	static u_int8_t calc = 0;
-	float c_villages, c_towns, c_ports, c_posts;
+	double c_villages, c_towns, c_ports, c_posts;
 	u_int16_t total;
 	u_int8_t i;
-	float rebuild;
+	double rebuild;
 
 	if(!building)
 	{
@@ -7356,7 +7347,7 @@ float RebuildTime(building_t *building)
 		}
 		else
 		{
-			Com_Printf(VERBOSE_DEBUG, "RebuildTime(total) == 0\n");
+			Com_Printf(VERBOSE_WARNING, "RebuildTime(total) == 0\n");
 		}
 
 		calc = 1;
@@ -7384,9 +7375,9 @@ float RebuildTime(building_t *building)
 
 	if(rebuild < 10000 /*10 seconds*/|| rebuild > 360000 /*50min*/)
 	{
-		Com_Printf(VERBOSE_DEBUG, "RebuildTime(rebuild) rebuild error %d\n", rebuild);
-		Com_Printf(VERBOSE_DEBUG, "RebuildTime(rebuild) post: %d, %f, %f, port: %d, %f, %f, village: %d, %f, %f, town: %d, %f, %f\n", posts, const_pos, c_posts, ports, const_por, c_ports, villages, const_v, c_villages, towns, const_t, c_towns);
-		Com_Printf(VERBOSE_DEBUG, "RebuildTime(rebuild) %f, Log %f, %f\n", rebuildtime->value, Com_Log(GetBuildingArmor(building->type, NULL), 40), (1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0)));
+		Com_Printf(VERBOSE_WARNING, "RebuildTime(rebuild) rebuild error %d\n", rebuild);
+		Com_Printf(VERBOSE_WARNING, "RebuildTime(rebuild) post: %d, %f, %f, port: %d, %f, %f, village: %d, %f, %f, town: %d, %f, %f\n", posts, const_pos, c_posts, ports, const_por, c_ports, villages, const_v, c_villages, towns, const_t, c_towns);
+		Com_Printf(VERBOSE_WARNING, "RebuildTime(rebuild) %f, Log %f, %f\n", rebuildtime->value, Com_Log(GetBuildingArmor(building->type, NULL), 40), (1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0)));
 		rebuild = 90000; // 15min
 	}
 
@@ -7413,7 +7404,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if(!building->field)
 	{
-		Com_Printf(VERBOSE_DEBUG, "AddBuildingDamage() building %d has no field", building->id);
+		Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddBuildingDamage() building %d has no field", building->id);
 		return 0;
 	}
 
@@ -7472,7 +7463,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 									}
 									else
 									{
-										Com_Printf(VERBOSE_DEBUG, "Main Ship (%d) destroyed (F%d) by %s %s\n", building->id, building->field, client ? (client->drone ? "drone" : "player") : "-HOST-",
+										Com_Printf(VERBOSE_ALWAYS, "Main Ship (%d) destroyed (F%d) by %s %s\n", building->id, building->field, client ? (client->drone ? "drone" : "player") : "-HOST-",
 												client ? client->longnick : "");
 										break;
 									}
@@ -7584,10 +7575,6 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 				{
 					if (client->country == building->country)
 					{
-						//debug
-						if (building->country != arena->fields[building->field - 1].country)
-							Com_Printf(VERBOSE_DEBUG, "structure at field %d differ country value (b%d;f%d;p%d)\n", building->field, building->country, arena->fields[building->field - 1].country, client->country);
-
 						client->structstod--;
 
 						CPrintf(client->country,
@@ -8395,14 +8382,14 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 	memcpy(loginname, buffer+1, buffer[0]);
 	loginname[31] = '\0';
 
-	Com_Printf(VERBOSE_DEBUG, "LOGINNAME %s\n", loginname);
+	Com_Printf(VERBOSE_ALWAYS, "LOGINNAME %s\n", loginname);
 
 	memset(nickname, 0, sizeof(nickname));
 	memcpy(nickname, buffer+2+buffer[0], 6);
 
 	strncpy(nickname, wbnick2ascii(ascii2wbnick(nickname, 0)), 6);
 
-	Com_Printf(VERBOSE_DEBUG, "NICK %s\n", nickname);
+	Com_Printf(VERBOSE_ALWAYS, "NICK %s\n", nickname);
 
 	nickpacket->packetid = htons(Com_WBhton(0x2001));
 
@@ -9381,18 +9368,18 @@ void SendScreenUpdates(client_t *client)
 				updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
 				updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
 
-				//			updateplane2->pitch = (float) client->visible[i].client->angles[0][0] * 128 / 1800;
-				//			updateplane2->xaccel = (float) client->visible[i].client->accelxyz[0][0] / 4;
-				//			updateplane2->prxspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[0][0] / 64) << 9) ^ 0x8000); // 7
-				//			updateplane2->prxspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[0][0] / 4) & 0x1FF) ^ 0x0100); // 9
-				//			updateplane2->roll = (float) client->visible[i].client->angles[1][0] * 128 / 1800;
-				//			updateplane2->yaccel = (float) client->visible[i].client->accelxyz[1][0] / 4;
-				//			updateplane2->bryspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[1][0] / 64) << 9) ^ 0x8000); // 7
-				//			updateplane2->bryspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[1][0] / 4) & 0x1FF) ^ 0x0100); // 9
-				//			updateplane2->yaw = (float) client->visible[i->client]->angles[2][0] * 128 / 1800;
-				//			updateplane2->zaccel = (float) client->visible[i].client->accelxyz[2][0] / 4;
-				//			updateplane2->yrzspeed = htons(((int8_t)((float) client->visible[i].client->aspeeds[2][0] / 64) << 9) ^ 0x8000); // 7
-				//			updateplane2->yrzspeed |= htons(((int8_t)((float) client->visible[i].client->speedxyz[2][0] / 4) & 0x1FF) ^ 0x0100); // 9
+				//			updateplane2->pitch = (double) client->visible[i].client->angles[0][0] * 128 / 1800;
+				//			updateplane2->xaccel = (double) client->visible[i].client->accelxyz[0][0] / 4;
+				//			updateplane2->prxspeed = htons(((int8_t)((double) client->visible[i].client->aspeeds[0][0] / 64) << 9) ^ 0x8000); // 7
+				//			updateplane2->prxspeed |= htons(((int8_t)((double) client->visible[i].client->speedxyz[0][0] / 4) & 0x1FF) ^ 0x0100); // 9
+				//			updateplane2->roll = (double) client->visible[i].client->angles[1][0] * 128 / 1800;
+				//			updateplane2->yaccel = (double) client->visible[i].client->accelxyz[1][0] / 4;
+				//			updateplane2->bryspeed = htons(((int8_t)((double) client->visible[i].client->aspeeds[1][0] / 64) << 9) ^ 0x8000); // 7
+				//			updateplane2->bryspeed |= htons(((int8_t)((double) client->visible[i].client->speedxyz[1][0] / 4) & 0x1FF) ^ 0x0100); // 9
+				//			updateplane2->yaw = (double) client->visible[i->client]->angles[2][0] * 128 / 1800;
+				//			updateplane2->zaccel = (double) client->visible[i].client->accelxyz[2][0] / 4;
+				//			updateplane2->yrzspeed = htons(((int8_t)((double) client->visible[i].client->aspeeds[2][0] / 64) << 9) ^ 0x8000); // 7
+				//			updateplane2->yrzspeed |= htons(((int8_t)((double) client->visible[i].client->speedxyz[2][0] / 4) & 0x1FF) ^ 0x0100); // 9
 			}
 			j++;
 		}
@@ -11020,11 +11007,11 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 	{
 		if (client->shanghai) // start shanghai flight
 		{
-			Com_Printf(VERBOSE_DEBUG, "Client have Shanghai\n");
 			if (client->shanghai->ready && !client->shanghai->infly)
 			{
 				client->shanghai->attached = client;
 				Com_Printf(VERBOSE_DEBUG, "Start Shanghai Fly\n");
+				Com_Printf(VERBOSE_ALWAYS, "%s start flight with %s in shanghai\n", client->longnick, client->shanghai->longnick);
 				SendGunnerStatusChange(client, 2, client->shanghai); // define position to be attached in client
 				SendAttachList(NULL, client->shanghai);
 				client->shanghai->visible[MAX_SCREEN - 1].client = client;

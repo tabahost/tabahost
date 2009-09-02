@@ -617,13 +617,13 @@ int ProcessClient(client_t *client)
 								if(near_en)
 								{
 									client->hitby[0].dbid = near_en->id;
-									client->hitby[0].damage = (float)MAX_UINT32; // TODO: Score: collision: change this
+									client->hitby[0].damage = (double)MAX_UINT32; // TODO: Score: collision: change this
 
 									if(nearplane == near_en)
 									near_en = client;
 
 									nearplane->hitby[0].dbid = near_en->id;
-									nearplane->hitby[0].damage = (float)MAX_UINT32; // TODO: Score: collision: change this
+									nearplane->hitby[0].damage = (double)MAX_UINT32; // TODO: Score: collision: change this
 								}
 
 								client->cancollide = -1;
@@ -1779,7 +1779,7 @@ void ClearKillers(client_t *client)
 {
 	if (client)
 	{
-		Com_Printf(VERBOSE_DEBUG, "Remove all killers from list\n");
+		Com_Printf(VERBOSE_DEBUG_DAMAGE, "Remove all killers from list\n");
 		memset(&(client->hitby), 0, sizeof(hitby_t) * MAX_HITBY);
 	}
 }
@@ -1794,7 +1794,7 @@ void ClearBombers(u_int8_t field)
 {
 	if (field < fields->value)
 	{
-		Com_Printf(VERBOSE_DEBUG, "Remove all bombers from list\n");
+		Com_Printf(VERBOSE_DEBUG_DAMAGE, "Remove all bombers from list\n");
 		memset(&(arena->fields[field].hitby), 0, sizeof(hitby_t) * MAX_HITBY);
 	}
 }
@@ -1807,7 +1807,7 @@ void ClearBombers(u_int8_t field)
 
 void CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags)
 {
-	float Ea, Eb, K;
+	double Ea, Eb, K;
 
 	if(!winner->rank)
 		winner->rank = 1500;
@@ -1818,7 +1818,7 @@ void CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags)
 	{
 		if ((flags & ELO_WINNER) && (winner != looser) /*ack dont have rank*/)
 		{
-			Ea = 1 / (1 + powf(10, (float)(looser->rank - winner->rank) / 400));
+			Ea = 1 / (1 + powf(10, (double)(looser->rank - winner->rank) / 400));
 
 			if (winner->rank > 2400)
 				K = 16;
@@ -1832,7 +1832,7 @@ void CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags)
 
 		if ((flags & ELO_LOOSER) && (winner != looser) /*ack dont have rank*/)
 		{
-			Eb = 1 / (1 + powf(10, (float)(winner->rank - looser->rank) / 400));
+			Eb = 1 / (1 + powf(10, (double)(winner->rank - looser->rank) / 400));
 
 			if (looser->rank > 2400)
 				K = 16;

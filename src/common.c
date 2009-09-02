@@ -773,7 +773,7 @@ void Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id)
  Logs description of an event
  */
 
-void Com_LogDescription(u_int32_t type, float value, char *string)
+void Com_LogDescription(u_int32_t type, double value, char *string)
 {
 	char query_log[256];
 
@@ -839,6 +839,16 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_ERROR);
 							break;
+						case VERBOSE_DEBUG_SCORES:
+							logfile[tverb] = fopen(FILE_DEBUG_SCORES, "a+");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_DEBUG_SCORES);
+							break;
+						case VERBOSE_DEBUG_DAMAGE:
+							logfile[tverb] = fopen(FILE_DEBUG_DAMAGE, "a+");
+							if(!logfile[tverb])
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_DEBUG_DAMAGE);
+							break;
 						case VERBOSE_DEBUG:
 							logfile[tverb] = fopen(FILE_DEBUG, "a+");
 							if(!logfile[tverb])
@@ -892,6 +902,20 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 					fprintf(logfile[0], "ERROR: ");
 				if (tverb && logfile[tverb])
 					fprintf(logfile[tverb], "ERROR: ");
+				break;
+			case VERBOSE_DEBUG_SCORES:
+				printf("DEBUG: SCORES: ");
+				if (logfile[0])
+					fprintf(logfile[0], "DEBUG: SCORES: ");
+				if (tverb && logfile[tverb])
+					fprintf(logfile[tverb], "DEBUG: SCORES: ");
+				break;
+			case VERBOSE_DEBUG_DAMAGE:
+				printf("DEBUG: DAMAGE: ");
+				if (logfile[0])
+					fprintf(logfile[0], "DEBUG: DAMAGE: ");
+				if (tverb && logfile[tverb])
+					fprintf(logfile[tverb], "DEBUG: DAMAGE: ");
 				break;
 			case VERBOSE_DEBUG:
 				printf("DEBUG: ");
@@ -951,21 +975,21 @@ char *Com_Padloc(int32_t x, int32_t y)
 
 int d_mysql_query(MYSQL *mysql, const char *query)
 {
-	u_int32_t debug_querytime;
+	u_int32_t querytime;
 	int32_t i;
 
 	if (printqueries->value)
-		Com_Printf(VERBOSE_DEBUG, "MYSQL \"%s\"\n", query);
+		Com_Printf(VERBOSE_DEBUG, "MYSQL: \"%s\"\n", query);
 
-	debug_querytime = Sys_Milliseconds();
+	querytime = Sys_Milliseconds();
 	if ((i = mysql_query(mysql, query)))
 	{
 		return i;
 	}
 
-	if ((debug_querytime = Sys_Milliseconds() - debug_querytime) > 70 /*ms*/)// || mysqlview->value)
+	if ((querytime = Sys_Milliseconds() - querytime) > 70 /*ms*/)// || mysqlview->value)
 	{
-		Com_Printf(VERBOSE_DEBUG, "d_mysql_query() delayed query %ums \"%s\"\n", debug_querytime, query);
+		Com_Printf(VERBOSE_WARNING, "d_mysql_query() delayed query %ums \"%s\"\n", querytime, query);
 	}
 
 	return i;
@@ -979,7 +1003,7 @@ int d_mysql_query(MYSQL *mysql, const char *query)
 
 int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
 {
-	u_int32_t debug_querytime;
+	u_int32_t querytime;
 	int32_t i;
 
 	if (printqueries->value)
@@ -987,7 +1011,7 @@ int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
 
 	if (!client || ((arena->frame - client->lastsql) > 300/*3 sec*/))
 	{
-		debug_querytime = Sys_Milliseconds();
+		querytime = Sys_Milliseconds();
 		if ((i = mysql_query(mysql, query)))
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_MySQL_Query(): %s error %d: %s\n", client ? client->longnick : "-HOST-", mysql_errno(mysql), mysql_error(mysql));
@@ -995,14 +1019,14 @@ int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
 			return i;
 		}
 
-		if ((debug_querytime = Sys_Milliseconds() - debug_querytime) > 70 /*ms*/)// || mysqlview->value)
+		if ((querytime = Sys_Milliseconds() - querytime) > 70 /*ms*/)// || mysqlview->value)
 		{
-			Com_Printf(VERBOSE_DEBUG, "Com_MySQL_Query() delayed query %ums \"%s\"\n", debug_querytime, query);
+			Com_Printf(VERBOSE_WARNING, "Com_MySQL_Query() delayed query %ums \"%s\"\n", querytime, query);
 		}
 	}
 	else
 	{
-		PPrintf(client, RADIO_YELLOW, "SQL flood, wait %.2f seconds", (float)(300 - (arena->frame - client->lastsql))/100);
+		PPrintf(client, RADIO_YELLOW, "SQL flood, wait %.2f seconds", (double)(300 - (arena->frame - client->lastsql))/100);
 		Com_Printf(VERBOSE_WARNING, "%s SQL flood\n", client->longnick);
 		return -1;
 	}

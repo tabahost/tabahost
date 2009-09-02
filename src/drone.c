@@ -789,7 +789,7 @@ int ProcessDrone(client_t *drone)
 								drone->ord = 1;
 
 								PPrintf(drone->related[0], RADIO_DARKGREEN, "Tank %s reached f%d", drone->longnick, drone->dronefield+1, dist);
-								Com_Printf(VERBOSE_DEBUG, "Tank %s reached f%d\n", drone->longnick, drone->dronefield+1, dist);
+								Com_Printf(VERBOSE_ALWAYS, "Tank %s(%s) reached f%d\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-", drone->dronefield+1, dist);
 							}
 						}
 						else if (k) // no target far but near
@@ -840,7 +840,7 @@ int ProcessDrone(client_t *drone)
 									{
 										drone->ord = 1;
 										PPrintf(drone->related[0], RADIO_DARKGREEN, "Katyusha %s reached f%d", drone->longnick, drone->dronefield+1, dist);
-										Com_Printf(VERBOSE_DEBUG, "Katyusha %s reached f%d\n", drone->longnick, drone->dronefield+1, dist);
+										Com_Printf(VERBOSE_ALWAYS, "Katyusha %s(%s) reached f%d\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-", drone->dronefield+1, dist);
 									}
 
 									if (j < fields->value)
@@ -911,9 +911,15 @@ int ProcessDrone(client_t *drone)
 			else
 			{
 				if (drone->drone & DRONE_KATY)
+				{
 					PPrintf(drone->related[0], RADIO_DARKGREEN, "Katyusha %s finished its mission", drone->longnick);
+					Com_Printf(VERBOSE_ALWAYS, "Katyusha %s(%s) finished its mission\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-");
+				}
 				else
+				{
 					PPrintf(drone->related[0], RADIO_DARKGREEN, "Tank %s finished its mission", drone->longnick);
+					Com_Printf(VERBOSE_ALWAYS, "Tank %s(%s) finished its mission\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-");
+				}
 				RemoveDrone(drone);
 			}
 			break;
@@ -987,7 +993,15 @@ int ProcessDrone(client_t *drone)
 				if (drone->countrytime > 36000) // remove drone if throw time is more than 6 minutes (bug)
 				{
 					PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos has finished his bugged mission");
-					Com_Printf(VERBOSE_DEBUG, "Commandos throw time %u\n", drone->countrytime);
+					Com_Printf(VERBOSE_ALWAYS, "Commandos %s has finished his bugged mission\n", drone->longnick);
+					Com_Printf(VERBOSE_WARNING, "Commandos %s throw time %u, drone X %d, Y %d, Z %d, target X %d, Y %d\n",
+						drone->longnick, 
+						drone->countrytime,
+						drone->posxy[0][0],
+						drone->posxy[1][0],
+						GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50,
+						arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx,
+						arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy);
 					RemoveDrone(drone);
 				}
 
@@ -996,6 +1010,7 @@ int ProcessDrone(client_t *drone)
 			else
 			{
 				PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos has finished his mission");
+				Com_Printf(VERBOSE_ALWAYS, "Commandos %s has finished his mission\n", drone->longnick);
 				RemoveDrone(drone);
 			}
 			break;
@@ -1020,7 +1035,7 @@ int ProcessDrone(client_t *drone)
 	{
 		if (drone->drone & (DRONE_FAU | DRONE_WINGS1 | DRONE_WINGS2 | DRONE_HMACK | DRONE_HTANK | DRONE_KATY | DRONE_EJECTED | DRONE_COMMANDOS | DRONE_DEBUG))
 		{
-			Com_Printf(VERBOSE_DEBUG, "Removed unrelated drone %s type %u\n", drone->longnick, drone->drone);
+			Com_Printf(VERBOSE_WARNING, "Removed unrelated drone %s type %u\n", drone->longnick, drone->drone);
 			return -1;
 		}
 	}
@@ -1093,7 +1108,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 	int16_t velx, vely, velz, part;
 	int32_t dist;
 	ottofiring_t *otto;
-	float sdamage;
+	double sdamage;
 
 	if ((dist = DistBetween(source->posxy[0][0], source->posxy[1][0], source->posalt[0], dest->posxy[0][0], dest->posxy[1][0], dest->posalt[0], -1)) > 3000)
 		return;
@@ -1102,13 +1117,13 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 
 	otto = (ottofiring_t *) buffer;
 
-	velx = (float)((dest->posxy[0][0] + dest->speedxyz[0][0]) - source->posxy[0][0]) * 3170 / dist;
-	vely = (float)((dest->posxy[1][0] + dest->speedxyz[1][0]) - source->posxy[1][0]) * 3170 / dist;
-	velz = (float)((dest->posalt[0] + dest->speedxyz[2][0]) - source->posalt[0]) * 3170 / dist;
+	velx = (double)((dest->posxy[0][0] + dest->speedxyz[0][0]) - source->posxy[0][0]) * 3170 / dist;
+	vely = (double)((dest->posxy[1][0] + dest->speedxyz[1][0]) - source->posxy[1][0]) * 3170 / dist;
+	velz = (double)((dest->posalt[0] + dest->speedxyz[2][0]) - source->posalt[0]) * 3170 / dist;
 
 	if (!animate)
 	{
-		if (rand()%100 < ((1.1 - (float)dist/3000) * 100))
+		if (rand()%100 < ((1.1 - (double)dist/3000) * 100))
 		{
 			i = 0;
 			while (dest->armor.points[part = (rand()%32)] < 0)
@@ -1127,7 +1142,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 			j = AddKiller(dest, source);
 			if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
 			{
-				sdamage = (float)(10.0 * logf(1.0 + 100.0 * 40.0 / (float)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+				sdamage = (double)(10.0 * logf(1.0 + 100.0 * 40.0 / (double)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
 
 				if(sdamage >= 0)
 				{
@@ -1135,7 +1150,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
+					Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
 				}
 			}
 			
@@ -1282,8 +1297,8 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 				velz = 1500 * cos(Com_Rad(90 - angle)); // CV, TANKS fire
 		}
 
-		velx = (float)(destx - origx) * velz / dist;
-		vely = (float)(desty - origy) * velz / dist;
+		velx = (double)(destx - origx) * velz / dist;
+		vely = (double)(desty - origy) * velz / dist;
 
 		//
 		if (client && (client->drone & DRONE_KATY))
@@ -1302,7 +1317,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 		{
 			if (client->drone & DRONE_COMMANDOS) // COMMANDOS
 			{
-				client->countrytime = (float) 200 * velz / GRAVITY;
+				client->countrytime = (double) 200 * velz / GRAVITY;
 
 				if (wb3->value)
 					mun = MORTAR_BOMB; // 250kg AP
@@ -1315,7 +1330,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 			}
 			else if (client->drone & (DRONE_TANK1 | DRONE_TANK2))
 			{
-				dist = (float) 200 * velz / GRAVITY;
+				dist = (double) 200 * velz / GRAVITY;
 
 				if (wb3->value)
 					mun = 103; // 75mm M1897
@@ -1340,7 +1355,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 			}
 			else // MINEN
 			{
-				dist = (float) 200 * velz / GRAVITY;
+				dist = (double) 200 * velz / GRAVITY;
 
 				if (wb3->value)
 					mun = 88; // 250kg AP
@@ -1352,7 +1367,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 		}
 		else // CV, TANKS
 		{
-			dist = (float) 200 * velz / GRAVITY;
+			dist = (double) 200 * velz / GRAVITY;
 
 			mun = 83;
 
@@ -1530,7 +1545,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 	u_int16_t fieldradius;
 	int8_t killer = 0;
 	u_int8_t buffer[7];
-	float sdamage;
+	double sdamage;
 	wb3tonnage_t *wb3tonnage;
 	
 	wb3tonnage = (wb3tonnage_t *)buffer;
@@ -1738,7 +1753,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 		
 									if (killer >= 0 && killer < MAX_HITBY)
 									{
-										sdamage = (float)(10.0 * logf(1.0 + 100.0 * (float)munition->he / (float)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
+										sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)munition->he / (double)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
 
 										if(sdamage >= 0)
 										{
@@ -1746,7 +1761,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 										}
 										else
 										{
-											Com_Printf(VERBOSE_DEBUG, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he, ((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
+											Com_Printf(VERBOSE_WARNING, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he, ((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
 										}
 									}
 								}

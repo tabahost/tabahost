@@ -183,31 +183,31 @@ typedef unsigned int u_int32_t;
 #define FLAG_MAPFLAGSOWN	0x100
 #define FLAG_MAPFLAGSENEMY	0x200
 
-#define EVENT_CREATE		10000	/// PLIP, PLCTRID
-#define EVENT_LOGIN			10001	/// PLIP, PLCTRID
-#define EVENT_LOGOUT		10002	/// PLIP, PLCTRID
-#define EVENT_DISCO			10003	/// PLIP, PLCTRID
-#define EVENT_KILL			10004	/// PLPLANE, PLPLTYPE, PLCTRY, PLORD, VCPLANE, VCPLTYPE, VCCTRY, VCORD
-#define EVENT_KILLSTRUCT	10005	/// PLCTRY, COUNTRY, STRUCT, FIELD
-#define EVENT_HITSTRUCT		10006	/// PLCTRY, COUNTRY, STRUCT, FIELD, AMMO
-#define EVENT_DROP			10007	/// PLPLANE, AMMO
-#define EVENT_CAPT			10008	/// PLCTRY, FIELD
-#define EVENT_RESET			10009	/// TERRAIN
-#define EVENT_TAKEOFF		10010	/// PLPLANE, PLCTRY, PLORD, FIELD
-#define EVENT_LAND			10011	/// PLPLANE, PLCTRY, FIELD
-#define EVENT_EJECT			10012	/// PLPLANE, PLCTRY
-#define EVENT_CAPTURED		10013	/// PLPLANE, PLCTRY
-#define EVENT_BAIL			10014	/// PLPLANE, PLCTRY
-#define EVENT_DITCH			10015	/// PLPLANE, PLCTRY
-#define EVENT_COLLIDED		10016	/// PLPLANE, PLCTRY, VCPLANE, VCCTRY
+#define EVENT_CREATE		10000	// PLIP, PLCTRID
+#define EVENT_LOGIN			10001	// PLIP, PLCTRID
+#define EVENT_LOGOUT		10002	// PLIP, PLCTRID
+#define EVENT_DISCO			10003	// PLIP, PLCTRID
+#define EVENT_KILL			10004	// PLPLANE, PLPLTYPE, PLCTRY, PLORD, VCPLANE, VCPLTYPE, VCCTRY, VCORD
+#define EVENT_KILLSTRUCT	10005	// PLCTRY, COUNTRY, STRUCT, FIELD
+#define EVENT_HITSTRUCT		10006	// PLCTRY, COUNTRY, STRUCT, FIELD, AMMO
+#define EVENT_DROP			10007	// PLPLANE, AMMO
+#define EVENT_CAPT			10008	// PLCTRY, FIELD
+#define EVENT_RESET			10009	// TERRAIN
+#define EVENT_TAKEOFF		10010	// PLPLANE, PLCTRY, PLORD, FIELD
+#define EVENT_LAND			10011	// PLPLANE, PLCTRY, FIELD
+#define EVENT_EJECT			10012	// PLPLANE, PLCTRY
+#define EVENT_CAPTURED		10013	// PLPLANE, PLCTRY
+#define EVENT_BAIL			10014	// PLPLANE, PLCTRY
+#define EVENT_DITCH			10015	// PLPLANE, PLCTRY
+#define EVENT_COLLIDED		10016	// PLPLANE, PLCTRY, VCPLANE, VCCTRY
 #define EVENT_RESCUE		10017	// PLPLANE, PLCTRY, VCPLANE
-#define EVENT_TANKS			10018	/// PLCTRY, FIELD, TOFIELD
-#define EVENT_FAU			10019	/// PLCTRY, FIELD
-#define EVENT_MEDAL			10020	/// MDWHAT, MDWHY, MDHM
-#define EVENT_THANKS		10021	/// EVENT_THANKS - value
-#define EVENT_ADM_ALTVAR	20001	/// VAR
+#define EVENT_TANKS			10018	// PLCTRY, FIELD, TOFIELD
+#define EVENT_FAU			10019	// PLCTRY, FIELD
+#define EVENT_MEDAL			10020	// MDWHAT, MDWHY, MDHM
+#define EVENT_THANKS		10021	// EVENT_THANKS - value
+#define EVENT_ADM_ALTVAR	20001	// VAR
 #define EVENT_ADM_COMMAND	20002	// COMMAND
-#define EVENT_ADM_CAPT		20003	/// COUNTRY, FIELD, TERRAIN
+#define EVENT_ADM_CAPT		20003	// COUNTRY, FIELD, TERRAIN
 #define EVENT_ADM_RESET		20004	// TERRAIN
 #define EVENT_ADM_TANKS		20005	// FIELD, TOFIELD
 #define EVENT_DESC_PLIP		30001	// player IP
@@ -256,22 +256,26 @@ typedef unsigned int u_int32_t;
 #define SCORE_FIELDCAPT		0x0800	// 2048 field capture
 #define SCORE_DISCO			0x1000	// 4096 disconnected
 
-#define VERBOSE_ALWAYS		0		// always prints these messages
-#define VERBOSE_ATTENTION	1		// attention messages
-#define VERBOSE_WARNING		2		// warning messages
-#define VERBOSE_ERROR		3		// error messages
-#define VERBOSE_DEBUG		4		// debug messages
-#define VERBOSE_MAX			4		// max
-#define VERBOSE_SMAX		"4"		// max string
-#define VERBOSE_ONLINE		-5		// always prints these messages
-#define VERBOSE_CHAT		-6		// always prints these messages
-#define VERBOSE_KILL		-7		// always prints these messages
-#define MAX_LOGFILE			8		// maximum of logfiles
+#define VERBOSE_ALWAYS			0		// always prints these messages
+#define VERBOSE_ATTENTION		1		// attention messages
+#define VERBOSE_WARNING			2		// warning messages
+#define VERBOSE_ERROR			3		// error messages
+#define VERBOSE_DEBUG_SCORES	4		// debug scores messages
+#define VERBOSE_DEBUG_DAMAGE	5		// debug damage messages
+#define VERBOSE_DEBUG			6		// debug messages
+#define VERBOSE_MAX				6		// max
+#define VERBOSE_SMAX			"6"		// max string
+#define VERBOSE_ONLINE			-7		// always prints these messages
+#define VERBOSE_CHAT			-8		// always prints these messages
+#define VERBOSE_KILL			-9		// always prints these messages
+#define MAX_LOGFILE				10		// maximum of logfiles
 
 #define FILE_CONSOLE		"./logs/console.log"
 #define FILE_ATTENTION		"./logs/attention.log"
 #define FILE_WARNING		"./logs/warning.log"
 #define FILE_ERROR			"./logs/error.log"
+#define FILE_DEBUG_SCORES	"./logs/debug_scores.log"
+#define FILE_DEBUG_DAMAGE	"./logs/debug_damage.log"
 #define FILE_DEBUG			"./logs/debug.log"
 #define FILE_ONLINE			"./logs/online.log"
 #define FILE_CHAT			"./logs/chat.log"
@@ -548,7 +552,7 @@ typedef struct hitby_s
 	char		longnick[10];
 	u_int32_t	squadron;
 	u_int16_t	plane;
-	float		damage;
+	double		damage;
 } hitby_t;
 
 typedef struct field_s
@@ -560,7 +564,7 @@ typedef struct field_s
 	u_int32_t	radius;
 	u_int8_t	abletocapture;
 	u_int8_t	closed;
-	float		tonnage;
+	double		tonnage;
 	u_int8_t	vitals;
 	u_int8_t	paras;
 	u_int32_t	alert;
@@ -571,7 +575,7 @@ typedef struct field_s
 	struct hitby_s	hitby[MAX_HITBY]; // players who hit field
 	cv_t		*cv; // linked CV
 	struct city_s *city[MAX_CITYFIELD]; // linked city
-	float		rps[MAX_PLANES];
+	double		rps[MAX_PLANES];
 	building_t	buildings[MAX_BUILDINGS]; // 1st building is radar
 } field_t;
 
@@ -599,8 +603,8 @@ typedef struct damage_s
 	int32_t		apstop[32];
 	int32_t		imunity[32];
 	int32_t		parent[32];
-	float		positiveG;
-	float		negativeG;
+	double		positiveG;
+	double		negativeG;
 } damage_t;
 
 typedef struct mapcycle_s
@@ -646,26 +650,26 @@ typedef struct arena_s
 	char		*address;		// Arena address (e.g.: wb.chph.ras.ru)
 	damage_t	planedamage[MAX_PLANES]; // Set plane armor
 	struct	{
-				float takeoff;
-				float ammotype[MAX_MUNTYPE];	// LoadAmmo():29
-				float buildtype[BUILD_MAX];		//
-				float planemodel[MAX_PLANES];	// LoadDamageModel():24
-				float planeweight[MAX_PLANES];	// LoadDamageModel():25
-				float newpilot;					//
-				float technologylost;			//
-				float informationlost;			//
-				float life;						//
-				float planetransport;			//
-				float pilottransport;			//
-				float flighthour;				//
+				double takeoff;
+				double ammotype[MAX_MUNTYPE];	// LoadAmmo():29
+				double buildtype[BUILD_MAX];		//
+				double planemodel[MAX_PLANES];	// LoadDamageModel():24
+				double planeweight[MAX_PLANES];	// LoadDamageModel():25
+				double newpilot;					//
+				double technologylost;			//
+				double informationlost;			//
+				double life;						//
+				double planetransport;			//
+				double pilottransport;			//
+				double flighthour;				//
 			} costs;
 	struct	{
 				int32_t	points;
 				int32_t	apstop;
 				int32_t	imunity;
 			} buildarmor[BUILD_MAX];
-	float		goldindex;		// dificulty index for gold
-	float		redindex;		// dificulty index for red
+	double		goldindex;		// dificulty index for gold
+	double		redindex;		// dificulty index for red
 	int16_t		numplayers;		// number of current playing players
 	int16_t		numdrones;		// number of current playing drones
 	bomb_t		bombs[MAX_BOMBS]; //
@@ -679,7 +683,7 @@ typedef struct var_s
 	char		*string;		// string stored in variable
 	int			flags;			// variable flags
 	u_short		modified;		// it was recently changed?
-	float		value;			// variable value
+	double		value;			// variable value
 	struct var_s *next;			// pointer to next variable in chain list
 } var_t;
 
@@ -740,7 +744,7 @@ typedef struct client_s
 	u_int8_t	threatened;		// drone are in threat?
 	u_int8_t	droneformation;	// formation wings drones will assume
 	int16_t		droneformchanged;	// wingmen formation changed (angle diff between last pos to new pos)
-	float		dronedistance;	// wingmen formation changed (angle diff between last pos to new pos)
+	double		dronedistance;	// wingmen formation changed (angle diff between last pos to new pos)
 	u_int8_t	dronefield;		// where drone was dropped
 	u_int32_t	dronetimer;		// how many frames drones will live & time client started to fly (game.c:1643)
 	u_int16_t	dronelasttarget; // Last target drone (commandos) had aimed
@@ -837,8 +841,8 @@ typedef struct client_s
 	u_int8_t	killssortie;	// kills in this sortie
 	u_int16_t	killstod;		// kills in this TOD
 	u_int16_t	structstod;		// structures in this TOD
-	float		lastscore;		// score in last flight
-	float		streakscore;	// score in last streak
+	double		lastscore;		// score in last flight
+	double		streakscore;	// score in last streak
 	u_int8_t	nummedals;		// num of medals received // TODO: Misc: unused????
 	int16_t		rank;			// Elo rating
 	u_int8_t	ranking;		// pilot ranking
@@ -2024,7 +2028,7 @@ int		Com_Send(client_t *client, u_int8_t *buf, int len);
 void	ConnError(int n);
 int		Com_Read(FILE *fp, u_int8_t *buffer, u_int32_t num);
 void	Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id);
-void	Com_LogDescription(u_int32_t type, float value, char *string);
+void	Com_LogDescription(u_int32_t type, double value, char *string);
 void	Com_Printf(int8_t verb, char *fmt, ...);
 char	*Com_TimeSeconds(u_int32_t seconds);
 char	*Com_Padloc(int32_t x, int32_t y);
@@ -2078,7 +2082,7 @@ void	CheckVars(void);
 var_t	*Var_Get(char *var_name, char *var_value, int flags);
 var_t	*Var_FindVar(char *var_name);
 var_t	*Var_Set (char *var_name, char *value);
-float	Var_VariableValue (char *var_name);
+double	Var_VariableValue (char *var_name);
 char	*Var_VariableString (char *var_name);
 void	Var_WriteVariables (char *path, client_t *client);
 u_int8_t UpdateArenaStatus(u_int8_t uptime);
@@ -2098,7 +2102,7 @@ void	PReqBomberList(client_t *client);
 void	PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client);
 void	PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached);
 void	CheckMaxG(client_t *client);
-float	ClientG(client_t *client);
+double	ClientG(client_t *client);
 void	PChutePos(u_int8_t *buffer, client_t *client);
 void	WB3GunnerUpdate(u_int8_t *buffer, client_t *client);
 void	WB3FireSuppression(u_int8_t *buffer, client_t *client);
@@ -2121,7 +2125,7 @@ char	*GetHitSite(u_int8_t id);
 char	*GetSmallHitSite(u_int8_t id);
 munition_t *GetMunition(u_int8_t id);
 u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, char *pap, client_t *client);
-float	RebuildTime(building_t *building);
+double	RebuildTime(building_t *building);
 u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, client_t *client);
 void	SendFieldStatus(u_int16_t field, client_t *client);
 void	SetBuildingStatus(building_t *building, u_int8_t status, client_t *client);
@@ -2237,7 +2241,7 @@ void	ReducePlanes(u_int8_t field);
 void	IncreaseAcksReup(u_int8_t field);
 u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot);
 u_int8_t GetFieldParas(u_int8_t type);
-float	GetTonnageToClose(u_int8_t field);
+double	GetTonnageToClose(u_int8_t field);
 u_int8_t Alt2Index(int32_t alt);
 void	WB3MapTopography(client_t *client);
 void	WB3Mapper(client_t *client);
@@ -2336,7 +2340,7 @@ void	Cmd_Time(u_int16_t time, char *mult, client_t *client);
 void	Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client);
 void	Cmd_Field(u_int8_t field, client_t *client);
 void	Cmd_City(u_int8_t city, client_t *client);
-void	Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *client);
+void	Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *client);
 void	Cmd_Say(char *argv[], u_int8_t argc, client_t *client);
 void	Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount);
 void	Cmd_Show(client_t *client);
@@ -2361,7 +2365,7 @@ void	Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client);
 void	Cmd_Gclear(char *nick, client_t *client);
 void	Cmd_Shanghai(u_int8_t *buffer, client_t *client);
 void	Cmd_View(client_t *victim, client_t *client);
-void	Cmd_Minen(u_int32_t dist, float angle, client_t *client);
+void	Cmd_Minen(u_int32_t dist, double angle, client_t *client);
 void	Cmd_Tanks(char *field, client_t *client);
 void	Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek);
 void	Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client);
@@ -2380,13 +2384,13 @@ void	Cmd_CheckBuildings(client_t *client); // debug
 // scores.c
 
 void	ScoresEvent(u_int16_t event, client_t *client, int32_t misc);
-float	ScorePlaneCost(client_t *client);
-float	ScoreFixPlaneCost(float plane_life, float plane_cost);
-float	ScorePlaneTransportCost(client_t *client);
-float	ScorePilotTransportCost(client_t *client);
-float	ScoreFlightTimeCost(client_t *client);
-float	ScoreDamageCost(client_t *client);
-float	ScorePlaneLife(client_t *client);
+double	ScorePlaneCost(client_t *client);
+double	ScoreFixPlaneCost(double plane_life, double plane_cost);
+double	ScorePlaneTransportCost(client_t *client);
+double	ScorePilotTransportCost(client_t *client);
+double	ScoreFlightTimeCost(client_t *client);
+double	ScoreDamageCost(client_t *client);
+double	ScorePlaneLife(client_t *client);
 void	ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client);
 int8_t	ScoresCheckKiller(client_t *client, int32_t *maneuver);
 u_int8_t ScoresCheckMedals(client_t *client);
@@ -2395,12 +2399,12 @@ u_int8_t ScoresCheckCaptured(client_t *client);
 void	ScoresCreate(client_t *client);
 void	ResetScores(void);
 void	BackupScores(u_int8_t collect_type);
-float	ScoreTechnologyCost(client_t *client);
-float	GetBuildingCost(u_int8_t type);
-float	GetAmmoCost(u_int8_t type);
-float	GetFieldCost(u_int8_t field);
+double	ScoreTechnologyCost(client_t *client);
+double	GetBuildingCost(u_int8_t type);
+double	GetAmmoCost(u_int8_t type);
+double	GetFieldCost(u_int8_t field);
 void	ScoreFieldCapture(u_int8_t field);
-float	ScorePieceDamage(int8_t killer, float event_cost, client_t *client);
+double	ScorePieceDamage(int8_t killer, double event_cost, client_t *client);
 void	ScoreLoadCosts(void);
 
 // Variables

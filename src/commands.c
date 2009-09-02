@@ -249,8 +249,8 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 		mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 
 		time = Sys_Milliseconds() - time;
-		Com_Printf(VERBOSE_DEBUG, "SaveAmmo(): Query Time %.3fsec\n", (float)(time)/1000);
-		PPrintf(client, RADIO_YELLOW, "Query Time %.3fsec\n", (float)(time)/1000);
+		Com_Printf(VERBOSE_DEBUG, "SaveAmmo(): Query Time %.3fsec\n", (double)(time)/1000);
+		PPrintf(client, RADIO_YELLOW, "Query Time %.3fsec\n", (double)(time)/1000);
 	}
 	else
 	{
@@ -2464,7 +2464,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	u_int8_t country, type, status, build_alive, build_total;
 	u_int16_t i, j;
 	u_int32_t reup, treup;
-	float tonnage_recover;
+	double tonnage_recover;
 	u_int8_t c_cities, totalcities;
 	FILE *fp;
 	char buffer[32];
@@ -2520,7 +2520,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					}
 				}
 
-				fprintf(fp, "%5.0f%%%4d/%02d", (float)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
+				fprintf(fp, "%5.0f%%%4d/%02d", (double)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
 				//fprintf(fp, "%s", buffer);
 
 				if(!oldcapt->value && wb3->value)
@@ -2580,11 +2580,11 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		
 		if(!oldcapt->value && wb3->value)
 		{
-			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras, ToT: %.2f, TTC: %.2f", (float)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type), arena->fields[field].tonnage, GetTonnageToClose(field+1));
+			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras, ToT: %.2f, TTC: %.2f", (double)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type), arena->fields[field].tonnage, GetTonnageToClose(field+1));
 		}
 		else
 		{
-			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras", (float)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
+			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras", (double)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
 		}
 
 		if (status)
@@ -2619,7 +2619,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					}
 				}
 
-				tonnage_recover = (1.0 + (((float)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(field+1) / (24.0 * rebuildtime->value / 9.0);
+				tonnage_recover = (1.0 + (((double)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(field+1) / (24.0 * rebuildtime->value / 9.0);
 
 				treup = ((arena->fields[field].tonnage - GetTonnageToClose(field+1)) * 6000) / tonnage_recover;
 			
@@ -2780,7 +2780,7 @@ void Cmd_City(u_int8_t citynum, client_t *client)
  Declares an structure
  */
 
-void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *client)
+void Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *client)
 {
 	client_t *drone;
 	u_int32_t time;
@@ -2876,7 +2876,7 @@ void Cmd_StartFau(u_int32_t dist, float angle, u_int8_t attached, client_t *clie
 	}
 
 	drone->angles[2][0] = angle;
-	drone->dronetimer = (float)dist*100/DRONE_FAU_SPEED;
+	drone->dronetimer = (double)dist*100/DRONE_FAU_SPEED;
 
 	if (attached)
 	{
@@ -3092,7 +3092,7 @@ void Cmd_Score(char *player, client_t *client)
 	u_int32_t ftime, player_id, debug_querytime;
 	char filename[128];
 	char nickname[7];
-	float ratio1, ratio2, ratio3, ratio4, csortie;
+	double ratio1, ratio2, ratio3, ratio4, csortie;
 	FILE *fp;
 	MYSQL_RES *temp_result= NULL;
 	MYSQL_ROW temp_row= NULL;
@@ -3896,7 +3896,7 @@ void Cmd_Clear(client_t *client)
 		Com_MySQL_Flush(&my_sock, __FILE__, __LINE__);
 
 		PPrintf(client, RADIO_LIGHTYELLOW, "Your score is cleared");
-		Com_Printf(VERBOSE_DEBUG, "Score cleared\n");
+		Com_Printf(VERBOSE_ALWAYS, "%s cleared scores\n", client->longnick);
 	}
 	else
 	{
@@ -5083,6 +5083,7 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 		drone->dronefield = i;
 
 		PPrintf(client, RADIO_YELLOW, "Commandos dropped at field f%d (dist %d)", i+1, dist);
+		Com_Printf(VERBOSE_ALWAYS, "Commandos %s dropped at field f%d (dist %d)\n", drone->longnick);
 	}
 	else
 	{
@@ -5486,7 +5487,7 @@ void Cmd_View(client_t *victim, client_t *client)
  View what other player is doing
  */
 
-void Cmd_Minen(u_int32_t dist, float angle, client_t *client)
+void Cmd_Minen(u_int32_t dist, double angle, client_t *client)
 {
 	int32_t destx, desty;
 
@@ -5636,7 +5637,7 @@ void Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek)
 void Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client)
 {
 	u_int8_t i;
-	float score;
+	double score;
 	client_t *pclient;
 
 	if (argc > 3)
@@ -6031,13 +6032,13 @@ void Cmd_CheckBuildings(client_t *client)
 	{
 		if(arena->fields[i].paras > GetFieldParas(arena->fields[i].type))
 		{
-			Com_Printf(VERBOSE_DEBUG, "Field %d paras bugged %d\n", i+1, arena->fields[i].paras);
+			Com_Printf(VERBOSE_WARNING, "Field %d paras bugged %d\n", i+1, arena->fields[i].paras);
 			arena->fields[i].paras = GetFieldParas(arena->fields[i].type);
 		}
 		
 		if(arena->fields[i].tonnage > (GetTonnageToClose(i+1) * 2.4))
 		{
-			Com_Printf(VERBOSE_DEBUG, "Field %d tonnage bugged %.3f\n", i+1, arena->fields[i].tonnage);
+			Com_Printf(VERBOSE_WARNING, "Field %d tonnage bugged %.3f\n", i+1, arena->fields[i].tonnage);
 			arena->fields[i].tonnage = (GetTonnageToClose(i+1) * 2.4);
 		}
 			
@@ -6046,7 +6047,16 @@ void Cmd_CheckBuildings(client_t *client)
 			if (arena->fields[i].buildings[j].field)
 			{
 				if (arena->fields[i].buildings[j].field != (i + 1))
-					Com_Printf(VERBOSE_DEBUG, "Building id %d f%d field %d\n", arena->fields[i].buildings[j].id, i + 1, arena->fields[i].buildings[j].field);
+				{
+					Com_Printf(VERBOSE_WARNING, "Building id %d at f%d with wrong field index: f%d\n", arena->fields[i].buildings[j].id, i + 1, arena->fields[i].buildings[j].field);
+					arena->fields[i].buildings[j].field = (i + 1);
+				}
+
+				if (arena->fields[i].buildings[j].country != arena->fields[i].country)
+				{
+					Com_Printf(VERBOSE_WARNING, "Building id %d at f%d differ country value (b%d;f%d)\n", arena->fields[i].buildings[j].id, i + 1, arena->fields[i].buildings[j].country, arena->fields[i].country);
+					arena->fields[i].buildings[j].country = arena->fields[i].country;
+				}
 			}
 		}
 	}

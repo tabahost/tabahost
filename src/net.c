@@ -344,7 +344,7 @@ int GetPacket(client_t *client)
 		client->timeout = 0;
 
 		len = 0;
-		if (mainbuffer[1] > 0) /// check===> len = (buffer[1]*0x100) | buffer[2];
+		if (mainbuffer[1] > 0) // check===> len = (buffer[1]*0x100) | buffer[2];
 		{
 			len = mainbuffer[1] * 0x100;
 		}
@@ -526,7 +526,7 @@ void FlushSocket(int sockfd)
 	{
 		//		if(debug->value)
 		//		{
-		Com_Printf(VERBOSE_DEBUG, "Flushing socket (%d) n(%d):\n", socket, n);
+		Com_Printf(VERBOSE_WARNING, "Flushing socket (%d) n(%d):\n", socket, n);
 		Com_Printfhex(mainbuffer, n);
 		//		}
 		//		else

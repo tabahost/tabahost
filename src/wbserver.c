@@ -110,10 +110,10 @@ int main(int argc, char *argv[])
 	Var_Get("port", port->string, VAR_NOSET);
 	Var_Get("maxclients", maxclients->string, VAR_NOSET);
 	Var_Get("maxentities", maxentities->string, VAR_NOSET);
-	//Var_Get("sqlserver", sqlserver->string, VAR_NOSET);
-	//Var_Get("database", database->string, VAR_NOSET);
+	// Var_Get("sqlserver", sqlserver->string, VAR_NOSET);
+	// Var_Get("database", database->string, VAR_NOSET);
 	Var_Get("hostdomain", hostdomain->string, VAR_NOSET);
-	//// vars set in each config.cfg
+	// vars set in each config.cfg
 	Var_Get("fields", fields->string, VAR_NOSET | VAR_ARCHIVE);
 	Var_Get("cities", cities->string, VAR_NOSET | VAR_ARCHIVE);
 	Var_Get("cvs", cvs->string, VAR_NOSET | VAR_ARCHIVE);
@@ -209,7 +209,7 @@ int main(int argc, char *argv[])
 				arena->frame = 1; // reset frames when max divisible by one minute (600 decasecs)
 				oldtime = Sys_ResetMilliseconds();
 				arena->time = Sys_Milliseconds();
-				Com_Printf(VERBOSE_DEBUG, "Time Reset\n");
+				Com_Printf(VERBOSE_WARNING, "Uptime reached 49 days, arena->frame reset\n");
 			}
 
 			checksync = FloorDiv(arena->time, 10);
@@ -544,7 +544,7 @@ void RunFrame(void)
 
 		if(!(arena->frame % (int)(100/server_speeds->value)))
 		{
-			printf("all:%3i arn:%3i cli:%3i sent: %.3f recv: %.3f time: %u\n", all, arn, cli, (float)arena->sent/1000, (float)arena->recv/1000, arena->time);
+			printf("all:%3i arn:%3i cli:%3i sent: %.3f recv: %.3f time: %u\n", all, arn, cli, (double)arena->sent/1000, (double)arena->recv/1000, arena->time);
 			fflush(stdout);
 
 			all = arn = cli = 0;

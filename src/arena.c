@@ -701,8 +701,8 @@ void SendMapDots(void)
 				{
 					radar2 = (radardot2_t *)(buffer+3+(7*j));
 					radar2->slot = htons(i);
-					radar2->posx = htons((float) clients[i].posxy[0][0] / (312 * 3.28));
-					radar2->posy = htons((float) clients[i].posxy[1][0] / (312 * 3.28));
+					radar2->posx = htons((double) clients[i].posxy[0][0] / (312 * 3.28));
+					radar2->posy = htons((double) clients[i].posxy[1][0] / (312 * 3.28));
 					radar2->country = clients[i].country;
 					j++;
 				}
@@ -710,8 +710,8 @@ void SendMapDots(void)
 				{
 					radar2 = (radardot2_t *)(buffer+3+(7*j));
 					radar2->slot = htons(i);
-					radar2->posx = htons((float) clients[i].posxy[0][0] / (312 * 3.28));
-					radar2->posy = htons((float) clients[i].posxy[1][0] / (312 * 3.28));
+					radar2->posx = htons((double) clients[i].posxy[0][0] / (312 * 3.28));
+					radar2->posy = htons((double) clients[i].posxy[1][0] / (312 * 3.28));
 					if (iff->value)
 						radar2->country = clients[i].country;
 					else
@@ -1376,11 +1376,11 @@ void UpdateRPS(u_int16_t minutes)
 	struct tm timestr;
 	struct tm *timeptr;
 	u_int8_t i, j;
-	float rate;
+	double rate;
 	u_int32_t basedate, lagdate[4];
 
 	if(minutes)
-		rate = (float)minutes / rps->value;
+		rate = (double)minutes / rps->value;
 	else
 		rate = 1.00;
 
@@ -1415,10 +1415,10 @@ void UpdateRPS(u_int16_t minutes)
 						&& arena->rps[j].country & 0x04) || (arena->fields[i].country == 4 && arena->rps[j].country & 0x08)) && ((arena->rps[j].in <= basedate && arena->rps[j].out > basedate)
 						|| (!arena->rps[j].in && !arena->rps[j].out)))
 				{
-					arena->fields[i].rps[j] += (float)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
+					arena->fields[i].rps[j] += (double)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
 
 					if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
-						arena->fields[i].rps[j] = (float)arena->rps[j].pool[arena->fields[i].type - 1];
+						arena->fields[i].rps[j] = (double)arena->rps[j].pool[arena->fields[i].type - 1];
 				}
 				else if (arcade->value)
 				{
@@ -1432,10 +1432,10 @@ void UpdateRPS(u_int16_t minutes)
 						&& arena->rps[j].out > lagdate[arena->fields[i].country - 1]) || (!arena->rps[j].in && !arena->rps[j].out)))
 				{
 					arena->rps[j].used = 1;
-					arena->fields[i].rps[j] += (float)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
+					arena->fields[i].rps[j] += (double)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
 
 					if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
-						arena->fields[i].rps[j] = (float)arena->rps[j].pool[arena->fields[i].type - 1];
+						arena->fields[i].rps[j] = (double)arena->rps[j].pool[arena->fields[i].type - 1];
 				}
 				else if (arcade->value)
 				{
@@ -3397,7 +3397,7 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 void ReducePlanes(u_int8_t field)
 {
 	u_int8_t i;
-	float reduce;
+	double reduce;
 
 	switch(arena->fields[field - 1].type)
 	{
@@ -3636,9 +3636,9 @@ u_int8_t GetFieldParas(u_int8_t type)
 	}
 }
 
-float GetTonnageToClose(u_int8_t field)
+double GetTonnageToClose(u_int8_t field)
 {
-	static float ttc_buf[MAX_FIELDTYPE];
+	static double ttc_buf[MAX_FIELDTYPE];
 
 	u_int16_t i;
 
@@ -4433,7 +4433,7 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 {
 	int8_t bomber;
 
-	Com_Printf(VERBOSE_DEBUG, "Field Damage: %u\n", damage);
+	Com_Printf(VERBOSE_DEBUG_DAMAGE, "Field Damage: %u\n", damage);
 
 	if(!client)
 		return;
@@ -4444,7 +4444,7 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 
 		if(!(bomber < 0))
 		{
-			arena->fields[field].hitby[bomber].damage += (float)damage;
+			arena->fields[field].hitby[bomber].damage += (double)damage;
 		}
 	}
 }
