@@ -34,7 +34,7 @@ void Cmd_LoadBatch(client_t *client)
 	char file[128];
 	char command[1024];
 
-	sprintf(file, "./batch/%s.cfg", client->longnick);
+	snprintf(file, sizeof(file), "./batch/%s.cfg", client->longnick);
 
 	if ((fp = fopen(file, "r")) == NULL)
 	{
@@ -488,9 +488,9 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 			{
 				client->ord = 0;
 				if (arcade->value)
-					sprintf(message, "You selected %s (N%d)", GetPlaneName(planenumber), planenumber);
+					snprintf(message, sizeof(message), "You selected %s (N%d)", GetPlaneName(planenumber), planenumber);
 				else
-					sprintf(message, "You selected %s (N%d), %d left", GetPlaneName(planenumber), planenumber, (int16_t)arena->fields[client->field - 1].rps[planenumber]);
+					snprintf(message, sizeof(message), "You selected %s (N%d), %d left", GetPlaneName(planenumber), planenumber, (int16_t)arena->fields[client->field - 1].rps[planenumber]);
 			}
 
 			client->plane = planenumber;
@@ -498,9 +498,9 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 		else
 		{
 			if (arcade->value)
-				sprintf(message, "Your plane is %s (N%d)", GetPlaneName(client->plane), client->plane);
+				snprintf(message, sizeof(message), "Your plane is %s (N%d)", GetPlaneName(client->plane), client->plane);
 			else
-				sprintf(message, "Your plane is %s (N%d), %d left", GetPlaneName(client->plane), client->plane, (int16_t)arena->fields[client->field - 1].rps[client->plane]);
+				snprintf(message, sizeof(message), "Your plane is %s (N%d), %d left", GetPlaneName(client->plane), client->plane, (int16_t)arena->fields[client->field - 1].rps[client->plane]);
 		}
 
 //		if (rps->value && strlen(message) && !arcade->value)
@@ -761,13 +761,11 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 			}
 
 			if (wb3->value)
-				sprintf(
-						my_query,
+				sprintf(my_query,
 						"SELECT ipaddress.id FROM players, players_ipaddress, ipaddress WHERE players.id = '%u' AND players.id = players_ipaddress.player_id AND ipaddress.id = players_ipaddress.ipaddress_id",
 						id);
 			else
-				sprintf(
-						my_query,
+				sprintf(my_query,
 						"SELECT hdserials.id FROM players, players_hdserials, hdserials WHERE players.id = '%u' AND players.id = players_hdserials.player_id AND hdserials.id = players_hdserials.hdserial_id",
 						id);
 
@@ -1210,7 +1208,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	client->status_damage = 0; // to force player not appear damaged after takeoff
 	client->chute = 0; // to assure client is not flagged as chute
 
-	sprintf(client->logfile, "%s,%s,%s,%s,%u", mapname->string, client->longnick, GetSmallPlaneName(client->plane), GetCountry(client->country), (u_int32_t)time(NULL));
+	snprintf(client->logfile, sizeof(client->logfile), "%s,%s,%s,%s,%u", mapname->string, client->longnick, GetSmallPlaneName(client->plane), GetCountry(client->country), (u_int32_t)time(NULL));
 
 	client->obradar = 0;
 
@@ -1387,7 +1385,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 	{
 		//~ if(!client) // a real capture
 		//~ {
-		//~ sprintf(buffer, "f%d", field+1);
+		//~ snprintf(buffer, sizeof(buffer), "f%d", field+1);
 		//~ Cmd_Seta(buffer, 0, -1, 0); // remove all planes from a sunk CV
 		//~ }
 
@@ -1702,7 +1700,7 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 										else if (hideadmin->value)
 											arena->numplayers++;
 
-										PPrintf(puser, RADIO_LIGHTYELLOW, "Your attributes are changed, please restart your Warbirds");
+										PPrintf(puser, RADIO_LIGHTYELLOW, "Your attributes are changed, please restart your game");
 									}
 
 									puser->attr = mod;
@@ -2399,12 +2397,9 @@ void Cmd_Time(u_int16_t time, char *mult, client_t *client)
 			if (clients[i].inuse && !clients[i].drone && clients[i].ready)
 			{
 				SendPacket(buffer, sizeof(buffer), &clients[i]);
-				SendArenaRules(&clients[i]);
 			}
 		}
 	}
-
-	planerangelimit->modified = enemyidlim->modified = friendlyidlim->modified = 1;
 }
 
 /**
@@ -2638,7 +2633,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	{
 		memset(buffer, 0, sizeof(buffer));
 
-		sprintf(buffer, "./fields/field%d.txt", field+1);
+		snprintf(buffer, sizeof(buffer), "./fields/field%d.txt", field+1);
 
 		if (!(fp = fopen(buffer, "wb")))
 		{
@@ -2746,7 +2741,7 @@ void Cmd_City(u_int8_t citynum, client_t *client)
 	{
 		memset(buffer, 0, sizeof(buffer));
 
-		sprintf(buffer, "./fields/city%d.txt", citynum);
+		snprintf(buffer, sizeof(buffer), "./fields/city%d.txt", citynum);
 
 		if (!(fp = fopen(buffer, "wb")))
 		{
@@ -2775,9 +2770,55 @@ void Cmd_City(u_int8_t citynum, client_t *client)
 }
 
 /**
+ Cmd_StartDrone
+
+ OP command to fire a drone for Damage Model test
+ */
+
+void Cmd_StartDrone(u_int32_t field, u_int32_t plane, double angle, client_t *client)
+{
+	client_t *drone;
+	u_int32_t dist = 150000;
+
+	if (angle*10 > 3599)
+	{
+		PPrintf(client, RADIO_YELLOW, "angle: 0<->359.9 degrees");
+		return;
+	}
+
+	if (client && client->attr == 1)
+	{
+		PPrintf(client, RADIO_YELLOW, "You're an Admin, you can't start V-1");
+		return;
+	}
+
+	drone = AddDrone(DRONE_FAU, arena->fields[field - 1].posxyz[0], arena->fields[field - 1].posxyz[1], arena->fields[field - 1].posxyz[2], 2, plane, client);
+
+	if (!drone)
+		return;
+
+	drone->speedxyz[0][0] = 300 * sin(Com_Rad(angle)) * -1;
+	drone->speedxyz[1][0] = 300 * cos(Com_Rad(angle));
+	drone->speedxyz[2][0] = 100;
+	drone->angles[0][0] = 80;
+
+	BPrintf(RADIO_GREEN, "Drone launched from field %d azimuth: %.1f�", field, angle);
+
+	angle = 360.0 - angle;
+
+	if ((angle *= 10) > 901)
+	{
+		angle -= 3600;
+	}
+
+	drone->angles[2][0] = angle;
+	drone->dronetimer = (double)dist*100/300;
+}
+
+/**
  Cmd_StartFau
 
- Declares an structure
+ Start a V-1
  */
 
 void Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *client)
@@ -2869,6 +2910,8 @@ void Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *cli
 	drone->angles[0][0] = 80;
 
 	PPrintf(client, RADIO_YELLOW, "V-1 launched azimuth: %.1f�, distance: %d fts ", angle, dist);
+
+	angle = 360.0 - angle;
 
 	if ((angle *= 10) > 901)
 	{
@@ -3002,7 +3045,7 @@ void Cmd_Show(client_t *client)
 
 	memset(filename, 0, sizeof(filename));
 
-	sprintf(filename, "%s.LOCK", FILE_ARNASETTINGS);
+	snprintf(filename, sizeof(filename), "%s.LOCK", FILE_ARNASETTINGS);
 
 	Sys_WaitForLock(filename);
 
@@ -3102,7 +3145,7 @@ void Cmd_Score(char *player, client_t *client)
 
 	strncpy(nickname, player ? player : client->longnick, 6);
 
-	sprintf(filename, "./players/%s.score.LOCK", nickname);
+	snprintf(filename, sizeof(filename), "./players/%s.score.LOCK", nickname);
 
 	Sys_WaitForLock(filename);
 
@@ -3174,8 +3217,7 @@ void Cmd_Score(char *player, client_t *client)
 			 players.country, score_common.flyred, score_common.flygold, score_common.flighttime, score_common.totalscore, score_common.lastscore, squads.name
 			 ********************************************************/
 
-			sprintf(
-					my_query,
+			sprintf(my_query,
 					"SELECT players.country, players.rank, score_common.flyred, score_common.flygold, score_common.flighttime, score_common.totalscore, score_common.lastscore, squads.name FROM players INNER JOIN score_common ON players.id = score_common.player_id LEFT JOIN squads ON players.squad_owner = squads.owner WHERE players.id = '%u'",
 					player_id);
 
@@ -3257,8 +3299,7 @@ void Cmd_Score(char *player, client_t *client)
 										fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("fighter_score")) + Com_Atof(Com_MyRow("jabo_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
 
 										debug_querytime = Sys_Milliseconds();
-										sprintf(
-												my_query,
+										sprintf(my_query,
 												"SELECT players.longnick \
 															FROM players \
 															RIGHT JOIN score_kills ON players.id = score_kills.victim_id \
@@ -3303,8 +3344,7 @@ void Cmd_Score(char *player, client_t *client)
 
 										debug_querytime = Sys_Milliseconds();
 
-										sprintf(
-												my_query,
+										sprintf(my_query,
 												"SELECT players.longnick \
 															FROM players \
 															RIGHT JOIN score_kills ON players.id = score_kills.player_id \
@@ -3414,8 +3454,7 @@ void Cmd_Score(char *player, client_t *client)
 
 													debug_querytime = Sys_Milliseconds();
 
-													sprintf(
-															my_query,
+													sprintf(my_query,
 															"SELECT players.longnick \
 																		FROM players \
 																		RIGHT JOIN score_kills ON players.id = score_kills.victim_id \
@@ -3460,8 +3499,7 @@ void Cmd_Score(char *player, client_t *client)
 
 													debug_querytime = Sys_Milliseconds();
 
-													sprintf(
-															my_query,
+													sprintf(my_query,
 															"SELECT players.longnick \
 																		FROM players \
 																		RIGHT JOIN score_kills ON players.id = score_kills.player_id \
@@ -3583,8 +3621,7 @@ void Cmd_Score(char *player, client_t *client)
 
 																debug_querytime = Sys_Milliseconds();
 
-																sprintf(
-																		my_query,
+																sprintf(my_query,
 																		"SELECT players.longnick \
 																					FROM players \
 																					RIGHT JOIN score_kills ON players.id = score_kills.victim_id \
@@ -3630,8 +3667,7 @@ void Cmd_Score(char *player, client_t *client)
 
 																debug_querytime = Sys_Milliseconds();
 
-																sprintf(
-																		my_query,
+																sprintf(my_query,
 																		"SELECT players.longnick \
 																					FROM players \
 																					RIGHT JOIN score_kills ON players.id = score_kills.player_id \
@@ -4028,7 +4064,7 @@ void Cmd_Jsquad(client_t *client)
 	{
 		if (client->invite->squadron) // squadron already exists
 		{
-			sprintf(my_query, "UPDATE players SET squad_owner = '%u', squad_flag = '%u' WHERE id = '%u'", client->invite->squadron, 
+			sprintf(my_query, "UPDATE players SET squad_owner = '%u', squad_flag = '%u' WHERE id = '%u'", client->invite->squadron,
 			SQUADRON_INVITE, client->id);
 
 			if (!Com_MySQL_Query(client, &my_sock, my_query))
@@ -4620,7 +4656,7 @@ void Cmd_Hls(client_t *client)
 void Cmd_Listavail(u_int8_t field, client_t *client)
 {
 	u_int8_t i, j;
-	u_int32_t time;
+	// u_int32_t time;
 	u_int32_t rpsreplace;
 	FILE *fp;
 	char buffer[32];
@@ -4644,7 +4680,7 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	sprintf(buffer, "./fields/availf%d.txt", field);
+	snprintf(buffer, sizeof(buffer), "./fields/availf%d.txt", field);
 
 	if (!(fp = fopen(buffer, "wb")))
 	{
@@ -5252,8 +5288,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 				Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banid): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
-			sprintf(
-					my_query,
+			sprintf(my_query,
 					"SELECT hdserials.id FROM players, players_hdserials, hdserials WHERE players.id = '%u' AND players.id = players_hdserials.player_id AND hdserials.id = players_hdserials.hdserial_id",
 					id);
 
@@ -5593,12 +5628,12 @@ void Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek)
 
 	if (client->infly)
 	{
-		sprintf(buffer, "I'm a %s at %s angels%.0f(%.0fm) %s to %s(%.0f)", GetSmallPlaneName(client->plane), Com_Padloc(client->posxy[0][0], client->posxy[1][0]), WBAngels(client->posalt[0]),
+		snprintf(buffer, sizeof(buffer), "I'm a %s at %s angels%.0f(%.0fm) %s to %s(%.0f)", GetSmallPlaneName(client->plane), Com_Padloc(client->posxy[0][0], client->posxy[1][0]), WBAngels(client->posalt[0]),
 				WBAltMeters(client->posalt[0]), WBVSI(client->speedxyz[2][0], 0), WBRhumb(WBtoHdg(client->angles[2][0])), WBHeading(WBtoHdg(client->angles[2][0])) );
 	}
 	else
 	{
-		sprintf(buffer, "I'm at tower");
+		snprintf(buffer, sizeof(buffer), "I'm at tower");
 
 		if (!client->hq)
 		{
@@ -5809,7 +5844,7 @@ void Cmd_Lives(char *nick, int8_t amount, client_t *client)
 	char buffer[64];
 	client_t *player;
 
-	sprintf(buffer, "UPDATE players SET lives = %d", amount);
+	snprintf(buffer, sizeof(buffer), "UPDATE players SET lives = %d", amount);
 
 	if (nick)
 	{

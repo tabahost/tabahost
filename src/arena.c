@@ -220,7 +220,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 
 	if (reset)
 	{
-		sprintf(file, "./arenas/%s/arena", filename);
+		snprintf(file, sizeof(file), "./arenas/%s/arena", filename);
 	}
 	else
 	{
@@ -496,13 +496,13 @@ void SaveArenaStatus(char *filename, client_t *client)
 
 	SavePlanesPool(filename, client);
 
-	/*
-	if (wb3->value)
-	{
-		sprintf(file, "./arenas/%s/arena.topo", dirname->string);
-		SaveEarthMap(file);
-	}
-	*/
+
+//	if (wb3->value)
+//	{
+//		snprintf(file, sizeof(file), "./arenas/%s/arena.topo", dirname->string);
+//		SaveEarthMap(file);
+//	}
+
 
 	fclose(fp);
 }
@@ -947,7 +947,7 @@ void ResetCVPos(cv_t *cv)
 	cv->outofport = 0;
 	cv->wpnum = 0;
 	cv->speed = cvspeed->value;
-	sprintf(cv->logfile, "%s,cv%u,%s,%u", mapname->string, cv->id, GetCountry(arena->fields[cv->field].country), (u_int32_t)time(NULL));
+	snprintf(cv->logfile, sizeof(cv->logfile), "%s,cv%u,%s,%u", mapname->string, cv->id, GetCountry(arena->fields[cv->field].country), (u_int32_t)time(NULL));
 	//	arena->cv[j].stuck = 0;
 	//	arena->fields[cv->field].posxyz[0] = cv->wp[0][0];
 	//	arena->fields[cv->field].posxyz[1] = cv->wp[0][1];
@@ -1235,7 +1235,7 @@ void ReadCVWaypoints(u_int8_t num)
 	FILE *fp;
 	char buffer[128];
 
-	sprintf(file, "./arenas/%s/cv%d.rte", dirname->string, num);
+	snprintf(file, sizeof(file), "./arenas/%s/cv%d.rte", dirname->string, num);
 
 	arena->cv[num].wptotal = 0;
 
@@ -1280,7 +1280,7 @@ void LogCVsPosition(void)
 
 	for (i = 0; i < cvs->value; i++)
 	{
-		sprintf(filename, "./logs/players/%s.cvl", arena->cv[i].logfile);
+		snprintf(filename, sizeof(filename), "./logs/players/%s.cvl", arena->cv[i].logfile);
 
 		if (!(fp = fopen(filename, "a")))
 		{
@@ -1586,7 +1586,7 @@ void AddBomb(u_int16_t id, int32_t destx, int32_t desty, u_int8_t type, int16_t 
 {
 	u_int16_t i = 0;
 
-	if (timer < 12000)
+	if (timer < 36000)
 	{
 		for (i = 0; i < MAX_BOMBS; i++)
 		{
@@ -1607,7 +1607,7 @@ void AddBomb(u_int16_t id, int32_t destx, int32_t desty, u_int8_t type, int16_t 
 		}
 	}
 	else
-		Com_Printf(VERBOSE_WARNING, "AddBomb() timer > 120 sec (%d)\n, timer/100");
+		Com_Printf(VERBOSE_WARNING, "AddBomb() timer > 360 sec (%d)\n", timer/100);
 
 	if (i == MAX_BOMBS)
 	{
@@ -2729,7 +2729,7 @@ void CheckBoatDamage(building_t *building, client_t *client)
 
 	arena->fields[building->field - 1].cv->speed = speed;
 
-	sprintf(buffer, "f%d", building->field);
+	snprintf(buffer, sizeof(buffer), "f%d", building->field);
 
 	if (building->type == BUILD_CV)
 	{
@@ -3159,7 +3159,7 @@ void ChangeArena(char *map, client_t *client)
 	u_int8_t j;
 	FILE *fp;
 
-	sprintf(file, "./arenas/%s/config.cfg", map);
+	snprintf(file, sizeof(file), "./arenas/%s/config.cfg", map);
 
 	// check if .cfg exists
 	if ((fp = fopen(file, "r")))
@@ -3199,7 +3199,7 @@ void ChangeArena(char *map, client_t *client)
 		Var_Get("sqlserver", sqlserver->string, VAR_ADMIN);
 		Var_Get("database", database->string, VAR_ADMIN); // VAR_ARCHIVE
 
-		sprintf(file, "./arenas/%s/config", map);
+		snprintf(file, sizeof(file), "./arenas/%s/config", map);
 		Cmd_LoadConfig(file, client);
 
 		Var_Get("fields", fields->string, VAR_NOSET | VAR_ARCHIVE);
@@ -3221,7 +3221,7 @@ void ChangeArena(char *map, client_t *client)
 		free(arena->cities);
 		arena->cities = (city_t *) Z_Malloc((sizeof(city_t) * cities->value) + 1);
 
-		sprintf(file, "./arenas/%s/arena", map);
+		snprintf(file, sizeof(file), "./arenas/%s/arena", map);
 		LoadArenaStatus(file, NULL, 0);
 
 		if (wb3->value)
@@ -3234,7 +3234,7 @@ void ChangeArena(char *map, client_t *client)
 		if (rps->value)
 		{
 			Cmd_Seta("f-1", 0, -1, 0); // set 0 to all planes in all fields
-			sprintf(file, "./arenas/%s/planes", map);
+			snprintf(file, sizeof(file), "./arenas/%s/planes", map);
 			LoadRPS(file, NULL);
 			UpdateRPS(0);
 		}
@@ -4613,11 +4613,13 @@ void DebugArena(char *file, u_int32_t line)
 	time_t ltime;
 	FILE *fp;
 
+	Sys_PrintTrace();
+
 	memset(filename, 0, sizeof(filename));
 
 	time(&ltime);
 
-	sprintf(filename, "./debug/%uarena.txt.LOCK", (u_int32_t)ltime);
+	snprintf(filename, sizeof(filename), "./debug/%uarena.txt.LOCK", (u_int32_t)ltime);
 
 	Sys_WaitForLock(filename);
 

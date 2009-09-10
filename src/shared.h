@@ -61,6 +61,7 @@
 #include <sys/stat.h>
 #include <mysql/mysql.h>
 #include <sys/resource.h>
+#include <execinfo.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -154,7 +155,7 @@ typedef unsigned int u_int32_t;
 #define VAR_NOSET			2		// block variable from change value
 #define VAR_ADMIN			4		// only admins can change this variable
 #define MORTAR_BOMB			88		// 250Kg AP
-#define MORTAR				585.0	// mortar velocity (ft/s) (492, range= 10697; 585, range = 15072)
+#define MORTAR				680.0	// mortar velocity (ft/s) (585, range= 10697; 680, range = 14450)
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s�)
 #define MODULUS(a) (a > 0 ? a : a * -1)
 #define PLANE_FAU			180	// ME262 48, Predator 180
@@ -233,6 +234,7 @@ typedef unsigned int u_int32_t;
 #define EVENT_DESC_MDWHY	60002	// why earned
 #define EVENT_DESC_MDHM		60003	// how much
 
+#define ENDFLIGHT_ZERO			0	// Zero?
 #define ENDFLIGHT_LANDED		1	// landed
 #define ENDFLIGHT_PILOTKILL		2	// killed in flight
 #define ENDFLIGHT_CRASHED		4	// plane crashed
@@ -1991,6 +1993,7 @@ void	ConnStatistics(client_t *client, u_int32_t len, u_int8_t type);
 u_int32_t Sys_Milliseconds (void);
 u_int32_t Sys_ResetMilliseconds(void);
 void	Sys_Init(void);
+void	Sys_PrintTrace (void);
 void	Sys_RemoveFiles(char *file);
 void	Sys_SQL_Init(void);
 void	Sys_SQL_Close(void);
@@ -2256,6 +2259,7 @@ void	SetBFieldType(building_t *buildings, u_int16_t type);
 void	CalcFactoryBuildings(void);
 void	DebiteFactoryBuildings(city_t *city);
 void	CrediteFactoryBuildings(city_t *city);
+void	DebugArena(char *file, u_int32_t line);
 
 //client.c
 void	InitClients(void);
@@ -2340,6 +2344,7 @@ void	Cmd_Time(u_int16_t time, char *mult, client_t *client);
 void	Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client);
 void	Cmd_Field(u_int8_t field, client_t *client);
 void	Cmd_City(u_int8_t city, client_t *client);
+void	Cmd_StartDrone(u_int32_t field, u_int32_t plane, double angle, client_t *client);
 void	Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *client);
 void	Cmd_Say(char *argv[], u_int8_t argc, client_t *client);
 void	Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount);
@@ -2409,183 +2414,184 @@ void	ScoreLoadCosts(void);
 
 // Variables
 
-extern	arena_t		*arena;			// arena settings
-extern	arenaslist_t	arenaslist[MAX_ARENASLIST];	// list of online arenas
-extern	client_t	*clients;		// list of clients
+extern	arena_t		*arena;			/// arena settings
+extern	arenaslist_t	arenaslist[MAX_ARENASLIST];	/// list of online arenas
+extern	client_t	*clients;		/// list of clients
 extern	u_int32_t	factorybuildings[4];
 extern	u_int32_t	factorybuildingsup[4];
-extern	u_int32_t	maxmuntype;		// get this value from number os entries in DB
-extern	u_int32_t	maxplanes;		// get this value from number os entries in DB
-extern  jmp_buf 	debug_buffer;	// debug buffer
+extern	u_int32_t	maxmuntype;		/// get this value from number os entries in DB
+extern	u_int32_t	maxplanes;		/// get this value from number os entries in DB
+extern  jmp_buf 	debug_buffer;	/// debug buffer
 extern  u_int8_t    mainbuffer[MAX_RECVDATA];
-extern	var_t		*var_vars;		// list of variables
-extern	GeoIP		*gi;			// GeoIP struct
-extern	MYSQL		my_sock;		// mysql socket
-extern	MYSQL_RES	*my_result;		// mysql results' main pointer
-extern	MYSQL_ROW	my_row;			// mysql main row
-extern	u_int32_t	my_id;			// mysql main id from AUTO_INCREMENT
-extern	char		my_query[MAX_QUERY]; // main query buffer
+extern	var_t		*var_vars;		/// list of variables
+extern	GeoIP		*gi;			/// GeoIP struct
+extern	MYSQL		my_sock;		/// mysql socket
+extern	MYSQL_RES	*my_result;		/// mysql results' main pointer
+extern	MYSQL_ROW	my_row;			/// mysql main row
+extern	u_int32_t	my_id;			/// mysql main id from AUTO_INCREMENT
+extern	char		my_query[MAX_QUERY]; /// main query buffer
 extern	u_int16_t packets_tab[210][3];
-extern	var_t		*airshowsmoke;	// enable air show smoke
-extern	var_t		*allowtakeoff;	// allow players to takeoff
-extern	var_t		*altv;			//
-extern	var_t		*ammomult;		//
-extern	var_t		*arcade;		// enable arena arcade mode
-extern	var_t		*arenaflags1;	// arena flags
-extern	var_t		*arenaflags2;	// arena flags
-extern	var_t		*arenaflags3;	// arena flags
-extern	var_t		*arenalist;		// domain of central arena that receive UDP packets
-extern	var_t		*batchfile;		// exec batch file on login
-extern	var_t		*blackout;		// enable blackout
-extern	var_t		*broadcast;		// enable broadcast channel
-extern	var_t		*bulletradius;	// bulletradius value
-extern	var_t		*canreload;		// enable reload airplanes
-extern	var_t		*canreset;		// enable reset
-extern	var_t		*clickrangelim;	// Maximum range for left/right click detect
-extern	var_t		*cities;		// num of cities (radars, ports, cities, refineries...)
-extern	var_t		*changemaponreset;	// enable change map on reset mode
-extern	var_t		*consoleinput;	// enable/disable console input (windows stuffs, arg!)
-extern	var_t		*contrail;		// contrail altitude limit
-extern	var_t		*countries;		// num of countries playing the game
-extern	var_t		*countrytime;	// limit change country for X seconds
-extern	var_t		*crcview;		// temporary var
-extern	var_t		*ctf;			// ctf mode
-extern	var_t		*currday;		// set current day
-extern	var_t		*currmonth;		// set current month
-extern	var_t		*curryear;		// set current year
-extern	var_t		*cvcapture;		// enable cv/cargo capture
-extern	var_t		*cvdelay;		// time between salvos
-extern	var_t		*cvradarrange0;	// radar range of neutral CV
-extern	var_t		*cvradarrange1;	// radar range of red CV
-extern	var_t		*cvradarrange2;	// radar range of green CV
-extern	var_t		*cvradarrange3;	// radar range of gold CV
-extern	var_t		*cvradarrange4;	// radar range of purple CV
-extern	var_t		*cvrange;		// max range of CV's artillery
-extern	var_t		*cvs;			// num of cv's in map
-extern	var_t		*cvsalvo;		// amount of bullets fired in a time from artillery
-extern	var_t		*cvspeed;		// CV speed in ft/s
-extern	var_t		*database;		// DB name
-extern	var_t		*dayhours;		// how many hours have a day
-extern	var_t		*dbpasswd;		// DB password
-extern	var_t		*dbuser;		// DB username
-extern	var_t		*debug;			// debugvar
-extern	var_t		*printqueries;	// debugvar
-extern	var_t		*dirname;		// directory of current map
-extern	var_t		*dpitch;		// debugvar
-extern	var_t		*droll;			// debugvar
-extern	var_t		*dyaw;			// debugvar
-extern	var_t		*easymode;		// allow easymode [1] and force easy mode [2]
-extern	var_t		*emulatecollision;	// emulate collision with the other side (e.g. if one client collided, other will be forced to collide
-extern	var_t		*enableottos;	// allow to use ottos
-extern	var_t		*endday;		// set end day
-extern	var_t		*endmonth;		// set end month
-extern	var_t		*endyear;		// set end year
-extern	var_t		*enemydotsfly;	//
-extern	var_t		*enemydotstwr;	//
-extern	var_t		*enemyidlim;	//
-extern	var_t		*enemyidlimbomber;	//
-extern	var_t		*enemynames;	// allow to see enemy names
-extern	var_t		*enemyplanes;	// allow to see enemy planes icon
-extern	var_t		*fields;		// num of fields
-extern	var_t		*flakmax;		//
-extern	var_t		*flypenalty;	// how much seconds client will be penalized
-extern	var_t		*friendlydotsfly;	//
-extern	var_t		*friendlydotstwr;	//
-extern	var_t		*friendlyfire;	// allow to shot down friendly planes
-extern	var_t		*friendlyidlim;	//
-extern	var_t		*friendlyidlimbomber; //
-extern	var_t		*gruntsmaxd;	// WB3 distance where grund are heard
-extern	var_t		*gruntshoot;	// WB3 enable shoot grunt
-extern	var_t		*gruntcapture;	// WB3 capture grunt
-extern	var_t		*fueldiv;		//
-extern	var_t		*gunrad;		// gunradius value
-extern	var_t		*gunstats;		// enable print gunstats
-extern	var_t		*gwarning;		// warning limit of G overload
-extern	var_t		*hideadmin;		// turns Admins invisible for .ros and entered exits game messages
-extern	var_t		*hostdomain;	// domain of arena
-extern	var_t		*hostname;		// name of arena
-extern	var_t		*iff;			// enable Identification Friendly or Foe
-extern	var_t		*initday;		// set initial day
-extern	var_t		*initmonth;		// set initial month
-extern	var_t		*inityear;		// set initial year
-extern	var_t		*iconbombersoverride; // allow to override bomber icons
-extern	var_t		*katyrange;		// max range of KATY fire
-extern	var_t		*killcvtoreset;	// CVs are in reset accounting
-extern	var_t		*landingcapture;	 // enable landing capture
-extern	var_t		*lethality;		// damage multiplier
+extern	var_t		*ackstardisable; /// disable ackstar
+extern	var_t		*airshowsmoke;	/// enable air show smoke
+extern	var_t		*allowtakeoff;	/// allow players to takeoff
+extern	var_t		*altv;			///
+extern	var_t		*ammomult;		///
+extern	var_t		*arcade;		/// enable arena arcade mode
+extern	var_t		*arenaflags1;	/// arena flags
+extern	var_t		*arenaflags2;	/// arena flags
+extern	var_t		*arenaflags3;	/// arena flags
+extern	var_t		*arenalist;		/// domain of central arena that receive UDP packets
+extern	var_t		*batchfile;		/// exec batch file on login
+extern	var_t		*blackout;		/// enable blackout
+extern	var_t		*broadcast;		/// enable broadcast channel
+extern	var_t		*bulletradius;	/// bulletradius value
+extern	var_t		*canreload;		/// enable reload airplanes
+extern	var_t		*canreset;		/// enable reset
+extern	var_t		*clickrangelim;	/// Maximum range for left/right click detect
+extern	var_t		*cities;		/// num of cities (radars, ports, cities, refineries...)
+extern	var_t		*changemaponreset;	/// enable change map on reset mode
+extern	var_t		*consoleinput;	/// enable/disable console input (windows stuffs, arg!)
+extern	var_t		*contrail;		/// contrail altitude limit
+extern	var_t		*countries;		/// num of countries playing the game
+extern	var_t		*countrytime;	/// limit change country for X seconds
+extern	var_t		*crcview;		/// temporary var
+extern	var_t		*ctf;			/// ctf mode
+extern	var_t		*currday;		/// set current day
+extern	var_t		*currmonth;		/// set current month
+extern	var_t		*curryear;		/// set current year
+extern	var_t		*cvcapture;		/// enable cv/cargo capture
+extern	var_t		*cvdelay;		/// time between salvos
+extern	var_t		*cvradarrange0;	/// radar range of neutral CV
+extern	var_t		*cvradarrange1;	/// radar range of red CV
+extern	var_t		*cvradarrange2;	/// radar range of green CV
+extern	var_t		*cvradarrange3;	/// radar range of gold CV
+extern	var_t		*cvradarrange4;	/// radar range of purple CV
+extern	var_t		*cvrange;		/// max range of CV's artillery
+extern	var_t		*cvs;			/// num of cv's in map
+extern	var_t		*cvsalvo;		/// amount of bullets fired in a time from artillery
+extern	var_t		*cvspeed;		/// CV speed in ft/s
+extern	var_t		*database;		/// DB name
+extern	var_t		*dayhours;		/// how many hours have a day
+extern	var_t		*dbpasswd;		/// DB password
+extern	var_t		*dbuser;		/// DB username
+extern	var_t		*debug;			/// debugvar
+extern	var_t		*printqueries;	/// debugvar
+extern	var_t		*dirname;		/// directory of current map
+extern	var_t		*dpitch;		/// debugvar
+extern	var_t		*droll;			/// debugvar
+extern	var_t		*dyaw;			/// debugvar
+extern	var_t		*easymode;		/// allow easymode [1] and force easy mode [2]
+extern	var_t		*emulatecollision;	/// emulate collision with the other side (e.g. if one client collided, other will be forced to collide
+extern	var_t		*enableottos;	/// allow to use ottos
+extern	var_t		*endday;		/// set end day
+extern	var_t		*endmonth;		/// set end month
+extern	var_t		*endyear;		/// set end year
+extern	var_t		*enemydotsfly;	///
+extern	var_t		*enemydotstwr;	///
+extern	var_t		*enemyidlim;	///
+extern	var_t		*enemyidlimbomber;	///
+extern	var_t		*enemynames;	/// allow to see enemy names
+extern	var_t		*enemyplanes;	/// allow to see enemy planes icon
+extern	var_t		*fields;		/// num of fields
+extern	var_t		*flakmax;		///
+extern	var_t		*flypenalty;	/// how much seconds client will be penalized
+extern	var_t		*friendlydotsfly;	///
+extern	var_t		*friendlydotstwr;	///
+extern	var_t		*friendlyfire;	/// allow to shot down friendly planes
+extern	var_t		*friendlyidlim;	///
+extern	var_t		*friendlyidlimbomber; ///
+extern	var_t		*gruntsmaxd;	/// WB3 distance where grund are heard
+extern	var_t		*gruntshoot;	/// WB3 enable shoot grunt
+extern	var_t		*gruntcapture;	/// WB3 capture grunt
+extern	var_t		*fueldiv;		///
+extern	var_t		*gunrad;		/// gunradius value
+extern	var_t		*gunstats;		/// enable print gunstats
+extern	var_t		*gwarning;		/// warning limit of G overload
+extern	var_t		*hideadmin;		/// turns Admins invisible for .ros and entered exits game messages
+extern	var_t		*hostdomain;	/// domain of arena
+extern	var_t		*hostname;		/// name of arena
+extern	var_t		*iff;			/// enable Identification Friendly or Foe
+extern	var_t		*initday;		/// set initial day
+extern	var_t		*initmonth;		/// set initial month
+extern	var_t		*inityear;		/// set initial year
+extern	var_t		*iconbombersoverride; /// allow to override bomber icons
+extern	var_t		*katyrange;		/// max range of KATY fire
+extern	var_t		*killcvtoreset;	/// CVs are in reset accounting
+extern	var_t		*landingcapture;	 /// enable landing capture
+extern	var_t		*lethality;		/// damage multiplier
 extern	var_t		*logfile_active;
-extern	var_t		*lograwposition; // log raw position in files
-extern	var_t		*mapcycle;		// enable mapcycle
-extern	var_t		*mapflags;		// enable mapflags
-extern	var_t		*mapflagsenemy;	// show circles of enemy countries
-extern	var_t		*mapflagsfly;	// show circles while flying
-extern	var_t		*mapflagsown;	// show circles of own country
-extern	var_t		*mapflagstwr;	// show circles while in twr
-extern	var_t		*mapname;		// name of current map
-extern	var_t		*mapscale;		// map square scale
-extern	var_t		*mapsize;		// map size in miles
-extern	var_t		*maxclients;	// maximum of incomming connections
-extern	var_t		*maxentities;	// maximum of players + drones in world
-extern	var_t		*maxpilotg;		//
-extern	var_t		*metar;			// allow use metar information
-extern	var_t		*midairs;		// midairs collisions
-extern	var_t		*mortars;		// set how much mortars JU52 and Li-2 can fire
-extern	var_t		*mview;			// set who can use .view (OPs, Admins or both)
-extern	var_t		*notanks;		// dont allow players and arena to spawn tanks/hmack/katy
-extern	var_t		*nowings;		// dont allow players to use wingmen
-extern	var_t		*obradar;		// adjust obradar for historical planes
-extern	var_t		*oldcapt;		// enable old way to capture fields (destroy all structures and drop paras)
-extern	var_t		*ottoaccuracy;	// set otto accuracy
-extern	var_t		*ottoadjust;	// set otto adjust
-extern	var_t		*ottoburstoff;	// set otto burst pause time
-extern	var_t		*ottoburston;	// set otto burst time by dist
-extern	var_t		*ottoburstonmax; // set otto burst time by hit
-extern	var_t		*ottorange;		// set otto max range
-extern	var_t		*ottoretarget;	// set otto retarget rime
-extern	var_t		*ottooverrides;	// set parameters client can override
-extern	var_t		*overload;		// set value for overload msg
-extern	var_t		*parassmall;	// paratroopers needed to capture a small field
-extern	var_t		*parasmedium;	// paratroopers needed to capture a medium field
-extern	var_t		*paraslarge;	// paratroopers needed to capture a large field
-extern	var_t		*paraspost;		// paratroopers needed to capture a Post
-extern	var_t		*parasvillage;	// paratroopers needed to capture a Village
-extern	var_t		*parasport;		// paratroopers needed to capture a Port
-extern	var_t		*parastown;		// paratroopers needed to capture a Town
-extern	var_t		*planeatradar;	// show planes models at radar range
-extern	var_t		*planerangelimit;	//
-extern	var_t		*planerangelimitbomber;	//
-extern	var_t		*port;			// server port
-extern	var_t		*predictpos;	// enable position prediction with x degree
-extern	var_t		*printeject;	// print eject messages to everyone
-extern	var_t		*printkills;	// print kills messages
-extern	var_t		*radaralt;		//
-extern	var_t		*radarheight;	//
-extern	var_t		*radarrange0;	//
-extern	var_t		*radarrange1;	//
-extern	var_t		*radarrange2;	//
-extern	var_t		*radarrange3;	//
-extern	var_t		*radarrange4;	//
-extern	var_t		*rebuildtime;	// rebuilding time base seconds
-extern	var_t		*respawncvs;	// after killed, cv will respawn
-extern	var_t		*rps;			// enable rps (value = minutes)
-extern	var_t		*server_speeds;	// show server speed
-extern	var_t		*skins;			// enable skins
-extern	var_t		*sqlserver;		// sql server address
-extern	var_t		*startalt;		//
-extern	var_t		*structlim;		//
-extern	var_t		*tanksrange;	// max range of TANKS fire
-extern	var_t		*teamkiller;	// Allow server set TK flag for teamkillers
-extern	var_t		*teamkillstructs;	// Allow to damage friendly structures
-extern	var_t		*thskins;		// enable force TH Skins
-extern	var_t		*timemult;		// arena time multiplier
-extern	var_t		*timeout;		// away timer
-extern	var_t		*ttc;			// tonnage to close
-extern	var_t		*verbose;		// printf messages priority
-extern	var_t		*wb3;			// enable WB3 protocol
-extern	var_t		*weather;		// configure weather
-extern	var_t		*whitelist;		// white list
-extern	var_t		*xwindvelocity;	//
-extern	var_t		*ywindvelocity;	//
-extern	var_t		*zwindvelocity;	//
+extern	var_t		*lograwposition; /// log raw position in files
+extern	var_t		*mapcycle;		/// enable mapcycle
+extern	var_t		*mapflags;		/// enable mapflags
+extern	var_t		*mapflagsenemy;	/// show circles of enemy countries
+extern	var_t		*mapflagsfly;	/// show circles while flying
+extern	var_t		*mapflagsown;	/// show circles of own country
+extern	var_t		*mapflagstwr;	/// show circles while in twr
+extern	var_t		*mapname;		/// name of current map
+extern	var_t		*mapscale;		/// map square scale
+extern	var_t		*mapsize;		/// map size in miles
+extern	var_t		*maxclients;	/// maximum of incomming connections
+extern	var_t		*maxentities;	/// maximum of players + drones in world
+extern	var_t		*maxpilotg;		///
+extern	var_t		*metar;			/// allow use metar information
+extern	var_t		*midairs;		/// midairs collisions
+extern	var_t		*mortars;		/// set how much mortars JU52 and Li-2 can fire
+extern	var_t		*mview;			/// set who can use .view (OPs, Admins or both)
+extern	var_t		*notanks;		/// dont allow players and arena to spawn tanks/hmack/katy
+extern	var_t		*nowings;		/// dont allow players to use wingmen
+extern	var_t		*obradar;		/// adjust obradar for historical planes
+extern	var_t		*oldcapt;		/// enable old way to capture fields (destroy all structures and drop paras)
+extern	var_t		*ottoaccuracy;	/// set otto accuracy
+extern	var_t		*ottoadjust;	/// set otto adjust
+extern	var_t		*ottoburstoff;	/// set otto burst pause time
+extern	var_t		*ottoburston;	/// set otto burst time by dist
+extern	var_t		*ottoburstonmax; /// set otto burst time by hit
+extern	var_t		*ottorange;		/// set otto max range
+extern	var_t		*ottoretarget;	/// set otto retarget rime
+extern	var_t		*ottooverrides;	/// set parameters client can override
+extern	var_t		*overload;		/// set value for overload msg
+extern	var_t		*parassmall;	/// paratroopers needed to capture a small field
+extern	var_t		*parasmedium;	/// paratroopers needed to capture a medium field
+extern	var_t		*paraslarge;	/// paratroopers needed to capture a large field
+extern	var_t		*paraspost;		/// paratroopers needed to capture a Post
+extern	var_t		*parasvillage;	/// paratroopers needed to capture a Village
+extern	var_t		*parasport;		/// paratroopers needed to capture a Port
+extern	var_t		*parastown;		/// paratroopers needed to capture a Town
+extern	var_t		*planeatradar;	/// show planes models at radar range
+extern	var_t		*planerangelimit;	///
+extern	var_t		*planerangelimitbomber;	///
+extern	var_t		*port;			/// server port
+extern	var_t		*predictpos;	/// enable position prediction with x degree
+extern	var_t		*printeject;	/// print eject messages to everyone
+extern	var_t		*printkills;	/// print kills messages
+extern	var_t		*radaralt;		///
+extern	var_t		*radarheight;	///
+extern	var_t		*radarrange0;	///
+extern	var_t		*radarrange1;	///
+extern	var_t		*radarrange2;	///
+extern	var_t		*radarrange3;	///
+extern	var_t		*radarrange4;	///
+extern	var_t		*rebuildtime;	/// rebuilding time base seconds
+extern	var_t		*respawncvs;	/// after killed, cv will respawn
+extern	var_t		*rps;			/// enable rps (value = minutes)
+extern	var_t		*server_speeds;	/// show server speed
+extern	var_t		*skins;			/// enable skins
+extern	var_t		*sqlserver;		/// sql server address
+extern	var_t		*startalt;		///
+extern	var_t		*structlim;		///
+extern	var_t		*tanksrange;	/// max range of TANKS fire
+extern	var_t		*teamkiller;	/// Allow server set TK flag for teamkillers
+extern	var_t		*teamkillstructs;	/// Allow to damage friendly structures
+extern	var_t		*thskins;		/// enable force TH Skins
+extern	var_t		*timemult;		/// arena time multiplier
+extern	var_t		*timeout;		/// away timer
+extern	var_t		*ttc;			/// tonnage to close
+extern	var_t		*verbose;		/// printf messages priority
+extern	var_t		*wb3;			/// enable WB3 protocol
+extern	var_t		*weather;		/// configure weather
+extern	var_t		*whitelist;		/// white list
+extern	var_t		*xwindvelocity;	///
+extern	var_t		*ywindvelocity;	///
+extern	var_t		*zwindvelocity;	///
 
-extern	FILE		*logfile[MAX_LOGFILE];		// general logfile
+extern	FILE		*logfile[MAX_LOGFILE];		/// general logfile

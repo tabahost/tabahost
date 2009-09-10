@@ -22,6 +22,7 @@
 
 #include "shared.h"
 
+var_t *ackstardisable; // extern
 var_t *airshowsmoke; // extern
 var_t *allowtakeoff; // extern
 var_t *altv; // extern
@@ -203,6 +204,7 @@ void InitVars(void)
 	maxclients = Var_Get("maxclients", "100", VAR_ADMIN);
 	maxentities = Var_Get("maxentities", "200", VAR_ADMIN);
 #endif
+	ackstardisable = Var_Get("ackstardisable", "0", VAR_ARCHIVE);
 	airshowsmoke = Var_Get("airshowsmoke", "0", VAR_ARCHIVE);
 	allowtakeoff = Var_Get("allowtakeoff", "1", VAR_ARCHIVE);
 	altv = Var_Get("altv", "0", VAR_ARCHIVE);

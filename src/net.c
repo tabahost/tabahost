@@ -150,7 +150,7 @@ int InitUDPNet(int portno)
 
 int32_t SendPacketTHL(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
-	int i;
+	// int i;
 	u_int8_t datagram[MAX_SENDDATA];
 	datagram_t *packet;
 	u_int16_t header;
@@ -224,7 +224,7 @@ int32_t SendPacketTHL(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
-	int i;
+	//int i;
 	u_int8_t datagram[MAX_SENDDATA];
 	datagram_t *packet;
 	u_int16_t header;
@@ -308,8 +308,7 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	}
 	else
 	{
-		Com_Printf(VERBOSE_WARNING, "SendPacket() overflowed (packet to %s - %s)\n",
-				client->longnick, client->ip);
+		Com_Printf(VERBOSE_WARNING, "SendPacket() overflowed (packet to %s - %s)\n", client->longnick, client->ip);
 		RemoveClient(client);
 		return -1;
 	}
@@ -325,6 +324,9 @@ int GetPacket(client_t *client)
 {
 	u_int16_t len, recvlen;
 	int32_t n, m;
+
+	if(!client || !client->inuse)
+		return 0;
 
 	memset(mainbuffer, 0, MAX_RECVDATA);
 

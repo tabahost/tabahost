@@ -1088,7 +1088,7 @@ void DroneGetTarget(client_t *drone)
 	else
 	{
 		i = rand() % j;
-		if (i < MAX_BUILDINGS)
+		if (i < j)
 			drone->dronelasttarget = temp[i];
 		else
 			drone->dronelasttarget = MAX_BUILDINGS;
@@ -1266,7 +1266,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 			}
 		}
 
-		dist = sqrt(Com_Pow(origx - destx, 2) + Com_Pow(origy - desty, 2));
+		dist = sqrt(Com_Pow(origx - destx, 2) + Com_Pow(origy - desty, 2)); // this never get a negative number
 
 		if (client && (client->drone & DRONE_KATY))
 		{

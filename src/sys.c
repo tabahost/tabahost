@@ -149,6 +149,30 @@ void Sys_Init(void)
 }
 
 /**
+ Sys_PrintTrace
+
+ Print a backtrace at current point
+ */
+
+void Sys_PrintTrace (void)
+{
+  void *array[10];
+  size_t size;
+  char **strings;
+  size_t i;
+
+  size = backtrace (array, 10);
+  strings = backtrace_symbols (array, size);
+
+  Com_Printf(VERBOSE_DEBUG, "Obtained %zd stack frames.\n", size);
+
+  for (i = 0; i < size; i++)
+	  Com_Printf(VERBOSE_DEBUG, "%s\n", strings[i]);
+
+  free (strings);
+}
+
+/**
  Sys_RemoveFiles
 
  Delete files. Syntaxe: "path/file"
@@ -156,7 +180,7 @@ void Sys_Init(void)
 
 void Sys_RemoveFiles(char *pathfile)
 {
-	FILE *fp;
+	//FILE *fp;
 	DIR *dp;
 	struct dirent *ep;
 	char path[256];
@@ -180,7 +204,7 @@ void Sys_RemoveFiles(char *pathfile)
 
 	if (dp != NULL)
 	{
-		while (ep = readdir(dp))
+		while ((ep = readdir(dp)))
 		{
 			if (strstr(ep->d_name, file))
 			{

@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 	Com_Printf(VERBOSE_ALWAYS, "This is free software, and you are welcome to redistribute\n");
 	Com_Printf(VERBOSE_ALWAYS, "it under certain conditions; For details type 'license' command\n");
 	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
-	Com_Printf(VERBOSE_ALWAYS, "Starting Server. Version: %s - Build %s\n", VERSION,__DATE__ );
+	Com_Printf(VERBOSE_ALWAYS, "Starting Server. Version: %s - Build %s %s\n", VERSION,__DATE__,__TIME__ );
 	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
 
 	Sys_SQL_Init(); // startting SQL after InitTCPNet 'cause WSAStartup() in windows
@@ -155,7 +155,7 @@ int main(int argc, char *argv[])
 	if(rps->value)
 	{
 		Cmd_Seta("f-1", 0, -1, 0); // set 0 to all planes in all fields
-		sprintf(buffer, "./arenas/%s/planes", dirname->string);
+		snprintf(buffer, sizeof(buffer), "./arenas/%s/planes", dirname->string);
 		LoadRPS(buffer, NULL);
 		UpdateRPS(0);
 	}
@@ -567,11 +567,11 @@ void BackupArenaStatus(void)
 
 	if (arena)
 	{
-		sprintf(date, "%d", arena->year);
+		snprintf(date, sizeof(date), "%d", arena->year);
 		Var_Set("curryear", date);
-		sprintf(date, "%d", arena->month);
+		snprintf(date, sizeof(date), "%d", arena->month);
 		Var_Set("currmonth", date);
-		sprintf(date, "%d", arena->day);
+		snprintf(date, sizeof(date), "%d", arena->day);
 		Var_Set("currday", date);
 		SaveArenaStatus("arena", NULL);
 	}
@@ -683,7 +683,7 @@ void ExitServer(int status)
 		}
 	}
 
-	printf("Server s/**ed\n"); /*****************/
+	printf("Server closed\n"); /*****************/
 	fflush(stdout);
 
 	exit(status);

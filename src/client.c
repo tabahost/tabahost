@@ -222,11 +222,13 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 		return;
 	}
 
+	Sys_PrintTrace();
+
 	memset(filename, 0, sizeof(filename));
 
 	time(&ltime);
 
-	sprintf(filename, "./debug/%u%s.txt.LOCK", (u_int32_t)ltime, client->longnick);
+	snprintf(filename, sizeof(filename), "./debug/%u%s.txt.LOCK", (u_int32_t)ltime, client->longnick);
 
 	Sys_WaitForLock(filename);
 
@@ -671,10 +673,13 @@ int ProcessClient(client_t *client)
 
 					if(x <= 0)
 					{
-						if(x < 0 && strlen(client->longnick))
+						if(x < 0)
 						{
-							BPrintf(RADIO_YELLOW, "%s broke connection", client->longnick);
-							Com_Printf(VERBOSE_ALWAYS, "%s broke connection\n", client->longnick);
+							if(client && strlen(client->longnick))
+							{
+								BPrintf(RADIO_YELLOW, "%s broke connection", client->longnick);
+								Com_Printf(VERBOSE_ALWAYS, "%s broke connection\n", client->longnick);
+							}
 							z = -1;
 						}
 
@@ -1257,7 +1262,7 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 
 int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client)
 {
-	u_int8_t i;
+	// u_int8_t i;
 
 	DecryptBlock(buffer, 32, client->loginkey);
 
@@ -1292,7 +1297,7 @@ int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client)
 /**
  FindDBClient
 
- Find a client in clients array using shortnick
+ Find a client in clients array using DB ID
  */
 
 client_t *FindDBClient(u_int32_t dbid)
@@ -1516,8 +1521,7 @@ u_int8_t CheckBanned(client_t *client) // twin of CheckTK
 {
 	u_int8_t banned = 0;
 
-	sprintf(
-			my_query,
+	sprintf(my_query,
 			"SELECT hdserials.hdserial FROM players, players_hdserials, hdserials WHERE players.id = '%u' AND players.id = players_hdserials.player_id AND hdserials.id = players_hdserials.hdserial_id AND hdserials.banned = '1'",
 			client->id);
 
@@ -1577,13 +1581,11 @@ u_int8_t CheckTK(client_t *client) // twin of CheckBanned
 	u_int8_t teamkiller = 0;
 
 	if (wb3->value)
-		sprintf(
-				my_query,
+		sprintf(my_query,
 				"SELECT ipaddress.ipaddr FROM players, players_ipaddress, ipaddress WHERE players.id = '%u' AND players.id = players_ipaddress.player_id AND ipaddress.id = players_ipaddress.ipaddress_id AND ipaddress.teamkiller = '1'",
 				client->id);
 	else
-		sprintf(
-				my_query,
+		sprintf(my_query,
 				"SELECT hdserials.hdserial FROM players, players_hdserials, hdserials WHERE players.id = '%u' AND players.id = players_hdserials.player_id AND hdserials.id = players_hdserials.hdserial_id AND hdserials.teamkiller = '1'",
 				client->id);
 
@@ -1902,7 +1904,7 @@ void ForceEndFlight(u_int8_t remdron, client_t *client)
 	buffer[3] = ENDFLIGHT_LANDED;
 	buffer[5] = client->field;
 	
-	sprintf(field, "f%d", client->field);
+	snprintf(field, sizeof(field), "f%d", client->field);
 
 	SendPacket(buffer, sizeof(buffer), client);
 	//Cmd_Move(field, client->country, client);
@@ -2059,10 +2061,10 @@ char *CreateSkin(client_t *client, u_int8_t number)
 	switch (client->country)
 	{
 		case COUNTRY_RED:
-			sprintf(buffer, "ppv\\%s\\%sr%dppv.vfc@%sr%d.ppv", GetPlaneDir(client->plane), thskins->string, number, thskins->string, number);
+			snprintf(buffer, sizeof(buffer), "ppv\\%s\\%sr%dppv.vfc@%sr%d.ppv", GetPlaneDir(client->plane), thskins->string, number, thskins->string, number);
 			break;
 		case COUNTRY_GOLD:
-			sprintf(buffer, "ppv\\%s\\%sg%dppv.vfc@%sg%d.ppv", GetPlaneDir(client->plane), thskins->string, number, thskins->string, number);
+			snprintf(buffer, sizeof(buffer), "ppv\\%s\\%sg%dppv.vfc@%sg%d.ppv", GetPlaneDir(client->plane), thskins->string, number, thskins->string, number);
 			break;
 		default:
 			buffer[0] = '\0';
@@ -2209,9 +2211,9 @@ void LogRAWPosition(u_int8_t server, client_t *client)
 	FILE *fp;
 
 	if (server)
-		sprintf(file, "./logs/players/%s.srv", client->longnick);
+		snprintf(file, sizeof(file), "./logs/players/%s.srv", client->longnick);
 	else
-		sprintf(file, "./logs/players/%s.cli", client->longnick);
+		snprintf(file, sizeof(file), "./logs/players/%s.cli", client->longnick);
 
 	if (!(fp = fopen(file, "a")))
 	{
@@ -2237,7 +2239,7 @@ void LogPosition(client_t *client)
 	FILE *fp;
 	char filename[128];
 
-	sprintf(filename, "./logs/players/%s.pos", client->logfile);
+	snprintf(filename, sizeof(filename), "./logs/players/%s.pos", client->logfile);
 
 	if (!(fp = fopen(filename, "a")))
 	{

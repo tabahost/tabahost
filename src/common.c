@@ -479,7 +479,7 @@ void Com_PrintLogBuffer(client_t * client)
 int Com_Send(client_t *client, u_int8_t *buf, int len)
 {
 	int n, tlen;
-	u_int8_t i;
+	//u_int8_t i;
 	u_int8_t *tbuf;
 
 	if (!client->socket) // to avoid SIGPIPE
@@ -757,7 +757,7 @@ void Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id)
 {
 	char query_log[256];
 
-	sprintf(query_log, "INSERT INTO log_events SET event = '%u', player_id = '%u', victim_id = '%u', date = FROM_UNIXTIME(%u)", event, player_id, victim_id, (u_int32_t)time(NULL));
+	snprintf(query_log, sizeof(query_log), "INSERT INTO log_events SET event = '%u', player_id = '%u', victim_id = '%u', date = FROM_UNIXTIME(%u)", event, player_id, victim_id, (u_int32_t)time(NULL));
 
 	if (d_mysql_query(&my_sock, query_log))
 	{
@@ -777,7 +777,7 @@ void Com_LogDescription(u_int32_t type, double value, char *string)
 {
 	char query_log[256];
 
-	sprintf(query_log, "INSERT INTO log_descriptions SET event_id = '%u', type = '%u'", my_id, type);
+	snprintf(query_log, sizeof(query_log), "INSERT INTO log_descriptions SET event_id = '%u', type = '%u'", my_id, type);
 
 	if (value)
 		sprintf(query_log, "%s, value = '%.3f'", query_log, value);
@@ -950,7 +950,7 @@ char *Com_TimeSeconds(u_int32_t seconds)
 {
 	static char buffer[32];
 
-	sprintf(buffer, "%3u'%02u\"", (seconds / 60), (seconds % 60));
+	snprintf(buffer, sizeof(buffer), "%3u'%02u\"", (seconds / 60), (seconds % 60));
 
 	return buffer;
 }
@@ -968,7 +968,7 @@ char *Com_Padloc(int32_t x, int32_t y)
 
 	PadLoc(szPadLoc, x, y);
 
-	sprintf(buffer, "%.0f.%.0f%s", WBLongitude(x), WBLatitude(y), szPadLoc);
+	snprintf(buffer, sizeof(buffer), "%.0f.%.0f%s", WBLongitude(x), WBLatitude(y), szPadLoc);
 
 	return buffer;
 }
@@ -1603,7 +1603,7 @@ char *Com_SquadronName(u_int32_t owner)
 		{
 			if ((my_row = mysql_fetch_row(my_result)))
 			{
-				sprintf(buffer, "%s", Com_MyRow("name") ? Com_MyRow("name") : "(null)");
+				snprintf(buffer, sizeof(buffer), "%s", Com_MyRow("name") ? Com_MyRow("name") : "(null)");
 			}
 			else
 			{
