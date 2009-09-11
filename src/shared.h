@@ -122,7 +122,7 @@ typedef unsigned int u_int32_t;
 #define MAX_PREDICT			6		// max number os history for prediction
 #define MAX_TIMEOUT			6000	// 60 seconds of timeout (60x100frames)
 #define MAX_PRINTMSG		4096	// max chars per line
-#define MAX_RADIOMSG		74		// max of radio msg (63 chars + info)
+#define MAX_RADIOMSG		75		// max of radio msg (64 chars + info)
 #define MAX_SCREEN			64		// max aircrafts you can see on screen (32 wb2, 64, wb3)
 #define MAX_SCREENBUF		800		// buffer of MAX_SCREEN (19+MAX_SCREEN*21)
 #define MAX_MUNTYPE			204 	// = number of munition types

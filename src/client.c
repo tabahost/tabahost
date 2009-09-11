@@ -1366,7 +1366,7 @@ client_t *FindLClient(char *longnick)
 int PPrintf(client_t *client, u_int16_t radio, char *fmt, ...)
 {
 	va_list argptr;
-	u_int8_t buffer[MAX_RADIOMSG]; // 74 is max size of a radio message
+	u_int8_t buffer[MAX_RADIOMSG]; // 75 is max size of a radio message
 	char message[MAX_PRINTMSG];
 	u_int8_t n=0;
 	radiomessage_t *radiomessage;
@@ -1416,12 +1416,12 @@ int PPrintf(client_t *client, u_int16_t radio, char *fmt, ...)
 				}
 			}
 
-			radiomessage->msgsize = strlen(message+(63*n)) > 63 ? 63 : strlen(message+(63*n));
-			memcpy(&(radiomessage->message), message+(63*n), radiomessage->msgsize);
+			radiomessage->msgsize = strlen(message+(64*n)) > 64 ? 64 : strlen(message+(64*n));
+			memcpy(&(radiomessage->message), message+(64*n), radiomessage->msgsize);
 
 			SendPacket(buffer, radiomessage->msgsize + 11, client);
 
-			if (strlen(message+(63*n)) > 63)
+			if (strlen(message+(64*n)) > 64)
 				n++;
 			else
 				n=0;

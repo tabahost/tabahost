@@ -8324,7 +8324,7 @@ void WB3DotCommand(client_t *client, char *fmt, ...)
 
 void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8_t msgsize, client_t *client)
 {
-	u_int8_t buffer[MAX_RADIOMSG]; // 74 = 2 bytes (packet id -> 0x1200) maximum msgsize (63) + 4 bytes (msgto) + 4 bytes (msgfrom) + 1 byte (msgsize)
+	u_int8_t buffer[MAX_RADIOMSG]; // 74 = 2 bytes (packet id -> 0x1200) maximum msgsize (64) + 4 bytes (msgto) + 4 bytes (msgfrom) + 1 byte (msgsize)
 	u_int8_t i;
 	short int n;
 	client_t *toClient;
@@ -8356,7 +8356,7 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 	radiomessage->packetid = htons(Com_WBhton(0x1200));
 	radiomessage->msgto = htonl(msgto);
 	radiomessage->msgfrom = htonl(msgfrom);
-	radiomessage->msgsize = ((msgsize>63) ? 63 : msgsize);
+	radiomessage->msgsize = ((msgsize>64) ? 64 : msgsize);
 	memcpy(&(radiomessage->message), message, radiomessage->msgsize);
 
 	if (msgto > 0xFF) // Private Message
@@ -9881,7 +9881,7 @@ void WB3NWAttachSlot(client_t *client)
 
 void PRadioCommand(char *message, u_int8_t size, client_t *client)
 {
-	if (size > 0)
+	if (size > 0 && size <= 64)
 	{
 		message++;
 		message[size - 1] = '\0';
