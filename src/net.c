@@ -229,6 +229,30 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	datagram_t *packet;
 	u_int16_t header;
 
+	if(!client))
+	{
+		Com_Printf(VERBOSE_WARNING, "SendPacket() client not exist\n");
+		return -1;
+	}
+
+	if(!client->inuse))
+	{
+		Com_Printf(VERBOSE_WARNING, "SendPacket() client not in use\n");
+		return -1;
+	}
+
+	if(!client->socket))
+	{
+		Com_Printf(VERBOSE_WARNING, "SendPacket() client without socket\n");
+		return -1;
+	}
+
+	if(!buffer)
+	{
+		Com_Printf(VERBOSE_WARNING, "SendPacket() client without buffer\n");
+		return -1;
+	}
+
 	memset(datagram, 0, MAX_SENDDATA);
  
 	if (buffer)
@@ -293,18 +317,17 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				wbcrypt(&(packet->data), client->key, len, TRUE); // encrypting
 		}
 
-		if (client->login || (client->inuse && client->socket))
-		{
+//		if (client->login || (client->inuse && client->socket))
+//		{
 			return Com_Send(client, datagram, (int)len+4);
-		}
-		else
-		{
-			Com_Printf(VERBOSE_WARNING, "client not in use or without socket\n");
-			Com_Printf(VERBOSE_ALWAYS, "%s client not in use or without socket\n",
-					client->longnick);
-			RemoveClient(client);
-			return -1;
-		}
+//		}
+//		else
+//		{
+//			Com_Printf(VERBOSE_WARNING, "client not in use or without socket\n");
+//			Com_Printf(VERBOSE_ALWAYS, "%s client not in use or without socket\n", client->longnick);
+//			RemoveClient(client);
+//			return -1;
+//		}
 	}
 	else
 	{

@@ -980,7 +980,15 @@ int ProcessDrone(client_t *drone)
 						}
 						else if(!oldcapt->value && wb3->value)
 						{
-							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1], 0, drone);
+							//if((1.0 * drone->posxy[0][0] * drone->posxy[0][0] + 1.0 * drone->posxy[1][0] * drone->posxy[1][0]) < (MORTAR_RANGE * MORTAR_RANGE))
+							//{
+								ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1], 0, drone);
+							//}
+							//else
+							//{
+							//	drone->drone->posxy[0][0] += 
+							//	drone->drone->posxy[1][0] += 
+							//}
 						}
 						else
 							drone->dronetimer = 0;
@@ -1073,8 +1081,8 @@ void DroneGetTarget(client_t *drone)
 
 			if (x < 10000 && x > -10000 && y < 10000 && y > -10000)
 			{
-				//if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < 14000) 
-				if (1.0*x*x + 1.0*y*y < 196000000 /* 14000^2 */) // 14000^2 = 28 bits; x^2+y^2 = 28 bits
+				//if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < MORTAR_RANGE) 
+				if ((1.0*x*x + 1.0*y*y) < (MORTAR_RANGE * MORTAR_RANGE))
 				{
 					temp[j] = i;
 					j++;

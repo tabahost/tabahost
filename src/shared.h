@@ -114,7 +114,7 @@ typedef unsigned int u_int32_t;
 #define MAX_ARENASLIST		5		// max numer of arenas in arenaslist
 #define MAX_UDPDATA			4096	// max udp packet size
 #define MAX_RECVDATA		1024	// max data recv each recv()
-#define MAX_SENDDATA		1024	// max data can send
+#define MAX_SENDDATA		2048	// max data can send
 #define MAX_SENDBUFFER		8192	// max data can store in send buffer
 #define MAX_LOGBUFFER		16384	// max data can store in log buffer
 #define MAX_QUERY			4096	// max data can be query
@@ -156,6 +156,7 @@ typedef unsigned int u_int32_t;
 #define VAR_ADMIN			4		// only admins can change this variable
 #define MORTAR_BOMB			88		// 250Kg AP
 #define MORTAR				680.0	// mortar velocity (ft/s) (585, range= 10697; 680, range = 14450)
+#define MORTAR_RANGE		14000	// mortar range is 14000ft
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s�)
 #define MODULUS(a) (a > 0 ? a : a * -1)
 #define PLANE_FAU			180	// ME262 48, Predator 180
