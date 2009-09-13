@@ -994,14 +994,16 @@ int ProcessDrone(client_t *drone)
 				{
 					PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos has finished his bugged mission");
 					Com_Printf(VERBOSE_ALWAYS, "Commandos %s has finished his bugged mission\n", drone->longnick);
-					Com_Printf(VERBOSE_WARNING, "Commandos %s throw time %u, drone X %d, Y %d, Z %d, target X %d, Y %d\n",
+					Com_Printf(VERBOSE_WARNING, "Commandos %s throw time %u, drone X %d, Y %d, Z %d, target X %d, Y %d, field %u, target %u\n",
 						drone->longnick, 
 						drone->countrytime,
 						drone->posxy[0][0],
 						drone->posxy[1][0],
 						GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50,
 						arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx,
-						arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy);
+						arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy,
+						drone->dronefield,
+						drone->dronelasttarget);
 					RemoveDrone(drone);
 				}
 

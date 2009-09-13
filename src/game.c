@@ -6696,6 +6696,9 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 				sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)damage / (double)(((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]) + 1.0)));
 
+				if(pvictim->drone == DRONE_COMMANDOS)
+					Com_Printf(VERBOSE_DEBUG_DAMAGE, "Commandos damage = %.2f, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
+
 				if(sdamage >= 0)
 				{
 					pvictim->hitby[killer].damage += sdamage;

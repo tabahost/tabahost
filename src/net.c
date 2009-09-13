@@ -308,9 +308,11 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	}
 	else
 	{
-		Com_Printf(VERBOSE_WARNING, "SendPacket() overflowed (packet to %s - %s)\n", client->longnick, client->ip);
-		RemoveClient(client);
-		return -1;
+		Com_Printf(VERBOSE_WARNING, "SendPacket() overflowed (packet to %s - %s len %u)\n", client->longnick, client->ip, len);
+		Com_Printfhex(buffer, MAX_SENDDATA);
+		return 0;
+		//RemoveClient(client); // FIXME: temporary fix to catch a bug
+		//return -1;
 	}
 }
 
