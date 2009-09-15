@@ -229,19 +229,19 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	datagram_t *packet;
 	u_int16_t header;
 
-	if(!client))
+	if(!client)
 	{
 		Com_Printf(VERBOSE_WARNING, "SendPacket() client not exist\n");
 		return -1;
 	}
 
-	if(!client->inuse))
+	if(!client->inuse)
 	{
 		Com_Printf(VERBOSE_WARNING, "SendPacket() client not in use\n");
 		return -1;
 	}
 
-	if(!client->socket))
+	if(!client->socket)
 	{
 		Com_Printf(VERBOSE_WARNING, "SendPacket() client without socket\n");
 		return -1;

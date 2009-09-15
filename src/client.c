@@ -581,24 +581,24 @@ int ProcessClient(client_t *client)
 								
 								if(rand()%2)
 								{
-									SendForceStatus(STATUS_LWING, 0, nearplane); // lwing
-									SendForceStatus(STATUS_RWING, 0, client); // rwing
+									SendForceStatus(STATUS_LWING, nearplane->status_status, nearplane); // lwing
+									SendForceStatus(STATUS_RWING, client->status_status, client); // rwing
 								}
 								else if(rand()%2)
 								{
-									SendForceStatus(STATUS_RWING, 0, nearplane); // rwing
-									SendForceStatus(STATUS_LWING, 0, client); // lwing
+									SendForceStatus(STATUS_RWING, nearplane->status_status, nearplane); // rwing
+									SendForceStatus(STATUS_LWING, client->status_status, client); // lwing
 								}
 								else
 								{
-									SendForceStatus(STATUS_REARFUSE, 0, nearplane); // rfuse
+									SendForceStatus(STATUS_REARFUSE, nearplane->status_status, nearplane); // rfuse
 
 									if(rand()%2)
-									SendForceStatus(STATUS_LWING, 0, client);
+									SendForceStatus(STATUS_LWING, client->status_status, client);
 									else if(rand()%2)
-									SendForceStatus(STATUS_RWING, 0, client);
+									SendForceStatus(STATUS_RWING, client->status_status, client);
 									else
-									SendForceStatus(STATUS_REARFUSE, 0, client);
+									SendForceStatus(STATUS_REARFUSE, client->status_status, client);
 								}
 
 								near_en = NearPlane(client, client->country, 2000);

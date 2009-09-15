@@ -459,13 +459,13 @@ void ScoreFieldCapture(u_int8_t field)
 			{
 				if(IsCargo(NULL, arena->fields[field].hitby[i].plane))
 				{
-					Com_Printf(VERBOSE_DEBUG_SCORES, "Found Cargo damage %d\n", arena->fields[field].hitby[i].damage);
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Found Cargo damage %.2f\n", arena->fields[field].hitby[i].damage);
 					cargodamage += arena->fields[field].hitby[i].damage;
 					numcargos++;
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG_SCORES, "Found Bomber damage %d\n", arena->fields[field].hitby[i].damage);
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Found Bomber damage %.2f\n", arena->fields[field].hitby[i].damage);
 					bomberdamage += arena->fields[field].hitby[i].damage;
 					numbombers++;
 				}

@@ -1815,7 +1815,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_YELLOW, "You can't kill yourself in hmack, hit 'bail out'(enter) 3 times");
 				return;
 			}
-			SendForceStatus(STATUS_PILOT, 0, client);
+			SendForceStatus(STATUS_PILOT, client->status_status, client);
 			return;
 		}
 		else if (!Com_Stricmp(command, "fly"))
@@ -4805,11 +4805,11 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 							nearplane->damaged = 1;
 
 							if (rand()%2)
-								SendForceStatus(STATUS_LWING, 0, nearplane);
+								SendForceStatus(STATUS_LWING, nearplane->status_status, nearplane);
 							else if (rand()%2)
-								SendForceStatus(STATUS_RWING, 0, nearplane);
+								SendForceStatus(STATUS_RWING, nearplane->status_status, nearplane);
 							else
-								SendForceStatus(STATUS_REARFUSE, 0, nearplane);
+								SendForceStatus(STATUS_REARFUSE, nearplane->status_status, nearplane);
 						}
 					}
 					break;
@@ -5695,7 +5695,7 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 		client->status_status = htonl(status->status_status);
 	}
 
-	if ((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value) && !wb3->value)
+	if (!wb3->value && (arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value))
 		client->status_damage |= (STATUS_LFUEL | STATUS_RFUEL);
 
 	for (i = 0; i < maxentities->value; i++)
@@ -6697,7 +6697,10 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)damage / (double)(((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]) + 1.0)));
 
 				if(pvictim->drone == DRONE_COMMANDOS)
-					Com_Printf(VERBOSE_DEBUG_DAMAGE, "Commandos damage = %.2f, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
+				{
+					Com_Printf(VERBOSE_DEBUG_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
+					sdamage = 59.0;
+				}
 
 				if(sdamage >= 0)
 				{
@@ -7274,7 +7277,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 					client->damaged = 1;
 					client->armor.points[place] = 0;
-					SendForceStatus((1 << place), 0, client);
+					SendForceStatus((1 << place), client->status_status, client);
 
 					if (!client->inuse || !client->infly) // drone killed
 					{
@@ -7299,17 +7302,17 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 						if (place == PLACE_LFUEL)
 						{
 							client->armor.points[PLACE_LWING] = 0;
-							SendForceStatus((1 << PLACE_LWING), 0, client);
+							SendForceStatus((1 << PLACE_LWING), client->status_status, client);
 						}
 						else if (place == PLACE_RFUEL)
 						{
 							client->armor.points[PLACE_RWING] = 0;
-							SendForceStatus((1 << PLACE_RWING), 0, client);
+							SendForceStatus((1 << PLACE_RWING), client->status_status, client);
 						}
 						else if (place == PLACE_CENTERFUEL)
 						{
 							client->armor.points[PLACE_CENTERFUSE] = 0;
-							SendForceStatus((1 << PLACE_CENTERFUSE), 0, client);
+							SendForceStatus((1 << PLACE_CENTERFUSE), client->status_status, client);
 						}
 
 						PPrintf(client, RADIO_YELLOW, "Your %s exploded", GetHitSite(place));
@@ -8034,7 +8037,6 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 {
 	u_int8_t buffer[10];
 	u_int8_t i;
-	u_int32_t end;
 	planestatus1_t *status;
 
 	if (!client || !client->infly)
@@ -8088,72 +8090,15 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 	}
 	// End parse status_damage
 
-	if (client->drone)
-	{
-		if (client->drone & DRONE_FAU)
-		{
-			if (status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE))
-			{
-				client->dronetimer = 0;
-				ScoresEvent(SCORE_KILLED, client, 0);
-				//ScoresCheckKiller(client, NULL);
-				//ClearKillers(client);
-			}
-			else
-				client->status_damage |= (status_damage | STATUS_LFUEL | STATUS_RFUEL | STATUS_ENGINE1 | STATUS_ENGINE2);
-		}
-		else if (client->drone & (DRONE_HMACK | DRONE_HTANK))
-		{
-			if (status_damage)
-			{
-				ScoresEvent(SCORE_KILLED, client, 0);
-				//ScoresCheckKiller(client, NULL);
-				//ClearKillers(client);
+	client->status_damage |= status_damage;
+	client->status_status |= status_status;
 
-				if (client->related[0])
-				{
-					if ((FLIGHT_TIME(client->related[0])/10) < (u_int32_t)(flypenalty->value * 100))
-					{
-						client->related[0]->hmackpenalty = (flypenalty->value * 100) - end;
-						client->related[0]->hmackpenaltyfield = client->related[0]->field;
-					}
-				}
-
-				RemoveDrone(client);
-
-				return;
-			}
-		}
-		else if (client->drone & (DRONE_COMMANDOS | DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY | DRONE_EJECTED))
-		{
-			if (status_damage)
-			{
-				ScoresEvent(SCORE_KILLED, client, 0);
-				//ScoresCheckKiller(client, NULL);
-				//ClearKillers(client);
-				RemoveDrone(client);
-				return;
-			}
-			else
-				client->status_damage |= status_damage;
-		}
-		else if (client->drone & (DRONE_WINGS1 | DRONE_WINGS2 | DRONE_DEBUG))
-		{
-			if (status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
-			{
-				ScoresEvent(SCORE_KILLED, client, 0);
-				//ScoresCheckKiller(client, NULL);
-				//ClearKillers(client);
-				RemoveDrone(client);
-				return;
-			}
-			else
-				client->status_damage |= status_damage;
-		}
-
+//	if (client->drone)
+//	{
 		PPlaneStatus(NULL, client);
-	}
-	else
+//	}
+//	else
+	if(!client->drone)
 	{
 		memset(buffer, 0, sizeof(buffer));
 
@@ -8162,9 +8107,6 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 		status->packetid = htons(Com_WBhton(0x0E02));
 		status->status_damage = htonl(status_damage);
 		status->status_status = htonl(status_status);
-
-		client->status_damage |= status_damage;
-		client->status_status |= status_status;
 
 		SendPacket(buffer, sizeof(buffer), client);
 	}

@@ -357,6 +357,14 @@ int ProcessDrone(client_t *drone)
 	switch (drone->drone)
 	{
 		case DRONE_FAU: // FAU
+			if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				//ScoresCheckKiller(drone, NULL);
+				//ClearKillers(drone);
+				drone->dronetimer = 0;
+			}
+
 			if (drone->dronetimer)
 			{
 				if (!((arena->frame - drone->frame) % 50))
@@ -393,9 +401,19 @@ int ProcessDrone(client_t *drone)
 				SendXBombs(drone);
 				PFAUDamage(drone);
 				RemoveDrone(drone);
+				return 0;
 			}
 			break;
 		case DRONE_WINGS1:
+			if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				//ScoresCheckKiller(drone, NULL);
+				//ClearKillers(drone);
+				RemoveDrone(drone);
+				return 0;
+			}
+
 			if (!((arena->frame - drone->frame) % 10))
 			{
 				if (drone->related[0])
@@ -538,10 +556,22 @@ int ProcessDrone(client_t *drone)
 					drone->aspeeds[2][0] = drone->related[0]->aspeeds[2][0];
 				}
 				else
+				{
 					RemoveDrone(drone);
+					return 0;
+				}
 			}
 			break;
 		case DRONE_WINGS2:
+			if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				//ScoresCheckKiller(drone, NULL);
+				//ClearKillers(drone);
+				RemoveDrone(drone);
+				return 0;
+			}
+
 			if (!((arena->frame - drone->frame) % 10))
 			{
 				if (drone->related[0])
@@ -679,13 +709,24 @@ int ProcessDrone(client_t *drone)
 					drone->aspeeds[2][0] = drone->related[0]->aspeeds[2][0];
 				}
 				else
+				{
 					RemoveDrone(drone);
+					return 0;
+				}
 			}
 			break;
 		case DRONE_TANK1:
 		case DRONE_TANK2:
 		case DRONE_AAA:
 		case DRONE_KATY:
+			if (drone->status_damage)
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				//ScoresCheckKiller(drone, NULL);
+				//ClearKillers(drone);
+				RemoveDrone(drone);
+				return 0;
+			}
 
 			near = NULL;
 			ang = 0;
@@ -921,11 +962,31 @@ int ProcessDrone(client_t *drone)
 					Com_Printf(VERBOSE_ALWAYS, "Tank %s(%s) finished its mission\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-");
 				}
 				RemoveDrone(drone);
+				return 0;
 			}
 			break;
 
 		case DRONE_HTANK:
 		case DRONE_HMACK:
+			if (drone->status_damage)
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				//ScoresCheckKiller(client, NULL);
+				//ClearKillers(client);
+
+				if (drone->related[0])
+				{
+					if ((FLIGHT_TIME(drone->related[0])/10) < (u_int32_t)(flypenalty->value * 100))
+					{
+						drone->related[0]->hmackpenalty = (flypenalty->value * 100) - (FLIGHT_TIME(drone->related[0])/10);
+						drone->related[0]->hmackpenaltyfield = drone->related[0]->field;
+					}
+				}
+
+				RemoveDrone(drone);
+				return 0;
+			}
+
 			if (!((arena->frame - drone->frame) % 50))
 			{
 				if (drone->related[0])
@@ -960,6 +1021,14 @@ int ProcessDrone(client_t *drone)
 			}
 			break;
 		case DRONE_COMMANDOS:
+			if (drone->status_damage)
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				//ScoresCheckKiller(drone, NULL);
+				//ClearKillers(drone);
+				drone->dronetimer = 0;
+			}
+
 			if (drone->dronetimer)
 			{
 				if (!(drone->countrytime))
@@ -1013,6 +1082,7 @@ int ProcessDrone(client_t *drone)
 						drone->dronefield,
 						drone->dronelasttarget);
 					RemoveDrone(drone);
+					return 0;
 				}
 
 				drone->dronetimer--;
@@ -1022,9 +1092,19 @@ int ProcessDrone(client_t *drone)
 				PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos has finished his mission");
 				Com_Printf(VERBOSE_ALWAYS, "Commandos %s has finished his mission\n", drone->longnick);
 				RemoveDrone(drone);
+				return 0;
 			}
 			break;
 		case DRONE_DEBUG:
+			if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				//ScoresCheckKiller(drone, NULL);
+				//ClearKillers(drone);
+				RemoveDrone(drone);
+				return 0;
+			}
+
 			drone->angles[0][0] = dpitch->value;
 			drone->angles[1][0] = droll->value;
 			drone->angles[2][0] = dyaw->value;
