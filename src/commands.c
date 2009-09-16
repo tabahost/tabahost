@@ -461,7 +461,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 void Cmd_Plane(u_int16_t planenumber, client_t *client)
 {
 	u_int32_t rpsreplace;
-	char message[64];
+	char message[128];
 	u_int8_t buffer[10];
 	plane_t *plane;
 

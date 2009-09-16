@@ -1021,51 +1021,55 @@ int ProcessDrone(client_t *drone)
 			}
 			break;
 		case DRONE_COMMANDOS:
-			if (drone->status_damage)
-			{
-				ScoresEvent(SCORE_KILLED, drone, 0);
-				//ScoresCheckKiller(drone, NULL);
-				//ClearKillers(drone);
-				drone->dronetimer = 0;
-			}
-
 			if (drone->dronetimer)
 			{
 				if (!(drone->countrytime))
 				{
 					if (arena->fields[drone->dronefield].country != drone->country)
 					{
-						DroneGetTarget(drone);
+						if(!((arena->frame - drone->frame) % 50)) // drone fire tick every 500ms
+						{
+							DroneGetTarget(drone);
 
-						if (drone->dronelasttarget < MAX_BUILDINGS)
-						{
-							if (drone->related[0])
+							if (drone->dronelasttarget < MAX_BUILDINGS)
 							{
-								PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos aiming at %s, F%d",
-										GetBuildingType(arena->fields[drone->dronefield].buildings[drone->dronelasttarget].type), drone->dronefield+1);
+								if (drone->related[0])
+								{
+									PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos aiming at %s, F%d",
+											GetBuildingType(arena->fields[drone->dronefield].buildings[drone->dronelasttarget].type), drone->dronefield+1);
+								}
+								ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
+								//							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 							}
-							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
-							//							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
+							else if(!oldcapt->value && wb3->value)
+							{
+								x = drone->posxy[0][0] - arena->fields[drone->dronefield].posxyz[0];
+								y = drone->posxy[1][0] - arena->fields[drone->dronefield].posxyz[1];
+
+								if((1.0 * x * x + 1.0 * y * y) < (MORTAR_RANGE * MORTAR_RANGE))
+								{
+									ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50,
+										arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1], 0, drone);
+								}
+								else // runs toward field center to get more targets or the field center for ToT
+								{
+									ang = AngleTo(drone->posxy[0][0], drone->posxy[1][0], arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1]);
+
+									drone->posxy[0][0] -= (int32_t)(7.0 * sin(Com_Rad(ang)));
+									drone->posxy[1][0] += (int32_t)(7.0 * cos(Com_Rad(ang)));
+								}
+							}
+							else
+								drone->dronetimer = 0;
 						}
-						else if(!oldcapt->value && wb3->value)
-						{
-							//if((1.0 * drone->posxy[0][0] * drone->posxy[0][0] + 1.0 * drone->posxy[1][0] * drone->posxy[1][0]) < (MORTAR_RANGE * MORTAR_RANGE))
-							//{
-								ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1], 0, drone);
-							//}
-							//else
-							//{
-							//	drone->drone->posxy[0][0] += 
-							//	drone->drone->posxy[1][0] += 
-							//}
-						}
-						else
-							drone->dronetimer = 0;
 					}
 					else
 						drone->dronetimer = 0;
 				}
-				drone->countrytime--;
+				else
+				{
+					drone->countrytime--;
+				}
 
 				if (drone->countrytime > 36000) // remove drone if throw time is more than 6 minutes (bug)
 				{
@@ -1082,7 +1086,6 @@ int ProcessDrone(client_t *drone)
 						drone->dronefield,
 						drone->dronelasttarget);
 					RemoveDrone(drone);
-					return 0;
 				}
 
 				drone->dronetimer--;
@@ -1092,7 +1095,6 @@ int ProcessDrone(client_t *drone)
 				PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos has finished his mission");
 				Com_Printf(VERBOSE_ALWAYS, "Commandos %s has finished his mission\n", drone->longnick);
 				RemoveDrone(drone);
-				return 0;
 			}
 			break;
 		case DRONE_DEBUG:
