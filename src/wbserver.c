@@ -234,9 +234,12 @@ int main(int argc, char *argv[])
 				arena->frame = checksync;
 			}
 
-			if(time> overload->value)
+			arena->overload = 0;
+
+			if(time > overload->value)
 			{
 				Com_Printf(VERBOSE_WARNING, "possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
+				arena->overload = 1;
 			}
 		}
 		else
@@ -319,7 +322,7 @@ int main(int argc, char *argv[])
 		}
 
 		UpdateLocalArenaslist();
-		oldtime = arena->time; // change: why this is here and not up there?
+		oldtime = arena->time; // FIXME: why this is here and not up there?
 	}
 #ifdef _WIN32
 	sleep(1000);

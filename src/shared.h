@@ -630,6 +630,7 @@ typedef struct bomb_s
 typedef struct arena_s
 {
 	u_int32_t	time;			// current server time
+	u_int8_t	overload;		// overload flag
 	u_int32_t	sent;			// bytes sent
 	u_int32_t	recv;			// bytes recv
 	u_int32_t	frame;			//
@@ -888,6 +889,7 @@ typedef struct client_s
 	u_int16_t	msgtimer;		// msgtimer (friendly hit)
 	u_int32_t	lastsql;		// last time client made a SQL request;
 	u_int32_t	timer;			// player timer
+	u_int32_t	arenatimer;		// stores arenatimer to compare with client timer
 	u_int32_t	pingtest;		// pingtest timer
 	u_int32_t	postimer;		// last position update arena's time
 	u_int32_t	awaytimer;		// away timer

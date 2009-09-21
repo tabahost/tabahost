@@ -1021,6 +1021,15 @@ int ProcessDrone(client_t *drone)
 			}
 			break;
 		case DRONE_COMMANDOS:
+			if (drone->status_damage)
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				//ScoresCheckKiller(drone, NULL);
+				//ClearKillers(drone);
+				RemoveDrone(drone);
+				return 0;
+			}
+
 			if (drone->dronetimer)
 			{
 				if (!(drone->countrytime))

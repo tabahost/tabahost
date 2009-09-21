@@ -4946,6 +4946,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	planeposition2_t *plane2;
 	int32_t field;
 	u_int32_t distance;
+	client_t *near;
 
 	if (wb3->value)
 	{
@@ -4993,6 +4994,14 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			if (!client->predict)
 			{
 				client->offset = client->timer - ntohl(wb3plane->timer);
+
+				if(client->cancollide && !arena->overload && client->offset < -600)
+				{
+					near = NearPlane(client, client->country, planerangelimit->value);
+
+					Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, client->offset, near?"enemy near":"");
+				}
+
 				client->timer = ntohl(wb3plane->timer);
 			}
 		}
@@ -9526,7 +9535,6 @@ void SendArenaRules(client_t *client)
 	memset(buffer, 0, sizeof(buffer));
 
 	Com_Printf(VERBOSE_DEBUG, "Printing Arena Rules to %s\n", client->longnick);
-	Sys_PrintTrace();
 
 	if (client->attr & FLAG_ADMIN)
 	{

@@ -330,6 +330,7 @@ int ProcessClient(client_t *client)
 	client_t *nearplane;
 	client_t *near_en;
 	int32_t x, y, z;
+	int16_t offset;
 
 	if (client->disconnect)
 	{
@@ -531,7 +532,6 @@ int ProcessClient(client_t *client)
 				if(predictpos->value && client->infly)
 				{
 					if((arena->time - client->postimer)> 600) // if client didnt send position packet in 500ms
-
 					{
 						Com_Printf(VERBOSE_DEBUG, "arena->time %u\n", arena->time);
 						Com_Printf(VERBOSE_DEBUG, "arena - postimer %u\n", arena->time - client->postimer);
@@ -543,6 +543,22 @@ int ProcessClient(client_t *client)
 				{
 					// if(!((arena->frame - client->frame) % 500)) // debug
 						SendPlayersNear(client);
+
+					if(!((arena->frame - client->frame) % 50))
+					{
+						if(client->cancollide && !arena->overload)
+						{
+							offset = (arena->time - client->arenatimer + client->offset);
+							if(offset > 20 || offset < -20)
+							{
+								near_en = NearPlane(client, client->country, planerangelimit->value);
+
+								Com_Printf(VERBOSE_DEBUG, "%s possible connection problem (offset %d) %s\n", client->longnick, offset, near_en?"enemy near":"");
+							}
+						}
+
+						client->arenatimer = arena->time;
+					}
 
 					if((client->lograwdata || lograwposition->value) && !((arena->frame - client->frame) % 50) && client->infly)
 					{
