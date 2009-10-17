@@ -1,22 +1,22 @@
 /***
- *  Copyright (C) 2004-2008 Francisco Bischoff
+ *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
  *
- *  This file is part of Tabajara Host.
+ *  This file is part of Tabajara Host Server.
  *
- *  Tabajara Host is free software: you can redistribute it and/or modify
+ *  Tabajara Host Server is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Tabajara Host is distributed in the hope that it will be useful,
+ *  Tabajara Host Server is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
+ *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
  *
  ***/
 
@@ -646,6 +646,9 @@ void CheckArenaRules(void)
 				arena->month = 1;
 				arena->year++;
 			}
+
+			if (arena->hour - (7 - ((int)dayhours->value%10)/2) == dayhours->value) // check hours
+				BPrintf(RADIO_YELLOW, "Current Date: %04d/%02d/%02d", arena->year, arena->month, arena->day);
 
 			if (wb3->value && !(arena->frame % (int)((360000 * dayhours->value) /timemult->value))) // set date and dayhours every day
 			{
@@ -1800,6 +1803,20 @@ void ProcessCommands(char *command, client_t *client)
 			//Cmd_Pingtest(0, client);
 			return;
 		}
+		else if(!Com_Stricmp(command, "startdrone"))
+		{
+			if(testarena->value)
+			{
+				if(!argv[2])
+				{
+					PPrintf(client, RADIO_LIGHTYELLOW, "usage: .startdrone <field> <plane> <angle>");
+					return;
+				}
+
+				Cmd_StartDrone(Com_Atoi(argv[0]), Com_Atoi(argv[1]), Com_Atof(argv[2]), client);
+				return;
+			}
+		}
 		else if (!Com_Stricmp(command, "easy"))
 		{
 			if (argv[0])
@@ -2382,21 +2399,21 @@ void ProcessCommands(char *command, client_t *client)
 	// commands that console can execute
 	if (!Com_Stricmp(command, "version"))
 	{
-		PPrintf(client, RADIO_LIGHTYELLOW, "Tabajara Host version %s, build %s %s", VERSION, __DATE__, __TIME__ );
+		PPrintf(client, RADIO_LIGHTYELLOW, "Tabajara Host Server version %s, build %s %s", VERSION, __DATE__, __TIME__ );
 		return;
 	}
 	if(!Com_Stricmp(command, "license"))
 	{
-		printf("Tabajara Host is free software: you can redistribute it and/or modify\n");
+		printf("Tabajara Host Server is free software: you can redistribute it and/or modify\n");
 		printf("it under the terms of the GNU Affero General Public License as published by\n");
 		printf("the Free Software Foundation, either version 3 of the License, or\n");
 		printf("(at your option) any later version.\n\n");
-		printf("Tabajara Host is distributed in the hope that it will be useful,\n");
+		printf("Tabajara Host Server is distributed in the hope that it will be useful,\n");
 		printf("but WITHOUT ANY WARRANTY; without even the implied warranty of\n");
 		printf("MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n");
 		printf("GNU Affero General Public License for more details.\n\n");
 		printf("You should have received a copy of the GNU Affero General Public License\n");
-		printf("along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.\n");
+		printf("along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.\n");
 		fflush(stdout);
 		return;
 	}
@@ -2877,17 +2894,6 @@ void ProcessCommands(char *command, client_t *client)
 			AddDrone(DRONE_DEBUG, client->posxy[0][0], client->posxy[1][0], client->posalt[0] + 100, client->country, Com_Atoi(argv[0]), client);
 			return;
 		}
-		else if(!Com_Stricmp(command, "startdrone"))
-		{
-			if(!argv[2])
-			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .startdrone <field> <plane> <angle>");
-				return;
-			}
-
-			Cmd_StartDrone(Com_Atoi(argv[0]), Com_Atoi(argv[1]), Com_Atof(argv[2]), client);
-			return;
-		}
 		else if(!Com_Stricmp(command, "capt"))
 		{
 			if(!argv[0] || !argv[1])
@@ -3096,7 +3102,7 @@ void ProcessCommands(char *command, client_t *client)
 		{
 			if(!argv[2])
 			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .date <mm> <dd> <yyyy>");
+				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .date <yyyy> <mm> <dd>");
 			}
 			else
 			Cmd_Date(Com_Atoi(argv[0]), Com_Atoi(argv[1]), Com_Atoi(argv[2]), client);
@@ -4014,19 +4020,31 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					SendExecutablesCheck(1, client);
 					SendLastConfig(client);
 
-					snprintf(file, sizeof(file), "./arenas/%s/motd.txt", dirname->string);
+					snprintf(file, sizeof(file), "motd.txt");
 
-					if((fp = fopen(file, "r")) == NULL)
+					if ((fp = fopen(file, "r")) == NULL)
 					{
-						Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", file);
-						snprintf(file, sizeof(file), "motd.txt");
+						// Couldn't open general motd.txt, try arena motd
+						snprintf(file, sizeof(file), "./arenas/%s/motd.txt", dirname->string);
+
+						if ((fp = fopen(file, "r")) == NULL)
+						{
+							// Couldn't even open arena motd, print error
+							Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", file);
+							memset(file, 0, sizeof(file));
+						}
+						else
+						{
+							fclose(fp);
+						}
 					}
 					else
 					{
 						fclose(fp);
 					}
 
-					SendFileSeq1(file, "motd.txt", client);
+					if(strlen(file))
+						SendFileSeq1(file, "motd.txt", client);
 
 					PPrintf(client, RADIO_YELLOW, "Tabajara Host version %s, build %s %s", VERSION, __DATE__, __TIME__);
 
@@ -4887,7 +4905,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			client->score.costscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status_damage = client->status_status = client->infly
 					= client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2]
 					= client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer
-					= client->score.penaltyscore = client->commandos = client->damaged = 0;
+					= client->score.penaltyscore = client->commandos = client->damaged = client->conn_sum = client->conn_count = client->conn_curravg = client->conn_lastavg = 0;
 
 			memset(client->skin, 0, sizeof(client->skin));
 
@@ -4945,8 +4963,11 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	wb3planeposition_t *wb3plane;
 	planeposition2_t *plane2;
 	int32_t field;
-	u_int32_t distance;
-	client_t *near;
+	u_int32_t distance, oldpostimer;
+	int16_t clientoffset;
+	int16_t posoffset;
+	double conn_avgdiff;
+	client_t *near = NULL;
 
 	if (wb3->value)
 	{
@@ -4957,12 +4978,17 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		plane = (planeposition_t *) buffer;
 	}
 
+	oldpostimer = client->postimer;
 	client->postimer = arena->time; // set the time when last position packet has been received
 
 	if (attached)
 	{
 		plane2 = (planeposition2_t *) buffer;
-		client->offset = client->timer - ntohl(plane2->timer);
+		clientoffset = client->timer - ntohl(plane2->timer);
+		if(oldpostimer == client->postimer) // if this packet was received in bolus
+			client->offset += clientoffset;
+		else
+			client->offset = clientoffset;
 		client->timer = ntohl(plane2->timer);
 		//		client->atradar = ntohs(0x10);
 
@@ -4993,13 +5019,69 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			//		client->atradar = ntohs(wb3plane->radar);
 			if (!client->predict)
 			{
-				client->offset = client->timer - ntohl(wb3plane->timer);
+				clientoffset = client->timer - ntohl(wb3plane->timer);
+				if(oldpostimer == client->postimer) // if this packet was received in bolus
+					client->offset += clientoffset;
+				else
+					client->offset = clientoffset;
 
-				if(client->cancollide && !arena->overload && client->offset < -600)
+				if(client->cancollide && !arena->overload)
 				{
-					near = NearPlane(client, client->country, planerangelimit->value);
+					if(clientoffset < -600)
+					{
+						near = NearPlane(client, client->country, planerangelimit->value);
+						Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, clientoffset, near?"enemy near":"");
+					}
 
-					Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, client->offset, near?"enemy near":"");
+					if(client->postimer != oldpostimer) // not received in bolus
+					{
+						posoffset = (client->postimer - oldpostimer + client->offset);
+						posoffset = MODULUS(posoffset);
+
+						client->conn_sum += posoffset;
+						client->conn_count++;
+
+						if(client->conn_count >= 40) // each 15 seconds in flight
+						{
+							if(!client->conn_lastavg)
+							{
+								client->conn_lastavg = (double)client->conn_sum / client->conn_count;
+							}
+							else
+							{
+								client->conn_lastavg = 0.5 * client->conn_lastavg + 0.5 * (double)client->conn_sum / client->conn_count;
+							}
+
+							client->conn_sum = 10 * client->conn_lastavg;
+							client->conn_count = 10;
+
+							if(client->conn_curravg)
+							{
+								conn_avgdiff = client->conn_curravg - client->conn_lastavg;
+								Com_Printf(VERBOSE_DEBUG, "%s avgdiff %.3f\n", client->longnick, conn_avgdiff);
+								//if(MODULUS(conn_avgdiff) > 100)
+							}
+
+							client->conn_curravg = (double)client->conn_sum / client->conn_count;
+							Com_Printf(VERBOSE_DEBUG, "%s current avg: %.3f\n", client->longnick, client->conn_curravg);
+
+							if(client->conn_curravg > 150)
+							{
+								client->connection = 3; // poor
+							}
+							else if(client->conn_curravg > 100)
+							{
+								client->connection = 2; // unstable
+							}
+							else if(client->conn_curravg > 50)
+							{
+								client->connection = 1; // fair
+							}
+							else
+								client->connection = 0; // stable
+							UpdateIngameClients(0);
+						}
+					}
 				}
 
 				client->timer = ntohl(wb3plane->timer);
@@ -5013,7 +5095,11 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			//		client->atradar = ntohs(plane->radar);
 			if (!client->predict)
 			{
-				client->offset = client->timer - ntohl(plane->timer);
+				clientoffset = client->timer - ntohl(plane->timer);
+				if(oldpostimer == client->postimer) // if this packet was received in bolus
+					client->offset += clientoffset;
+				else
+					client->offset = clientoffset;
 				client->timer = ntohl(plane->timer);
 			}
 		}
@@ -5208,64 +5294,6 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				CheckMaxG(client);
 		}
 	}
-	/*	else
-	 {
-	 for(i = 0; i < MAX_RELATED; i++)
-	 {
-	 if(client->related[i] && (client->related[i]->drone & DRONE_EJECTED))
-	 break;
-	 }
-
-	 if(i < MAX_RELATED) // found drone (plane after ejection)
-	 {
-	 if(wb3->value)
-	 {
-	 client->related[i]->posxy[0][0] = ntohl(wb3plane->posx);
-	 client->related[i]->posxy[1][0] = ntohl(wb3plane->posy);
-	 client->related[i]->posalt[0] = ntohl(wb3plane->alt);
-	 client->related[i]->speedxyz[0][0] = ntohs(wb3plane->xspeed);
-	 client->related[i]->speedxyz[1][0] = ntohs(wb3plane->yspeed);
-	 client->related[i]->speedxyz[2][0] = ntohs(wb3plane->climbspeed);
-	 client->related[i]->accelxyz[0][0] = ntohs(wb3plane->sideaccel);
-	 client->related[i]->accelxyz[1][0] = ntohs(wb3plane->forwardaccel);
-	 client->related[i]->accelxyz[2][0] = ntohs(wb3plane->climbaccel);
-	 client->related[i]->angles[0][0] = ntohs(wb3plane->pitchangle);
-	 client->related[i]->angles[1][0] = ntohs(wb3plane->rollangle);
-	 client->related[i]->angles[2][0] = ntohs(wb3plane->yawangle);
-	 client->related[i]->aspeeds[0][0] = ntohs(wb3plane->pitchangspeed);
-	 client->related[i]->aspeeds[1][0] = ntohs(wb3plane->rollangspeed);
-	 client->related[i]->aspeeds[2][0] = ntohs(wb3plane->yawangspeed);
-	 //			client->related[i]->atradar = ntohs(plane->radar);
-	 client->related[i]->offset = client->related[i]->timer - ntohl(wb3plane->timer);
-	 client->related[i]->timer = ntohl(wb3plane->timer);
-	 }
-	 else
-	 {
-	 client->related[i]->posxy[0][0] = ntohl(plane->posx);
-	 client->related[i]->posxy[1][0] = ntohl(plane->posy);
-	 client->related[i]->posalt[0] = ntohl(plane->alt);
-	 client->related[i]->speedxyz[0][0] = ntohs(plane->xspeed);
-	 client->related[i]->speedxyz[1][0] = ntohs(plane->yspeed);
-	 client->related[i]->speedxyz[2][0] = ntohs(plane->climbspeed);
-	 client->related[i]->accelxyz[0][0] = ntohs(plane->sideaccel);
-	 client->related[i]->accelxyz[1][0] = ntohs(plane->forwardaccel);
-	 client->related[i]->accelxyz[2][0] = ntohs(plane->climbaccel);
-	 client->related[i]->angles[0][0] = ntohs(plane->pitchangle);
-	 client->related[i]->angles[1][0] = ntohs(plane->rollangle);
-	 client->related[i]->angles[2][0] = ntohs(plane->yawangle);
-	 client->related[i]->aspeeds[0][0] = ntohs(plane->pitchangspeed);
-	 client->related[i]->aspeeds[1][0] = ntohs(plane->rollangspeed);
-	 client->related[i]->aspeeds[2][0] = ntohs(plane->yawangspeed);
-	 //			client->related[i]->atradar = ntohs(plane->radar);
-	 client->related[i]->offset = client->related[i]->timer - ntohl(plane->timer);
-	 client->related[i]->timer = ntohl(plane->timer);
-	 }
-	 }
-
-	 //		//client->atradar = ntohs(plane->radar); // This makes chute appear at radar
-	 //		client->atradar = 0x14;
-	 }
-	 */
 
 	if (client->mapper)
 	{
@@ -5316,10 +5344,6 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 
 		}
 	}
-
-// CV Test
-//	u_int8_t teste[31] = {0x00, 0x15, 0x00, 0x00, 0x00, 0x03, 0x17, 0xB0, 0x00, 0x06, 0x61, 0xE7, 0x00, 0x00, 0x0B, 0xB8, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x4E, 0x00, 0x02};
-//	SendPacket(teste, sizeof(teste), client);
 }
 
 /**
@@ -6097,6 +6121,8 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 
 	hits = flakhit->hits;
 
+	Com_Printf(VERBOSE_DEBUG_DAMAGE, "PFlakHit hits %d\n", hits);
+
 	if (!(pvictim = FindSClient(ntohl(flakhit->victim))))
 		return;
 
@@ -6124,45 +6150,33 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 	if (killer >= 0)
 		pvictim->hitby[killer].damage += munition->he;
 
-	Com_Printf(VERBOSE_ALWAYS, "-HOST- hit %s with %s\n", pvictim->longnick, munition->abbrev);
+	if (client != pvictim)
+	{
+		Com_Printf(VERBOSE_WARNING, "PFlakHit(client!=pvictim) client = %s, pvictim = %s\n", client->longnick, pvictim->longnick);
+	}
 
-	if (gunstats->value)// || client->gunstat || pvictim->gunstat)
+	Com_Printf(VERBOSE_ALWAYS, "-HOST- Flakhit %s with %s\n", pvictim->longnick, munition->abbrev);
+
+	if (gunstats->value)
 	{
 		memset(heb, 0, sizeof(heb));
 		AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, heb, NULL, pvictim);
 
-		if (client != pvictim)
+		if (gunstats->value > 1 && client->gunstat && (client != pvictim))
 		{
-//			if (gunstats->value)
-//			{
-				memset(header, 0, sizeof(header));
-				snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, flakhit->type, munition->he, munition->ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
-				memset(gunstatsb, 0, sizeof(gunstatsb));
-				snprintf(gunstatsb, sizeof(gunstatsb), "%s;;%s", header, heb);
-//			}
-//			else
-//			{
-//				memset(gunstatsb, 0, sizeof(gunstatsb));
-//				snprintf(gunstatsb, sizeof(gunstatsb), "Hit %s with %s at cfz", pvictim->longnick, munition->abbrev);
-//			}
-//			if (gunstats->value || client->gunstat)
-				PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
+			memset(header, 0, sizeof(header));
+			snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, flakhit->type, munition->he, munition->ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
+			memset(gunstatsb, 0, sizeof(gunstatsb));
+			snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
+			PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
 		}
 
-//		if (gunstats->value)
-//		{
-			memset(header, 0, sizeof(header));
-			snprintf(header, sizeof(header), "%s%s%s(%u)[%de%dp]", client->longnick, GetSmallPlaneName(client->plane), munition->abbrev, flakhit->type, munition->he, munition->ap);
-			memset(gunstatsb, 0, sizeof(gunstatsb));
-			snprintf(gunstatsb, sizeof(gunstatsb), "%s;;%s", header, heb);
-//		}
-//		else
-//		{
-//			memset(gunstatsb, 0, sizeof(gunstatsb));
-//			snprintf(gunstatsb, sizeof(gunstatsb), "%s hit you with %s at cfz", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev);
-//		}
-
-//		if (gunstats->value || pvictim->gunstat)
+		memset(header, 0, sizeof(header));
+		snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, flakhit->type, munition->he, munition->ap);
+		memset(gunstatsb, 0, sizeof(gunstatsb));
+		snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
+		Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s\n", gunstatsb);
+		if (gunstats->value > 1 && pvictim->gunstat)
 			PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 	}
 	else
@@ -6195,7 +6209,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (!building)
 	{
-		if (gunstats->value)
+		if (gunstats->value > 1 && client->gunstat)
 			PPrintf(client, RADIO_LIGHTYELLOW, "Building %d not declared", htons(hitstructure->build));
 
 		Com_Printf(VERBOSE_WARNING, "Building %d not declared", htons(hitstructure->build));
@@ -6239,7 +6253,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 	distance /= 300; // convert feets to yards
 
-	j = hits; // to avoid log hits several times
+//	j = hits; // to avoid log hits several times
 
 	for (i = 0; i < hits; i++)
 	{
@@ -6260,11 +6274,11 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 		damaged = AddBuildingDamage(building, munition->he, ap, client);
 
-		if (j == hits)
-		{
-			Com_Printf(VERBOSE_ALWAYS, "%s %shit %u rounds at %s with %s\n", client->longnick, building->country==client->country ? "friendly " : "", hits, GetBuildingType(building->type), munition->abbrev);
-			j = 0;
-		}
+//		if (j == hits)
+//		{
+//			Com_Printf(VERBOSE_ALWAYS, "%s %shit %u rounds at %s with %s\n", client->longnick, building->country==client->country ? "friendly " : "", hits, GetBuildingType(building->type), munition->abbrev);
+//			j = 0;
+//		}
 
 		if (IsBomber(client) && client->wings)
 		{
@@ -6285,7 +6299,11 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 		}
 
 		if (gunstats->value)
-			PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+		{
+			if (gunstats->value > 1 && client->gunstat)
+				PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+			Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client?client->longnick:"-HOST-", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+		}
 //		else if (client->gunstat)
 //			PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 	}
@@ -6327,10 +6345,10 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (!building)
 	{
-		if (gunstats->value)
+		if (gunstats->value > 1 && client->gunstat)
 			PPrintf(client, RADIO_LIGHTYELLOW, "Building %d not declared", htons(hardhitstructure->build));
 
-		Com_Printf(VERBOSE_WARNING, "Building %d not declared", htons(hardhitstructure->build));
+		Com_Printf(VERBOSE_WARNING, "Building %d not declared\n", htons(hardhitstructure->build));
 
 		tempbuild.id = htons(hardhitstructure->build);
 		SetBuildingStatus(&tempbuild, 1, NULL);
@@ -6419,7 +6437,11 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	i = AddBuildingDamage(building, he, munition->ap, client);
 
 	if (gunstats->value)
-		PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+	{
+		if (gunstats->value > 1 && client->gunstat)
+			PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+		Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client?client->longnick:"-HOST-", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+	}
 //	else if (client->gunstat)
 //		PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 
@@ -6450,7 +6472,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	u_int32_t dist;
 	double distance, sdamage, totaldamage;
 	int8_t killer = 0;
-	int32_t damage, debug_damage;
+	int32_t damage;
 	munition_t *munition;
 	client_t *pvictim;
 	char header[128];
@@ -6569,7 +6591,6 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	debug_damage = 0;
 
 	for (i = 0; i < hits; i++)
 	{
@@ -6647,7 +6668,8 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 		// End Needle pre-processing
 
-		he = munition->he;
+		he = (u_int16_t)munition->he;
+
 		if((((double)munition->decay * distance) + munition->ap) > 0)
 			ap = ((double)munition->decay * distance) + munition->ap;
 		else
@@ -6701,15 +6723,13 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if(needle[j] >= 0 && needle[j] < MAX_PLACE && killer >= 0 && killer < MAX_HITBY)
 			{
-				debug_damage += damage;
-
 				sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)damage / (double)(((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]) + 1.0)));
 
-				if(pvictim->drone == DRONE_COMMANDOS)
-				{
-					Com_Printf(VERBOSE_DEBUG_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
-					sdamage = 59.0;
-				}
+//				if(pvictim->drone == DRONE_COMMANDOS)
+//				{
+//					Com_Printf(VERBOSE_DEBUG_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
+//					sdamage = 59.0;
+//				}
 
 				if(sdamage >= 0)
 				{
@@ -6727,7 +6747,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			he = 0;
 		}
 
-		if (gunstats->value) // || client->gunstat || pvictim->gunstat)
+		if (gunstats->value)
 		{
 			hitplane = (hitplane_t *)buffer;
 
@@ -6744,55 +6764,24 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			else
 				ap = 0;
 
-			if (client != pvictim)
+			if (gunstats->value > 1 && client->gunstat && (client != pvictim))
 			{
-//				if (gunstats->value)
-//				{
-					memset(header, 0, sizeof(header));
-					snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, hitplane->type, munition->he, ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
-					memset(gunstatsb, 0, sizeof(gunstatsb));
-					snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;%s%s", header, heb, ign, apb);
-					Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s\n", gunstatsb);
-//				}
-//				else
-//				{
-//					memset(gunstatsb, 0, sizeof(gunstatsb));
-//					snprintf(gunstatsb, sizeof(gunstatsb), "Hit %s with %s at %s", pvictim->longnick, munition->abbrev, GetSmallHitSite(needle[0]));
-//				}
-
-//				if (gunstats->value || client->gunstat)
-					PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
-			}
-
-//			if (gunstats->value)
-//			{
 				memset(header, 0, sizeof(header));
-				snprintf(header, sizeof(header), "%s(%s)%s(%u)[%de%dp]", client->longnick, GetSmallPlaneName(client->plane), munition->abbrev, hitplane->type, munition->he, ap);
+				snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, hitplane->type, munition->he, ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
 				memset(gunstatsb, 0, sizeof(gunstatsb));
 				snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;%s%s", header, heb, ign, apb);
-//			}
-//			else
-//			{
-//				memset(gunstatsb, 0, sizeof(gunstatsb));
-//				snprintf(gunstatsb, sizeof(gunstatsb), "%s hit you with %s at %s", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev, GetSmallHitSite(needle[0]));
-//			}
-//			if (gunstats->value || pvictim->gunstat)
+				PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
+			}
+
+			memset(header, 0, sizeof(header));
+			snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, hitplane->type, munition->he, ap);
+			memset(gunstatsb, 0, sizeof(gunstatsb));
+			snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;%s%s", header, heb, ign, apb);
+			Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s\n", gunstatsb);
+			if (gunstats->value > 1 && pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 		}
 	}
-
-	Com_Printf(VERBOSE_ALWAYS, "%s %shit %u rounds at %s with %s at %s;%s;%s;%s;%s (%d damage)\n",
-			(client != pvictim) ? client->longnick : "-HOST",
-			(client != pvictim && client->country == pvictim->country) ? "friendly " : "",
-			hits,
-			pvictim->longnick,
-			munition->abbrev,
-			(needle[0] >= 0)?GetHitSite(needle[0]):"",
-			(needle[1] >= 0)?GetHitSite(needle[1]):"",
-			(needle[2] >= 0)?GetHitSite(needle[2]):"",
-			(needle[3] >= 0)?GetHitSite(needle[3]):"",
-			(needle[4] >= 0)?GetHitSite(needle[4]):"",
-			debug_damage);
 
 	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 	{
@@ -6972,44 +6961,26 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 			return; // not hit plane if with wingmans
 	}
 
-	if (gunstats->value)// || client->gunstat || pvictim->gunstat)
+	if (gunstats->value)
 	{
 		memset(heb, 0, sizeof(heb));
 		AddPlaneDamage(hardhitplane->place, he, 0, heb, NULL, pvictim);
 
-		if (client != pvictim)
+		if (gunstats->value > 1 && client->gunstat && (client != pvictim))
 		{
-//			if (gunstats->value)
-//			{
-				memset(header, 0, sizeof(header));
-				snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, hardhitplane->munition, munition->he, munition->ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
-				memset(gunstatsb, 0, sizeof(gunstatsb));
-				snprintf(gunstatsb, sizeof(gunstatsb), "%s;;%s", header, heb);
-//			}
-//			else
-//			{
-//				memset(gunstatsb, 0, sizeof(gunstatsb));
-//				snprintf(gunstatsb, sizeof(gunstatsb), "Hit %s with %s at %s", pvictim->longnick, munition->abbrev, GetSmallHitSite(hardhitplane->place));
-//			}
-
-//			if (gunstats->value || client->gunstat)
-				PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
+			memset(header, 0, sizeof(header));
+			snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, hardhitplane->munition, munition->he, munition->ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
+			memset(gunstatsb, 0, sizeof(gunstatsb));
+			snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
+			PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
 		}
 
-//		if (gunstats->value)
-//		{
-			memset(header, 0, sizeof(header));
-			snprintf(header, sizeof(header), "%s%s%s(%u)[%de%dp]", client->longnick, GetSmallPlaneName(client->plane), munition->abbrev, hardhitplane->munition, munition->he, munition->ap);
-			memset(gunstatsb, 0, sizeof(gunstatsb));
-			snprintf(gunstatsb, sizeof(gunstatsb), "%s;;%s", header, heb);
-//		}
-//		else
-//		{
-//			memset(gunstatsb, 0, sizeof(gunstatsb));
-//			snprintf(gunstatsb, sizeof(gunstatsb), "%s hit you with %s at %s", (client == pvictim) ? "-HOST-" : client->longnick, munition->abbrev, GetSmallHitSite(hardhitplane->place));
-//		}
-
-//		if (gunstats->value || pvictim->gunstat)
+		memset(header, 0, sizeof(header));
+		snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, hardhitplane->munition, munition->he, munition->ap);
+		memset(gunstatsb, 0, sizeof(gunstatsb));
+		snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
+		Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s\n", gunstatsb);
+		if (gunstats->value > 1 && pvictim->gunstat)
 			PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 	}
 	else
@@ -7343,7 +7314,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 				if (gunstats->value)
 				{
 					if (he && phe)
-						sprintf(phe, "|%s=%d-%d|", GetSmallHitSite(place), client->armor.points[place], dmgprobe);
+						sprintf(phe, "|%s=%d-(%d+%d)|", GetSmallHitSite(place), client->armor.points[place], he, apabsorb/*dmgprobe*/);
 				}
 
 				client->armor.points[place] -= dmgprobe;
@@ -8725,6 +8696,9 @@ void UpdateIngameClients(u_int8_t attr)
 	}
 	else
 	{
+		fprintf(fp, " Callsign   Side    Status     Country   Connection\n");
+		fprintf(fp, "====================================================\n");
+
 		for (i = 0, j = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].attr == 1 && hideadmin->value)
@@ -8733,33 +8707,34 @@ void UpdateIngameClients(u_int8_t attr)
 			if (clients[i].inuse && !clients[i].drone && (attr ? clients[i].attr & attr : 1))
 			{
 				j++;
-				fprintf(fp, "%s %s ", clients[i].longnick, GetCountry(clients[i].country));
+				fprintf(fp, "  %-10s%-7s", clients[i].longnick, GetCountry(clients[i].country));
 
 				if(clients[i].loginkey == 1)
 				{
-					fprintf(fp, "In Chat");
+					fprintf(fp, "In Chat     ");
 				}
 				else if (clients[i].infly)
 				{
 					if (IsGround(&clients[i]))
-						fprintf(fp, "In Ground");
+						fprintf(fp, "In Ground   ");
 					else
-						fprintf(fp, "In Flight");
+						fprintf(fp, "In Flight   ");
 				}
 				else
 				{
 					if (clients[i].field)
 					{
 						if (!clients[i].hq)
-							fprintf(fp, "FIELD F%d", clients[i].field);
+							fprintf(fp, "FIELD F%03d  ", clients[i].field);
 						else
-							fprintf(fp, "HQ");
+							fprintf(fp, "HQ          ");
 					}
 					else
-						fprintf(fp, "CONNECTING");
+						fprintf(fp, "CONNECTING  ");
 				}
 
-				fprintf(fp, " (%s)\n", GeoIP_country_name_by_addr(gi, clients[i].ip));
+				fprintf(fp, "%-10s%s\n", GeoIP_country_name_by_addr(gi, clients[i].ip),
+						!(clients[i].cancollide)?"":clients[i].connection == 0?"Stable":clients[i].connection == 1?"Fair":clients[i].connection == 2?"Unstable":"Poor");
 
 				for (k = 0; k < maxentities->value; k++) // add sharing IP
 				{
@@ -8767,7 +8742,7 @@ void UpdateIngameClients(u_int8_t attr)
 					{
 						if (!strcmp(clients[k].ip, clients[i].ip))
 						{
-							fprintf(fp, " Sharing IP with %s\n", clients[k].longnick);
+							fprintf(fp, "\\--> Sharing IP with %s\n", clients[k].longnick);
 							break;
 						}
 					}
@@ -8778,7 +8753,7 @@ void UpdateIngameClients(u_int8_t attr)
 
 	if (!j)
 	{
-		fprintf(fp, "There is no player online\n");
+		fprintf(fp, "             There is no player online\n");
 	}
 	fclose(fp);
 
@@ -8959,7 +8934,7 @@ int32_t SendArenaNames(client_t *client)
 	// make compatible with WB 2008, remove to WB2007
 	if (wb3->value == 2)
 	{
-		sprintf( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2008 Tabajara Host\n$Welcome to the Free Public Arenas!\n$\n");
+		sprintf( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2009 Tabajara Host Server\n$Welcome to the Free Public Arenas!\n$\n");
 		offset += 139;
 	}
 

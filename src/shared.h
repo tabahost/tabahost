@@ -1,22 +1,22 @@
 /***
- *  Copyright (C) 2004-2008 Francisco Bischoff
+ *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
  *
- *  This file is part of Tabajara Host.
+ *  This file is part of Tabajara Host Server.
  *
- *  Tabajara Host is free software: you can redistribute it and/or modify
+ *  Tabajara Host Server is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Tabajara Host is distributed in the hope that it will be useful,
+ *  Tabajara Host Server is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
+ *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
  *
  ***/
 
@@ -889,8 +889,12 @@ typedef struct client_s
 	u_int16_t	msgtimer;		// msgtimer (friendly hit)
 	u_int32_t	lastsql;		// last time client made a SQL request;
 	u_int32_t	timer;			// player timer
-	u_int32_t	arenatimer;		// stores arenatimer to compare with client timer
 	u_int32_t	pingtest;		// pingtest timer
+	u_int8_t	connection;		// Connection status. 0 = stable, 1 = fair, 2 = unstable, 3 = poor
+	u_int32_t	conn_sum;		// Connection sum
+	u_int16_t	conn_count;		// Connection counter
+	double		conn_lastavg;	// Connection last average
+	double		conn_curravg;	// Connection current average
 	u_int32_t	postimer;		// last position update arena's time
 	u_int32_t	awaytimer;		// away timer
 	u_int32_t	timeout;		// actual timeout
@@ -2344,7 +2348,7 @@ void	Cmd_Decl(char *argv[], u_int8_t argc, client_t *client);
 void	Cmd_Pingtest(u_int16_t frame, client_t *client);
 void	Cmd_Undecl(u_int16_t id, client_t *client);
 void	Cmd_Time(u_int16_t time, char *mult, client_t *client);
-void	Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client);
+void	Cmd_Date(u_int16_t year, u_int8_t month, u_int8_t day, client_t *client);
 void	Cmd_Field(u_int8_t field, client_t *client);
 void	Cmd_City(u_int8_t city, client_t *client);
 void	Cmd_StartDrone(u_int32_t field, u_int32_t plane, double angle, client_t *client);
@@ -2585,6 +2589,7 @@ extern	var_t		*structlim;		///
 extern	var_t		*tanksrange;	/// max range of TANKS fire
 extern	var_t		*teamkiller;	/// Allow server set TK flag for teamkillers
 extern	var_t		*teamkillstructs;	/// Allow to damage friendly structures
+extern	var_t		*testarena;		/// Enable Test Arena features
 extern	var_t		*thskins;		/// enable force TH Skins
 extern	var_t		*timemult;		/// arena time multiplier
 extern	var_t		*timeout;		/// away timer

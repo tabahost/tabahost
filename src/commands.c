@@ -1,22 +1,22 @@
 /***
- *  Copyright (C) 2004-2008 Francisco Bischoff
+ *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
  * 
- *  This file is part of Tabajara Host.
+ *  This file is part of Tabajara Host Server.
  *
- *  Tabajara Host is free software: you can redistribute it and/or modify
+ *  Tabajara Host Server is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Tabajara Host is distributed in the hope that it will be useful,
+ *  Tabajara Host Server is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
+ *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
  * 
  ***/
 
@@ -1238,6 +1238,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 				case 113: /*do17z*/
 				case 114: /*109g2eto*/
 				case 125: /*ki44iib*/
+				case 220: /*a67*/
 					client->obradar = (int32_t)obradar->value;
 					break;
 				default:
@@ -2408,7 +2409,7 @@ void Cmd_Time(u_int16_t time, char *mult, client_t *client)
  Set Arena Date
  */
 
-void Cmd_Date(u_int8_t month, u_int8_t day, u_int16_t year, client_t *client)
+void Cmd_Date(u_int16_t year, u_int8_t month, u_int8_t day, client_t *client)
 {
 
 	if (!month || month > 12)
@@ -2779,6 +2780,18 @@ void Cmd_StartDrone(u_int32_t field, u_int32_t plane, double angle, client_t *cl
 {
 	client_t *drone;
 	u_int32_t dist = 150000;
+
+	if(!plane || (plane >= MAX_PLANES))
+	{
+		PPrintf(client, RADIO_YELLOW, "Invalid Plane");
+		return;
+	}
+
+	if(field > fields->value)
+	{
+		PPrintf(client, RADIO_YELLOW, "Invalid Field");
+		return;
+	}
 
 	if (angle*10 > 3599)
 	{
@@ -6073,7 +6086,7 @@ void Cmd_CheckBuildings(client_t *client)
 		
 		if(arena->fields[i].tonnage > (GetTonnageToClose(i+1) * 2.4))
 		{
-			Com_Printf(VERBOSE_WARNING, "Field %d tonnage bugged %.3f\n", i+1, arena->fields[i].tonnage);
+			Com_Printf(VERBOSE_WARNING, "Field %d tonnage bugged %.3f/%.3f\n", i+1, arena->fields[i].tonnage, (GetTonnageToClose(i+1) * 2.4));
 			arena->fields[i].tonnage = (GetTonnageToClose(i+1) * 2.4);
 		}
 			

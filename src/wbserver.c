@@ -1,16 +1,16 @@
 /***
- *  Copyright (C) 2004-2008 Francisco Bischoff
+ *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
  * 
- *  This file is part of Tabajara Host.
+ *  This file is part of Tabajara Host Server.
  *
- *  Tabajara Host is free software: you can redistribute it and/or modify
+ *  Tabajara Host Server is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Tabajara Host is distributed in the hope that it will be useful,
+ *  Tabajara Host Server is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 	ioctlv = 1;
 
 	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
-	Com_Printf(VERBOSE_ALWAYS, "Tabajara Host Copyright (C) 2004-2008 Francisco Bischoff\n");
+	Com_Printf(VERBOSE_ALWAYS, "Tabajara Host Copyright (C) 2004-2009 Francisco Bischoff\n");
 	Com_Printf(VERBOSE_ALWAYS, "This program comes with ABSOLUTELY NO WARRANTY;\n");
 	Com_Printf(VERBOSE_ALWAYS, "This is free software, and you are welcome to redistribute\n");
 	Com_Printf(VERBOSE_ALWAYS, "it under certain conditions; For details type 'license' command\n");
@@ -234,12 +234,13 @@ int main(int argc, char *argv[])
 				arena->frame = checksync;
 			}
 
-			arena->overload = 0;
+			if(arena->overload)
+				arena->overload--;
 
 			if(time > overload->value)
 			{
 				Com_Printf(VERBOSE_WARNING, "possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
-				arena->overload = 1;
+				arena->overload = 100;
 			}
 		}
 		else

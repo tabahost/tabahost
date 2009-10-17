@@ -1,22 +1,22 @@
 /***
- *  Copyright (C) 2004-2008 Francisco Bischoff
+ *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
  *
- *  This file is part of Tabajara Host.
+ *  This file is part of Tabajara Host Server.
  *
- *  Tabajara Host is free software: you can redistribute it and/or modify
+ *  Tabajara Host Server is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Tabajara Host is distributed in the hope that it will be useful,
+ *  Tabajara Host Server is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
+ *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
  *
  ***/
 
@@ -173,6 +173,7 @@ var_t *structlim; // extern
 var_t *tanksrange; // extern
 var_t *teamkiller; // extern
 var_t *teamkillstructs; // extern
+var_t *testarena; // extern
 var_t *thskins; // extern
 var_t *timemult; // extern
 var_t *timeout; // extern
@@ -347,6 +348,7 @@ void InitVars(void)
 	tanksrange = Var_Get("tanksrange", "5000", VAR_ARCHIVE); // max of 46339
 	teamkiller = Var_Get("teamkiller", "1", VAR_ARCHIVE);
 	teamkillstructs = Var_Get("teamkillstructs", "1", VAR_ARCHIVE);
+	testarena = Var_Get("testarena", "0", VAR_ARCHIVE);
 	thskins = Var_Get("thskins", "0", VAR_ARCHIVE);
 	timemult = Var_Get("timemult", "6", VAR_ARCHIVE);
 	timeout = Var_Get("timeout", "120", VAR_ARCHIVE);
@@ -374,12 +376,15 @@ void InitVars(void)
 
 void CheckVars(void)
 {
+	u_int8_t modified = 0;
 	u_int8_t i;
 	u_int32_t date;
 	var_t *var;
 
 	if (logfile_active->modified)
 	{
+		modified = 1;
+
 		if ((!logfile_active->value))
 		{
 			for(i = 0; i < MAX_LOGFILE; i++)
@@ -395,6 +400,8 @@ void CheckVars(void)
 
 	if (database->modified || sqlserver->modified)
 	{
+		modified = 1;
+
 		mysql_close(&my_sock);
 
 		if (!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, 3306, NULL /*unix_socket*/, 0))
@@ -412,11 +419,15 @@ void CheckVars(void)
 
 	if(ttc->modified)
 	{
+		modified = 1;
+
 		GetTonnageToClose(FALSE);
 	}
 
 	if (dirname->modified)
 	{
+		modified = 1;
+
 		arena->mapnum = -1;
 
 		for (i = 0; i < MAX_MAPCYCLE; i++)
@@ -454,6 +465,8 @@ void CheckVars(void)
 
 	if (countrytime->modified)
 	{
+		modified = 1;
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone)
@@ -465,6 +478,8 @@ void CheckVars(void)
 
 	if (hideadmin->modified)
 	{
+		modified = 1;
+
 		date = 0;
 
 		for (i = 0; i < maxentities->value; i++)
@@ -483,6 +498,8 @@ void CheckVars(void)
 
 	if (server_speeds->modified)
 	{
+		modified = 1;
+
 		if (server_speeds->value >= 100)
 		{
 			Var_Set("server_speeds", "99");
@@ -496,6 +513,8 @@ void CheckVars(void)
 
 	if (timemult->modified)
 	{
+		modified = 1;
+
 		if (timemult->value >= 6000)
 		{
 			Var_Set("timemult", "5999");
@@ -511,6 +530,8 @@ void CheckVars(void)
 
 	if (wb3->value && weather->modified)
 	{
+		modified = 1;
+
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
 		for (i = 0; i < maxentities->value; i++)
@@ -535,6 +556,8 @@ void CheckVars(void)
 
 	if (wb3->value && (gruntsmaxd->modified || gruntshoot->modified || gruntcapture->modified))
 	{
+		modified = 1;
+
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
 		for (i = 0; i < maxentities->value; i++)
@@ -560,6 +583,8 @@ void CheckVars(void)
 			|| fueldiv->modified || flakmax->modified || radarrange0->modified || radarrange1->modified || radarrange2->modified || radarrange3->modified || radarrange4->modified
 			|| structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified || planerangelimitbomber->modified || arenaflags1->modified || arenaflags2->modified)
 	{
+		modified = 1;
+
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
 		for (i = 0; i < maxentities->value; i++)
@@ -581,6 +606,8 @@ void CheckVars(void)
 
 	if (arenaflags3->modified)
 	{
+		modified = 1;
+
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
 		for (i = 0; i < maxentities->value; i++)
@@ -600,9 +627,9 @@ void CheckVars(void)
 		}
 	}
 
-	i = UpdateArenaStatus(FALSE);
+	UpdateArenaStatus(FALSE);
 
-	if(i)
+	if(modified)
 	{
 		for (var = var_vars; var; var = var->next)
 		{

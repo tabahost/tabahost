@@ -1,22 +1,22 @@
 /***
- *  Copyright (C) 2004-2008 Francisco Bischoff
+ *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
  * 
- *  This file is part of Tabajara Host.
+ *  This file is part of Tabajara Host Server.
  *
- *  Tabajara Host is free software: you can redistribute it and/or modify
+ *  Tabajara Host Server is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Tabajara Host is distributed in the hope that it will be useful,
+ *  Tabajara Host Server is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
+ *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
  * 
  ***/
 
@@ -1165,7 +1165,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 							Com_Printf(VERBOSE_CHAT, "`-> from %s\n", Com_SquadronName(killer->squadron));
 					}
 					
-					Com_Printf(VERBOSE_KILL, "%s Maneuver Killed by %s at %s\n", client->longnick, killer->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_KILL, "%s(%s) Maneuver Killed by %s(%s) at %s\n", client->longnick, GetSmallPlaneName(client->plane), killer->longnick, GetSmallPlaneName(killer->plane), Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					
 					if(IsFighter(killer) && IsFighter(client))
 						CalcEloRating(killer /*winner*/, client /*looser*/, ELO_BOTH);
@@ -1343,7 +1343,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						BPrintf(RADIO_GREEN, buffer);
 					}
 
-					Com_Printf(VERBOSE_KILL, "%s Teamkilled by %s at %s\n", client->longnick, client->hitby[j].longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_KILL, "%s(%s) Teamkilled by %s(%s) at %s\n", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j].longnick, GetSmallPlaneName(client->hitby[j].plane), Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				}
 				else // enemy kill
 				{
@@ -1368,7 +1368,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						BPrintf(RADIO_YELLOW, buffer);
 					}
 
-					Com_Printf(VERBOSE_KILL, "%s Killed by %s at %s\n", client->longnick, client->hitby[j].longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_KILL, "%s(%s) Killed by %s(%s) at %s\n", client->longnick, GetSmallPlaneName(client->plane), client->hitby[j].longnick, GetSmallPlaneName(client->hitby[j].plane), Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 				}
 				
 				if ((client->hitby[j].dbid != client->id) && (client->hitby[j].country != client->country))
@@ -1525,7 +1525,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 								PPrintf(dbclient, RADIO_YELLOW, "You've got a piece of %s", client->longnick);
 						}
 
-						Com_Printf(VERBOSE_KILL, "%s got a piece of %s\n", client->hitby[i].longnick, client->longnick);
+						Com_Printf(VERBOSE_KILL, "%s(%s) got a piece of %s\n", client->hitby[i].longnick, GetSmallPlaneName(client->hitby[j].plane), client->longnick);
 
 						if (IsFighter(NULL, client->hitby[i].plane))
 						{
@@ -1560,7 +1560,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						}
 						else
 						{
-							Com_Printf(VERBOSE_KILL, "%s got a piece of his friend %s\n", client->hitby[i].longnick, client->longnick);
+							Com_Printf(VERBOSE_KILL, "%s(%s) got a piece of his friend %s\n", client->hitby[i].longnick, GetSmallPlaneName(client->hitby[j].plane), client->longnick);
 						}
 					}
 				}

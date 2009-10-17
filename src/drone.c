@@ -1,22 +1,22 @@
 /***
- *  Copyright (C) 2004-2008 Francisco Bischoff
+ *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
  * 
- *  This file is part of Tabajara Host.
+ *  This file is part of Tabajara Host Server.
  *
- *  Tabajara Host is free software: you can redistribute it and/or modify
+ *  Tabajara Host Server is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
  *  (at your option) any later version.
  *
- *  Tabajara Host is distributed in the hope that it will be useful,
+ *  Tabajara Host Server is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU Affero General Public License for more details.
  *
  *  You should have received a copy of the GNU Affero General Public License
- *  along with Tabajara Host.  If not, see <http://www.gnu.org/licenses/agpl.html>.
+ *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
  * 
  ***/
 
@@ -1683,7 +1683,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 			if (radius > MAX_BOMBRADIUS)
 				radius = MAX_BOMBRADIUS;
 	
-		if (gunstats->value)
+		if (gunstats->value > 1 && client->gunstat)
 			PPrintf(client, RADIO_RED, "Radius %d", radius);
 
 		j = 0;
@@ -1736,7 +1736,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 								b = y - arena->fields[field].buildings[i].posy;
 								if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
 								{
-									if (gunstats->value)
+									if (gunstats->value > 1 && client->gunstat)
 										PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->fields[field].buildings[i].type), munition->he);
 
 									Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->fields[field].buildings[i].country) ? "friendly " : "",
@@ -1766,7 +1766,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 										CheckBoatDamage(&arena->fields[field].buildings[i], client);
 									}
 
-									if (gunstats->value)
+									if (gunstats->value > 1 && client->gunstat)
 										PPrintf(client, RADIO_GREEN, "Hit %s", GetBuildingType(arena->fields[field].buildings[i].type));
 									j++;
 								}
@@ -1789,7 +1789,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 								b = y - arena->cities[city].buildings[i].posy;
 								if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
 								{
-									if (gunstats->value)
+									if (gunstats->value > 1 && client->gunstat)
 										PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->cities[city].buildings[i].type), munition->he);
 	
 									Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->cities[city].buildings[i].country) ? "friendly " : "",
