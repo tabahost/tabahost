@@ -511,7 +511,10 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 		
 		if (rps->value && strlen(message) && !arcade->value)
 		{
-			rpsreplace = (rps->value * 6000) / arena->rps[client->plane].pool[arena->fields[client->field - 1].type - 1];
+			if(arena->fields[client->field - 1].rps_custom_rate[client->plane])
+				rpsreplace = (rps->value * 6000) / arena->fields[client->field - 1].rps_custom_rate[client->plane];
+			else
+				rpsreplace = (rps->value * 6000) / arena->rps[client->plane].pool[arena->fields[client->field - 1].type - 1];
 
 			if(!((arena->fields[client->field - 1].country == 1 && arena->rps[client->plane].country & 0x01) ||
 				(arena->fields[client->field - 1].country == 2 && arena->rps[client->plane].country & 0x02) ||
@@ -4712,7 +4715,10 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 				{
 					if (rps->value && !arcade->value)
 					{
-						rpsreplace = (rps->value * 6000) / arena->rps[i].pool[arena->fields[j].type - 1];
+						if(arena->fields[j].rps_custom_rate[i])
+							rpsreplace = (rps->value * 6000) / arena->fields[j].rps_custom_rate[i];
+						else
+							rpsreplace = (rps->value * 6000) / arena->rps[i].pool[arena->fields[j].type - 1];
 
 						if(!((arena->fields[j].country == 1 && arena->rps[i].country & 0x01) ||
 							(arena->fields[j].country == 2 && arena->rps[i].country & 0x02) ||

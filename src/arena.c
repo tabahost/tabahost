@@ -1432,10 +1432,21 @@ void UpdateRPS(u_int16_t minutes)
 						&& arena->rps[j].out > lagdate[arena->fields[i].country - 1]) || (!arena->rps[j].in && !arena->rps[j].out)))
 				{
 					arena->rps[j].used = 1;
-					arena->fields[i].rps[j] += (double)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
 
-					if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
-						arena->fields[i].rps[j] = (double)arena->rps[j].pool[arena->fields[i].type - 1];
+					if(arena->fields[i].rps_custom_rate[j])
+					{
+						arena->fields[i].rps[j] += (double)arena->fields[i].rps_custom_rate[j] * rate;
+
+						if(arena->fields[i].rps[j] > arena->fields[i].rps_custom_rate[j])
+							arena->fields[i].rps[j] = (double)arena->fields[i].rps_custom_rate[j];
+					}
+					else
+					{
+						arena->fields[i].rps[j] += (double)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
+
+						if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
+							arena->fields[i].rps[j] = (double)arena->rps[j].pool[arena->fields[i].type - 1];
+					}
 				}
 				else if (arcade->value)
 				{
@@ -1624,9 +1635,10 @@ void AddBomb(u_int16_t id, int32_t destx, int32_t desty, u_int8_t type, int16_t 
 
 void LoadRPS(char *path, client_t *client)
 {
-	u_int8_t i, j;
+	u_int8_t i, j, k;
 	char file[128];
 	char buffer[4096];
+	char *token;
 	FILE *fp;
 
 	strcpy(file, path);
@@ -1691,6 +1703,19 @@ void LoadRPS(char *path, client_t *client)
 			arena->rps[i].pool[16] = Com_Atoi((char *)strtok(NULL, ";")); // WB3Village
 			arena->rps[i].pool[17] = Com_Atoi((char *)strtok(NULL, ";")); // WB3Town
 			arena->rps[i].pool[18] = Com_Atoi((char *)strtok(NULL, ";")); // WB3Port
+
+			while((token = strtok(NULL, ";")))
+			{
+				j = Com_Atou(token);
+
+				if(!j || j >= fields->value) // invalid field
+					break;
+
+				k = Com_Atou((char *)strtok(NULL, ";")); // RPS custom value
+
+				arena->fields[j-1].rps_custom_rate[i] = k;
+				Com_Printf(VERBOSE_DEBUG, "Field %d has %d of plane %s\n", j, k, GetSmallPlaneName(i));
+			}
 		}
 	}
 
@@ -1712,7 +1737,7 @@ void LoadRPS(char *path, client_t *client)
 void SaveRPS(char *path, client_t *client)
 {
 	char file[128];
-	u_int8_t i;
+	u_int8_t i, j;
 	FILE *fp;
 
 	strcpy(file, path);
@@ -1737,10 +1762,20 @@ void SaveRPS(char *path, client_t *client)
 
 	for (i = 0; i < maxplanes; i++)
 	{
-		fprintf(fp, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n", arena->rps[i].country, arena->rps[i].in, arena->rps[i].out, arena->rps[i].pool[0], arena->rps[i].pool[1],
+		fprintf(fp, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d", arena->rps[i].country, arena->rps[i].in, arena->rps[i].out, arena->rps[i].pool[0], arena->rps[i].pool[1],
 				arena->rps[i].pool[2], arena->rps[i].pool[3], arena->rps[i].pool[4], arena->rps[i].pool[5], arena->rps[i].pool[6], arena->rps[i].pool[7], arena->rps[i].pool[8], arena->rps[i].pool[9],
 				arena->rps[i].pool[10], arena->rps[i].pool[11], arena->rps[i].pool[12], arena->rps[i].pool[13], arena->rps[i].pool[14], arena->rps[i].pool[15], arena->rps[i].pool[16],
 				arena->rps[i].pool[17], arena->rps[i].pool[18]);
+
+		for(j = 0; j < fields->value; j++)
+		{
+			if(arena->fields[j].rps_custom_rate[i])
+			{
+				fprintf(fp, ";%d;%d", j+1, arena->fields[j].rps_custom_rate[i]);
+			}
+		}
+
+		fprintf(fp, "\n");
 	}
 
 	fclose(fp);

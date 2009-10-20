@@ -8934,7 +8934,7 @@ int32_t SendArenaNames(client_t *client)
 	// make compatible with WB 2008, remove to WB2007
 	if (wb3->value == 2)
 	{
-		sprintf( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2009 Tabajara Host Server\n$Welcome to the Free Public Arenas!\n$\n");
+		sprintf( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2009 Tabajara Host\n$Welcome to the Free Public Arenas!\n$\n");
 		offset += 139;
 	}
 

@@ -579,6 +579,7 @@ typedef struct field_s
 	cv_t		*cv; // linked CV
 	struct city_s *city[MAX_CITYFIELD]; // linked city
 	double		rps[MAX_PLANES];
+	u_int8_t	rps_custom_rate[MAX_PLANES];
 	building_t	buildings[MAX_BUILDINGS]; // 1st building is radar
 } field_t;
 
