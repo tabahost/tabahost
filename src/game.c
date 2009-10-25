@@ -973,7 +973,8 @@ void CheckArenaRules(void)
 					}
 
 					if (j == MAX_CITYFIELD)
-						arena->fields[i].abletocapture = 1;
+						if(((int16_t)spawnred->value != (i+1)) && ((int16_t)spawngold->value != (i+1))) // if not a spawnfield
+							arena->fields[i].abletocapture = 1;
 
 					arena->fields[i].closed = 0;
 					arena->fields[i].warehouse = 0; // to avoid field be reclosed by warehouse effect
@@ -6749,15 +6750,15 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 		if (gunstats->value)
 		{
-			hitplane = (hitplane_t *)buffer;
+//			hitplane = (hitplane_t *)buffer;
 
-			munition = GetMunition(hitplane->type);
+//			munition = GetMunition(hitplane->type);
 
-			if (!munition)
-			{
-				Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hitplane->type, client->plane);
-				return;
-			}
+//			if (!munition)
+//			{
+//				Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hitplane->type, client->plane);
+//				return;
+//			}
 
 			if((((double)munition->decay * distance) + munition->ap) > 0)
 				ap = ((double)munition->decay * distance) + munition->ap;

@@ -167,6 +167,8 @@ var_t *respawncvs; // extern
 var_t *rps; // extern
 var_t *server_speeds; // extern
 var_t *skins; // extern
+var_t *spawnred; // extern
+var_t *spawngold; // extern
 var_t *sqlserver; // extern
 var_t *startalt; // extern
 var_t *structlim; // extern
@@ -342,6 +344,8 @@ void InitVars(void)
 	rps = Var_Get("rps", "60", VAR_ARCHIVE);
 	server_speeds = Var_Get("server_speeds", "0", VAR_ARCHIVE | VAR_ADMIN);
 	skins = Var_Get("skins", "0", VAR_ADMIN);
+	spawnred = Var_Get("spawnred", "0", VAR_ARCHIVE);
+	spawngold = Var_Get("spawngold", "0", VAR_ARCHIVE);
 	sqlserver = Var_Get("sqlserver", "localhost", VAR_ADMIN);
 	startalt = Var_Get("startalt", "0", VAR_ARCHIVE);
 	structlim = Var_Get("structlim", "3", VAR_ARCHIVE);
