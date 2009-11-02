@@ -6635,7 +6635,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if (pvictim->armor.points[hitplane->place[j]] < 0)
 			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "unused place %d, plane %s(%d)", hitplane->place[j], GetSmallPlaneName(pvictim->plane), pvictim->plane);
+//				PPrintf(client, RADIO_LIGHTYELLOW, "unused place %d, plane %s(%d)", hitplane->place[j], GetSmallPlaneName(pvictim->plane), pvictim->plane);
 				Com_Printf(VERBOSE_WARNING, "PHitPlane(): unused place %d plane %d\n", hitplane->place[j], pvictim->plane);
 				continue; // unused part
 			}

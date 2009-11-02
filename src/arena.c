@@ -1415,10 +1415,20 @@ void UpdateRPS(u_int16_t minutes)
 						&& arena->rps[j].country & 0x04) || (arena->fields[i].country == 4 && arena->rps[j].country & 0x08)) && ((arena->rps[j].in <= basedate && arena->rps[j].out > basedate)
 						|| (!arena->rps[j].in && !arena->rps[j].out)))
 				{
-					arena->fields[i].rps[j] += (double)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
+					if(arena->fields[i].rps_custom_rate[j])
+					{
+						arena->fields[i].rps[j] += (double)arena->fields[i].rps_custom_rate[j] * rate;
 
-					if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
-						arena->fields[i].rps[j] = (double)arena->rps[j].pool[arena->fields[i].type - 1];
+						if(arena->fields[i].rps[j] > arena->fields[i].rps_custom_rate[j])
+							arena->fields[i].rps[j] = (double)arena->fields[i].rps_custom_rate[j];
+					}
+					else
+					{
+						arena->fields[i].rps[j] += (double)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
+
+						if(arena->fields[i].rps[j] > arena->rps[j].pool[arena->fields[i].type - 1])
+							arena->fields[i].rps[j] = (double)arena->rps[j].pool[arena->fields[i].type - 1];
+					}
 				}
 				else if (arcade->value)
 				{
@@ -3734,7 +3744,7 @@ double GetTonnageToClose(u_int8_t field)
 		}
 		else
 		{
-			Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() ttc_buf[%d] returned zero, field %d\n", arena->fields[field].type, field);
+			Com_Printf(VERBOSE_WARNING, "GetTonnageToClose() ttc_buf[%d] returned zero, field %d\n", arena->fields[field].type, field+1);
 			return 0;
 		}
 	}

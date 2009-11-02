@@ -1,9 +1,10 @@
+*************************************
+To test the Damage Model, use
 
-DUE TO MAIN ARENA ISSUES, YOU ARE FLYING AT
-BACKUP ARENA
+.startdrone field plane angle
 
-YOUR SCORE WON'T BE RECORDED.
+e.g: .startdrone 10 23 0
 
-Sorry for the inconvenience.
+This will fire a destructable drone
 
                 -=Ø=-
