@@ -1422,7 +1422,7 @@ void UpdateRPS(u_int16_t minutes)
 						if(arena->fields[i].rps[j] > arena->fields[i].rps_custom_rate[j])
 							arena->fields[i].rps[j] = (double)arena->fields[i].rps_custom_rate[j];
 					}
-					else
+					else if(arena->rps[j].pool[arena->fields[i].type - 1])
 					{
 						arena->fields[i].rps[j] += (double)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
 
@@ -1450,7 +1450,7 @@ void UpdateRPS(u_int16_t minutes)
 						if(arena->fields[i].rps[j] > arena->fields[i].rps_custom_rate[j])
 							arena->fields[i].rps[j] = (double)arena->fields[i].rps_custom_rate[j];
 					}
-					else
+					else if(arena->rps[j].pool[arena->fields[i].type - 1])
 					{
 						arena->fields[i].rps[j] += (double)arena->rps[j].pool[arena->fields[i].type - 1] * rate;
 

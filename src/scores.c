@@ -888,9 +888,9 @@ double ScorePlaneLife(client_t *client)
 
 	for(pointsleft = totalpoints = i = 0; i < 32; i++)
 	{
-		if(arena->planedamage[client->plane - 1].points[i] > 0)
+		if(arena->planedamage[client->plane].points[i] > 0)
 		{
-			totalpoints += arena->planedamage[client->plane - 1].points[i];
+			totalpoints += arena->planedamage[client->plane].points[i];
 
 			if(!(client->status_damage & (1 << i)))
 			{
@@ -901,6 +901,8 @@ double ScorePlaneLife(client_t *client)
 	}
 
 //	pointsleft = totalpoints - pointsleft;
+	Com_Printf(VERBOSE_DEBUG_SCORES, "ScorePlaneLife() pointsleft = %.3f, TimeCost = %.3f, totalpoints = %.3f\n", pointsleft, ScoreFlightTimeCost(client), totalpoints);
+
 	if((pointsleft -= ScoreFlightTimeCost(client)) < 0.0)
 	{
 		Com_Printf(VERBOSE_DEBUG_SCORES, "ScorePlaneLife(pointsleft) < 0, %f\n", pointsleft);
