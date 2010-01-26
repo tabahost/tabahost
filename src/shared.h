@@ -169,12 +169,18 @@ typedef unsigned int u_int32_t;
 #define FLAG_EASYMODE2		0x02	// TODO: test this in wb3
 #define FLAG_ENEMYNAMES		0x04
 #define FLAG_ENEMYPLANES	0x08
-#define FLAG_MIDAIRS		0x10
+#define FLAG_MIDAIRS		0x10 // SHOW: 0 - 3? maybe can friendly collision?
 #define FLAG_BLACKOUT		0x20
+//#define FLAG_UNK			0x40
 #define FLAG_AIRSHOWSMOKE	0x80
 #define FLAG_ENABLEOTTOS	0x100
-#define FLAG_UNK1			0x400
-#define FLAG_UNK2			0x800
+//#define FLAG_UNK			0x200
+//#define FLAG_UNK			0x400
+//#define FLAG_UNK			0x800
+//#define FLAG_UNK			0x1000
+//#define FLAG_UNK			0x2000
+//#define FLAG_UNK			0x4000
+//#define FLAG_UNK			0x8000
 #define FLAG_PLANEATRADAR	0x02
 #define FLAG_FRIENDLYDOTSTWR	0x04
 #define FLAG_ENEMYDOTSTWR	0x08
@@ -1285,12 +1291,12 @@ typedef struct wb3arenarules_s			// 03 00
 	u_int32_t	radarrange2;
 	u_int32_t	radarrange3;
 	u_int32_t	radarrange4;
-	u_int8_t	unknown3; // 0x55
-	u_int8_t	unknown4; // 0x55
-	u_int8_t	arenaflags2; // 0x80
-	u_int8_t	arenaflags1; // 0x20
+	u_int8_t	ackshrinkco;
+	u_int8_t	ackgrowco;
+	u_int8_t	arenaflags2;
+	u_int8_t	arenaflags1;
 	u_int8_t	unknown5;  // 0x10
-	u_int32_t	clickrangelim; // 00 00 52 08 ???
+	u_int32_t	clickrangelim;
 	u_int8_t	unknown6;  // 0x05
 } wb3arenarules_t;
 
@@ -2440,9 +2446,12 @@ extern	u_int32_t	my_id;			/// mysql main id from AUTO_INCREMENT
 extern	char		my_query[MAX_QUERY]; /// main query buffer
 extern	u_int16_t packets_tab[210][3];
 extern	var_t		*ackstardisable; /// disable ackstar
+extern	var_t		*ackgrowco;		/// Fixed ack grow coefficient
+extern	var_t		*ackshrinkco;	/// Fixed ack shrink coefficient
+extern	var_t		*ackmaxtrav;	/// Fixed ack max traverse rate
 extern	var_t		*airshowsmoke;	/// enable air show smoke
 extern	var_t		*allowtakeoff;	/// allow players to takeoff
-extern	var_t		*altv;			///
+extern	var_t		*altv;			/// SHOW: 0-15 ??? other altv configures?
 extern	var_t		*ammomult;		///
 extern	var_t		*arcade;		/// enable arena arcade mode
 extern	var_t		*arenaflags1;	/// arena flags

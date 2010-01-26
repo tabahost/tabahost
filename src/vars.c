@@ -22,6 +22,9 @@
 
 #include "shared.h"
 
+var_t *ackgrowco; // extern
+var_t *ackshrinkco; // extern
+var_t *ackmaxtrav; // extern
 var_t *ackstardisable; // extern
 var_t *airshowsmoke; // extern
 var_t *allowtakeoff; // extern
@@ -207,6 +210,9 @@ void InitVars(void)
 	maxclients = Var_Get("maxclients", "100", VAR_ADMIN);
 	maxentities = Var_Get("maxentities", "200", VAR_ADMIN);
 #endif
+	ackgrowco = Var_Get("ackgrowco", "8.5", VAR_ARCHIVE);
+	ackshrinkco = Var_Get("ackshrinkco", "85", VAR_ARCHIVE);
+	ackmaxtrav = Var_Get("ackmaxtrav", "40", VAR_ARCHIVE);
 	ackstardisable = Var_Get("ackstardisable", "0", VAR_ARCHIVE);
 	airshowsmoke = Var_Get("airshowsmoke", "0", VAR_ARCHIVE);
 	allowtakeoff = Var_Get("allowtakeoff", "1", VAR_ARCHIVE);
@@ -585,7 +591,8 @@ void CheckVars(void)
 			|| friendlydotsfly->modified || enemydotsfly->modified || friendlydotstwr->modified || enemydotstwr->modified || planerangelimit->modified || enemyidlim->modified
 			|| friendlyidlim->modified || ammomult->modified || xwindvelocity->modified || ywindvelocity->modified || zwindvelocity->modified || maxpilotg->modified || altv->modified
 			|| fueldiv->modified || flakmax->modified || radarrange0->modified || radarrange1->modified || radarrange2->modified || radarrange3->modified || radarrange4->modified
-			|| structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified || planerangelimitbomber->modified || arenaflags1->modified || arenaflags2->modified)
+			|| structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified || planerangelimitbomber->modified || arenaflags1->modified || arenaflags2->modified
+			|| ackgrowco->modified || ackshrinkco->modified || ackmaxtrav->modified)
 	{
 		modified = 1;
 

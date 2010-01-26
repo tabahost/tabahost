@@ -70,7 +70,7 @@ u_int16_t packets_tab[210][3] =
 		{ 0xFB03, 0xFB03, 0xFB03 }, // thl
 		*/
 
-// WB2   WB2007  WB2008
+		// WB2   WB2007  WB2008
 		{ 0x0200, 0x0400, 0xFFFF }, // pcNEW_USER
 		{ 0x0201, 0x0401, 0x0809 }, // pcSTART_FLIGHT *
 		{ 0x0202, 0x0402, 0x080A }, // pcEXIT_FLIGHT =
@@ -268,7 +268,7 @@ u_int16_t packets_tab[210][3] =
 		{ 0xFFFF, 0x0012, 0xFFFF }, // bgAI_WEAPON_HIT_PLAYER
 		{ 0xFFFF, 0x0013, 0xFFFF }, // bgAI_HIT_SCORED_ON_OBJECT
 		{ 0xFFFF, 0x0014, 0xFFFF }, // bgAI_WEAPON_HIT_OBJECT
-		{ 0xFFFF, 0x0015, 0xFFFF }, // bgALLAI_PLANES_UPDATE
+		{ 0xFFFF, 0x0015, 0x0015 }, // bgALLAI_PLANES_UPDATE
 		{ 0xFFFF, 0x0016, 0xFFFF }, // bgRADARAI_PLANES_UPDATE
 		{ 0xFFFF, 0x0017, 0xFFFF }, // bgCLEARAI_RADAR
 		{ 0xFFFF, 0x0018, 0xFFFF }, // bgAI_MOUNT
@@ -9558,7 +9558,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->structlim = structlim->value;
 		wb3arenarules->unknown1 = 0x2D;
 		wb3arenarules->unknown2 = 0xA0;
-		wb3arenarules->ackmaxtrav = 0x28; // ??
+		wb3arenarules->ackmaxtrav = ackmaxtrav->value;
 		wb3arenarules->altv = altv->value ? altv->value : (IsBomber(client) || !client->cancollide) ? 1 : 0;
 		wb3arenarules->fueldiv = htonl(fueldiv->value);
 		wb3arenarules->flakmax = htonl(flakmax->value);
@@ -9567,8 +9567,8 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->radarrange2 = htonl(radarrange2->value);
 		wb3arenarules->radarrange3 = htonl(radarrange3->value);
 		wb3arenarules->radarrange4 = htonl(radarrange4->value);
-		wb3arenarules->unknown3 = 0x55;
-		wb3arenarules->unknown4 = 0x55;
+		wb3arenarules->ackshrinkco = ackshrinkco->value;
+		wb3arenarules->ackgrowco = (u_int8_t) (ackgrowco->value * 10);
 		wb3arenarules->arenaflags2 = arenaflags2->value; // 0x80
 		wb3arenarules->arenaflags1 = arenaflags1->value; // 0x20
 		wb3arenarules->unknown5 = 0x10;
