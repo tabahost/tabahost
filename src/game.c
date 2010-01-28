@@ -2782,7 +2782,7 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				if(!Var_Set(argv[0], argv[1]))
 				{
-					PPrintf(client, RADIO_LIGHTYELLOW, "%s is write protected", argv[0]);
+					PPrintf(client, RADIO_LIGHTYELLOW, "%s is write protected or out of range", argv[0]);
 				}
 			}
 			return;
@@ -3464,7 +3464,8 @@ void ProcessCommands(char *command, client_t *client)
 		{
 			if(!argv[0])
 			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "\"%s\" is \"%s\"", var->name, var->string);
+				PPrintf(client, RADIO_LIGHTYELLOW, "\"%s\": \"%s\" (min: %s - max %s)", var->name, var->string, var->min, var->max);
+				PPrintf(client, RADIO_LIGHTYELLOW, "%s", var->description);
 			}
 			else
 			{
@@ -3476,7 +3477,7 @@ void ProcessCommands(char *command, client_t *client)
 
 				if(!Var_Set(command, argv[0]))
 				{
-					PPrintf(client, RADIO_LIGHTYELLOW, "%s is write protected", command);
+					PPrintf(client, RADIO_LIGHTYELLOW, "%s is write protected or out of range", command);
 				}
 				else
 				{
@@ -9776,7 +9777,7 @@ void WB3ArenaConfig2(client_t *client)
 
 	arenaconfig2->packetid = htons(Com_WBhton(0x0312));
 	arenaconfig2->arnaflags3 = htonl(arenaflags3->value);
-	arenaconfig2->config2 = htonl(0x7530);
+	arenaconfig2->ackflakmax = htonl(ackflakmax->value);
 
 	SendPacket(buffer, sizeof(buffer), client);
 }

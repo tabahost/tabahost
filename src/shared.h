@@ -692,8 +692,11 @@ typedef struct var_s
 {
 	char		*name;			// variable name
 	char		*string;		// string stored in variable
+	char		*description	// description
 	int			flags;			// variable flags
 	u_short		modified;		// it was recently changed?
+	double		min;			// variable min
+	double		max;			// variable max
 	double		value;			// variable value
 	struct var_s *next;			// pointer to next variable in chain list
 } var_t;
@@ -1395,7 +1398,7 @@ typedef struct wb3arenaconfig2_s	// 03 12
 {
 	u_int16_t	packetid;
 	u_int32_t	arnaflags3;
-	u_int32_t	config2; // WINGSTRIKERNG??
+	u_int32_t	ackflakmax;
 } wb3arenaconfig2_t;
 
 typedef struct idle_s			// 09 04
@@ -1585,14 +1588,14 @@ typedef struct ottoparams_s	// 0F 00
 {
 	u_int16_t	packetid;	//
 	u_int8_t	accuracy; //OTTO_ACCURACY
-	u_int16_t	override;
+	u_int16_t	override; // OTTO_OVERRIDES?
 	u_int16_t	range;    // OTTO_RANGE
 	u_int16_t	burston; // OTTO_BURSTON_BASE x 100
 	u_int16_t	burstonmax; // OTTO_BURSTON_MAX x 100
 	u_int16_t	burstoff; // OTTO_BURSTOFF_BASE x 100
 	u_int16_t	retarget; // OTTO_RETARGET_TIME x 100
 	u_int16_t	adjust; // OTTO_ADJUST
-	u_int32_t	unknown1; // OTTO_OVERRIDES
+	u_int32_t	unknown1; // OTTO_OVERRIDES?
 } ottoparams_t;
 
 typedef struct ottofiring_s	// 0F 01
@@ -2096,7 +2099,8 @@ char	*PadLoc(char *szBuffer, double dLongitude, double dLatitude);
 // vars.c
 void	InitVars(void);
 void	CheckVars(void);
-var_t	*Var_Get(char *var_name, char *var_value, int flags);
+var_t	*Var_SetFlags(char *var_name, int flags);
+var_t	*Var_Get(char *var_name, char *var_value, char *min, char *max, char *description, int flags);
 var_t	*Var_FindVar(char *var_name);
 var_t	*Var_Set (char *var_name, char *value);
 double	Var_VariableValue (char *var_name);
@@ -2449,6 +2453,7 @@ extern	var_t		*ackstardisable; /// disable ackstar
 extern	var_t		*ackgrowco;		/// Fixed ack grow coefficient
 extern	var_t		*ackshrinkco;	/// Fixed ack shrink coefficient
 extern	var_t		*ackmaxtrav;	/// Fixed ack max traverse rate
+extern	var_t		*ackflakmax;	/// Maximum altitude for fixed ack 88 guns
 extern	var_t		*airshowsmoke;	/// enable air show smoke
 extern	var_t		*allowtakeoff;	/// allow players to takeoff
 extern	var_t		*altv;			/// SHOW: 0-15 ??? other altv configures?

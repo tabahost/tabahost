@@ -3235,26 +3235,26 @@ void ChangeArena(char *map, client_t *client)
 		arena->redindex = 1.0;
 
 		// execute "map".cfg
-		Var_Get("fields", fields->string, VAR_ARCHIVE | VAR_ADMIN);
-		Var_Get("cities", cities->string, VAR_ARCHIVE | VAR_ADMIN);
-		Var_Get("cvs", cvs->string, VAR_ARCHIVE | VAR_ADMIN);
-		Var_Get("mapname", mapname->string, VAR_ARCHIVE | VAR_ADMIN);
-		Var_Get("dirname", dirname->string, VAR_ARCHIVE | VAR_ADMIN);
-		Var_Get("wb3", wb3->string, VAR_ARCHIVE | VAR_ADMIN);
-		Var_Get("sqlserver", sqlserver->string, VAR_ADMIN);
-		Var_Get("database", database->string, VAR_ADMIN); // VAR_ARCHIVE
+		Var_SetFlags("fields", VAR_ARCHIVE | VAR_ADMIN);
+		Var_SetFlags("cities", VAR_ARCHIVE | VAR_ADMIN);
+		Var_SetFlags("cvs", VAR_ARCHIVE | VAR_ADMIN);
+		Var_SetFlags("mapname", VAR_ARCHIVE | VAR_ADMIN);
+		Var_SetFlags("dirname", VAR_ARCHIVE | VAR_ADMIN);
+		Var_SetFlags("wb3", VAR_ARCHIVE | VAR_ADMIN);
+		Var_SetFlags("sqlserver", VAR_ADMIN);
+		Var_SetFlags("database", VAR_ADMIN); // VAR_ARCHIVE
 
 		snprintf(file, sizeof(file), "./arenas/%s/config", map);
 		Cmd_LoadConfig(file, client);
 
-		Var_Get("fields", fields->string, VAR_NOSET | VAR_ARCHIVE);
-		Var_Get("cities", cities->string, VAR_NOSET | VAR_ARCHIVE);
-		Var_Get("cvs", cvs->string, VAR_NOSET | VAR_ARCHIVE);
-		Var_Get("mapname", mapname->string, VAR_NOSET | VAR_ARCHIVE);
-		Var_Get("dirname", dirname->string, VAR_NOSET | VAR_ARCHIVE);
-		Var_Get("wb3", wb3->string, VAR_ARCHIVE | VAR_NOSET);
-		Var_Get("sqlserver", sqlserver->string, VAR_NOSET);
-		Var_Get("database", database->string, VAR_NOSET); // VAR_ARCHIVE
+		Var_SetFlags("fields", VAR_NOSET | VAR_ARCHIVE);
+		Var_SetFlags("cities", VAR_NOSET | VAR_ARCHIVE);
+		Var_SetFlags("cvs", VAR_NOSET | VAR_ARCHIVE);
+		Var_SetFlags("mapname", VAR_NOSET | VAR_ARCHIVE);
+		Var_SetFlags("dirname", VAR_NOSET | VAR_ARCHIVE);
+		Var_SetFlags("wb3", VAR_ARCHIVE | VAR_NOSET);
+		Var_SetFlags("sqlserver", VAR_NOSET);
+		Var_SetFlags("database", VAR_NOSET); // VAR_ARCHIVE
 
 		arena->day = currday->value;
 		arena->month = currmonth->value;

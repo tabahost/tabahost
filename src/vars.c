@@ -26,6 +26,7 @@ var_t *ackgrowco; // extern
 var_t *ackshrinkco; // extern
 var_t *ackmaxtrav; // extern
 var_t *ackstardisable; // extern
+var_t *ackflakmax; // extern
 var_t *airshowsmoke; // extern
 var_t *allowtakeoff; // extern
 var_t *altv; // extern
@@ -202,180 +203,181 @@ var_t *var_vars; // extern
 
 void InitVars(void)
 {
-	port = Var_Get("port", "19243", 0);
+	port = Var_Get("port", "19243", "19243", "19250", "Set the listen port", 0);
 #ifdef RETAIL	// RETAIL is a limited version for development or lan party
-	maxclients = Var_Get("maxclients", "6", VAR_NOSET);
-	maxentities = Var_Get("maxentities", "12", VAR_NOSET);
+	maxclients = Var_Get("maxclients", "6", "6", "100", "Set the max clients allowed to play", VAR_NOSET);
+	maxentities = Var_Get("maxentities", "12", "12", "200", "Set the max entities allowed to spawn in game", VAR_NOSET);
 #else
-	maxclients = Var_Get("maxclients", "100", VAR_ADMIN);
-	maxentities = Var_Get("maxentities", "200", VAR_ADMIN);
+	maxclients = Var_Get("maxclients", "100", "6", "100", "Set the max clients allowed to play", VAR_ADMIN);
+	maxentities = Var_Get("maxentities", "200", "12", "200", "Set the max entities allowed to spawn in game", VAR_ADMIN);
 #endif
-	ackgrowco = Var_Get("ackgrowco", "8.5", VAR_ARCHIVE);
-	ackshrinkco = Var_Get("ackshrinkco", "85", VAR_ARCHIVE);
-	ackmaxtrav = Var_Get("ackmaxtrav", "40", VAR_ARCHIVE);
-	ackstardisable = Var_Get("ackstardisable", "0", VAR_ARCHIVE);
-	airshowsmoke = Var_Get("airshowsmoke", "0", VAR_ARCHIVE);
-	allowtakeoff = Var_Get("allowtakeoff", "1", VAR_ARCHIVE);
-	altv = Var_Get("altv", "0", VAR_ARCHIVE);
-	ammomult = Var_Get("ammomult", "100", VAR_ARCHIVE);
-	arcade = Var_Get("arcade", "0", VAR_ARCHIVE);
-	arenaflags1 = Var_Get("arenaflags1", "3", VAR_ARCHIVE);
-	arenaflags2 = Var_Get("arenaflags2", "0", VAR_ARCHIVE);
-	arenaflags3 = Var_Get("arenaflags3", "27", VAR_ARCHIVE);
-	arenalist = Var_Get("arenalist", "0", VAR_ADMIN);
-	batchfile = Var_Get("batchfile", "0", VAR_ARCHIVE);
-	blackout = Var_Get("blackout", "1", VAR_ARCHIVE);
-	broadcast = Var_Get("broadcast", "1", VAR_ARCHIVE);
-	bulletradius = Var_Get("bulletradius", "0.1", VAR_ARCHIVE);
-	canreload = Var_Get("canreload", "0", VAR_ARCHIVE);
-	canreset = Var_Get("canreset", "1", VAR_ARCHIVE | VAR_ADMIN);
-	clickrangelim = Var_Get("clickrangelim", "21000", VAR_ARCHIVE);
-	cities = Var_Get("cities", "5", VAR_ARCHIVE | VAR_ADMIN);
-	changemaponreset = Var_Get("changemaponreset", "0", VAR_ARCHIVE | VAR_ADMIN);
-	consoleinput = Var_Get("consoleinput", "1", VAR_ARCHIVE | VAR_ADMIN);
-	contrail = Var_Get("contrail", "20000", VAR_ARCHIVE);
-	countries = Var_Get("countries", "2", VAR_ARCHIVE | VAR_ADMIN);
-	countrytime = Var_Get("countrytime", "300", VAR_ARCHIVE);
-	crcview = Var_Get("crcview", "0", VAR_ARCHIVE);
-	ctf = Var_Get("ctf", "0", VAR_ARCHIVE);
-	currday = Var_Get("currday", "1", VAR_ARCHIVE);
-	currmonth = Var_Get("currmonth", "9", VAR_ARCHIVE);
-	curryear = Var_Get("curryear", "1939", VAR_ARCHIVE);
-	cvcapture = Var_Get("cvcapture", "1", VAR_ARCHIVE);
-	cvdelay = Var_Get("cvdelay", "30", VAR_ARCHIVE);
-	cvradarrange0 = Var_Get("cvradarrange0", "30", VAR_ARCHIVE);
-	cvradarrange1 = Var_Get("cvradarrange1", "50000", VAR_ARCHIVE);
-	cvradarrange2 = Var_Get("cvradarrange2", "50000", VAR_ARCHIVE);
-	cvradarrange3 = Var_Get("cvradarrange3", "50000", VAR_ARCHIVE);
-	cvradarrange4 = Var_Get("cvradarrange4", "50000", VAR_ARCHIVE);
-	cvrange = Var_Get("cvrange", "40000", VAR_ARCHIVE); // max of 46339
-	cvs = Var_Get("cvs", "1", VAR_ARCHIVE | VAR_ADMIN);
-	cvsalvo = Var_Get("cvsalvo", "10", VAR_ARCHIVE);
-	cvspeed = Var_Get("cvspeed", "50", VAR_ARCHIVE);
-	database = Var_Get("database", "tabahost", VAR_ADMIN);
-	dayhours = Var_Get("dayhours", "14", VAR_ARCHIVE);
-	dbpasswd = Var_Get("dbpasswd", "t4b4d4t4b4s3", VAR_ADMIN);
-	dbuser = Var_Get("dbuser", "franz", VAR_ADMIN);
-	dirname = Var_Get("dirname", "wb3europe", VAR_ARCHIVE | VAR_ADMIN);
-	easymode = Var_Get("easymode", "0", VAR_ARCHIVE);
-	emulatecollision = Var_Get("emulatecollision", "0", VAR_ARCHIVE);
-	enableottos = Var_Get("enableottos", "1", VAR_ARCHIVE);
-	endday = Var_Get("endday", "16", VAR_ADMIN);
-	endmonth = Var_Get("endmonth", "8", VAR_ADMIN);
-	endyear = Var_Get("endyear", "1945", VAR_ADMIN);
-	enemydotsfly = Var_Get("enemydotsfly", "1", VAR_ARCHIVE);
-	enemydotstwr = Var_Get("enemydotstwr", "1", VAR_ARCHIVE);
-	enemyidlim = Var_Get("enemyidlim", "1500", VAR_ARCHIVE);
-	enemyidlimbomber = Var_Get("enemyidlimbomber", "1500", VAR_ARCHIVE);
-	enemynames = Var_Get("enemynames", "0", VAR_ARCHIVE);
-	enemyplanes = Var_Get("enemyplanes", "1", VAR_ARCHIVE);
-	fields = Var_Get("fields", "21", VAR_ARCHIVE | VAR_ADMIN);
-	flakmax = Var_Get("flakmax", "12000", VAR_ARCHIVE);
-	flypenalty = Var_Get("flypenalty", "150", VAR_ARCHIVE);
-	friendlydotsfly = Var_Get("friendlydotsfly", "1", VAR_ARCHIVE);
-	friendlydotstwr = Var_Get("friendlydotstwr", "1", VAR_ARCHIVE);
-	friendlyfire = Var_Get("friendlyfire", "1", VAR_ARCHIVE);
-	friendlyidlim = Var_Get("friendlyidlim", "1500", VAR_ARCHIVE);
-	friendlyidlimbomber = Var_Get("friendlyidlimbomber", "1500", VAR_ARCHIVE);
-	fueldiv = Var_Get("fueldiv", "100", VAR_ARCHIVE);
-	gruntcapture = Var_Get("gruntcapture", "1", VAR_ARCHIVE);
-	gruntshoot = Var_Get("gruntshoot", "1", VAR_ARCHIVE);
-	gruntsmaxd = Var_Get("gruntsmaxd", "6000", VAR_ARCHIVE);
-	gunrad = Var_Get("gunrad", "0.1", VAR_ARCHIVE);
-	gunstats = Var_Get("gunstats", "0", VAR_ARCHIVE);
-	gwarning = Var_Get("gwarning", "0.5", VAR_ARCHIVE);
-	hideadmin = Var_Get("hideadmin", "1", VAR_ARCHIVE | VAR_ADMIN);
-	hostdomain = Var_Get("hostdomain", "localhost", VAR_ADMIN);
-	hostname = Var_Get("hostname", "Main Arena", VAR_ARCHIVE | VAR_ADMIN);
-	iconbombersoverride = Var_Get("iconbombersoverride", "1", VAR_ARCHIVE);
-	iff = Var_Get("iff", "1", VAR_ARCHIVE);
-	initday = Var_Get("initday", "1", VAR_ADMIN);
-	initmonth = Var_Get("initmonth", "9", VAR_ADMIN);
-	inityear = Var_Get("inityear", "1939", VAR_ADMIN);
-	katyrange = Var_Get("katyrange", "8000", VAR_ARCHIVE); // theorical max of 46339
-	killcvtoreset = Var_Get("killcvtoreset", "1", VAR_ARCHIVE);
-	landingcapture = Var_Get("landingcapture", "0", VAR_ARCHIVE | VAR_ADMIN);
-	lethality = Var_Get("lethality", "1", VAR_ARCHIVE | VAR_ADMIN);
-	logfile_active = Var_Get("logfile_active", "1", VAR_ARCHIVE | VAR_ADMIN);
-	lograwposition = Var_Get("lograwposition", "0", VAR_ARCHIVE);
-	mapcycle = Var_Get("mapcycle", "1", VAR_ARCHIVE);
-	mapflags = Var_Get("mapflags", "1", VAR_ARCHIVE);
-	mapflagsenemy = Var_Get("mapflagsenemy", "1", VAR_ARCHIVE);
-	mapflagsfly = Var_Get("mapflagsfly", "0", VAR_ARCHIVE);
-	mapflagsown = Var_Get("mapflagsown", "1", VAR_ARCHIVE);
-	mapflagstwr = Var_Get("mapflagstwr", "1", VAR_ARCHIVE);
-	mapname = Var_Get("mapname", "europe", VAR_ARCHIVE | VAR_ADMIN);
-	mapscale = Var_Get("mapscale", "20", VAR_ARCHIVE | VAR_ADMIN);
-	mapsize = Var_Get("mapsize", "128", VAR_ARCHIVE | VAR_ADMIN);
-	maxpilotg = Var_Get("maxpilotg", "11", VAR_ARCHIVE);
-	metar = Var_Get("metar", "0", VAR_ARCHIVE);
-	midairs = Var_Get("midairs", "1", VAR_ARCHIVE);
-	mortars = Var_Get("mortars", "10", VAR_ARCHIVE);
-	mview = Var_Get("mview", "1", VAR_ARCHIVE | VAR_ADMIN);
-	notanks = Var_Get("notanks", "0", VAR_ARCHIVE);
-	nowings = Var_Get("nowings", "0", VAR_ARCHIVE);
-	obradar = Var_Get("obradar", "6000", VAR_ARCHIVE); // D20
-	oldcapt = Var_Get("oldcapt", "1", VAR_ARCHIVE);
-	ottoaccuracy = Var_Get("ottoaccuracy", "5", VAR_ARCHIVE);
-	ottoadjust = Var_Get("ottoadjust", "6", VAR_ARCHIVE);
-	ottoburstoff = Var_Get("ottoburstoff", "1.00", VAR_ARCHIVE);
-	ottoburston = Var_Get("ottoburston", "1.00", VAR_ARCHIVE);
-	ottoburstonmax = Var_Get("ottoburstonmax", "3.00", VAR_ARCHIVE);
-	ottooverrides = Var_Get("ottooverrides", "0", VAR_ARCHIVE);
-	ottorange = Var_Get("ottorange", "10", VAR_ARCHIVE);
-	ottoretarget = Var_Get("ottoretarget", "0.20", VAR_ARCHIVE);
-	overload = Var_Get("overload", "500", VAR_ARCHIVE | VAR_ADMIN);
-	parassmall = Var_Get("parassmall", "4", VAR_ARCHIVE);
-	parasmedium = Var_Get("parasmedium", "4", VAR_ARCHIVE);
-	paraslarge = Var_Get("paraslarge", "4", VAR_ARCHIVE);
-	paraspost = Var_Get("paraspost", "4", VAR_ARCHIVE);
-	parasvillage = Var_Get("parasvillage", "4", VAR_ARCHIVE);
-	parasport = Var_Get("parasport", "4", VAR_ARCHIVE);
-	parastown = Var_Get("parastown", "4", VAR_ARCHIVE);
-	planeatradar = Var_Get("planeatradar", "0", VAR_ARCHIVE);
-	planerangelimit = Var_Get("planerangelimit", "1500", VAR_ARCHIVE);
-	planerangelimitbomber = Var_Get("planerangelimitbomber", "1500", VAR_ARCHIVE);
-	predictpos = Var_Get("predictpos", "0", 0);
-	printeject = Var_Get("printeject", "0", VAR_ARCHIVE);
-	printkills = Var_Get("printkills", "1", VAR_ARCHIVE);
-	radaralt = Var_Get("radaralt", "600", VAR_ARCHIVE);
-	radarheight = Var_Get("radarheight", "20000", VAR_ARCHIVE);
-	radarrange0 = Var_Get("radarrange0", "30", VAR_ARCHIVE);
-	radarrange1 = Var_Get("radarrange1", "121500", VAR_ARCHIVE);
-	radarrange2 = Var_Get("radarrange2", "121500", VAR_ARCHIVE);
-	radarrange3 = Var_Get("radarrange3", "121500", VAR_ARCHIVE);
-	radarrange4 = Var_Get("radarrange4", "121500", VAR_ARCHIVE);
-	rebuildtime = Var_Get("rebuildtime", "12", VAR_ARCHIVE);
-	respawncvs = Var_Get("respawncvs", "1", VAR_ARCHIVE);
-	rps = Var_Get("rps", "60", VAR_ARCHIVE);
-	server_speeds = Var_Get("server_speeds", "0", VAR_ARCHIVE | VAR_ADMIN);
-	skins = Var_Get("skins", "0", VAR_ADMIN);
-	spawnred = Var_Get("spawnred", "0", VAR_ARCHIVE);
-	spawngold = Var_Get("spawngold", "0", VAR_ARCHIVE);
-	sqlserver = Var_Get("sqlserver", "localhost", VAR_ADMIN);
-	startalt = Var_Get("startalt", "0", VAR_ARCHIVE);
-	structlim = Var_Get("structlim", "3", VAR_ARCHIVE);
-	tanksrange = Var_Get("tanksrange", "5000", VAR_ARCHIVE); // max of 46339
-	teamkiller = Var_Get("teamkiller", "1", VAR_ARCHIVE);
-	teamkillstructs = Var_Get("teamkillstructs", "1", VAR_ARCHIVE);
-	testarena = Var_Get("testarena", "0", VAR_ARCHIVE);
-	thskins = Var_Get("thskins", "0", VAR_ARCHIVE);
-	timemult = Var_Get("timemult", "6", VAR_ARCHIVE);
-	timeout = Var_Get("timeout", "120", VAR_ARCHIVE);
-	ttc = Var_Get("ttc", "1.2", VAR_ARCHIVE);
-	verbose = Var_Get("verbose", VERBOSE_SMAX, VAR_ARCHIVE | VAR_ADMIN);
-	wb3 = Var_Get("wb3", "0", VAR_ARCHIVE | VAR_ADMIN);
-	weather = Var_Get("weather", "0", VAR_ARCHIVE);
-	whitelist = Var_Get("whitelist", "0", VAR_ARCHIVE);
-	xwindvelocity = Var_Get("xwindvelocity", "0", VAR_ARCHIVE);
-	ywindvelocity = Var_Get("ywindvelocity", "0", VAR_ARCHIVE);
-	zwindvelocity = Var_Get("zwindvelocity", "0", VAR_ARCHIVE);
+	ackgrowco = Var_Get("ackgrowco", "8.5", "0.0", "20.0", "Fixed ack grow coefficient", VAR_ARCHIVE);
+	ackshrinkco = Var_Get("ackshrinkco", "85", "0", "100", "Fixed ack shrink coefficient", VAR_ARCHIVE);
+	ackmaxtrav = Var_Get("ackmaxtrav", "40", "0", "180", "Fixed ack max traverse rate", VAR_ARCHIVE);
+	ackstardisable = Var_Get("ackstardisable", "0", "0", "1", "Disable ackstar", VAR_ARCHIVE);
+	ackflakmax = Var_Get("ackflakmax", "30000", "0", "50000", "Maximum altitude for fixed ack 88 guns", VAR_ARCHIVE);
+	airshowsmoke = Var_Get("airshowsmoke", "0", "0", "1", "Allow air show smoke (.smoke)", VAR_ARCHIVE);
+	allowtakeoff = Var_Get("allowtakeoff", "1", "0", "1", "Allow takeoffs", VAR_ARCHIVE);
+	altv = Var_Get("altv", "0", "0", "15", "Enable external view", VAR_ARCHIVE);
+	ammomult = Var_Get("ammomult", "100", "0.1", "32", "Relative amount of ammo each plane carries", VAR_ARCHIVE);
+	arcade = Var_Get("arcade", "0", "0", "1", "Enable arcade mode", VAR_ARCHIVE);
+	arenaflags1 = Var_Get("arenaflags1", "3", "0", "255", "Bitfield configuration for .arnaflags", VAR_ARCHIVE);
+	arenaflags2 = Var_Get("arenaflags2", "0", "0", "255", "Bitfield configuration for .arnaflags", VAR_ARCHIVE);
+	arenaflags3 = Var_Get("arenaflags3", "27", "0", "255", "Bitfield configuration for .arnaflags", VAR_ARCHIVE);
+	arenalist = Var_Get("arenalist", "0", "0", "0", NULL, VAR_ADMIN);
+	batchfile = Var_Get("batchfile", "0", "0", "0", NULL, VAR_ARCHIVE);
+	blackout = Var_Get("blackout", "1", "0", "0", NULL, VAR_ARCHIVE);
+	broadcast = Var_Get("broadcast", "1", "0", "0", NULL, VAR_ARCHIVE);
+	bulletradius = Var_Get("bulletradius", "0.1", "0", "0", NULL, VAR_ARCHIVE);
+	canreload = Var_Get("canreload", "0", "0", "0", NULL, VAR_ARCHIVE);
+	canreset = Var_Get("canreset", "1", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	clickrangelim = Var_Get("clickrangelim", "21000", "0", "0", NULL, VAR_ARCHIVE);
+	cities = Var_Get("cities", "5", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	changemaponreset = Var_Get("changemaponreset", "0", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	consoleinput = Var_Get("consoleinput", "1", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	contrail = Var_Get("contrail", "20000", "0", "0", NULL, VAR_ARCHIVE);
+	countries = Var_Get("countries", "2", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	countrytime = Var_Get("countrytime", "300", "0", "0", NULL, VAR_ARCHIVE);
+	crcview = Var_Get("crcview", "0", "0", "0", NULL, VAR_ARCHIVE);
+	ctf = Var_Get("ctf", "0", "0", "0", NULL, VAR_ARCHIVE);
+	currday = Var_Get("currday", "1", "0", "0", NULL, VAR_ARCHIVE);
+	currmonth = Var_Get("currmonth", "9", "0", "0", NULL, VAR_ARCHIVE);
+	curryear = Var_Get("curryear", "1939", "0", "0", NULL, VAR_ARCHIVE);
+	cvcapture = Var_Get("cvcapture", "1", "0", "0", NULL, VAR_ARCHIVE);
+	cvdelay = Var_Get("cvdelay", "30", "0", "0", NULL, VAR_ARCHIVE);
+	cvradarrange0 = Var_Get("cvradarrange0", "30", "0", "0", NULL, VAR_ARCHIVE);
+	cvradarrange1 = Var_Get("cvradarrange1", "50000", "0", "0", NULL, VAR_ARCHIVE);
+	cvradarrange2 = Var_Get("cvradarrange2", "50000", "0", "0", NULL, VAR_ARCHIVE);
+	cvradarrange3 = Var_Get("cvradarrange3", "50000", "0", "0", NULL, VAR_ARCHIVE);
+	cvradarrange4 = Var_Get("cvradarrange4", "50000", "0", "0", NULL, VAR_ARCHIVE);
+	cvrange = Var_Get("cvrange", "40000", "0", "0", NULL, VAR_ARCHIVE); // max of 46339
+	cvs = Var_Get("cvs", "1", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	cvsalvo = Var_Get("cvsalvo", "10", "0", "0", NULL, VAR_ARCHIVE);
+	cvspeed = Var_Get("cvspeed", "50", "0", "0", NULL, VAR_ARCHIVE);
+	database = Var_Get("database", "tabahost", "0", "0", NULL, VAR_ADMIN);
+	dayhours = Var_Get("dayhours", "14", "0", "0", NULL, VAR_ARCHIVE);
+	dbpasswd = Var_Get("dbpasswd", "t4b4d4t4b4s3", "0", "0", NULL, VAR_ADMIN);
+	dbuser = Var_Get("dbuser", "franz", "0", "0", NULL, VAR_ADMIN);
+	dirname = Var_Get("dirname", "wb3europe", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	easymode = Var_Get("easymode", "0", "0", "0", NULL, VAR_ARCHIVE);
+	emulatecollision = Var_Get("emulatecollision", "0", "0", "0", NULL, VAR_ARCHIVE);
+	enableottos = Var_Get("enableottos", "1", "0", "0", NULL, VAR_ARCHIVE);
+	endday = Var_Get("endday", "16", "0", "0", NULL, VAR_ADMIN);
+	endmonth = Var_Get("endmonth", "8", "0", "0", NULL, VAR_ADMIN);
+	endyear = Var_Get("endyear", "1945", "0", "0", NULL, VAR_ADMIN);
+	enemydotsfly = Var_Get("enemydotsfly", "1", "0", "0", NULL, VAR_ARCHIVE);
+	enemydotstwr = Var_Get("enemydotstwr", "1", "0", "0", NULL, VAR_ARCHIVE);
+	enemyidlim = Var_Get("enemyidlim", "1500", "0", "0", NULL, VAR_ARCHIVE);
+	enemyidlimbomber = Var_Get("enemyidlimbomber", "1500", "0", "0", NULL, VAR_ARCHIVE);
+	enemynames = Var_Get("enemynames", "0", "0", "0", NULL, VAR_ARCHIVE);
+	enemyplanes = Var_Get("enemyplanes", "1", "0", "0", NULL, VAR_ARCHIVE);
+	fields = Var_Get("fields", "21", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	flakmax = Var_Get("flakmax", "12000", "0", "0", NULL, VAR_ARCHIVE);
+	flypenalty = Var_Get("flypenalty", "150", "0", "0", NULL, VAR_ARCHIVE);
+	friendlydotsfly = Var_Get("friendlydotsfly", "1", "0", "0", NULL, VAR_ARCHIVE);
+	friendlydotstwr = Var_Get("friendlydotstwr", "1", "0", "0", NULL, VAR_ARCHIVE);
+	friendlyfire = Var_Get("friendlyfire", "1", "0", "0", NULL, VAR_ARCHIVE);
+	friendlyidlim = Var_Get("friendlyidlim", "1500", "0", "0", NULL, VAR_ARCHIVE);
+	friendlyidlimbomber = Var_Get("friendlyidlimbomber", "1500", "0", "0", NULL, VAR_ARCHIVE);
+	fueldiv = Var_Get("fueldiv", "100", "0", "0", NULL, VAR_ARCHIVE);
+	gruntcapture = Var_Get("gruntcapture", "1", "0", "0", NULL, VAR_ARCHIVE);
+	gruntshoot = Var_Get("gruntshoot", "1", "0", "0", NULL, VAR_ARCHIVE);
+	gruntsmaxd = Var_Get("gruntsmaxd", "6000", "0", "0", NULL, VAR_ARCHIVE);
+	gunrad = Var_Get("gunrad", "0.1", "0", "0", NULL, VAR_ARCHIVE);
+	gunstats = Var_Get("gunstats", "0", "0", "0", NULL, VAR_ARCHIVE);
+	gwarning = Var_Get("gwarning", "0.5", "0", "0", NULL, VAR_ARCHIVE);
+	hideadmin = Var_Get("hideadmin", "1", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	hostdomain = Var_Get("hostdomain", "localhost", "0", "0", NULL, VAR_ADMIN);
+	hostname = Var_Get("hostname", "Main Arena", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	iconbombersoverride = Var_Get("iconbombersoverride", "1", "0", "0", NULL, VAR_ARCHIVE);
+	iff = Var_Get("iff", "1", "0", "0", NULL, VAR_ARCHIVE);
+	initday = Var_Get("initday", "1", "0", "0", NULL, VAR_ADMIN);
+	initmonth = Var_Get("initmonth", "9", "0", "0", NULL, VAR_ADMIN);
+	inityear = Var_Get("inityear", "1939", "0", "0", NULL, VAR_ADMIN);
+	katyrange = Var_Get("katyrange", "8000", "0", "0", NULL, VAR_ARCHIVE); // theorical max of 46339
+	killcvtoreset = Var_Get("killcvtoreset", "1", "0", "0", NULL, VAR_ARCHIVE);
+	landingcapture = Var_Get("landingcapture", "0", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	lethality = Var_Get("lethality", "1", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	logfile_active = Var_Get("logfile_active", "1", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	lograwposition = Var_Get("lograwposition", "0", "0", "0", NULL, VAR_ARCHIVE);
+	mapcycle = Var_Get("mapcycle", "1", "0", "0", NULL, VAR_ARCHIVE);
+	mapflags = Var_Get("mapflags", "1", "0", "0", NULL, VAR_ARCHIVE);
+	mapflagsenemy = Var_Get("mapflagsenemy", "1", "0", "0", NULL, VAR_ARCHIVE);
+	mapflagsfly = Var_Get("mapflagsfly", "0", "0", "0", NULL, VAR_ARCHIVE);
+	mapflagsown = Var_Get("mapflagsown", "1", "0", "0", NULL, VAR_ARCHIVE);
+	mapflagstwr = Var_Get("mapflagstwr", "1", "0", "0", NULL, VAR_ARCHIVE);
+	mapname = Var_Get("mapname", "europe", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	mapscale = Var_Get("mapscale", "20", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	mapsize = Var_Get("mapsize", "128", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	maxpilotg = Var_Get("maxpilotg", "11", "0", "0", NULL, VAR_ARCHIVE);
+	metar = Var_Get("metar", "0", "0", "0", NULL, VAR_ARCHIVE);
+	midairs = Var_Get("midairs", "1", "0", "0", NULL, VAR_ARCHIVE);
+	mortars = Var_Get("mortars", "10", "0", "0", NULL, VAR_ARCHIVE);
+	mview = Var_Get("mview", "1", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	notanks = Var_Get("notanks", "0", "0", "0", NULL, VAR_ARCHIVE);
+	nowings = Var_Get("nowings", "0", "0", "0", NULL, VAR_ARCHIVE);
+	obradar = Var_Get("obradar", "6000", "0", "0", NULL, VAR_ARCHIVE); // D20
+	oldcapt = Var_Get("oldcapt", "1", "0", "0", NULL, VAR_ARCHIVE);
+	ottoaccuracy = Var_Get("ottoaccuracy", "5", "0", "0", NULL, VAR_ARCHIVE);
+	ottoadjust = Var_Get("ottoadjust", "6", "0", "0", NULL, VAR_ARCHIVE);
+	ottoburstoff = Var_Get("ottoburstoff", "1.00", "0", "0", NULL, VAR_ARCHIVE);
+	ottoburston = Var_Get("ottoburston", "1.00", "0", "0", NULL, VAR_ARCHIVE);
+	ottoburstonmax = Var_Get("ottoburstonmax", "3.00", "0", "0", NULL, VAR_ARCHIVE);
+	ottooverrides = Var_Get("ottooverrides", "0", "0", "0", NULL, VAR_ARCHIVE);
+	ottorange = Var_Get("ottorange", "10", "0", "0", NULL, VAR_ARCHIVE);
+	ottoretarget = Var_Get("ottoretarget", "0.20", "0", "0", NULL, VAR_ARCHIVE);
+	overload = Var_Get("overload", "500", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	parassmall = Var_Get("parassmall", "4", "0", "0", NULL, VAR_ARCHIVE);
+	parasmedium = Var_Get("parasmedium", "4", "0", "0", NULL, VAR_ARCHIVE);
+	paraslarge = Var_Get("paraslarge", "4", "0", "0", NULL, VAR_ARCHIVE);
+	paraspost = Var_Get("paraspost", "4", "0", "0", NULL, VAR_ARCHIVE);
+	parasvillage = Var_Get("parasvillage", "4", "0", "0", NULL, VAR_ARCHIVE);
+	parasport = Var_Get("parasport", "4", "0", "0", NULL, VAR_ARCHIVE);
+	parastown = Var_Get("parastown", "4", "0", "0", NULL, VAR_ARCHIVE);
+	planeatradar = Var_Get("planeatradar", "0", "0", "0", NULL, VAR_ARCHIVE);
+	planerangelimit = Var_Get("planerangelimit", "1500", "0", "0", NULL, VAR_ARCHIVE);
+	planerangelimitbomber = Var_Get("planerangelimitbomber", "1500", "0", "0", NULL, VAR_ARCHIVE);
+	predictpos = Var_Get("predictpos", "0", "0", "0", NULL, 0);
+	printeject = Var_Get("printeject", "0", "0", "0", NULL, VAR_ARCHIVE);
+	printkills = Var_Get("printkills", "1", "0", "0", NULL, VAR_ARCHIVE);
+	radaralt = Var_Get("radaralt", "600", "0", "0", NULL, VAR_ARCHIVE);
+	radarheight = Var_Get("radarheight", "20000", "0", "0", NULL, VAR_ARCHIVE);
+	radarrange0 = Var_Get("radarrange0", "30", "0", "0", NULL, VAR_ARCHIVE);
+	radarrange1 = Var_Get("radarrange1", "121500", "0", "0", NULL, VAR_ARCHIVE);
+	radarrange2 = Var_Get("radarrange2", "121500", "0", "0", NULL, VAR_ARCHIVE);
+	radarrange3 = Var_Get("radarrange3", "121500", "0", "0", NULL, VAR_ARCHIVE);
+	radarrange4 = Var_Get("radarrange4", "121500", "0", "0", NULL, VAR_ARCHIVE);
+	rebuildtime = Var_Get("rebuildtime", "12", "0", "0", NULL, VAR_ARCHIVE);
+	respawncvs = Var_Get("respawncvs", "1", "0", "0", NULL, VAR_ARCHIVE);
+	rps = Var_Get("rps", "60", "0", "0", NULL, VAR_ARCHIVE);
+	server_speeds = Var_Get("server_speeds", "0", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	skins = Var_Get("skins", "0", "0", "0", NULL, VAR_ADMIN);
+	spawnred = Var_Get("spawnred", "0", "0", "0", NULL, VAR_ARCHIVE);
+	spawngold = Var_Get("spawngold", "0", "0", "0", NULL, VAR_ARCHIVE);
+	sqlserver = Var_Get("sqlserver", "localhost", "0", "0", NULL, VAR_ADMIN);
+	startalt = Var_Get("startalt", "0", "0", "0", NULL, VAR_ARCHIVE);
+	structlim = Var_Get("structlim", "3", "0", "0", NULL, VAR_ARCHIVE);
+	tanksrange = Var_Get("tanksrange", "5000", "0", "0", NULL, VAR_ARCHIVE); // max of 46339
+	teamkiller = Var_Get("teamkiller", "1", "0", "0", NULL, VAR_ARCHIVE);
+	teamkillstructs = Var_Get("teamkillstructs", "1", "0", "0", NULL, VAR_ARCHIVE);
+	testarena = Var_Get("testarena", "0", "0", "0", NULL, VAR_ARCHIVE);
+	thskins = Var_Get("thskins", "0", "0", "0", NULL, VAR_ARCHIVE);
+	timemult = Var_Get("timemult", "6", "0", "0", NULL, VAR_ARCHIVE);
+	timeout = Var_Get("timeout", "120", "0", "0", NULL, VAR_ARCHIVE);
+	ttc = Var_Get("ttc", "1.2", "0", "0", NULL, VAR_ARCHIVE);
+	verbose = Var_Get("verbose", "0", "0", NULL, VERBOSE_SMAX, VAR_ARCHIVE | VAR_ADMIN);
+	wb3 = Var_Get("wb3", "0", "0", "0", NULL, VAR_ARCHIVE | VAR_ADMIN);
+	weather = Var_Get("weather", "0", "0", "0", NULL, VAR_ARCHIVE);
+	whitelist = Var_Get("whitelist", "0", "0", "0", NULL, VAR_ARCHIVE);
+	xwindvelocity = Var_Get("xwindvelocity", "0", "0", "0", NULL, VAR_ARCHIVE);
+	ywindvelocity = Var_Get("ywindvelocity", "0", "0", "0", NULL, VAR_ARCHIVE);
+	zwindvelocity = Var_Get("zwindvelocity", "0", "0", "0", NULL, VAR_ARCHIVE);
 
-	debug = Var_Get("debug", "0", 0);
-	printqueries = Var_Get("printqueries", "0", 0);
-	dpitch = Var_Get("dpitch", "0", 0);
-	droll = Var_Get("droll", "0", 0);
-	dyaw = Var_Get("dyaw", "0", 0);
+	debug = Var_Get("debug", "0", "0", "0", NULL, 0);
+	printqueries = Var_Get("printqueries", "0", "0", "0", NULL, 0);
+	dpitch = Var_Get("dpitch", "0", "0", "0", NULL, 0);
+	droll = Var_Get("droll", "0", "0", "0", NULL, 0);
+	dyaw = Var_Get("dyaw", "0", "0", "0", NULL, 0);
 }
 
 /**
@@ -653,30 +655,54 @@ void CheckVars(void)
 }
 
 /**
- Var_Get
+ Var_SetFlags
 
- Put a new variable at vars array or set flags if it already exists
+ Set Flags for an existing variable
  */
 
-var_t *Var_Get(char *var_name, char *var_value, int flags)
+var_t *Var_SetFlags(char *var_name, int flags)
 {
 	var_t *var;
 
 	var = Var_FindVar(var_name);
+
 	if (var)
 	{
 		var->flags = flags;
 		return var;
 	}
 
+	return NULL;
+}
+
+
+/**
+ Var_Get
+
+ Put a new variable at vars array or returns it if already exist
+ */
+
+var_t *Var_Get(char *var_name, char *var_value, char *min, char *max, char *description, int flags)
+{
+	var_t *var;
+
+	var = Var_FindVar(var_name);
+	if (var)
+	{
+		return var;
+	}
+
 	if (!var_value)
-		return 0;
+		return NULL;
 
 	var = Z_Malloc(sizeof(*var));
 	var->name = CopyString(var_name);
+	var->min = Com_Atof(min);
+	var->max = Com_Atof(max);
 	var->string = CopyString(var_value);
-	var->modified = 1;
 	var->value = Com_Atof(var->string);
+	var->modified = 1;
+	var->description = CopyString(description);
 
 	// link the variable in
 	var->next = var_vars;
@@ -725,7 +751,7 @@ var_t *Var_Set(char *var_name, char *value)
 	var = Var_FindVar(var_name);
 	if (!var)
 	{ // create it
-		return Var_Get(var_name, value, 0);
+		return Var_Get(var_name, value, "0", "0", NULL, 0);
 	}
 
 	if (var->flags & VAR_NOSET)
@@ -734,12 +760,17 @@ var_t *Var_Set(char *var_name, char *value)
 	if (!Com_Strcmp(value, var->string))
 		return var; // not changed
 
-	var->modified = 1;
-
-	free(var->string);
-
-	var->string = CopyString(value);
-	var->value = Com_Atof(var->string);
+	if(Com_Atof(value) > var->max || Com_Atof(value) < var->min)
+	{
+		return NULL;
+	}
+	else
+	{
+		var->modified = 1;
+		free(var->string);
+		var->string = CopyString(value);
+		var->value = Com_Atof(var->string);
+	}
 
 	return var;
 }
