@@ -3464,8 +3464,8 @@ void ProcessCommands(char *command, client_t *client)
 		{
 			if(!argv[0])
 			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "\"%s\": \"%s\" (min: %s - max %s)", var->name, var->string, var->min, var->max);
-				PPrintf(client, RADIO_LIGHTYELLOW, "%s", var->description);
+				PPrintf(client, RADIO_LIGHTYELLOW, "\"%s\":\"%s\" (min: %.2f - max %.2f)", var->name, var->string, var->min, var->max);
+				PPrintf(client, RADIO_LIGHTYELLOW, "%s", var->description?var->description:"No description");
 			}
 			else
 			{

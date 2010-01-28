@@ -1400,6 +1400,9 @@ char *CopyString(char *in)
 {
 	char *out;
 
+	if(!in)
+		return NULL;
+
 	out = Z_Malloc(strlen(in)+1);
 	strcpy(out, in);
 	return out;

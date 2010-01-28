@@ -692,7 +692,7 @@ typedef struct var_s
 {
 	char		*name;			// variable name
 	char		*string;		// string stored in variable
-	char		*description	// description
+	char		*description;	// description
 	int			flags;			// variable flags
 	u_short		modified;		// it was recently changed?
 	double		min;			// variable min

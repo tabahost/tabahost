@@ -760,7 +760,7 @@ var_t *Var_Set(char *var_name, char *value)
 	if (!Com_Strcmp(value, var->string))
 		return var; // not changed
 
-	if(Com_Atof(value) > var->max || Com_Atof(value) < var->min)
+	if(var->min != var->max && (Com_Atof(value) > var->max || Com_Atof(value) < var->min))
 	{
 		return NULL;
 	}
