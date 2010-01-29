@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
 	Var_SetFlags("mapname", VAR_NOSET | VAR_ARCHIVE);
 	Var_SetFlags("dirname", VAR_NOSET | VAR_ARCHIVE);
 	Var_SetFlags("wb3", VAR_NOSET);
+	Com_Printf(VERBOSE_DEBUG, "First NOSET\n");
 
 	sockfd = InitTCPNet(port->value);
 	udpfd = InitUDPNet(port->value);

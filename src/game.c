@@ -9528,7 +9528,7 @@ void SendArenaRules(client_t *client)
 {
 	u_int8_t buffer[83];
 	u_int8_t buffersize;
-	u_int32_t mapflags = 0;
+	u_int32_t flags = 0;
 	arenarules_t *arenarules;
 	wb3arenarules_t *wb3arenarules;
 
@@ -9538,32 +9538,32 @@ void SendArenaRules(client_t *client)
 
 	if (client->attr & FLAG_ADMIN)
 	{
-		mapflags = (FLAG_MAPFLAGSFLY | FLAG_MAPFLAGSTWR | FLAG_MAPFLAGSOWN | FLAG_MAPFLAGSENEMY | FLAG_PLANEATRADAR);
+		flags = (FLAG_MAPFLAGSFLY | FLAG_MAPFLAGSTWR | FLAG_MAPFLAGSOWN | FLAG_MAPFLAGSENEMY | FLAG_PLANEATRADAR);
 	}
 	else if (mapflags->value)
 	{
 		if (mapflagsfly->value)
-			mapflags |= FLAG_MAPFLAGSFLY;
+			flags |= FLAG_MAPFLAGSFLY;
 		if (mapflagstwr->value)
-			mapflags |= FLAG_MAPFLAGSTWR;
+			flags |= FLAG_MAPFLAGSTWR;
 		if (mapflagsown->value)
-			mapflags |= FLAG_MAPFLAGSOWN;
+			flags |= FLAG_MAPFLAGSOWN;
 		if (mapflagsenemy->value)
-			mapflags |= FLAG_MAPFLAGSENEMY;
+			flags |= FLAG_MAPFLAGSENEMY;
 		if (planeatradar->value)
-			mapflags |= FLAG_PLANEATRADAR;
+			flags |= FLAG_PLANEATRADAR;
 		if (!friendlydotsfly->value)
-			mapflags |= FLAG_FRIENDLYDOTSFLY;
+			flags |= FLAG_FRIENDLYDOTSFLY;
 		if (!enemydotsfly->value)
-			mapflags |= FLAG_ENEMYDOTSFLY;
+			flags |= FLAG_ENEMYDOTSFLY;
 		if (!friendlydotstwr->value)
-			mapflags |= FLAG_FRIENDLYDOTSTWR;
+			flags |= FLAG_FRIENDLYDOTSTWR;
 		if (!enemydotstwr->value)
-			mapflags |= FLAG_ENEMYDOTSTWR;
+			flags |= FLAG_ENEMYDOTSTWR;
 	}
 	else
 	{
-		mapflags = 0;
+		flags = 0;
 	}
 
 	if (wb3->value)
@@ -9572,7 +9572,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules = (wb3arenarules_t *)buffer;
 		wb3arenarules->packetid = htons(Com_WBhton(0x0300));
 		wb3arenarules->radaralt = htonl(radaralt->value);
-		wb3arenarules->mapflags = htonl(mapflags);
+		wb3arenarules->mapflags = htonl(flags);
 		wb3arenarules->ammomult = htonl(ammomult->value);
 		wb3arenarules->maxpilotg = htons(maxpilotg->value);
 		wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
@@ -9604,7 +9604,7 @@ void SendArenaRules(client_t *client)
 		arenarules = (arenarules_t *)buffer;
 		arenarules->packetid = htons(0x0300);
 		arenarules->radaralt = htonl(radaralt->value);
-		arenarules->mapflags = htonl(rules);
+		arenarules->mapflags = htonl(flags);
 		arenarules->ammomult = htonl(ammomult->value);
 		arenarules->xwindvelocity = htonl(xwindvelocity->value);
 		arenarules->ywindvelocity = htonl(ywindvelocity->value);

@@ -3235,6 +3235,7 @@ void ChangeArena(char *map, client_t *client)
 		arena->redindex = 1.0;
 
 		// execute "map".cfg
+		Com_Printf(VERBOSE_DEBUG, "First SET\n");
 		Var_SetFlags("fields", VAR_ARCHIVE | VAR_ADMIN);
 		Var_SetFlags("cities", VAR_ARCHIVE | VAR_ADMIN);
 		Var_SetFlags("cvs", VAR_ARCHIVE | VAR_ADMIN);
@@ -3255,7 +3256,7 @@ void ChangeArena(char *map, client_t *client)
 		Var_SetFlags("wb3", VAR_ARCHIVE | VAR_NOSET);
 		Var_SetFlags("sqlserver", VAR_NOSET);
 		Var_SetFlags("database", VAR_NOSET); // VAR_ARCHIVE
-
+		Com_Printf(VERBOSE_DEBUG, "Second NOSET\n");
 		arena->day = currday->value;
 		arena->month = currmonth->value;
 		arena->year = curryear->value;

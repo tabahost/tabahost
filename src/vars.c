@@ -135,6 +135,7 @@ var_t *nowings; // extern
 var_t *obradar;	// extern
 var_t *oldcapt; // extern
 var_t *ottoaccuracy; // set otto accuracy
+var_t *ottoacquirerange; // extern
 var_t *ottoadjust; // set otto adjust
 var_t *ottoburstoff; // set otto burst pause time
 var_t *ottoburston; // set otto burst time by dist

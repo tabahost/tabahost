@@ -2571,7 +2571,7 @@ extern	var_t		*nowings;		/// dont allow players to use wingmen
 extern	var_t		*obradar;		/// adjust obradar for historical planes
 extern	var_t		*oldcapt;		/// enable old way to capture fields (destroy all structures and drop paras)
 extern	var_t		*ottoaccuracy;	/// set otto accuracy
-extern	var_t		*ottoacquirerange	/// set otto acquire range
+extern	var_t		*ottoacquirerange;	/// set otto acquire range
 extern	var_t		*ottoadjust;	/// set otto adjust
 extern	var_t		*ottoburstoff;	/// set otto burst pause time
 extern	var_t		*ottoburston;	/// set otto burst time by dist
