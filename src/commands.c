@@ -618,20 +618,33 @@ void Cmd_Ord(u_int8_t ord, client_t *client)
 void Cmd_Easy(u_int8_t easy, client_t *client)
 {
 
-	if (easymode->value)
+	if (easymode->value) // enabled or forced easy mode
 	{
-		if (easymode->value > 1)
-			client->easymode = easy = 1;
+		if(easymode->value == 2) // forced easy mode
+		{
+			client->easymode = 1;
+			PPrintf(client, RADIO_YELLOW, "Forced easy flight mode");
+		}
 		else
-			client->easymode = easy;
-	}
-	else
-		client->easymode = easy = 0;
+		{
+			if(easy > 2)
+				easy = 2;
 
-	if (easy)
-		PPrintf(client, RADIO_YELLOW, "Easy flight mode enabled");
-	else
-		PPrintf(client, RADIO_YELLOW, "Easy flight mode disabled");
+			client->easymode = easy;
+
+			if (client->easymode == 2)
+				PPrintf(client, RADIO_YELLOW, "Relaxed flight mode enabled");
+			else if (client->easymode == 1)
+				PPrintf(client, RADIO_YELLOW, "Easy flight mode enabled");
+			else
+				PPrintf(client, RADIO_YELLOW, "Easy flight mode disabled");
+		}
+	}
+	else // strict real mode
+	{
+		client->easymode = 0;
+		PPrintf(client, RADIO_YELLOW, "Strict real mode, easy mode disabled");
+	}
 }
 
 /**
@@ -986,7 +999,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			rules |= FLAG_AIRSHOWSMOKE;
 		if (client->easymode)
 			rules |= FLAG_EASYMODE;
-		if (client->easymode > 1)
+		if (client->easymode == 2)
 			rules |= FLAG_EASYMODE2;
 		if (enemynames->value)
 			rules |= FLAG_ENEMYNAMES;

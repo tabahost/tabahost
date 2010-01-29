@@ -687,7 +687,7 @@ void CheckArenaRules(void)
 		}
 	}
 
-	if (wb3->value && !(arena->frame % 12000))
+	if (wb3->value && !(arena->frame % 3000)) // 30 seconds
 	{
 		if (!setjmp(debug_buffer))
 		{
@@ -9205,6 +9205,29 @@ void SendOttoParams(client_t *client)
 	otto->unknown1 = htonl(0x0000);
 
 	SendPacket(buffer, sizeof(buffer), client);
+
+	SendOttoParams2(client);
+}
+
+/**
+ SendOttoParams2
+
+ Send Otto parameters
+ */
+
+void SendOttoParams2(client_t *client)
+{
+	u_int8_t buffer[21];
+	ottoparams2_t *otto;
+
+	memset(buffer, 0, sizeof(buffer));
+	otto = (ottoparams_t *)buffer;
+
+	otto->packetid = htons(Com_WBhton(0x2103));
+	otto->unk1 = htons(0x0000);
+	otto->ottoacquirerange = htons((u_int16_t)ottoacquirerange->value);
+
+	SendPacket(buffer, sizeof(buffer), client);
 }
 
 /**
@@ -9505,7 +9528,7 @@ void SendArenaRules(client_t *client)
 {
 	u_int8_t buffer[83];
 	u_int8_t buffersize;
-	u_int32_t rules = 0;
+	u_int32_t mapflags = 0;
 	arenarules_t *arenarules;
 	wb3arenarules_t *wb3arenarules;
 
@@ -9515,33 +9538,32 @@ void SendArenaRules(client_t *client)
 
 	if (client->attr & FLAG_ADMIN)
 	{
-		rules = (FLAG_MAPFLAGSFLY | FLAG_MAPFLAGSTWR | FLAG_MAPFLAGSOWN |
-		FLAG_MAPFLAGSENEMY | FLAG_PLANEATRADAR);
+		mapflags = (FLAG_MAPFLAGSFLY | FLAG_MAPFLAGSTWR | FLAG_MAPFLAGSOWN | FLAG_MAPFLAGSENEMY | FLAG_PLANEATRADAR);
 	}
 	else if (mapflags->value)
 	{
 		if (mapflagsfly->value)
-			rules |= FLAG_MAPFLAGSFLY;
+			mapflags |= FLAG_MAPFLAGSFLY;
 		if (mapflagstwr->value)
-			rules |= FLAG_MAPFLAGSTWR;
+			mapflags |= FLAG_MAPFLAGSTWR;
 		if (mapflagsown->value)
-			rules |= FLAG_MAPFLAGSOWN;
+			mapflags |= FLAG_MAPFLAGSOWN;
 		if (mapflagsenemy->value)
-			rules |= FLAG_MAPFLAGSENEMY;
+			mapflags |= FLAG_MAPFLAGSENEMY;
 		if (planeatradar->value)
-			rules |= FLAG_PLANEATRADAR;
+			mapflags |= FLAG_PLANEATRADAR;
 		if (!friendlydotsfly->value)
-			rules |= FLAG_FRIENDLYDOTSFLY;
+			mapflags |= FLAG_FRIENDLYDOTSFLY;
 		if (!enemydotsfly->value)
-			rules |= FLAG_ENEMYDOTSFLY;
+			mapflags |= FLAG_ENEMYDOTSFLY;
 		if (!friendlydotstwr->value)
-			rules |= FLAG_FRIENDLYDOTSTWR;
+			mapflags |= FLAG_FRIENDLYDOTSTWR;
 		if (!enemydotstwr->value)
-			rules |= FLAG_ENEMYDOTSTWR;
+			mapflags |= FLAG_ENEMYDOTSTWR;
 	}
 	else
 	{
-		rules = 0;
+		mapflags = 0;
 	}
 
 	if (wb3->value)
@@ -9550,7 +9572,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules = (wb3arenarules_t *)buffer;
 		wb3arenarules->packetid = htons(Com_WBhton(0x0300));
 		wb3arenarules->radaralt = htonl(radaralt->value);
-		wb3arenarules->mapflags = htonl(rules);
+		wb3arenarules->mapflags = htonl(mapflags);
 		wb3arenarules->ammomult = htonl(ammomult->value);
 		wb3arenarules->maxpilotg = htons(maxpilotg->value);
 		wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
@@ -9777,7 +9799,7 @@ void WB3ArenaConfig2(client_t *client)
 
 	arenaconfig2->packetid = htons(Com_WBhton(0x0312));
 	arenaconfig2->arnaflags3 = htonl(arenaflags3->value);
-	arenaconfig2->ackflakmax = htonl(ackflakmax->value);
+	arenaconfig2->wingstrikerng = htonl(wingstrikerng->value);
 
 	SendPacket(buffer, sizeof(buffer), client);
 }

@@ -826,7 +826,7 @@ typedef struct client_s
 	u_int32_t	fuel;			// %fuel
 	u_int32_t	conv;			// convergency
 	u_int8_t	country;		// player's country
-	u_int32_t	countrytime;	// time untill can change country (centiseconds)
+	u_int32_t	countrytime;	// time untill can change country
 	u_int8_t	gunstat;		// enable gunstats printing
 	u_int8_t	ord;			// ordinance
 	u_int8_t	rain;			// enable or disable rain
@@ -1398,7 +1398,7 @@ typedef struct wb3arenaconfig2_s	// 03 12
 {
 	u_int16_t	packetid;
 	u_int32_t	arnaflags3;
-	u_int32_t	ackflakmax;
+	u_int32_t	wingstrikerng;
 } wb3arenaconfig2_t;
 
 typedef struct idle_s			// 09 04
@@ -1597,6 +1597,13 @@ typedef struct ottoparams_s	// 0F 00
 	u_int16_t	adjust; // OTTO_ADJUST
 	u_int32_t	unknown1; // OTTO_OVERRIDES?
 } ottoparams_t;
+
+typedef struct ottoparams2_s	// 0F 03
+{
+	u_int16_t	packetid;	//
+	u_int16_t	unk1; // 
+	u_int16_t	ottoacquirerange; // OTTO_ACQUIRE_RANGE
+} ottoparams2_t;
 
 typedef struct ottofiring_s	// 0F 01
 {
@@ -2168,6 +2175,7 @@ void	SendPlayersNames(client_t *client);
 void	SendIdle(client_t *client);
 void	SendPlayersNear(client_t *client);
 void	SendOttoParams(client_t *client);
+void	SendOttoParams2(client_t *client);
 void	SendLastConfig(client_t *client);
 void	AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove);
 void	SendScreenUpdates(client_t *client);
@@ -2453,7 +2461,6 @@ extern	var_t		*ackstardisable; /// disable ackstar
 extern	var_t		*ackgrowco;		/// Fixed ack grow coefficient
 extern	var_t		*ackshrinkco;	/// Fixed ack shrink coefficient
 extern	var_t		*ackmaxtrav;	/// Fixed ack max traverse rate
-extern	var_t		*ackflakmax;	/// Maximum altitude for fixed ack 88 guns
 extern	var_t		*airshowsmoke;	/// enable air show smoke
 extern	var_t		*allowtakeoff;	/// allow players to takeoff
 extern	var_t		*altv;			/// SHOW: 0-15 ??? other altv configures?
@@ -2515,7 +2522,7 @@ extern	var_t		*enemyidlimbomber;	///
 extern	var_t		*enemynames;	/// allow to see enemy names
 extern	var_t		*enemyplanes;	/// allow to see enemy planes icon
 extern	var_t		*fields;		/// num of fields
-extern	var_t		*flakmax;		///
+extern	var_t		*flakmax;		/// Maximum altitude for fixed ack 88 guns
 extern	var_t		*flypenalty;	/// how much seconds client will be penalized
 extern	var_t		*friendlydotsfly;	///
 extern	var_t		*friendlydotstwr;	///
@@ -2564,6 +2571,7 @@ extern	var_t		*nowings;		/// dont allow players to use wingmen
 extern	var_t		*obradar;		/// adjust obradar for historical planes
 extern	var_t		*oldcapt;		/// enable old way to capture fields (destroy all structures and drop paras)
 extern	var_t		*ottoaccuracy;	/// set otto accuracy
+extern	var_t		*ottoacquirerange	/// set otto acquire range
 extern	var_t		*ottoadjust;	/// set otto adjust
 extern	var_t		*ottoburstoff;	/// set otto burst pause time
 extern	var_t		*ottoburston;	/// set otto burst time by dist
@@ -2615,6 +2623,7 @@ extern	var_t		*verbose;		/// printf messages priority
 extern	var_t		*wb3;			/// enable WB3 protocol
 extern	var_t		*weather;		/// configure weather
 extern	var_t		*whitelist;		/// white list
+extern	var_t		*wingstrikerng;	/// 
 extern	var_t		*xwindvelocity;	///
 extern	var_t		*ywindvelocity;	///
 extern	var_t		*zwindvelocity;	///
