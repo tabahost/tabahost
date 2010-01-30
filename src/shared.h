@@ -1371,6 +1371,12 @@ typedef struct wb3gruntconfig_s	// 03 0D
 	u_int8_t	capturegrunts;
 } wb3gruntconfig_t;
 
+typedef struct wb3randomseed_s	// 03 0E
+{
+	u_int16_t	packetid;
+	u_int32_t	seed;
+} wb3randomseed_t;
+
 typedef struct wb3arenaflags3_s	// 03 0F
 {
 	u_int16_t	packetid;

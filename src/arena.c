@@ -515,7 +515,7 @@ void SaveArenaStatus(char *filename, client_t *client)
 
 void SaveWebsiteData(void)
 {
-	u_int16_t i, j, k;
+	u_int16_t i, j;
 	u_int16_t build_total, build_alive;
 	char file[128];
 	time_t ltime;
@@ -525,7 +525,7 @@ void SaveWebsiteData(void)
 
 	if (!(fp = fopen(file, "w")))
 	{
-		PPrintf(client, RADIO_YELLOW, "WARNING: SaveWebsiteData() Cannot open file \"%s\"", file);
+		Com_Printf(VERBOSE_WARNING, "SaveWebsiteData() Cannot open file \"%s\"\n", file);
 		return;
 	}
 	else
