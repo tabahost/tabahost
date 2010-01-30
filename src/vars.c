@@ -260,7 +260,7 @@ void InitVars(void)
 	dbuser = Var_Get("dbuser", "franz", "0", "0", "Set database username", VAR_ADMIN);
 	dirname = Var_Get("dirname", "wb3europe", "0", "0", "Set map directory name", VAR_ARCHIVE | VAR_ADMIN);
 	easymode = Var_Get("easymode", "0", "0", "2", "Enable easy mode (2 = forced easy mode)", VAR_ARCHIVE);
-	emulatecollision = Var_Get("emulatecollision", "0", "1", "Emulate friendly collision (WB2.77)", NULL, VAR_ARCHIVE);
+	emulatecollision = Var_Get("emulatecollision", "0", "0", "1", "Emulate friendly collision (WB2.77)", VAR_ARCHIVE);
 	enableottos = Var_Get("enableottos", "1", "0", "1", "Enable autogunners (OTTO)", VAR_ARCHIVE);
 	endday = Var_Get("endday", "16", "1", "31", "End of TOD day", VAR_ADMIN);
 	endmonth = Var_Get("endmonth", "8", "1", "12", "End of TOD month", VAR_ADMIN);
@@ -301,7 +301,7 @@ void InitVars(void)
 	logfile_active = Var_Get("logfile_active", "1", "0", "1", "Enable logfiles", VAR_ARCHIVE | VAR_ADMIN);
 	lograwposition = Var_Get("lograwposition", "0", "0", "1", "Enable log of RAW position (.srv and .cli files)", VAR_ARCHIVE);
 	mapcycle = Var_Get("mapcycle", "1", "0", "1", "Enable mapcycle", VAR_ARCHIVE);
-	mapflags = Var_Get("mapflags", "1", "0", "1023", "Set Map Flags", VAR_ARCHIVE);
+	mapflags = Var_Get("mapflags", "1", "0", "1", "Set Map Flags", VAR_ARCHIVE);
 	mapflagsenemy = Var_Get("mapflagsenemy", "1", "0", "1", "Show circles of enemy countries", VAR_ARCHIVE);
 	mapflagsfly = Var_Get("mapflagsfly", "0", "0", "1", "Show circles while flying", VAR_ARCHIVE);
 	mapflagsown = Var_Get("mapflagsown", "1", "0", "1", "Show circles of own country", VAR_ARCHIVE);
@@ -311,7 +311,7 @@ void InitVars(void)
 	mapsize = Var_Get("mapsize", "128", "100", "500", "Size of entire map in miles", VAR_ARCHIVE | VAR_ADMIN);
 	maxpilotg = Var_Get("maxpilotg", "11", "5", "50", "Maximum G load before pilot fatality", VAR_ARCHIVE);
 	metar = Var_Get("metar", "0", "0", "1", "Enable metar based weather generation", VAR_ARCHIVE);
-	midairs = Var_Get("midairs", "1", "0", "1", "Enable midair collisions detection", VAR_ARCHIVE);
+	midairs = Var_Get("midairs", "1", "0", "4095", "Enable midair collisions detection", VAR_ARCHIVE);
 	mortars = Var_Get("mortars", "10", "0", "20", "Set how many mortars JU52 and Li-2 can fire", VAR_ARCHIVE);
 	mview = Var_Get("mview", "1", "0", "3", "Set who can use .view (OPs, Admins or both)", VAR_ARCHIVE | VAR_ADMIN);
 	notanks = Var_Get("notanks", "0", "0", "1", "Don't allow players and arena to spawn tanks/hmack/katy", VAR_ARCHIVE);
@@ -365,7 +365,7 @@ void InitVars(void)
 	thskins = Var_Get("thskins", "0", "0", "1", "Enable force TH-rules skins", VAR_ARCHIVE);
 	timemult = Var_Get("timemult", "6", "1", "12", "Set arena time multiplier", VAR_ARCHIVE);
 	timeout = Var_Get("timeout", "120", "0", "600", "Set away kick timeout in seconds", VAR_ARCHIVE);
-	ttc = Var_Get("ttc", "1.2", "0.5", "20.0", NULL, VAR_ARCHIVE);
+	ttc = Var_Get("ttc", "1.2", "0.5", "20.0", "Tonnage to close a field", VAR_ARCHIVE);
 	verbose = Var_Get("verbose", VERBOSE_SMAX, "0", VERBOSE_SMAX, "Set log verbose threashold", VAR_ARCHIVE | VAR_ADMIN);
 	wb3 = Var_Get("wb3", "0", "0", "2", "Set WB3 mode. 0 = WB2.77, 1 = 2007, 2 = 2008/2009", VAR_ARCHIVE | VAR_ADMIN);
 	weather = Var_Get("weather", "0", "0", "3", "Set weather. 0 = Cloudy, 1 = Clear, 2 = Raining, 3 = Partialy Cloudy", VAR_ARCHIVE);

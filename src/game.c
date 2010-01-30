@@ -9189,7 +9189,7 @@ void SendOttoParams(client_t *client)
 
 	otto->packetid = htons(Com_WBhton(0x2100));
 	otto->accuracy = ottoaccuracy->value;
-	otto->override = htons((u_int16_t)ottooverrides->value);
+	otto->unknown1 = htons(0x0000);
 
 	if (client->ackstar)
 		otto->range = htons(0);
@@ -9201,7 +9201,7 @@ void SendOttoParams(client_t *client)
 	otto->burstoff = htons((u_int16_t)(ottoburstoff->value * 100));
 	otto->retarget = htons((u_int16_t)(ottoretarget->value * 100));
 	otto->adjust = htons((u_int16_t)(ottoadjust->value));
-	otto->unknown1 = htonl(0x0000);
+	otto->override = htonl((u_int32_t)ottooverrides->value);
 
 	SendPacket(buffer, sizeof(buffer), client);
 
@@ -9220,7 +9220,7 @@ void SendOttoParams2(client_t *client)
 	ottoparams2_t *otto;
 
 	memset(buffer, 0, sizeof(buffer));
-	otto = (ottoparams_t *)buffer;
+	otto = (ottoparams2_t *)buffer;
 
 	otto->packetid = htons(Com_WBhton(0x2103));
 	otto->unk1 = htons(0x0000);

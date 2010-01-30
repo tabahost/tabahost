@@ -1594,21 +1594,21 @@ typedef struct ottoparams_s	// 0F 00
 {
 	u_int16_t	packetid;	//
 	u_int8_t	accuracy; //OTTO_ACCURACY
-	u_int16_t	override; // OTTO_OVERRIDES?
+	u_int16_t	unknown1; // ???
 	u_int16_t	range;    // OTTO_RANGE
 	u_int16_t	burston; // OTTO_BURSTON_BASE x 100
 	u_int16_t	burstonmax; // OTTO_BURSTON_MAX x 100
 	u_int16_t	burstoff; // OTTO_BURSTOFF_BASE x 100
 	u_int16_t	retarget; // OTTO_RETARGET_TIME x 100
 	u_int16_t	adjust; // OTTO_ADJUST
-	u_int32_t	unknown1; // OTTO_OVERRIDES?
+	u_int32_t	override; // OTTO_OVERRIDES
 } ottoparams_t;
 
 typedef struct ottoparams2_s	// 0F 03
 {
 	u_int16_t	packetid;	//
 	u_int16_t	unk1; // 
-	u_int16_t	ottoacquirerange; // OTTO_ACQUIRE_RANGE
+	u_int16_t	ottoacquirerange; // OTTO_ACQUIRE_RANGE?
 } ottoparams2_t;
 
 typedef struct ottofiring_s	// 0F 01
