@@ -445,7 +445,6 @@ void Cmd_Move(char *field, int country, client_t *client)
 	SendPacket(buffer, sizeof(buffer), client);
 	SendArenaRules(client);
 	WB3SendGruntConfig(client);
-	//	WB3SendArenaFlags3(client);
 	WB3ArenaConfig2(client);
 	WB3SendAcks(client);
 
@@ -1296,7 +1295,6 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 		SendArenaRules(client);
 		WB3SendGruntConfig(client);
-		//	WB3SendArenaFlags3(client);
 		WB3ArenaConfig2(client);
 	}
 

@@ -221,9 +221,9 @@ void InitVars(void)
 	altv = Var_Get("altv", "0", "0", "15", "Enable external view", VAR_ARCHIVE);
 	ammomult = Var_Get("ammomult", "100", "0.1", "32", "Relative amount of ammo each plane carries", VAR_ARCHIVE);
 	arcade = Var_Get("arcade", "0", "0", "1", "Enable arcade mode", VAR_ARCHIVE);
-	arenaflags1 = Var_Get("arenaflags1", "3", "0", "255", "Bitfield configuration for .arnaflags", VAR_ARCHIVE);
-	arenaflags2 = Var_Get("arenaflags2", "0", "0", "255", "Bitfield configuration for .arnaflags", VAR_ARCHIVE);
-	arenaflags3 = Var_Get("arenaflags3", "27", "0", "255", "Bitfield configuration for .arnaflags", VAR_ARCHIVE);
+	arenaflags1 = Var_Get("arenaflags1", "3", "0", "255", "Bitfield configuration for arnaflags1", VAR_ARCHIVE);
+	arenaflags2 = Var_Get("arenaflags2", "0", "0", "255", "Bitfield configuration for arnaflags2", VAR_ARCHIVE);
+	arenaflags3 = Var_Get("arenaflags3", "27", "0", "16383", "Bitfield configuration for arnaflags3", VAR_ARCHIVE);
 	arenalist = Var_Get("arenalist", "0", "0", "0", "URL to send arenalist data (0 = disabled)", VAR_ADMIN);
 	batchfile = Var_Get("batchfile", "0", "0", "1", "Exec server-side player's batch file on login", VAR_ARCHIVE);
 	blackout = Var_Get("blackout", "1", "0", "1", "Enable blackout effect", VAR_ARCHIVE);
@@ -619,7 +619,7 @@ void CheckVars(void)
 		}
 	}
 
-	if (arenaflags3->modified)
+	if (arenaflags3->modified || wingstrikerng->modified)
 	{
 		modified = 1;
 
@@ -637,7 +637,7 @@ void CheckVars(void)
 						arena->thaisent[clients[i].thai].b = 1;
 				}
 
-				WB3SendArenaFlags3(&clients[i]);
+				WB3ArenaConfig2(&clients[i]);
 			}
 		}
 	}

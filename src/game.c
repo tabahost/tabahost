@@ -121,9 +121,9 @@ u_int16_t packets_tab[210][3] =
 		{ 0x030A, 0x030A, 0x060C }, // arnaMAP_VECTOR
 		{ 0x030B, 0x030B, 0xFFFF }, // arnaREFRESH_FIELD_OBJECTS *******************************
 		{ 0xFFFF, 0x030C, 0xFFFF }, // arnaSET_DATE
-		{ 0xFFFF, 0x030D, 0x060B }, // arnaGRUNT_CONFIG *
-		{ 0xFFFF, 0x030E, 0xFFFF }, // arnaRANDOM_SEED
-		{ 0xFFFF, 0x030F, 0x0608 }, // arnaARENAFLAGS3 *
+		{ 0xFFFF, 0x030D, 0x060B }, // arnaGRUNT_CONFIG * 
+		{ 0xFFFF, 0x030E, 0x0608 }, // arnaRANDOM_SEED
+		{ 0xFFFF, 0x030F, 0xFFFF }, // arnaARENAFLAGS3 *
 		{ 0xFFFF, 0x0310, 0xFFFF }, // arnaCONFIG_FLIGHTMODEL *******************************
 		{ 0xFFFF, 0x0311, 0xFFFF }, // arnaCONFIG_WEAPONS
 		{ 0xFFFF, 0x0312, 0x0614 }, // arnaSET_CONFIG2 *
@@ -1452,7 +1452,7 @@ void CheckArenaRules(void)
 
 	// Backup Tick
 
-	if (!(arena->frame % 90000)) // 15 min
+	if (!(arena->frame % 30000)) // 5 min
 	{
 		if (!setjmp(debug_buffer))
 		{
@@ -1800,7 +1800,7 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "pingtest"))
 		{
-			PPrintf(client, RADIO_YELLOW, "Command currently disabled");
+			PPrintf(client, RADIO_YELLOW, "Your connection quality is currently: %s", !(client->cancollide)?"Not available":client->connection == 0?"Stable":client->connection == 1?"Fair":client->connection == 2?"Unstable":"Poor");
 			//Cmd_Pingtest(0, client);
 			return;
 		}
@@ -4006,7 +4006,6 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					if(wb3->value)
 					{
 						WB3SendGruntConfig(client);
-						//					WB3SendArenaFlags3(client);
 						WB3ArenaConfig2(client);
 						if(((u_int8_t)weather->value == 2) && !client->rain)
 							WB3DotCommand(client, ".weather 0"); // cloudy
@@ -9760,6 +9759,27 @@ void WB3SendArenaFlags3(client_t *client)
 }
 
 /**
+ WB3RandomSeed
+
+ Send random seed to client
+ */
+
+void WB3RandomSeed(client_t *client)
+{
+	u_int8_t buffer[6];
+	wb3randomseed_t *wb3randomseed;
+
+	memset(buffer, 0, sizeof(buffer));
+
+	wb3randomseed = (wb3randomseed_t *)buffer;
+
+	wb3randomseed->packetid = htons(Com_WBhton(0x030E));
+	wb3randomseed->seed = htonl(0x1F002ABF);
+
+	SendPacket(buffer, sizeof(buffer), client);
+}
+
+/**
  WB3ConfigFM
 
  Send Flight Model Config
@@ -11187,7 +11207,6 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 
 	SendArenaRules(client);
 	WB3SendGruntConfig(client);
-	//	WB3SendArenaFlags3(client);
 	WB3ArenaConfig2(client);
 
 	SendPacket(packet, sizeof(packet), client);

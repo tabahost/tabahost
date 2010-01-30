@@ -433,7 +433,7 @@ void SaveArenaStatus(char *filename, client_t *client)
 	}
 	else
 	{
-		for (i = 0; i < fields->value; i++)
+		for (i = 0; i < fields->value; i++) // Print field status
 		{
 			fprintf(fp, "%u;%d;%d;%d;%u;%u;%u;%u;%u", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], arena->fields[i].posxyz[2], arena->fields[i].radius, arena->fields[i].country,
 					arena->fields[i].abletocapture, arena->fields[i].closed, arena->fields[i].paras);
@@ -460,7 +460,7 @@ void SaveArenaStatus(char *filename, client_t *client)
 			//				fprintf(fp, ";%d", arena->fields[i].rps[j]);
 			//			}
 
-			for (j = 0; j < MAX_BUILDINGS; j++)
+			for (j = 0; j < MAX_BUILDINGS; j++) // Print building status
 			{
 				if (arena->fields[i].buildings[j].field)
 					fprintf(fp, ";%u;%u;%u;%u;%u;%d;%u;%d;%d;%d", arena->fields[i].buildings[j].field, arena->fields[i].country, arena->fields[i].buildings[j].id,
@@ -503,6 +503,86 @@ void SaveArenaStatus(char *filename, client_t *client)
 //		SaveEarthMap(file);
 //	}
 
+
+	fclose(fp);
+}
+
+/**
+ SaveWebsiteData
+
+ Save website data
+ */
+
+void SaveWebsiteData(void)
+{
+	u_int16_t i, j, k;
+	u_int16_t build_total, build_alive;
+	char file[128];
+	time_t ltime;
+	FILE *fp;
+
+	strcpy(file, "./cron/webdata.csv");
+
+	if (!(fp = fopen(file, "w")))
+	{
+		PPrintf(client, RADIO_YELLOW, "WARNING: SaveWebsiteData() Cannot open file \"%s\"", file);
+		return;
+	}
+	else
+	{
+		time(&ltime);
+		fprintf(fp, "%s;%u;%u;%u;%u;%u;%u\n", arena->mapname, (u_int32_t)ltime, arena->year, arena->month, arena->day, arena->hour, arena->minute);
+
+		for(i = 0; i < maxentities->value; i++)
+		{
+			if (clients[i].inuse && !clients[i].drone && clients[i].ready)
+			{
+				if(i > 0)
+					fprintf(fp, ";");
+
+				fprintf(fp, "%s;%u", clients[i].longnick, clients[i].country);
+			}
+		}
+		fprintf(fp, "\n");
+
+		for (i = 0; i < fields->value; i++) // Print field status
+		{
+			build_total = build_alive = 0;
+			
+			for (j = 0; j < MAX_BUILDINGS; j++)
+			{
+				if (!arena->fields[i].buildings[j].field)
+					break;
+
+				if (IsVitalBuilding(&(arena->fields[i].buildings[j]), oldcapt->value))
+				{
+					if(!arena->fields[i].buildings[j].status)
+						build_alive++;
+					
+					build_total++;
+				}
+			}
+
+			fprintf(fp, "%u;%d;%d;%d;%u;%u;%u;%u;%u;%u;%.2f;%.2f;%u;%u", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], 
+				arena->fields[i].posxyz[2], arena->fields[i].radius, arena->fields[i].country, arena->fields[i].abletocapture,
+				arena->fields[i].closed, arena->fields[i].paras, GetFieldParas(arena->fields[i].type) /*maxparas*/,
+				arena->fields[i].tonnage, GetTonnageToClose(i+1), build_alive, build_total);
+
+			for (j = 0; j < MAX_BUILDINGS; j++) // Print building status
+			{
+				if (arena->fields[i].buildings[j].field)
+					fprintf(fp, ";%u;%u;%u;%u;%u;%d;%u;%d;%d;%d", arena->fields[i].buildings[j].field, arena->fields[i].country,
+					arena->fields[i].buildings[j].id, arena->fields[i].buildings[j].type, arena->fields[i].buildings[j].status,
+					arena->fields[i].buildings[j].timer, arena->fields[i].buildings[j].armor, arena->fields[i].buildings[j].posx,
+					arena->fields[i].buildings[j].posy, arena->fields[i].buildings[j].posz);
+				else
+				{
+					break;
+				}
+			}
+			fprintf(fp, "\n");
+		}
+	}
 
 	fclose(fp);
 }

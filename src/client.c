@@ -490,6 +490,11 @@ int ProcessClient(client_t *client)
 					UpdateClientFile(client); // update client database every 5 minutes
 				}
 
+				if(client->cancollide && !((arena->frame - client->frame) % 3000)) // 30 seconds
+				{
+					PPrintf(client, RADIO_YELLOW, "Connection quality: %s", client->connection == 0?"Stable":client->connection == 1?"Fair":client->connection == 2?"Unstable":"Poor");
+				}
+
 				if(!((arena->frame - client->frame) % 180000)) // 30 minutes
 				{
 					if(client->tklimit)
@@ -649,7 +654,6 @@ int ProcessClient(client_t *client)
 			}
 
 			if(!((arena->frame - client->frame) % 1000)) // 10 secs
-
 			{
 				client->warptimer = client->warp;
 			}

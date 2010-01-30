@@ -579,6 +579,7 @@ void BackupArenaStatus(void)
 		snprintf(date, sizeof(date), "%d", arena->day);
 		Var_Set("currday", date);
 		SaveArenaStatus("arena", NULL);
+		SaveWebsiteData();
 	}
 
 	Var_WriteVariables("config", NULL);
