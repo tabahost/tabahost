@@ -9541,6 +9541,8 @@ void SendArenaRules(client_t *client)
 	}
 	else if (mapflags->value)
 	{
+		flags |= (u_int32_t)mapflags->value;
+
 		if (mapflagsfly->value)
 			flags |= FLAG_MAPFLAGSFLY;
 		if (mapflagstwr->value)
@@ -9577,10 +9579,10 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
 		wb3arenarules->ywindvelocity = htonl(ywindvelocity->value);
 		wb3arenarules->zwindvelocity = client->plane == 54 ? htonl(zwindvelocity->value - 9):htonl(zwindvelocity->value);
-		wb3arenarules->structlim = structlim->value;
+		wb3arenarules->structlim = (u_int8_t) structlim->value;
 		wb3arenarules->unknown1 = 0x2D;
 		wb3arenarules->unknown2 = 0xA0;
-		wb3arenarules->ackmaxtrav = ackmaxtrav->value;
+		wb3arenarules->ackmaxtrav = (u_int8_t) ackmaxtrav->value;
 		wb3arenarules->altv = altv->value ? altv->value : (IsBomber(client) || !client->cancollide) ? 1 : 0;
 		wb3arenarules->fueldiv = htonl(fueldiv->value);
 		wb3arenarules->flakmax = htonl(flakmax->value);
@@ -9589,7 +9591,7 @@ void SendArenaRules(client_t *client)
 		wb3arenarules->radarrange2 = htonl(radarrange2->value);
 		wb3arenarules->radarrange3 = htonl(radarrange3->value);
 		wb3arenarules->radarrange4 = htonl(radarrange4->value);
-		wb3arenarules->ackshrinkco = ackshrinkco->value;
+		wb3arenarules->ackshrinkco = (u_int8_t) ackshrinkco->value;
 		wb3arenarules->ackgrowco = (u_int8_t) (ackgrowco->value * 10);
 		wb3arenarules->arenaflags2 = arenaflags2->value; // 0x80
 		wb3arenarules->arenaflags1 = arenaflags1->value; // 0x20

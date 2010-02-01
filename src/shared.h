@@ -166,15 +166,15 @@ typedef unsigned int u_int32_t;
 #define FLAG_ADMIN			1		// check if a client is ADMIN
 #define FLAG_OP				2		// check if a client is OP
 #define FLAG_EASYMODE		0x01
-#define FLAG_EASYMODE2		0x02	// TODO: test this in wb3
+//#define FLAG_UNK			0x02
 #define FLAG_ENEMYNAMES		0x04
 #define FLAG_ENEMYPLANES	0x08
-#define FLAG_MIDAIRS		0x10 // SHOW: 0 - 3? maybe can friendly collision?
+#define FLAG_MIDAIRS		0x10
 #define FLAG_BLACKOUT		0x20
 //#define FLAG_UNK			0x40
 #define FLAG_AIRSHOWSMOKE	0x80
 #define FLAG_ENABLEOTTOS	0x100
-//#define FLAG_UNK			0x200
+#define FLAG_EASYMODE2		0x200
 //#define FLAG_UNK			0x400
 //#define FLAG_UNK			0x800
 //#define FLAG_UNK			0x1000

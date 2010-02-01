@@ -998,7 +998,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			rules |= FLAG_AIRSHOWSMOKE;
 		if (client->easymode)
 			rules |= FLAG_EASYMODE;
-		if (client->easymode == 1)
+		if (client->easymode == 2)
 			rules |= FLAG_EASYMODE2;
 		if (enemynames->value)
 			rules |= FLAG_ENEMYNAMES;
@@ -1006,11 +1006,6 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			rules |= FLAG_ENEMYPLANES;
 		if (enableottos->value)
 			rules |= FLAG_ENABLEOTTOS;
-		//		if(dpitch->value) // DEBUG
-		//			rules |= FLAG_UNK1;
-		//		if(droll->value) // DEBUG
-		//			rules |= FLAG_UNK2;
-		rules = (u_int32_t)midairs->value; // DEBUG
 	}
 
 	if (!wb3->value)

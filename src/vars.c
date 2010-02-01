@@ -591,12 +591,39 @@ void CheckVars(void)
 		}
 	}
 
-	if (radaralt->modified || mapflags->modified || mapflagsfly->modified || mapflagstwr->modified || mapflagsown->modified || mapflagsenemy->modified || planeatradar->modified
-			|| friendlydotsfly->modified || enemydotsfly->modified || friendlydotstwr->modified || enemydotstwr->modified || planerangelimit->modified || enemyidlim->modified
-			|| friendlyidlim->modified || ammomult->modified || xwindvelocity->modified || ywindvelocity->modified || zwindvelocity->modified || maxpilotg->modified || altv->modified
-			|| fueldiv->modified || flakmax->modified || radarrange0->modified || radarrange1->modified || radarrange2->modified || radarrange3->modified || radarrange4->modified
-			|| structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified || planerangelimitbomber->modified || arenaflags1->modified || arenaflags2->modified
-			|| ackgrowco->modified || ackshrinkco->modified || ackmaxtrav->modified)
+	if (ottoaccuracy->modified || ottoacquirerange->modified || ottoadjust->modified || ottoburstoff->modified || ottoburston->modified
+			|| ottoburstonmax->modified || ottooverrides->modified || ottorange->modified || ottoretarget->modified)
+	{
+		modified = 1;
+
+		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
+		for (i = 0; i < maxentities->value; i++)
+		{
+			if (clients[i].inuse && !clients[i].drone)
+			{
+				if(clients[i].thai) // CheckVars
+				{
+					if(arena->thaisent[clients[i].thai].b)
+						continue;
+					else
+						arena->thaisent[clients[i].thai].b = 1;
+				}
+
+				SendOttoParams(&clients[i]);
+			}
+		}
+	}
+
+	if (radaralt->modified || mapflags->modified || mapflagsfly->modified || mapflagstwr->modified || mapflagsown->modified
+			|| mapflagsenemy->modified || planeatradar->modified || friendlydotsfly->modified || enemydotsfly->modified
+			|| friendlydotstwr->modified || enemydotstwr->modified || planerangelimit->modified || enemyidlim->modified
+			|| friendlyidlim->modified || ammomult->modified || xwindvelocity->modified || ywindvelocity->modified
+			|| zwindvelocity->modified || maxpilotg->modified || ackmaxtrav->modified || altv->modified || fueldiv->modified
+			|| flakmax->modified || radarrange0->modified || radarrange1->modified || radarrange2->modified || radarrange3->modified
+			|| radarrange4->modified || structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified
+			|| planerangelimitbomber->modified || ackgrowco->modified || ackshrinkco->modified || arenaflags1->modified
+			|| arenaflags2->modified || clickrangelim->modified)
 	{
 		modified = 1;
 
