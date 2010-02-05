@@ -531,7 +531,7 @@ void SaveWebsiteData(void)
 	else
 	{
 		time(&ltime);
-		fprintf(fp, "%s;%u;%u;%u;%u;%u;%u\n", arena->mapname, (u_int32_t)ltime, arena->year, arena->month, arena->day, arena->hour, arena->minute);
+		fprintf(fp, "%s;%u;%u;%u;%u;%u;%u\n", mapname->string, (u_int32_t)ltime, arena->year, arena->month, arena->day, arena->hour, arena->minute);
 
 		for(i = 0; i < maxentities->value; i++)
 		{
