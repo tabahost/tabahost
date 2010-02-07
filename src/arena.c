@@ -533,14 +533,15 @@ void SaveWebsiteData(void)
 		time(&ltime);
 		fprintf(fp, "%s;%u;%u;%u;%u;%u;%u\n", mapname->string, (u_int32_t)ltime, arena->year, arena->month, arena->day, arena->hour, arena->minute);
 
-		for(i = 0; i < maxentities->value; i++)
+		for(i = 0, j = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone && clients[i].ready)
 			{
-				if(i > 0)
+				if(j > 0)
 					fprintf(fp, ";");
 
 				fprintf(fp, "%s;%u", clients[i].longnick, clients[i].country);
+				j++;
 			}
 		}
 		fprintf(fp, "\n");
