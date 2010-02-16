@@ -973,8 +973,16 @@ void CheckArenaRules(void)
 					}
 
 					if (j == MAX_CITYFIELD)
+					{
 						if(((int16_t)spawnred->value != (i+1)) && ((int16_t)spawngold->value != (i+1))) // if not a spawnfield
+						{
+							if(!arena->fields[i].abletocapture)
+							{
+								arena->fields[i].tonnage *= 0.25; // reduce tonnage to 25% when reopened after captured
+							}
 							arena->fields[i].abletocapture = 1;
+						}
+					}
 
 					arena->fields[i].closed = 0;
 					arena->fields[i].warehouse = 0; // to avoid field be reclosed by warehouse effect
