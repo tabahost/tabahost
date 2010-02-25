@@ -4972,7 +4972,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	wb3planeposition_t *wb3plane;
 	planeposition2_t *plane2;
 	int32_t field;
-	u_int32_t distance, oldpostimer;
+	u_int32_t distance;
 	int16_t clientoffset;
 	int16_t posoffset;
 	double conn_avgdiff;
@@ -4987,14 +4987,14 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		plane = (planeposition_t *) buffer;
 	}
 
-	oldpostimer = client->postimer;
+	client->oldpostimer = client->postimer;
 	client->postimer = arena->time; // set the time when last position packet has been received
 
 	if (attached)
 	{
 		plane2 = (planeposition2_t *) buffer;
 		clientoffset = client->timer - ntohl(plane2->timer);
-		if(oldpostimer == client->postimer) // if this packet was received in bolus
+		if(client->oldpostimer == client->postimer) // if this packet was received in bolus
 			client->offset += clientoffset;
 		else
 			client->offset = clientoffset;
@@ -5029,7 +5029,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			if (!client->predict)
 			{
 				clientoffset = client->timer - ntohl(wb3plane->timer);
-				if(oldpostimer == client->postimer) // if this packet was received in bolus
+				if(client->oldpostimer == client->postimer) // if this packet was received in bolus
 					client->offset += clientoffset;
 				else
 					client->offset = clientoffset;
@@ -5042,9 +5042,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 						Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, clientoffset, near?"enemy near":"");
 					}
 
-					if(client->postimer != oldpostimer) // not received in bolus
+					if(client->postimer != client->oldpostimer) // not received in bolus
 					{
-						posoffset = (client->postimer - oldpostimer + client->offset);
+						posoffset = (client->postimer - client->oldpostimer + client->offset);
 						posoffset = MODULUS(posoffset);
 
 						client->conn_sum += posoffset;
@@ -5105,7 +5105,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			if (!client->predict)
 			{
 				clientoffset = client->timer - ntohl(plane->timer);
-				if(oldpostimer == client->postimer) // if this packet was received in bolus
+				if(client->oldpostimer == client->postimer) // if this packet was received in bolus
 					client->offset += clientoffset;
 				else
 					client->offset = clientoffset;
@@ -9168,7 +9168,7 @@ void SendPlayersNear(client_t *client)
 
 	for (i = 0; i < (MAX_SCREEN - 1); i++)
 	{
-		if (client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer))
+		if (client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer)) // if any client has been updated, send screen update
 		{
 			SendScreenUpdates(client);
 			return;
@@ -9373,13 +9373,11 @@ void SendScreenUpdates(client_t *client)
 	{
 		if (client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer))
 		{
-			client->visible[i].timer = client->visible[i].client->timer;
-
 			if (wb3->value)
 			{
 				wb3updateplane2 = (wb3updateplane2_t *)(buffer+19+(22*j));
 
-				wb3updateplane2->timeoffset = htons(client->visible[i].client->offset);//htons(0xFFFC);
+				wb3updateplane2->timeoffset = htons(client->visible[i].timer - client->visible[i].client->timer);//htons(0xFFFC);
 
 				wb3updateplane2->slot = i;
 				wb3updateplane2->unk1 = 0x10;
@@ -9428,7 +9426,7 @@ void SendScreenUpdates(client_t *client)
 			{
 				updateplane2 = (updateplane2_t *)(buffer+19+(21*j));
 
-				updateplane2->timeoffset = htons(client->visible[i].client->offset);//htons(0xFFFC);
+				updateplane2->timeoffset = htons(client->visible[i].timer - client->visible[i].client->timer);//htons(0xFFFC);
 
 				updateplane2->slot = i;
 				updateplane2->relposx = htons(client->visible[i].client->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
@@ -9460,6 +9458,8 @@ void SendScreenUpdates(client_t *client)
 				//			updateplane2->yrzspeed = htons(((int8_t)((double) client->visible[i].client->aspeeds[2][0] / 64) << 9) ^ 0x8000); // 7
 				//			updateplane2->yrzspeed |= htons(((int8_t)((double) client->visible[i].client->speedxyz[2][0] / 4) & 0x1FF) ^ 0x0100); // 9
 			}
+
+			client->visible[i].timer = client->visible[i].client->timer;
 			j++;
 		}
 	}

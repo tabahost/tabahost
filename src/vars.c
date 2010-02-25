@@ -307,8 +307,8 @@ void InitVars(void)
 	mapflagsown = Var_Get("mapflagsown", "1", "0", "1", "Show circles of own country", VAR_ARCHIVE);
 	mapflagstwr = Var_Get("mapflagstwr", "1", "0", "0", "Show circles while in twr", VAR_ARCHIVE);
 	mapname = Var_Get("mapname", "europe", "0", "0", "Current map name", VAR_ARCHIVE | VAR_ADMIN);
-	mapscale = Var_Get("mapscale", "20", "10", "50", "Size of map quadrants in miles", VAR_ARCHIVE | VAR_ADMIN);
-	mapsize = Var_Get("mapsize", "128", "100", "500", "Size of entire map in miles", VAR_ARCHIVE | VAR_ADMIN);
+	mapscale = Var_Get("mapscale", "20", "1", "50", "Size of map quadrants in miles", VAR_ARCHIVE | VAR_ADMIN);
+	mapsize = Var_Get("mapsize", "128", "10", "500", "Size of entire map in miles", VAR_ARCHIVE | VAR_ADMIN);
 	maxpilotg = Var_Get("maxpilotg", "11", "5", "50", "Maximum G load before pilot fatality", VAR_ARCHIVE);
 	metar = Var_Get("metar", "0", "0", "1", "Enable metar based weather generation", VAR_ARCHIVE);
 	midairs = Var_Get("midairs", "1", "0", "4095", "Enable midair collisions detection", VAR_ARCHIVE);

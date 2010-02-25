@@ -210,7 +210,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 			}
 			clients[i].frame = arena->frame + (rand()%1000);
 
-			clients[i].offset = clients[i].timer - arena->time;
+			clients[i].offset = 0;
 			clients[i].timer = arena->time;
 
 			//			if(!(type & DRONE_EJECTED))
@@ -1128,8 +1128,8 @@ int ProcessDrone(client_t *drone)
 
 	if((!((arena->frame - drone->frame) % 50)))
 	{
-		drone->offset = drone->timer - arena->time;
-		drone->timer = arena->time;
+		drone->offset = -500;
+		drone->timer += 500;
 	}
 
 	if (!drone->related[0])
@@ -1546,7 +1546,7 @@ void SendDronePos(client_t *drone, client_t *client)
 		wb3pos = (wb3planeposition_t *)buffer;
 
 		wb3pos->packetid = htons(Com_WBhton(0x0E00));
-		wb3pos->timer = htonl(arena->time); // TODO: FIXME: drone->timer?
+		wb3pos->timer = htonl(drone->timer);
 		wb3pos->radar = htons(0); // htons(0x30);
 		wb3pos->plane = htons(drone->plane); // 0;
 		wb3pos->posx = htonl(drone->posxy[0][0]);
@@ -1585,7 +1585,7 @@ void SendDronePos(client_t *drone, client_t *client)
 		pos->pitchangspeed = htons(drone->aspeeds[0][0]);
 		pos->rollangspeed = htons(drone->aspeeds[1][0]);
 		pos->yawangspeed = htons(drone->aspeeds[2][0]);
-		pos->timer = htonl(arena->time); // TODO: FIXME: drone->timer?
+		pos->timer = htonl(drone->timer);
 		pos->radar = htons(0x30);
 		pos->plane = 0;
 	}
@@ -2010,7 +2010,7 @@ u_int32_t NewDroneName(client_t *client)
 
 		i = Com_Atoi(buffer);
 
-		j = (arena->time % i) + 1; // random nick in list
+		j = (rand()%i) + 1; // random nick in list
 
 		k = 0;
 		while (k < j)

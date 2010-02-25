@@ -543,10 +543,13 @@ int ProcessClient(client_t *client)
 					}
 				}
 
-				if(!((arena->frame - client->frame) % 10))
+				if(!((arena->frame - client->frame) % 50)) // 500ms
 				{
-						SendPlayersNear(client);
+					SendPlayersNear(client);
+				}
 
+				if(!((arena->frame - client->frame) % 10)) // 100ms
+				{
 					if((client->lograwdata || lograwposition->value) && !((arena->frame - client->frame) % 50) && client->infly)
 					{
 						LogRAWPosition(TRUE, client);
