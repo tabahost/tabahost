@@ -4972,7 +4972,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	wb3planeposition_t *wb3plane;
 	planeposition2_t *plane2;
 	int32_t field;
-	u_int32_t distance;
+	u_int32_t distance, oldpostimer;
 	int16_t clientoffset;
 	int16_t posoffset;
 	double conn_avgdiff;
@@ -4987,14 +4987,14 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		plane = (planeposition_t *) buffer;
 	}
 
-	client->oldpostimer = client->postimer;
+	oldpostimer = client->postimer;
 	client->postimer = arena->time; // set the time when last position packet has been received
 
 	if (attached)
 	{
 		plane2 = (planeposition2_t *) buffer;
 		clientoffset = client->timer - ntohl(plane2->timer);
-		if(client->oldpostimer == client->postimer) // if this packet was received in bolus
+		if(oldpostimer == client->postimer) // if this packet was received in bolus
 			client->offset += clientoffset;
 		else
 			client->offset = clientoffset;
@@ -5029,7 +5029,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			if (!client->predict)
 			{
 				clientoffset = client->timer - ntohl(wb3plane->timer);
-				if(client->oldpostimer == client->postimer) // if this packet was received in bolus
+				if(oldpostimer == client->postimer) // if this packet was received in bolus
 					client->offset += clientoffset;
 				else
 					client->offset = clientoffset;
@@ -5042,9 +5042,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 						Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, clientoffset, near?"enemy near":"");
 					}
 
-					if(client->postimer != client->oldpostimer) // not received in bolus
+					if(client->postimer != oldpostimer) // not received in bolus
 					{
-						posoffset = (client->postimer - client->oldpostimer + client->offset);
+						posoffset = (client->postimer - oldpostimer + client->offset);
 						posoffset = MODULUS(posoffset);
 
 						client->conn_sum += posoffset;
@@ -5105,7 +5105,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			if (!client->predict)
 			{
 				clientoffset = client->timer - ntohl(plane->timer);
-				if(client->oldpostimer == client->postimer) // if this packet was received in bolus
+				if(oldpostimer == client->postimer) // if this packet was received in bolus
 					client->offset += clientoffset;
 				else
 					client->offset = clientoffset;

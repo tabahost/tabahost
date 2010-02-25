@@ -497,11 +497,11 @@ void SaveArenaStatus(char *filename, client_t *client)
 	SavePlanesPool(filename, client);
 
 
-//	if (wb3->value)
-//	{
-//		snprintf(file, sizeof(file), "./arenas/%s/arena.topo", dirname->string);
-//		SaveEarthMap(file);
-//	}
+	if (wb3->value)
+	{
+		snprintf(file, sizeof(file), "./arenas/%s/arena.topo", dirname->string);
+		SaveEarthMap(file);
+	}
 
 
 	fclose(fp);
