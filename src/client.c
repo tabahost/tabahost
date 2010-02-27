@@ -80,7 +80,7 @@ void AddClient(int socket, struct sockaddr_in *cli_addr)
 			clients[i].streakscore = 0;
 
 			clients[i].frame = arena->frame;
-			clients[i].offset = clients[i].timer - arena->time;
+			clients[i].offset = 0;
 			clients[i].timer = arena->time;
 			break;
 		}
@@ -281,7 +281,7 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 		fprintf(fp, "flypenaltyfield   = %10u  hmackgear     = %10u  hmackpenalty   = %10u\n", client->flypenaltyfield, client->hmackgear, client->hmackpenalty);
 		fprintf(fp, "hmackpenaltyfield = %10u  nummedals     = %10u  ranking        = %10u\n", client->hmackpenaltyfield, client->nummedals, client->ranking);
 		fprintf(fp, "killssortie       = %10u  killstod      = %10u  structstod     = %10u\n", client->killssortie, client->killstod, client->structstod);
-		fprintf(fp, "tklimit           = %10u  fileframe     = %10u  timer          = %10u\n", client->tklimit, client->fileframe, client->timer);
+		fprintf(fp, "tklimit           = %10u  fileframe     = %10u  timer          = %10u\n", client->tklimit, client->fileframe, client->clienttimer);
 		fprintf(fp, "fueltimer         = %10u  oiltimer      = %10u  oildamaged     = %10u\n", client->fueltimer, client->oiltimer, client->oildamaged);
 		fprintf(fp, "radio[0]          = %10u  radio[1]      = %10u  radio[2]       = %10u\n", client->radio[0], client->radio[1], client->radio[2]);
 		fprintf(fp, "radio[3]          = %10u  cancollide    = %10d\n\n", client->radio[3], client->cancollide);
@@ -877,7 +877,7 @@ void BackupPosition(client_t *client, u_int8_t predict)
 	if (predict)
 	{
 		client->offset = client->postimer - arena->time;
-		client->timer -= client->offset;
+		client->clienttimer -= client->offset;
 		client->postimer = arena->time;
 		client->predict++;
 	}
@@ -2228,7 +2228,7 @@ void LogRAWPosition(u_int8_t server, client_t *client)
 	{
 		fprintf(fp, "%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%u;%d;%u;%u\n", client->posxy[0][0], client->posxy[1][0], client->posalt[0], client->angles[0][0], client->angles[1][0],
 				client->angles[2][0], client->speedxyz[0][0], client->speedxyz[1][0], client->speedxyz[2][0], client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0],
-				client->aspeeds[0][0], client->aspeeds[1][0], client->aspeeds[2][0], client->timer, client->offset, arena->time, Sys_Milliseconds());
+				client->aspeeds[0][0], client->aspeeds[1][0], client->aspeeds[2][0], client->clienttimer, client->offset, arena->time, Sys_Milliseconds());
 		fclose(fp);
 	}
 }

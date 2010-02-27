@@ -4972,7 +4972,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	wb3planeposition_t *wb3plane;
 	planeposition2_t *plane2;
 	int32_t field;
-	u_int32_t distance, oldpostimer;
+	u_int32_t distance, oldpostimer, basetimer;
 	int16_t clientoffset;
 	int16_t posoffset;
 	double conn_avgdiff;
@@ -4993,12 +4993,13 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	if (attached)
 	{
 		plane2 = (planeposition2_t *) buffer;
-		clientoffset = client->timer - ntohl(plane2->timer);
+		clientoffset = client->clienttimer - ntohl(plane2->timer);
+		client->clienttimer = ntohl(plane2->timer);
+
 		if(oldpostimer == client->postimer) // if this packet was received in bolus
 			client->offset += clientoffset;
 		else
 			client->offset = clientoffset;
-		client->timer = ntohl(plane2->timer);
 		//		client->atradar = ntohs(0x10);
 
 		/*		if(client->attached && client->view)
@@ -5028,7 +5029,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			//		client->atradar = ntohs(wb3plane->radar);
 			if (!client->predict)
 			{
-				clientoffset = client->timer - ntohl(wb3plane->timer);
+				clientoffset = client->clienttimer - ntohl(wb3plane->timer);
+				client->clienttimer = ntohl(wb3plane->timer);
+
 				if(oldpostimer == client->postimer) // if this packet was received in bolus
 					client->offset += clientoffset;
 				else
@@ -5092,8 +5095,6 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 						}
 					}
 				}
-
-				client->timer = ntohl(wb3plane->timer);
 			}
 		}
 		else
@@ -5104,12 +5105,13 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			//		client->atradar = ntohs(plane->radar);
 			if (!client->predict)
 			{
-				clientoffset = client->timer - ntohl(plane->timer);
+				clientoffset = client->clienttimer - ntohl(plane->timer);
+				client->clienttimer =  ntohl(plane->timer);
+
 				if(oldpostimer == client->postimer) // if this packet was received in bolus
 					client->offset += clientoffset;
 				else
 					client->offset = clientoffset;
-				client->timer = ntohl(plane->timer);
 			}
 		}
 
@@ -5303,6 +5305,29 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				CheckMaxG(client);
 		}
 	}
+
+	basetimer = arena->time - client->clienttimer;
+	if(client->basetimer > basetimer)
+	{
+		client->basetimer -= 2;
+	}
+	if(client->basetimer < basetimer)
+	{
+		client->basetimer += 2;
+	}
+
+	if(MODULUS(basetimer - client->basetimer) > 500)
+	{
+		client->basediff++;
+
+		if(client->basediff > 10)
+		{
+			client->basetimer = basetimer;
+			client->basediff = 0;
+		}
+	}
+
+	client->timer = client->clienttimer + client->basetimer;
 
 	if (client->mapper)
 	{
@@ -5564,6 +5589,7 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 {
 	u_int8_t i, j, num;
 	chutepos_t *chute;
+	u_int32_t basetimer;
 
 	chute = (chutepos_t *)buffer;
 
@@ -5662,8 +5688,33 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 					= client->related[i]->accelxyz[2][0] = client->related[i]->angles[0][0] = client->related[i]->angles[1][0] = client->related[i]->angles[2][0] = client->related[i]->aspeeds[0][0]
 							= client->related[i]->aspeeds[1][0] = client->related[i]->aspeeds[2][0] = 0;
 
-			client->related[i]->offset = client->related[i]->timer - ntohl(chute->timer);
-			client->related[i]->timer = ntohl(chute->timer);
+			client->related[i]->offset = client->clienttimer - ntohl(chute->timer);
+
+			client->clienttimer = ntohl(chute->timer);
+
+			basetimer = arena->time - client->clienttimer;
+			if(client->basetimer > basetimer)
+			{
+				client->basetimer -= 2;
+			}
+			if(client->basetimer < basetimer)
+			{
+				client->basetimer += 2;
+			}
+
+			if(MODULUS(basetimer - client->basetimer) > 500)
+			{
+				client->basediff++;
+
+				if(client->basediff > 10)
+				{
+					client->basetimer = basetimer;
+					client->basediff = 0;
+				}
+			}
+
+			client->timer = client->clienttimer + client->basetimer;
+			client->related[i]->timer = client->timer;
 		}
 	}
 }
@@ -9377,7 +9428,7 @@ void SendScreenUpdates(client_t *client)
 			{
 				wb3updateplane2 = (wb3updateplane2_t *)(buffer+19+(22*j));
 
-				wb3updateplane2->timeoffset = htons(client->visible[i].timer - client->visible[i].client->timer);//htons(0xFFFC);
+				wb3updateplane2->timeoffset = htons(arena->time - client->visible[i].client->timer);//htons(0xFFFC);
 
 				wb3updateplane2->slot = i;
 				wb3updateplane2->unk1 = 0x10;
@@ -9426,7 +9477,7 @@ void SendScreenUpdates(client_t *client)
 			{
 				updateplane2 = (updateplane2_t *)(buffer+19+(21*j));
 
-				updateplane2->timeoffset = htons(client->visible[i].timer - client->visible[i].client->timer);//htons(0xFFFC);
+				updateplane2->timeoffset = htons(arena->time - client->visible[i].client->timer);//htons(0xFFFC);
 
 				updateplane2->slot = i;
 				updateplane2->relposx = htons(client->visible[i].client->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));

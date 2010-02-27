@@ -899,6 +899,9 @@ typedef struct client_s
 	u_int16_t	msgtimer;		// msgtimer (friendly hit)
 	u_int32_t	lastsql;		// last time client made a SQL request;
 	u_int32_t	timer;			// player timer
+	u_int32_t	clienttimer;	// player clienttimer
+	u_int32_t	basetimer;		// player basetimer
+	u_int32_t	basediff;		// player basediff
 	u_int32_t	pingtest;		// pingtest timer
 	u_int8_t	connection;		// Connection status. 0 = stable, 1 = fair, 2 = unstable, 3 = poor
 	u_int32_t	conn_sum;		// Connection sum
