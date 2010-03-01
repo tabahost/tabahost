@@ -669,10 +669,10 @@ void CheckVars(void)
 		}
 	}
 
-	UpdateArenaStatus(FALSE);
-
 	if(modified)
 	{
+		UpdateArenaStatus(FALSE);
+
 		for (var = var_vars; var; var = var->next)
 		{
 			if (var->modified)
@@ -885,6 +885,8 @@ u_int8_t UpdateArenaStatus(u_int8_t uptime)
 			emulatecollision, enemyidlim, enemynames, enemyplanes, flakmax, flypenalty, friendlyfire, friendlyidlim, fueldiv, gunstats, iff, katyrange, mapname, midairs, mortars, mview, ottoaccuracy,
 			ottoadjust, ottoburstoff, ottoburston, ottoburstonmax, ottorange, ottoretarget, ottooverrides, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
 			tanksrange, timemult, timeout, whitelist }; // TODO: remove paratroopers from DB
+
+	Com_Printf(VERBOSE_ALWAYS, "Updating Arena Status, uptime %u\n", uptime);
 
 	sprintf(my_query, "UPDATE arena_status SET");
 
