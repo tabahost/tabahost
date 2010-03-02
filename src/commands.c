@@ -5072,12 +5072,12 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
  Drop Commandos
  */
 
-void Cmd_Commandos(client_t *client, u_int32_t height)
+void Cmd_Commandos(client_t *client)
 {
 	client_t *drone;
 	u_int8_t i;
 	int32_t x, y;
-	u_int32_t dist;
+	u_int32_t dist, height;
 
 	dist = 0;
 
@@ -5092,6 +5092,10 @@ void Cmd_Commandos(client_t *client, u_int32_t height)
 		PPrintf(client, RADIO_YELLOW, "You are a team killer, you cannot drop commandos");
 		return;
 	}
+
+	height = GetHeightAt(client->posxy[0][0], client->posxy[1][0]);
+
+	Com_Printf(VERBOSE_DEBUG, "%s Commandos at X %u Y %u Z %u - %s\n", client->longnick, client->posxy[0][0], client->posxy[1][0], height, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 	if (!height)
 	{

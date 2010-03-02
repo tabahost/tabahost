@@ -886,8 +886,6 @@ u_int8_t UpdateArenaStatus(u_int8_t uptime)
 			ottoadjust, ottoburstoff, ottoburston, ottoburstonmax, ottorange, ottoretarget, ottooverrides, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
 			tanksrange, timemult, timeout, whitelist }; // TODO: remove paratroopers from DB
 
-	Com_Printf(VERBOSE_ALWAYS, "Updating Arena Status, uptime %u\n", uptime);
-
 	sprintf(my_query, "UPDATE arena_status SET");
 
 	for (i = 0, j = 0; i < 49; i++)

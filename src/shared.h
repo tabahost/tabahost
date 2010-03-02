@@ -2401,7 +2401,7 @@ void	Cmd_Hls(client_t *client);
 void	Cmd_Listavail(u_int8_t field, client_t *client);
 void	Cmd_Wings(u_int8_t mode, client_t *client);
 void	Cmd_Hmack(client_t *client, char *command, u_int8_t tank);
-void	Cmd_Commandos(client_t *client, u_int32_t height);
+void	Cmd_Commandos(client_t *client);
 void	Cmd_Info(char *nick, client_t *client);
 void	Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client);
 void	Cmd_Gclear(char *nick, client_t *client);

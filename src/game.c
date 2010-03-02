@@ -2094,7 +2094,7 @@ void ProcessCommands(char *command, client_t *client)
 				}
 			}
 
-			Cmd_Commandos(client, GetHeightAt(client->posxy[0][0], client->posxy[1][0]));
+			Cmd_Commandos(client);
 			return;
 		}
 		else if (!Com_Stricmp(command, "printlogbuffer"))
