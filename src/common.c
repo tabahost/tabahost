@@ -1966,8 +1966,8 @@ double WBLongitude(double dAbsLongitude)
 	double cdSquare00Longitude;
 	double cdSquareWidth;
 
-	cdSquareWidth = (double)mapscale->value * 5280;
-	cdSquare00Longitude = (double)mapsize->value * 165;
+	cdSquareWidth = (double)mapscale->value * 5280; // 5280 feet = 1 mile
+	cdSquare00Longitude = (double)mapsize->value * 168.75;
 
 	return floor((dAbsLongitude - cdSquare00Longitude) / cdSquareWidth);
 }
@@ -1983,8 +1983,8 @@ double WBLatitude(double dAbsLatitude)
 	double cdSquare00Latitude;
 	double cdSquareHeight;
 
-	cdSquareHeight = (double)mapscale->value * 5280;
-	cdSquare00Latitude = (double)mapsize->value * 165;
+	cdSquareHeight = (double)mapscale->value * 5280; // 5280 feet = 1 mile
+	cdSquare00Latitude = (double)mapsize->value * 168.75;
 
 	return floor((dAbsLatitude - cdSquare00Latitude) / cdSquareHeight);
 }
@@ -2144,7 +2144,7 @@ char *PadLoc(char *szBuffer, double dLongitude, double dLatitude)
 	double cdSquareWidth;
 	memset(szBuffer, 0, 20);
 
-	cdSquareWidth = (double)mapscale->value * 5280;
+	cdSquareWidth = (double)mapscale->value * 5280; // 5280 feet = 1 mile
 	dLongitude -= (double)mapsize->value * 165;
 	dLatitude -= (double)mapsize->value * 165;
 
