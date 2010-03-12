@@ -346,7 +346,8 @@ void Cmd_Move(char *field, int country, client_t *client)
 			nothq = 0;
 			client->field = 1;
 			client->hq = 1;
-			PPrintf(client, RADIO_YELLOW, "You moved to HQ");
+			client->country = country;
+			PPrintf(client, RADIO_YELLOW, "You moved to HQ, please chose your country");
 		}
 		else
 		{

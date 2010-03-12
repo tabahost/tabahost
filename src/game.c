@@ -1662,12 +1662,19 @@ void ProcessCommands(char *command, client_t *client)
 	{
 		if (!Com_Stricmp(command, "country"))
 		{
-			if (!client->infly || client->attr == 1)
+			if (!client->infly || (client->attr & FLAG_ADMIN))
 			{
 				if (argv[0])
 				{
-					Cmd_Move(NULL, Com_Atoi(argv[0]), client);
-					UpdateClientFile(client);
+					if(Com_Atoi(argv[0]) == 1 || Com_Atoi(argv[0]) == 3 || client->attr) // limit to Red and Gold for normal users
+					{
+						Cmd_Move(NULL, Com_Atoi(argv[0]), client);
+						UpdateClientFile(client);
+					}
+					else
+					{
+						PPrintf(client, RADIO_YELLOW, "Invalid country, please select Red (1) or Gold (3)");
+					}
 				}
 				else
 				{
@@ -1808,7 +1815,19 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if (!Com_Stricmp(command, "pingtest"))
 		{
-			PPrintf(client, RADIO_YELLOW, "Your connection quality is currently: %s", !(client->cancollide)?"Not available":client->connection == 0?"Stable":client->connection == 1?"Fair":client->connection == 2?"Unstable":"Poor");
+			if(argv[0])
+			{
+				if(pclient = FindLClient(argv[0]))
+				{
+					PPrintf(client, RADIO_YELLOW, "%s connection quality is currently: %s", pclient->longnick, !(pclient->cancollide)?"Not available":pclient->connection == 0?"Stable":pclient->connection == 1?"Fair":pclient->connection == 2?"Unstable":"Poor");
+				}
+				else
+				{
+					PPrintf(client, RADIO_YELLOW, "Player not found");
+				}
+			}
+			else
+				PPrintf(client, RADIO_YELLOW, "Your connection quality is currently: %s", !(client->cancollide)?"Not available":client->connection == 0?"Stable":client->connection == 1?"Fair":client->connection == 2?"Unstable":"Poor");
 			//Cmd_Pingtest(0, client);
 			return;
 		}
@@ -5067,25 +5086,25 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 							client->conn_sum = 10 * client->conn_lastavg;
 							client->conn_count = 10;
 
-							if(client->conn_curravg)
-							{
-								conn_avgdiff = client->conn_curravg - client->conn_lastavg;
-								Com_Printf(VERBOSE_DEBUG, "%s avgdiff %.3f\n", client->longnick, conn_avgdiff);
-								//if(MODULUS(conn_avgdiff) > 100)
-							}
+							// if(client->conn_curravg)
+							// {
+							// 	conn_avgdiff = client->conn_curravg - client->conn_lastavg;
+							// 	Com_Printf(VERBOSE_DEBUG, "%s avgdiff %.3f\n", client->longnick, conn_avgdiff);
+							// 	//if(MODULUS(conn_avgdiff) > 100)
+							// }
 
 							client->conn_curravg = (double)client->conn_sum / client->conn_count;
-							Com_Printf(VERBOSE_DEBUG, "%s current avg: %.3f\n", client->longnick, client->conn_curravg);
+							// Com_Printf(VERBOSE_DEBUG, "%s current avg: %.3f\n", client->longnick, client->conn_curravg);
 
-							if(client->conn_curravg > 150)
+							if(client->conn_curravg > 175)
 							{
 								client->connection = 3; // poor
 							}
-							else if(client->conn_curravg > 100)
+							else if(client->conn_curravg > 125)
 							{
 								client->connection = 2; // unstable
 							}
-							else if(client->conn_curravg > 50)
+							else if(client->conn_curravg > 75)
 							{
 								client->connection = 1; // fair
 							}
@@ -8355,12 +8374,17 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 				PPrintf(client, RADIO_YELLOW, "You can't send a message to drones");
 				return;
 			}
-			SendPacket(buffer, radiomessage->msgsize + 11, toClient);
-			SendPacket(buffer, radiomessage->msgsize + 11, client);
 
-			message[msgsize] = '\0';
+			if(!(client->squadron == 732 /*vlamik*/ && toClient->squadron == 1581 /*robtec*/) &&
+				!(client->squadron == 1581 /*robtec*/ && toClient->squadron == 732 /*vlamik*/))
+			{
+				SendPacket(buffer, radiomessage->msgsize + 11, toClient);
+				SendPacket(buffer, radiomessage->msgsize + 11, client);
 
-			Com_Printf(VERBOSE_CHAT, "%s:(%s)%s\n", client->longnick, toClient->longnick, message);
+				message[msgsize] = '\0';
+
+				Com_Printf(VERBOSE_CHAT, "%s:(%s)%s\n", client->longnick, toClient->longnick, message);
+			}
 		}
 		else
 		{
@@ -8437,6 +8461,10 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 				{
 					if ((n=CanHear(client, &clients[i], msgto)) > 0)
 					{
+						if((client->squadron == 732 /*vlamik*/ && clients[i].squadron == 1581 /*robtec*/) ||
+							(clients[i].squadron == 1581 /*robtec*/ && client->squadron == 732 /*vlamik*/))
+							continue;
+
 						if(clients[i].thai) // PrintRadioMessage
 						{
 							if(arena->thaisent[clients[i].thai].b)
