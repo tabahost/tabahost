@@ -8375,16 +8375,16 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 				return;
 			}
 
-			if(!(client->squadron == 732 /*vlamik*/ && toClient->squadron == 1581 /*robtec*/) &&
-				!(client->squadron == 1581 /*robtec*/ && toClient->squadron == 732 /*vlamik*/))
-			{
+//			if(!(client->squadron == 732 /*vlamik*/ && toClient->squadron == 1581 /*robtec*/) &&
+//				!(client->squadron == 1581 /*robtec*/ && toClient->squadron == 732 /*vlamik*/))
+//			{
 				SendPacket(buffer, radiomessage->msgsize + 11, toClient);
 				SendPacket(buffer, radiomessage->msgsize + 11, client);
 
 				message[msgsize] = '\0';
 
 				Com_Printf(VERBOSE_CHAT, "%s:(%s)%s\n", client->longnick, toClient->longnick, message);
-			}
+//			}
 		}
 		else
 		{
@@ -8461,9 +8461,9 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 				{
 					if ((n=CanHear(client, &clients[i], msgto)) > 0)
 					{
-						if((client->squadron == 732 /*vlamik*/ && clients[i].squadron == 1581 /*robtec*/) ||
-							(clients[i].squadron == 1581 /*robtec*/ && client->squadron == 732 /*vlamik*/))
-							continue;
+//						if((client->squadron == 732 /*vlamik*/ && clients[i].squadron == 1581 /*robtec*/) ||
+//							(clients[i].squadron == 1581 /*robtec*/ && client->squadron == 732 /*vlamik*/))
+//							continue;
 
 						if(clients[i].thai) // PrintRadioMessage
 						{
@@ -8815,7 +8815,7 @@ void UpdateIngameClients(u_int8_t attr)
 						if (!clients[i].hq)
 							fprintf(fp, "FIELD F%03d  ", clients[i].field);
 						else
-							fprintf(fp, "HQ          ");
+							fprintf(fp, "   HQ       ");
 					}
 					else
 						fprintf(fp, "CONNECTING  ");
