@@ -1754,7 +1754,6 @@ int8_t AddKiller(client_t *victim, client_t *client)
 			else
 			{
 				empty = i;
-				break;
 			}
 		}
 
@@ -1787,10 +1786,25 @@ int8_t AddKiller(client_t *victim, client_t *client)
 
 void ClearKillers(client_t *client)
 {
+	u_int8_t i;
+
 	if (client)
 	{
 		Com_Printf(VERBOSE_DEBUG_DAMAGE, "Remove all killers from list\n");
-		memset(&(client->hitby), 0, sizeof(hitby_t) * MAX_HITBY);
+
+		for(i = 0; i < MAX_HITBY; i++)
+		{
+			if(client->hitby[i].dbid)
+			{
+				Com_Printf(VERBOSE_DEBUG, "DAMAGE: Removing %s\n", client->hitby[i].longnick);
+			}
+			client->hitby[i].country = 0;
+			client->hitby[i].damage = 0.0;
+			client->hitby[i].dbid = 0;
+			client->hitby[i].longnick[0] = 0;
+			client->hitby[i].plane = 0;
+			client->hitby[i].squadron = 0;
+		}
 	}
 }
 
@@ -1802,10 +1816,21 @@ void ClearKillers(client_t *client)
 
 void ClearBombers(u_int8_t field)
 {
+	u_int8_t i;
+
 	if (field < fields->value)
 	{
 		Com_Printf(VERBOSE_DEBUG_DAMAGE, "Remove all bombers from list\n");
-		memset(&(arena->fields[field].hitby), 0, sizeof(hitby_t) * MAX_HITBY);
+
+		for(i = 0; i < MAX_HITBY; i++)
+		{
+			arena->fields[field].hitby[i].country = 0;
+			arena->fields[field].hitby[i].damage = 0;
+			arena->fields[field].hitby[i].dbid = 0;
+			arena->fields[field].hitby[i].longnick[0] = 0;
+			arena->fields[field].hitby[i].plane = 0;
+			arena->fields[field].hitby[i].squadron = 0;
+		}
 	}
 }
 

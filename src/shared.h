@@ -158,7 +158,7 @@ typedef unsigned int u_int32_t;
 #define MORTAR				680.0	// mortar velocity (ft/s) (585, range= 10697; 680, range = 14450)
 #define MORTAR_RANGE		14000	// mortar range is 14000ft
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s�)
-#define MODULUS(a) (a > 0 ? a : a * -1)
+#define MODULUS(a) ((a) > 0 ? (a) : (a) * -1)
 #define PLANE_FAU			180	// ME262 48, Predator 180
 #define COLLECT_CYCLE		0
 #define COLLECT_MAP			1

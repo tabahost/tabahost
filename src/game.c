@@ -4894,7 +4894,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 	if (!setjmp(debug_buffer))
 	{
-		if (!client->chute || (client->chute && ((end == ENDFLIGHT_PILOTKILL) || (end == ENDFLIGHT_BAILED) || (end == ENDFLIGHT_PANCAKE))))
+		if (!client->chute || (client->chute && ((end == ENDFLIGHT_PILOTKILL) || (end == ENDFLIGHT_BAILED) || (end == ENDFLIGHT_PANCAKE) || (end == ENDFLIGHT_DITCHFAILED))))
 		{
 			ScoresEndFlight(end, land, gunused, totalhits, client);
 
@@ -5067,7 +5067,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 					if(client->postimer != oldpostimer) // not received in bolus
 					{
 						posoffset = (client->postimer - oldpostimer + client->offset);
-						posoffset = MODULUS(posoffset);
+						posoffset = abs(posoffset);
 
 						client->conn_sum += posoffset;
 						client->conn_count++;
@@ -5335,7 +5335,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		client->basetimer += 2;
 	}
 
-	if(MODULUS(basetimer - client->basetimer) > 500)
+	if(abs(basetimer - client->basetimer) > 500)
 	{
 		client->basediff++;
 
@@ -5721,7 +5721,7 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 				client->basetimer += 2;
 			}
 
-			if(MODULUS(basetimer - client->basetimer) > 500)
+			if(abs(basetimer - client->basetimer) > 500)
 			{
 				client->basediff++;
 
@@ -6862,7 +6862,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		}
 	}
 
-	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
+	if (killer >=0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 	{
 		for (i = 0; i < MAX_HITBY; i++) // check who hit player
 		{
@@ -7067,7 +7067,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		AddPlaneDamage(hardhitplane->place, he, 0, NULL, NULL, pvictim);
 	}
 
-	if (killer >=0 && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
+	if (killer >=0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 	{
 		for (i = 0; i < MAX_HITBY; i++) // check who hit player
 		{
@@ -8375,16 +8375,16 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 				return;
 			}
 
-//			if(!(client->squadron == 732 /*vlamik*/ && toClient->squadron == 1581 /*robtec*/) &&
-//				!(client->squadron == 1581 /*robtec*/ && toClient->squadron == 732 /*vlamik*/))
-//			{
+			if(!(client->squadron == 732 /*vlamik*/ && toClient->squadron == 1581 /*robtec*/) &&
+				!(client->squadron == 1581 /*robtec*/ && toClient->squadron == 732 /*vlamik*/))
+			{
 				SendPacket(buffer, radiomessage->msgsize + 11, toClient);
 				SendPacket(buffer, radiomessage->msgsize + 11, client);
 
 				message[msgsize] = '\0';
 
 				Com_Printf(VERBOSE_CHAT, "%s:(%s)%s\n", client->longnick, toClient->longnick, message);
-//			}
+			}
 		}
 		else
 		{
@@ -8461,9 +8461,9 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 				{
 					if ((n=CanHear(client, &clients[i], msgto)) > 0)
 					{
-//						if((client->squadron == 732 /*vlamik*/ && clients[i].squadron == 1581 /*robtec*/) ||
-//							(clients[i].squadron == 1581 /*robtec*/ && client->squadron == 732 /*vlamik*/))
-//							continue;
+						if((client->squadron == 732 /*vlamik*/ && clients[i].squadron == 1581 /*robtec*/) ||
+							(client->squadron == 1581 /*robtec*/ && clients[i].squadron == 732 /*vlamik*/))
+							continue;
 
 						if(clients[i].thai) // PrintRadioMessage
 						{

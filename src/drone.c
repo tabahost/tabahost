@@ -791,9 +791,9 @@ int ProcessDrone(client_t *drone)
 								x = drone->posxy[0][0] - buildings[i].posx;
 								y = drone->posxy[1][0] - buildings[i].posy;
 
-								if ((MODULUS(x) < tanksrange->value) && (MODULUS(y) < tanksrange->value))
+								if ((abs(x) < tanksrange->value) && (abs(y) < tanksrange->value))
 								{
-									if ((MODULUS(x)> 200) && (MODULUS(y)> 200))
+									if ((abs(x)> 200) && (abs(y)> 200))
 									{
 										ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0] + 2, buildings[i].posx, buildings[i].posy, 0, drone);
 										drone->dronetimer--;
@@ -1518,7 +1518,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 				destx = clients[i].posxy[0][0] - origx;
 				desty = clients[i].posxy[1][0] - origy;
 
-				if ((MODULUS(destx) < cvrange->value) && (MODULUS(desty) < cvrange->value))
+				if ((abs(destx) < cvrange->value) && (abs(desty) < cvrange->value))
 				{
 					SendPacket(buffer, sizeof(buffer), &clients[i]);
 				}

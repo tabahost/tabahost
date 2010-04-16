@@ -100,7 +100,7 @@ void Cmd_LoadConfig(char *filename, client_t *client)
 
 void Cmd_Ros(client_t *client)
 {
-	u_int8_t red, green, gold, purp, i;
+	u_int8_t red, green, gold, purp, unk, i;
 
 	if (client)
 	{
@@ -112,7 +112,7 @@ void Cmd_Ros(client_t *client)
 	else
 		Sys_Printfile(FILE_INGAME);
 
-	for (red = green = gold = purp = i = 0; i < maxentities->value; i++)
+	for (red = green = gold = purp = unk = i = 0; i < maxentities->value; i++)
 	{
 		if (clients[i].attr == 1 && hideadmin->value)
 			continue;
@@ -121,6 +121,9 @@ void Cmd_Ros(client_t *client)
 		{
 			switch (clients[i].country)
 			{
+				case 0:
+					unk++;
+					break;
 				case 1:
 					red++;
 					break;
@@ -137,9 +140,9 @@ void Cmd_Ros(client_t *client)
 		}
 	}
 
-	arena->numplayers = red + green + gold + purp;
+	arena->numplayers = red + green + gold + purp + unk;
 
-	PPrintf(client, RADIO_LIGHTYELLOW, "Reds: %d, Greens: %d, Golds: %d, Purps: %d", red, green, gold, purp);
+	PPrintf(client, RADIO_LIGHTYELLOW, "Reds: %d, Golds: %d, HQ: %d", red, gold, unk);
 }
 
 /**
@@ -397,14 +400,14 @@ void Cmd_Move(char *field, int country, client_t *client)
 				{
 					if (clients[i].inuse && !clients[i].drone && clients[i].ready && &clients[i] != client)
 					{
-						if (clients[i].country != country && !strcmp(clients[i].ip, client->ip) && !clients[i].thai)
+						if (clients[i].country /* already have a country */ && clients[i].country != country && !strcmp(clients[i].ip, client->ip) && !clients[i].thai)
 						{
 							country = clients[i].country;
 							PPrintf(client, RADIO_YELLOW, "Country forced to %s due IP Sharing with %s", GetCountry(country), clients[i].longnick);
 							break;
 						}
-						else if(clients[i].arenabuildsok /*not in login */ && clients[i].squadron /*already have squadron*/ && 
-							clients[i].squadron == client->squadron /* same squadron */)
+						else if(clients[i].arenabuildsok /*not in login */ && clients[i].country /* already have a country */ &&
+								clients[i].squadron /*already have squadron*/ && clients[i].squadron == client->squadron /* same squadron */)
 						{
 							country = clients[i].country;
 							PPrintf(client, RADIO_YELLOW, "Country forced to %s due Squadron sharing with %s", GetCountry(country), clients[i].longnick);
@@ -1322,6 +1325,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		if (position != 100)
 		{
 			Com_Printf(VERBOSE_ALWAYS, "%s takeoff from f%d with plane %s ord %d country %s\n", client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
+			ClearKillers(client);
 
 			Com_LogEvent(EVENT_TAKEOFF, client->id, 0);
 			Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);

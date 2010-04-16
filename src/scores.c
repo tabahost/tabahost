@@ -1143,7 +1143,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 
 				if (killer)
 				{
-					j = AddKiller(client, killer);
+					AddKiller(client, killer);
 
 					dbclient = killer;
 

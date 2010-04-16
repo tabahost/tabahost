@@ -811,7 +811,7 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 
 	if(verb <= verbose->value);
 	{
-		tverb = MODULUS(verb);
+		tverb = abs(verb);
 		va_start(argptr, fmt);
 		vsprintf(msg, fmt, argptr);
 		va_end(argptr);

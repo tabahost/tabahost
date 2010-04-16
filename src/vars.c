@@ -725,25 +725,23 @@ var_t *Var_Get(char *var_name, char *var_value, char *min, char *max, char *desc
 		return NULL;
 
 	var = Z_Malloc(sizeof(*var));
-	var->name = CopyString(var_name);
-	var->min = Com_Atof(min);
-	var->max = Com_Atof(max);
-	var->string = CopyString(var_value);
-	var->value = Com_Atof(var->string);
-	var->modified = 1;
-	var->description = CopyString(description);
-
-	// link the variable in
-	var->next = var_vars;
 
 	if (var)
 	{
+		var->name = CopyString(var_name);
+		var->min = Com_Atof(min);
+		var->max = Com_Atof(max);
+		var->string = CopyString(var_value);
+		var->value = Com_Atof(var->string);
+		var->modified = 1;
+		var->description = CopyString(description);
+		var->flags = flags;
+		// link the variable in backwards
+		var->next = var_vars;
 		var_vars = var;
 	}
 	else
 		Com_Printf(VERBOSE_WARNING, "Var_Get(): var == NULL\n");
-
-	var->flags = flags;
 
 	return var;
 }

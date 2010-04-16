@@ -3487,7 +3487,7 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 			distx = posx - fieldx;
 			disty = posy - fieldy;
 
-			if (MODULUS(distx) < 46340 && MODULUS(disty) < 46340)
+			if (abs(distx) < 46340 && abs(disty) < 46340)
 			{
 				tdist = sqrt(Com_Pow(distx, 2) + Com_Pow(disty, 2));
 
