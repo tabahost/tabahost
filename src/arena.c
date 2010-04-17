@@ -1001,42 +1001,6 @@ void SendCVPos(client_t *client, u_int8_t cvnum)
 }
 
 /**
- ResetCVPos
-
- Reset CV back to starting point (port)
- */
-
-void ResetCVPos(cv_t *cv)
-{
-	u_int16_t i;
-
-	for (i = 0; i < MAX_BUILDINGS; i++)
-	{
-		if (!arena->fields[cv->field].buildings[i].field)
-		{
-			break;
-		}
-		else
-		{
-			arena->fields[cv->field].buildings[i].status = 1;
-			arena->fields[cv->field].buildings[i].timer = 0;
-		}
-	}
-
-	cv->timebase = 0;
-	cv->threatened = 0;
-	cv->outofport = 0;
-	cv->wpnum = 0;
-	cv->speed = cvspeed->value;
-	snprintf(cv->logfile, sizeof(cv->logfile), "%s,cv%u,%s,%u", mapname->string, cv->id, GetCountry(arena->fields[cv->field].country), (u_int32_t)time(NULL));
-	//	arena->cv[j].stuck = 0;
-	//	arena->fields[cv->field].posxyz[0] = cv->wp[0][0];
-	//	arena->fields[cv->field].posxyz[1] = cv->wp[0][1];
-
-
-}
-
-/**
  SetCVSpeed
 
  Set convoy speeds when some boat is damaged or reached waypoint
@@ -1309,16 +1273,16 @@ void SendCVRoute(client_t *client, u_int8_t cvnum)
  Read CV waypoints from file
  */
 
-void ReadCVWaypoints(u_int8_t num)
+void ReadCVWaypoints(u_int8_t group)
 {
 	char file[32];
 	u_int8_t i;
 	FILE *fp;
 	char buffer[128];
 
-	snprintf(file, sizeof(file), "./arenas/%s/cv%d.rte", dirname->string, num);
+	snprintf(file, sizeof(file), "./arenas/%s/cv%d.rte", dirname->string, group);
 
-	arena->cv[num].wptotal = 0;
+	arena->cvs[group].wptotal = 0;
 
 	if (!(fp = fopen(file, "r")))
 	{
@@ -1328,18 +1292,18 @@ void ReadCVWaypoints(u_int8_t num)
 
 	for (i = 0; fgets(buffer, sizeof(buffer), fp); i++)
 	{
-		arena->cv[num].wp[i][0] = Com_Atoi((char *)strtok(buffer, ";"));
-		arena->cv[num].wp[i][1] = Com_Atoi((char *)strtok(NULL, ";"));
+		arena->cvs[group].wp[i][0] = Com_Atoi((char *)strtok(buffer, ";"));
+		arena->cvs[group].wp[i][1] = Com_Atoi((char *)strtok(NULL, ";"));
 
-		arena->cv[num].wptotal++;
+		arena->cvs[group].wptotal++;
 
-		if (arena->cv[num].wptotal >= MAX_WAYPOINTS)
+		if (arena->cvs[group].wptotal >= MAX_WAYPOINTS)
 			break;
 
 		memset(buffer, 0, sizeof(buffer));
 	}
 
-	if (!arena->cv[num].wptotal)
+	if (!arena->cvs[group].wptotal)
 	{
 		PPrintf(NULL, RADIO_YELLOW, "WARNING: ReadCVWaypoints() error reading \"%s\"", file);
 	}
@@ -1361,17 +1325,20 @@ void LogCVsPosition(void)
 
 	for (i = 0; i < cvs->value; i++)
 	{
-		snprintf(filename, sizeof(filename), "./logs/players/%s.cvl", arena->cv[i].logfile);
+		if(arena->cv[i].ships)
+		{
+			snprintf(filename, sizeof(filename), "./logs/players/%s.cvl", arena->cvs[i].logfile);
 
-		if (!(fp = fopen(filename, "a")))
-		{
-			Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", filename);
-		}
-		else
-		{
-			fprintf(fp, "%d;%d;%f;%f;%u;%u;%u\n", arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->cv[i].xyspeed[0], arena->cv[i].xyspeed[1],
-					arena->cv[i].threatened, arena->fields[arena->cv[i].field].country, (u_int32_t)time(NULL));
-			fclose(fp);
+			if (!(fp = fopen(filename, "a")))
+			{
+				Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", filename);
+			}
+			else
+			{
+				fprintf(fp, "%d;%d;%f;%f;%u;%u;%u\n", arena->cv[i].ships->Position.x, arena->cv[i].ships->Position.y, arena->cv[i].ships->Vel.curr, Com_Deg(arena->cv[i].ships->Yaw.curr),
+						arena->cv[i].threatened, arena->cv[i].country, (u_int32_t)time(NULL));
+				fclose(fp);
+			}
 		}
 	}
 }
@@ -2878,7 +2845,7 @@ void CheckBoatDamage(building_t *building, client_t *client)
 
 			Cmd_Seta(buffer, 0, -1, 0); // remove all planes from a sunk convoy
 
-			ResetCVPos(arena->fields[building->field - 1].cv);
+			ResetCV(arena->fields[building->field - 1].cvs->id);
 
 			if (respawncvs->value)
 				arena->fields[building->field - 1].cv->speed = cvspeed->value;
@@ -2927,7 +2894,7 @@ void CheckBoatDamage(building_t *building, client_t *client)
 
 				Cmd_Seta(buffer, 0, -1, 0); // remove all planes from a sunk convoy
 
-				ResetCVPos(arena->fields[building->field - 1].cv);
+				ResetCV(arena->fields[building->field - 1].cvs->id);
 
 				if (respawncvs->value)
 					arena->fields[building->field - 1].cv->speed = cvspeed->value;
@@ -2985,7 +2952,7 @@ void CheckBoatDamage(building_t *building, client_t *client)
 
 					Cmd_Seta(buffer, 0, -1, 0); // remove all planes from a sunk convoy
 
-					ResetCVPos(arena->fields[building->field - 1].cv);
+					ResetCV(arena->fields[building->field - 1].cvs->id);
 
 					if (respawncvs->value)
 						arena->fields[building->field - 1].cv->speed = cvspeed->value;
@@ -3053,7 +3020,7 @@ void CheckBoatDamage(building_t *building, client_t *client)
 
 					Cmd_Seta(buffer, 0, -1, 0); // remove all planes from a sunk convoy
 
-					ResetCVPos(arena->fields[building->field - 1].cv);
+					ResetCV(arena->fields[building->field - 1].cvs->id);
 
 					if (respawncvs->value)
 						arena->fields[building->field - 1].cv->speed = cvspeed->value;
@@ -3376,15 +3343,7 @@ void ChangeArena(char *map, client_t *client)
 		{
 			if ((arena->fields[i].type == FIELD_CV) || (arena->fields[i].type == FIELD_CARGO) || (arena->fields[i].type == FIELD_DD) || (arena->fields[i].type == FIELD_SUBMARINE))
 			{
-				ReadCVWaypoints(j);
-
-				arena->fields[i].cv = &(arena->cv[j]);
-
-				arena->cv[j].id = j;
-				arena->cv[j].field = i;
-				ResetCVPos(&(arena->cv[j]));
-
-				//				SetCVRoute(&(arena->cv[j]));
+				ConfigureCV(i, j, arena->fields[i].country);
 				j++;
 			}
 		}

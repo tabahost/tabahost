@@ -6002,15 +6002,15 @@ void Cmd_CheckWaypoints(client_t *client)
 	{
 		ReadCVWaypoints(i);
 
-		for (j = 1; j < arena->cv[i].wptotal; j++)
+		for (j = 1; j < arena->cvs[i].wptotal; j++)
 		{
-			if (!IsVisible(arena->cv[i].wp[j][0], arena->cv[i].wp[j][1], 5, arena->cv[i].wp[j - 1][0], arena->cv[i].wp[j - 1][1], 5))
+			if (!IsVisible(arena->cvs[i].wp[j][0], arena->cvs[i].wp[j][1], 5, arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5))
 			{
 				PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> %u] error", i, j - 1, j);
 			}
 		}
 
-		if (!IsVisible(arena->cv[i].wp[j - 1][0], arena->cv[i].wp[j - 1][1], 5, arena->cv[i].wp[1][0], arena->cv[i].wp[1][1], 5))
+		if (!IsVisible(arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5, arena->cvs[i].wp[1][0], arena->cvs[i].wp[1][1], 5))
 			PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> 1] error", i, j - 1);
 	}
 }

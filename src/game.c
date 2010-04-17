@@ -1066,6 +1066,12 @@ void CheckArenaRules(void)
 		if (!(arena->frame % 6000)) // Log CVs position every 60sec
 			LogCVsPosition();
 
+		if(!(arena->frame % 50)) // 500ms
+		{
+			for (i = 0; i < cvs->value; i++)
+				RunShips(i, 0);
+		}
+
 		for (i = 0; i < cvs->value; i++)
 		{
 			// CV Route
@@ -3444,7 +3450,7 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Reseting CV %u", i);
 
-				ResetCVPos(&(arena->cv[i]));
+				ResetCV(i);
 			}
 			return;
 		}
