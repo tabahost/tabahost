@@ -1,0 +1,480 @@
+/***
+ *  Copyright (C) 2004-2009 Francisco Bischoff
+ *  Copyright (C) 2006 MaxMind LLC
+ *  Copyright (C) 2000-2003 MySQL AB
+ * 
+ *  This file is part of Tabajara Host Server.
+ *
+ *  Tabajara Host Server is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  Tabajara Host Server is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
+ * 
+ ***/
+
+#include "shared.h"
+
+void RunShips_Walk(ship_t *B)
+{
+	// IncVeloc
+	B->Vel.curr = B->Vel.curr + B->Acel.curr;
+	if(B->Vel.curr > B->Vel.max)
+		B->Vel.curr = B->Vel.max;
+	else if(B->Vel.curr < B->Vel.min)
+		B->Vel.curr = B->Vel.min;
+
+	B->Position.x = B->Position.x + B->Vel.curr * cos(B->Yaw.curr);
+	B->Position.y = B->Position.y + B->Vel.curr * sin(B->Yaw.curr);
+
+	if(B->Position.x > B->x.Width)
+		B->Position.x = B->Position.x - B->x.Width;
+	else if(B->Position.x < 0)
+		B->Position.x = B->Position.x + Box.Width;
+
+	if(B->Position.y > Box.Height)
+		B->Position.y = B->Position.y - Box.Height;
+	else if(B->Position.y < 0)
+		B->Position.y = B->Position.y + Box.Height;
+}
+
+double RunShips_Angle(double ang)
+{
+	static float F = 2 * M_PI;
+
+	while(ang >= F)
+		ang -= F;
+	while(ang < 0)
+		ang += F;
+	return ang;
+}
+
+double RunShips_AngleDef(double ang)
+{
+	ang = RunShips_Angle(ang);
+	if(ang > M_PI)
+		ang -= 2*M_PI;
+	return ang;
+}
+
+void RunShips_Yaw(ship_t *B, ship_t *CV)
+{
+	double dx, dy;
+
+	// ajusta angulo alvo
+	if(B->Position.x == B->Target.x && B->Position.y == B->Target.y)
+	{
+		B->Yaw.target = RunShips_Angle(CV->Yaw.curr);
+	}
+	else
+	{
+		dx = B->Target.x - B->Position.x;
+		dy = B->Target.y - B->Position.y;
+
+		if(dy == 0)
+		{
+			if(dx > 0) // direita
+				B->Yaw.target = 0;
+			else // esquerda
+				B->Yaw.target = M_PI;
+		}
+		else if(dx == 0)
+		{
+			if(dy > 0) // baixo
+				B->Yaw.target = 1.5*M_PI;
+			else // cima
+				B->Yaw.target = 0.5*M_PI;
+		}
+		else
+		{
+			B->Yaw.target = arctan(dy/dx);
+			if(dx<0)
+				B->Yaw.target = B->Yaw.target + M_PI;
+		}
+	}
+
+	B->Yaw.target = RunShips_Angle(B->Yaw.target);
+	// ajusta velocidade angular
+	// B->YawVel = B->Yawtarget-B->Yaw;
+	B->YawVel.curr = RunShips_AngleDef(B->Yaw.target - B->Yaw.curr);
+	if(B->YawVel.curr > B->YawVel.max)
+		B->YawVel.curr = B->YawVel.max;
+	else if(B->YawVel.curr < B->YawVel.min)
+		B->YawVel.curr = B->YawVel.min;
+	// incrementa yaw
+	B->Yaw.curr = RunShips_Angle(B->Yaw.curr + B->YawVel.curr);
+	// ajusta velocidade
+	B->Vel.target = sqrt(dx*dx+dy*dy) / 3;
+	dx = B->Vel.max * (1 - MODULUS(RunShips_AngleDef(B->Yaw.target - B->Yaw.curr) / (0.5 * M_PI))); // 1 - x°/90°
+
+	if(dx < B->Vel.min)
+		dx = B->Vel.min;
+
+	if(B->Vel.target > dx)
+		B->Vel.target = dx;
+
+	B->Acel.curr = B->Vel.target - B->Vel.curr; // controle P
+	if(B->Acel.curr > B->Acel.max)
+		B->Acel.curr = B->Acel.max;
+	else if(B->Acel.curr < B->Acel.min)
+		B->Acel.curr = B->Acel.min;
+	// B->Vel.curr = B->Vel.target;
+}
+
+void RunShips_ReTarget(ship_t *B, ship_t *D, ship_t *CV, const double *A)
+{
+	B->Target.x = D->Position.x + A[0] * CV->radius * cos(CV->Yaw.curr+A[1]*M_PI);
+	B->Target.y = D->Position.y + A[0] * CV->radius * sin(CV->Yaw.curr+A[1]*M_PI);
+}
+
+void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
+{
+	const double Form[4][6][2] = {
+		{{500,0.25},{500,-0.25},{848.5281,0.75},{848.5281,-0.75},{600,1},{800,0}},
+		{{600,0.25},{600,-0.25},{848.5281,0.5},{848.5281,-0.5},{600,1},{700,0}},
+		{{500,0.5},{500,-0.5},{5,1},{707.1068,0.75},{707.1068,-0.75},{500,0}},
+		{{600,0.1667},{600,-0.1667},{600,0.5},{6,-0.5},{600,0.8333},{600,-0.8333}}
+	};
+
+	u_int8_t i;
+	int32_t FIdx;
+	ships_t *mainShip = NULL;
+	ships_t *ship = NULL;
+
+	mainShip = MainShipTarget(group);
+	if(!mainShip)
+		return;
+
+	RunShips_Yaw(mainShip);
+	RunShips_Walk(mainShip);
+
+	if(ProcessDroneShips(mainShip) < 0)
+	{
+		if(RemoveShip(mainShip))
+			RunShips(group); // Find next mainship and continue. If no mainShip is found, it will return here.
+		else // no more ships in array, reset it
+			ResetCV(group);
+		return;
+	}
+
+	for(i = 0, ship = arena->cvs[group].ships; ship && i < 6; ship = ship->next)
+	{
+		if(ship == mainShip)
+			continue;
+
+		RunShips_ReTarget(ship, mainShip, Form[formation][i++]);
+		RunShips_Yaw(ship);
+		RunShips_Walk(ship);
+		if(ProcessDroneShips(ship) < 0)
+		{
+			if(!RemoveShip(ship)) // no more ships in array, reset it
+				ResetCV(group);
+		}
+	}
+}
+
+int8_t ProcessDroneShips(ships_t *ship)
+{
+	client_t *drone;
+
+	if(!(drone = ship->drone))
+	{
+		return -1;
+	}
+
+	if (drone->bugged)
+	{
+		BPrintf(RADIO_YELLOW, "DroneShip %s bugged, and will be removed", drone->longnick);
+		RemoveDrone(drone);
+		return -1;
+	}
+
+	if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+	{
+		ScoresEvent(SCORE_KILLED, drone, 0);
+		RemoveDrone(drone);
+		return -1;
+	}
+
+	DroneVisibleList(drone);
+
+	drone->posxy[0][0] = ship->Position.x; // X
+	drone->posxy[1][0] = ship->Position.y; // Y
+	drone->posalt[0] = 0; // Z
+	drone->speedxyz[0][0] = ship->Vel.curr * cos(ship->Yaw.curr); // X
+	drone->speedxyz[1][0] = ship->Vel.curr * sin(ship->Yaw.curr); // Y
+	drone->speedxyz[2][0] = 0; // Z
+	drone->angles[0][0] = 0; // Roll
+	drone->angles[1][0] = 0; // Pitch
+	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr) * 10); // Yaw
+	drone->accelxyz[0][0] = ship->Acel.curr * cos(ship->Yaw.curr); // X
+	drone->accelxyz[1][0] = ship->Acel.curr * sin(ship->Yaw.curr); // Y
+	drone->accelxyz[2][0] = 0; // Z
+	drone->aspeeds[0][0] = 0; // Roll
+	drone->aspeeds[1][0] = 0; // Pitch
+	drone->aspeeds[2][0] = floor(Com_Deg(ship->YawVel.curr) * 2); // Yaw - degrees per second?
+
+	drone->offset = -500;
+	drone->timer += 500;
+
+	return 0;
+}
+
+ship_t *MainShipTarget(u_int8_t group)
+{
+	u_int8_t i
+	int8_t cv, da, dd;
+	double yaw;
+	ship_t *ship;
+	ship_t *cv = NULL;
+	ship_t *ca = NULL;
+	ship_t *dd = NULL;
+
+	if(!arena->cvs[group].ships)
+	{
+		Com_Printf(VERBOSE_WARNING, "MainShipTarget(): No ship in group %d\n", group);
+		return NULL;
+	}
+	
+	// locate the main ship (first ship of the biggest type)
+	for(ship = arena->cvs[group].ships; ship; ship = ship->next)
+	{
+		switch(ship->type)
+		{
+			case SHIPTYPE_CV:
+				if(!cv)
+					cv = ship;
+				break;
+			case SHIPTYPE_CA:
+				if(!ca)
+					ca = ship;
+				break;
+			case SHIPTYPE_DD:
+				if(!dd)
+					dd = ship;
+				break;
+			default:
+				Com_Printf(VERBOSE_WARNING, "MainShipTarget(): unknown ship type\n");
+		}
+		
+		if(cv)
+			break;
+	}
+	
+	if(cv || ca || dd )
+	{
+		if(cv)
+			ship = cv;
+		else if(ca)
+			ship = ca;
+		else if(dd)
+			ship = dd;
+		
+		if((abs(ship->Target.y-ship->Position.y) > 70) || (abs(ship->Target.x-ship->Position.x) > 70))
+			return ship;
+
+		// Next waypoint
+		arena->cvs[group].wpnum++;
+
+		if (arena->cvs[group].wpnum == arena->cvs[group].wptotal) // reset waypoint index
+		{
+			arena->cvs[group].wpnum = 1;
+		}
+
+		ship->Target.x = arena->cvs[group].wp[arena->cvs[group].wpnum][0];
+		ship->Target.y = arena->cvs[group].wp[arena->cvs[group].wpnum][1];
+
+		return ship;
+	}
+	else
+	{
+		Com_Printf(VERBOSE_WARNING, "MainShipTarget(): No main ship found\n");
+		return NULL;
+	}
+}
+
+void RemoveAllShips(u_int8_t group)
+{
+	ship_t *ship;
+
+	for(ship = arena->cvs[group].ships; ship; ship = ship->next)
+	{
+		if(ship->drone)
+			RemoveDrone(ship->drone);
+		free(ship);
+	}
+
+	arena->cvs[group].ships = NULL;
+}
+
+void CreateAllShips(u_int8_t group)
+{
+	AddShip(group, SHIP_DD, arena->cvs[group].country);
+	AddShip(group, SHIP_DD, arena->cvs[group].country);
+	AddShip(group, SHIP_DD, arena->cvs[group].country);
+	AddShip(group, SHIP_DD, arena->cvs[group].country);
+	AddShip(group, SHIP_CA, arena->cvs[group].country);
+	AddShip(group, SHIP_CA, arena->cvs[group].country);
+	AddShip(group, SHIP_ENTERPRISE, arena->cvs[group].country);
+}
+
+/**
+ ResetCV
+
+ Reset CV back to starting point (port)
+ */
+
+void ResetCV(u_int8_t group)
+{
+	// CREATE ALL SHIPS AGAIN
+
+	RemoveAllShips(group);
+	CreateAllShips(group);
+
+	arena->cvs[group].threatened = 0;
+	arena->cvs[group].outofport = 0;
+	arena->cvs[group].wpnum = 0;
+	snprintf(arena->cvs[group].logfile, sizeof(arena->cvs[group].logfile), "%s,cv%u,%s,%u", mapname->string, arena->cvs[group].id, GetCountry(arena->cvs[group].country), (u_int32_t)time(NULL));
+}
+
+void ConfigureCV(u_int8_t field, u_int8_t group, u_int8_t country)
+{
+	ReadCVWaypoints(group);
+
+	arena->fields[field].cvs = &(arena->cvs[group]);
+
+	arena->cvs[group].id = group;
+	arena->cvs[group].field = field;
+	arena->cvs[group].country = country;
+	ResetCV(group);
+}
+
+ship_t *RemoveShip(ship_t *ship)
+{
+	u_int8_t group;
+	ship_t *previous = NULL;
+
+	if(!ship)
+	{
+		Com_Printf(VERBOSE_WARNING, "RemoveShip() ship == NULL\n");
+		return NULL;
+	}
+
+	group = ship->group;
+
+	if(arena->cvs[group].ships != ship)
+	{
+		for(previous = arena->cvs[group].ships; previous; previous = previous->next)
+		{
+			if(previous->next == ship)
+				break;
+		}
+	}
+
+	if(!previous)
+	{
+		if(arena->cvs[group].ships == ship) // ship is the first of chain
+		{
+			arena->cvs[group].ships = ship->next; // fix the chain
+		}
+		//	else // ship is not in group(!)
+	}
+	else if(previous->next == ship) // more than one ship in chain (if statement is redundant)
+	{
+		previous->next = ship->next; // fix the chain
+	}
+
+	if(ship->drone)
+		RemoveDrone(ship->drone);
+	free(ship);
+
+	return arena->cvs[group].ships;
+}
+
+ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
+{
+	ship_t *ship;
+
+	ship = Z_Malloc(sizeof(ship));
+
+	if(ship)
+	{
+		ship->group = group;
+		ship->country = country;
+		ship->Position.x = arena->cvs[group].wp[0][0];
+		ship->Position.y = arena->cvs[group].wp[0][1];
+		ship->Target.x = arena->cvs[group].wp[1][0];
+		ship->Target.y = arena->cvs[group].wp[1][1];
+		ship->Vel.curr = 0;
+		ship->Vel.target = ship->Vel.curr;
+		ship->Acel.curr = 0;
+		ship->Acel.target = ship->Acel.curr;
+		ship->Acel.min = -0.2;
+		ship->Acel.max = 0.6;
+		ship->Yaw.curr = Com_Rad(AngleTo(ship->Position.x, ship->Position.y, ship->Target.x, ship->Target.y));
+		ship->Yaw.target = ship->Yaw.curr;
+		ship->YawVel.curr = 0;
+		ship->YawVel.target = 0;
+		
+		switch(plane)
+		{
+			// CV
+			case SHIP_KAGA: // KAGA 73
+			case SHIP_ENTERPRISE: // ENTERPRISE 78
+				ship->type = SHIPTYPE_CV;
+				ship->radius = 872; // feet
+				ship->Vel.max = 27; // 54 feet per second
+				ship->Vel.min = 0.2;
+				ship->YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
+				ship->YawVel.min = -ship->YawVel.max;
+				break;
+			case SHIP_CA: // CA 77
+				ship->type = SHIPTYPE_CA;
+				ship->radius = 492; // feet
+				ship->Vel.max = 31; // 62 feet per second
+				ship->Vel.min = 0.2;
+				ship->YawVel.max = 1.33334 * M_PI / 180; // 2.6666º per second (in radians)
+				ship->YawVel.min = -ship->YawVel.max;
+				break;
+			case SHIP_DD: // DD 74
+				ship->type = SHIPTYPE_DD;
+				ship->radius = 376; // feet
+				ship->Vel.max = 31; // 61 feet per second
+				ship->Vel.min = 0.2;
+				ship->YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
+				ship->YawVel.min = -ship->YawVel.max;
+				break;
+			default:
+				Com_Printf(VERBOSE_WARNING, "AddShip(): unknown ship type\n");
+				break;
+		}
+
+		ship->drone = AddDrone(DRONE_SHIP, ship->Position.x, ship->Position.y, 0, ship->country, plane, NULL);
+
+		if(ship->drone)
+		{
+			Com_Printf(VERBOSE_ALWAYS, "Ship created. Group %d type %d\n", group, ship->type);
+		}
+		else
+		{
+			Com_Printf(VERBOSE_WARNING, "AddShip(): Cannot create drone\n");
+			RemoveShip(ship);
+			return NULL;
+		}
+		
+		// link the variable in backwards
+		ship->next = arena->cvs[group].ships;
+		arena->cvs[group].ships = ship;
+	}
+	else
+		Com_Printf(VERBOSE_WARNING, "AddShip(): ship == NULL\n");
+
+	return ship;
+}
