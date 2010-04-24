@@ -1070,8 +1070,26 @@ void CheckArenaRules(void)
 		{
 			for (i = 0; i < cvs->value; i++)
 				RunShips(i, 0);
+
+			// check if there are enemies around
+			if (arena->cvs[i].ships && !arena->cvs[i].threatened && !(arena->frame % 600))
+			{
+				for (j = 0; j < maxentities->value; j++)
+				{
+					if (clients[j].inuse && clients[j].ready && clients[j].infly && clients[j].country != arena->cvs[i].country)
+					{
+						if (DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0],
+							arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, 15000) >= 0)
+						{
+							ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
+							break;
+						}
+					}
+				}
+			}
 		}
 
+/** WB2 CV
 		for (i = 0; i < cvs->value; i++)
 		{
 			// CV Route
@@ -1203,6 +1221,7 @@ void CheckArenaRules(void)
 				}
 			}
 		}
+*/
 	}
 	else
 	{
@@ -6393,6 +6412,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 //			PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 	}
 
+/** WB2 CV
 	if (building->field <= fields->value)
 	{
 		if (building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE && damaged)
@@ -6400,6 +6420,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 			CheckBoatDamage(building, client);
 		}
 	}
+*/
 }
 
 /**
@@ -6532,6 +6553,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client->longnick, client->country ==building->country ? "friendly " : "", GetBuildingType(building->type), munition->abbrev);
 
+/** WB2 CV
 	if (building->field <= fields->value)
 	{
 		if (building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE && i)
@@ -6539,6 +6561,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 			CheckBoatDamage(building, client);
 		}
 	}
+*/
 }
 
 /**
@@ -7360,7 +7383,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 			{
 				if (!setjmp(debug_buffer))
 				{
-					if (client->fueltimer && client->fueltimer > 1000)
+					if (client->fueltimer > 1000)
 					{
 						client->damaged = 1;
 

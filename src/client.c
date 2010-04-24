@@ -390,11 +390,13 @@ int ProcessClient(client_t *client)
 
 				SendFieldsCountries(client);
 
+/** WB2 CV
 				for(i = 0; i < cvs->value; i++)
 				{
 					SendCVRoute(client, i);
 					SendCVPos(client, i);
 				}
+*/
 
 				if(client->hdserial || wb3->value)
 				{

@@ -598,7 +598,7 @@ typedef struct cv_s
 	u_int8_t	zigzag;			// next zigzag maneuver
 	u_int32_t	timebase;		// system time when next waypoint will be send
 	u_int8_t	wptotal;		// total of waypoints
-	u_int8_t	outofport;			// out of port (1st waypoint)
+	u_int8_t	outofport;		// out of port (1st waypoint)
 //	u_int8_t	stuck;			// stuck in land
 	char		logfile[64];	// logfile name
 	u_int8_t	wpnum;			// num of actual waypoint
@@ -2300,15 +2300,13 @@ u_int32_t GetBuildingImunity(u_int8_t type, client_t *client);
 void	SendMapDots(void);
 u_int8_t SeeEnemyDot(client_t *client, u_int8_t country);
 void	ClearMapDots(client_t *client);
-void	SendCVPos(client_t *client, u_int8_t cvnum);
-void	SetCVSpeed(cv_t *cv);
-u_int32_t GetCVTimebase(cv_t *cv);
-double	GetCVSpeeds(cv_t *cv, u_int8_t xy);
-void	SetCVRoute(cv_t *cv);
-int32_t GetCVPos(cv_t *cv, u_int8_t xy);
-void	ChangeCVRoute(cv_t *cv, double angle, u_int16_t distance,  client_t *client);
-void	SendCVRoute(client_t *client, u_int8_t cvnum);
-void	ReadCVWaypoints(u_int8_t num);
+//void	SendCVPos(client_t *client, u_int8_t cvnum);
+//void	SetCVSpeed(cv_t *cv);
+//u_int32_t GetCVTimebase(cv_t *cv);
+//double	GetCVSpeeds(cv_t *cv, u_int8_t xy);
+//void	SetCVRoute(cv_t *cv);
+//int32_t GetCVPos(cv_t *cv, u_int8_t xy);
+//void	SendCVRoute(client_t *client, u_int8_t cvnum);
 void	LogCVsPosition(void);
 void	ListWaypoints(client_t *client);
 char	*GetPlaneName(u_int16_t plane);
@@ -2330,7 +2328,7 @@ int8_t	HaveGunner(u_int16_t plane);
 void	LoadAmmo(client_t *client);
 void	LoadDamageModel(client_t *client);
 void	SaveDamageModel(client_t *client, char *row);
-void	CheckBoatDamage(building_t *building, client_t *client);
+//void	CheckBoatDamage(building_t *building, client_t *client);
 void	CaptureField(u_int8_t field, client_t *client);
 u_int16_t TimetoNextArena(void);
 void	InitArena(void);
@@ -2424,7 +2422,9 @@ void	RunShips_Yaw(ship_t *B, ship_t *CV);
 void	RunShips_ReTarget(ship_t *B, ship_t *D, ship_t *CV, const double *A);
 void	RunShips(u_int8_t group, u_int8_t formation); // Call every 500ms
 int8_t	ProcessDroneShips(ships_t *ship);
+void	ChangeCVRoute(cv_t *cv, double angle, u_int16_t distance,  client_t *client);
 ship_t	*MainShipTarget(u_int8_t group);
+void	ReadCVWaypoints(u_int8_t num);
 void	ResetCV(u_int8_t group);
 void	RemoveShip(ship_t *ship);
 ship_t	*AddShip(u_int8_t group, u_int8_t plane, u_int8_t country);

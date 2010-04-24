@@ -276,20 +276,33 @@ ship_t *MainShipTarget(u_int8_t group)
 			ship = ca;
 		else if(dd)
 			ship = dd;
+
+		// update field position
+		arena->fields[arena->cvs[group].field].posxyz[0] = ship->Position.x;
+		arena->fields[arena->cvs[group].field].posxyz[1] = ship->Position.y;
+
+		// update target waypoint (this may be changed manually or automatically for defensive maneuver)
+		ship->Target.x = arena->cvs[group].wp[arena->cvs[group].wpnum][0];
+		ship->Target.y = arena->cvs[group].wp[arena->cvs[group].wpnum][1];
 		
+		// Check waypoint
 		if((abs(ship->Target.y-ship->Position.y) > 70) || (abs(ship->Target.x-ship->Position.x) > 70))
 			return ship;
 
 		// Next waypoint
+		ReadCVWaypoints(group); // reload waypoints from file
+
+		if(arena->cvs[group].threatened)
+		{
+			arena->cvs[group].threatened = 0;
+		}
+
 		arena->cvs[group].wpnum++;
 
-		if (arena->cvs[group].wpnum == arena->cvs[group].wptotal) // reset waypoint index
+		if(arena->cvs[group].wpnum == arena->cvs[group].wptotal) // reset waypoint index
 		{
 			arena->cvs[group].wpnum = 1;
 		}
-
-		ship->Target.x = arena->cvs[group].wp[arena->cvs[group].wpnum][0];
-		ship->Target.y = arena->cvs[group].wp[arena->cvs[group].wpnum][1];
 
 		return ship;
 	}
@@ -354,6 +367,131 @@ void ConfigureCV(u_int8_t field, u_int8_t group, u_int8_t country)
 	arena->cvs[group].field = field;
 	arena->cvs[group].country = country;
 	ResetCV(group);
+}
+
+/**
+ ReadCVWaypoints
+
+ Read CV waypoints from file
+ */
+
+void ReadCVWaypoints(u_int8_t group)
+{
+	char file[32];
+	u_int8_t i;
+	FILE *fp;
+	char buffer[128];
+
+	snprintf(file, sizeof(file), "./arenas/%s/cv%d.rte", dirname->string, group);
+
+	arena->cvs[group].wptotal = 0;
+
+	if (!(fp = fopen(file, "r")))
+	{
+		PPrintf(NULL, RADIO_YELLOW, "WARNING: ReadCVWaypoints() Cannot open file \"%s\"", file);
+		return;
+	}
+
+	for (i = 0; fgets(buffer, sizeof(buffer), fp); i++)
+	{
+		arena->cvs[group].wp[i][0] = Com_Atoi((char *)strtok(buffer, ";"));
+		arena->cvs[group].wp[i][1] = Com_Atoi((char *)strtok(NULL, ";"));
+
+		arena->cvs[group].wptotal++;
+
+		if (arena->cvs[group].wptotal >= MAX_WAYPOINTS)
+			break;
+
+		memset(buffer, 0, sizeof(buffer));
+	}
+
+	if (!arena->cvs[group].wptotal)
+	{
+		PPrintf(NULL, RADIO_YELLOW, "WARNING: ReadCVWaypoints() error reading \"%s\"", file);
+	}
+
+	fclose(fp);
+}
+
+/**
+ ChangeCVRoute
+
+ Change Route of CV, in threathness or by command
+ */
+
+void ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client)
+{
+	u_int8_t lastwp;
+	int8_t angleoffset = 0;
+
+	if (cv->wpnum >= cv->wptotal)
+	{
+		Com_Printf(VERBOSE_WARNING, "ChangeCVRoute() wpnum >= wptotal\n");
+		cv->wpnum = 1;
+	}
+
+	cv->threatened = 1;
+
+	if (cv->wpnum == 1)
+	{
+		lastwp = cv->wptotal - 1;
+	}
+	else
+		lastwp = cv->wpnum - 1;
+
+	if (!client)
+	{
+		angle = AngleTo(cv->ships->Position.x, cv->ships->Position.y, cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1]);
+
+		if (rand()%100 < 60) // zigzag
+		{
+			angleoffset = 45 * Com_Pow(-1, cv->zigzag);
+
+			if (cv->zigzag == 1)
+			{
+				cv->zigzag = 2;
+			}
+			else
+			{
+				cv->zigzag = 1;
+			}
+		}
+		else
+		{
+			angleoffset = 45 * Com_Pow(-1, rand()%2);
+		}
+
+		if (GetHeightAt(cv->ships->Position.x - (10000 * sin(Com_Rad(angle + angleoffset))), cv->ships->Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
+		{
+			angleoffset *= -1;
+		}
+
+		angle += angleoffset;
+		distance = 2000;
+	}
+
+	// defines which waypoint will be changed
+	// if dist to next waypoint < 2000, dont backward wp counter
+	if (DistBetween(cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], 0, arena->fields[cv->field].posxyz[0], arena->fields[cv->field].posxyz[1], 0, 2000) >= 0)
+	{
+		lastwp = cv->wpnum;
+	}
+	else
+		cv->wpnum = lastwp;
+
+	cv->wp[lastwp][0] = arena->fields[cv->field].posxyz[0] - (distance * sin(Com_Rad(angle)));
+	cv->wp[lastwp][1] = arena->fields[cv->field].posxyz[1] + (distance * cos(Com_Rad(angle)));
+
+	if (client)
+	{
+		PPrintf(client, RADIO_YELLOW, "Waypoint changed to %s", Com_Padloc(cv->wp[lastwp][0], cv->wp[lastwp][1]));
+		PPrintf(client, RADIO_YELLOW, "ETA: %s\"", Com_TimeSeconds(distance / cv->speed));
+	}
+
+	//SetCVSpeed(cv);
+
+	// configure to next wpnum be that nearest to cv->wp[lastwp][0]
+	// coded at threatened = 0;
 }
 
 ship_t *RemoveShip(ship_t *ship)

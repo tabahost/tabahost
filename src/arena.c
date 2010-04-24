@@ -905,29 +905,21 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 
 		range /= 2;
 
-		for (i = 0, j = 0; i < cvs->value; i++)
+		for (i = 0, j = 0; (i < cvs->value) && !j; i++)
 		{
-			k = fields->value - i - 1;
-
-			if (!j)
+			if (arena->cv[i].ships && arena->cv[i].country == country)
 			{
-				if (arena->fields[k].country == country)
-				{
-					if (arena->fields[k].type >= FIELD_CV || arena->fields[k].type <= FIELD_SUBMARINE)
-					{
-						x = (arena->fields[k].posxyz[0] - client->posxy[0][0]) / 22;
-						y = (arena->fields[k].posxyz[1] - client->posxy[1][0]) / 22;
-						z = client->posalt[0] - arena->fields[k].posxyz[2];
+				x = (arena->cv[i].ships->Position.x - client->posxy[0][0]) / 22;
+				y = (arena->cv[i].ships->Position.y - client->posxy[1][0]) / 22;
+				z = client->posalt[0];
 
-						if (x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (arena->fields[k].posxyz[2] + radaralt->value) && z < (arena->fields[k].posxyz[2] + radarheight->value))
+				if (x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > radaralt->value && z < radarheight->value)
+				{
+					if (IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->cv[i].ships->Position.x, arena->cv[i].ships->Position.y, 0)
+					{
+						if (sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range/11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
 						{
-							if (IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->fields[k].posxyz[0], arena->fields[k].posxyz[1], arena->fields[k].posxyz[2]))
-							{
-								if (sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range/11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
-								{
-									j = 1;
-								}
-							}
+							j = 1;
 						}
 					}
 				}
@@ -982,7 +974,7 @@ void ClearMapDots(client_t *client)
 
  Send Current CV Pos
  */
-
+/** WB2 CV
 void SendCVPos(client_t *client, u_int8_t cvnum)
 {
 	cvpos_t *cvpos;
@@ -999,13 +991,14 @@ void SendCVPos(client_t *client, u_int8_t cvnum)
 
 	SendPacket(buffer, sizeof(buffer), client);
 }
+*/
 
 /**
  SetCVSpeed
 
  Set convoy speeds when some boat is damaged or reached waypoint
  */
-
+/** WB2 CV
 void SetCVSpeed(cv_t *cv)
 {
 	int16_t i;
@@ -1059,13 +1052,14 @@ void SetCVSpeed(cv_t *cv)
 	//	BPrintf(RADIO_RED, "DEBUG: timebase CV %d - %u", cv->field+1, cv->timebase);
 	cv->outofport = 1;
 }
+*/
 
 /**
  GetCVTimebase
 
  Get current timebase to reach next waypoint
  */
-
+/** WB2 CV
 u_int32_t GetCVTimebase(cv_t *cv)
 {
 	u_int32_t timebase;
@@ -1095,13 +1089,14 @@ u_int32_t GetCVTimebase(cv_t *cv)
 
 	return timebase;
 }
+*/
 
 /**
  GetCVSpeeds
 
  Get X or Y speed based on current route (current pos and destiny)
  */
-
+/** WB2 CV
 double GetCVSpeeds(cv_t *cv, u_int8_t xy)
 {
 	double prop;
@@ -1110,107 +1105,28 @@ double GetCVSpeeds(cv_t *cv, u_int8_t xy)
 
 	return (double)(cv->wp[cv->wpnum][xy] - arena->fields[cv->field].posxyz[xy]) * prop;
 }
+*/
 
 /**
  SetCVRoute
 
  Set CV Route (timebase and XY speeds)
  */
-
+/** WB2 CV
 void SetCVRoute(cv_t *cv)
 {
 	cv->xyspeed[0] = GetCVSpeeds(cv, 0);
 	cv->xyspeed[1] = GetCVSpeeds(cv, 1);
 	cv->timebase = GetCVTimebase(cv);
 }
-
-/**
- ChangeCVRoute
-
- Change Route of CV, in threathness or by command
- */
-
-void ChangeCVRoute(cv_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client)
-{
-	u_int8_t lastwp;
-	int8_t angleoffset = 0;
-
-	if (cv->wpnum >= cv->wptotal)
-	{
-		Com_Printf(VERBOSE_WARNING, "ChangeCVRoute() wpnum >= wptotal\n");
-		cv->wpnum = 1;
-	}
-
-	cv->threatened = 1;
-
-	if (cv->wpnum == 1)
-	{
-		lastwp = cv->wptotal - 1;
-	}
-	else
-		lastwp = cv->wpnum - 1;
-
-	if (!client)
-	{
-		angle = AngleTo(arena->fields[cv->field].posxyz[0], arena->fields[cv->field].posxyz[1], cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1]);
-
-		if (rand()%100 < 60) // zigzag
-		{
-			angleoffset = 45 * Com_Pow(-1, cv->zigzag);
-
-			if (cv->zigzag == 1)
-			{
-				cv->zigzag = 2;
-			}
-			else
-			{
-				cv->zigzag = 1;
-			}
-		}
-		else
-		{
-			angleoffset = 45 * Com_Pow(-1, rand()%2);
-		}
-
-		if (GetHeightAt(arena->fields[cv->field].posxyz[0] - (10000 * sin(Com_Rad(angle + angleoffset))), arena->fields[cv->field].posxyz[1] + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
-		{
-			angleoffset *= -1;
-		}
-
-		angle += angleoffset;
-		distance = 2000;
-	}
-
-	// defines which waypoint will be changed
-	// if dist to next waypoint < 2000, dont backward wp counter
-	if (DistBetween(cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], 0, arena->fields[cv->field].posxyz[0], arena->fields[cv->field].posxyz[1], 0, 2000) >= 0)
-	{
-		lastwp = cv->wpnum;
-	}
-	else
-		cv->wpnum = lastwp;
-
-	cv->wp[lastwp][0] = arena->fields[cv->field].posxyz[0] - (distance * sin(Com_Rad(angle)));
-	cv->wp[lastwp][1] = arena->fields[cv->field].posxyz[1] + (distance * cos(Com_Rad(angle)));
-
-	if (client)
-	{
-		PPrintf(client, RADIO_YELLOW, "Waypoint changed to %s", Com_Padloc(cv->wp[lastwp][0], cv->wp[lastwp][1]));
-		PPrintf(client, RADIO_YELLOW, "ETA: %s\"", Com_TimeSeconds(distance / cv->speed));
-	}
-
-	SetCVSpeed(cv);
-
-	// configure to next wpnum be that nearest to cv->wp[lastwp][0]
-	// coded at threatened = 0;
-}
+*/
 
 /**
  GetCVPos
 
  Get current XY CV pos based in estimated time to reach next waypoint and current XY speed
  */
-
+/** WB2 CV
 int32_t GetCVPos(cv_t *cv, u_int8_t xy)
 {
 	int32_t offset;
@@ -1225,13 +1141,14 @@ int32_t GetCVPos(cv_t *cv, u_int8_t xy)
 
 	return (int32_t)(cv->wp[cv->wpnum][xy] - offset);
 }
+*/
 
 /**
  SendCVRoute
 
  Send CV Route to client
  */
-
+/** WB2 CV
 void SendCVRoute(client_t *client, u_int8_t cvnum)
 {
 	cvroute_t *cvroute;
@@ -1241,20 +1158,20 @@ void SendCVRoute(client_t *client, u_int8_t cvnum)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	/*	if(!client->arenafieldsok)
-	 {
-	 Com_Printf(VERBOSE_DEBUG, "%s CV%u %u;%u;%u;%d;%d;%d;%d\n",
-	 client->longnick,
-	 cvnum,
-	 arena->cv[cvnum].wpnum,
-	 arena->time,
-	 arena->cv[cvnum].timebase,
-	 arena->cv[cvnum].wp[arena->cv[cvnum].wpnum][0],
-	 arena->cv[cvnum].wp[arena->cv[cvnum].wpnum][1],
-	 GetCVPos(&(arena->cv[cvnum]), 0),
-	 GetCVPos(&(arena->cv[cvnum]), 1));
-	 }
-	 */
+	//	if(!client->arenafieldsok)
+	// {
+	// Com_Printf(VERBOSE_DEBUG, "%s CV%u %u;%u;%u;%d;%d;%d;%d\n",
+	// client->longnick,
+	// cvnum,
+	// arena->cv[cvnum].wpnum,
+	// arena->time,
+	// arena->cv[cvnum].timebase,
+	// arena->cv[cvnum].wp[arena->cv[cvnum].wpnum][0],
+	// arena->cv[cvnum].wp[arena->cv[cvnum].wpnum][1],
+	// GetCVPos(&(arena->cv[cvnum]), 0),
+	// GetCVPos(&(arena->cv[cvnum]), 1));
+	// }
+	//
 	cvroute->packetid = htons(Com_WBhton(0x0303));
 	cvroute->number = htons(cvnum);
 	cvroute->basetime = htonl(arena->time);
@@ -1266,50 +1183,7 @@ void SendCVRoute(client_t *client, u_int8_t cvnum)
 
 	SendPacket(buffer, sizeof(buffer), client);
 }
-
-/**
- ReadCVWaypoints
-
- Read CV waypoints from file
- */
-
-void ReadCVWaypoints(u_int8_t group)
-{
-	char file[32];
-	u_int8_t i;
-	FILE *fp;
-	char buffer[128];
-
-	snprintf(file, sizeof(file), "./arenas/%s/cv%d.rte", dirname->string, group);
-
-	arena->cvs[group].wptotal = 0;
-
-	if (!(fp = fopen(file, "r")))
-	{
-		PPrintf(NULL, RADIO_YELLOW, "WARNING: ReadCVWaypoints() Cannot open file \"%s\"", file);
-		return;
-	}
-
-	for (i = 0; fgets(buffer, sizeof(buffer), fp); i++)
-	{
-		arena->cvs[group].wp[i][0] = Com_Atoi((char *)strtok(buffer, ";"));
-		arena->cvs[group].wp[i][1] = Com_Atoi((char *)strtok(NULL, ";"));
-
-		arena->cvs[group].wptotal++;
-
-		if (arena->cvs[group].wptotal >= MAX_WAYPOINTS)
-			break;
-
-		memset(buffer, 0, sizeof(buffer));
-	}
-
-	if (!arena->cvs[group].wptotal)
-	{
-		PPrintf(NULL, RADIO_YELLOW, "WARNING: ReadCVWaypoints() error reading \"%s\"", file);
-	}
-
-	fclose(fp);
-}
+*/
 
 /**
  LogCVsPosition
@@ -2785,6 +2659,7 @@ void SaveDamageModel(client_t *client, char *row)
  Check if boat was damage, set new speed or capture it
  */
 
+/** WB2 CV
 void CheckBoatDamage(building_t *building, client_t *client)
 {
 	u_int8_t capture = 0;
@@ -3055,6 +2930,8 @@ void CheckBoatDamage(building_t *building, client_t *client)
 		}
 	}
 }
+
+*/
 
 /**
  CaptureField
