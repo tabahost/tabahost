@@ -217,7 +217,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 				default:
 					clients[i].plane = 1;
 			}
-			clients[i].frame = arena->frame + (rand()%1000);
+			clients[i].frame = arena->frame;// + (rand()%1000);
 
 			clients[i].offset = 0;
 			clients[i].timer = arena->time;

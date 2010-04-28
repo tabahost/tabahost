@@ -33,16 +33,6 @@ void RunShips_Walk(ship_t *B)
 
 	B->Position.x = B->Position.x + B->Vel.curr * cos(B->Yaw.curr);
 	B->Position.y = B->Position.y + B->Vel.curr * sin(B->Yaw.curr);
-
-//	if(B->Position.x > B->x.Width)
-//		B->Position.x = B->Position.x - B->x.Width;
-//	else if(B->Position.x < 0)
-//		B->Position.x = B->Position.x + Box.Width;
-//
-//	if(B->Position.y > Box.Height)
-//		B->Position.y = B->Position.y - Box.Height;
-//	else if(B->Position.y < 0)
-//		B->Position.y = B->Position.y + Box.Height;
 }
 
 double RunShips_Angle(double ang)
@@ -130,14 +120,58 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 
 void RunShips_ReTarget(ship_t *B, ship_t *CV, const double *A)
 {
-	B->Target.x = CV->Position.x + A[0] * CV->radius * cos(CV->Yaw.curr+A[1]*M_PI);
-	B->Target.y = CV->Position.y + A[0] * CV->radius * sin(CV->Yaw.curr+A[1]*M_PI);
+	B->Target.x = CV->Position.x + A[0] * cos(CV->Yaw.curr+A[1]*M_PI);
+	B->Target.y = CV->Position.y + A[0] * sin(CV->Yaw.curr+A[1]*M_PI);
+}
+
+void RunShips_Prepare(ship_t *ship, ship_t *mainShip, const double *A)
+{
+	double dx, dy;
+
+	if(!A || ship == mainShip) // main Ship
+	{
+		dx = ship->Target.x - ship->Position.x;
+		dy = ship->Target.y - ship->Position.y;
+
+		if(dy == 0)
+		{
+			if(dx > 0) // direita
+				ship->Yaw.target = 0;
+			else // esquerda
+				ship->Yaw.target = M_PI;
+		}
+		else if(dx == 0)
+		{
+			if(dy > 0) // baixo
+				ship->Yaw.target = 1.5*M_PI;
+			else // cima
+				ship->Yaw.target = 0.5*M_PI;
+		}
+		else
+		{
+			ship->Yaw.target = atan(dy/dx);
+			if(dx<0)
+				ship->Yaw.target = ship->Yaw.target + M_PI;
+		}
+
+		ship->Yaw.target = RunShips_Angle(ship->Yaw.target);
+		ship->Yaw.curr = ship->Yaw.target;
+	}
+	else
+	{
+		ship->Yaw.target = mainShip->Yaw.target;
+		ship->Yaw.curr = mainShip->Yaw.curr;
+		ship->Target.x = mainShip->Position.x + A[0] * cos(mainShip->Yaw.curr+A[1]*M_PI);
+		ship->Target.y = mainShip->Position.y + A[0] * sin(mainShip->Yaw.curr+A[1]*M_PI);
+		ship->Position.x = ship->Target.x;
+		ship->Position.y = ship->Target.y;
+	}
 }
 
 void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 {
 	const double Form[4][6][2] = {
-		{{50,0.25},{50,-0.25},{84.85281,0.75},{84.85281,-0.75},{60,1},{80,0}},
+		{{2500,0.25},{2500,-0.25},{4243,0.75},{4243,-0.75},{3000,1},{4000,0}},
 		{{600,0.25},{600,-0.25},{848.5281,0.5},{848.5281,-0.5},{600,1},{700,0}},
 		{{500,0.5},{500,-0.5},{5,1},{707.1068,0.75},{707.1068,-0.75},{500,0}},
 		{{600,0.1667},{600,-0.1667},{600,0.5},{6,-0.5},{600,0.8333},{600,-0.8333}}
@@ -151,6 +185,20 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 	mainShip = MainShipTarget(group);
 	if(!mainShip)
 		return;
+
+	// if first steps, configure all ships
+	if((arena->frame - mainShip->drone->frame) < 100)
+	{
+		RunShips_Prepare(mainShip, mainShip, NULL);
+
+		for(i = 0, ship = arena->cvs[group].ships; ship && i < 6; ship = ship->next)
+		{
+			if(ship == mainShip)
+				continue;
+			else
+				RunShips_Prepare(ship, mainShip, Form[formation][i++]);
+		}
+	}
 
 	RunShips_Yaw(mainShip, mainShip);
 	RunShips_Walk(mainShip);
@@ -237,7 +285,7 @@ int8_t ProcessDroneShips(ship_t *ship)
 	drone->speedxyz[2][0] = 0; // Z
 	drone->angles[0][0] = 0; // Roll
 	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr + 4.71238899) * 10); // Yaw
+	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr + 4.69493569) * 10); // Yaw
 	drone->accelxyz[0][0] = ship->Acel.curr * cos(ship->Yaw.curr); // X
 	drone->accelxyz[1][0] = ship->Acel.curr * sin(ship->Yaw.curr); // Y
 	drone->accelxyz[2][0] = 0; // Z
@@ -583,8 +631,8 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 		ship->Vel.target = ship->Vel.curr;
 		ship->Acel.curr = 0;
 		ship->Acel.target = ship->Acel.curr;
-		ship->Acel.min = -0.2;
-		ship->Acel.max = 0.6;
+		ship->Acel.min = -2;
+		ship->Acel.max = 4;
 		ship->Yaw.curr = Com_Rad(AngleTo(ship->Position.x, ship->Position.y, ship->Target.x, ship->Target.y));
 		ship->Yaw.target = ship->Yaw.curr;
 		ship->YawVel.curr = 0;
@@ -596,26 +644,26 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 			case SHIP_KAGA: // KAGA 73
 			case SHIP_ENTERPRISE: // ENTERPRISE 78
 				ship->type = SHIPTYPE_CV;
-				ship->radius = 100; // 872 feet
-				ship->Vel.max = 50; // 54 feet per second
+				ship->radius = 400; // 800 feet
+				ship->Vel.max = 27; // 54 feet per second
 				ship->Vel.min = 0.2;
-				ship->YawVel.max = 4 * M_PI / 180; // 2º per second (in radians)
+				ship->YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;
 				break;
 			case SHIP_CA: // CA 77
 				ship->type = SHIPTYPE_CA;
-				ship->radius = 100; // 492 feet
-				ship->Vel.max = 100; // 62 feet per second
+				ship->radius = 165; // 330 feet
+				ship->Vel.max = 31; // 62 feet per second
 				ship->Vel.min = 0.2;
-				ship->YawVel.max = 4 * M_PI / 180; // 2.6666º per second (in radians)
+				ship->YawVel.max = 1.3334 * M_PI / 180; // 2.6666º per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;
 				break;
 			case SHIP_DD: // DD 74
 				ship->type = SHIPTYPE_DD;
-				ship->radius = 100; // 376 feet
-				ship->Vel.max = 100; // 61 feet per second
+				ship->radius = 165; // 330 feet
+				ship->Vel.max = 31; // 61 feet per second
 				ship->Vel.min = 0.2;
-				ship->YawVel.max = 4 * M_PI / 180; // 3º per second (in radians)
+				ship->YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;
 				break;
 			default:
