@@ -195,6 +195,15 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].ready = 0;
 					clients[i].countrytime = 100;
 					break;
+				case DRONE_SHIP:
+					clients[i].plane = plane;
+					clients[i].posxy[0][0] = posx;
+					clients[i].posxy[1][0] = posy;
+					clients[i].posalt[0] = posz;
+					clients[i].country = country;
+					clients[i].shortnick = shortnick;
+					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
+					break;
 				case DRONE_DEBUG:
 					clients[i].plane = plane;
 					clients[i].posxy[0][0] = posx;
@@ -345,6 +354,9 @@ int ProcessDrone(client_t *drone)
 	u_int32_t dist;
 	client_t *near;
 	building_t *buildings;
+
+	if(drone->drone & DRONE_SHIP) // do not process ships
+		return 0;
 
 	if (drone->bugged)
 	{
@@ -1760,11 +1772,12 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, u_int8_t type, u_int16_t speed, u_
 									{
 										DebugClient(__FILE__, __LINE__, TRUE, client);
 									}
-
+/** WB2 CV
 									if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE && damaged)
 									{
 										CheckBoatDamage(&arena->fields[field].buildings[i], client);
 									}
+*/
 
 									if (gunstats->value > 1 && client->gunstat)
 										PPrintf(client, RADIO_GREEN, "Hit %s", GetBuildingType(arena->fields[field].buildings[i].type));
@@ -1990,7 +2003,10 @@ u_int32_t NewDroneName(client_t *client)
 
 	if (Sys_LockFile(FILE_DRONENICKS_LOCK) < 0)
 	{
-		return client->shortnick;
+		if(client)
+			return client->shortnick;
+		else
+			return ascii2wbnick("unamed", 1);
 	}
 
 	if ((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
@@ -2005,7 +2021,10 @@ u_int32_t NewDroneName(client_t *client)
 			Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 			fclose(fp);
 			Sys_UnlockFile(FILE_DRONENICKS_LOCK);
-			return client->shortnick;
+			if(client)
+				return client->shortnick;
+			else
+				return ascii2wbnick("unamed", 1);
 		}
 
 		i = Com_Atoi(buffer);
@@ -2020,7 +2039,10 @@ u_int32_t NewDroneName(client_t *client)
 				Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 				fclose(fp);
 				Sys_UnlockFile(FILE_DRONENICKS_LOCK);
-				return client->shortnick;
+				if(client)
+					return client->shortnick;
+				else
+					return ascii2wbnick("unamed", 1);
 			}
 
 			k++;
@@ -2044,7 +2066,10 @@ u_int32_t NewDroneName(client_t *client)
 					Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 					fclose(fp);
 					Sys_UnlockFile(FILE_DRONENICKS_LOCK);
-					return client->shortnick;
+					if(client)
+						return client->shortnick;
+					else
+						return ascii2wbnick("unamed", 1);
 				}
 
 				nick = ascii2wbnick(buffer, 1);
@@ -2070,7 +2095,10 @@ u_int32_t NewDroneName(client_t *client)
 			{
 				Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", FILE_DRONENICKS);
 				Sys_UnlockFile(FILE_DRONENICKS_LOCK);
-				return client->shortnick;
+				if(client)
+					return client->shortnick;
+				else
+					return ascii2wbnick("unamed", 1);
 			}
 			else
 			{
@@ -2080,7 +2108,10 @@ u_int32_t NewDroneName(client_t *client)
 					Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 					fclose(fp);
 					Sys_UnlockFile(FILE_DRONENICKS_LOCK);
-					return client->shortnick;
+					if(client)
+						return client->shortnick;
+					else
+						return ascii2wbnick("unamed", 1);
 				}
 
 				for (k = 0; k < j; k++)
@@ -2090,7 +2121,10 @@ u_int32_t NewDroneName(client_t *client)
 						Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 						fclose(fp);
 						Sys_UnlockFile(FILE_DRONENICKS_LOCK);
-						return client->shortnick;
+						if(client)
+							return client->shortnick;
+						else
+							return ascii2wbnick("unamed", 1);
 					}
 
 					nick = ascii2wbnick(buffer, 0);//1);
@@ -2111,7 +2145,10 @@ u_int32_t NewDroneName(client_t *client)
 
 				if (k == j)
 				{
-					nick = client->shortnick;
+					if(client)
+						nick = client->shortnick;
+					else
+						nick = ascii2wbnick("unamed", 1);
 				}
 			}
 		}

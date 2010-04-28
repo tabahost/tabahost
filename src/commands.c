@@ -2521,8 +2521,8 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 				if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 				{
-					if (arena->fields[field].cv)
-						fprintf(fp, "%.3f ft/s", arena->fields[field].cv->speed);
+					if (arena->fields[field].cvs->ships)
+						fprintf(fp, "%.3f ft/s", arena->fields[field].cvs->ships->Vel.curr);
 					else
 						Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
 				}
@@ -2685,8 +2685,8 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 			if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 			{
-				if (arena->fields[field].cv)
-					fprintf(fp, "CONVOY SPEED: %.3f ft/s\n\n", arena->fields[field].cv->speed);
+				if (arena->fields[field].cvs->ships)
+					fprintf(fp, "CONVOY SPEED: %.3f ft/s\n\n", arena->fields[field].cvs->ships->Vel.curr);
 				else
 					Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
 			}
@@ -5857,7 +5857,7 @@ void Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client)
 	if (arena->fields[client->field - 1].type >= FIELD_CV && arena->fields[client->field - 1].type <= FIELD_SUBMARINE)
 	{
 		if (distance <= 20000 && distance >= 5000)
-			ChangeCVRoute(arena->fields[client->field - 1].cv, angle, distance, client);
+			ChangeCVRoute(arena->fields[client->field - 1].cvs, angle, distance, client);
 		else
 			PPrintf(client, RADIO_LIGHTYELLOW, "Distance limited to 5000 - 20000 feets");
 	}

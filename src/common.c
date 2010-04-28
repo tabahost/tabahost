@@ -1486,7 +1486,14 @@ double Com_Rad(double angle)
 
 double Com_Deg(double angle)
 {
-	return (angle * 180 / M_PI);
+	double degree;
+
+	degree = (angle * 180.0 / M_PI);
+
+	while(degree >= 360.0)
+		degree -= 360.0;
+
+	return degree;
 }
 
 /**

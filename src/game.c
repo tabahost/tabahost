@@ -313,7 +313,7 @@ void CheckArenaRules(void)
 	u_int8_t reds, golds, k;
 	double tonnage_recover;
 	u_int8_t c_cities, totalcities;
-	u_int32_t dist, tempdist;
+	u_int32_t dist;
 	int32_t posx;
 	char file[128];
 	//	double angle;
@@ -434,8 +434,8 @@ void CheckArenaRules(void)
 								arena->fields[i].buildings[j].status = 0;
 								arena->fields[i].buildings[j].armor = GetBuildingArmor(arena->fields[i].buildings[j].type, NULL);
 
-								if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
-									SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
+//								if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
+//									SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
 
 								SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status, NULL);
 
@@ -1842,7 +1842,7 @@ void ProcessCommands(char *command, client_t *client)
 		{
 			if(argv[0])
 			{
-				if(pclient = FindLClient(argv[0]))
+				if((pclient = FindLClient(argv[0])))
 				{
 					PPrintf(client, RADIO_YELLOW, "%s connection quality is currently: %s", pclient->longnick, !(pclient->cancollide)?"Not available":pclient->connection == 0?"Stable":pclient->connection == 1?"Fair":pclient->connection == 2?"Unstable":"Poor");
 				}
@@ -5019,7 +5019,6 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	u_int32_t distance, oldpostimer, basetimer;
 	int16_t clientoffset;
 	int16_t posoffset;
-	double conn_avgdiff;
 	client_t *near = NULL;
 
 	if (wb3->value)
@@ -7824,14 +7823,15 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 				if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
 				{
-					if (building->type >= BUILD_CV && building->type <= BUILD_CARGO)
-					{
-						SinkBoat(FALSE, building, NULL);
-						PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
-
-						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
-					}
-					else if (IsVitalBuilding(building, oldcapt->value))
+//					if (building->type >= BUILD_CV && building->type <= BUILD_CARGO)
+//					{
+//						SinkBoat(FALSE, building, NULL);
+//						PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
+//
+//						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
+//					}
+//					else
+					if (IsVitalBuilding(building, oldcapt->value))
 					{
 						PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s", GetBuildingType(building->type), Com_TimeSeconds(building->timer/100));
 
@@ -7905,8 +7905,8 @@ void SendFieldStatus(u_int16_t field, client_t *client)
 			{
 				if (arena->fields[field].buildings[i].status)
 				{
-					if ((arena->fields[field].buildings[i].type > BUILD_CV) && (arena->fields[field].buildings[i].type <= BUILD_SUBMARINE))
-						SinkBoat(FALSE, &arena->fields[field].buildings[i], client);
+//					if ((arena->fields[field].buildings[i].type > BUILD_CV) && (arena->fields[field].buildings[i].type <= BUILD_SUBMARINE))
+//						SinkBoat(FALSE, &arena->fields[field].buildings[i], client);
 
 					SetBuildingStatus(&arena->fields[field].buildings[i], 2, client);
 				}
@@ -11846,7 +11846,7 @@ void Kamikase(client_t *client)
 
  Sink or Raise boats
  */
-
+/** WB2 CV
 void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
 {
 	sinkboat_t *sink;
@@ -11907,6 +11907,7 @@ void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
 		}
 	}
 }
+*/
 
 /**
  GetFactoryReupTime

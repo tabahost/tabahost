@@ -907,15 +907,15 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 
 		for (i = 0, j = 0; (i < cvs->value) && !j; i++)
 		{
-			if (arena->cv[i].ships && arena->cv[i].country == country)
+			if (arena->cvs[i].ships && arena->cvs[i].country == country)
 			{
-				x = (arena->cv[i].ships->Position.x - client->posxy[0][0]) / 22;
-				y = (arena->cv[i].ships->Position.y - client->posxy[1][0]) / 22;
+				x = (arena->cvs[i].ships->Position.x - client->posxy[0][0]) / 22;
+				y = (arena->cvs[i].ships->Position.y - client->posxy[1][0]) / 22;
 				z = client->posalt[0];
 
 				if (x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > radaralt->value && z < radarheight->value)
 				{
-					if (IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->cv[i].ships->Position.x, arena->cv[i].ships->Position.y, 0)
+					if (IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0))
 					{
 						if (sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range/11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
 						{
@@ -1199,7 +1199,7 @@ void LogCVsPosition(void)
 
 	for (i = 0; i < cvs->value; i++)
 	{
-		if(arena->cv[i].ships)
+		if(arena->cvs[i].ships)
 		{
 			snprintf(filename, sizeof(filename), "./logs/players/%s.cvl", arena->cvs[i].logfile);
 
@@ -1209,8 +1209,8 @@ void LogCVsPosition(void)
 			}
 			else
 			{
-				fprintf(fp, "%d;%d;%f;%f;%u;%u;%u\n", arena->cv[i].ships->Position.x, arena->cv[i].ships->Position.y, arena->cv[i].ships->Vel.curr, Com_Deg(arena->cv[i].ships->Yaw.curr),
-						arena->cv[i].threatened, arena->cv[i].country, (u_int32_t)time(NULL));
+				fprintf(fp, "%d;%d;%f;%f;%u;%u;%u\n", arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, arena->cvs[i].ships->Vel.curr, Com_Deg(arena->cvs[i].ships->Yaw.curr),
+						arena->cvs[i].threatened, arena->cvs[i].country, (u_int32_t)time(NULL));
 				fclose(fp);
 			}
 		}
@@ -3220,6 +3220,7 @@ void ChangeArena(char *map, client_t *client)
 		{
 			if ((arena->fields[i].type == FIELD_CV) || (arena->fields[i].type == FIELD_CARGO) || (arena->fields[i].type == FIELD_DD) || (arena->fields[i].type == FIELD_SUBMARINE))
 			{
+				Com_Printf(VERBOSE_DEBUG, "CV Detected\n");
 				ConfigureCV(i, j, arena->fields[i].country);
 				j++;
 			}
@@ -3301,7 +3302,8 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 		{
 			if (arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 			{
-				if (!cvs || (arena->fields[i].cv->speed == 0.01))
+				// TODO Check this in new cvs
+				if (!cvs || (arena->fields[i].cvs->ships && (arena->fields[i].cvs->ships->Vel.curr == 0.01)))
 				{
 					continue;
 				}

@@ -34,15 +34,15 @@ void RunShips_Walk(ship_t *B)
 	B->Position.x = B->Position.x + B->Vel.curr * cos(B->Yaw.curr);
 	B->Position.y = B->Position.y + B->Vel.curr * sin(B->Yaw.curr);
 
-	if(B->Position.x > B->x.Width)
-		B->Position.x = B->Position.x - B->x.Width;
-	else if(B->Position.x < 0)
-		B->Position.x = B->Position.x + Box.Width;
-
-	if(B->Position.y > Box.Height)
-		B->Position.y = B->Position.y - Box.Height;
-	else if(B->Position.y < 0)
-		B->Position.y = B->Position.y + Box.Height;
+//	if(B->Position.x > B->x.Width)
+//		B->Position.x = B->Position.x - B->x.Width;
+//	else if(B->Position.x < 0)
+//		B->Position.x = B->Position.x + Box.Width;
+//
+//	if(B->Position.y > Box.Height)
+//		B->Position.y = B->Position.y - Box.Height;
+//	else if(B->Position.y < 0)
+//		B->Position.y = B->Position.y + Box.Height;
 }
 
 double RunShips_Angle(double ang)
@@ -94,7 +94,7 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 		}
 		else
 		{
-			B->Yaw.target = arctan(dy/dx);
+			B->Yaw.target = atan(dy/dx);
 			if(dx<0)
 				B->Yaw.target = B->Yaw.target + M_PI;
 		}
@@ -112,7 +112,7 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 	B->Yaw.curr = RunShips_Angle(B->Yaw.curr + B->YawVel.curr);
 	// ajusta velocidade
 	B->Vel.target = sqrt(dx*dx+dy*dy) / 3;
-	dx = B->Vel.max * (1 - MODULUS(RunShips_AngleDef(B->Yaw.target - B->Yaw.curr) / (0.5 * M_PI))); // 1 - x°/90°
+	dx = B->Vel.max * (1 - MODULUS(RunShips_AngleDef(B->Yaw.target - B->Yaw.curr) / (0.5 * M_PI))); // 1 - xï¿½/90ï¿½
 
 	if(dx < B->Vel.min)
 		dx = B->Vel.min;
@@ -128,49 +128,73 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 	// B->Vel.curr = B->Vel.target;
 }
 
-void RunShips_ReTarget(ship_t *B, ship_t *D, ship_t *CV, const double *A)
+void RunShips_ReTarget(ship_t *B, ship_t *CV, const double *A)
 {
-	B->Target.x = D->Position.x + A[0] * CV->radius * cos(CV->Yaw.curr+A[1]*M_PI);
-	B->Target.y = D->Position.y + A[0] * CV->radius * sin(CV->Yaw.curr+A[1]*M_PI);
+	B->Target.x = CV->Position.x + A[0] * CV->radius * cos(CV->Yaw.curr+A[1]*M_PI);
+	B->Target.y = CV->Position.y + A[0] * CV->radius * sin(CV->Yaw.curr+A[1]*M_PI);
 }
 
 void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 {
 	const double Form[4][6][2] = {
-		{{500,0.25},{500,-0.25},{848.5281,0.75},{848.5281,-0.75},{600,1},{800,0}},
+		{{50,0.25},{50,-0.25},{84.85281,0.75},{84.85281,-0.75},{60,1},{80,0}},
 		{{600,0.25},{600,-0.25},{848.5281,0.5},{848.5281,-0.5},{600,1},{700,0}},
 		{{500,0.5},{500,-0.5},{5,1},{707.1068,0.75},{707.1068,-0.75},{500,0}},
 		{{600,0.1667},{600,-0.1667},{600,0.5},{6,-0.5},{600,0.8333},{600,-0.8333}}
 	};
 
 	u_int8_t i;
-	int32_t FIdx;
-	ships_t *mainShip = NULL;
-	ships_t *ship = NULL;
+	ship_t *mainShip = NULL;
+	ship_t *ship = NULL;
+	client_t *near = NULL;
 
 	mainShip = MainShipTarget(group);
 	if(!mainShip)
 		return;
 
-	RunShips_Yaw(mainShip);
+	RunShips_Yaw(mainShip, mainShip);
 	RunShips_Walk(mainShip);
 
 	if(ProcessDroneShips(mainShip) < 0)
 	{
 		if(RemoveShip(mainShip))
-			RunShips(group); // Find next mainship and continue. If no mainShip is found, it will return here.
+		{
+			Com_Printf(VERBOSE_DEBUG, "RunShips() ProcessDroneShips(error), going to recursive call\n");
+			RunShips(group, formation); // Find next mainship and continue. If no mainShip is found, it will return here.
+		}
 		else // no more ships in array, reset it
 			ResetCV(group);
 		return;
 	}
 
+//	if((near = NearPlane(mainShip->drone, 0, planerangelimit->value)))
+//	{
+//		Com_Printf(VERBOSE_DEBUG, "Near %s X %u Y %u Z %u\n",
+//			near->longnick,
+//			near->posxy[0][0],
+//			near->posxy[1][0],
+//			near->posalt[0]);
+//	}
+
 	for(i = 0, ship = arena->cvs[group].ships; ship && i < 6; ship = ship->next)
 	{
 		if(ship == mainShip)
+		{
+//			Com_Printf(VERBOSE_DEBUG, "Type %u CV %s X %u Y %u H.curr %.2f H.tar %.2f S.curr %.2f S.tar %.2f\n",
+//					ship->type,
+//					ship->drone->longnick,
+//					ship->drone->posxy[0][0],
+//					ship->drone->posxy[1][0],
+//					ship->Yaw.curr,
+//					ship->Yaw.target,
+//					ship->Vel.curr,
+//					ship->Vel.target);
+
 			continue;
+		}
 
 		RunShips_ReTarget(ship, mainShip, Form[formation][i++]);
-		RunShips_Yaw(ship);
+		RunShips_Yaw(ship, mainShip);
 		RunShips_Walk(ship);
 		if(ProcessDroneShips(ship) < 0)
 		{
@@ -180,7 +204,7 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 	}
 }
 
-int8_t ProcessDroneShips(ships_t *ship)
+int8_t ProcessDroneShips(ship_t *ship)
 {
 	client_t *drone;
 
@@ -213,7 +237,7 @@ int8_t ProcessDroneShips(ships_t *ship)
 	drone->speedxyz[2][0] = 0; // Z
 	drone->angles[0][0] = 0; // Roll
 	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr) * 10); // Yaw
+	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr + 4.71238899) * 10); // Yaw
 	drone->accelxyz[0][0] = ship->Acel.curr * cos(ship->Yaw.curr); // X
 	drone->accelxyz[1][0] = ship->Acel.curr * sin(ship->Yaw.curr); // Y
 	drone->accelxyz[2][0] = 0; // Z
@@ -229,9 +253,6 @@ int8_t ProcessDroneShips(ships_t *ship)
 
 ship_t *MainShipTarget(u_int8_t group)
 {
-	u_int8_t i
-	int8_t cv, da, dd;
-	double yaw;
 	ship_t *ship;
 	ship_t *cv = NULL;
 	ship_t *ca = NULL;
@@ -317,6 +338,8 @@ void RemoveAllShips(u_int8_t group)
 {
 	ship_t *ship;
 
+	Com_Printf(VERBOSE_DEBUG, "RemoveAllShips() group %u\n", group);
+
 	for(ship = arena->cvs[group].ships; ship; ship = ship->next)
 	{
 		if(ship->drone)
@@ -329,6 +352,8 @@ void RemoveAllShips(u_int8_t group)
 
 void CreateAllShips(u_int8_t group)
 {
+	Com_Printf(VERBOSE_DEBUG, "CreateAllShips() group %u\n", group);
+
 	AddShip(group, SHIP_DD, arena->cvs[group].country);
 	AddShip(group, SHIP_DD, arena->cvs[group].country);
 	AddShip(group, SHIP_DD, arena->cvs[group].country);
@@ -347,7 +372,7 @@ void CreateAllShips(u_int8_t group)
 void ResetCV(u_int8_t group)
 {
 	// CREATE ALL SHIPS AGAIN
-
+	Com_Printf(VERBOSE_DEBUG, "ResetCV() group %u\n", group);
 	RemoveAllShips(group);
 	CreateAllShips(group);
 
@@ -359,6 +384,8 @@ void ResetCV(u_int8_t group)
 
 void ConfigureCV(u_int8_t field, u_int8_t group, u_int8_t country)
 {
+	Com_Printf(VERBOSE_DEBUG, "ConfigureCV(): Creationg CV field %u, group %u, country %u\n", field, group, country);
+
 	ReadCVWaypoints(group);
 
 	arena->fields[field].cvs = &(arena->cvs[group]);
@@ -381,6 +408,8 @@ void ReadCVWaypoints(u_int8_t group)
 	u_int8_t i;
 	FILE *fp;
 	char buffer[128];
+
+	Com_Printf(VERBOSE_DEBUG, "ReadCVWaypoints() group %u\n", group);
 
 	snprintf(file, sizeof(file), "./arenas/%s/cv%d.rte", dirname->string, group);
 
@@ -485,7 +514,7 @@ void ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, 
 	if (client)
 	{
 		PPrintf(client, RADIO_YELLOW, "Waypoint changed to %s", Com_Padloc(cv->wp[lastwp][0], cv->wp[lastwp][1]));
-		PPrintf(client, RADIO_YELLOW, "ETA: %s\"", Com_TimeSeconds(distance / cv->speed));
+		PPrintf(client, RADIO_YELLOW, "ETA: %s\"", Com_TimeSeconds(distance / cv->ships->Vel.curr));
 	}
 
 	//SetCVSpeed(cv);
@@ -540,7 +569,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 {
 	ship_t *ship;
 
-	ship = Z_Malloc(sizeof(ship));
+	ship = Z_Malloc(sizeof(ship_t));
 
 	if(ship)
 	{
@@ -567,26 +596,26 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 			case SHIP_KAGA: // KAGA 73
 			case SHIP_ENTERPRISE: // ENTERPRISE 78
 				ship->type = SHIPTYPE_CV;
-				ship->radius = 872; // feet
-				ship->Vel.max = 27; // 54 feet per second
+				ship->radius = 100; // 872 feet
+				ship->Vel.max = 50; // 54 feet per second
 				ship->Vel.min = 0.2;
-				ship->YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
+				ship->YawVel.max = 4 * M_PI / 180; // 2Âº per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;
 				break;
 			case SHIP_CA: // CA 77
 				ship->type = SHIPTYPE_CA;
-				ship->radius = 492; // feet
-				ship->Vel.max = 31; // 62 feet per second
+				ship->radius = 100; // 492 feet
+				ship->Vel.max = 100; // 62 feet per second
 				ship->Vel.min = 0.2;
-				ship->YawVel.max = 1.33334 * M_PI / 180; // 2.6666º per second (in radians)
+				ship->YawVel.max = 4 * M_PI / 180; // 2.6666Âº per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;
 				break;
 			case SHIP_DD: // DD 74
 				ship->type = SHIPTYPE_DD;
-				ship->radius = 376; // feet
-				ship->Vel.max = 31; // 61 feet per second
+				ship->radius = 100; // 376 feet
+				ship->Vel.max = 100; // 61 feet per second
 				ship->Vel.min = 0.2;
-				ship->YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
+				ship->YawVel.max = 4 * M_PI / 180; // 3Âº per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;
 				break;
 			default:
@@ -598,7 +627,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 
 		if(ship->drone)
 		{
-			Com_Printf(VERBOSE_ALWAYS, "Ship created. Group %d type %d\n", group, ship->type);
+			Com_Printf(VERBOSE_ALWAYS, "Ship %s created. Group %d type %d\n", ship->drone->longnick, group, ship->type);
 		}
 		else
 		{
