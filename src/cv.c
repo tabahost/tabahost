@@ -226,18 +226,17 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 
 	for(i = 0, ship = arena->cvs[group].ships; ship && i < 6; ship = ship->next)
 	{
+//		Com_Printf(VERBOSE_DEBUG, "Type %u CV %s X %u Y %u Head %u S %.2f S.tar %.2f\n",
+//				ship->type,
+//				ship->drone->longnick,
+//				ship->drone->posxy[0][0],
+//				ship->drone->posxy[1][0],
+//				ship->drone->angles[2][0],
+//				ship->Vel.curr,
+//				ship->Vel.target);
+
 		if(ship == mainShip)
 		{
-//			Com_Printf(VERBOSE_DEBUG, "Type %u CV %s X %u Y %u H.curr %.2f H.tar %.2f S.curr %.2f S.tar %.2f\n",
-//					ship->type,
-//					ship->drone->longnick,
-//					ship->drone->posxy[0][0],
-//					ship->drone->posxy[1][0],
-//					ship->Yaw.curr,
-//					ship->Yaw.target,
-//					ship->Vel.curr,
-//					ship->Vel.target);
-
 			continue;
 		}
 
@@ -291,7 +290,7 @@ int8_t ProcessDroneShips(ship_t *ship)
 	drone->accelxyz[2][0] = 0; // Z
 	drone->aspeeds[0][0] = 0; // Roll
 	drone->aspeeds[1][0] = 0; // Pitch
-	drone->aspeeds[2][0] = floor(Com_Deg(ship->YawVel.curr) * 2); // Yaw - degrees per second?
+	drone->aspeeds[2][0] = floor(Com_Deg(ship->YawVel.curr)); // debug * 2); // Yaw - degrees per second?
 
 	drone->offset = -500;
 	drone->timer += 500;
