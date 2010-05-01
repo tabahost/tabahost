@@ -58,16 +58,16 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 {
 	double dx, dy;
 
+	dx = B->Target.x - B->Position.x;
+	dy = B->Target.y - B->Position.y;
+
 	// ajusta angulo alvo
-	if(B->Position.x == B->Target.x && B->Position.y == B->Target.y)
+	if(sqrt(dx*dx+dy*dy) < 100) // ship reached WP
 	{
 		B->Yaw.target = RunShips_Angle(CV->Yaw.curr);
 	}
 	else
 	{
-		dx = B->Target.x - B->Position.x;
-		dy = B->Target.y - B->Position.y;
-
 		if(dy == 0)
 		{
 			if(dx > 0) // direita
@@ -226,12 +226,12 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 
 	for(i = 0, ship = arena->cvs[group].ships; ship && i < 6; ship = ship->next)
 	{
-//		Com_Printf(VERBOSE_DEBUG, "Type %u CV %s X %u Y %u Head %u S %.2f S.tar %.2f\n",
+//		Com_Printf(VERBOSE_DEBUG, "Type %u CV %s X %u Y %u Head %.2f S %.2f S.tar %.2f\n",
 //				ship->type,
 //				ship->drone->longnick,
 //				ship->drone->posxy[0][0],
 //				ship->drone->posxy[1][0],
-//				ship->drone->angles[2][0],
+//				Com_Deg(ship->Yaw.curr),
 //				ship->Vel.curr,
 //				ship->Vel.target);
 

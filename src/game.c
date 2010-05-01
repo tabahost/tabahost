@@ -230,7 +230,7 @@ u_int16_t packets_tab[210][3] =
 		{ 0xFFFF, 0x1916, 0x3224 }, // wpFUEL_CONSUMED =
 		{ 0xFFFF, 0x1917, 0x3225 }, // wpMAXALT_WEAPON_FIRED =*
 		{ 0xFFFF, 0x1918, 0x322A }, // wpDELAYEDFUSE_WEAPON_FIRED
-		{ 0xFFFF, 0x1919, 0xFFFF }, // wpAICONTROLLED_WEAPON_FIRED
+		{ 0xFFFF, 0x1919, 0xFFFF }, // wpAICONTROLLED_WEAPON_FIRED // fire animated sidewinder???
 
 		{ 0x1F00, 0x1600, 0x2C2C }, // ftDNLOAD_REQUEST =
 		{ 0x1F01, 0x1601, 0x2C2D }, // ftDNLOAD_RESPONCE *
@@ -248,7 +248,7 @@ u_int16_t packets_tab[210][3] =
 		{ 0xFFFF, 0x160D, 0xFFFF }, // ftPIPE
 
 		{ 0x2100, 0x0000, 0x0000 }, // bgFILL_SLOT *
-		{ 0x2101, 0x0001, 0xFFFF }, // bgUPDATE * (wb2, same as 0001 in wb3)
+		{ 0x2101, 0x0001, 0xFFFF }, // bgUPDATE * (wb2, same as 0x001E in wb3)
 		{ 0x2102, 0x0002, 0x0002 }, // bgPLANE_DAMAGE *
 		{ 0x2103, 0x0003, 0xFFFF }, // bgRESEND_SLOT_INFO
 		{ 0x2104, 0x0004, 0xFFFF }, // bgALL_PLANES_UPDATE
@@ -277,10 +277,10 @@ u_int16_t packets_tab[210][3] =
 		{ 0xFFFF, 0x001B, 0xFFFF }, // bgAI_MOUNT_UPDATE
 		{ 0xFFFF, 0x001C, 0xFFFF }, // bgCMEYESLAVE_FILL_SLOT
 		{ 0xFFFF, 0x001D, 0xFFFF }, // bgAI_CLIENT_UPDATE
-		{ 0xFFFF, 0x001E, 0x001E }, // bgUPDATE2 * (wb3, same as 0001 in wb2)
+		{ 0xFFFF, 0x001E, 0x001E }, // bgUPDATE2 * (wb3, same as 0x0001 in wb2)
 		{ 0xFFFF, 0x001F, 0xFFFF }, // bgAI_UPDATE2
 		{ 0xFFFF, 0x0020, 0xFFFF }, // bgAI_UPDATE3
-		{ 0xFFFF, 0x0021, 0xFFFF }, // bgAI_WANTSAIHITFLAG
+		{ 0xFFFF, 0x0021, 0x0021 }, // bgAI_WANTSAIHITFLAG
 		{ 0xFFFF, 0x0022, 0x0022 }, // bgSUPPRESS_FIRE *
 		{ 0xFFFF, 0x0023, 0xFFFF }, // bgAI_SUPPRESS_FIRE
 		{ 0xFFFF, 0x0024, 0x0024 }, // bgEXTERNAL_AMMOCNT *
