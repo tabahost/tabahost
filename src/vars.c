@@ -167,6 +167,8 @@ var_t *radarrange2; // extern
 var_t *radarrange3; // extern
 var_t *radarrange4; // extern
 var_t *rebuildtime; // extern
+var_t *resetsred; // extern
+var_t *resetsgold; // extern
 var_t *respawncvs; // extern
 var_t *rps; // extern
 var_t *server_speeds; // extern
@@ -349,6 +351,8 @@ void InitVars(void)
 	radarrange3 = Var_Get("radarrange3", "121500", "0", "100000", "Country 3 radar range", VAR_ARCHIVE);
 	radarrange4 = Var_Get("radarrange4", "121500", "0", "100000", "Country 4 radar range", VAR_ARCHIVE);
 	rebuildtime = Var_Get("rebuildtime", "12.0", "0.5", "20.0", "Set rebuild time coefficient", VAR_ARCHIVE);
+	resetsred = Var_Get("resetsred", "0", "0", "9999", "Number of Red resets", VAR_ARCHIVE | VAR_ADMIN);
+	resetsgold = Var_Get("resetsgold", "0", "0", "9999", "Number of Gold resets", VAR_ARCHIVE | VAR_ADMIN);
 	respawncvs = Var_Get("respawncvs", "1", "0", "1", "Set if after killed, CV will respawn", VAR_ARCHIVE);
 	rps = Var_Get("rps", "60", "0.1", "120.0", "Set RPS update rate", VAR_ARCHIVE);
 	server_speeds = Var_Get("server_speeds", "0", "0.1", "5", "Enable print server speeds (value is a frequency multiplier)", VAR_ARCHIVE | VAR_ADMIN);

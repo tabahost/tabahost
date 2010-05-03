@@ -212,7 +212,7 @@ char *GetBuildingType(u_int16_t type)
 
 void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 {
-	u_int16_t i, j, k, l;
+	u_int16_t i, j, k, l, group;
 	char file[128];
 	char buffer[25000];
 	FILE *fp;
@@ -241,7 +241,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 
 		PPrintf(client, RADIO_LIGHTYELLOW, "Loading arena status from \"%s\"", file);
 
-		for (i = 0; i < fields->value; i++)
+		for (i = 0, group = 0; i < fields->value; i++)
 		{
 			memset(buffer, 0, sizeof(buffer));
 			if (!fgets(buffer, sizeof(buffer), fp))
@@ -270,61 +270,91 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 				else
 					arena->fields[i].paras = 0;
 
-				j = Com_Atoi((char *)strtok(NULL, ";"));
-
-				for (k = 0; k < j; k++)
+				if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type >= FIELD_SUBMARINE)
 				{
-					l = Com_Atoi((char *)strtok(NULL, ";"));
-
-					if (l)
+					Com_Printf(VERBOSE_DEBUG, "CV Detected\n");
+					if(group < cvs->value)
 					{
-						arena->cities[l - 1].field = &arena->fields[i];
-						arena->fields[i].city[k] = &arena->cities[l - 1];
+						ReadCVWaypoints(group);
+
+						arena->fields[i].cvs = &(arena->cvs[group]);
+						arena->cvs[group].id = group;
+						arena->cvs[group].field = i;
+						arena->cvs[group].country = arena->fields[i].country;
+
+						for(j = 0; k = Com_Atou((char *)strtok(NULL, ";")); j++)
+						{
+							arena->cvs[group].fleetships[j] = k;
+						}
+
+						arena->cvs[group].fleetshipstotal = j;
+
+						ResetCV(group);
+						group++;
 					}
-				}
-
-				if (!reset)
-				{
-					//					for(j = 0; j < maxplanes; j++)
-					//					{
-					//						arena->fields[i].rps[j] = Com_Atoi((char *)strtok(NULL, ";"));
-					//					}
-					for (j = 0; j < MAX_BUILDINGS; j++)
+					else
 					{
-						if (!(token = strtok(NULL, ";")))
-							break;
-
-						arena->fields[i].buildings[j].field = Com_Atoi(token);
-						arena->fields[i].buildings[j].country = Com_Atoi((char *)strtok(NULL, ";"));
-						arena->fields[i].buildings[j].country = arena->fields[i].country; // FIXME: remove building country from .arn files
-						arena->fields[i].buildings[j].id = Com_Atoi((char *)strtok(NULL, ";"));
-						arena->fields[i].buildings[j].type = Com_Atoi((char *)strtok(NULL, ";"));
-						arena->fields[i].buildings[j].fieldtype = arena->fields[i].type;
-						arena->fields[i].buildings[j].status = Com_Atoi((char *)strtok(NULL, ";"));
-						arena->fields[i].buildings[j].timer = Com_Atoi((char *)strtok(NULL, ";"));
-						arena->fields[i].buildings[j].armor = Com_Atoi((char *)strtok(NULL, ";"));
-						arena->fields[i].buildings[j].posx = Com_Atoi((char *)strtok(NULL, ";"));
-						arena->fields[i].buildings[j].posy = Com_Atoi((char *)strtok(NULL, ";"));
-						arena->fields[i].buildings[j].posz = Com_Atoi((char *)strtok(NULL, ";"));
-
-						if(sqrt(Com_Pow(arena->fields[i].buildings[j].posx - arena->fields[i].posxyz[0], 2) + Com_Pow(arena->fields[i].buildings[j].posy - arena->fields[i].posxyz[1], 2)) <= arena->fields[i].radius)
-						{
-							arena->fields[i].buildings[j].infield = 1;
-						}
-						else
-						{
-							arena->fields[i].buildings[j].infield = 0;
-						}
+						Com_Printf(VERBOSE_WARNING, "LoadArenaStatus(): CV group out of range\n");
 					}
 				}
 				else
 				{
-					for (j = 0; j < MAX_BUILDINGS; j++)
+					j = Com_Atoi((char *)strtok(NULL, ";"));
+
+					for (k = 0; k < j; k++)
 					{
-						if (arena->fields[i].buildings[j].field)
-							arena->fields[i].buildings[j].country = arena->fields[i].country;
-						else
-							break;
+						l = Com_Atoi((char *)strtok(NULL, ";"));
+
+						if (l)
+						{
+							arena->cities[l - 1].field = &arena->fields[i];
+							arena->fields[i].city[k] = &arena->cities[l - 1];
+						}
+					}
+
+					if (!reset)
+					{
+						//					for(j = 0; j < maxplanes; j++)
+						//					{
+						//						arena->fields[i].rps[j] = Com_Atoi((char *)strtok(NULL, ";"));
+						//					}
+						for (j = 0; j < MAX_BUILDINGS; j++)
+						{
+							if (!(token = strtok(NULL, ";")))
+								break;
+
+							arena->fields[i].buildings[j].field = Com_Atoi(token);
+							arena->fields[i].buildings[j].country = Com_Atoi((char *)strtok(NULL, ";"));
+							arena->fields[i].buildings[j].country = arena->fields[i].country; // FIXME: remove building country from .arn files
+							arena->fields[i].buildings[j].id = Com_Atoi((char *)strtok(NULL, ";"));
+							arena->fields[i].buildings[j].type = Com_Atoi((char *)strtok(NULL, ";"));
+							arena->fields[i].buildings[j].fieldtype = arena->fields[i].type;
+							arena->fields[i].buildings[j].status = Com_Atoi((char *)strtok(NULL, ";"));
+							arena->fields[i].buildings[j].timer = Com_Atoi((char *)strtok(NULL, ";"));
+							arena->fields[i].buildings[j].armor = Com_Atoi((char *)strtok(NULL, ";"));
+							arena->fields[i].buildings[j].posx = Com_Atoi((char *)strtok(NULL, ";"));
+							arena->fields[i].buildings[j].posy = Com_Atoi((char *)strtok(NULL, ";"));
+							arena->fields[i].buildings[j].posz = Com_Atoi((char *)strtok(NULL, ";"));
+
+							if(sqrt(Com_Pow(arena->fields[i].buildings[j].posx - arena->fields[i].posxyz[0], 2) + Com_Pow(arena->fields[i].buildings[j].posy - arena->fields[i].posxyz[1], 2)) <= arena->fields[i].radius)
+							{
+								arena->fields[i].buildings[j].infield = 1;
+							}
+							else
+							{
+								arena->fields[i].buildings[j].infield = 0;
+							}
+						}
+					}
+					else
+					{
+						for (j = 0; j < MAX_BUILDINGS; j++)
+						{
+							if (arena->fields[i].buildings[j].field)
+								arena->fields[i].buildings[j].country = arena->fields[i].country;
+							else
+								break;
+						}
 					}
 				}
 			}
@@ -419,7 +449,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 
 void SaveArenaStatus(char *filename, client_t *client)
 {
-	u_int16_t i, j, k;
+	u_int16_t i, j, k, group;
 	char file[128];
 	FILE *fp;
 
@@ -433,42 +463,64 @@ void SaveArenaStatus(char *filename, client_t *client)
 	}
 	else
 	{
-		for (i = 0; i < fields->value; i++) // Print field status
+		for (i = 0, group = 0; i < fields->value; i++) // Print field status
 		{
-			fprintf(fp, "%u;%d;%d;%d;%u;%u;%u;%u;%u", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], arena->fields[i].posxyz[2], arena->fields[i].radius, arena->fields[i].country,
-					arena->fields[i].abletocapture, arena->fields[i].closed, arena->fields[i].paras);
+			fprintf(fp, "%u;%d;%d;%d;%u;%u;%u;%u;%u",
+				arena->fields[i].type,
+				arena->fields[i].posxyz[0],
+				arena->fields[i].posxyz[1],
+				arena->fields[i].posxyz[2],
+				arena->fields[i].radius,
+				arena->fields[i].country,
+				arena->fields[i].abletocapture,
+				arena->fields[i].closed,
+				arena->fields[i].paras);
 
-			for (j = k = 0; j < MAX_CITYFIELD; j++)
+			if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type >= FIELD_SUBMARINE)
 			{
-				if (arena->fields[i].city[j])
-					k++;
-			}
-
-			fprintf(fp, ";%u", k);
-
-			if (k)
-			{
-				for (j = 0; j < MAX_CITYFIELD; j++)
+				if(group < cvs->value)
 				{
-					if (arena->fields[i].city[j])
-						fprintf(fp, ";%u", arena->fields[i].city[j]->number);
+					for(ship = arena->cvs[group].ships; ship; ship = ship->next)
+					{
+						fprintf(fp, ";%u", ship->plane);
+					}
+					
+					group++;
 				}
-			}
-
-			//			for(j = 0; j < maxplanes; j++)
-			//			{
-			//				fprintf(fp, ";%d", arena->fields[i].rps[j]);
-			//			}
-
-			for (j = 0; j < MAX_BUILDINGS; j++) // Print building status
-			{
-				if (arena->fields[i].buildings[j].field)
-					fprintf(fp, ";%u;%u;%u;%u;%u;%d;%u;%d;%d;%d", arena->fields[i].buildings[j].field, arena->fields[i].country, arena->fields[i].buildings[j].id,
-							arena->fields[i].buildings[j].type, arena->fields[i].buildings[j].status, arena->fields[i].buildings[j].timer, arena->fields[i].buildings[j].armor,
-							arena->fields[i].buildings[j].posx, arena->fields[i].buildings[j].posy, arena->fields[i].buildings[j].posz);
 				else
 				{
-					break;
+					Com_Printf(VERBOSE_WARNING, "SaveArenaStatus(): CV group out of range\n");
+				}
+			}
+			else
+			{
+				for (j = k = 0; j < MAX_CITYFIELD; j++)
+				{
+					if (arena->fields[i].city[j])
+						k++;
+				}
+
+				fprintf(fp, ";%u", k);
+
+				if (k)
+				{
+					for (j = 0; j < MAX_CITYFIELD; j++)
+					{
+						if (arena->fields[i].city[j])
+							fprintf(fp, ";%u", arena->fields[i].city[j]->number);
+					}
+				}
+
+				for (j = 0; j < MAX_BUILDINGS; j++) // Print building status
+				{
+					if (arena->fields[i].buildings[j].field)
+						fprintf(fp, ";%u;%u;%u;%u;%u;%d;%u;%d;%d;%d", arena->fields[i].buildings[j].field, arena->fields[i].country, arena->fields[i].buildings[j].id,
+								arena->fields[i].buildings[j].type, arena->fields[i].buildings[j].status, arena->fields[i].buildings[j].timer, arena->fields[i].buildings[j].armor,
+								arena->fields[i].buildings[j].posx, arena->fields[i].buildings[j].posy, arena->fields[i].buildings[j].posz);
+					else
+					{
+						break;
+					}
 				}
 			}
 			fprintf(fp, "\n");
@@ -802,6 +854,67 @@ void SendMapDots(void)
 			}
 		}
 	}
+}
+
+/**
+ SendCVDots
+
+ Send CV dots at radar
+ */
+
+void SendCVDots(void)
+{
+	u_int8_t i, j, k, country;
+	ship_t *ship;
+	wb3allaiplanesupdate_t *cvdot;
+	u_int8_t buffer[30];
+
+	cvdot = (wb3allaiplanesupdate_t *) buffer;
+
+	memset(buffer, 0, sizeof(buffer));
+
+//	for (country = 1; country <= 4; country++)
+//	{
+		for(i = 0, j = 0; i < cvs->value; i++)
+		{
+			for(ship = arena->cvs[i].ships; ship; ship = ship->next)
+			{
+				cvdot->packetid = htons(Com_WBhton(0x0015));
+				cvdot->slot = htons(j);
+				cvdot->posx = htonl(ship->Position.x);
+				cvdot->posy = htonl(ship->Position.y);
+				cvdot->unk1 = 0;
+				cvdot->unk2 = htonl(0x0004);
+				cvdot->country = htonl(ship->country);
+				cvdot->plane = htonl(ship->plane);
+				cvdot->number = htons(j++);
+
+				memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
+				for (k = 0; k < maxentities->value; k++)
+				{
+					if (clients[k].inuse && !clients[k].drone && clients[k].ready && !clients[k].infly)
+					{
+						if(clients[k].thai) // SendCVDots
+						{				   // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
+							if(arena->thaisent[clients[k].thai].b)
+								continue;
+							else
+								arena->thaisent[clients[k].thai].b = 1;
+						}
+
+//						if (clients[k].mapdots)
+//							ClearMapDots(&clients[k]);
+
+//						clients[k].mapdots = 1;
+						SendPacket(buffer, sizeof(buffer), &clients[k]);
+					}
+				}
+
+//				memset(buffer, 0, sizeof(buffer));
+			}
+		}
+//	}
 }
 
 /**
@@ -3090,12 +3203,13 @@ void InitArena(void)
 	arena->frame = 0;
 
 	arena->hour = 7 - ((int)dayhours->value%10)/2;
-	arena->day = currday->value;
-	arena->month = currmonth->value;
-	arena->year = curryear->value;
-	CalcTimemultBasedOnTime();
-	arena->fields = (field_t *) Z_Malloc((sizeof(field_t) * fields->value) + 1);
-	arena->cities = (city_t *) Z_Malloc((sizeof(city_t) * cities->value) + 1);
+	// next comments are present at ChangeArena();
+//	arena->day = currday->value;
+//	arena->month = currmonth->value;
+//	arena->year = curryear->value;
+//	CalcTimemultBasedOnTime();
+//	arena->fields = (field_t *) Z_Malloc((sizeof(field_t) * fields->value) + 1);
+//	arena->cities = (city_t *) Z_Malloc((sizeof(city_t) * cities->value) + 1);
 
 	sprintf(my_query, "TRUNCATE online_players");
 
@@ -3187,9 +3301,11 @@ void ChangeArena(char *map, client_t *client)
 		arena->year = curryear->value;
 		CalcTimemultBasedOnTime();
 
-		free(arena->fields);
+		if(arena->fields)
+			free(arena->fields);
 		arena->fields = (field_t *) Z_Malloc((sizeof(field_t) * fields->value) + 1);
-		free(arena->cities);
+		if(arena->cities)
+			free(arena->cities);
 		arena->cities = (city_t *) Z_Malloc((sizeof(city_t) * cities->value) + 1);
 
 		snprintf(file, sizeof(file), "./arenas/%s/arena", map);
@@ -3216,15 +3332,15 @@ void ChangeArena(char *map, client_t *client)
 		}
 
 		// Set original CV status
-		for (i = (fields->value - 1), j = 0; i >= 0 && j < cvs->value; i--)
-		{
-			if ((arena->fields[i].type == FIELD_CV) || (arena->fields[i].type == FIELD_CARGO) || (arena->fields[i].type == FIELD_DD) || (arena->fields[i].type == FIELD_SUBMARINE))
-			{
-				Com_Printf(VERBOSE_DEBUG, "CV Detected\n");
-				ConfigureCV(i, j, arena->fields[i].country);
-				j++;
-			}
-		}
+//		for (i = (fields->value - 1), j = 0; i >= 0 && j < cvs->value; i--)
+//		{
+//			if ((arena->fields[i].type == FIELD_CV) || (arena->fields[i].type == FIELD_CARGO) || (arena->fields[i].type == FIELD_DD) || (arena->fields[i].type == FIELD_SUBMARINE))
+//			{
+//				Com_Printf(VERBOSE_DEBUG, "CV Detected\n");
+//				ConfigureCV(i, j, arena->fields[i].country);
+//				j++;
+//			}
+//		}
 
 		RebuildTime(FALSE); // reset rebuildtime
 		GetTonnageToClose(FALSE); // reset Tonnage To Close

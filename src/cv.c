@@ -399,15 +399,13 @@ void RemoveAllShips(u_int8_t group)
 
 void CreateAllShips(u_int8_t group)
 {
+	u_int8_t i;
 	Com_Printf(VERBOSE_DEBUG, "CreateAllShips() group %u\n", group);
 
-	AddShip(group, SHIP_DD, arena->cvs[group].country);
-	AddShip(group, SHIP_DD, arena->cvs[group].country);
-	AddShip(group, SHIP_DD, arena->cvs[group].country);
-	AddShip(group, SHIP_DD, arena->cvs[group].country);
-	AddShip(group, SHIP_CA, arena->cvs[group].country);
-	AddShip(group, SHIP_CA, arena->cvs[group].country);
-	AddShip(group, SHIP_ENTERPRISE, arena->cvs[group].country);
+	for(i = 0; i < arena->cvs[group].fleetshipstotal; i++)
+	{
+		AddShip(group, arena->cvs[group].fleetships[i], arena->cvs[group].country);
+	}
 }
 
 /**
@@ -427,20 +425,6 @@ void ResetCV(u_int8_t group)
 	arena->cvs[group].outofport = 0;
 	arena->cvs[group].wpnum = 0;
 	snprintf(arena->cvs[group].logfile, sizeof(arena->cvs[group].logfile), "%s,cv%u,%s,%u", mapname->string, arena->cvs[group].id, GetCountry(arena->cvs[group].country), (u_int32_t)time(NULL));
-}
-
-void ConfigureCV(u_int8_t field, u_int8_t group, u_int8_t country)
-{
-	Com_Printf(VERBOSE_DEBUG, "ConfigureCV(): Creationg CV field %u, group %u, country %u\n", field, group, country);
-
-	ReadCVWaypoints(group);
-
-	arena->fields[field].cvs = &(arena->cvs[group]);
-
-	arena->cvs[group].id = group;
-	arena->cvs[group].field = field;
-	arena->cvs[group].country = country;
-	ResetCV(group);
 }
 
 /**
@@ -615,6 +599,7 @@ ship_t *RemoveShip(ship_t *ship)
 ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 {
 	ship_t *ship;
+	ship_t *link;
 
 	ship = Z_Malloc(sizeof(ship_t));
 
@@ -641,7 +626,9 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 		{
 			// CV
 			case SHIP_KAGA: // KAGA 73
+				ship->plane = SHIP_KAGA;
 			case SHIP_ENTERPRISE: // ENTERPRISE 78
+				ship->plane = SHIP_ENTERPRISE;
 				ship->type = SHIPTYPE_CV;
 				ship->radius = 400; // 800 feet
 				ship->Vel.max = 27; // 54 feet per second
@@ -650,6 +637,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 				ship->YawVel.min = -ship->YawVel.max;
 				break;
 			case SHIP_CA: // CA 77
+				ship->plane = SHIP_CA;
 				ship->type = SHIPTYPE_CA;
 				ship->radius = 165; // 330 feet
 				ship->Vel.max = 31; // 62 feet per second
@@ -658,6 +646,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 				ship->YawVel.min = -ship->YawVel.max;
 				break;
 			case SHIP_DD: // DD 74
+				ship->plane = SHIP_DD;
 				ship->type = SHIPTYPE_DD;
 				ship->radius = 165; // 330 feet
 				ship->Vel.max = 31; // 61 feet per second
@@ -683,9 +672,20 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 			return NULL;
 		}
 		
-		// link the variable in backwards
-		ship->next = arena->cvs[group].ships;
-		arena->cvs[group].ships = ship;
+		// link the variable at end of queue
+		if(!arena->cvs[group].ships)
+		{
+			arena->cvs[group].ships = ship;
+		}
+		else
+		{
+			link = arena->cvs[group].ships;
+			while(link->next)
+				link = link->next;
+
+			ship->next = NULL;
+			link->next = ship;
+		}
 	}
 	else
 		Com_Printf(VERBOSE_WARNING, "AddShip(): ship == NULL\n");

@@ -559,6 +559,7 @@ typedef struct value2_s // TValue2
 
 typedef struct ship_s
 {
+	u_int8_t	plane;		// ship plane: KAGA, ENTERPRISE, Etc.
 	u_int8_t	type;		// ship type: 0 = CV; 1 = CA; 2 = DD
 	u_int8_t	country;	// ship country (1 = red, 3 = gold)
 	u_int8_t	group;		// group index
@@ -583,6 +584,8 @@ typedef struct cvs_s
 	u_int8_t	outofport;		// out of port (1st waypoint)
 //	u_int8_t	stuck;			// stuck in land
 	char		logfile[64];	// logfile name
+	u_int8_t	fleetships[12];	// fleet ships, e.g: 73;77;77;77;78
+	u_int8_t	fleetshipstotal;
 	u_int8_t	wptotal;		// total of waypoints
 	u_int8_t	wpnum;			// num of actual waypoint
 	int32_t		wp[MAX_WAYPOINTS][2]; // waypoints
@@ -713,7 +716,6 @@ typedef struct arena_s
 	u_int32_t	scenario;		// scenario start frame
 	bool_t		thaisent[256];	// array of 256 bits. used in loops to check if already sent data to some THAI group;
 	munition_t	munition[MAX_MUNTYPE];		// ammo characteristics
-	//cv_t		cv[8];			// cv structure (legacy)
 	cvs_t		cvs[MAX_CVS];	// New CV structures
 	rps_t		rps[MAX_PLANES]; // planes to auto field update
 	mapcycle_t	mapcycle[16];	// list of maps to cycle
@@ -744,6 +746,7 @@ typedef struct arena_s
 			} buildarmor[BUILD_MAX];
 	double		goldindex;		// dificulty index for gold
 	double		redindex;		// dificulty index for red
+	u_int8_t	lastreset;		// Last reset 1 = Red, 3 = Gold
 	int16_t		numplayers;		// number of current playing players
 	int16_t		numdrones;		// number of current playing drones
 	bomb_t		bombs[MAX_BOMBS]; //
@@ -2038,6 +2041,19 @@ typedef struct wb3supressfire_s		// 21 22
 	u_int32_t	supress;
 } wb3supressfire_t;
 
+typedef struct wb3allaiplanesupdate_s // 00 15
+{
+	u_int16_t	packetid;
+	u_int16_t	slot;
+	u_int32_t	posx;
+	u_int32_t	posy;
+	u_int32_t	unk1;
+	u_int32_t	unk2;
+	u_int32_t	country;
+	u_int32_t	plane;
+	u_int16_t	number;
+} wb3allaiplanesupdate_t;
+
 typedef struct wb3planeskin_s		// 00 2C
 {
 	u_int16_t	packetid;
@@ -2298,6 +2314,7 @@ u_int32_t GetBuildingArmor(u_int8_t type, client_t *client);
 u_int32_t GetBuildingAPstop(u_int8_t type, client_t *client);
 u_int32_t GetBuildingImunity(u_int8_t type, client_t *client);
 void	SendMapDots(void);
+void	SendCVDots(void);
 u_int8_t SeeEnemyDot(client_t *client, u_int8_t country);
 void	ClearMapDots(client_t *client);
 //void	SendCVPos(client_t *client, u_int8_t cvnum);
@@ -2687,6 +2704,8 @@ extern	var_t		*radarrange2;	///
 extern	var_t		*radarrange3;	///
 extern	var_t		*radarrange4;	///
 extern	var_t		*rebuildtime;	/// rebuilding time base seconds
+extern	var_t		*resetsred;		// How many resets by red
+extern	var_t		*resetsgold;	// How many resets by gold
 extern	var_t		*respawncvs;	/// after killed, cv will respawn
 extern	var_t		*rps;			/// enable rps (value = minutes)
 extern	var_t		*server_speeds;	/// show server speed

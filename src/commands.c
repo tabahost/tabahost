@@ -1510,6 +1510,17 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 					BPrintf(RADIO_YELLOW, "*********   AXIS  %s   *********", arena->fields[field].country == COUNTRY_GOLD?"LOST":"WON");
 					BPrintf(RADIO_YELLOW, "*********************************");
 
+					if(arena->fields[field].country == COUNTRY_RED) // Gold reset
+					{
+						snprintf(buffer, sizeof(buffer), "%d", resetsred->value + 1);
+						Var_Set("resetsred", buffer);
+					}
+					else // Red reset
+					{
+						snprintf(buffer, sizeof(buffer), "%d", resetsgold->value + 1);
+						Var_Set("resetsgold", buffer);
+					}
+
 					Com_LogEvent(EVENT_RESET, 0, 0);
 					Com_LogDescription(EVENT_DESC_TERRAIN, 0, mapname->string);
 
