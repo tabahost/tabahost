@@ -272,7 +272,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 
 				if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 				{
-					Com_Printf(VERBOSE_DEBUG, "CV Detected\n");
+					Com_Printf(VERBOSE_DEBUG, "CV Detected - type %u, posx %u posy %u\n", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1]);
 					if(group < cvs->value)
 					{
 						ReadCVWaypoints(group);
@@ -285,6 +285,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 						for(j = 0; (token = strtok(NULL, ";")); j++)
 						{
 							k = Com_Atou(token);
+							Com_Printf(VERBOSE_DEBUG, "Add ship %u - j %u\n", k, j);
 							arena->cvs[group].fleetships[j] = k;
 						}
 
