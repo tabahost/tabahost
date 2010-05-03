@@ -282,7 +282,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 						arena->cvs[group].field = i;
 						arena->cvs[group].country = arena->fields[i].country;
 
-						for(j = 0; (token = strtok(NULL, ";")); j++)
+						for(j = 0; (token = (char *)strtok(NULL, ";")); j++)
 						{
 							k = Com_Atou(token);
 							Com_Printf(VERBOSE_DEBUG, "Add ship %u - j %u\n", k, j);
@@ -291,7 +291,8 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 
 						arena->cvs[group].fleetshipstotal = j;
 
-						ResetCV(group);
+						if(j)
+							ResetCV(group);
 						group++;
 					}
 					else
@@ -322,7 +323,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 						//					}
 						for (j = 0; j < MAX_BUILDINGS; j++)
 						{
-							if (!(token = strtok(NULL, ";")))
+							if (!(token = (char *)strtok(NULL, ";")))
 								break;
 
 							arena->fields[i].buildings[j].field = Com_Atoi(token);
