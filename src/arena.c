@@ -272,6 +272,15 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 
 				if(!reset && arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 				{
+					token = (char *)strtok(NULL, ";");
+					Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
+					token = (char *)strtok(NULL, ";");
+					Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
+					token = (char *)strtok(NULL, ";");
+					Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
+					token = (char *)strtok(NULL, ";");
+					Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
+
 					Com_Printf(VERBOSE_DEBUG, "CV Detected - type %u, posx %u posy %u\n", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1]);
 					if(group < cvs->value)
 					{
@@ -281,15 +290,6 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 						arena->cvs[group].id = group;
 						arena->cvs[group].field = i;
 						arena->cvs[group].country = arena->fields[i].country;
-
-						token = (char *)strtok(NULL, ";");
-						Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
-						token = (char *)strtok(NULL, ";");
-						Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
-						token = (char *)strtok(NULL, ";");
-						Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
-						token = (char *)strtok(NULL, ";");
-						Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
 
 						for(j = 0; (token = (char *)strtok(NULL, ";")); j++)
 						{
