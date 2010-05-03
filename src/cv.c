@@ -404,6 +404,7 @@ void CreateAllShips(u_int8_t group)
 
 	for(i = 0; i < arena->cvs[group].fleetshipstotal; i++)
 	{
+		Com_Printf(VERBOSE_DEBUG, "Creating Ship %u - group %u\n", arena->cvs[group].fleetships[i], group);
 		AddShip(group, arena->cvs[group].fleetships[i], arena->cvs[group].country);
 	}
 }
