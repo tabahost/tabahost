@@ -270,7 +270,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 				else
 					arena->fields[i].paras = 0;
 
-				if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type >= FIELD_SUBMARINE)
+				if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 				{
 					Com_Printf(VERBOSE_DEBUG, "CV Detected\n");
 					if(group < cvs->value)
@@ -282,8 +282,9 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 						arena->cvs[group].field = i;
 						arena->cvs[group].country = arena->fields[i].country;
 
-						for(j = 0; k = Com_Atou((char *)strtok(NULL, ";")); j++)
+						for(j = 0; (token = strtok(NULL, ";")); j++)
 						{
+							k = Com_Atou(token);
 							arena->cvs[group].fleetships[j] = k;
 						}
 
