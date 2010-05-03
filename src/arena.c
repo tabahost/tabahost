@@ -268,6 +268,12 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 					arena->fields[i].paras = Com_Atoi((char *)strtok(NULL, ";"));
 					token = (char *)strtok(NULL, ";");
 					Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
+					token = (char *)strtok(NULL, ";");
+					Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
+					token = (char *)strtok(NULL, ";");
+					Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
+					token = (char *)strtok(NULL, ";");
+					Com_Printf(VERBOSE_DEBUG, "Teste: %s\n", token);
 				}
 				else
 					arena->fields[i].paras = 0;
@@ -490,7 +496,7 @@ void SaveArenaStatus(char *filename, client_t *client)
 					{
 						fprintf(fp, ";%u", ship->plane);
 					}
-					
+
 					group++;
 				}
 				else
@@ -607,7 +613,7 @@ void SaveWebsiteData(void)
 		for (i = 0; i < fields->value; i++) // Print field status
 		{
 			build_total = build_alive = 0;
-			
+
 			for (j = 0; j < MAX_BUILDINGS; j++)
 			{
 				if (!arena->fields[i].buildings[j].field)
@@ -617,12 +623,12 @@ void SaveWebsiteData(void)
 				{
 					if(!arena->fields[i].buildings[j].status)
 						build_alive++;
-					
+
 					build_total++;
 				}
 			}
 
-			fprintf(fp, "%u;%d;%d;%d;%u;%u;%u;%u;%u;%u;%.2f;%.2f;%u;%u", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], 
+			fprintf(fp, "%u;%d;%d;%d;%u;%u;%u;%u;%u;%u;%.2f;%.2f;%u;%u", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1],
 				arena->fields[i].posxyz[2], arena->fields[i].radius, arena->fields[i].country, arena->fields[i].abletocapture,
 				arena->fields[i].closed, arena->fields[i].paras, GetFieldParas(arena->fields[i].type) /*maxparas*/,
 				arena->fields[i].tonnage, GetTonnageToClose(i+1), build_alive, build_total);
