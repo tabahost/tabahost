@@ -478,7 +478,7 @@ void SaveArenaStatus(char *filename, client_t *client)
 				arena->fields[i].closed,
 				arena->fields[i].paras);
 
-			if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type >= FIELD_SUBMARINE)
+			if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 			{
 				if(group < cvs->value)
 				{
