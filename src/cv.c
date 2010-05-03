@@ -400,7 +400,7 @@ void RemoveAllShips(u_int8_t group)
 void CreateAllShips(u_int8_t group)
 {
 	u_int8_t i;
-	Com_Printf(VERBOSE_DEBUG, "CreateAllShips() group %u\n", group);
+	Com_Printf(VERBOSE_DEBUG, "CreateAllShips() group %u - total %u ships\n", group, arena->cvs[group].fleetshipstotal);
 
 	for(i = 0; i < arena->cvs[group].fleetshipstotal; i++)
 	{
