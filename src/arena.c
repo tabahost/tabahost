@@ -451,6 +451,7 @@ void SaveArenaStatus(char *filename, client_t *client)
 {
 	u_int16_t i, j, k, group;
 	char file[128];
+	ship_t *ship;
 	FILE *fp;
 
 	strcpy(file, filename);

@@ -994,7 +994,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	if (client->flypenalty && client->flypenaltyfield == client->field && !client->attached && client->attr != 1)
 	{
-		PPrintf(client, RADIO_YELLOW, "You can't take off from this field for %s", Com_TimeSeconds(client->flypenalty / 100));
+		PPrintf(client, RADIO_YELLOW, "You can't take off from this field for %s", Com_TimeSeconds(client->flypenalty));
 		if (wb3->value)
 		{
 			wb3fly->error = htons(0x09);

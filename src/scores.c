@@ -987,9 +987,10 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 	// check if time penalized
 	if (!(end == ENDFLIGHT_LANDED || end == ENDFLIGHT_DITCHED) && !(end == ENDFLIGHT_BAILED && client->attached))
 	{
-		if ((FLIGHT_TIME(client)/10) < (flypenalty->value * 100))
+		i = (FLIGHT_TIME(client)/1000);
+		if (i < flypenalty->value)
 		{
-			client->flypenalty = (flypenalty->value * 100) - i;
+			client->flypenalty = flypenalty->value - i;
 			client->flypenaltyfield = client->field;
 		}
 	}

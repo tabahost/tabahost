@@ -1092,25 +1092,25 @@ void CheckArenaRules(void)
 		for (i = 0; i < cvs->value; i++)
 		{
 			// CV Attack
-			if (arena->cvs[i].ships && !((arena->frame - arena->cvs[i].ships->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cv[i].field >= fields->value))
+			if (arena->cvs[i].ships && !((arena->frame - arena->cvs[i].ships->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
 			{
 				dist = 0;
 
-				j = NearestField(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->cv[i].country, TRUE, TRUE, &dist);
+				j = NearestField(arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->cvs[i].country, TRUE, TRUE, &dist);
 
-				if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cv[i].field)
+				if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cvs[i].field)
 				{
 					if (j < fields->value)
 					{
 						if (!arena->fields[j].closed)
 						{
-							if (arena->fields[arena->cv[i].field].type == FIELD_SUBMARINE)
+							if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
 							{
-								ThrowBomb(FALSE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-								ThrowBomb(TRUE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+								ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+								ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
 							}
 							else
-								CVFire(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0],
+								CVFire(arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0],
 										arena->fields[j].posxyz[1], arena->fields[j].posxyz[2]);
 						}
 					}
@@ -1118,13 +1118,13 @@ void CheckArenaRules(void)
 					{
 						if (!arena->cities[j - (int16_t)fields->value].closed)
 						{
-							if (arena->fields[arena->cv[i].field].type == FIELD_SUBMARINE)
+							if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
 							{
-								ThrowBomb(FALSE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
-								ThrowBomb(TRUE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+								ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+								ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
 							}
 							else
-								CVFire(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2]);
+								CVFire(arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2]);
 						}
 					}
 				}
@@ -4158,8 +4158,8 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					PPrintf(client, RADIO_YELLOW, "Last Reset: %s (%u x %u) %s",
 						arena->lastreset==1?GetCountry(1):GetCountry(3),
 						arena->lastreset==1?resetsred->value:resetsgold->value,
-						arena->lastreset==1?resetsgold->value:resestred->value,
-						arena->lastreset==1?GetCountry(3):GetCountry(1),
+						arena->lastreset==1?resetsgold->value:resetsred->value,
+						arena->lastreset==1?GetCountry(3):GetCountry(1));
 
 					if(!(client->attr == 1 && hideadmin->value))
 					{
