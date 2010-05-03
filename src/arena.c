@@ -282,6 +282,10 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 						arena->cvs[group].field = i;
 						arena->cvs[group].country = arena->fields[i].country;
 
+						token = (char *)strtok(NULL, ";");
+
+						Com_Printf(VERBOSE_DEBUG, "Teste: %s", token);
+
 						for(j = 0; (token = (char *)strtok(NULL, ";")); j++)
 						{
 							k = Com_Atou(token);
