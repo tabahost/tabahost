@@ -2055,22 +2055,22 @@ typedef struct wb3aifillslot_s // 00 08
 typedef struct wb3allaiplanesupdate_s // 00 15
 {
 	u_int16_t	packetid;
-	u_int16_t	slot;
+	u_int16_t	number;
 	u_int32_t	posx;
 	u_int32_t	posy;
 	u_int32_t	unk1;
 	u_int32_t	unk2;
 	u_int32_t	country;
 	u_int32_t	plane;
-	u_int16_t	number;
+	u_int16_t	slot;
 } wb3allaiplanesupdate_t;
 
 typedef struct wb3aimount_s // 00 18
 {
 	u_int16_t	packetid;
 	u_int16_t	unk1;
-	u_int8_t	unk2;
-	u_int8_t	unk3;
+	u_int8_t	number;
+	u_int8_t	inout; // 1 in, 2 out
 } wb3aimount_t;
 
 typedef struct wb3planeskin_s		// 00 2C

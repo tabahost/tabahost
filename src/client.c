@@ -2017,11 +2017,11 @@ void WB3AiFillSlot(client_t *client)
 	aifillslot = (wb3aifillslot_t *)buffer;
 
 	aifillslot->packetid = htons(Com_WBhton(0x0008));
-	aifillslot->slot = 0;
+	aifillslot->slot = 25;
 	aifillslot->shortnick = htonl(ascii2wbnick("--cv--", 1));
 	aifillslot->country = htonl(client->country);
-	aifillslot->plane = htons(0x0049);
-	aifillslot->unk1 = htons(0x0005);
+	aifillslot->plane = htons(78);
+	aifillslot->unk1 = htons(dpitch->value);
 	aifillslot->unk2 = 0;
 
 	SendPacket(buffer, sizeof(buffer), client);
@@ -2041,7 +2041,7 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 
 	aimount = (wb3aimount_t *) buffer;
 
-	PPrintf(client, RADIO_YELLOW, "unk1: %d unk2: %d unk3: %d", ntohs(aimount->unk1), aimount->unk2, aimount->unk3);
+	PPrintf(client, RADIO_YELLOW, "unk1: %d cvnum: %d inout: %d", ntohs(aimount->unk1)/*cvdot->unk2*/, aimount->number, aimount->inout);
 	
 	WB3AiFillSlot(client);
 }

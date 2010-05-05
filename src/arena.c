@@ -884,14 +884,14 @@ void SendCVDots(void)
 			for(ship = arena->cvs[i].ships; ship; ship = ship->next)
 			{
 				cvdot->packetid = htons(Com_WBhton(0x0015));
-				cvdot->slot = htons(j);
+				cvdot->number = htons(j);
 				cvdot->posx = htonl(ship->Position.x);
 				cvdot->posy = htonl(ship->Position.y);
 				cvdot->unk1 = 0;
-				cvdot->unk2 = htonl(0x0004);
+				cvdot->unk2 = htonl(dpitch->value);
 				cvdot->country = htonl(ship->country);
 				cvdot->plane = htonl(ship->plane);
-				cvdot->number = htons(j++);
+				cvdot->slot = htons(j++);
 
 				memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
@@ -1054,7 +1054,7 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 				y = (client->posxy[1][0] - clients[i].posxy[1][0]) / 10;
 				z = (client->posalt[0] - clients[i].posalt[0]) / 10;
 
-				if (x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (clients[i].obradar / -10) && z < (clients[i].obradar / 10))
+				if (x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (clients[i].obradar / -10) && z < (clients[i].obradar / 10))
 				{
 					if (sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (clients[i].obradar / 10))
 						j = 1;
