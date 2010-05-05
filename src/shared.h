@@ -2041,6 +2041,17 @@ typedef struct wb3supressfire_s		// 21 22
 	u_int32_t	supress;
 } wb3supressfire_t;
 
+typedef struct wb3aifillslot_s // 00 08
+{
+	u_int16_t	packetid;
+	u_int8_t	slot;
+	u_int32_t	shortnick;
+	u_int32_t	country;
+	u_int16_t	plane;
+	u_int16_t	unk1;
+	u_int8_t	unk2;
+} wb3aifillslot_t;
+
 typedef struct wb3allaiplanesupdate_s // 00 15
 {
 	u_int16_t	packetid;
@@ -2053,6 +2064,14 @@ typedef struct wb3allaiplanesupdate_s // 00 15
 	u_int32_t	plane;
 	u_int16_t	number;
 } wb3allaiplanesupdate_t;
+
+typedef struct wb3aimount_s // 00 18
+{
+	u_int16_t	packetid;
+	u_int16_t	unk1;
+	u_int8_t	unk2;
+	u_int8_t	unk3;
+} wb3aimount_t;
 
 typedef struct wb3planeskin_s		// 00 2C
 {
@@ -2405,6 +2424,7 @@ void	CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags);
 client_t *NearPlane(client_t *client, u_int8_t country, int32_t limit);
 void	ForceEndFlight(u_int8_t remdron, client_t *client);
 void	ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client);
+void	WB3AiMount(u_int8_t *buffer, client_t *client);
 void	WB3ClientSkin(u_int8_t *buffer, client_t *client);
 char	*CreateSkin(client_t *client, u_int8_t number);
 void	WB3OverrideSkin(u_int8_t slot, client_t *client);

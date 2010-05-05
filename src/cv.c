@@ -298,7 +298,7 @@ int8_t ProcessDroneShips(ship_t *ship)
 	return 0;
 }
 
-ship_t *MainShipTarget(u_int8_t group)
+ship_t *MainShip(u_int8_t group)
 {
 	ship_t *ship;
 	ship_t *cv = NULL;
@@ -307,7 +307,7 @@ ship_t *MainShipTarget(u_int8_t group)
 
 	if(!arena->cvs[group].ships)
 	{
-		Com_Printf(VERBOSE_WARNING, "MainShipTarget(): No ship in group %d\n", group);
+		Com_Printf(VERBOSE_WARNING, "MainShip(): No ship in group %d\n", group);
 		return NULL;
 	}
 	
@@ -329,13 +329,13 @@ ship_t *MainShipTarget(u_int8_t group)
 					dd = ship;
 				break;
 			default:
-				Com_Printf(VERBOSE_WARNING, "MainShipTarget(): unknown ship type\n");
+				Com_Printf(VERBOSE_WARNING, "MainShip(): unknown ship type\n");
 		}
 		
 		if(cv)
 			break;
 	}
-	
+
 	if(cv || ca || dd )
 	{
 		if(cv)
@@ -345,6 +345,24 @@ ship_t *MainShipTarget(u_int8_t group)
 		else if(dd)
 			ship = dd;
 
+		return ship;
+	}
+
+	return NULL;
+}
+
+ship_t *MainShipTarget(u_int8_t group)
+{
+	ship_t *ship;
+
+	if(!arena->cvs[group].ships)
+	{
+		Com_Printf(VERBOSE_WARNING, "MainShipTarget(): No ship in group %d\n", group);
+		return NULL;
+	}
+
+	if(ship = MainShip(group))
+	{
 		// update field position
 		arena->fields[arena->cvs[group].field].posxyz[0] = ship->Position.x;
 		arena->fields[arena->cvs[group].field].posxyz[1] = ship->Position.y;

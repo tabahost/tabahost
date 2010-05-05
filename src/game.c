@@ -271,7 +271,7 @@ u_int16_t packets_tab[210][3] =
 		{ 0xFFFF, 0x0015, 0x0015 }, // bgALLAI_PLANES_UPDATE
 		{ 0xFFFF, 0x0016, 0xFFFF }, // bgRADARAI_PLANES_UPDATE
 		{ 0xFFFF, 0x0017, 0xFFFF }, // bgCLEARAI_RADAR
-		{ 0xFFFF, 0x0018, 0xFFFF }, // bgAI_MOUNT
+		{ 0xFFFF, 0x0018, 0x0018 }, // bgAI_MOUNT
 		{ 0xFFFF, 0x0019, 0xFFFF }, // bgAI_ATTACH_UPDATE
 		{ 0xFFFF, 0x001A, 0xFFFF }, // bgAI_GUNNER_ENABLE
 		{ 0xFFFF, 0x001B, 0xFFFF }, // bgAI_MOUNT_UPDATE
@@ -3872,6 +3872,16 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		switch (n)
 		{
+			case 0x0018:
+				if (!setjmp(debug_buffer))
+				{
+					WB3AiMount(buffer, client);
+				}
+				else
+				{
+					DebugClient(__FILE__, __LINE__, TRUE, client);
+				}
+				break;
 			case 0x002C:
 				if (!setjmp(debug_buffer))
 				{

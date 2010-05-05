@@ -2002,6 +2002,51 @@ void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
 }
 
 /**
+ WB3AiFillSlot
+
+ Add Ai to screen
+ */
+
+void WB3AiFillSlot(client_t *client)
+{
+	u_int8_t buffer[16];
+	wb3aifillslot_t *aifillslot;
+
+	memset(buffer, 0, sizeof(buffer));
+
+	aifillslot = (wb3aifillslot_t *)buffer;
+
+	aifillslot->packetid = htons(Com_WBhton(0x0008));
+	aifillslot->slot = 0;
+	aifillslot->shortnick = htonl(ascii2wbnick("--cv--", 1));
+	aifillslot->country = htonl(client->country);
+	aifillslot->plane = htons(0x0049);
+	aifillslot->unk1 = htons(0x0005);
+	aifillslot->unk2 = 0;
+
+	SendPacket(buffer, sizeof(buffer), client);
+}
+
+/**
+ WB3AiMount
+
+ Request to mount CV Deck
+ */
+
+void WB3AiMount(u_int8_t *buffer, client_t *client)
+{
+	u_int8_t i, j;
+	wb3aimount_t *aimount;
+	ship_t *ship;
+
+	aimount = (wb3aimount_t *) buffer;
+
+	PPrintf(client, RADIO_YELLOW, "unk1: %d unk2: %d unk3: %d", ntohs(aimount->unk1), aimount->unk2, aimount->unk3);
+	
+	WB3AiFillSlot(client);
+}
+
+/**
  WB3ClientSkin
 
  Set client skin
