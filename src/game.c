@@ -3864,6 +3864,11 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		Com_WBntoh(&n);
 
+		if(debug->value && client->inuse && client->ready && client->attr)
+		{
+			PPrintf(client, RADIO_GREEN, "(C->S) 0x%4X", n);
+		}
+
 		if (!client->drone)
 		{
 			if (n != 0x0E00) // TODO: Bug: THAI still being kicked
