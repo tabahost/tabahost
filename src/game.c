@@ -9518,7 +9518,7 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
  Adds or remove a plane to client screen
  */
 
-void AddRemoveCVScreen(client_t *plane, client_t *client, u_int8_t unk1)
+void AddRemoveCVScreen(client_t *plane, client_t *client, u_int8_t unk1, u_int8_t cvnum)
 {
 	u_int8_t buffer[16];
 	wb3aifillslot_t *aifillslot;
@@ -9533,7 +9533,7 @@ void AddRemoveCVScreen(client_t *plane, client_t *client, u_int8_t unk1)
 	aifillslot->country = htonl(plane->country);
 	aifillslot->plane = htons(plane->plane);
 	aifillslot->unk1 = htons(unk1);
-	aifillslot->cvnum = GetCVNum(plane);
+	aifillslot->cvnum = cvnum;
 
 	SendPacket(buffer, sizeof(buffer), client);
 	SendPlaneStatus(plane, client);

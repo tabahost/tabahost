@@ -2021,7 +2021,29 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 
 	if(ship)
 	{
-		AddRemoveCVScreen(ship, client, ntohs(aimount->unk1));
+		AddRemoveCVScreen(ship, client, ntohs(aimount->unk1), aimount->cvnum);
+	}
+}
+
+/**
+ GetCShipByNum
+
+ Return Ship client_t from cvnum
+ */
+
+client_t *GetCShipByNum(u_int8_t cvnum)
+{
+	u_int8_t i, j;
+	ship_t *ship;
+
+	for(i = 0, j = 0; i < cvs->value; i++)
+	{
+		for(ship = arena->cvs[i].ships; ship; ship = ship->next)
+		{
+			if(j == cvnum)
+				return ship->drone;
+			j++;
+		}
 	}
 }
 
