@@ -3866,7 +3866,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		if(debug->value && client->inuse && client->ready && client->attr)
 		{
-			PPrintf(client, RADIO_GREEN, "(C->S) 0x%4X", n);
+			PPrintf(client, RADIO_GREEN, "(C->S) 0x%X", n);
 		}
 
 		if (!client->drone)
@@ -9527,7 +9527,7 @@ void AddRemoveCVScreen(client_t *plane, client_t *client, u_int8_t unk1, u_int8_
 	aifillslot = (wb3aifillslot_t *)buffer;
 
 	aifillslot->packetid = htons(Com_WBhton(0x0008));
-	client->visible[MAX_SCREEN - 1].client = plane;
+	client->visible[15].client = plane;
 	aifillslot->slot = GetSlot(plane, client);
 	aifillslot->shortnick = htonl(plane->shortnick);
 	aifillslot->country = htonl(plane->country);
