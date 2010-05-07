@@ -2002,6 +2002,28 @@ void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
 }
 
 /**
+ GetCShipByNum
+
+ Return Ship client_t from cvnum
+ */
+
+client_t *GetCShipByNum(u_int8_t cvnum)
+{
+	u_int8_t i, j;
+	ship_t *ship;
+
+	for(i = 0, j = 0; i < cvs->value; i++)
+	{
+		for(ship = arena->cvs[i].ships; ship; ship = ship->next)
+		{
+			if(j == cvnum)
+				return ship->drone;
+			j++;
+		}
+	}
+}
+
+/**
  WB3AiMount
 
  Request to mount CV Deck
@@ -2022,28 +2044,6 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 	if(ship)
 	{
 		AddRemoveCVScreen(ship, client, ntohs(aimount->unk1), aimount->cvnum);
-	}
-}
-
-/**
- GetCShipByNum
-
- Return Ship client_t from cvnum
- */
-
-client_t *GetCShipByNum(u_int8_t cvnum)
-{
-	u_int8_t i, j;
-	ship_t *ship;
-
-	for(i = 0, j = 0; i < cvs->value; i++)
-	{
-		for(ship = arena->cvs[i].ships; ship; ship = ship->next)
-		{
-			if(j == cvnum)
-				return ship->drone;
-			j++;
-		}
 	}
 }
 
