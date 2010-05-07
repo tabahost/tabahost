@@ -2049,7 +2049,7 @@ typedef struct wb3aifillslot_s // 00 08
 	u_int32_t	country;
 	u_int16_t	plane;
 	u_int16_t	unk1;
-	u_int8_t	unk2;
+	u_int8_t	cvnum;
 } wb3aifillslot_t;
 
 typedef struct wb3allaiplanesupdate_s // 00 15
@@ -2069,7 +2069,7 @@ typedef struct wb3aimount_s // 00 18
 {
 	u_int16_t	packetid;
 	u_int16_t	unk1;
-	u_int8_t	number;
+	u_int8_t	cvnum;
 	u_int8_t	inout; // 1 in, 2 out
 } wb3aimount_t;
 

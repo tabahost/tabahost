@@ -8290,7 +8290,10 @@ void SendPlaneStatus(client_t *plane, client_t *client)
 
 	status = (planestatus2_t *)buffer;
 
-	status->packetid = htons(Com_WBhton(0x0002));
+	if(plane->drone == DRONE_SHIP)
+		status->packetid = htons(Com_WBhton(0x000A));
+	else
+		status->packetid = htons(Com_WBhton(0x0002));
 	status->slot = GetSlot(plane, client);
 
 	status->status_damage = ntohl(plane->status_damage);
@@ -9510,6 +9513,39 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 }
 
 /**
+ AddRemoveCVScreen
+
+ Adds or remove a plane to client screen
+ */
+
+void AddRemoveCVScreen(client_t *plane, client_t *client, u_int8_t unk1)
+{
+	u_int8_t buffer[16];
+	wb3aifillslot_t *aifillslot;
+
+	memset(buffer, 0, sizeof(buffer));
+	aifillslot = (wb3aifillslot_t *)buffer;
+
+	aifillslot->packetid = htons(Com_WBhton(0x0008));
+	client->visible[MAX_SCREEN - 1].client = plane;
+	aifillslot->slot = GetSlot(plane, client);
+	aifillslot->shortnick = htonl(plane->shortnick);
+	aifillslot->country = htonl(plane->country);
+	aifillslot->plane = htons(plane->plane);
+	aifillslot->unk1 = htons(unk1);
+	aifillslot->cvnum = GetCVNum(plane);
+
+	SendPacket(buffer, sizeof(buffer), client);
+	SendPlaneStatus(plane, client);
+
+//	if(skins->value)
+//	{
+//		Com_Printf(VERBOSE_DEBUG, "WB3OverrideSkin() at AddRemovePlaneScreen()\n");
+//		WB3OverrideSkin(addplane->slot, client);
+//	}
+}
+
+/**
  SendScreenUpdates
 
  Update client screen with planes status
@@ -9528,14 +9564,8 @@ void SendScreenUpdates(client_t *client)
 	memset(buffer, 0, sizeof(buffer));
 	updateplane = (updateplane_t *)buffer;
 
-	if (wb3->value)
-	{
-		updateplane->packetid = htons(Com_WBhton(0x001E));
-	}
-	else
-	{
-		updateplane->packetid = htons(Com_WBhton(0x0001));
-	}
+//	updateplane->packetid = htons(Com_WBhton(0x0009));
+	updateplane->packetid = htons(Com_WBhton(0x001E));
 
 	updateplane->timer = htonl(arena->time);
 	updateplane->posx = htonl(((client->posxy[0][0] >> 11) << 11));
@@ -9581,14 +9611,6 @@ void SendScreenUpdates(client_t *client)
 				wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // Yaw Angular Speed // 7
 				wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // Z Speed // 9
 
-//				if(IsGround(client->visible[i].client))
-//				{
-//					wb3updateplane2->prxspeed = htons(0x8000); // zero Pitch Angular Speed
-//					wb3updateplane2->bryspeed = htons(0x8000); // zero Roll Angular Speed
-//					wb3updateplane2->zaccel = 0; // zero Z Acceleration
-//					wb3updateplane2->yrzspeed |= htons(0x0100); // zero Z Speed
-//				}
-
 				if (fp)
 				{
 					fprintf(fp, "%u;%d;%d;%d;%d;%u;%d;%d;%d;%d;%u\n",
@@ -9627,19 +9649,6 @@ void SendScreenUpdates(client_t *client)
 				updateplane2->zaccel = client->visible[i].client->accelxyz[2][0] >> 2;
 				updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
 				updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-
-				//			updateplane2->pitch = (double) client->visible[i].client->angles[0][0] * 128 / 1800;
-				//			updateplane2->xaccel = (double) client->visible[i].client->accelxyz[0][0] / 4;
-				//			updateplane2->prxspeed = htons(((int8_t)((double) client->visible[i].client->aspeeds[0][0] / 64) << 9) ^ 0x8000); // 7
-				//			updateplane2->prxspeed |= htons(((int8_t)((double) client->visible[i].client->speedxyz[0][0] / 4) & 0x1FF) ^ 0x0100); // 9
-				//			updateplane2->roll = (double) client->visible[i].client->angles[1][0] * 128 / 1800;
-				//			updateplane2->yaccel = (double) client->visible[i].client->accelxyz[1][0] / 4;
-				//			updateplane2->bryspeed = htons(((int8_t)((double) client->visible[i].client->aspeeds[1][0] / 64) << 9) ^ 0x8000); // 7
-				//			updateplane2->bryspeed |= htons(((int8_t)((double) client->visible[i].client->speedxyz[1][0] / 4) & 0x1FF) ^ 0x0100); // 9
-				//			updateplane2->yaw = (double) client->visible[i->client]->angles[2][0] * 128 / 1800;
-				//			updateplane2->zaccel = (double) client->visible[i].client->accelxyz[2][0] / 4;
-				//			updateplane2->yrzspeed = htons(((int8_t)((double) client->visible[i].client->aspeeds[2][0] / 64) << 9) ^ 0x8000); // 7
-				//			updateplane2->yrzspeed |= htons(((int8_t)((double) client->visible[i].client->speedxyz[2][0] / 4) & 0x1FF) ^ 0x0100); // 9
 			}
 
 			client->visible[i].timer = client->visible[i].client->timer;

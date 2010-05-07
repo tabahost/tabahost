@@ -832,7 +832,7 @@ void SendMapDots(void)
 				j = 0;
 			}
 
-			if (clients[i].inuse && clients[i].ready && clients[i].infly) // mount dot packet
+			if (clients[i].inuse && clients[i].ready && clients[i].infly && !(clients[i].drone == DRONE_SHIP)) // mount dot packet
 			{
 				if ((clients[i].country == country) && iff->value)
 				{
