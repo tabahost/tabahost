@@ -257,7 +257,7 @@ u_int16_t packets_tab[210][3] =
 		{ 0xFFFF, 0x0007, 0x0007 }, // bgGUNNER_ATT *
 		{ 0xFFFF, 0x0008, 0x0008 }, // bgAI_FILL_SLOT
 		{ 0xFFFF, 0x0009, 0xFFFF }, // bgAI_UPDATE
-		{ 0xFFFF, 0x000A, 0xFFFF }, // bgAI_PLANE_DAMAGE
+		{ 0xFFFF, 0x000A, 0x000A }, // bgAI_PLANE_DAMAGE
 		{ 0xFFFF, 0x000B, 0xFFFF }, // bgAI_RESEND_SLOT_INFO
 		{ 0xFFFF, 0x000C, 0xFFFF }, // bgAI_GUNNER_ATT
 		{ 0xFFFF, 0x000D, 0xFFFF }, // bgAIHOST_PLANE_DAMAGE
@@ -9564,8 +9564,8 @@ void SendScreenUpdates(client_t *client)
 	memset(buffer, 0, sizeof(buffer));
 	updateplane = (updateplane_t *)buffer;
 
-//	updateplane->packetid = htons(Com_WBhton(0x0009));
-	updateplane->packetid = htons(Com_WBhton(0x001E));
+	updateplane->packetid = htons(Com_WBhton(0x0009));
+//	updateplane->packetid = htons(Com_WBhton(0x001E));
 
 	updateplane->timer = htonl(arena->time);
 	updateplane->posx = htonl(((client->posxy[0][0] >> 11) << 11));
@@ -9586,7 +9586,7 @@ void SendScreenUpdates(client_t *client)
 	{
 		if (client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer))
 		{
-			if (wb3->value)
+			if (!wb3->value)
 			{
 				wb3updateplane2 = (wb3updateplane2_t *)(buffer+19+(22*j));
 
