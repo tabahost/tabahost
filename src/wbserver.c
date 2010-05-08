@@ -162,11 +162,7 @@ int main(int argc, char *argv[])
 	}
 
 	LoadAmmo(NULL);
-	if(wb3->value)
 	LoadMapcycle("wb3mapcycle", NULL);
-	else
-	LoadMapcycle("mapcycle", NULL);
-
 	LoadArenaStatus("arena", NULL, 0);
 
 #ifdef _WIN32

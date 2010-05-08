@@ -470,25 +470,22 @@ int ProcessClient(client_t *client)
 
 				// Forced config
 
-				if(wb3->value)
+				if(!((arena->frame - client->frame) % 30000))
 				{
-					if(!((arena->frame - client->frame) % 30000))
+					if(!metar->value)
 					{
-						if(!metar->value)
-						{
-							if((weather->value == 2) && !client->rain)
-								WB3DotCommand(client, ".weather 0"); // cloudy
-							else
-								WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
-						}
-						WB3DotCommand(client, ".clutterdistance 8500");
+						if((weather->value == 2) && !client->rain)
+							WB3DotCommand(client, ".weather 0"); // cloudy
+						else
+							WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
 					}
-
-					//				if(IsGround(client) && client->infly && !((arena->frame - client->frame) % 1000))
-					//				{
-					//					WB3Mapper(client);
-					//				}
+					WB3DotCommand(client, ".clutterdistance 8500");
 				}
+
+				//				if(IsGround(client) && client->infly && !((arena->frame - client->frame) % 1000))
+				//				{
+				//					WB3Mapper(client);
+				//				}
 
 				if(!((arena->frame - client->frame) % 30000))
 				{
@@ -551,6 +548,9 @@ int ProcessClient(client_t *client)
 				if(!((arena->frame - client->frame) % 50)) // 500ms
 				{
 					SendPlayersNear(client);
+
+					if(client->deck)
+						SendDeckUpdates(client);
 				}
 
 				if(!((arena->frame - client->frame) % 10)) // 100ms
@@ -1035,24 +1035,8 @@ int32_t ProcessLogin(client_t *client)
 				return n;
 			break;
 		case 1:
-			if (!wb3->value)
-			{
-				n = Com_Recv(client->socket, mainbuffer, 1); // Receive client acknowledgement
-				if (n > 0)
-				{
-					SendPlayersNames(client);
-					return -1;
-				}
-				else if (n < 0)
-				{
-					return n;
-				}
-			}
-			else
-			{
-				SendPlayersNames(client);
-				return -1;
-			}
+			SendPlayersNames(client);
+			return -1;
 			break;
 		default:
 			Com_Printf(VERBOSE_WARNING, "login unk\n");
@@ -2002,12 +1986,12 @@ void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
 }
 
 /**
- GetCShipByNum
+ GetShipByNum
 
  Return Ship client_t from cvnum
  */
 
-client_t *GetCShipByNum(u_int8_t cvnum)
+ship_t *GetShipByNum(u_int8_t cvnum)
 {
 	u_int8_t i, j;
 	ship_t *ship;
@@ -2017,7 +2001,7 @@ client_t *GetCShipByNum(u_int8_t cvnum)
 		for(ship = arena->cvs[i].ships; ship; ship = ship->next)
 		{
 			if(j == cvnum)
-				return ship->drone;
+				return ship;
 			j++;
 		}
 	}
@@ -2033,18 +2017,22 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 {
 	u_int8_t i, j;
 	wb3aimount_t *aimount;
-	client_t *ship;
+	ship_t *ship;
+	char field[8];
 
 	aimount = (wb3aimount_t *) buffer;
 
 	PPrintf(client, RADIO_YELLOW, "unk1: %d cvnum: %d inout: %d", ntohs(aimount->unk1)/*cvdot->unk2*/, aimount->cvnum, aimount->inout);
 	
-	ship = GetCShipByNum(aimount->cvnum);
+	ship = GetShipByNum(aimount->cvnum);
 
-	if(ship)
-	{
-		AddRemoveCVScreen(ship, client, ntohs(aimount->unk1), aimount->cvnum);
-	}
+	if(!ship || !ship->drone)
+		return;
+
+	client->field = arena->cvs[ship->group].field+1;
+	SendRPS(client);
+	client->field = 1;
+	AddRemoveCVScreen(ship->drone, client, ntohs(aimount->unk1), aimount->cvnum);
 }
 
 /**

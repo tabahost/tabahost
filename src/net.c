@@ -278,11 +278,6 @@ int32_t SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		header = (u_int16_t)(datagram[3] << 2) + datagram[4];
 
-		if(debug->value && client->inuse && client->ready && client->attr)
-		{
-			PPrintf(client, RADIO_RED, "(S->C) 0x%X", header);
-		}
-
 		Com_WBntoh(&header);
 
 		switch(header)

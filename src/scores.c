@@ -1462,7 +1462,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 							break;
 						}
 					default:
-						if (wb3->value && IsGround(client))
+						if (IsGround(client))
 						{
 							strcat(my_query, " killtank = killtank + '1'");
 

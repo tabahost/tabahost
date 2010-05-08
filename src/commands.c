@@ -887,14 +887,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	if (wb3->value)
-	{
-		wb3fly = (wb3initflight_t *)buffer;
-	}
-	else
-	{
-		fly = (initflight_t *)buffer;
-	}
+	wb3fly = (wb3initflight_t *)buffer;
 
 	wb3fly->packetid = htons(Com_WBhton(0x0401));
 
@@ -904,21 +897,15 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		{
 			PPrintf(client, RADIO_YELLOW, "Takeoff was blocked by administrators");
 
-			if (wb3->value)
-			{
-				wb3fly->error = htons(0x09);
-				SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-			}
+			wb3fly->error = htons(0x09);
+			SendPacket(buffer, 69 + 12, client);
 			return 1;
 		}
 		else if (!client->lives)
 		{
 			PPrintf(client, RADIO_YELLOW, "You are killed and cannot fly");
-			if (wb3->value)
-			{
-				wb3fly->error = htons(0x03);
-				SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-			}
+			wb3fly->error = htons(0x03);
+			SendPacket(buffer, 69 + 12, client);
 			return 1;
 		}
 	}
@@ -926,55 +913,40 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	if (client->tkstatus && !IsBomber(client))
 	{
 		PPrintf(client, RADIO_YELLOW, "You are a team killer, you must fly bomber");
-		if (wb3->value)
-		{
-			wb3fly->error = htons(0x07);
-			SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-		}
+		wb3fly->error = htons(0x07);
+		SendPacket(buffer, 69 + 12, client);
 		return 1;
 	}
 
 	if (client->field > fields->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid Field F%u", client->field);
-		if (wb3->value)
-		{
-			wb3fly->error = htons(0x02);
-			SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-		}
+		wb3fly->error = htons(0x02);
+		SendPacket(buffer, 69 + 12, client);
 		return 1;
 	}
 
 	if ((arena->fields[client->field-1].country != client->country) && (client->attr != 1))
 	{
 		PPrintf(client, RADIO_YELLOW, "This field is not from your country");
-		if (wb3->value)
-		{
-			wb3fly->error = htons(0x02);
-			SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-		}
+		wb3fly->error = htons(0x02);
+		SendPacket(buffer, 69 + 12, client);
 		return 1;
 	}
 
 	if (arena->fields[client->field-1].closed && client->attr != 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You cannot take off - This field is closed");
-		if (wb3->value)
-		{
-			wb3fly->error = htons(0x08);
-			SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-		}
+		wb3fly->error = htons(0x08);
+		SendPacket(buffer, 69 + 12, client);
 		return 1;
 	}
 
 	if (!GetPlaneName(client->plane) || client->plane == PLANE_FAU)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid plane");
-		if (wb3->value)
-		{
-			wb3fly->error = htons(0x07);
-			SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-		}
+		wb3fly->error = htons(0x07);
+		SendPacket(buffer, 69 + 12, client);
 		return 1;
 	}
 
@@ -983,11 +955,8 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		if ((arena->fields[client->field - 1].rps[client->plane] > -1 && arena->fields[client->field - 1].rps[client->plane] < 1) && !client->attached && client->attr != 1)
 		{
 			PPrintf(client, RADIO_YELLOW, "Plane not available");
-			if (wb3->value)
-			{
-				wb3fly->error = htons(0x07);
-				SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-			}
+			wb3fly->error = htons(0x07);
+			SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
 			return 1;
 		}
 	}
@@ -995,11 +964,8 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	if (client->flypenalty && client->flypenaltyfield == client->field && !client->attached && client->attr != 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You can't take off from this field for %s", Com_TimeSeconds(client->flypenalty));
-		if (wb3->value)
-		{
-			wb3fly->error = htons(0x09);
-			SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
-		}
+		wb3fly->error = htons(0x09);
+		SendPacket(buffer, (wb3->value ? 69 : 67) + 12, client);
 		return 1;
 	}
 
@@ -1078,60 +1044,25 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	{
 		if (client->attached->drone & (DRONE_HMACK | DRONE_HTANK))
 		{
-			if (wb3->value)
-			{
-				wb3fly->alt = htonl(arena->fields[client->field - 1].posxyz[2]);
-			}
-			else
-			{
-				fly->alt = htonl(arena->fields[client->field - 1].posxyz[2]);
-			}
+			wb3fly->alt = htonl(arena->fields[client->field - 1].posxyz[2]);
 		}
 
 		if (i == MAX_RELATED)
 		{
-			if (wb3->value)
-			{
-				wb3fly->alt = htonl(0x0102);
-			}
-			else
-			{
-				fly->alt = htonl(0x0102);
-			}
+			wb3fly->alt = htonl(0x0102);
 		}
 	}
 	else if ((arena->fields[client->field - 1].type == FIELD_CARGO || arena->fields[client->field - 1].type == FIELD_SUBMARINE) && !startalt->value)
 	{
-		if (wb3->value)
-		{
-			wb3fly->alt = htonl(30);
-		}
-		else
-		{
-			fly->alt = htonl(30);
-		}
+		wb3fly->alt = htonl(30);
 	}
 	else if (arena->fields[client->field - 1].type == FIELD_DD && !startalt->value)
 	{
-		if (wb3->value)
-		{
-			wb3fly->alt = htonl(70);
-		}
-		else
-		{
-			fly->alt = htonl(70);
-		}
+		wb3fly->alt = htonl(70);
 	}
 	else
 	{
-		if (wb3->value)
-		{
-			wb3fly->alt = htonl(startalt->value);
-		}
-		else
-		{
-			fly->alt = htonl(startalt->value);
-		}
+		wb3fly->alt = htonl(startalt->value);
 	}
 
 	if (!wb3->value)
@@ -1147,82 +1078,46 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		}
 	}
 
-	if (wb3->value)
-	{
-		strcpy(client->skin, CreateSkin(client, 1));
-		
-		wb3fly->country = htonl(client->country);
-		wb3fly->field = htons(client->field - 1);
-		wb3fly->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
-		wb3fly->bulletradius2 = htons((u_int16_t)(bulletradius->value * 10));
-		wb3fly->gunrad = htons((u_int16_t)(gunrad->value * 10));
-		wb3fly->bulletradius3 = htons((u_int16_t)(bulletradius->value * 10));
-		wb3fly->unknown10 = htonl(100); // same value from wb3requestfly_t unk4 (100)
-		wb3fly->unknown11 = htonl(900); // same value from wb3requestfly_t unk5 (900)
-		wb3fly->rules = htonl(rules);
-		wb3fly->attachedpos = htonl(position);
-		wb3fly->numofarrays = 1;
-	}
-	else
-	{
-		fly->conv = htonl(client->conv * 3);
-		fly->country = htonl(client->country);
-		fly->field = htons(client->field - 1);
-		fly->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
-		fly->bulletradius2 = htons((u_int16_t)(bulletradius->value * 10));
-		fly->gunrad = htons((u_int16_t)(gunrad->value * 10));
-		fly->bulletradius3 = htons((u_int16_t)(bulletradius->value * 10));
-		fly->unknown6 = htons(0x01); // 0x01
-		fly->unknown7 = htons(0x01); // 0x01
-		fly->unknown8 = htons(0x0a); // 0x0a
-		fly->unknown9 = 1; // 0x100
-		fly->rules = htonl(rules);
-		fly->attachedpos = htonl(position);
-		fly->numofarrays = 1;
-	}
+	strcpy(client->skin, CreateSkin(client, 1));
+	
+	wb3fly->country = htonl(client->country);
+	wb3fly->field = htons(client->field - 1);
+	wb3fly->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
+	wb3fly->bulletradius2 = htons((u_int16_t)(bulletradius->value * 10));
+	wb3fly->gunrad = htons((u_int16_t)(gunrad->value * 10));
+	wb3fly->bulletradius3 = htons((u_int16_t)(bulletradius->value * 10));
+	wb3fly->unknown10 = htonl(100); // same value from wb3requestfly_t unk4 (100)
+	wb3fly->unknown11 = htonl(900); // same value from wb3requestfly_t unk5 (900)
+	wb3fly->rules = htonl(rules);
+	wb3fly->attachedpos = htonl(position);
+	wb3fly->numofarrays = 1;
 
 	if (client->attached)
 	{
-		if (wb3->value)
-		{
-			wb3fly->plane = htons(client->attached->plane);
-			j = wb3fly->numofarrays;
-		}
-		else
-		{
-			fly->plane = htons(client->attached->plane);
-			fly->attached = htonl(2);
-			j = fly->numofarrays;
-		}
+		wb3fly->plane = htons(client->attached->plane);
+		j = wb3fly->numofarrays;
 
 		for (i = 0; i < j; i++)
 		{
-			fly2 = (initflight2_t *)(buffer + (wb3->value ? 69 : 67) + (12 * i));
+			fly2 = (initflight2_t *)(buffer + 69 + (12 * i));
 			fly2->ord = 0;
 		}
 	}
 	else
 	{
-		if (wb3->value)
-		{
-			wb3fly->plane = htons(client->plane);
+		wb3fly->plane = htons(client->plane);
 
-			j = wb3fly->numofarrays;
-		}
-		else
-		{
-			fly->plane = htons(client->plane);
-			j = fly->numofarrays;
-		}
+		j = wb3fly->numofarrays;
 
 		for (i = 0; i < j; i++)
 		{
-			fly2 = (initflight2_t *)(buffer + (wb3->value ? 69 : 67) + (12 * i));
+			fly2 = (initflight2_t *)(buffer + 69 + (12 * i));
 			fly2->ord = client->ord;
 		}
 	}
 
 	client->dronetimer = arena->time; // stores time when client started flight
+	client->deck = NULL; // client is not at CV deck
 	client->damaged = 0;
 
 	client->infly = 1;
@@ -1244,60 +1139,33 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	if (arena->year >= 1944)
 	{
-		if (wb3->value)
+		switch (client->plane)
 		{
-			switch (client->plane)
-			{
-				case 1: /*f6f5*/
-				case 4: /*f4u1d*/
-				case 9: /*ki84ia*/
-				case 16: /*110g2*/
-				case 19: /*190d9*/
-				case 27: /*p38l*/
-				case 35: /*ju88a4*/
-				case 37: /*b25j*/
-				case 38: /*b17g*/
-				case 48: /*me262*/
-				case 52: /*mosq6*/
-				case 57: /*ju87g*/
-				case 59: /*b24j*/
-				case 71: /*f86*/
-				case 82: /*mosqnf2*/
-				case 88: /*g4m1*/
-				case 101: /*he111h3*/
-				case 113: /*do17z*/
-				case 114: /*109g2eto*/
-				case 125: /*ki44iib*/
-				case 220: /*a67*/
-					client->obradar = (int32_t)obradar->value;
-					break;
-				default:
-					client->obradar = 0;
-			}
-		}
-		else
-		{
-			switch (client->plane)
-			{
-				case 16:
-				case 26:
-				case 27:
-				case 37:
-				case 38:
-				case 48:
-				case 52:
-				case 53:
-				case 57:
-				case 59:
-				case 67:
-				case 91:
-				case 95:
-				case 100:
-					client->obradar = (int32_t)obradar->value;
-					break;
-				default:
-					client->obradar = 0;
-			}
+			case 1: /*f6f5*/
+			case 4: /*f4u1d*/
+			case 9: /*ki84ia*/
+			case 16: /*110g2*/
+			case 19: /*190d9*/
+			case 27: /*p38l*/
+			case 35: /*ju88a4*/
+			case 37: /*b25j*/
+			case 38: /*b17g*/
+			case 48: /*me262*/
+			case 52: /*mosq6*/
+			case 57: /*ju87g*/
+			case 59: /*b24j*/
+			case 71: /*f86*/
+			case 82: /*mosqnf2*/
+			case 88: /*g4m1*/
+			case 101: /*he111h3*/
+			case 113: /*do17z*/
+			case 114: /*109g2eto*/
+			case 125: /*ki44iib*/
+			case 220: /*a67*/
+				client->obradar = (int32_t)obradar->value;
+				break;
+			default:
+				client->obradar = 0;
 		}
 	}
 
@@ -1313,7 +1181,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		WB3ArenaConfig2(client);
 	}
 
-	SendPacket(buffer, (wb3->value ? 69 : 67) + (12 * j /*num of arrays*/), client);
+	SendPacket(buffer, 69 + (12 * j /*num of arrays*/), client);
 
 	if (client->lives > 0)
 	{
@@ -2486,8 +2354,7 @@ void Cmd_Date(u_int16_t year, u_int8_t month, u_int8_t day, client_t *client)
 	arena->month = month;
 	arena->year = year;
 
-	if (wb3->value)
-		WB3DotCommand(NULL, ".date %u %u %u", arena->month, arena->day, arena->year);
+	WB3DotCommand(NULL, ".date %u %u %u", arena->month, arena->day, arena->year);
 }
 
 /**
@@ -2517,7 +2384,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		{
 			fprintf(fp, "FIELD   SIDE    TYPE   STATUS   UP   PARAS");
 			
-			if(!oldcapt->value && wb3->value)
+			if(!oldcapt->value)
 			{
 				fprintf(fp, "   ToT   TTC\n-------------------------------------------------------\n");
 			}
@@ -2560,7 +2427,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				fprintf(fp, "%5.0f%%%4d/%02d", (double)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
 				//fprintf(fp, "%s", buffer);
 
-				if(!oldcapt->value && wb3->value)
+				if(!oldcapt->value)
 				{
 					fprintf(fp, "%6.0f%6.0f\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
 				}
@@ -2615,7 +2482,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	{
 		PPrintf(client, RADIO_YELLOW, "Field F%d: Country: %s, Type: %s, Status: %s", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
 		
-		if(!oldcapt->value && wb3->value)
+		if(!oldcapt->value)
 		{
 			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras, ToT: %.2f, TTC: %.2f", (double)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type), arena->fields[field].tonnage, GetTonnageToClose(field+1));
 		}
@@ -2639,7 +2506,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				}
 			}
 			
-			if(!oldcapt->value && wb3->value)
+			if(!oldcapt->value)
 			{
 				c_cities = totalcities = 0;
 
@@ -2684,7 +2551,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		else
 		{
 			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\nPARAS: %d/%d\n\n", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open", arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
-			if(!oldcapt->value && wb3->value)
+			if(!oldcapt->value)
 			{
 				fprintf(fp, "TONNAGE ON TARGET: %.2f\nTONNAGE TO CLOSE: %.2f\n", arena->fields[field].tonnage, GetTonnageToClose(field+1));
 			}
@@ -3665,13 +3532,10 @@ void Cmd_Score(char *player, client_t *client)
 															if (Com_Atof(Com_MyRow("ground_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow("cost_score")) || Com_Atof(Com_MyRow("rescue_score")))
 															{
 																fprintf(fp, "(+) GROUND  score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")));
-																if (wb3->value)
-																{
-																	fprintf(fp, "(+) CAPTURE score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
-																	fprintf(fp, "(+) RESCUE  score: %10.3f\n", Com_Atof(Com_MyRow("rescue_score")));
-																	fprintf(fp, "(-) COSTS   score: %10.3f\n", Com_Atof(Com_MyRow("cost_score")));
-																	fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")) + Com_Atof(Com_MyRow("rescue_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
-																}
+																fprintf(fp, "(+) CAPTURE score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
+																fprintf(fp, "(+) RESCUE  score: %10.3f\n", Com_Atof(Com_MyRow("rescue_score")));
+																fprintf(fp, "(-) COSTS   score: %10.3f\n", Com_Atof(Com_MyRow("cost_score")));
+																fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")) + Com_Atof(Com_MyRow("rescue_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
 
 																debug_querytime = Sys_Milliseconds();
 
@@ -5603,10 +5467,7 @@ void Cmd_Minen(u_int32_t dist, double angle, client_t *client)
 		return;
 	}
 
-	if (wb3->value)
-		destx = client->posxy[0][0] + (dist * sin(Com_Rad(angle)));
-	else
-		destx = client->posxy[0][0] - (dist * sin(Com_Rad(angle)));
+	destx = client->posxy[0][0] + (dist * sin(Com_Rad(angle)));
 	desty = client->posxy[1][0] + (dist * cos(Com_Rad(angle)));
 
 	ThrowBomb(FALSE, client->posxy[0][0], client->posxy[1][0], client->posalt[0], destx, desty, 0, client);

@@ -559,7 +559,6 @@ void SaveArenaStatus(char *filename, client_t *client)
 //		SaveEarthMap(file);
 //	}
 
-
 	fclose(fp);
 }
 
@@ -1540,26 +1539,15 @@ void SendRPS(client_t *client)
 	sendrps->packetid = htons(Com_WBhton(0x1D0F));
 	sendrps->amount = maxplanes;
 
-	if (wb3->value)
-		i = 1;
-	else
-		i = 0;
-
 	for (i = 1; i < maxplanes; i++)
 	{
 		if (arena->fields[client->field - 1].rps[i] >= 1 || arena->fields[client->field - 1].rps[i] == -1 || (i >= 131 && i <=134 && wb3->value))
 		{
-			if (wb3->value)
-				buffer[i+2] = 0;
-			else
-				buffer[i+3] = 0;
+			buffer[i+2] = 0;
 		}
 		else
 		{
-			if (wb3->value)
-				buffer[i+2] = 1;
-			else
-				buffer[i+3] = 1;
+			buffer[i+2] = 1;
 		}
 	}
 
@@ -2075,29 +2063,15 @@ int8_t IsCargo(client_t *client, ...)
 		}
 		else if (plane < maxplanes)
 		{
-			if (wb3->value)
+			switch (plane)
 			{
-				switch (plane)
-				{
-					case 54: // ju52
-					case 67: // M5
-					case 79: // opel truck
-					case 137: // C47
-						return 1;
-					default:
-						return 0;
-				}
-			}
-			else
-			{
-				switch (plane)
-				{
-					case 54: // ju52
-					case 82: // Li-2
-						return 1;
-					default:
-						return 0;
-				}
+				case 54: // ju52
+				case 67: // M5
+				case 79: // opel truck
+				case 137: // C47
+					return 1;
+				default:
+					return 0;
 			}
 		}
 		else
@@ -2113,29 +2087,15 @@ int8_t IsCargo(client_t *client, ...)
 		plane = client->plane;
 	}
 
-	if (wb3->value)
+	switch (plane)
 	{
-		switch (plane)
-		{
-			case 54: // ju52
-			case 67: // M5
-			case 79: // opel truck
-			case 137: // C47
-				return 1;
-			default:
-				return 0;
-		}
-	}
-	else
-	{
-		switch (plane)
-		{
-			case 54: // ju52
-			case 82: // Li-2
-				return 1;
-			default:
-				return 0;
-		}
+		case 54: // ju52
+		case 67: // M5
+		case 79: // opel truck
+		case 137: // C47
+			return 1;
+		default:
+			return 0;
 	}
 }
 
@@ -3117,7 +3077,7 @@ void CaptureField(u_int8_t field, client_t *client)
 			}
 			else
 			{
-				if(!oldcapt->value && wb3->value)
+				if(!oldcapt->value)
 				{
 					if ((arena->fields[field - 1].buildings[i].type == BUILD_HANGAR) && !arena->fields[field - 1].buildings[i].status)
 						hangar++;
@@ -3315,10 +3275,7 @@ void ChangeArena(char *map, client_t *client)
 		snprintf(file, sizeof(file), "./arenas/%s/arena", map);
 		LoadArenaStatus(file, NULL, 0);
 
-		if (wb3->value)
-			strcat(file, ".topo");
-		else
-			strcat(file, ".elv");
+		strcat(file, ".topo");
 
 		LoadEarthMap(file);
 
@@ -3595,7 +3552,7 @@ u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 	}
 	else
 	{
-		if(notot || !wb3->value)
+		if(notot)
 		{
 			if ((building->type == BUILD_50CALACK) ||
 				(building->type == BUILD_20MMACK) ||

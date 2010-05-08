@@ -172,7 +172,7 @@ u_int8_t *wbcrypt(u_int8_t *buffer, u_int32_t key, u_int16_t size, u_int8_t oldc
 {
 	u_int16_t n, i;
 
-	if (wb3->value && !oldcrypt)
+	if (!oldcrypt)
 	{
 		// key = (key >> (size%3)) & 0xFF; // WB 2007
 		key |= (size << 2);
@@ -184,7 +184,7 @@ u_int8_t *wbcrypt(u_int8_t *buffer, u_int32_t key, u_int16_t size, u_int8_t oldc
 
 	for (n=0/*3*/, i = 0; n<size/*+3*/; n++) // n = 0 if removed 3 first bytes form packet
 	{
-		if (wb3->value && !oldcrypt)
+		if (!oldcrypt)
 		{
 			//  buffer[n] ^= key; // wb2007
 			buffer[n] ^= (key >> i++);
@@ -1352,10 +1352,7 @@ double WBtoHdg(int16_t angle)
 	else
 		heading = (double)((double)angle / 10);
 
-	if (wb3->value)
-		return (360.0L - heading);
-	else
-		return heading;
+	return (360.0L - heading);
 }
 
 /**

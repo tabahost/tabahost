@@ -351,7 +351,7 @@ void CheckArenaRules(void)
 		{
 			if(rebuildtime->value < 9999)
 			{
-				if(!oldcapt->value && wb3->value && arena->fields[i].tonnage && !(arena->frame % 6000)) // every minute
+				if(!oldcapt->value && arena->fields[i].tonnage && !(arena->frame % 6000)) // every minute
 				{
 					c_cities = totalcities = 0;
 
@@ -650,7 +650,7 @@ void CheckArenaRules(void)
 			if (arena->hour - (7 - ((int)dayhours->value%10)/2) == dayhours->value) // check hours
 				BPrintf(RADIO_YELLOW, "Current Date: %04d/%02d/%02d", arena->year, arena->month, arena->day);
 
-			if (wb3->value && !(arena->frame % (int)((360000 * dayhours->value) /timemult->value))) // set date and dayhours every day
+			if (!(arena->frame % (int)((360000 * dayhours->value) /timemult->value))) // set date and dayhours every day
 			{
 				if (arena->month >= 1 && arena->month <= 3) // winter
 				{
@@ -687,7 +687,7 @@ void CheckArenaRules(void)
 		}
 	}
 
-	if (wb3->value && !(arena->frame % 3000)) // 30 seconds
+	if (!(arena->frame % 3000)) // 30 seconds
 	{
 		if (!setjmp(debug_buffer))
 		{
@@ -910,14 +910,14 @@ void CheckArenaRules(void)
 
 				if(vitals && !arena->fields[i].vitals)
 				{
-					if(!oldcapt->value && wb3->value)
+					if(!oldcapt->value)
 					{
 						CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i+1);
 						CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
 					}
 				}
 
-				if(!oldcapt->value && wb3->value)
+				if(!oldcapt->value)
 				{
 					if(arena->fields[i].tonnage < GetTonnageToClose(i+1))
 						close = 0;
@@ -3734,7 +3734,7 @@ void SendFileSeq5(u_int16_t seek, client_t *client)
 
 	if (seek >= client->fileframe)
 	{
-		if (!wb3->value || !client->loginkey)
+		if (!client->loginkey)
 			SendFileSeq7(client);
 		return;
 	}
@@ -3863,11 +3863,6 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		n = (buffer[0] * 0x100) | buffer[1];
 
 		Com_WBntoh(&n);
-
-		if(debug->value && client->inuse && client->ready && client->attr)
-		{
-			PPrintf(client, RADIO_GREEN, "(C->S) 0x%X", n);
-		}
 
 		if (!client->drone)
 		{
@@ -4125,21 +4120,18 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					}
 
 					//SendArenaRules(client);
-					if(wb3->value)
-					{
-						WB3SendGruntConfig(client);
-						WB3ArenaConfig2(client);
-						if(((u_int8_t)weather->value == 2) && !client->rain)
-							WB3DotCommand(client, ".weather 0"); // cloudy
-						else
-							WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
-						WB3DotCommand(client, ".date %u %u %u", arena->month, arena->day, arena->year);
-						WB3DotCommand(client, ".weathereffects 1");
-						WB3NWAttachSlot(client);
-					}
+					WB3SendGruntConfig(client);
+					WB3ArenaConfig2(client);
+					if(((u_int8_t)weather->value == 2) && !client->rain)
+						WB3DotCommand(client, ".weather 0"); // cloudy
+					else
+						WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
+					WB3DotCommand(client, ".date %u %u %u", arena->month, arena->day, arena->year);
+					WB3DotCommand(client, ".weathereffects 1");
+					WB3NWAttachSlot(client);
 
 					SendOttoParams(client);
-					//if(!wb3->value)
+					if(!wb3->value)
 					SendExecutablesCheck(1, client);
 					SendLastConfig(client);
 
@@ -4171,10 +4163,10 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					PPrintf(client, RADIO_YELLOW, "Tabajara Host version %s, build %s %s", VERSION, __DATE__, __TIME__);
 					PPrintf(client, RADIO_YELLOW, "Last Reset: %s (%u x %u) %s",
-						arena->lastreset==1?GetCountry(1):GetCountry(3),
-						arena->lastreset==1?resetsred->value:resetsgold->value,
-						arena->lastreset==1?resetsgold->value:resetsred->value,
-						arena->lastreset==1?GetCountry(3):GetCountry(1));
+						(arena->lastreset==1)?GetCountry(1):GetCountry(3),
+						(arena->lastreset==1)?resetsred->value:resetsgold->value,
+						(arena->lastreset==1)?resetsgold->value:resetsred->value,
+						(arena->lastreset==1)?GetCountry(3):GetCountry(1));
 
 					if(!(client->attr == 1 && hideadmin->value))
 					{
@@ -5096,14 +5088,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	int16_t posoffset;
 	client_t *near = NULL;
 
-	if (wb3->value)
-	{
-		wb3plane = (wb3planeposition_t *) buffer;
-	}
-	else
-	{
-		plane = (planeposition_t *) buffer;
-	}
+	wb3plane = (wb3planeposition_t *) buffer;
 
 	oldpostimer = client->postimer;
 	client->postimer = arena->time; // set the time when last position packet has been received
@@ -5136,100 +5121,80 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	{
 		BackupPosition(client, FALSE);
 
-		if (wb3->value)
+		if (!client->mapper)
 		{
-			if (!client->mapper)
-			{
-				client->posxy[0][0] = ntohl(wb3plane->posx);
-				client->posxy[1][0] = ntohl(wb3plane->posy);
-			}
-			client->posalt[0] = ntohl(wb3plane->alt);
-			//		client->atradar = ntohs(wb3plane->radar);
-			if (!client->predict)
-			{
-				clientoffset = client->clienttimer - ntohl(wb3plane->timer);
-				client->clienttimer = ntohl(wb3plane->timer);
+			client->posxy[0][0] = ntohl(wb3plane->posx);
+			client->posxy[1][0] = ntohl(wb3plane->posy);
+		}
+		client->posalt[0] = ntohl(wb3plane->alt);
+		//		client->atradar = ntohs(wb3plane->radar);
+		if (!client->predict)
+		{
+			clientoffset = client->clienttimer - ntohl(wb3plane->timer);
+			client->clienttimer = ntohl(wb3plane->timer);
 
-				if(oldpostimer == client->postimer) // if this packet was received in bolus
-					client->offset += clientoffset;
-				else
-					client->offset = clientoffset;
+			if(oldpostimer == client->postimer) // if this packet was received in bolus
+				client->offset += clientoffset;
+			else
+				client->offset = clientoffset;
 
-				if(client->cancollide && !arena->overload)
+			if(client->cancollide && !arena->overload)
+			{
+				if(clientoffset < -600)
 				{
-					if(clientoffset < -600)
+					near = NearPlane(client, client->country, planerangelimit->value);
+					Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, clientoffset, near?"enemy near":"");
+				}
+
+				if(client->postimer != oldpostimer) // not received in bolus
+				{
+					posoffset = (client->postimer - oldpostimer + client->offset);
+					posoffset = abs(posoffset);
+
+					client->conn_sum += posoffset;
+					client->conn_count++;
+
+					if(client->conn_count >= 40) // each 15 seconds in flight
 					{
-						near = NearPlane(client, client->country, planerangelimit->value);
-						Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, clientoffset, near?"enemy near":"");
-					}
-
-					if(client->postimer != oldpostimer) // not received in bolus
-					{
-						posoffset = (client->postimer - oldpostimer + client->offset);
-						posoffset = abs(posoffset);
-
-						client->conn_sum += posoffset;
-						client->conn_count++;
-
-						if(client->conn_count >= 40) // each 15 seconds in flight
+						if(!client->conn_lastavg)
 						{
-							if(!client->conn_lastavg)
-							{
-								client->conn_lastavg = (double)client->conn_sum / client->conn_count;
-							}
-							else
-							{
-								client->conn_lastavg = 0.5 * client->conn_lastavg + 0.5 * (double)client->conn_sum / client->conn_count;
-							}
-
-							client->conn_sum = 10 * client->conn_lastavg;
-							client->conn_count = 10;
-
-							// if(client->conn_curravg)
-							// {
-							// 	conn_avgdiff = client->conn_curravg - client->conn_lastavg;
-							// 	Com_Printf(VERBOSE_DEBUG, "%s avgdiff %.3f\n", client->longnick, conn_avgdiff);
-							// 	//if(MODULUS(conn_avgdiff) > 100)
-							// }
-
-							client->conn_curravg = (double)client->conn_sum / client->conn_count;
-							// Com_Printf(VERBOSE_DEBUG, "%s current avg: %.3f\n", client->longnick, client->conn_curravg);
-
-							if(client->conn_curravg > 175)
-							{
-								client->connection = 3; // poor
-							}
-							else if(client->conn_curravg > 125)
-							{
-								client->connection = 2; // unstable
-							}
-							else if(client->conn_curravg > 75)
-							{
-								client->connection = 1; // fair
-							}
-							else
-								client->connection = 0; // stable
-							UpdateIngameClients(0);
+							client->conn_lastavg = (double)client->conn_sum / client->conn_count;
 						}
+						else
+						{
+							client->conn_lastavg = 0.5 * client->conn_lastavg + 0.5 * (double)client->conn_sum / client->conn_count;
+						}
+
+						client->conn_sum = 10 * client->conn_lastavg;
+						client->conn_count = 10;
+
+						// if(client->conn_curravg)
+						// {
+						// 	conn_avgdiff = client->conn_curravg - client->conn_lastavg;
+						// 	Com_Printf(VERBOSE_DEBUG, "%s avgdiff %.3f\n", client->longnick, conn_avgdiff);
+						// 	//if(MODULUS(conn_avgdiff) > 100)
+						// }
+
+						client->conn_curravg = (double)client->conn_sum / client->conn_count;
+						// Com_Printf(VERBOSE_DEBUG, "%s current avg: %.3f\n", client->longnick, client->conn_curravg);
+
+						if(client->conn_curravg > 175)
+						{
+							client->connection = 3; // poor
+						}
+						else if(client->conn_curravg > 125)
+						{
+							client->connection = 2; // unstable
+						}
+						else if(client->conn_curravg > 75)
+						{
+							client->connection = 1; // fair
+						}
+						else
+							client->connection = 0; // stable
+						UpdateIngameClients(0);
 					}
 				}
-			}
-		}
-		else
-		{
-			client->posxy[0][0] = ntohl(plane->posx);
-			client->posxy[1][0] = ntohl(plane->posy);
-			client->posalt[0] = ntohl(plane->alt);
-			//		client->atradar = ntohs(plane->radar);
-			if (!client->predict)
-			{
-				clientoffset = client->clienttimer - ntohl(plane->timer);
-				client->clienttimer =  ntohl(plane->timer);
-
-				if(oldpostimer == client->postimer) // if this packet was received in bolus
-					client->offset += clientoffset;
-				else
-					client->offset = clientoffset;
 			}
 		}
 
@@ -5247,36 +5212,18 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 
 		if (client->infly)
 		{
-			if (wb3->value)
-			{
-				client->speedxyz[0][i] = ntohs(wb3plane->xspeed);
-				client->speedxyz[1][i] = ntohs(wb3plane->yspeed);
-				client->speedxyz[2][i] = ntohs(wb3plane->climbspeed);
-				client->accelxyz[0][i] = ntohs(wb3plane->sideaccel);
-				client->accelxyz[1][i] = ntohs(wb3plane->forwardaccel);
-				client->accelxyz[2][i] = ntohs(wb3plane->climbaccel);
-				client->angles[0][i] = ntohs(wb3plane->pitchangle);
-				client->angles[1][i] = ntohs(wb3plane->rollangle);
-				client->angles[2][i] = ntohs(wb3plane->yawangle);
-				client->aspeeds[0][i] = ntohs(wb3plane->pitchangspeed);
-				client->aspeeds[1][i] = ntohs(wb3plane->rollangspeed);
-				client->aspeeds[2][i] = ntohs(wb3plane->yawangspeed);
-			}
-			else
-			{
-				client->speedxyz[0][i] = ntohs(plane->xspeed);
-				client->speedxyz[1][i] = ntohs(plane->yspeed);
-				client->speedxyz[2][i] = ntohs(plane->climbspeed);
-				client->accelxyz[0][i] = ntohs(plane->sideaccel);
-				client->accelxyz[1][i] = ntohs(plane->forwardaccel);
-				client->accelxyz[2][i] = ntohs(plane->climbaccel);
-				client->angles[0][i] = ntohs(plane->pitchangle);
-				client->angles[1][i] = ntohs(plane->rollangle);
-				client->angles[2][i] = ntohs(plane->yawangle);
-				client->aspeeds[0][i] = ntohs(plane->pitchangspeed);
-				client->aspeeds[1][i] = ntohs(plane->rollangspeed);
-				client->aspeeds[2][i] = ntohs(plane->yawangspeed);
-			}
+			client->speedxyz[0][i] = ntohs(wb3plane->xspeed);
+			client->speedxyz[1][i] = ntohs(wb3plane->yspeed);
+			client->speedxyz[2][i] = ntohs(wb3plane->climbspeed);
+			client->accelxyz[0][i] = ntohs(wb3plane->sideaccel);
+			client->accelxyz[1][i] = ntohs(wb3plane->forwardaccel);
+			client->accelxyz[2][i] = ntohs(wb3plane->climbaccel);
+			client->angles[0][i] = ntohs(wb3plane->pitchangle);
+			client->angles[1][i] = ntohs(wb3plane->rollangle);
+			client->angles[2][i] = ntohs(wb3plane->yawangle);
+			client->aspeeds[0][i] = ntohs(wb3plane->pitchangspeed);
+			client->aspeeds[1][i] = ntohs(wb3plane->rollangspeed);
+			client->aspeeds[2][i] = ntohs(wb3plane->yawangspeed);
 
 			if ((client->lograwdata || lograwposition->value) && client->infly)
 			{
@@ -5394,15 +5341,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 					{
 						if(midairs->value)
 						{
-							if(!wb3->value)
-							{
-								PPrintf(client, RADIO_YELLOW, "Friendly collision enabled");
-							}
-							else
-							{
-								if(IsBomber(client) || IsCargo(client)) // TODO: Collision: this is a temporary fix to wings collision
-									WB3DotCommand(client, ".midairs_frndly 1");
-							}
+							//PPrintf(client, RADIO_YELLOW, "Friendly collision enabled");
+							if(IsBomber(client) || IsCargo(client)) // TODO: Collision: this is a temporary fix to wings collision
+								WB3DotCommand(client, ".midairs_frndly 1");
 						}
 
 						client->cancollide = 1;
@@ -5593,8 +5534,8 @@ double ClientG(client_t *client)
 //	PPrintf(client, RADIO_GREEN, "Pitch %.2f, Roll %.2f, Yaw %.2f", pitch, roll, yaw);
 //	PPrintf(client, RADIO_RED, "AccX %d, AccY %d, Accz %d", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
 
-	if(wb3->value)
-		pitch *= -1;
+	// WB3 Stuff
+	pitch *= -1;
 
 	hyaw = yaw;
 
@@ -5687,8 +5628,8 @@ double ClientG(client_t *client)
 
 	///////////
 
-	if(wb3->value)
-		Ay = 180 - Ay;
+	// WB3 stuff
+	Ay = 180 - Ay;
 
 	g = (((double)client->accelxyz[0][0]/31) * cos(Com_Rad(Ax))) + (((double)client->accelxyz[1][0]/31) * cos(Com_Rad(Ay))) + ((((double)client->accelxyz[2][0]/31) + 1) * cos(Com_Rad(Az)));
 
@@ -5737,32 +5678,6 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 			if (!client->attached)
 			{
 				AddDrone(DRONE_EJECTED, client->posxy[0][0], client->posxy[1][0], client->posalt[0], client->country, client->plane, client);
-
-				if (!wb3->value)
-				{
-					for (i = 0; i < maxentities->value; i++)
-					{
-						if (clients[i].inuse && !clients[i].drone)
-						{
-							for (j = 0; j < MAX_SCREEN; j++)
-							{
-								if (!clients[i].visible[j].client)
-									continue;
-
-								if (client == clients[i].visible[j].client)
-								{
-									AddRemovePlaneScreen(client, &clients[i], TRUE);
-									num = client->country;
-									client->country = 0; // neutral
-									//client->status_damage = client->status_status = 0;
-									AddRemovePlaneScreen(client, &clients[i], FALSE);
-									client->country = num;
-									break;
-								}
-							}
-						}
-					}
-				}
 			}
 			else if (!client->attached->drone)
 			{
@@ -6080,37 +5995,18 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 				{
 					SendPacket(buffer, len, &clients[i]);
 
-					if (wb3->value)
+					if (drop->item == 103 /* 75mm M1897 */)
 					{
-						if (drop->item == 103 /* 75mm M1897 */)
-						{
-							drop->item = 149 /* Flak */;
-							SendPacket(buffer, len, &clients[i]);
-							drop->item = 103 /* 75mm M1897 */;
-						}
-
-						if (drop->item == 88) /* 250kg AP */
-						{
-							drop->item = 149 /* Flak */;
-							SendPacket(buffer, len, &clients[i]);
-							drop->item = 88 /* 75mm M1897 */;
-						}
+						drop->item = 149 /* Flak */;
+						SendPacket(buffer, len, &clients[i]);
+						drop->item = 103 /* 75mm M1897 */;
 					}
-					else
-					{
-						if (drop->item == 113 /* Flare */)
-						{
-							drop->item = 150 /* Hvy Flak */;
-							SendPacket(buffer, len, &clients[i]);
-							drop->item = 113 /* Flare */;
-						}
 
-						if (drop->item == 112 /* Bomb */)
-						{
-							drop->item = 150 /* Hvy Flak */;
-							SendPacket(buffer, len, &clients[i]);
-							drop->item = 112 /* Bomb */;
-						}
+					if (drop->item == 88) /* 250kg AP */
+					{
+						drop->item = 149 /* Flak */;
+						SendPacket(buffer, len, &clients[i]);
+						drop->item = 88 /* 75mm M1897 */;
 					}
 
 					/*
@@ -6397,7 +6293,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (building->country == client->country)
 	{
-		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
+		if(oldcapt->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 		{
 			if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
 			{
@@ -6546,7 +6442,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	if (building->country == client->country)
 	{
-		if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
+		if(oldcapt->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 		{
 			if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
 			{
@@ -7694,7 +7590,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		return 0;
 	}
 
-	if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
+	if(oldcapt->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 	{
 		if (client && (client->country == building->country) && !teamkillstructs->value)
 			return 0;
@@ -7857,7 +7753,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 				Com_LogDescription(EVENT_DESC_STRUCT, building->type, NULL);
 				Com_LogDescription(EVENT_DESC_FIELD, building->field, NULL);
 
-				if(oldcapt->value || !wb3->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
+				if(oldcapt->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 				{
 					if (client->country == building->country)
 					{
@@ -8104,13 +8000,10 @@ void PFireMG(u_int8_t *buffer, u_int8_t len, client_t *client)
 
 	firemg->packetid = htons(Com_WBhton(0x1909));
 
-	if (wb3->value)
-	{
-		i = wb3firemg->slot;
-		guntype = ntohl(wb3firemg->sumguntype);
-		firemg->sumguntype = htonl(guntype);
-		firemg->slot = i;
-	}
+	i = wb3firemg->slot;
+	guntype = ntohl(wb3firemg->sumguntype);
+	firemg->sumguntype = htonl(guntype);
+	firemg->slot = i;
 
 	for (i = 0; i < MAX_RELATED; i++)
 	{
@@ -8290,10 +8183,7 @@ void SendPlaneStatus(client_t *plane, client_t *client)
 
 	status = (planestatus2_t *)buffer;
 
-	if(plane->drone == DRONE_SHIP)
-		status->packetid = htons(Com_WBhton(0x000A));
-	else
-		status->packetid = htons(Com_WBhton(0x0002));
+	status->packetid = htons(Com_WBhton(0x0002));
 	status->slot = GetSlot(plane, client);
 
 	status->status_damage = ntohl(plane->status_damage);
@@ -8804,7 +8694,7 @@ int32_t SendCopyright(client_t *client)
 
 	copyrighta = (copyrighta_t *)(buffer);
 
-	if (wb3->value && client->loginkey)
+	if (client->loginkey)
 	{
 		copyrighta->packetid = htons(Com_WBhton(0x0D00));// htons(0x0D00); // 2007
 		copyrighta->gameversion = htonl(0x4B54B);// 2008 //htonl(0x4B0F4); // 2007
@@ -8821,7 +8711,7 @@ int32_t SendCopyright(client_t *client)
 	offset = 7+copyrighta->nicksize;
 	buffer[offset++] = 0x3D;
 
-	if (wb3->value && client->loginkey)
+	if (client->loginkey)
 		memcpy( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved", 61);
 	else
 		memcpy( &(buffer[offset]), "Copyright (C) 2001 iEntertainment Network All Rights Reserved", 61);
@@ -8833,7 +8723,7 @@ int32_t SendCopyright(client_t *client)
 
 	offset = offset+66+copyrightb->mapnamesize;
 
-	if (wb3->value && client->loginkey) // gameversion
+	if (client->loginkey) // gameversion
 	{
 		buffer[offset++] = 0x00;
 		buffer[offset++] = 0x04;
@@ -9142,7 +9032,7 @@ int32_t SendArenaNames(client_t *client)
 			// %s:%s:%d:Free:%d:%d:00000000:%s:%s%s
 
 			sprintf(&(buffer[offset]), "%s:%s:%d:Free:%d:%d:00000000:%s:%s%s", p_arenas[i]->hostname, p_arenas[i]->hostdomain, p_arenas[i]->logintime, // dirname->string,
-					p_arenas[i]->maxclients, p_arenas[i]->numplayers, wb3->value ? "arnalst3" : "arnalst2", wb3->value ? p_arenas[i]->mapname : "\n", wb3->value ? "\n" : "");
+					p_arenas[i]->maxclients, p_arenas[i]->numplayers, "arnalst3", wb3->value ? p_arenas[i]->mapname : "\n", wb3->value ? "\n" : "");
 
 			for (; offset < 1024; offset++)
 			{
@@ -9437,37 +9327,17 @@ void SendLastConfig(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	if (wb3->value)
-	{
-		wb3lastconfig = (wb3lastconfig_t *)buffer;
-		wb3lastconfig->packetid = htons(Com_WBhton(0x0404));
-	}
-	else
-	{
-		lastconfig = (lastconfig_t *)buffer;
-		lastconfig->packetid = htons(Com_WBhton(0x0404));
-	}
+	wb3lastconfig = (wb3lastconfig_t *)buffer;
+	wb3lastconfig->packetid = htons(Com_WBhton(0x0404));
 
-	if (wb3->value)
-	{
-		wb3lastconfig->unk1 = htonl(0x4A00);
-		wb3lastconfig->plane = htonl(0x01);
-		wb3lastconfig->unk2 = htonl(0x01);
-		wb3lastconfig->unk3 = htonl(0x2000);
-		wb3lastconfig->unk4 = htonl(0x12);
-		wb3lastconfig->country = htonl(client->country);
-		wb3lastconfig->nick = htonl(client->shortnick);
-		wb3lastconfig->unk5 = htonl(0);
-	}
-	else
-	{
-		lastconfig->plane = htonl(client->plane);
-		lastconfig->country = htonl(client->country);
-		lastconfig->nick = htonl(client->shortnick);
-		lastconfig->fuel = htonl(client->fuel);
-		lastconfig->conv = htonl(client->conv*3);
-		lastconfig->ord = htonl(client->ord);
-	}
+	wb3lastconfig->unk1 = htonl(0x4A00);
+	wb3lastconfig->plane = htonl(0x01);
+	wb3lastconfig->unk2 = htonl(0x01);
+	wb3lastconfig->unk3 = htonl(0x2000);
+	wb3lastconfig->unk4 = htonl(0x12);
+	wb3lastconfig->country = htonl(client->country);
+	wb3lastconfig->nick = htonl(client->shortnick);
+	wb3lastconfig->unk5 = htonl(0);
 
 	SendPacket(buffer, sizeof(buffer), client);
 }
@@ -9527,22 +9397,16 @@ void AddRemoveCVScreen(client_t *plane, client_t *client, u_int8_t unk1, u_int8_
 	aifillslot = (wb3aifillslot_t *)buffer;
 
 	aifillslot->packetid = htons(Com_WBhton(0x0008));
-	client->visible[15].client = plane;
-	aifillslot->slot = GetSlot(plane, client);
+	aifillslot->slot = 0;
 	aifillslot->shortnick = htonl(plane->shortnick);
 	aifillslot->country = htonl(plane->country);
 	aifillslot->plane = htons(plane->plane);
 	aifillslot->unk1 = htons(unk1);
 	aifillslot->cvnum = cvnum;
 
+	client->deck = plane;
 	SendPacket(buffer, sizeof(buffer), client);
-	SendPlaneStatus(plane, client);
-
-//	if(skins->value)
-//	{
-//		Com_Printf(VERBOSE_DEBUG, "WB3OverrideSkin() at AddRemovePlaneScreen()\n");
-//		WB3OverrideSkin(addplane->slot, client);
-//	}
+	//SendPlaneStatus(plane, client);
 }
 
 /**
@@ -9564,8 +9428,7 @@ void SendScreenUpdates(client_t *client)
 	memset(buffer, 0, sizeof(buffer));
 	updateplane = (updateplane_t *)buffer;
 
-	updateplane->packetid = htons(Com_WBhton(0x0009));
-//	updateplane->packetid = htons(Com_WBhton(0x001E));
+	updateplane->packetid = htons(Com_WBhton(0x001E));
 
 	updateplane->timer = htonl(arena->time);
 	updateplane->posx = htonl(((client->posxy[0][0] >> 11) << 11));
@@ -9586,69 +9449,43 @@ void SendScreenUpdates(client_t *client)
 	{
 		if (client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer))
 		{
-			if (!wb3->value)
+			wb3updateplane2 = (wb3updateplane2_t *)(buffer+19+(22*j));
+
+			wb3updateplane2->timeoffset = htons(arena->time - client->visible[i].client->timer);//htons(0xFFFC);
+
+			wb3updateplane2->slot = i;
+			wb3updateplane2->unk1 = 0x10;
+			wb3updateplane2->relposx = htons(client->visible[i].client->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
+			wb3updateplane2->relposy = htons(client->visible[i].client->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
+			wb3updateplane2->relalt = htons(client->visible[i].client->posalt[0] - ((client->posalt[0] >> 9) << 9));
+
+			wb3updateplane2->pitch = client->visible[i].client->angles[0][0] / 14; // Pitch Position
+			wb3updateplane2->xaccel = client->visible[i].client->accelxyz[0][0] >> 2; // X Acceleration
+			wb3updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // Pitch Angular Speed // 7
+			wb3updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // X Speed // 9
+			wb3updateplane2->roll = client->visible[i].client->angles[1][0] / 14; // Roll Position
+			wb3updateplane2->yaccel = client->visible[i].client->accelxyz[1][0] >> 2; // Y Acceleration
+			wb3updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // Roll Angular Speed // 7
+			wb3updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // Y Speed // 9
+			wb3updateplane2->yaw = client->visible[i].client->angles[2][0] / 14; // Yaw Position
+			wb3updateplane2->zaccel = client->visible[i].client->accelxyz[2][0] >> 2; // Z Acceleration
+			wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // Yaw Angular Speed // 7
+			wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // Z Speed // 9
+
+			if (fp)
 			{
-				wb3updateplane2 = (wb3updateplane2_t *)(buffer+19+(22*j));
-
-				wb3updateplane2->timeoffset = htons(arena->time - client->visible[i].client->timer);//htons(0xFFFC);
-
-				wb3updateplane2->slot = i;
-				wb3updateplane2->unk1 = 0x10;
-				wb3updateplane2->relposx = htons(client->visible[i].client->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
-				wb3updateplane2->relposy = htons(client->visible[i].client->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
-				wb3updateplane2->relalt = htons(client->visible[i].client->posalt[0] - ((client->posalt[0] >> 9) << 9));
-
-				wb3updateplane2->pitch = client->visible[i].client->angles[0][0] / 14; // Pitch Position
-				wb3updateplane2->xaccel = client->visible[i].client->accelxyz[0][0] >> 2; // X Acceleration
-				wb3updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // Pitch Angular Speed // 7
-				wb3updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // X Speed // 9
-				wb3updateplane2->roll = client->visible[i].client->angles[1][0] / 14; // Roll Position
-				wb3updateplane2->yaccel = client->visible[i].client->accelxyz[1][0] >> 2; // Y Acceleration
-				wb3updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // Roll Angular Speed // 7
-				wb3updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // Y Speed // 9
-				wb3updateplane2->yaw = client->visible[i].client->angles[2][0] / 14; // Yaw Position
-				wb3updateplane2->zaccel = client->visible[i].client->accelxyz[2][0] >> 2; // Z Acceleration
-				wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // Yaw Angular Speed // 7
-				wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // Z Speed // 9
-
-				if (fp)
-				{
-					fprintf(fp, "%u;%d;%d;%d;%d;%u;%d;%d;%d;%d;%u\n",
-							ntohl(updateplane->timer),
-							(int32_t)ntohl(updateplane->posx),
-							(int32_t)ntohl(updateplane->posy),
-							(int32_t)ntohl(updateplane->alt),
-							(int16_t)ntohs(wb3updateplane2->timeoffset),
-							wb3updateplane2->slot,
-							wb3updateplane2->unk1,
-							(int16_t)ntohs(wb3updateplane2->relposx),
-							(int16_t)ntohs(wb3updateplane2->relposy),
-							(int16_t)ntohs(wb3updateplane2->relalt),
-							Sys_Milliseconds());
-				}
-			}
-			else
-			{
-				updateplane2 = (updateplane2_t *)(buffer+19+(21*j));
-
-				updateplane2->timeoffset = htons(arena->time - client->visible[i].client->timer);//htons(0xFFFC);
-
-				updateplane2->slot = i;
-				updateplane2->relposx = htons(client->visible[i].client->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
-				updateplane2->relposy = htons(client->visible[i].client->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
-				updateplane2->relalt = htons(client->visible[i].client->posalt[0] - ((client->posalt[0] >> 9) << 9));
-				updateplane2->pitch = client->visible[i].client->angles[0][0] / 14; // >> 4;
-				updateplane2->xaccel = client->visible[i].client->accelxyz[0][0] >> 2;
-				updateplane2->prxspeed = htons(((client->visible[i].client->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
-				updateplane2->prxspeed |= htons(((client->visible[i].client->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-				updateplane2->roll = client->visible[i].client->angles[1][0] / 14; // >> 4;
-				updateplane2->yaccel = client->visible[i].client->accelxyz[1][0] >> 2;
-				updateplane2->bryspeed = htons(((client->visible[i].client->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
-				updateplane2->bryspeed |= htons(((client->visible[i].client->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-				updateplane2->yaw = client->visible[i].client->angles[2][0] / 14; //>> 4;
-				updateplane2->zaccel = client->visible[i].client->accelxyz[2][0] >> 2;
-				updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
-				updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+				fprintf(fp, "%u;%d;%d;%d;%d;%u;%d;%d;%d;%d;%u\n",
+						ntohl(updateplane->timer),
+						(int32_t)ntohl(updateplane->posx),
+						(int32_t)ntohl(updateplane->posy),
+						(int32_t)ntohl(updateplane->alt),
+						(int16_t)ntohs(wb3updateplane2->timeoffset),
+						wb3updateplane2->slot,
+						wb3updateplane2->unk1,
+						(int16_t)ntohs(wb3updateplane2->relposx),
+						(int16_t)ntohs(wb3updateplane2->relposy),
+						(int16_t)ntohs(wb3updateplane2->relalt),
+						Sys_Milliseconds());
 			}
 
 			client->visible[i].timer = client->visible[i].client->timer;
@@ -9664,6 +9501,55 @@ void SendScreenUpdates(client_t *client)
 
 	updateplane->num = j;
 	SendPacket(buffer, 20+(22*j), client);
+}
+
+/**
+ SendDeckUpdates
+
+ Update client screen with deck status
+ */
+
+void SendDeckUpdates(client_t *client)
+{
+	u_int8_t buffer[42];
+	updateplane_t *updateplane;
+	updateplane2_t *updateplane2;
+
+	if(!client || !client->deck)
+		return;
+
+	memset(buffer, 0, sizeof(buffer));
+	updateplane = (updateplane_t *)buffer;
+
+	updateplane->packetid = htons(Com_WBhton(0x0009));
+
+	updateplane->num = 1;
+	updateplane->timer = htonl(arena->time);
+	updateplane->posx = htonl(((client->posxy[0][0] >> 11) << 11));
+	updateplane->posy = htonl(((client->posxy[1][0] >> 11) << 11));
+	updateplane->alt = htonl(((client->posalt[0] >> 9) << 9));
+
+	updateplane2 = (updateplane2_t *)(buffer+19);
+
+	updateplane2->timeoffset = htons(arena->time - client->deck->timer);//htons(0xFFFC);
+	updateplane2->slot = 0;
+	updateplane2->relposx = htons(client->deck->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
+	updateplane2->relposy = htons(client->deck->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
+	updateplane2->relalt = htons(client->deck->posalt[0] - ((client->posalt[0] >> 9) << 9));
+	updateplane2->pitch = client->deck->angles[0][0] / 14; // >> 4;
+	updateplane2->xaccel = client->deck->accelxyz[0][0] >> 2;
+	updateplane2->prxspeed = htons(((client->deck->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->prxspeed |= htons(((client->deck->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+	updateplane2->roll = client->deck->angles[1][0] / 14; // >> 4;
+	updateplane2->yaccel = client->deck->accelxyz[1][0] >> 2;
+	updateplane2->bryspeed = htons(((client->deck->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->bryspeed |= htons(((client->deck->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+	updateplane2->yaw = client->deck->angles[2][0] / 14; //>> 4;
+	updateplane2->zaccel = client->deck->accelxyz[2][0] >> 2;
+	updateplane2->yrzspeed = htons(((client->deck->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->yrzspeed |= htons(((client->deck->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+
+	SendPacket(buffer, sizeof(buffer), client);
 }
 
 /**
@@ -9767,149 +9653,70 @@ void SendArenaRules(client_t *client)
 		flags = 0;
 	}
 
-	if (wb3->value)
-	{
-		buffersize = 83;
-		wb3arenarules = (wb3arenarules_t *)buffer;
-		wb3arenarules->packetid = htons(Com_WBhton(0x0300));
-		wb3arenarules->radaralt = htonl(radaralt->value);
-		wb3arenarules->mapflags = htonl(flags);
-		wb3arenarules->ammomult = htonl(ammomult->value);
-		wb3arenarules->maxpilotg = htons(maxpilotg->value);
-		wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
-		wb3arenarules->ywindvelocity = htonl(ywindvelocity->value);
-		wb3arenarules->zwindvelocity = client->plane == 54 ? htonl(zwindvelocity->value - 9):htonl(zwindvelocity->value);
-		wb3arenarules->structlim = (u_int8_t) structlim->value;
-		wb3arenarules->unknown1 = 0x2D;
-		wb3arenarules->unknown2 = 0xA0;
-		wb3arenarules->ackmaxtrav = (u_int8_t) ackmaxtrav->value;
-		wb3arenarules->altv = altv->value ? altv->value : (IsBomber(client) || !client->cancollide) ? 1 : 0;
-		wb3arenarules->fueldiv = htonl(fueldiv->value);
-		wb3arenarules->flakmax = htonl(flakmax->value);
-		wb3arenarules->radarrange0 = htonl(radarrange0->value);
-		wb3arenarules->radarrange1 = htonl(radarrange1->value);
-		wb3arenarules->radarrange2 = htonl(radarrange2->value);
-		wb3arenarules->radarrange3 = htonl(radarrange3->value);
-		wb3arenarules->radarrange4 = htonl(radarrange4->value);
-		wb3arenarules->ackshrinkco = (u_int8_t) ackshrinkco->value;
-		wb3arenarules->ackgrowco = (u_int8_t) (ackgrowco->value * 10);
-		wb3arenarules->arenaflags2 = arenaflags2->value; // 0x80
-		wb3arenarules->arenaflags1 = arenaflags1->value; // 0x20
-		wb3arenarules->unknown5 = 0x10;
-		wb3arenarules->clickrangelim = htonl(clickrangelim->value);
-		wb3arenarules->unknown6 = 0x05;
-	}
-	else
-	{
-		buffersize = 80;
-		arenarules = (arenarules_t *)buffer;
-		arenarules->packetid = htons(0x0300);
-		arenarules->radaralt = htonl(radaralt->value);
-		arenarules->mapflags = htonl(flags);
-		arenarules->ammomult = htonl(ammomult->value);
-		arenarules->xwindvelocity = htonl(xwindvelocity->value);
-		arenarules->ywindvelocity = htonl(ywindvelocity->value);
-		arenarules->zwindvelocity = htonl(zwindvelocity->value);
-		arenarules->maxpilotg = htons(maxpilotg->value);
-		arenarules->structlim = structlim->value;
-		arenarules->unknown1 = 0x5A;
-		arenarules->unknown2 = htons(0x2828);
-		arenarules->altv = altv->value ? altv->value : IsBomber(client) ? 1 : 0;
-		arenarules->fueldiv = htonl(fueldiv->value);
-		arenarules->flakmax = htonl(flakmax->value);
-		arenarules->radarrange0 = htonl(radarrange0->value);
-		arenarules->radarrange1 = htonl(radarrange1->value);
-		arenarules->radarrange2 = htonl(radarrange2->value);
-		arenarules->radarrange3 = htonl(radarrange3->value);
-		arenarules->radarrange4 = htonl(radarrange4->value);
-		arenarules->unknown3 = 0x55;
-		arenarules->unknown4 = 0x30;
-		arenarules->arenaflags2 = arenaflags2->value; // 00
-		arenarules->arenaflags1 = arenaflags1->value; // 03
-		arenarules->unknown7 = 0x10;
-		arenarules->unknown8 = 0x01;
-		arenarules->unknown9 = 0x07;
-	}
+	buffersize = 83;
+	wb3arenarules = (wb3arenarules_t *)buffer;
+	wb3arenarules->packetid = htons(Com_WBhton(0x0300));
+	wb3arenarules->radaralt = htonl(radaralt->value);
+	wb3arenarules->mapflags = htonl(flags);
+	wb3arenarules->ammomult = htonl(ammomult->value);
+	wb3arenarules->maxpilotg = htons(maxpilotg->value);
+	wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
+	wb3arenarules->ywindvelocity = htonl(ywindvelocity->value);
+	wb3arenarules->zwindvelocity = client->plane == 54 ? htonl(zwindvelocity->value - 9):htonl(zwindvelocity->value);
+	wb3arenarules->structlim = (u_int8_t) structlim->value;
+	wb3arenarules->unknown1 = 0x2D;
+	wb3arenarules->unknown2 = 0xA0;
+	wb3arenarules->ackmaxtrav = (u_int8_t) ackmaxtrav->value;
+	wb3arenarules->altv = altv->value ? altv->value : (IsBomber(client) || !client->cancollide) ? 1 : 0;
+	wb3arenarules->fueldiv = htonl(fueldiv->value);
+	wb3arenarules->flakmax = htonl(flakmax->value);
+	wb3arenarules->radarrange0 = htonl(radarrange0->value);
+	wb3arenarules->radarrange1 = htonl(radarrange1->value);
+	wb3arenarules->radarrange2 = htonl(radarrange2->value);
+	wb3arenarules->radarrange3 = htonl(radarrange3->value);
+	wb3arenarules->radarrange4 = htonl(radarrange4->value);
+	wb3arenarules->ackshrinkco = (u_int8_t) ackshrinkco->value;
+	wb3arenarules->ackgrowco = (u_int8_t) (ackgrowco->value * 10);
+	wb3arenarules->arenaflags2 = arenaflags2->value; // 0x80
+	wb3arenarules->arenaflags1 = arenaflags1->value; // 0x20
+	wb3arenarules->unknown5 = 0x10;
+	wb3arenarules->clickrangelim = htonl(clickrangelim->value);
+	wb3arenarules->unknown6 = 0x05;
 
 	if (client->attr & FLAG_ADMIN)
 	{
-		if (wb3->value)
-		{
-			wb3arenarules->planerangelimit = htonl(16000);
-			wb3arenarules->enemyidlim = htonl(16000);
-			wb3arenarules->friendlyidlim = htonl(16000);
-		}
-		else
-		{
-			arenarules->planerangelimit = htonl(16000);
-			arenarules->enemyidlim = htonl(16000);
-			arenarules->friendlyidlim = htonl(16000);
-		}
+		wb3arenarules->planerangelimit = htonl(16000);
+		wb3arenarules->enemyidlim = htonl(16000);
+		wb3arenarules->friendlyidlim = htonl(16000);
 	}
 	else if (IsFighter(client) || ((IsBomber(client) || IsGround(client)) && !iconbombersoverride->value))
 	{
 		if ((arena->hour <= 5 && arena->minute < 30) || (arena->hour >= 18 && arena->minute >= 30))
 		{
-			if (wb3->value)
-			{
-				wb3arenarules->planerangelimit = htonl(planerangelimit->value / 2);
-				wb3arenarules->enemyidlim = htonl(enemyidlim->value / 2);
-				wb3arenarules->friendlyidlim = htonl(friendlyidlim->value / 2);
-			}
-			else
-			{
-				arenarules->planerangelimit = htonl(planerangelimit->value / 2);
-				arenarules->enemyidlim = htonl(enemyidlim->value / 2);
-				arenarules->friendlyidlim = htonl(friendlyidlim->value / 2);
-			}
+			wb3arenarules->planerangelimit = htonl(planerangelimit->value / 2);
+			wb3arenarules->enemyidlim = htonl(enemyidlim->value / 2);
+			wb3arenarules->friendlyidlim = htonl(friendlyidlim->value / 2);
 		}
 		else
 		{
-			if (wb3->value)
-			{
-				wb3arenarules->planerangelimit = htonl(planerangelimit->value);
-				wb3arenarules->enemyidlim = htonl(enemyidlim->value);
-				wb3arenarules->friendlyidlim = htonl(friendlyidlim->value);
-			}
-			else
-			{
-				arenarules->planerangelimit = htonl(planerangelimit->value);
-				arenarules->enemyidlim = htonl(enemyidlim->value);
-				arenarules->friendlyidlim = htonl(friendlyidlim->value);
-			}
+			wb3arenarules->planerangelimit = htonl(planerangelimit->value);
+			wb3arenarules->enemyidlim = htonl(enemyidlim->value);
+			wb3arenarules->friendlyidlim = htonl(friendlyidlim->value);
 		}
 	}
 	else
 	{
 		if ((arena->hour < 6 && arena->minute < 30) || (arena->hour > 17 && arena->minute > 29))
 		{
-			if (wb3->value)
-			{
-				wb3arenarules->planerangelimit = htonl(planerangelimitbomber->value / 2);
-				wb3arenarules->enemyidlim = htonl(enemyidlimbomber->value / 2);
-				wb3arenarules->friendlyidlim = htonl(friendlyidlimbomber->value / 2);
-			}
-			else
-			{
-				arenarules->planerangelimit = htonl(planerangelimitbomber->value / 2);
-				arenarules->enemyidlim = htonl(enemyidlimbomber->value / 2);
-				arenarules->friendlyidlim = htonl(friendlyidlimbomber->value / 2);
-			}
+			wb3arenarules->planerangelimit = htonl(planerangelimitbomber->value / 2);
+			wb3arenarules->enemyidlim = htonl(enemyidlimbomber->value / 2);
+			wb3arenarules->friendlyidlim = htonl(friendlyidlimbomber->value / 2);
 		}
 		else
 		{
-			if (wb3->value)
-			{
-				wb3arenarules->planerangelimit = htonl(planerangelimitbomber->value);
-				wb3arenarules->enemyidlim = htonl(enemyidlimbomber->value);
-				wb3arenarules->friendlyidlim = htonl(friendlyidlimbomber->value);
-			}
-			else
-			{
-				arenarules->planerangelimit = htonl(planerangelimitbomber->value);
-				arenarules->enemyidlim = htonl(enemyidlimbomber->value);
-				arenarules->friendlyidlim = htonl(friendlyidlimbomber->value);
-			}
+			wb3arenarules->planerangelimit = htonl(planerangelimitbomber->value);
+			wb3arenarules->enemyidlim = htonl(enemyidlimbomber->value);
+			wb3arenarules->friendlyidlim = htonl(friendlyidlimbomber->value);
 		}
 	}
 
@@ -11097,78 +10904,58 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 
 				if (num_rows)
 				{
-					if (wb3->value)
+					snprintf(filename, sizeof(filename), "./players/%s.medal.LOCK", client->longnick);
+
+					Sys_WaitForLock(filename);
+
+					if (Sys_LockFile(filename) < 0)
+						return;
+
+					filename[strlen(filename) - 5] = '\0';
+
+					if (!(fp = fopen(filename, "wb")))
 					{
-						snprintf(filename, sizeof(filename), "./players/%s.medal.LOCK", client->longnick);
-
-						Sys_WaitForLock(filename);
-
-						if (Sys_LockFile(filename) < 0)
-							return;
-
-						filename[strlen(filename) - 5] = '\0';
-
-						if (!(fp = fopen(filename, "wb")))
-						{
-							Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't open file \"%s\"\n", filename);
-							PPrintf(client,
-							RADIO_YELLOW, "PClientMedals(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
-							Sys_UnlockFile(strcat(filename, ".LOCK"));
-							return;
-						}
+						Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't open file \"%s\"\n", filename);
+						PPrintf(client,
+						RADIO_YELLOW, "PClientMedals(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
+						Sys_UnlockFile(strcat(filename, ".LOCK"));
+						return;
 					}
 
 					for (i = 0; i < num_rows; i++)
 					{
 						if ((my_row = mysql_fetch_row(my_result)))
 						{
-							if (wb3->value)
+							fprintf(fp, "[IMG]offln\\common\\med%s.tga 0 0 77 153[/IMG]\n", Com_MyRow("what"));
+
+							switch (Com_Atou(Com_MyRow("why")))
 							{
-								fprintf(fp, "[IMG]offln\\common\\med%s.tga 0 0 77 153[/IMG]\n", Com_MyRow("what"));
-
-								switch (Com_Atou(Com_MyRow("why")))
-								{
-									case 1:
-										fprintf(fp, "streak of %s kills\n", Com_MyRow("howmuch"));
-										break;
-									case 2:
-										fprintf(fp, "%s kills in a tour of duty\n", Com_MyRow("howmuch"));
-										break;
-									case 3:
-										fprintf(fp, "%s career kills\n", Com_MyRow("howmuch"));
-										break;
-									case 4:
-										fprintf(fp, "%s kills in a sortie\n", Com_MyRow("howmuch"));
-										break;
-									case 5:
-										fprintf(fp, "bomber streak of %s kills\n", Com_MyRow("howmuch"));
-										break;
-									case 6:
-										fprintf(fp, "%s structures destroyed in a tour\n", Com_MyRow("howmuch"));
-										break;
-									case 7:
-										fprintf(fp, "%s career structures destroyed\n", Com_MyRow("howmuch"));
-										break;
-									case 8:
-										fprintf(fp, "%s career fields captured\n", Com_MyRow("howmuch"));
-										break;
-									default:
-										fprintf(fp, "unknown\n");
-										break;
-								}
-							}
-							else
-							{
-								medals2 = (clientmedals2_t *)(bufmedals+offset);
-
-								medals2->medal = Com_Atou(Com_MyRow("what"));
-								medals2->deed = Com_Atou(Com_MyRow("why"));
-								medals2->time = htonl(Com_Atou(Com_MyRow("date_time")));
-								medals2->num = htons(Com_Atou(Com_MyRow("howmuch")));
-
-								offset += 8;
-
-								if (i == 29)
+								case 1:
+									fprintf(fp, "streak of %s kills\n", Com_MyRow("howmuch"));
+									break;
+								case 2:
+									fprintf(fp, "%s kills in a tour of duty\n", Com_MyRow("howmuch"));
+									break;
+								case 3:
+									fprintf(fp, "%s career kills\n", Com_MyRow("howmuch"));
+									break;
+								case 4:
+									fprintf(fp, "%s kills in a sortie\n", Com_MyRow("howmuch"));
+									break;
+								case 5:
+									fprintf(fp, "bomber streak of %s kills\n", Com_MyRow("howmuch"));
+									break;
+								case 6:
+									fprintf(fp, "%s structures destroyed in a tour\n", Com_MyRow("howmuch"));
+									break;
+								case 7:
+									fprintf(fp, "%s career structures destroyed\n", Com_MyRow("howmuch"));
+									break;
+								case 8:
+									fprintf(fp, "%s career fields captured\n", Com_MyRow("howmuch"));
+									break;
+								default:
+									fprintf(fp, "unknown\n");
 									break;
 							}
 						}
@@ -11179,13 +10966,10 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 						}
 					}
 
-					if (wb3->value)
-					{
-						fclose(fp);
-						SendFileSeq1(filename, "medals.txt", client);
-						Sys_UnlockFile(strcat(filename, ".LOCK"));
-						return;
-					}
+					fclose(fp);
+					SendFileSeq1(filename, "medals.txt", client);
+					Sys_UnlockFile(strcat(filename, ".LOCK"));
+					return;
 				}
 
 				medals3 = (clientmedals3_t *)(bufmedals+offset);
@@ -11419,7 +11203,7 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 	SetPlaneDamage(client->plane, client);
 	UpdateIngameClients(0);
 	SendOttoParams(client);
-	//if (!wb3->value)
+	if (!wb3->value)
 		SendExecutablesCheck(2, client);
 }
 

@@ -546,7 +546,7 @@ void CheckVars(void)
 		CalcTimemultBasedOnTime();
 	}
 
-	if (wb3->value && weather->modified)
+	if (weather->modified)
 	{
 		modified = 1;
 
@@ -572,7 +572,7 @@ void CheckVars(void)
 		}
 	}
 
-	if (wb3->value && (gruntsmaxd->modified || gruntshoot->modified || gruntcapture->modified))
+	if(gruntsmaxd->modified || gruntshoot->modified || gruntcapture->modified)
 	{
 		modified = 1;
 

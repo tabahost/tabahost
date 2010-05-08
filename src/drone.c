@@ -539,10 +539,7 @@ int ProcessDrone(client_t *drone)
 						angle %= 3600;
 					angle /= 10;
 
-					if (wb3->value)
-						drone->posxy[0][0] = drone->related[0]->posxy[0][0] + (DRONE_DIST * sin(Com_Rad(angle)));
-					else
-						drone->posxy[0][0] = drone->related[0]->posxy[0][0] - (DRONE_DIST * sin(Com_Rad(angle)));
+					drone->posxy[0][0] = drone->related[0]->posxy[0][0] + (DRONE_DIST * sin(Com_Rad(angle)));
 					drone->posxy[1][0] = drone->related[0]->posxy[1][0] + (DRONE_DIST * cos(Com_Rad(angle)));
 
 					drone->posalt[0] = drone->related[0]->posalt[0];
@@ -693,10 +690,7 @@ int ProcessDrone(client_t *drone)
 						}
 					}
 
-					if (wb3->value)
-						drone->posxy[0][0] = drone->related[0]->posxy[0][0] + ((DRONE_DIST * drone->dronedistance) * sin(Com_Rad(angle)));
-					else
-						drone->posxy[0][0] = drone->related[0]->posxy[0][0] - ((DRONE_DIST * drone->dronedistance) * sin(Com_Rad(angle)));
+					drone->posxy[0][0] = drone->related[0]->posxy[0][0] + ((DRONE_DIST * drone->dronedistance) * sin(Com_Rad(angle)));
 					drone->posxy[1][0] = drone->related[0]->posxy[1][0] + ((DRONE_DIST * drone->dronedistance) * cos(Com_Rad(angle)));
 					drone->posalt[0] = drone->related[0]->posalt[0];
 
@@ -1062,7 +1056,7 @@ int ProcessDrone(client_t *drone)
 								ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 								//							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 							}
-							else if(!oldcapt->value && wb3->value)
+							else if(!oldcapt->value)
 							{
 								x = drone->posxy[0][0] - arena->fields[drone->dronefield].posxyz[0];
 								y = drone->posxy[1][0] - arena->fields[drone->dronefield].posxyz[1];
@@ -1271,14 +1265,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 		}
 	}
 
-	if (wb3->value)
-	{
-		otto->packetid = htons(Com_WBhton(0x1900));
-	}
-	else
-	{
-		otto->packetid = htons(Com_WBhton(0x2101));
-	}
+	otto->packetid = htons(Com_WBhton(0x1900));
 	otto->item = 143;
 	otto->posx = htonl(source->posxy[0][0]);
 	otto->posy = htonl(source->posxy[1][0]);
@@ -1553,54 +1540,27 @@ void SendDronePos(client_t *drone, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	if (wb3->value)
-	{
-		wb3pos = (wb3planeposition_t *)buffer;
+	wb3pos = (wb3planeposition_t *)buffer;
 
-		wb3pos->packetid = htons(Com_WBhton(0x0E00));
-		wb3pos->timer = htonl(drone->timer);
-		wb3pos->radar = htons(0); // htons(0x30);
-		wb3pos->plane = htons(drone->plane); // 0;
-		wb3pos->posx = htonl(drone->posxy[0][0]);
-		wb3pos->posy = htonl(drone->posxy[1][0]);
-		wb3pos->alt = htonl(drone->posalt[0]);
-		wb3pos->xspeed = htons(drone->speedxyz[0][0]);
-		wb3pos->yspeed = htons(drone->speedxyz[1][0]);
-		wb3pos->climbspeed = htons(drone->speedxyz[2][0]);
-		wb3pos->sideaccel = htons(drone->accelxyz[0][0]);
-		wb3pos->forwardaccel = htons(drone->accelxyz[1][0]);
-		wb3pos->climbaccel = htons(drone->accelxyz[2][0]);
-		wb3pos->pitchangle = htons(drone->angles[0][0]);
-		wb3pos->rollangle = htons(drone->angles[1][0]);
-		wb3pos->yawangle = htons(drone->angles[2][0]);
-		wb3pos->pitchangspeed = htons(drone->aspeeds[0][0]);
-		wb3pos->rollangspeed = htons(drone->aspeeds[1][0]);
-		wb3pos->yawangspeed = htons(drone->aspeeds[2][0]);
-	}
-	else
-	{
-		pos = (planeposition_t *)buffer;
-
-		pos->packetid = htons(Com_WBhton(0x0E00));
-		pos->posx = htonl(drone->posxy[0][0]);
-		pos->posy = htonl(drone->posxy[1][0]);
-		pos->alt = htonl(drone->posalt[0]);
-		pos->xspeed = htons(drone->speedxyz[0][0]);
-		pos->yspeed = htons(drone->speedxyz[1][0]);
-		pos->climbspeed = htons(drone->speedxyz[2][0]);
-		pos->sideaccel = htons(drone->accelxyz[0][0]);
-		pos->forwardaccel = htons(drone->accelxyz[1][0]);
-		pos->climbaccel = htons(drone->accelxyz[2][0]);
-		pos->pitchangle = htons(drone->angles[0][0]);
-		pos->rollangle = htons(drone->angles[1][0]);
-		pos->yawangle = htons(drone->angles[2][0]);
-		pos->pitchangspeed = htons(drone->aspeeds[0][0]);
-		pos->rollangspeed = htons(drone->aspeeds[1][0]);
-		pos->yawangspeed = htons(drone->aspeeds[2][0]);
-		pos->timer = htonl(drone->timer);
-		pos->radar = htons(0x30);
-		pos->plane = 0;
-	}
+	wb3pos->packetid = htons(Com_WBhton(0x0E00));
+	wb3pos->timer = htonl(drone->timer);
+	wb3pos->radar = htons(0); // htons(0x30);
+	wb3pos->plane = htons(drone->plane); // 0;
+	wb3pos->posx = htonl(drone->posxy[0][0]);
+	wb3pos->posy = htonl(drone->posxy[1][0]);
+	wb3pos->alt = htonl(drone->posalt[0]);
+	wb3pos->xspeed = htons(drone->speedxyz[0][0]);
+	wb3pos->yspeed = htons(drone->speedxyz[1][0]);
+	wb3pos->climbspeed = htons(drone->speedxyz[2][0]);
+	wb3pos->sideaccel = htons(drone->accelxyz[0][0]);
+	wb3pos->forwardaccel = htons(drone->accelxyz[1][0]);
+	wb3pos->climbaccel = htons(drone->accelxyz[2][0]);
+	wb3pos->pitchangle = htons(drone->angles[0][0]);
+	wb3pos->rollangle = htons(drone->angles[1][0]);
+	wb3pos->yawangle = htons(drone->angles[2][0]);
+	wb3pos->pitchangspeed = htons(drone->aspeeds[0][0]);
+	wb3pos->rollangspeed = htons(drone->aspeeds[1][0]);
+	wb3pos->yawangspeed = htons(drone->aspeeds[2][0]);
 
 	SendPacket(buffer, sizeof(buffer), client);
 }

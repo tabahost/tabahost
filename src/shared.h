@@ -953,6 +953,7 @@ typedef struct client_s
 	struct client_s *view;		// view what other player is doing
 	struct client_s *shanghai;	// what client is shanghai
 	struct client_s	*attached;	// who client is attached
+	struct client_s	*deck;		// client is at CV Deck
 
 	struct client_s	*gunnerview;	// which client player is viewing
 	struct client_s	*gunners[14];
