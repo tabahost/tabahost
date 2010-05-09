@@ -1357,11 +1357,11 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 		else // CV, TANKS
 		{
 			//dispersion
-			if (dist > 20)
+			if (dist > 10)
 			{
-				velx = rand()%(dist / 20);
+				velx = rand()%(dist / 10);
 				destx += Com_Pow(-1, rand()%2) * velx;
-				vely = rand()%(dist / 20);
+				vely = rand()%(dist / 10);
 				desty += Com_Pow(-1, rand()%2) * vely;
 			}
 		}
@@ -1384,17 +1384,14 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 			// CV
 			angle = Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2); // CV, TANKS fire
 
-		//velz=>velxy
+		//variable velz contains velxy value
 		if (client && (client->drone & DRONE_KATY))
 			velz = 70 * cos(Com_Rad(angle));
 		else if (client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
 			velz = MORTAR * cos(Com_Rad(90 - angle));
 		else // CV
 		{
-			if ((origz * 10) > destz)
-				velz = 1500 * cos(Com_Rad(angle)); // CV, TANKS fire
-			else
-				velz = 1500 * cos(Com_Rad(90 - angle)); // CV, TANKS fire
+			velz = 1500 * cos(Com_Rad(angle)); // CV, TANKS fire
 		}
 
 		velx = (double)(destx - origx) * velz / dist;
@@ -1407,10 +1404,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 			velz = MORTAR * sin(Com_Rad(90 - angle));
 		else // CV
 		{
-			if ((origz * 10) > destz)
-				velz = 1500 * sin(Com_Rad(angle)); // CV, TANKS fire
-			else
-				velz = 1500 * sin(Com_Rad(90 - angle)); // CV, TANKS fire
+			velz = 1500 * sin(Com_Rad(angle)); // CV, TANKS fire
 		}
 
 		if (client) // COMMANDOS or MINEN (or HKATY?)

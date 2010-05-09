@@ -484,9 +484,9 @@ void SaveArenaStatus(char *filename, client_t *client)
 			{
 				if(group < cvs->value)
 				{
-					for(ship = arena->cvs[group].ships; ship; ship = ship->next)
+					for(j = 0; j < arena->cvs[group].fleetshipstotal; j++)
 					{
-						fprintf(fp, ";%u", ship->plane);
+						fprintf(fp, ";%u", arena->cvs[group].fleetships[j]);
 					}
 
 					group++;

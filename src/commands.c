@@ -350,6 +350,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 			client->field = 1;
 			client->hq = 1;
 			client->country = 0;
+			// client->deck = NULL;
 			PPrintf(client, RADIO_YELLOW, "You moved to HQ, please chose your country");
 			PPrintf(client, RADIO_YELLOW, "Type .country 1 for Allies or .country 3 for Axis");
 		}
@@ -368,6 +369,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 				if (!arena->fields[fieldn].closed || client->attr == 1)
 				{
 					client->field = fieldn + 1;
+					// client->deck = NULL;
 					PPrintf(client, RADIO_YELLOW, "You moved to f%s", field);
 				}
 				else
@@ -1081,7 +1083,10 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	strcpy(client->skin, CreateSkin(client, 1));
 	
 	wb3fly->country = htonl(client->country);
-	wb3fly->field = htons(client->field - 1);
+	if(client->deck)
+		wb3fly->field = 0;
+	else
+		wb3fly->field = htons(client->field - 1);
 	wb3fly->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
 	wb3fly->bulletradius2 = htons((u_int16_t)(bulletradius->value * 10));
 	wb3fly->gunrad = htons((u_int16_t)(gunrad->value * 10));
@@ -1117,7 +1122,6 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	}
 
 	client->dronetimer = arena->time; // stores time when client started flight
-	client->deck = NULL; // client is not at CV deck
 	client->damaged = 0;
 
 	client->infly = 1;
@@ -5726,10 +5730,10 @@ void Cmd_Destroy(u_int8_t field, int32_t time, client_t *client)
 
 void Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client)
 {
-	if (arena->fields[client->field - 1].type >= FIELD_CV && arena->fields[client->field - 1].type <= FIELD_SUBMARINE)
+	if (client->deck)
 	{
 		if (distance <= 20000 && distance >= 5000)
-			ChangeCVRoute(arena->fields[client->field - 1].cvs, angle, distance, client);
+			ChangeCVRoute(&arena->cvs[client->deck->group], angle, distance, client);
 		else
 			PPrintf(client, RADIO_LIGHTYELLOW, "Distance limited to 5000 - 20000 feets");
 	}

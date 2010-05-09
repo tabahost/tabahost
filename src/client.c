@@ -1343,7 +1343,7 @@ client_t *FindLClient(char *longnick)
 
 	for (i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone && !Com_Strcmp(clients[i].longnick, longnick))
+		if (clients[i].inuse /*&& !clients[i].drone */&& !Com_Strcmp(clients[i].longnick, longnick))
 		{
 			return &clients[i];
 		}
@@ -2029,10 +2029,17 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 	if(!ship || !ship->drone)
 		return;
 
-	client->field = arena->cvs[ship->group].field+1;
-	SendRPS(client);
-	client->field = 1;
-	AddRemoveCVScreen(ship->drone, client, ntohs(aimount->unk1), aimount->cvnum);
+	if(aimount->inout == 1)
+	{
+		client->field = arena->cvs[ship->group].field+1;
+		SendRPS(client);
+		client->field = 1;
+		AddRemoveCVScreen(ship, client, FALSE, ntohs(aimount->unk1), aimount->cvnum);
+	}
+	else if(aimount->inout == 2)
+	{
+		AddRemoveCVScreen(ship, client, TRUE, ntohs(aimount->unk1), aimount->cvnum);
+	}
 }
 
 /**

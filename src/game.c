@@ -4800,7 +4800,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					}
 					else
 					{
-						land = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, FALSE, NULL);
+						land = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, TRUE, NULL);
 
 						if (land < 0)
 						{
@@ -4822,8 +4822,16 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 						snprintf(field, sizeof(field), "f%d", land);
 
-						Com_Printf(VERBOSE_ALWAYS, "%s landed out of runway at %s\n", client->longnick, field);
-						PPrintf(client, RADIO_YELLOW, "%s landed out of %s runway", client->longnick, field);
+						if(arena->fields[land - 1].type == FIELD_CV)
+						{
+							Com_Printf(VERBOSE_ALWAYS, "%s at %s (CV)\n", client->longnick, field);
+							PPrintf(client, RADIO_YELLOW, "%s at CV %s", client->longnick, field);
+						}
+						else
+						{
+							Com_Printf(VERBOSE_ALWAYS, "%s landed out of runway at %s\n", client->longnick, field);
+							PPrintf(client, RADIO_YELLOW, "%s landed out of %s runway", client->longnick, field);
+						}
 					}
 					break;
 				case ENDFLIGHT_PILOTKILL:
@@ -9388,7 +9396,7 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
  Adds or remove a plane to client screen
  */
 
-void AddRemoveCVScreen(client_t *plane, client_t *client, u_int8_t unk1, u_int8_t cvnum)
+void AddRemoveCVScreen(ship_t *ship, client_t *client, u_int8_t remove, u_int8_t unk1, u_int8_t cvnum)
 {
 	u_int8_t buffer[16];
 	wb3aifillslot_t *aifillslot;
@@ -9396,15 +9404,27 @@ void AddRemoveCVScreen(client_t *plane, client_t *client, u_int8_t unk1, u_int8_
 	memset(buffer, 0, sizeof(buffer));
 	aifillslot = (wb3aifillslot_t *)buffer;
 
-	aifillslot->packetid = htons(Com_WBhton(0x0008));
+	aifillslot->packetid = htons(Com_WBhton(0x0008));  // nick, country, plane == 0 -> remove
 	aifillslot->slot = 0;
-	aifillslot->shortnick = htonl(plane->shortnick);
-	aifillslot->country = htonl(plane->country);
-	aifillslot->plane = htons(plane->plane);
+
+	if(!remove)
+	{
+		if(ship->drone)
+		{
+			aifillslot->shortnick = htonl(ship->drone->shortnick);
+			aifillslot->country = htonl(ship->drone->country);
+			aifillslot->plane = htons(ship->drone->plane);
+			client->deck = ship;
+		}
+		else
+			return;
+	}
+	else
+		client->deck = NULL;
+
 	aifillslot->unk1 = htons(unk1);
 	aifillslot->cvnum = cvnum;
 
-	client->deck = plane;
 	SendPacket(buffer, sizeof(buffer), client);
 	//SendPlaneStatus(plane, client);
 }
@@ -9515,7 +9535,7 @@ void SendDeckUpdates(client_t *client)
 	updateplane_t *updateplane;
 	updateplane2_t *updateplane2;
 
-	if(!client || !client->deck)
+	if(!client || !client->deck || !client->deck->drone)
 		return;
 
 	memset(buffer, 0, sizeof(buffer));
@@ -9531,23 +9551,23 @@ void SendDeckUpdates(client_t *client)
 
 	updateplane2 = (updateplane2_t *)(buffer+19);
 
-	updateplane2->timeoffset = htons(arena->time - client->deck->timer);//htons(0xFFFC);
+	updateplane2->timeoffset = htons(arena->time - client->deck->drone->timer);//htons(0xFFFC);
 	updateplane2->slot = 0;
-	updateplane2->relposx = htons(client->deck->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
-	updateplane2->relposy = htons(client->deck->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
-	updateplane2->relalt = htons(client->deck->posalt[0] - ((client->posalt[0] >> 9) << 9));
-	updateplane2->pitch = client->deck->angles[0][0] / 14; // >> 4;
-	updateplane2->xaccel = client->deck->accelxyz[0][0] >> 2;
-	updateplane2->prxspeed = htons(((client->deck->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
-	updateplane2->prxspeed |= htons(((client->deck->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-	updateplane2->roll = client->deck->angles[1][0] / 14; // >> 4;
-	updateplane2->yaccel = client->deck->accelxyz[1][0] >> 2;
-	updateplane2->bryspeed = htons(((client->deck->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
-	updateplane2->bryspeed |= htons(((client->deck->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-	updateplane2->yaw = client->deck->angles[2][0] / 14; //>> 4;
-	updateplane2->zaccel = client->deck->accelxyz[2][0] >> 2;
-	updateplane2->yrzspeed = htons(((client->deck->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
-	updateplane2->yrzspeed |= htons(((client->deck->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+	updateplane2->relposx = htons(client->deck->drone->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
+	updateplane2->relposy = htons(client->deck->drone->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
+	updateplane2->relalt = htons(client->deck->drone->posalt[0] - ((client->posalt[0] >> 9) << 9));
+	updateplane2->pitch = client->deck->drone->angles[0][0] / 14; // >> 4;
+	updateplane2->xaccel = client->deck->drone->accelxyz[0][0] >> 2;
+	updateplane2->prxspeed = htons(((client->deck->drone->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->prxspeed |= htons(((client->deck->drone->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+	updateplane2->roll = client->deck->drone->angles[1][0] / 14; // >> 4;
+	updateplane2->yaccel = client->deck->drone->accelxyz[1][0] >> 2;
+	updateplane2->bryspeed = htons(((client->deck->drone->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->bryspeed |= htons(((client->deck->drone->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+	updateplane2->yaw = client->deck->drone->angles[2][0] / 14; //>> 4;
+	updateplane2->zaccel = client->deck->drone->accelxyz[2][0] >> 2;
+	updateplane2->yrzspeed = htons(((client->deck->drone->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->yrzspeed |= htons(((client->deck->drone->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
 
 	SendPacket(buffer, sizeof(buffer), client);
 }
@@ -11113,6 +11133,12 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 				}
 			}
 		}
+	}
+
+	if(client->deck)
+	{
+		AddRemoveCVScreen(NULL, client, TRUE, 0, 0);
+		client->deck = NULL; // client is not at CV deck
 	}
 }
 

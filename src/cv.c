@@ -99,7 +99,8 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 	else if(B->YawVel.curr < B->YawVel.min)
 		B->YawVel.curr = B->YawVel.min;
 	// incrementa yaw
-	B->Yaw.curr = RunShips_Angle(B->Yaw.curr + B->YawVel.curr);
+	if(abs(B->Yaw.curr - B->Yaw.target) > (0.01 * M_PI))
+		B->Yaw.curr = RunShips_Angle(B->Yaw.curr + B->YawVel.curr);
 	// ajusta velocidade
 	B->Vel.target = sqrt(dx*dx+dy*dy) / 3;
 	dx = B->Vel.max * (1 - MODULUS(RunShips_AngleDef(B->Yaw.target - B->Yaw.curr) / (0.5 * M_PI))); // 1 - x�/90�
