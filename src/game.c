@@ -1069,20 +1069,22 @@ void CheckArenaRules(void)
 		if(!(arena->frame % 50)) // 500ms
 		{
 			for (i = 0; i < cvs->value; i++)
+			{
 				RunShips(i, 0);
 
-			// check if there are enemies around
-			if (arena->cvs[i].ships && !arena->cvs[i].threatened && !(arena->frame % 600))
-			{
-				for (j = 0; j < maxentities->value; j++)
+				// check if there are enemies around
+				if (arena->cvs[i].ships && !arena->cvs[i].threatened && !(arena->frame % 600))
 				{
-					if (clients[j].inuse && clients[j].ready && clients[j].infly && clients[j].country != arena->cvs[i].country)
+					for (j = 0; j < maxentities->value; j++)
 					{
-						if (DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0],
-							arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, 15000) >= 0)
+						if (clients[j].inuse && clients[j].ready && clients[j].infly && clients[j].country != arena->cvs[i].country)
 						{
-							ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
-							break;
+							if (DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0],
+								arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, 15000) >= 0)
+							{
+								ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
+								break;
+							}
 						}
 					}
 				}

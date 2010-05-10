@@ -99,7 +99,7 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 	else if(B->YawVel.curr < B->YawVel.min)
 		B->YawVel.curr = B->YawVel.min;
 	// incrementa yaw
-	if(abs(B->Yaw.curr - B->Yaw.target) > (0.01 * M_PI))
+	//if(abs(B->Yaw.curr - B->Yaw.target) > (0.01 * M_PI))
 		B->Yaw.curr = RunShips_Angle(B->Yaw.curr + B->YawVel.curr);
 	// ajusta velocidade
 	B->Vel.target = sqrt(dx*dx+dy*dy) / 3;
@@ -373,7 +373,7 @@ ship_t *MainShipTarget(u_int8_t group)
 		ship->Target.y = arena->cvs[group].wp[arena->cvs[group].wpnum][1];
 		
 		// Check waypoint
-		if((abs(ship->Target.y-ship->Position.y) > 70) || (abs(ship->Target.x-ship->Position.x) > 70))
+		if((abs(ship->Target.y - ship->Position.y) > 70) || (abs(ship->Target.x - ship->Position.x) > 70))
 			return ship;
 
 		// Next waypoint
@@ -443,7 +443,7 @@ void ResetCV(u_int8_t group)
 
 	arena->cvs[group].threatened = 0;
 	arena->cvs[group].outofport = 0;
-	arena->cvs[group].wpnum = 0;
+	arena->cvs[group].wpnum = 1;
 	snprintf(arena->cvs[group].logfile, sizeof(arena->cvs[group].logfile), "%s,cv%u,%s,%u", mapname->string, arena->cvs[group].id, GetCountry(arena->cvs[group].country), (u_int32_t)time(NULL));
 }
 
@@ -501,28 +501,24 @@ void ReadCVWaypoints(u_int8_t group)
 
 void ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client)
 {
-	u_int8_t lastwp;
 	int8_t angleoffset = 0;
 
-	if (cv->wpnum >= cv->wptotal)
-	{
-		Com_Printf(VERBOSE_WARNING, "ChangeCVRoute() wpnum >= wptotal\n");
-		cv->wpnum = 1;
-	}
+	Com_Printf(VERBOSE_DEBUG, "WP %d\n", cv->wpnum);
 
-	cv->threatened = 1;
-
-	if (cv->wpnum == 1)
+	if(!cv->threatened) // step wpnum back, because its an automatic route change or first manual change
 	{
-		lastwp = cv->wptotal - 1;
+		cv->wpnum--;
+		cv->threatened = 1;
 	}
-	else
-		lastwp = cv->wpnum - 1;
+	// else // mantain wpnum, because is a manual route change
 
 	if (!client)
 	{
-		angle = AngleTo(cv->ships->Position.x, cv->ships->Position.y, cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1]);
+		// grab the pathway angle
+		// or cvpos? cv->ships->Position.x, cv->ships->Position.y
+		angle = AngleTo(cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], cv->wp[cv->wpnum+1][0], cv->wp[cv->wpnum+1][1]);
 
+		// change the route based in the pathway angle
 		if (rand()%100 < 60) // zigzag
 		{
 			angleoffset = 45 * Com_Pow(-1, cv->zigzag);
@@ -541,6 +537,7 @@ void ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, 
 			angleoffset = 45 * Com_Pow(-1, rand()%2);
 		}
 
+		// check if new waypoint is over land
 		if (GetHeightAt(cv->ships->Position.x - (10000 * sin(Com_Rad(angle + angleoffset))), cv->ships->Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
 		{
 			angleoffset *= -1;
@@ -550,25 +547,25 @@ void ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, 
 		distance = 2000;
 	}
 
-	// defines which waypoint will be changed
-	// if dist to next waypoint < 2000, dont backward wp counter
-	if (DistBetween(cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], 0, arena->fields[cv->field].posxyz[0], arena->fields[cv->field].posxyz[1], 0, 2000) >= 0)
-	{
-		lastwp = cv->wpnum;
-	}
-	else
-		cv->wpnum = lastwp;
+	Com_Printf(VERBOSE_DEBUG, "WP 0 X %d Y %d\n", cv->wp[0][0], cv->wp[0][1]);
+	Com_Printf(VERBOSE_DEBUG, "WP 1 X %d Y %d\n", cv->wp[1][0], cv->wp[1][1]);
+	Com_Printf(VERBOSE_DEBUG, "WP 2 X %d Y %d\n", cv->wp[2][0], cv->wp[2][1]);
+	Com_Printf(VERBOSE_DEBUG, "WP 3 X %d Y %d\n---------------------\n", cv->wp[3][0], cv->wp[3][1]);
 
-	cv->wp[lastwp][0] = arena->fields[cv->field].posxyz[0] - (distance * sin(Com_Rad(angle)));
-	cv->wp[lastwp][1] = arena->fields[cv->field].posxyz[1] + (distance * cos(Com_Rad(angle)));
+	cv->wp[cv->wpnum][0] = arena->fields[cv->field].posxyz[0] + (distance * sin(Com_Rad(angle)));
+	cv->wp[cv->wpnum][1] = arena->fields[cv->field].posxyz[1] + (distance * cos(Com_Rad(angle)));
+
+	Com_Printf(VERBOSE_DEBUG, "WP %d\n", cv->wpnum);
+	Com_Printf(VERBOSE_DEBUG, "WP 0 X %d Y %d\n", cv->wp[0][0], cv->wp[0][1]);
+	Com_Printf(VERBOSE_DEBUG, "WP 1 X %d Y %d\n", cv->wp[1][0], cv->wp[1][1]);
+	Com_Printf(VERBOSE_DEBUG, "WP 2 X %d Y %d\n", cv->wp[2][0], cv->wp[2][1]);
+	Com_Printf(VERBOSE_DEBUG, "WP 3 X %d Y %d\n=====================\n", cv->wp[3][0], cv->wp[3][1]);
 
 	if (client)
 	{
-		PPrintf(client, RADIO_YELLOW, "Waypoint changed to %s", Com_Padloc(cv->wp[lastwp][0], cv->wp[lastwp][1]));
+		PPrintf(client, RADIO_YELLOW, "Waypoint changed to %s", Com_Padloc(cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1]));
 		PPrintf(client, RADIO_YELLOW, "ETA: %s\"", Com_TimeSeconds(distance / cv->ships->Vel.curr));
 	}
-
-	//SetCVSpeed(cv);
 
 	// configure to next wpnum be that nearest to cv->wp[lastwp][0]
 	// coded at threatened = 0;
