@@ -217,7 +217,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 				default:
 					clients[i].plane = 1;
 			}
-			clients[i].frame = arena->frame;// + (rand()%1000);
+			clients[i].frame = arena->frame + (rand()%1000);
 
 			clients[i].offset = 0;
 			clients[i].timer = arena->time;
@@ -1293,16 +1293,31 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
  Fires artillary fire to nearest enemy field
  */
 
-void CVFire(int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz)
+void CVFire(ship_t *ship, int32_t destx, int32_t desty)
 {
-	u_int8_t i;
+	u_int8_t i, j;
 
-	for (i = 0; i < cvsalvo->value; i++)
+	switch(ship->type)
 	{
-		ThrowBomb(FALSE, origx, origy, origz, destx, desty, destz, NULL);
+		case SHIPTYPE_CV:
+			i = 5;
+			break;
+		case SHIPTYPE_CA:
+			i = 3;
+			break;
+		case SHIPTYPE_DD:
+			i = 2;
+			break;
+		default:
+			i = 2;
+			break;
 	}
 
-	ThrowBomb(TRUE, origx, origy, origz, destx, desty, destz, NULL);
+	for (j = 0; j < i; j++)
+	{
+		ThrowBomb(FALSE, ship->Position.x, ship->Position.y, 0, destx, desty, 0, NULL);
+	}
+	ThrowBomb(TRUE, ship->Position.x, ship->Position.y, 0, destx, desty, 0, NULL);
 }
 
 /**
@@ -2121,18 +2136,7 @@ void LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_
 	int32_t x, y;
 	client_t *drone;
 
-	x = arena->fields[fieldfrom].posxyz[0] - arena->fields[fieldto].posxyz[0];
-	y = arena->fields[fieldto].posxyz[1] - arena->fields[fieldfrom].posxyz[1];
-
-	if (!y)
-	{
-		if (x > 0)
-			angle = 90;
-		else
-			angle = 270;
-	}
-	else
-		angle = Com_Deg(atan2(x, y));
+	angle = AngleTo(arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldto].posxyz[0], arena->fields[fieldto].posxyz[1])
 
 	x = DRONE_TANK_SPEED * sin(Com_Rad(angle)) * -1;
 	y = DRONE_TANK_SPEED * cos(Com_Rad(angle));

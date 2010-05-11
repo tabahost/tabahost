@@ -582,12 +582,14 @@ typedef struct cvs_s
 	u_int8_t	threatened;		// cv is being attacked?
 	u_int8_t	zigzag;			// next zigzag maneuver
 	u_int8_t	outofport;		// out of port (1st waypoint)
+	u_int8_t	prepared;		// cv is prepared?
 //	u_int8_t	stuck;			// stuck in land
 	char		logfile[64];	// logfile name
 	u_int8_t	fleetships[12];	// fleet ships, e.g: 73;77;77;77;78
 	u_int8_t	fleetshipstotal;
 	u_int8_t	wptotal;		// total of waypoints
 	u_int8_t	wpnum;			// num of actual waypoint
+	field_t		*port;
 	int32_t		wp[MAX_WAYPOINTS][2]; // waypoints
 	ship_t		*ships;
 } cvs_t;
@@ -2442,7 +2444,7 @@ void	DroneVisibleList(client_t *drone);
 int		ProcessDrone(client_t *drone);
 void	DroneGetTarget(client_t *drone);
 void	FireAck(client_t *source, client_t *dest, u_int8_t animate);
-void	CVFire(int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz);
+void	CVFire(ship_t *ship, int32_t destx, int32_t desty);
 void	ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz, client_t *client);
 void	SendDronePos(client_t *drone, client_t *client);
 void	SendXBombs(client_t *drone);

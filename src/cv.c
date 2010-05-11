@@ -31,8 +31,8 @@ void RunShips_Walk(ship_t *B)
 	else if(B->Vel.curr < B->Vel.min)
 		B->Vel.curr = B->Vel.min;
 
-	B->Position.x = B->Position.x + B->Vel.curr * cos(B->Yaw.curr);
-	B->Position.y = B->Position.y + B->Vel.curr * sin(B->Yaw.curr);
+	B->Position.x = B->Position.x + B->Vel.curr * sin(B->Yaw.curr);
+	B->Position.y = B->Position.y + B->Vel.curr * cos(B->Yaw.curr);
 }
 
 double RunShips_Angle(double ang)
@@ -62,7 +62,7 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 	dy = B->Target.y - B->Position.y;
 
 	// ajusta angulo alvo
-	if(sqrt(dx*dx+dy*dy) < 100) // ship reached WP
+	if(sqrt(dx * dx + dy * dy) < 100) // ship reached WP
 	{
 		B->Yaw.target = RunShips_Angle(CV->Yaw.curr);
 	}
@@ -78,14 +78,14 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 		else if(dx == 0)
 		{
 			if(dy > 0) // baixo
-				B->Yaw.target = 1.5*M_PI;
+				B->Yaw.target = 1.5 * M_PI;
 			else // cima
-				B->Yaw.target = 0.5*M_PI;
+				B->Yaw.target = 0.5 * M_PI;
 		}
 		else
 		{
-			B->Yaw.target = atan(dy/dx);
-			if(dx<0)
+			B->Yaw.target = atan(dy / dx);
+			if(dx < 0)
 				B->Yaw.target = B->Yaw.target + M_PI;
 		}
 	}
@@ -102,7 +102,7 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 	//if(abs(B->Yaw.curr - B->Yaw.target) > (0.01 * M_PI))
 		B->Yaw.curr = RunShips_Angle(B->Yaw.curr + B->YawVel.curr);
 	// ajusta velocidade
-	B->Vel.target = sqrt(dx*dx+dy*dy) / 3;
+	B->Vel.target = sqrt(dx * dx + dy * dy) / 3;
 	dx = B->Vel.max * (1 - MODULUS(RunShips_AngleDef(B->Yaw.target - B->Yaw.curr) / (0.5 * M_PI))); // 1 - x�/90�
 
 	if(dx < B->Vel.min)
@@ -121,8 +121,8 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 
 void RunShips_ReTarget(ship_t *B, ship_t *CV, const double *A)
 {
-	B->Target.x = CV->Position.x + A[0] * cos(CV->Yaw.curr+A[1]*M_PI);
-	B->Target.y = CV->Position.y + A[0] * sin(CV->Yaw.curr+A[1]*M_PI);
+	B->Target.x = CV->Position.x + A[0] * sin(CV->Yaw.curr+A[1]*M_PI);
+	B->Target.y = CV->Position.y + A[0] * cos(CV->Yaw.curr+A[1]*M_PI);
 }
 
 void RunShips_Prepare(ship_t *ship, ship_t *mainShip, const double *A)
@@ -162,8 +162,8 @@ void RunShips_Prepare(ship_t *ship, ship_t *mainShip, const double *A)
 	{
 		ship->Yaw.target = mainShip->Yaw.target;
 		ship->Yaw.curr = mainShip->Yaw.curr;
-		ship->Target.x = mainShip->Position.x + A[0] * cos(mainShip->Yaw.curr+A[1]*M_PI);
-		ship->Target.y = mainShip->Position.y + A[0] * sin(mainShip->Yaw.curr+A[1]*M_PI);
+		ship->Target.x = mainShip->Position.x + A[0] * sin(mainShip->Yaw.curr+A[1]*M_PI);
+		ship->Target.y = mainShip->Position.y + A[0] * cos(mainShip->Yaw.curr+A[1]*M_PI);
 		ship->Position.x = ship->Target.x;
 		ship->Position.y = ship->Target.y;
 	}
@@ -188,8 +188,10 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 		return;
 
 	// if first steps, configure all ships
-	if((arena->frame - mainShip->drone->frame) < 100)
+	if(!arena->cvs[group].prepared)
 	{
+		arena->cvs[group].prepared = 1;
+
 		RunShips_Prepare(mainShip, mainShip, NULL);
 
 		for(i = 0, ship = arena->cvs[group].ships; ship && i < 6; ship = ship->next)
@@ -280,14 +282,14 @@ int8_t ProcessDroneShips(ship_t *ship)
 	drone->posxy[0][0] = ship->Position.x; // X
 	drone->posxy[1][0] = ship->Position.y; // Y
 	drone->posalt[0] = 0; // Z
-	drone->speedxyz[0][0] = ship->Vel.curr * cos(ship->Yaw.curr); // X
-	drone->speedxyz[1][0] = ship->Vel.curr * sin(ship->Yaw.curr); // Y
+	drone->speedxyz[0][0] = ship->Vel.curr * sin(ship->Yaw.curr); // X
+	drone->speedxyz[1][0] = ship->Vel.curr * cos(ship->Yaw.curr); // Y
 	drone->speedxyz[2][0] = 0; // Z
 	drone->angles[0][0] = 0; // Roll
 	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr + 4.69493569) * 10); // Yaw
-	drone->accelxyz[0][0] = ship->Acel.curr * cos(ship->Yaw.curr); // X
-	drone->accelxyz[1][0] = ship->Acel.curr * sin(ship->Yaw.curr); // Y
+	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr/* + 4.69493569*/) * 10); // Yaw
+	drone->accelxyz[0][0] = ship->Acel.curr * sin(ship->Yaw.curr); // X
+	drone->accelxyz[1][0] = ship->Acel.curr * cos(ship->Yaw.curr); // Y
 	drone->accelxyz[2][0] = 0; // Z
 	drone->aspeeds[0][0] = 0; // Roll
 	drone->aspeeds[1][0] = 0; // Pitch
@@ -441,8 +443,8 @@ void ResetCV(u_int8_t group)
 	RemoveAllShips(group);
 	CreateAllShips(group);
 
-	arena->cvs[group].threatened = 0;
-	arena->cvs[group].outofport = 0;
+//	arena->cvs[group].threatened = 0;
+//	arena->cvs[group].outofport = 0;
 	arena->cvs[group].wpnum = 1;
 	snprintf(arena->cvs[group].logfile, sizeof(arena->cvs[group].logfile), "%s,cv%u,%s,%u", mapname->string, arena->cvs[group].id, GetCountry(arena->cvs[group].country), (u_int32_t)time(NULL));
 }

@@ -1366,7 +1366,7 @@ double AngleTo(int32_t origx, int32_t origy, int32_t destx, int32_t desty)
 	int32_t x, y;
 	double ang;
 
-	x = origx - destx;
+	x = destx - origx;
 	y = desty - origy;
 
 	if (!y)

@@ -272,6 +272,13 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 
 				if(!reset && arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 				{
+					j = Com_Atou((char *)strtok(NULL, ";"));
+
+					if(j)
+						arena->cvs[group].port = &(arena->fields[j-1]);
+					else
+						arena->cvs[group].port = NULL;
+
 					for(j = 0; (token = (char *)strtok(NULL, ";")); j++)
 					{
 						k = Com_Atou(token);
@@ -302,7 +309,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 				}
 				else
 				{
-					j = Com_Atoi((char *)strtok(NULL, ";"));
+					j = Com_Atou((char *)strtok(NULL, ";"));
 
 					for (k = 0; k < j; k++)
 					{
@@ -484,6 +491,11 @@ void SaveArenaStatus(char *filename, client_t *client)
 			{
 				if(group < cvs->value)
 				{
+					if(arena->cvs[group].port)
+						fprintf(fp, ";%u", arena->cvs[group].port->number);
+					else
+						fprintf(fp, ";0");
+
 					for(j = 0; j < arena->cvs[group].fleetshipstotal; j++)
 					{
 						fprintf(fp, ";%u", arena->cvs[group].fleetships[j]);

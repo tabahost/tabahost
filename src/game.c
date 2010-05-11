@@ -309,8 +309,9 @@ void CheckArenaRules(void)
 	static u_int32_t players_num = 0;
 	static u_int16_t players_count = 0;
 	u_int8_t close, vitals, dominated;
-	int16_t i, j;
+	int16_t i, j, k;
 	u_int8_t reds, golds, k;
+	ship_t *ship;
 	double tonnage_recover;
 	u_int8_t c_cities, totalcities;
 	u_int32_t dist;
@@ -1094,178 +1095,68 @@ void CheckArenaRules(void)
 		for (i = 0; i < cvs->value; i++)
 		{
 			// CV Attack
-			if (arena->cvs[i].ships && !((arena->frame - arena->cvs[i].ships->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
+			for(ship = arena->cvs[i].ships; ship; ship = ship->next)
 			{
-				dist = 0;
-
-				j = NearestField(arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->cvs[i].country, TRUE, TRUE, &dist);
-
-				if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cvs[i].field)
+				if (!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
 				{
-					if (j < fields->value)
+					j = dist = 0;
+					
+					// check nearest CV
+					for(k = 0; k < cvs->value; k++)
 					{
-						if (!arena->fields[j].closed)
+						if(ship->country != arena->cvs[k].country)
 						{
-							if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+							posx = DistBetween(ship->Position.x, ship->Position.y, 0, arena->fields[arena->cvs[k].field].posxyz[0], arena->fields[arena->cvs[k].field].posxyz[1], 0, (int32_t)cvrange->value);
+
+							if(posx > 0)
 							{
-								ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-								ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+								if(!dist || (posx < dist))
+								{
+									dist = posx;
+									j = arena->cvs[k].field;
+								}
 							}
-							else
-								CVFire(arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0],
-										arena->fields[j].posxyz[1], arena->fields[j].posxyz[2]);
 						}
 					}
-					else
+
+					// check nearest field
+					if(!j)
 					{
-						if (!arena->cities[j - (int16_t)fields->value].closed)
+						j = NearestField(ship->Position.x, ship->Position.y, ship->country, TRUE, FALSE, &dist);
+					}
+
+					if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cvs[i].field)
+					{
+						if (j < fields->value)
 						{
-							if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+							if (!arena->fields[j].closed)
 							{
-								ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
-								ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+								if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+								{
+									ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+									ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+								}
+								else
+									CVFire(ship, arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
 							}
-							else
-								CVFire(arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2]);
+						}
+						else
+						{
+							if (!arena->cities[j - (int16_t)fields->value].closed)
+							{
+								if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+								{
+									ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+									ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+								}
+								else
+									CVFire(ship, arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1]);
+							}
 						}
 					}
 				}
 			}
 		}
-
-/** WB2 CV
-		for (i = 0; i < cvs->value; i++)
-		{
-			// CV Route
-
-			if (arena->cv[i].wptotal) // if CV have waypoints
-			{
-				if (arena->cv[i].outofport && !arena->cv[i].threatened && !(arena->frame % 600)) // check if there are enemies around
-				{
-					for (j = 0; j < maxentities->value; j++)
-					{
-						if (clients[j].inuse && clients[j].ready && clients[j].infly && clients[j].country != arena->fields[arena->cv[i].field].country)
-						{
-							if (DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0], arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1],
-									arena->fields[arena->cv[i].field].posxyz[2], 15000) >= 0)
-							{
-								ChangeCVRoute(&(arena->cv[i]), 0, 0, NULL);
-								break;
-							}
-						}
-					}
-				}
-
-				if (arena->time >= arena->cv[i].timebase) // if reach next waypoint
-				{
-					ReadCVWaypoints(i); // reset waypoints
-
-					if (arena->cv[i].threatened)
-					{
-						arena->cv[i].threatened = 0;
-
-						// set cv next waypoint based on current position
-						// this algorithm shall be futurely enhanced when re-reoute is done near last-2nd WP
-
-						dist = MAX_UINT32;
-
-						for (j = 1; j < arena->cv[i].wptotal; j++)
-						{
-							tempdist = DistBetween(arena->cv[i].wp[j][0], arena->cv[i].wp[j][1], 0, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], 0, 60000);
-
-							if (tempdist < dist)
-							{
-								dist = tempdist;
-								arena->cv[i].wpnum = j;
-							}
-						}
-					}
-					else
-						dist = 0;
-
-					arena->cv[i].wpnum++;
-
-					if (!arena->cv[i].outofport)
-					{
-						arena->fields[arena->cv[i].field].posxyz[0] = arena->cv[i].wp[0][0];
-						arena->fields[arena->cv[i].field].posxyz[1] = arena->cv[i].wp[0][1];
-					}
-
-					if (arena->cv[i].wpnum == arena->cv[i].wptotal) // reset waypoint index
-					{
-						arena->cv[i].wpnum = 1;
-					}
-
-					if (dist < MAX_UINT32)
-					{
-						SetCVSpeed(&(arena->cv[i]));
-					}
-					else
-					{
-						CPrintf(arena->fields[arena->cv[i].field].country,
-						RADIO_RED, "CV (F%d) is out of route", arena->cv[i].field+1);
-					}
-				}
-
-				if (!(arena->frame % 100))
-				{
-					if (arena->cv[i].field >= fields->value)
-					{
-						Com_Printf(VERBOSE_WARNING, "CheckArenaRules() CV %d not field declared\n", i);
-					}
-					else
-					{
-						// adjust field and CV pos, based on route
-						arena->fields[arena->cv[i].field].posxyz[0] = GetCVPos( &(arena->cv[i]), 0);
-						arena->fields[arena->cv[i].field].posxyz[1] = GetCVPos( &(arena->cv[i]), 1);
-
-						arena->fields[arena->cv[i].field].buildings[0].posx = arena->fields[arena->cv[i].field].posxyz[0];
-						arena->fields[arena->cv[i].field].buildings[0].posy = arena->fields[arena->cv[i].field].posxyz[1];
-					}
-				}
-			}
-			//		}
-
-			// CV Attack
-			if (arena->cv[i].speed > 1 && !(arena->frame % ((u_int32_t) cvdelay->value * 100)) && !(arena->cv[i].field >= fields->value))
-			{
-				dist = 0;
-
-				j = NearestField(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].country, TRUE, TRUE, &dist);
-
-				if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cv[i].field)
-				{
-					if (j < fields->value)
-					{
-						if (!arena->fields[j].closed)
-						{
-							if (arena->fields[arena->cv[i].field].type == FIELD_SUBMARINE)
-							{
-								ThrowBomb(FALSE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-								ThrowBomb(TRUE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-							}
-							else
-								CVFire(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->fields[j].posxyz[0],
-										arena->fields[j].posxyz[1], arena->fields[j].posxyz[2]);
-						}
-					}
-					else
-					{
-						if (!arena->cities[j - (int16_t)fields->value].closed)
-						{
-							if (arena->fields[arena->cv[i].field].type == FIELD_SUBMARINE)
-							{
-								ThrowBomb(FALSE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
-								ThrowBomb(TRUE, arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
-							}
-							else
-								CVFire(arena->fields[arena->cv[i].field].posxyz[0], arena->fields[arena->cv[i].field].posxyz[1], arena->fields[arena->cv[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2]);
-						}
-					}
-				}
-			}
-		}
-*/
 	}
 	else
 	{
