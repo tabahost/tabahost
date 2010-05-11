@@ -150,8 +150,8 @@ void RunShips_Prepare(ship_t *ship, ship_t *mainShip, const double *A)
 		}
 		else
 		{
-			ship->Yaw.target = atan2(dy, dx);
-			if(dx<0)
+			ship->Yaw.target = atan2(dx, dy);
+			if(dy < 0)
 				ship->Yaw.target = ship->Yaw.target + M_PI;
 		}
 
