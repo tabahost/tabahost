@@ -443,8 +443,8 @@ void ResetCV(u_int8_t group)
 	RemoveAllShips(group);
 	CreateAllShips(group);
 
-//	arena->cvs[group].threatened = 0;
-//	arena->cvs[group].outofport = 0;
+	arena->cvs[group].threatened = 0;
+	arena->cvs[group].outofport = 0;
 	arena->cvs[group].wpnum = 1;
 	snprintf(arena->cvs[group].logfile, sizeof(arena->cvs[group].logfile), "%s,cv%u,%s,%u", mapname->string, arena->cvs[group].id, GetCountry(arena->cvs[group].country), (u_int32_t)time(NULL));
 }

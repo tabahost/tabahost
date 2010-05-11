@@ -2136,7 +2136,7 @@ void LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_
 	int32_t x, y;
 	client_t *drone;
 
-	angle = AngleTo(arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldto].posxyz[0], arena->fields[fieldto].posxyz[1])
+	angle = AngleTo(arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldto].posxyz[0], arena->fields[fieldto].posxyz[1]);
 
 	x = DRONE_TANK_SPEED * sin(Com_Rad(angle)) * -1;
 	y = DRONE_TANK_SPEED * cos(Com_Rad(angle));

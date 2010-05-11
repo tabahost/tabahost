@@ -309,7 +309,7 @@ void CheckArenaRules(void)
 	static u_int32_t players_num = 0;
 	static u_int16_t players_count = 0;
 	u_int8_t close, vitals, dominated;
-	int16_t i, j, k;
+	int16_t i, j;
 	u_int8_t reds, golds, k;
 	ship_t *ship;
 	double tonnage_recover;
@@ -1601,6 +1601,7 @@ void ProcessCommands(char *command, client_t *client)
 				}
 
 				while (command[i] != '\"')
+
 					i++;
 
 				command[i] = '\0';
@@ -4312,6 +4313,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				{
 					PFireMG(buffer, len, client);
 				}
+
 				else
 				{
 					DebugClient(__FILE__, __LINE__, TRUE, client);

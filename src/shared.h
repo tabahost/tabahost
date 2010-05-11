@@ -589,7 +589,7 @@ typedef struct cvs_s
 	u_int8_t	fleetshipstotal;
 	u_int8_t	wptotal;		// total of waypoints
 	u_int8_t	wpnum;			// num of actual waypoint
-	field_t		*port;
+	struct field_s *port;
 	int32_t		wp[MAX_WAYPOINTS][2]; // waypoints
 	ship_t		*ships;
 } cvs_t;
