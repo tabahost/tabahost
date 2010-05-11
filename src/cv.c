@@ -287,7 +287,8 @@ int8_t ProcessDroneShips(ship_t *ship)
 	drone->speedxyz[2][0] = 0; // Z
 	drone->angles[0][0] = 0; // Roll
 	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr/* + 4.69493569*/) * 10); // Yaw
+	Com_Printf(VERBOSE_DEBUG, "Current YAW: %f\n", Com_Deg(ship->Yaw.curr));
+	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr - 4.69493569) * 10); // Yaw
 	drone->accelxyz[0][0] = ship->Acel.curr * sin(ship->Yaw.curr); // X
 	drone->accelxyz[1][0] = ship->Acel.curr * cos(ship->Yaw.curr); // Y
 	drone->accelxyz[2][0] = 0; // Z
