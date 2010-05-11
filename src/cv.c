@@ -71,21 +71,21 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 		if(dy == 0)
 		{
 			if(dx > 0) // direita
-				B->Yaw.target = 0;
+				B->Yaw.target = 0.5 * M_PI;
 			else // esquerda
-				B->Yaw.target = M_PI;
+				B->Yaw.target = 1.5 * M_PI;
 		}
 		else if(dx == 0)
 		{
 			if(dy > 0) // baixo
-				B->Yaw.target = 1.5 * M_PI;
+				B->Yaw.target = M_PI;
 			else // cima
-				B->Yaw.target = 0.5 * M_PI;
+				B->Yaw.target = 0;
 		}
 		else
 		{
-			B->Yaw.target = atan(dy / dx);
-			if(dx < 0)
+			B->Yaw.target = atan2(dx, dy);
+			if(dy < 0)
 				B->Yaw.target = B->Yaw.target + M_PI;
 		}
 	}
@@ -137,20 +137,20 @@ void RunShips_Prepare(ship_t *ship, ship_t *mainShip, const double *A)
 		if(dy == 0)
 		{
 			if(dx > 0) // direita
-				ship->Yaw.target = 0;
+				ship->Yaw.target = 0.5 * M_PI;
 			else // esquerda
-				ship->Yaw.target = M_PI;
+				ship->Yaw.target = 1.5 * M_PI;
 		}
 		else if(dx == 0)
 		{
 			if(dy > 0) // baixo
-				ship->Yaw.target = 1.5*M_PI;
+				ship->Yaw.target = M_PI;
 			else // cima
-				ship->Yaw.target = 0.5*M_PI;
+				ship->Yaw.target = 0;
 		}
 		else
 		{
-			ship->Yaw.target = atan(dy/dx);
+			ship->Yaw.target = atan2(dy, dx);
 			if(dx<0)
 				ship->Yaw.target = ship->Yaw.target + M_PI;
 		}
@@ -287,7 +287,7 @@ int8_t ProcessDroneShips(ship_t *ship)
 	drone->speedxyz[2][0] = 0; // Z
 	drone->angles[0][0] = 0; // Roll
 	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr + 1.57079633) * 10); // Yaw
+	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr/* + 1.57079633*/) * 10); // Yaw
 	drone->accelxyz[0][0] = ship->Acel.curr * sin(ship->Yaw.curr); // X
 	drone->accelxyz[1][0] = ship->Acel.curr * cos(ship->Yaw.curr); // Y
 	drone->accelxyz[2][0] = 0; // Z

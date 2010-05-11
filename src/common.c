@@ -1379,11 +1379,6 @@ double AngleTo(int32_t origx, int32_t origy, int32_t destx, int32_t desty)
 	else
 		ang = Com_Deg(atan2(x, y));
 
-	if (ang < 0)
-	{
-		ang += 360;
-	}
-
 	return ang;
 }
 
@@ -1478,7 +1473,7 @@ double Com_Rad(double angle)
 /**
  Com_Deg
 
- Converts Radians to Degrees
+ Converts Radians to Degrees form 0 to 359.999 degrees
  */
 
 double Com_Deg(double angle)
@@ -1487,8 +1482,21 @@ double Com_Deg(double angle)
 
 	degree = (angle * 180.0 / M_PI);
 
-	while(degree >= 360.0)
-		degree -= 360.0;
+	if(degree > 0)
+	{
+		while(degree >= 360.0)
+			degree -= 360.0;
+	}
+	else if(degree < 0)
+	{
+		while(degree <= -360.0)
+			degree += 360.0;
+
+		if(degree < 0)
+		{
+			degree = 360.0 - degree;
+		}
+	}
 
 	return degree;
 }
