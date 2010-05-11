@@ -190,8 +190,6 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 	// if first steps, configure all ships
 	if(!arena->cvs[group].prepared)
 	{
-		arena->cvs[group].prepared = 1;
-
 		RunShips_Prepare(mainShip, mainShip, NULL);
 
 		for(i = 0, ship = arena->cvs[group].ships; ship && i < 6; ship = ship->next)
@@ -201,6 +199,8 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 			else
 				RunShips_Prepare(ship, mainShip, Form[formation][i++]);
 		}
+
+		arena->cvs[group].prepared = 1;
 	}
 
 	RunShips_Yaw(mainShip, mainShip);
@@ -445,6 +445,7 @@ void ResetCV(u_int8_t group)
 
 	arena->cvs[group].threatened = 0;
 	arena->cvs[group].outofport = 0;
+	arena->cvs[group].prepared = 0;
 	arena->cvs[group].wpnum = 1;
 	snprintf(arena->cvs[group].logfile, sizeof(arena->cvs[group].logfile), "%s,cv%u,%s,%u", mapname->string, arena->cvs[group].id, GetCountry(arena->cvs[group].country), (u_int32_t)time(NULL));
 }
