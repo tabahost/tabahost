@@ -1083,7 +1083,7 @@ void CheckArenaRules(void)
 							if (DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0],
 								arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, 15000) >= 0)
 							{
-								// ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
+								ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
 								break;
 							}
 						}
@@ -1137,7 +1137,7 @@ void CheckArenaRules(void)
 									ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
 								}
 								else
-									;//CVFire(ship, arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
+									CVFire(ship, arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
 							}
 						}
 						else

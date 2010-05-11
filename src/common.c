@@ -1369,17 +1369,28 @@ double AngleTo(int32_t origx, int32_t origy, int32_t destx, int32_t desty)
 	x = destx - origx;
 	y = desty - origy;
 
-	if (!y)
+	if(!y)
 	{
 		if (x > 0)
-			ang = 90;
+			ang = 0.5 * M_PI; // right
 		else
-			ang = 270;
+			ang = 1.5 * M_PI; // left
+	}
+	else if(!x)
+	{
+		if (y > 0)
+			ang = 0.0; // up
+		else
+			ang = M_PI; // down
 	}
 	else
-		ang = Com_Deg(atan2(x, y));
+	{
+		ang = atan2(x, y);
+		if(y < 0)
+			ang += M_PI;
+	}
 
-	return ang;
+	return Com_Deg(ang);
 }
 
 /**

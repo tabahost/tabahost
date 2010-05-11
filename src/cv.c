@@ -68,26 +68,7 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 	}
 	else
 	{
-		if(dy == 0)
-		{
-			if(dx > 0) // direita
-				B->Yaw.target = 0.5 * M_PI;
-			else // esquerda
-				B->Yaw.target = 1.5 * M_PI;
-		}
-		else if(dx == 0)
-		{
-			if(dy > 0) // baixo
-				B->Yaw.target = M_PI;
-			else // cima
-				B->Yaw.target = 0;
-		}
-		else
-		{
-			B->Yaw.target = atan2(dx, dy);
-			if(dy < 0)
-				B->Yaw.target = B->Yaw.target + M_PI;
-		}
+		B->Yaw.target = Com_Rad(AngleTo(B->Position.x, B->Position.y, B->Target.x, B->Target.y));
 	}
 
 	B->Yaw.target = RunShips_Angle(B->Yaw.target);
@@ -103,7 +84,7 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 		B->Yaw.curr = RunShips_Angle(B->Yaw.curr + B->YawVel.curr);
 	// ajusta velocidade
 	B->Vel.target = sqrt(dx * dx + dy * dy) / 3;
-	dx = B->Vel.max * (1 - MODULUS(RunShips_AngleDef(B->Yaw.target - B->Yaw.curr) / (0.5 * M_PI))); // 1 - x�/90�
+	dx = B->Vel.max * (1 - MODULUS(RunShips_AngleDef(B->Yaw.target - B->Yaw.curr) / (0.5 * M_PI))); // 1 - xº/90º
 
 	if(dx < B->Vel.min)
 		dx = B->Vel.min;
@@ -127,34 +108,9 @@ void RunShips_ReTarget(ship_t *B, ship_t *CV, const double *A)
 
 void RunShips_Prepare(ship_t *ship, ship_t *mainShip, const double *A)
 {
-	double dx, dy;
-
 	if(!A || ship == mainShip) // main Ship
 	{
-		dx = ship->Target.x - ship->Position.x;
-		dy = ship->Target.y - ship->Position.y;
-
-		if(dy == 0)
-		{
-			if(dx > 0) // direita
-				ship->Yaw.target = 0.5 * M_PI;
-			else // esquerda
-				ship->Yaw.target = 1.5 * M_PI;
-		}
-		else if(dx == 0)
-		{
-			if(dy > 0) // baixo
-				ship->Yaw.target = M_PI;
-			else // cima
-				ship->Yaw.target = 0;
-		}
-		else
-		{
-			ship->Yaw.target = atan2(dx, dy);
-			if(dy < 0)
-				ship->Yaw.target = ship->Yaw.target + M_PI;
-		}
-
+		ship->Yaw.target = Com_Rad(AngleTo(ship->Position.x, ship->Position.y, ship->Target.x, ship->Target.y));
 		ship->Yaw.target = RunShips_Angle(ship->Yaw.target);
 		ship->Yaw.curr = ship->Yaw.target;
 	}
@@ -202,6 +158,22 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 
 		arena->cvs[group].prepared = 1;
 	}
+	
+	// PLACE_ENGINE1
+	// PLACE_REARFUSE | PLACE_CENTERFUSE
+	// PLACE_TAILGUN
+	// PLACE_NOSEGUN
+	// PLACE_LEFTGUN
+	// PLACE_RIGHTGUN
+	// PLACE_TOPGUN
+	// PLACE_BOTTOMGUN
+	// PLACE_RGEAR
+	// PLACE_LGEAR
+	// PLACE_FLAPS
+
+	// Set main ship always as the CV speed, so other ships can sustain the formation
+	// TODO: convoy speed verification (speed == more damaged)
+	mainShip->Vel.max = 27; // 54 feet per second
 
 	RunShips_Yaw(mainShip, mainShip);
 	RunShips_Walk(mainShip);
@@ -210,7 +182,7 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 	{
 		if(RemoveShip(mainShip))
 		{
-			Com_Printf(VERBOSE_DEBUG, "RunShips() ProcessDroneShips(error), going to recursive call\n");
+			Com_Printf(VERBOSE_DEBUG, "RunShips() ProcessDroneShips(error/kill), going to recursive call\n");
 			RunShips(group, formation); // Find next mainship and continue. If no mainShip is found, it will return here.
 		}
 		else // no more ships in array, reset it
@@ -249,7 +221,10 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 		if(ProcessDroneShips(ship) < 0)
 		{
 			if(!RemoveShip(ship)) // no more ships in array, reset it
+			{
 				ResetCV(group);
+				return;
+			}
 		}
 	}
 }
@@ -266,14 +241,14 @@ int8_t ProcessDroneShips(ship_t *ship)
 	if (drone->bugged)
 	{
 		BPrintf(RADIO_YELLOW, "DroneShip %s bugged, and will be removed", drone->longnick);
-		RemoveDrone(drone);
+		//RemoveDrone(drone);
 		return -1;
 	}
 
-	if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+	if (drone->status_damage & (PLACE_REARFUSE | PLACE_CENTERFUSE))
 	{
 		ScoresEvent(SCORE_KILLED, drone, 0);
-		RemoveDrone(drone);
+		//RemoveDrone(drone);
 		return -1;
 	}
 
@@ -287,7 +262,7 @@ int8_t ProcessDroneShips(ship_t *ship)
 	drone->speedxyz[2][0] = 0; // Z
 	drone->angles[0][0] = 0; // Roll
 	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr/* + 1.57079633*/) * 10); // Yaw
+	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr/* + 1.57079633 4.71238898*/) * 10); // Yaw
 	drone->accelxyz[0][0] = ship->Acel.curr * sin(ship->Yaw.curr); // X
 	drone->accelxyz[1][0] = ship->Acel.curr * cos(ship->Yaw.curr); // Y
 	drone->accelxyz[2][0] = 0; // Z
