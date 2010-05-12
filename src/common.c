@@ -1364,33 +1364,11 @@ double WBtoHdg(int16_t angle)
 double AngleTo(int32_t origx, int32_t origy, int32_t destx, int32_t desty)
 {
 	int32_t x, y;
-	double ang;
 
 	x = destx - origx;
 	y = desty - origy;
 
-	if(!y)
-	{
-		if (x > 0)
-			ang = 0.5 * M_PI; // right
-		else
-			ang = 1.5 * M_PI; // left
-	}
-	else if(!x)
-	{
-		if (y > 0)
-			ang = 0.0; // up
-		else
-			ang = M_PI; // down
-	}
-	else
-	{
-		ang = atan2(x, y);
-		if(y < 0)
-			ang += M_PI;
-	}
-
-	return Com_Deg(ang);
+	return Com_Deg(atan2(x, y));
 }
 
 /**
@@ -1492,22 +1470,12 @@ double Com_Deg(double angle)
 	double degree;
 
 	degree = (angle * 180.0 / M_PI);
+	
+	while(degree >= 360.0)
+		degree -= 360.0;
 
-	if(degree > 0)
-	{
-		while(degree >= 360.0)
-			degree -= 360.0;
-	}
-	else if(degree < 0)
-	{
-		while(degree <= -360.0)
-			degree += 360.0;
-
-		if(degree < 0)
-		{
-			degree = 360.0 - degree;
-		}
-	}
+	while(degree < 0.0)
+		degree += 360.0;
 
 	return degree;
 }

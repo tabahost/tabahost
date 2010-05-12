@@ -80,7 +80,7 @@ void RunShips_Yaw(ship_t *B, ship_t *CV)
 	else if(B->YawVel.curr < B->YawVel.min)
 		B->YawVel.curr = B->YawVel.min;
 	// incrementa yaw
-	//if(abs(B->Yaw.curr - B->Yaw.target) > (0.01 * M_PI))
+	//if(MODULUS(B->Yaw.curr - B->Yaw.target) > (0.01 * M_PI))
 		B->Yaw.curr = RunShips_Angle(B->Yaw.curr + B->YawVel.curr);
 	// ajusta velocidade
 	B->Vel.target = sqrt(dx * dx + dy * dy) / 3;
@@ -262,13 +262,13 @@ int8_t ProcessDroneShips(ship_t *ship)
 	drone->speedxyz[2][0] = 0; // Z
 	drone->angles[0][0] = 0; // Roll
 	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = floor(Com_Deg(ship->Yaw.curr/* + 1.57079633 4.71238898*/) * 10); // Yaw
+	drone->angles[2][0] = 3600 - (int32_t)floor(Com_Deg(ship->Yaw.curr) * 10); // Yaw
 	drone->accelxyz[0][0] = ship->Acel.curr * sin(ship->Yaw.curr); // X
 	drone->accelxyz[1][0] = ship->Acel.curr * cos(ship->Yaw.curr); // Y
 	drone->accelxyz[2][0] = 0; // Z
 	drone->aspeeds[0][0] = 0; // Roll
 	drone->aspeeds[1][0] = 0; // Pitch
-	drone->aspeeds[2][0] = floor(Com_Deg(ship->YawVel.curr)); // debug * 2); // Yaw - degrees per second?
+	drone->aspeeds[2][0] = 0;//(int32_t)floor(Com_Deg(ship->YawVel.curr)); // debug * 2); // Yaw - degrees per second?
 
 	drone->offset = -500;
 	drone->timer += 500;
