@@ -245,7 +245,7 @@ int8_t ProcessDroneShips(ship_t *ship)
 		return -1;
 	}
 
-	if (drone->status_damage & (PLACE_REARFUSE | PLACE_CENTERFUSE))
+	if (drone->status_damage & ((1 << PLACE_REARFUSE) | (1 << PLACE_CENTERFUSE) | (1 << PLACE_RGEAR) | (1 << PLACE_LGEAR)))
 	{
 		ScoresEvent(SCORE_KILLED, drone, 0);
 		//RemoveDrone(drone);
@@ -415,6 +415,8 @@ void ResetCV(u_int8_t group)
 {
 	// CREATE ALL SHIPS AGAIN
 	Com_Printf(VERBOSE_DEBUG, "ResetCV() group %u\n", group);
+
+	ReadCVWaypoints(group);
 	RemoveAllShips(group);
 	CreateAllShips(group);
 
@@ -492,9 +494,8 @@ void ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, 
 
 	if (!client)
 	{
-		// grab the pathway angle
-		// or cvpos? cv->ships->Position.x, cv->ships->Position.y
-		angle = AngleTo(cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1], cv->wp[cv->wpnum+1][0], cv->wp[cv->wpnum+1][1]);
+		// grab the cvpos pathway angle
+		angle = AngleTo(cv->ships->Position.x, cv->ships->Position.y, cv->wp[cv->wpnum+1][0], cv->wp[cv->wpnum+1][1]);
 
 		// change the route based in the pathway angle
 		if (rand()%100 < 60) // zigzag
@@ -516,7 +517,7 @@ void ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, 
 		}
 
 		// check if new waypoint is over land
-		if (GetHeightAt(cv->ships->Position.x - (10000 * sin(Com_Rad(angle + angleoffset))), cv->ships->Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
+		if (GetHeightAt(cv->ships->Position.x + (10000 * sin(Com_Rad(angle + angleoffset))), cv->ships->Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
 		{
 			angleoffset *= -1;
 		}
@@ -525,19 +526,8 @@ void ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, 
 		distance = 2000;
 	}
 
-	Com_Printf(VERBOSE_DEBUG, "WP 0 X %d Y %d\n", cv->wp[0][0], cv->wp[0][1]);
-	Com_Printf(VERBOSE_DEBUG, "WP 1 X %d Y %d\n", cv->wp[1][0], cv->wp[1][1]);
-	Com_Printf(VERBOSE_DEBUG, "WP 2 X %d Y %d\n", cv->wp[2][0], cv->wp[2][1]);
-	Com_Printf(VERBOSE_DEBUG, "WP 3 X %d Y %d\n---------------------\n", cv->wp[3][0], cv->wp[3][1]);
-
 	cv->wp[cv->wpnum][0] = arena->fields[cv->field].posxyz[0] + (distance * sin(Com_Rad(angle)));
 	cv->wp[cv->wpnum][1] = arena->fields[cv->field].posxyz[1] + (distance * cos(Com_Rad(angle)));
-
-	Com_Printf(VERBOSE_DEBUG, "WP %d\n", cv->wpnum);
-	Com_Printf(VERBOSE_DEBUG, "WP 0 X %d Y %d\n", cv->wp[0][0], cv->wp[0][1]);
-	Com_Printf(VERBOSE_DEBUG, "WP 1 X %d Y %d\n", cv->wp[1][0], cv->wp[1][1]);
-	Com_Printf(VERBOSE_DEBUG, "WP 2 X %d Y %d\n", cv->wp[2][0], cv->wp[2][1]);
-	Com_Printf(VERBOSE_DEBUG, "WP 3 X %d Y %d\n=====================\n", cv->wp[3][0], cv->wp[3][1]);
 
 	if (client)
 	{

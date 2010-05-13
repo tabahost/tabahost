@@ -289,8 +289,6 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
 					Com_Printf(VERBOSE_DEBUG, "CV Detected - type %u, posx %u posy %u\n", arena->fields[i].type, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1]);
 					if(group < cvs->value)
 					{
-						ReadCVWaypoints(group);
-
 						arena->fields[i].cvs = &(arena->cvs[group]);
 						arena->cvs[group].id = group;
 						arena->cvs[group].field = i;
