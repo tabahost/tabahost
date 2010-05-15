@@ -344,6 +344,7 @@ ship_t *MainShipTarget(u_int8_t group)
 		// update field position
 		arena->fields[arena->cvs[group].field].posxyz[0] = ship->Position.x;
 		arena->fields[arena->cvs[group].field].posxyz[1] = ship->Position.y;
+		arena->fields[arena->cvs[group].field].posxyz[2] = 59; // 18m
 
 		// update target waypoint (this may be changed manually or automatically for defensive maneuver)
 		ship->Target.x = arena->cvs[group].wp[arena->cvs[group].wpnum][0];

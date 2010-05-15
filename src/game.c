@@ -312,7 +312,8 @@ void CheckArenaRules(void)
 	int16_t i, j;
 	u_int8_t reds, golds, k;
 	ship_t *ship;
-	double tonnage_recover;
+	client_t* near;
+	double tonnage_recover, speed;
 	u_int8_t c_cities, totalcities;
 	u_int32_t dist;
 	int32_t posx;
@@ -1067,36 +1068,54 @@ void CheckArenaRules(void)
 		if (!(arena->frame % 6000)) // Log CVs position every 60sec
 			LogCVsPosition();
 
-		if(!(arena->frame % 50)) // 500ms
+		for (i = 0; i < cvs->value; i++)
 		{
-			for (i = 0; i < cvs->value; i++)
+			near = NULL;
+
+			if(!(arena->frame % 50)) // 500ms
 			{
 				RunShips(i, 0);
 
 				// check if there are enemies around
-				if (arena->cvs[i].ships && !arena->cvs[i].threatened && !(arena->frame % 600))
+				if (arena->cvs[i].ships && arena->cvs[i].ships->drone)
 				{
-					for (j = 0; j < maxentities->value; j++)
+					near = NearPlane(arena->cvs[i].ships->drone, arena->cvs[i].country, 15000);
+
+					if(near)
 					{
-						if (clients[j].inuse && clients[j].ready && clients[j].infly && clients[j].country != arena->cvs[i].country)
+						if (!arena->cvs[i].threatened && !(arena->frame % 600))
 						{
-							if (DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], clients[j].posalt[0],
-								arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, 15000) >= 0)
-							{
-								ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
-								break;
-							}
+							ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
 						}
 					}
 				}
 			}
-		}
 
-		for (i = 0; i < cvs->value; i++)
-		{
 			// CV Attack
 			for(ship = arena->cvs[i].ships; ship; ship = ship->next)
 			{
+				if(near)
+				{
+					if((posx = DistBetween(ship->Position.x, ship->Position.y, 0, near->posxy[0][0], near->posxy[1][0], near->posalt[0],  4000)) >= 0)
+					{
+						speed = sqrt(near->speedxyz[0][0]*near->speedxyz[0][0]+near->speedxyz[1][0]*near->speedxyz[1][0]+near->speedxyz[2][0]*near->speedxyz[2][0]);
+
+						// % of hit
+						j = (int16_t)(-0.038 * (float)posx + 118.0);
+						if(j < 0)
+							j = 0;
+						j = (int16_t)((float)j * (-0.001 * speed + 1.3));
+						if(j < 0)
+							j = 0;
+							// Flak: 0x1918 0x322A
+
+							if((rand() % 100) < j) // hit
+								FireAck(ship->drone, near, 0);
+							else // fail
+								FireAck(ship->drone, near, 1);
+					}
+				}
+
 				if (!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
 				{
 					j = dist = 0;

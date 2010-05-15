@@ -1233,7 +1233,7 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 		if (rand()%100 < ((1.1 - (double)dist/3000) * 100))
 		{
 			i = 0;
-			while (dest->armor.points[part = (rand()%32)] < 0)
+			while (dest->armor.points[part = (rand()%32)] <= 0)
 			{
 				i++;
 				//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
@@ -1315,7 +1315,7 @@ void CVFire(ship_t *ship, int32_t destx, int32_t desty)
 
 	for (j = 0; j < i; j++)
 	{
-		ThrowBomb(FALSE, ship->Position.x, ship->Position.y, 0, destx, desty, 0, NULL);
+		ThrowBomb(FALSE, ship->Position.x, ship->Position.y, 59, destx, desty, 0, NULL);
 	}
 	ThrowBomb(TRUE, ship->Position.x, ship->Position.y, 0, destx, desty, 0, NULL);
 }
