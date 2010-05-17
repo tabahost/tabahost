@@ -1212,6 +1212,7 @@ void DroneGetTarget(client_t *drone)
 
 void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 {
+	static double pspeed = 3170;
 	u_int8_t i, buffer[31];
 	int8_t j;
 	int16_t velx, vely, velz, part;
@@ -1230,55 +1231,52 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 
 	otto = (ottofiring_t *) buffer;
 
-	if (dist > 500)
+	if (dist > 100)
 	{
-		velx = rand()%(dist / 500);
+		velx = rand()%(dist / 100);
 		destx += Com_Pow(-1, rand()%2) * velx;
-		vely = rand()%(dist / 500);
+		vely = rand()%(dist / 100);
 		desty += Com_Pow(-1, rand()%2) * vely;
-		velz = rand()%(dist / 500);
+		velz = rand()%(dist / 100);
 		destz += Com_Pow(-1, rand()%2) * velz;
 	}
 
-	velx = (double)((destx + dest->speedxyz[0][0]) - source->posxy[0][0]) * 3170 / dist;
-	vely = (double)((desty + dest->speedxyz[1][0]) - source->posxy[1][0]) * 3170 / dist;
-	velz = (double)((destz + dest->speedxyz[2][0]) - source->posalt[0]) * 3170 / dist;
+	velx = (double)((destx + dest->speedxyz[0][0]) - source->posxy[0][0]) * (pspeed / (double)dist);
+	vely = (double)((desty + dest->speedxyz[1][0]) - source->posxy[1][0]) * (pspeed / (double)dist);
+	velz = (double)((destz + dest->speedxyz[2][0]) - source->posalt[0]) * (pspeed / (double)dist);
 
 	if (!animate)
 	{
-		if (rand()%100 < ((1.1 - (double)dist/3000) * 100))
+		i = 0;
+		while (dest->armor.points[part = (rand()%32)] <= 0)
 		{
-			i = 0;
-			while (dest->armor.points[part = (rand()%32)] <= 0)
+			i++;
+			//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
+			if (i > 150)
 			{
-				i++;
-				//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
-				if (i > 150)
-				{
-					Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: Infinite loop detected, breaking off\n");
-					return;
-				}
+				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: Infinite loop detected, breaking off\n");
+				return;
 			}
-
-			AddPlaneDamage(part, 40, 0, NULL, NULL, dest);
-
-			j = AddKiller(dest, source);
-			if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
-			{
-				sdamage = (double)(10.0 * logf(1.0 + 100.0 * 40.0 / (double)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
-
-				if(sdamage >= 0)
-				{
-					dest->hitby[j].damage += sdamage;
-				}
-				else
-				{
-					Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
-				}
-			}
-			
-			SendPings(1, 143, dest);
 		}
+
+		AddPlaneDamage(part, 30, 0, NULL, NULL, dest);
+
+		j = AddKiller(dest, source);
+		if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
+		{
+			sdamage = (double)(10.0 * logf(1.0 + 100.0 * 40.0 / (double)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+
+			if(sdamage >= 0)
+			{
+				dest->hitby[j].damage += sdamage;
+			}
+			else
+			{
+				Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
+			}
+		}
+		
+		SendPings(1, 143, dest);
 	}
 
 	otto->packetid = htons(Com_WBhton(0x1900));
@@ -1311,6 +1309,7 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 
 void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 {
+	static double pspeed = 3170;
 	u_int8_t i, buffer[35];
 	int8_t j;
 	int16_t velx, vely, velz, part;
@@ -1334,45 +1333,42 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 	velz = rand()%(dist / 12);
 	destz += (4 * dest->speedxyz[2][0]) + (Com_Pow(-1, rand()%2) * velz);
 
-	velx = (double)(destx - source->posxy[0][0]) * 3170 / dist;
-	vely = (double)(desty - source->posxy[1][0]) * 3170 / dist;
-	velz = (double)(destz - source->posalt[0]) * 3170 / dist;
+	velx = (double)(destx - source->posxy[0][0]) * (pspeed / (double)dist);
+	vely = (double)(desty - source->posxy[1][0]) * (pspeed / (double)dist);
+	velz = (double)(destz - source->posalt[0]) * (pspeed / (double)dist);
 	
 	if (!animate)
 	{
-		if (rand()%100 < ((1.1 - (double)dist/3000) * 100))
+		i = 0;
+		while (dest->armor.points[part = (rand()%32)] <= 0)
 		{
-			i = 0;
-			while (dest->armor.points[part = (rand()%32)] <= 0)
+			i++;
+			//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
+			if (i > 150)
 			{
-				i++;
-				//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
-				if (i > 150)
-				{
-					Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: Infinite loop detected, breaking off\n");
-					return;
-				}
+				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: Infinite loop detected, breaking off\n");
+				return;
 			}
-
-			AddPlaneDamage(part, 40, 0, NULL, NULL, dest);
-
-			j = AddKiller(dest, source);
-			if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
-			{
-				sdamage = (double)(10.0 * logf(1.0 + 100.0 * 40.0 / (double)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
-
-				if(sdamage >= 0)
-				{
-					dest->hitby[j].damage += sdamage;
-				}
-				else
-				{
-					Com_Printf(VERBOSE_WARNING, "FireFlak(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
-				}
-			}
-			
-			SendPings(1, 146, dest);
 		}
+
+		AddPlaneDamage(part, 40, 0, NULL, NULL, dest);
+
+		j = AddKiller(dest, source);
+		if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
+		{
+			sdamage = (double)(10.0 * logf(1.0 + 100.0 * 40.0 / (double)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+
+			if(sdamage >= 0)
+			{
+				dest->hitby[j].damage += sdamage;
+			}
+			else
+			{
+				Com_Printf(VERBOSE_WARNING, "FireFlak(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
+			}
+		}
+		
+		SendPings(1, 146, dest);
 	}
 
 	flak->packetid = htons(Com_WBhton(0x1917));
