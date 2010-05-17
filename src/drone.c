@@ -350,7 +350,7 @@ int ProcessDrone(client_t *drone)
 	double ang;
 	u_int16_t i = 0, k = 0;
 	int16_t j;
-	int32_t x, y;
+	int32_t x, y, planedist;
 	u_int32_t dist;
 	client_t *near;
 	building_t *buildings;
@@ -852,8 +852,10 @@ int ProcessDrone(client_t *drone)
 					// Evasive tick
 					if (near) // there is a enemy plane near
 					{
-						if (drone->drone & DRONE_AAA)
-							FireAck(drone, near, 0);
+						planedist = DistBetween(drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], near->posxy[0][0], near->posxy[1][0], near->posalt[0], 4000);
+
+						if (planedist >=0 && (drone->drone & DRONE_AAA))
+							FireAck(drone, near, planedist, 0);
 
 						drone->threatened = 1; // just for katy
 
@@ -1208,25 +1210,39 @@ void DroneGetTarget(client_t *drone)
  Fires ack fire from pos1 to pos2
  */
 
-void FireAck(client_t *source, client_t *dest, u_int8_t animate)
+void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 {
 	u_int8_t i, buffer[31];
 	int8_t j;
 	int16_t velx, vely, velz, part;
-	int32_t dist;
+	int32_t destx, desty, destz;
 	ottofiring_t *otto;
 	double sdamage;
 
-	if ((dist = DistBetween(source->posxy[0][0], source->posxy[1][0], source->posalt[0], dest->posxy[0][0], dest->posxy[1][0], dest->posalt[0], -1)) > 3000)
+	destx = dest->posxy[0][0];
+	desty = dest->posxy[1][0];
+	destz = dest->posalt[0];
+
+	if (dist > 4000)
 		return;
 
 	memset(buffer, 0, sizeof(buffer));
 
 	otto = (ottofiring_t *) buffer;
 
-	velx = (double)((dest->posxy[0][0] + dest->speedxyz[0][0]) - source->posxy[0][0]) * 3170 / dist;
-	vely = (double)((dest->posxy[1][0] + dest->speedxyz[1][0]) - source->posxy[1][0]) * 3170 / dist;
-	velz = (double)((dest->posalt[0] + dest->speedxyz[2][0]) - source->posalt[0]) * 3170 / dist;
+	if (dist > 500)
+	{
+		velx = rand()%(dist / 500);
+		destx += Com_Pow(-1, rand()%2) * velx;
+		vely = rand()%(dist / 500);
+		desty += Com_Pow(-1, rand()%2) * vely;
+		velz = rand()%(dist / 500);
+		destz += Com_Pow(-1, rand()%2) * velz;
+	}
+
+	velx = (double)((destx + dest->speedxyz[0][0]) - source->posxy[0][0]) * 3170 / dist;
+	vely = (double)((desty + dest->speedxyz[1][0]) - source->posxy[1][0]) * 3170 / dist;
+	velz = (double)((destz + dest->speedxyz[2][0]) - source->posalt[0]) * 3170 / dist;
 
 	if (!animate)
 	{
@@ -1275,6 +1291,104 @@ void FireAck(client_t *source, client_t *dest, u_int8_t animate)
 	otto->zspeed = htons(velz);
 	otto->unknown6 = htonl(0x40243);
 	otto->shortnick = htonl(source->shortnick);
+
+	////////////
+
+	for (i = 0; i < MAX_SCREEN; i++)
+	{
+		if (source->visible[i].client && !source->visible[i].client->drone)
+		{
+			SendPacket(buffer, sizeof(buffer), source->visible[i].client);
+		}
+	}
+}
+
+/**
+ FireFlak
+
+ Fires flak fire from pos1 to pos2
+ */
+
+void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
+{
+	u_int8_t i, buffer[35];
+	int8_t j;
+	int16_t velx, vely, velz, part;
+	int32_t destx, desty, destz;
+	wb3delayedfuse_t *flak;
+	double sdamage;
+
+	destx = dest->posxy[0][0];
+	desty = dest->posxy[1][0];
+	destz = dest->posalt[0];
+
+	memset(buffer, 0, sizeof(buffer));
+
+	flak = (wb3delayedfuse_t *) buffer;
+
+	// dispersion
+	velx = rand()%(dist / 12);
+	destx += (4 * dest->speedxyz[0][0]) + (Com_Pow(-1, rand()%2) * velx);
+	vely = rand()%(dist / 12);
+	desty += (4 * dest->speedxyz[1][0]) + (Com_Pow(-1, rand()%2) * vely);
+	velz = rand()%(dist / 12);
+	destz += (4 * dest->speedxyz[2][0]) + (Com_Pow(-1, rand()%2) * velz);
+
+	velx = (double)(destx - source->posxy[0][0]) * 3170 / dist;
+	vely = (double)(desty - source->posxy[1][0]) * 3170 / dist;
+	velz = (double)(destz - source->posalt[0]) * 3170 / dist;
+	
+	if (!animate)
+	{
+		if (rand()%100 < ((1.1 - (double)dist/3000) * 100))
+		{
+			i = 0;
+			while (dest->armor.points[part = (rand()%32)] <= 0)
+			{
+				i++;
+				//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
+				if (i > 150)
+				{
+					Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: Infinite loop detected, breaking off\n");
+					return;
+				}
+			}
+
+			AddPlaneDamage(part, 40, 0, NULL, NULL, dest);
+
+			j = AddKiller(dest, source);
+			if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
+			{
+				sdamage = (double)(10.0 * logf(1.0 + 100.0 * 40.0 / (double)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+
+				if(sdamage >= 0)
+				{
+					dest->hitby[j].damage += sdamage;
+				}
+				else
+				{
+					Com_Printf(VERBOSE_WARNING, "FireFlak(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
+				}
+			}
+			
+			SendPings(1, 146, dest);
+		}
+	}
+
+	flak->packetid = htons(Com_WBhton(0x1917));
+	flak->item = 146;
+	flak->id = htons(0x0800);
+	flak->posx = htonl(source->posxy[0][0]+200);
+	flak->posy = htonl(source->posxy[1][0]);
+	flak->alt = htonl(source->posalt[0] + 70);
+	flak->xspeed = htons(velx); // 550
+	flak->yspeed = htons(vely); // 1151  (total 1500)
+	flak->zspeed = htons(velz); // 788
+	flak->unknown1 = htonl(0x60);
+	flak->shortnick = htonl(source->shortnick);
+	flak->fusealt = htonl(destz);
+
+	// 32 25  92  08 00  00 03 6C 4D  00 03 C1 33  00 00 00 D5  02 26  04 7F  03 14  00 00 00 60  08 BA A0 2E  00 00 19 64 
 
 	////////////
 

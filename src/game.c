@@ -1083,6 +1083,8 @@ void CheckArenaRules(void)
 
 					if(near)
 					{
+						posx = DistBetween(arena->cvs[i].ships->Position.x,arena->cvs[i].ships->Position.y, 0, near->posxy[0][0], near->posxy[1][0], near->posalt[0], -1);
+
 						if (!arena->cvs[i].threatened && !(arena->frame % 600))
 						{
 							ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
@@ -1094,12 +1096,12 @@ void CheckArenaRules(void)
 			// CV Attack
 			for(ship = arena->cvs[i].ships; ship; ship = ship->next)
 			{
-				if(near)
+				if(near && posx > 0)
 				{
-					if((posx = DistBetween(ship->Position.x, ship->Position.y, 0, near->posxy[0][0], near->posxy[1][0], near->posalt[0],  4000)) >= 0)
-					{
-						speed = sqrt(near->speedxyz[0][0]*near->speedxyz[0][0]+near->speedxyz[1][0]*near->speedxyz[1][0]+near->speedxyz[2][0]*near->speedxyz[2][0]);
+					speed = sqrt(near->speedxyz[0][0]*near->speedxyz[0][0]+near->speedxyz[1][0]*near->speedxyz[1][0]+near->speedxyz[2][0]*near->speedxyz[2][0]);
 
+					if(posx <= 4000)
+					{
 						// % of hit
 						j = (int16_t)(-0.038 * (float)posx + 118.0);
 						if(j < 0)
@@ -1107,12 +1109,26 @@ void CheckArenaRules(void)
 						j = (int16_t)((float)j * (-0.001 * speed + 1.3));
 						if(j < 0)
 							j = 0;
-							// Flak: 0x1918 0x322A
 
-							if((rand() % 100) < j) // hit
-								FireAck(ship->drone, near, 0);
-							else // fail
-								FireAck(ship->drone, near, 1);
+						if((rand() % 100) < j) // hit
+							FireAck(ship->drone, near, posx, 0);
+						else // fail
+							FireAck(ship->drone, near, posx, 1);
+					}
+					else if(!(arena->frame % 300))
+					{
+						// % of hit
+//						j = (int16_t)(-0.038 * (float)posx + 118.0);
+//						if(j < 0)
+//							j = 0;
+//						j = (int16_t)((float)j * (-0.001 * speed + 1.3));
+//						if(j < 0)
+//							j = 0;
+
+//						if((rand() % 100) < j) // hit
+//							FireFlak(ship->drone, near, posx, 0);
+//						else // fail
+							FireFlak(ship->drone, near, posx, 1);
 					}
 				}
 
@@ -6508,12 +6524,12 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	}
 	else
 	{
-		if (client->attached)
-		{
-			FireAck(client, pvictim, 1);
-		}
-
 		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], pvictim->posxy[0][0], pvictim->posxy[1][0], pvictim->posalt[0], MAX_INT16);
+
+		if (client->attached && distance <= 4000)
+		{
+			FireAck(client, pvictim, distance, 1);
+		}
 	}
 
 	if (distance < 0)

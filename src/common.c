@@ -1896,7 +1896,7 @@ int32_t DistBetween(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, 
 		distance = sqrt(Com_Pow(distance, 2) + Com_Pow(z, 2));
 		return (int32_t)distance;
 	}
-	else if (x > -envelope && x < envelope && y > -envelope && y < envelope && z > -envelope && z < envelope)
+	else if (x >= -envelope && x <= envelope && y >= -envelope && y <= envelope && z >= -envelope && z <= envelope)
 	{
 		distance = sqrt(Com_Pow(x, 2) + Com_Pow(y, 2));
 		distance = sqrt(Com_Pow(distance, 2) + Com_Pow(z, 2));
