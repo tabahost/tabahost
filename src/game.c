@@ -4091,10 +4091,10 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						SendFileSeq1(file, "motd.txt", client);
 
 					PPrintf(client, RADIO_YELLOW, "Tabajara Host version %s, build %s %s", VERSION, __DATE__, __TIME__);
-					PPrintf(client, RADIO_YELLOW, "Last Reset: %s (%u x %u) %s",
+					PPrintf(client, RADIO_YELLOW, "Last Reset: %s (%s x %s) %s",
 						(arena->lastreset==1)?GetCountry(1):GetCountry(3),
-						(arena->lastreset==1)?resetsred->value:resetsgold->value,
-						(arena->lastreset==1)?resetsgold->value:resetsred->value,
+						(arena->lastreset==1)?resetsred->string:resetsgold->string,
+						(arena->lastreset==1)?resetsgold->string:resetsred->string,
 						(arena->lastreset==1)?GetCountry(3):GetCountry(1));
 
 					if(!(client->attr == 1 && hideadmin->value))

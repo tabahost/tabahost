@@ -1590,8 +1590,10 @@ void WB3SendAcks(client_t *client)
 		}
 	}
 
-	if (!(numacks = j))
-		return;
+	numacks = j;
+
+//	if (!numacks)
+//		return;
 
 	*(u_int16_t *)buffer = htons(Com_WBhton(0x1D12));
 
@@ -1599,34 +1601,37 @@ void WB3SendAcks(client_t *client)
 	*(buffer + numacks + 3) = numacks;
 	*(buffer + numacks + 4 + (numacks * 4)) = numacks;
 
-	for (i = 0, j = 0; i < MAX_BUILDINGS; i++)
+	if(numacks)
 	{
-		if (arena->fields[client->field - 1].buildings[i].field)
+		for (i = 0, j = 0; i < MAX_BUILDINGS; i++)
 		{
-			if (arena->fields[client->field - 1].buildings[i].type >= BUILD_50CALACK && arena->fields[client->field - 1].buildings[i].type <= BUILD_88MMFLAK)
+			if (arena->fields[client->field - 1].buildings[i].field)
 			{
-				*(buffer + 3 + j) = arena->fields[client->field - 1].buildings[i].status ? 0 : 1;
-
-				switch (arena->fields[client->field - 1].buildings[i].type)
+				if (arena->fields[client->field - 1].buildings[i].type >= BUILD_50CALACK && arena->fields[client->field - 1].buildings[i].type <= BUILD_88MMFLAK)
 				{
-					case BUILD_50CALACK:
-						*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(131);
-						break;
-					case BUILD_20MMACK:
-						*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(132);
-						break;
-					case BUILD_40MMACK:
-						*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(133);
-						break;
-					case BUILD_88MMFLAK:
-						*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(134);
-						break;
-					default:
-						*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(131);
-						break;
+					*(buffer + 3 + j) = arena->fields[client->field - 1].buildings[i].status ? 0 : 1;
+
+					switch (arena->fields[client->field - 1].buildings[i].type)
+					{
+						case BUILD_50CALACK:
+							*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(131);
+							break;
+						case BUILD_20MMACK:
+							*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(132);
+							break;
+						case BUILD_40MMACK:
+							*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(133);
+							break;
+						case BUILD_88MMFLAK:
+							*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(134);
+							break;
+						default:
+							*(u_int32_t *)(buffer + numacks + 4 + (j * 4)) = htonl(131);
+							break;
+					}
+					*(u_int32_t *)(buffer + numacks + 5 + (numacks * 4) + (j * 4)) = htonl(arena->fields[client->field - 1].buildings[i].id);
+					j++;
 				}
-				*(u_int32_t *)(buffer + numacks + 5 + (numacks * 4) + (j * 4)) = htonl(arena->fields[client->field - 1].buildings[i].id);
-				j++;
 			}
 		}
 	}
