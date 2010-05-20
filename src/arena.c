@@ -3722,6 +3722,9 @@ double GetTonnageToClose(u_int8_t field)
 		return 0;
 	}
 
+	if(arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE) // SHIPS have no TTC
+		return 0;
+
 	if(ttc_buf[arena->fields[field].type])
 	{
 		return ttc_buf[arena->fields[field].type];

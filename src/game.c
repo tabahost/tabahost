@@ -1103,7 +1103,7 @@ void CheckArenaRules(void)
 					if(posx <= 4000)
 					{
 						// % of hit
-						j = (int16_t)(-0.006 * (float)posx + 30.0);
+						j = (int16_t)(-0.003 * (float)posx + 11.0);
 						if(j < 0)
 							j = 0;
 						j = (int16_t)((float)j * (-0.001 * speed + 1.3));
@@ -1118,7 +1118,7 @@ void CheckArenaRules(void)
 					else if(!(arena->frame % 300)) // 3 sec
 					{
 						// % of hit
-						j = (int16_t)(-0.005 * (float)posx + 60.0);
+						j = (int16_t)(-0.001 * (float)posx + 15.0);
 						if(j < 0)
 							j = 0;
 						j = (int16_t)((float)j * (-0.001 * speed + 1.3));
