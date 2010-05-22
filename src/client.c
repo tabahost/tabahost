@@ -2032,9 +2032,13 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 	if(aimount->inout == 1)
 	{
 		client->field = arena->cvs[ship->group].field+1;
+		UpdateIngameClients(0);
+		SendArenaRules(client);
+		WB3SendGruntConfig(client);
+		WB3ArenaConfig2(client);
 		WB3SendAcks(client);
 		SendRPS(client);
-		client->field = 1;
+		//client->field = 1;
 		AddRemoveCVScreen(ship, client, FALSE, ntohs(aimount->unk1), aimount->cvnum);
 	}
 	else if(aimount->inout == 2)

@@ -1247,11 +1247,8 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 
 	if (!animate)
 	{
-		i = 0;
-		while (dest->armor.points[part = (rand()%32)] <= 0)
+		for(i = 0; dest->armor.points[part = (rand()%32)] <= 0 || part == PLACE_PILOT; i++)
 		{
-			i++;
-			//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
 			if (i > 150)
 			{
 				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: Infinite loop detected, breaking off\n");
@@ -1339,11 +1336,8 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 	
 	if (!animate)
 	{
-		i = 0;
-		while (dest->armor.points[part = (rand()%32)] <= 0)
+		for(i = 0; dest->armor.points[part = (rand()%32)] <= 0 || part == PLACE_PILOT; i++)
 		{
-			i++;
-			//				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: dest->armor.points[%u] = %d\n", part, dest->armor.points[part]);
 			if (i > 150)
 			{
 				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: Infinite loop detected, breaking off\n");

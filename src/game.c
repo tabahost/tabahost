@@ -11029,7 +11029,8 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 	}
 
 	client->plane = ntohl(reqfly->plane);
-	client->field = ntohl(reqfly->field);
+	if(!client->deck)
+		client->field = ntohl(reqfly->field);
 	client->ord = ntohl(reqfly->ord);
 
 	if (!Cmd_Fly(0, client))

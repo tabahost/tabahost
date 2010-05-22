@@ -906,7 +906,7 @@ void SendCVDots(void)
 
 				for (k = 0; k < maxentities->value; k++)
 				{
-					if ((clients[k].country == 3 || clients[k].country == 1) && clients[k].inuse && !clients[k].drone && clients[k].ready) // && !clients[k].infly)
+					if ((clients[k].country == 3 || clients[k].country == 1) && (clients[k].country == ship->country) && clients[k].inuse && !clients[k].drone && clients[k].ready) // && !clients[k].infly)
 					{
 						if(clients[k].thai) // SendCVDots
 						{				   // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
