@@ -173,7 +173,7 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 
 	// Set main ship always as the CV speed, so other ships can sustain the formation
 	// TODO: convoy speed verification (speed == more damaged)
-	mainShip->Vel.max = 27; // 54 feet per second
+	mainShip->Vel.max = 17; // 34 feet per second
 
 	RunShips_Yaw(mainShip, mainShip);
 	RunShips_Walk(mainShip);
@@ -602,7 +602,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 		ship->Acel.curr = 0;
 		ship->Acel.target = ship->Acel.curr;
 		ship->Acel.min = -2;
-		ship->Acel.max = 4;
+		ship->Acel.max = 3;
 		ship->Yaw.curr = Com_Rad(AngleTo(ship->Position.x, ship->Position.y, ship->Target.x, ship->Target.y));
 		ship->Yaw.target = ship->Yaw.curr;
 		ship->YawVel.curr = 0;
@@ -617,7 +617,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 				ship->plane = SHIP_ENTERPRISE;
 				ship->type = SHIPTYPE_CV;
 				ship->radius = 400; // 800 feet
-				ship->Vel.max = 27; // 54 feet per second
+				ship->Vel.max = 17; // 34 feet per second
 				ship->Vel.min = 0.2;
 				ship->YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;
@@ -626,7 +626,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 				ship->plane = SHIP_CA;
 				ship->type = SHIPTYPE_CA;
 				ship->radius = 165; // 330 feet
-				ship->Vel.max = 31; // 62 feet per second
+				ship->Vel.max = 20; // 40 feet per second
 				ship->Vel.min = 0.2;
 				ship->YawVel.max = 1.3334 * M_PI / 180; // 2.6666º per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;
@@ -635,7 +635,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 				ship->plane = SHIP_DD;
 				ship->type = SHIPTYPE_DD;
 				ship->radius = 165; // 330 feet
-				ship->Vel.max = 31; // 61 feet per second
+				ship->Vel.max = 20; // 40 feet per second
 				ship->Vel.min = 0.2;
 				ship->YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
 				ship->YawVel.min = -ship->YawVel.max;

@@ -334,7 +334,7 @@ void CheckArenaRules(void)
 				}
 				else
 				{
-					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].type, arena->bombs[i].speed, 0, arena->bombs[i].from);
+					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].destz, arena->bombs[i].type, arena->bombs[i].speed, 0, arena->bombs[i].from);
 					arena->bombs[i].id = 0;
 				}
 			}
@@ -6014,7 +6014,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 
 
 				//				PPrintf(client, RADIO_WHITE, "Vx %d Vy %d Vz %d speed %d", x, y, z, speed);
-				AddBomb(ntohs(drop->id), destx, desty, drop->item, speed, time, client->related[i]);
+				AddBomb(ntohs(drop->id), destx, desty, GetHeightAt(destx, desty), drop->item, speed, time, client->related[i]);
 			}
 			PDropItem(buffer, len, client->related[i]);
 		}
@@ -8634,13 +8634,13 @@ int32_t SendCopyright(client_t *client)
 
 	if (client->loginkey)
 	{
-		copyrighta->packetid = htons(Com_WBhton(0x0D00));// htons(0x0D00); // 2007
-		copyrighta->gameversion = htonl(0x4B54B);// 2008 //htonl(0x4B0F4); // 2007
+		copyrighta->packetid = htons(Com_WBhton(0x0D00));
+		copyrighta->gameversion = htonl(0x4BF47); // htonl(0x4B54B);
 	}
 	else
 	{
 		copyrighta->packetid = htons(0x0C00);
-		copyrighta->gameversion = htonl(0x043B55);
+		copyrighta->gameversion = htonl(0x4BF47); // htonl(0x43B55);
 	}
 	copyrighta->nicksize = strlen(client->longnick);
 	if (copyrighta->nicksize)
@@ -8650,9 +8650,9 @@ int32_t SendCopyright(client_t *client)
 	buffer[offset++] = 0x3D;
 
 	if (client->loginkey)
-		memcpy( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved", 61);
+		memcpy( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved", 61); // DO NOT change this line
 	else
-		memcpy( &(buffer[offset]), "Copyright (C) 2001 iEntertainment Network All Rights Reserved", 61);
+		memcpy( &(buffer[offset]), "Copyright (C) 2009 iEntertainment Network All Rights Reserved", 61);
 
 	copyrightb = (copyrightb_t *)(buffer+offset+61);
 	copyrightb->cryptkey = htonl(client->key);
@@ -8665,15 +8665,15 @@ int32_t SendCopyright(client_t *client)
 	{
 		buffer[offset++] = 0x00;
 		buffer[offset++] = 0x04;
-		buffer[offset++] = 0xB5;
-		buffer[offset] = 0x4B;
+		buffer[offset++] = 0xBF;
+		buffer[offset] = 0x47;
 	}
 	else // gameversion
 	{
 		buffer[offset++] = 0x00;
 		buffer[offset++] = 0x04;
-		buffer[offset++] = 0x3B;
-		buffer[offset] = 0x55;
+		buffer[offset++] = 0xBF;
+		buffer[offset] = 0x47;
 	}
 
 	return SendPacket(buffer, 78+copyrighta->nicksize+copyrightb->mapnamesize, client);
@@ -11649,6 +11649,7 @@ double CalcDamage(u_int32_t mass, u_int16_t vel)
 void Kamikase(client_t *client)
 {
 	int16_t i;
+	int32_t destx, desty;
 
 	// don't allow TK clients to make kamikase attacks
 	if (client->tkstatus)
@@ -11661,7 +11662,9 @@ void Kamikase(client_t *client)
 		if (i < 100) // supposed to made a kamikase
 		{
 			PPrintf(client, RADIO_YELLOW, "You made a Kamikase hit!");
-			AddBomb(0x01F9, client->posxy[0][0] + (client->speedxyz[0][0] / 2), client->posxy[1][0] + (client->speedxyz[1][0] / 2), 85/*800Kg*/, client->speedxyz[2][0], 0, client);
+			destx = client->posxy[0][0] + (client->speedxyz[0][0] / 2);
+			desty = client->posxy[1][0] + (client->speedxyz[1][0] / 2);
+			AddBomb(0x01F9, destx, desty, GetHeightAt(destx, desty), 85/*800Kg*/, client->speedxyz[2][0], 0, client);
 		}
 	}
 }
