@@ -2289,7 +2289,9 @@ void	SendOttoParams(client_t *client);
 void	SendOttoParams2(client_t *client);
 void	SendLastConfig(client_t *client);
 void	AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove);
+void	AddRemoveCVScreen(ship_t *ship, client_t *client, u_int8_t remove, u_int8_t unk1, u_int8_t cvnum);
 void	SendScreenUpdates(client_t *client);
+void	SendDeckUpdates(client_t *client);
 int		CanHear(client_t *client1, client_t *client2, u_int32_t msgto);
 void	SendArenaRules(client_t *client);
 void	WB3SendGruntConfig(client_t *client);
@@ -2325,6 +2327,7 @@ u_int32_t GetFactoryReupTime(u_int8_t country);
 u_int32_t GetRPSLag(u_int8_t country);
 
 //arena.c
+building_t	*GetBuilding(u_int16_t id);
 int32_t	GetFieldRadius(u_int8_t fieldtype);
 char	*GetFieldType(u_int8_t type);
 char	*GetBuildingType(u_int16_t type);

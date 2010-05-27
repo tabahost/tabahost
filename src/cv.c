@@ -137,7 +137,6 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 	u_int8_t i;
 	ship_t *mainShip = NULL;
 	ship_t *ship = NULL;
-	client_t *near = NULL;
 
 	mainShip = MainShipTarget(group);
 	if(!mainShip)

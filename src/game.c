@@ -5017,7 +5017,6 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 {
 	u_int8_t i;
-	planeposition_t *plane;
 	wb3planeposition_t *wb3plane;
 	planeposition2_t *plane2;
 	int32_t field;
@@ -5584,7 +5583,7 @@ double ClientG(client_t *client)
 
 void PChutePos(u_int8_t *buffer, client_t *client)
 {
-	u_int8_t i, j, num;
+	u_int8_t i;
 	chutepos_t *chute;
 	u_int32_t basetimer;
 
@@ -9260,7 +9259,6 @@ void SendOttoParams2(client_t *client)
 void SendLastConfig(client_t *client)
 {
 	u_int8_t buffer[34];
-	lastconfig_t *lastconfig;
 	wb3lastconfig_t *wb3lastconfig;
 
 	memset(buffer, 0, sizeof(buffer));
@@ -9370,7 +9368,6 @@ void SendScreenUpdates(client_t *client)
 	u_int8_t buffer[MAX_SCREENBUF];
 	u_int8_t i, j;
 	updateplane_t *updateplane;
-	updateplane2_t *updateplane2;
 	wb3updateplane2_t *wb3updateplane2;
 	char file[128];
 	FILE *fp= NULL;
@@ -9564,7 +9561,6 @@ void SendArenaRules(client_t *client)
 	u_int8_t buffer[83];
 	u_int8_t buffersize;
 	u_int32_t flags = 0;
-	arenarules_t *arenarules;
 	wb3arenarules_t *wb3arenarules;
 
 	memset(buffer, 0, sizeof(buffer));

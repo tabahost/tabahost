@@ -459,7 +459,6 @@ void SaveArenaStatus(char *filename, client_t *client)
 {
 	u_int16_t i, j, k, group;
 	char file[128];
-	ship_t *ship;
 	FILE *fp;
 
 	strcpy(file, filename);
@@ -877,7 +876,7 @@ void SendMapDots(void)
 
 void SendCVDots(void)
 {
-	u_int8_t i, j, k, country;
+	u_int8_t i, j, k;
 	ship_t *ship;
 	wb3allaiplanesupdate_t *cvdot;
 	u_int8_t buffer[30];
@@ -3220,7 +3219,6 @@ void ChangeArena(char *map, client_t *client)
 {
 	char file[256];
 	int16_t i;
-	u_int8_t j;
 	FILE *fp;
 
 	snprintf(file, sizeof(file), "./arenas/%s/config.cfg", map);

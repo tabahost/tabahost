@@ -2005,6 +2005,8 @@ ship_t *GetShipByNum(u_int8_t cvnum)
 			j++;
 		}
 	}
+
+	return NULL;
 }
 
 /**
@@ -2015,10 +2017,8 @@ ship_t *GetShipByNum(u_int8_t cvnum)
 
 void WB3AiMount(u_int8_t *buffer, client_t *client)
 {
-	u_int8_t i, j;
 	wb3aimount_t *aimount;
 	ship_t *ship;
-	char field[8];
 
 	aimount = (wb3aimount_t *) buffer;
 

@@ -995,53 +995,6 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			rules |= FLAG_ENABLEOTTOS;
 	}
 
-	if (!wb3->value)
-	{
-		if (client->attached)
-		{
-			fly->fuel = htonl(50);
-		}
-		else
-		{
-			if (IsFighter(client))
-			{
-				if (arena->fields[client->field - 1].type == FIELD_CV || arena->fields[client->field - 1].type == FIELD_CARGO || arena->fields[client->field - 1].type == FIELD_DD
-						|| arena->fields[client->field - 1].type == FIELD_SUBMARINE)
-				{
-					i = 80;
-				}
-				else
-				{
-					for (i = 0, j = 0; i < MAX_BUILDINGS; i++)
-					{
-						if (!arena->fields[client->field - 1].buildings[i].field)
-							break;
-
-						if (arena->fields[client->field - 1].buildings[i].type == BUILD_FUEL && !arena->fields[client->field - 1].buildings[i].status)
-							j++;
-					}
-
-					i = (30 * j) + 30;
-				}
-
-				if ((u_int8_t)client->fuel <= i || (u_int8_t)client->attr == 1)
-				{
-					fly->fuel = htonl(client->fuel);
-				}
-				else
-				{
-					PPrintf(client, RADIO_DARKGREEN, "Fuel limited to %u%%", i);
-
-					fly->fuel = htonl(i);
-				}
-			}
-			else
-			{
-				fly->fuel = htonl(client->fuel);
-			}
-		}
-	}
-
 	if (client->attached)
 	{
 		if (client->attached->drone & (DRONE_HMACK | DRONE_HTANK))
@@ -1384,12 +1337,12 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 
 					if(arena->fields[field].country == COUNTRY_RED) // Gold reset
 					{
-						snprintf(buffer, sizeof(buffer), "%d", resetsred->value + 1);
+						snprintf(buffer, sizeof(buffer), "%d", (int16_t)resetsred->value + 1);
 						Var_Set("resetsred", buffer);
 					}
 					else // Red reset
 					{
-						snprintf(buffer, sizeof(buffer), "%d", resetsgold->value + 1);
+						snprintf(buffer, sizeof(buffer), "%d", (int16_t)resetsgold->value + 1);
 						Var_Set("resetsgold", buffer);
 					}
 

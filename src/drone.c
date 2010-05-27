@@ -1308,11 +1308,9 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 {
 	static double pspeed = 3170;
 	u_int8_t i, buffer[35];
-	int8_t j;
-	int16_t velx, vely, velz, part;
+	int16_t velx, vely, velz;
 	int32_t destx, desty, destz;
 	wb3delayedfuse_t *flak;
-	double sdamage;
 
 	destx = dest->posxy[0][0];
 	desty = dest->posxy[1][0];
@@ -1616,7 +1614,6 @@ void SendDronePos(client_t *drone, client_t *client)
 {
 	u_int8_t buffer[46];
 	wb3planeposition_t *wb3pos;
-	planeposition_t *pos;
 
 	memset(buffer, 0, sizeof(buffer));
 
@@ -1905,7 +1902,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 									if (k > 150)
 									{
 										Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: HitStructsNear() Infinite loop detected, breaking off\n");
-										return;
+										return 0;
 									}
 								}
 
