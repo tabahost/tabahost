@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 	u_int32_t clisize;
 #ifdef _WIN32
 	int32_t err;
-#endif	
+#endif
 	u_int8_t sync;
 	u_long ioctlv;
 	/*	u_int32_t time, oldtime;*/
@@ -511,7 +511,7 @@ void RunFrame(void)
 							UpdateClientFile(&clients[i]);
 							Com_Printf(VERBOSE_WARNING, "%s ProcessClient() returned -1\n", clients[i].longnick);
 						}
-							
+
 						RemoveClient(&clients[i]);
 					}
 				}
@@ -617,7 +617,7 @@ void ExitServer(int status)
 
 	Lua_TestLua();
 	Lua_Close();
-	
+
 	Sys_SQL_Close();
 
 	Com_Printf(VERBOSE_ALWAYS, "Closing server socket\n"); /*********/
@@ -674,7 +674,7 @@ void ExitServer(int status)
 
 	Com_Printf(VERBOSE_ALWAYS, "Closing opened files\n"); /*********/
 	Com_Printf(VERBOSE_ALWAYS, "Exiting Server\n");
-	
+
 	for(i = 0; i < MAX_LOGFILE; i++)
 	{
 		if(logfile[i])

@@ -582,14 +582,14 @@ int ProcessClient(client_t *client)
 								if(!nearplane->drone)
 									PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
 								Com_Printf(VERBOSE_ALWAYS, "%s collided emulated with %s\n", client, nearplane->longnick);
-								
-								
+
+
 								PPrintf(client, RADIO_DARKGREEN, "%s collided with you!!!", nearplane->longnick);
 								Com_Printf(VERBOSE_ALWAYS, "%s collided emulated with %s\n", nearplane->longnick, client);
 
 								client->damaged = 1;
 								nearplane->damaged = 1;
-								
+
 								if(rand()%2)
 								{
 									SendForceStatus(STATUS_LWING, nearplane->status_status, nearplane); // lwing
@@ -1389,7 +1389,7 @@ int PPrintf(client_t *client, u_int16_t radio, char *fmt, ...)
 			radiomessage = (radiomessage_t *) (buffer);
 
 			radiomessage->packetid = htons(Com_WBhton(0x1200));
-			
+
 			if(radio < 1000)
 			{
 				radiomessage->msgto = htonl(radio);
@@ -1922,7 +1922,7 @@ void ForceEndFlight(u_int8_t remdron, client_t *client)
 	buffer[1] = 0x0A;
 	buffer[3] = ENDFLIGHT_LANDED;
 	buffer[5] = client->field;
-	
+
 	snprintf(field, sizeof(field), "f%d", client->field);
 
 	SendPacket(buffer, sizeof(buffer), client);
@@ -2023,7 +2023,7 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 	aimount = (wb3aimount_t *) buffer;
 
 	PPrintf(client, RADIO_YELLOW, "unk1: %d cvnum: %d inout: %d", ntohs(aimount->unk1)/*cvdot->unk2*/, aimount->cvnum, aimount->inout);
-	
+
 	ship = GetShipByNum(aimount->cvnum);
 
 	if(!ship || !ship->drone)
@@ -2101,7 +2101,7 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 		}
 
 		strcpy(client->skin, ps);
-		
+
 		for (i = 0; i < maxentities->value; i++)
 		{
 			if (clients[i].inuse && !clients[i].drone)
@@ -2125,7 +2125,7 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 	{
 		memset(client->skin, 0, sizeof(client->skin));
 	}
-	
+
 	Com_Printf(VERBOSE_DEBUG, "%s skin set to \"%s\"\n", client->longnick, client->skin);
 }
 
@@ -2165,24 +2165,24 @@ void WB3OverrideSkin(u_int8_t slot, client_t *client)
 	wb3overrideskin_t *overrideskin;
 	u_int8_t size;
 	u_int8_t buffer[256];
-	
+
 	memset(buffer, 0, sizeof(buffer));
 
 	overrideskin = (wb3overrideskin_t *) buffer;
-	
+
 	if(client->visible[slot].client)
 	{
 		size = strlen(client->visible[slot].client->skin);
-		
+
 		if(size && size < 64)
 		{
 			overrideskin->packetid = htons(Com_WBhton(0x002D));
 			overrideskin->slot = slot;
 			overrideskin->msgsize = size;
 			memcpy(&(overrideskin->msg), client->visible[slot].client->skin, size);
-	
+
 			Com_Printf(VERBOSE_DEBUG, "%s[%d] sent skin to %s \"%s\"\n", client->visible[slot].client->longnick, slot, client->longnick, client->visible[slot].client->skin);
-			
+
 			SendPacket(buffer, size + 4, client);
 		}
 	}

@@ -1660,7 +1660,7 @@ void AddBomb(u_int16_t id, int32_t destx, int32_t desty, int32_t destz, u_int8_t
 				arena->bombs[i].id = id;
 				arena->bombs[i].destx = destx;
 				arena->bombs[i].desty = desty;
-				arena->bombs[i].desty = destz;
+				arena->bombs[i].destz = destz;
 				arena->bombs[i].type = type;
 				arena->bombs[i].speed = speed;
 				arena->bombs[i].timer = timer;

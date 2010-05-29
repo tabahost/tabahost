@@ -1272,7 +1272,7 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 				Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
 			}
 		}
-		
+
 		SendPings(1, 143, dest);
 	}
 
@@ -1333,7 +1333,7 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 	velz = (double)(destz - source->posalt[0]) * (pspeed / (double)dist);
 
 	AddBomb(0x01F9, destx, desty, destz, 146/*Flak*/, 1500, ((destz - source->posalt[0])*100/velz) /*timer*/, source);
-	
+
 	flak->packetid = htons(Com_WBhton(0x1917));
 	flak->item = 146;
 	flak->id = htons(0x0800);
@@ -1463,16 +1463,34 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 			}
 		}
 		else if (client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
-			angle = Com_Deg(asin((GRAVITY * dist) / Com_Pow(MORTAR, 2)) / 2);
+			angle = 90.0 - Com_Deg(asin((GRAVITY * dist) / Com_Pow(MORTAR, 2)) / 2);
 		else
-			// CV
-			angle = Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2); // CV, TANKS fire
+		{
+			// CV, TANKS fire
+//			if((GetHeightAt(destx, desty) - GetHeightAt(origx, origy)) < 200)
+//			{
+				// knock down fire
+				angle = Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2);
+//			}
+//			else
+//			{
+				// smash fire
+//				angle = 90.0 - Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2);
+//			}
+		}
 
-		//variable velz contains velxy value
+/*
+Desnivel:
+
+Ttotal = (V + sqrt(V^2 - 2 * G * H))/G
+
+*/
+
+		//variable velz contains horizontal (XY) value
 		if (client && (client->drone & DRONE_KATY))
 			velz = 70 * cos(Com_Rad(angle));
 		else if (client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
-			velz = MORTAR * cos(Com_Rad(90 - angle));
+			velz = MORTAR * cos(Com_Rad(angle));
 		else // CV
 		{
 			velz = 1500 * cos(Com_Rad(angle)); // CV, TANKS fire
@@ -1481,11 +1499,11 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 		velx = (double)(destx - origx) * velz / dist;
 		vely = (double)(desty - origy) * velz / dist;
 
-		//
+		//variable velz contains vertical (Z) value
 		if (client && (client->drone & DRONE_KATY))
 			velz = 70 * sin(Com_Rad(angle));
 		else if (client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
-			velz = MORTAR * sin(Com_Rad(90 - angle));
+			velz = MORTAR * sin(Com_Rad(angle));
 		else // CV
 		{
 			velz = 1500 * sin(Com_Rad(angle)); // CV, TANKS fire
@@ -1686,29 +1704,29 @@ void SendXBombs(client_t *drone)
 
 u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_t speed, u_int8_t nuke, client_t *client)
 {
-	int32_t a, b;
+	int32_t a, b, radius;
 	u_int16_t c;
 	u_int16_t i, j, k, field;
 	u_int8_t city, damaged;
 	munition_t *munition, *max, *min;
-	int16_t radius, part;
+	int16_t part;
 	u_int16_t fieldradius;
 	int8_t killer = 0;
 	u_int8_t buffer[7];
 	double sdamage;
 	wb3tonnage_t *wb3tonnage;
-	
+
 	wb3tonnage = (wb3tonnage_t *)buffer;
-	
+
 	if (!setjmp(debug_buffer))
 	{
 		if(client && !client->inuse) // player removed
 		{
 			client = NULL;
 		}
-	
+
 		munition = GetMunition(type);
-	
+
 		if (!munition)
 		{
 			Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", type, client ? client->plane : 0);
@@ -1722,16 +1740,22 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 		{
 			Com_Printf(VERBOSE_WARNING, "HitStructsNear(): min->he == max->he\n");
 			radius = 0;
-		} 
+		}
+		else if (munition->he < min->he)
+		{
+			radius = 0;
+		}
 		else
+		{
 			radius = (munition->he - min->he) * (MAX_BOMBRADIUS - MIN_BOMBRADIUS) / (max->he - min->he);
+		}
 
 		radius += MIN_BOMBRADIUS;
-	
+
 		if (!nuke)
 			if (radius > MAX_BOMBRADIUS)
 				radius = MAX_BOMBRADIUS;
-	
+
 		if (gunstats->value > 1 && client->gunstat)
 			PPrintf(client, RADIO_RED, "Radius %d", radius);
 
@@ -1742,7 +1766,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 	{
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
-	
+
 	if (!setjmp(debug_buffer))
 	{
 		for (field = 0; field < k; field++)
@@ -1763,10 +1787,10 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 			if ((a >= (-1 * fieldradius) && a <= fieldradius) && (b >= (-1 * fieldradius) && b <= fieldradius))
 			{
 				c = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2));
-				
+
 				if (c < fieldradius)
 				{
-					if((arena->fields[field].posxyz[2] - z) < radius)
+					if((GetHeightAt(arena->fields[field].posxyz[0], arena->fields[field].posxyz[1]) - z) < (2*radius))
 					{
 						if (field < fields->value)
 						{
@@ -1821,7 +1845,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 						else // destroying cities
 						{
 							city = field - fields->value;
-						
+
 							for (i = 0; i < MAX_BUILDINGS; i++)
 							{
 								if (!arena->cities[city].buildings[i].field)
@@ -1836,7 +1860,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 									{
 										if (gunstats->value > 1 && client->gunstat)
 											PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->cities[city].buildings[i].type), munition->he);
-						
+
 										Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->cities[city].buildings[i].country) ? "friendly " : "",
 												GetBuildingType(arena->cities[city].buildings[i].type), munition->abbrev);
 										if (client)
@@ -1848,7 +1872,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 											Com_LogDescription(EVENT_DESC_FIELD, arena->cities[city].buildings[i].field, NULL);
 											Com_LogDescription(EVENT_DESC_AMMO, type, NULL);
 										}
-										
+
 										if (!setjmp(debug_buffer))
 										{
 											AddBuildingDamage(&arena->cities[city].buildings[i], munition->he, munition->ap, client);
@@ -1863,7 +1887,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 							}
 						}
 					}
-					
+
 					break;
 				}
 			}
@@ -1883,13 +1907,13 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 				if (clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
 					radius = 50;
 				else
-					radius = 180;
-	
+					radius = 200;
+
 				a = x - clients[i].posxy[0][0];
 				b = y - clients[i].posxy[1][0];
 				c = z - clients[i].posalt[0];
 
-				if (a > -radius && a < radius && b > -radius && b < radius && c > -radius && c < radius)
+				if (a > (-1*radius) && a < radius && b > (-1*radius) && b < radius && c > (-1*radius) && c < radius)
 				{
 					if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2) + Com_Pow(c, 2)) < radius)
 					{
@@ -1908,7 +1932,9 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 
 								SendPings(1, type, &clients[i]);
 
-								AddPlaneDamage(part, munition->he, munition->ap, NULL, NULL, &clients[i]);
+								AddPlaneDamage(part, munition->he, 0, NULL, NULL, &clients[i]);
+
+								PPrintf(&clients[i], RADIO_YELLOW, "You got hit by %s's flak", client?client->longnick:"-HOST-");
 
 								killer = AddKiller(&clients[i], client);
 
@@ -1940,7 +1966,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 	{
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
-	
+
 	return j;
 }
 

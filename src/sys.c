@@ -141,7 +141,7 @@ void Sys_Init(void)
 	signal(SIGILL, Sys_SigHandler); /* illegal instruction. (Bug in the code generator) */
 	signal(SIGTERM, Sys_SigHandler); /* termination signal from kill */
 	signal(SIGINT, Sys_SigHandler); /* Interrupt, normally Ctrl-C */
-	
+
 	for(i = 0; i < MAX_LOGFILE; i++)
 	{
 		logfile[i] = NULL;
@@ -606,7 +606,7 @@ void Sys_Printfile(char *file)
  }
  else
  {
- Com_Printf(VERBOSE_WARNING, "UNNAMED: Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));						
+ Com_Printf(VERBOSE_WARNING, "UNNAMED: Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
  }
  
  mysql_free_result(my_result);
@@ -616,7 +616,7 @@ void Sys_Printfile(char *file)
  else
  {
  Com_Printf(VERBOSE_WARNING, "UNNAMED: my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
- }				
+ }
  }
  else
  {

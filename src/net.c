@@ -411,7 +411,7 @@ int GetPacket(client_t *client)
 					return 0;
 				}
 			} //
-			
+
 			return n;
 		}
 		else

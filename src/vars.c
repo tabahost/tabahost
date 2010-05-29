@@ -354,7 +354,7 @@ void InitVars(void)
 	resetsred = Var_Get("resetsred", "0", "0", "9999", "Number of Red resets", VAR_ARCHIVE | VAR_ADMIN);
 	resetsgold = Var_Get("resetsgold", "0", "0", "9999", "Number of Gold resets", VAR_ARCHIVE | VAR_ADMIN);
 	respawncvs = Var_Get("respawncvs", "1", "0", "1", "Set if after killed, CV will respawn", VAR_ARCHIVE);
-	rps = Var_Get("rps", "60", "0.1", "120.0", "Set RPS update rate", VAR_ARCHIVE);
+	rps = Var_Get("rps", "60", "0", "120.0", "Set RPS update rate", VAR_ARCHIVE);
 	server_speeds = Var_Get("server_speeds", "0", "0.1", "5", "Enable print server speeds (value is a frequency multiplier)", VAR_ARCHIVE | VAR_ADMIN);
 	skins = Var_Get("skins", "0", "0", "1", "Enable online skins", VAR_ADMIN);
 	spawnred = Var_Get("spawnred", "0", "0", "150", "Set red's spawn field", VAR_ARCHIVE);

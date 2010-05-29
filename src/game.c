@@ -1135,7 +1135,7 @@ void CheckArenaRules(void)
 				if (!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
 				{
 					j = dist = 0;
-					
+
 					// check nearest CV
 					for(k = 0; k < cvs->value; k++)
 					{
@@ -7229,12 +7229,18 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		return 0;
 	}
 
+	if(client->armor.apstop[place] < 0)
+	{
+		Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(apstop) < 0 place %d plane %d\n", place, client->plane);
+		return 0;
+	}
+
 	if (!setjmp(debug_buffer))
 	{
 		apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place] : ap;
 		if(apabsorb < 0)
 		{
-			Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(apabsorb) < 0 at line %u\n", __LINE__);
+			Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(apabsorb) < 0 hitpoints %d apstop %d, place %u at line %u\n", client->armor.points[place], client->armor.apstop[place], place, __LINE__);
 			apabsorb = 0;
 		}
 		dmgprobe = he + apabsorb;

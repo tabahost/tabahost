@@ -239,7 +239,7 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 				// FIXME MySQL, sleep() for windows
 #ifdef  _WIN32
 				sleep(140);
-#else			
+#else
 				usleep(140000);
 #endif
 			}
@@ -528,7 +528,7 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 //			rpsreplace = (u_int32_t)(rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000));
 //			sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace/100));
 //		}
-		
+
 		if (rps->value && strlen(message) && !arcade->value)
 		{
 			if(arena->fields[client->field - 1].rps_custom_rate[client->plane])
@@ -1034,7 +1034,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	}
 
 	strcpy(client->skin, CreateSkin(client, 1));
-	
+
 	wb3fly->country = htonl(client->country);
 	if(client->deck)
 		wb3fly->field = 0;
@@ -1275,7 +1275,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 		{
 			arena->fields[field].ctf = country;
 			arena->fields[field].ctfcount = arena->frame;
-			
+
 			BPrintf(RADIO_YELLOW, "System: FIELDF%d has been captured by the %s", field+1, GetCountry(country));
 
 			for (/*j = */i = 0; i < MAX_CITYFIELD; i++) // Capture field and it captures the cities
@@ -1363,7 +1363,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 
 					for (i = 0; i < maxentities->value; i++)
 					{
-						
+
 						if (clients[i].inuse)
 						{
 							if(ctf->value)
@@ -1417,7 +1417,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 				SendPacket(buffer, sizeof(buffer), &clients[i]);
 			}
 		}
-		
+
 		SendFieldStatus(field, NULL);
 	}
 
@@ -2340,7 +2340,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		else
 		{
 			fprintf(fp, "FIELD   SIDE    TYPE   STATUS   UP   PARAS");
-			
+
 			if(!oldcapt->value)
 			{
 				fprintf(fp, "   ToT   TTC\n-------------------------------------------------------\n");
@@ -2365,9 +2365,9 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				{
 					fprintf(fp, "%8s", arena->fields[i].closed ? "Closed" : "Open");
 				}
-				
+
 				build_total = build_alive = 0;
-				
+
 				for (j = 0; j < MAX_BUILDINGS; j++)
 				{
 					if (!arena->fields[i].buildings[j].field)
@@ -2392,7 +2392,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				{
 					fprintf(fp, "\n");
 				}
-				
+
 //				if (status)
 //				{
 //					fprintf(fp, "ABLE TO CAPTURE: %s\n", arena->fields[field].abletocapture ? "Yes" : "No");
@@ -2420,7 +2420,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	status = arena->fields[field].closed;
 
 	build_total = build_alive = 0;
-	
+
 	for (i = 0; i < MAX_BUILDINGS; i++)
 	{
 		if (!arena->fields[field].buildings[i].field)
@@ -2430,7 +2430,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		{
 			if(!arena->fields[field].buildings[i].status)
 				build_alive++;
-			
+
 			build_total++;
 		}
 	}
@@ -2438,7 +2438,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	if (!client || client->infly)
 	{
 		PPrintf(client, RADIO_YELLOW, "Field F%d: Country: %s, Type: %s, Status: %s", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
-		
+
 		if(!oldcapt->value)
 		{
 			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras, ToT: %.2f, TTC: %.2f", (double)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type), arena->fields[field].tonnage, GetTonnageToClose(field+1));
@@ -2462,7 +2462,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					reup = arena->fields[field].buildings[i].timer;
 				}
 			}
-			
+
 			if(!oldcapt->value)
 			{
 				c_cities = totalcities = 0;
@@ -2475,7 +2475,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 						{
 							c_cities++;
 						}
-						
+
 						totalcities++;
 					}
 				}
@@ -2483,7 +2483,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				tonnage_recover = (1.0 + (((double)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(field+1) / (24.0 * rebuildtime->value / 9.0);
 
 				treup = ((arena->fields[field].tonnage - GetTonnageToClose(field+1)) * 6000) / tonnage_recover;
-			
+
 				if(treup < reup)
 				{
 					if(!client || client->attr)
@@ -3819,9 +3819,9 @@ void Cmd_Clear(client_t *client)
 
 #ifdef  _WIN32
 	sleep(140);
-#else			
+#else
 	usleep(140000);
-#endif	
+#endif
 
 	mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 }
@@ -3995,9 +3995,9 @@ void Cmd_Jsquad(client_t *client)
 
 #ifdef  _WIN32
 				sleep(140);
-#else			
+#else
 				usleep(140000);
-#endif								
+#endif
 				mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 			}
 			else
@@ -4341,7 +4341,7 @@ void Cmd_Disband(client_t *client)
 			Com_Printf(VERBOSE_WARNING, "Cmd_Disband(delete): couldn't query DELETE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
 
-		// clear leader ids					
+		// clear leader ids
 		sprintf(my_query, "UPDATE players SET squad_owner='0', squad_flag='0' WHERE id ='%u'", client->id);
 
 		if (!d_mysql_query(&my_sock, my_query))
@@ -4739,7 +4739,7 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 	/*	if(notanks->value)
 	 {
 	 PPrintf(client, RADIO_YELLOW, "You're not allowed to use this command");
-	 return;		
+	 return;
 	 }
 	 */
 
@@ -5619,7 +5619,7 @@ void Cmd_Restore(u_int8_t field, client_t *client)
 
 	arena->fields[field - 1].tonnage = 0;
 	arena->fields[field - 1].paras = 0;
-	
+
 	for (i = 0; i < MAX_BUILDINGS; i++)
 	{
 		if (arena->fields[field - 1].buildings[i].field)
@@ -5658,7 +5658,7 @@ void Cmd_Destroy(u_int8_t field, int32_t time, client_t *client)
 	{
 		time = 0;
 	}
-	
+
 	for (i = 0; i < MAX_BUILDINGS; i++)
 	{
 		if (arena->fields[field - 1].buildings[i].field)
@@ -5868,7 +5868,7 @@ void Cmd_Flare(client_t *client)
 	drop->unknown1 = htonl(0x20);
 	drop->shortnick = htonl(client->shortnick);
 
-	
+
 	for (i = 0; i < maxentities->value; i++)
 	{
 		if (clients[i].inuse && !clients[i].drone)
@@ -5886,7 +5886,7 @@ void Cmd_Flare(client_t *client)
 			}
 		}
 	}
-	
+
 	SendPacket(buffer, sizeof(buffer), client);
 }
 
@@ -5949,13 +5949,13 @@ void Cmd_CheckBuildings(client_t *client)
 			Com_Printf(VERBOSE_WARNING, "Field %d paras bugged %d\n", i+1, arena->fields[i].paras);
 			arena->fields[i].paras = GetFieldParas(arena->fields[i].type);
 		}
-		
+
 		if(arena->fields[i].tonnage > (GetTonnageToClose(i+1) * 2.4))
 		{
 			Com_Printf(VERBOSE_WARNING, "Field %d tonnage bugged %.3f/%.3f\n", i+1, arena->fields[i].tonnage, (GetTonnageToClose(i+1) * 2.4));
 			arena->fields[i].tonnage = (GetTonnageToClose(i+1) * 2.4);
 		}
-			
+
 		for (j = 0; j < MAX_BUILDINGS; j++)
 		{
 			if (arena->fields[i].buildings[j].field)

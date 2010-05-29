@@ -157,7 +157,7 @@ void RunShips(u_int8_t group, u_int8_t formation) // Call every 500ms
 
 		arena->cvs[group].prepared = 1;
 	}
-	
+
 	// PLACE_ENGINE1
 	// PLACE_REARFUSE | PLACE_CENTERFUSE
 	// PLACE_TAILGUN
@@ -287,7 +287,7 @@ ship_t *MainShip(u_int8_t group)
 		Com_Printf(VERBOSE_WARNING, "MainShip(): No ship in group %d\n", group);
 		return NULL;
 	}
-	
+
 	// locate the main ship (first ship of the biggest type)
 	for(ship = arena->cvs[group].ships; ship; ship = ship->next)
 	{
@@ -308,7 +308,7 @@ ship_t *MainShip(u_int8_t group)
 			default:
 				Com_Printf(VERBOSE_WARNING, "MainShip(): unknown ship type\n");
 		}
-		
+
 		if(cv)
 			break;
 	}
@@ -348,7 +348,7 @@ ship_t *MainShipTarget(u_int8_t group)
 		// update target waypoint (this may be changed manually or automatically for defensive maneuver)
 		ship->Target.x = arena->cvs[group].wp[arena->cvs[group].wpnum][0];
 		ship->Target.y = arena->cvs[group].wp[arena->cvs[group].wpnum][1];
-		
+
 		// Check waypoint
 		if((abs(ship->Target.y - ship->Position.y) > 70) || (abs(ship->Target.x - ship->Position.x) > 70))
 			return ship;
@@ -606,7 +606,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 		ship->Yaw.target = ship->Yaw.curr;
 		ship->YawVel.curr = 0;
 		ship->YawVel.target = 0;
-		
+
 		switch(plane)
 		{
 			// CV
@@ -656,7 +656,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 			RemoveShip(ship);
 			return NULL;
 		}
-		
+
 		// link the variable at end of queue
 		if(!arena->cvs[group].ships)
 		{

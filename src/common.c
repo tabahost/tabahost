@@ -306,7 +306,7 @@ void Com_Close(int *fd)
 int Com_Recv(int s, u_int8_t *buf, int len)
 {
 	int n;
-	
+
 	if(!s)
 	{
 		ConnError(ENOTSOCK);
@@ -491,7 +491,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 	// save the pointers and length
 	tbuf = buf;
 	tlen = len;
-	
+
 	// if there is something in buffer, send it first
 	if(client->buf_offset)
 	{
@@ -524,7 +524,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 					return -1;
 				}
 			}
-		
+
 			if(!client->wouldblock)
 			{
 				Com_Printf(VERBOSE_WARNING, "Com_Send() %s EWOULDBLOCK %d;%d;%d;%d;%d %d;%d;%d;%d;%d\n",
@@ -542,7 +542,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 
 				Com_PrintLogBuffer(client);
 			}
-			
+
 			client->wouldblock = 1;
 			arena->bufferit = 1;
 			return 0;
@@ -556,7 +556,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 #endif
 		if (server_speeds->value)
 			arena->sent += n;
-		
+
 		Com_RecordLogBuffer(client, buf, n);
 		ConnStatistics(client, n, 0 /*send*/);
 
@@ -564,15 +564,15 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 		{
 			buf += n;
 			len -= n;
-			
+
 			Com_Printf(VERBOSE_WARNING, "%s sent %d offset %d\n", client->longnick, n, client->buf_offset);
-			
+
 				if(client->buf_offset)
 				{
 					// copy unsent bytes to top of the list
 					memcpy(client->buffer, client->buffer+n, len);
 					client->buf_offset = len;
-					
+
 					if(arena->bufferit)
 					{
 						// now copy the rest of data to buffer
@@ -609,7 +609,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 				client->buf_offset = 0;
 				return Com_Send(client, tbuf, tlen);
 			}
-			
+
 			arena->bufferit = 1;
 			return n;
 		}
@@ -1470,7 +1470,7 @@ double Com_Deg(double angle)
 	double degree;
 
 	degree = (angle * 180.0 / M_PI);
-	
+
 	while(degree >= 360.0)
 		degree -= 360.0;
 
