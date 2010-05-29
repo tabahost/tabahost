@@ -1471,6 +1471,8 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 //			{
 				// knock down fire
 				angle = Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2);
+
+				angle += 0.004 * (GetHeightAt(destx, desty) - GetHeightAt(origx, origy));
 //			}
 //			else
 //			{
