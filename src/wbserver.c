@@ -665,6 +665,7 @@ void ExitServer(int status)
 	{
 		free(var_vars->name);
 		free(var_vars->string);
+		free(var_vars->description);
 		var = var_vars->next;
 		free(var_vars);
 		var_vars = var;

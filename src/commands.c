@@ -1337,12 +1337,12 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 
 					if(arena->fields[field].country == COUNTRY_RED) // Gold reset
 					{
-						snprintf(buffer, sizeof(buffer), "%d", (int16_t)resetsred->value + 1);
+						snprintf(buffer, sizeof(buffer), "%.f", resetsred->value + 1);
 						Var_Set("resetsred", buffer);
 					}
 					else // Red reset
 					{
-						snprintf(buffer, sizeof(buffer), "%d", (int16_t)resetsgold->value + 1);
+						snprintf(buffer, sizeof(buffer), "%.f", resetsgold->value + 1);
 						Var_Set("resetsgold", buffer);
 					}
 

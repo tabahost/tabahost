@@ -817,7 +817,7 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 		va_end(argptr);
 
 		time(&ltime);
-		if (logfile_active->value)
+		if (var_vars && logfile_active->value)
 		{
 			if (!logfile[0])
 				logfile[0] = fopen(FILE_CONSOLE, "a+");
