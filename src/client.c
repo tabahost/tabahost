@@ -1155,7 +1155,7 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 		if (debug->value)
 			Com_Printf(VERBOSE_DEBUG, "User %s, Passwd %s\n", user, pwd);
 
-		sprintf(my_query, "SELECT * FROM players LEFT JOIN score_common ON players.id = score_common.player_id WHERE players.loginuser = '%s' and players.password = MD5('%s') AND players.ipaddr = '%s' AND TIMESTAMPDIFF(SECOND, players.lastseen, NOW()) < 1800", user, pwd, client->ip);
+		sprintf(my_query, "SELECT * FROM players LEFT JOIN score_common ON players.id = score_common.player_id WHERE players.loginuser = '%s' and players.password = MD5('%s') AND players.ipaddr = '%s' AND TIMESTAMPDIFF(SECOND, players.lastseen, UTC_TIMESTAMP()) < 1800", user, pwd, client->ip);
 
 		if (!d_mysql_query(&my_sock, my_query)) // query succeeded
 		{

@@ -1068,129 +1068,185 @@ void CheckArenaRules(void)
 		if (!(arena->frame % 6000)) // Log CVs position every 60sec
 			LogCVsPosition();
 
-		for (i = 0; i < cvs->value; i++)
+		if (!setjmp(debug_buffer))
 		{
-			near = NULL;
-
-			if(!(arena->frame % 50)) // 500ms
+			for (i = 0; i < cvs->value; i++)
 			{
-				RunShips(i, 0);
+				near = NULL;
 
-				// check if there are enemies around
-				if (arena->cvs[i].ships && arena->cvs[i].ships->drone)
+				if (!setjmp(debug_buffer))
 				{
-					near = NearPlane(arena->cvs[i].ships->drone, arena->cvs[i].country, 15000);
-
-					if(near)
+					if(!(arena->frame % 50)) // 500ms
 					{
-						posx = DistBetween(arena->cvs[i].ships->Position.x,arena->cvs[i].ships->Position.y, 0, near->posxy[0][0], near->posxy[1][0], near->posalt[0], -1);
+						RunShips(i, 0);
 
-						if (!arena->cvs[i].threatened && !(arena->frame % 600))
+						// check if there are enemies around
+						if (arena->cvs[i].ships && arena->cvs[i].ships->drone)
 						{
-							ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
-						}
-					}
-				}
-			}
+							near = NearPlane(arena->cvs[i].ships->drone, arena->cvs[i].country, 15000);
 
-			// CV Attack
-			for(ship = arena->cvs[i].ships; ship; ship = ship->next)
-			{
-				if(near && posx > 0)
-				{
-					speed = sqrt(near->speedxyz[0][0]*near->speedxyz[0][0]+near->speedxyz[1][0]*near->speedxyz[1][0]+near->speedxyz[2][0]*near->speedxyz[2][0]);
-
-					if(posx <= 4000)
-					{
-						// % of hit
-						j = (int16_t)(-0.003 * (float)posx + 11.0);
-						if(j < 0)
-							j = 0;
-						j = (int16_t)((float)j * (-0.001 * speed + 1.3));
-						if(j < 0)
-							j = 0;
-
-						if((rand() % 100) < j) // hit
-							FireAck(ship->drone, near, posx, 0);
-						else // fail
-							FireAck(ship->drone, near, posx, 1);
-					}
-					else if(!(arena->frame % 300)) // 3 sec
-					{
-						// % of hit
-						j = (int16_t)(-0.001 * (float)posx + 15.0);
-						if(j < 0)
-							j = 0;
-						j = (int16_t)((float)j * (-0.001 * speed + 1.3));
-						if(j < 0)
-							j = 0;
-
-						if((rand() % 100) < j) // hit
-							FireFlak(ship->drone, near, posx, 0);
-						else // fail
-							FireFlak(ship->drone, near, posx, 1);
-					}
-				}
-
-				if (!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
-				{
-					j = dist = 0;
-
-					// check nearest CV
-					for(k = 0; k < cvs->value; k++)
-					{
-						if(ship->country != arena->cvs[k].country)
-						{
-							posx = DistBetween(ship->Position.x, ship->Position.y, 0, arena->fields[arena->cvs[k].field].posxyz[0], arena->fields[arena->cvs[k].field].posxyz[1], 0, (int32_t)cvrange->value);
-
-							if(posx > 0)
+							if (!setjmp(debug_buffer))
 							{
-								if(!dist || (posx < dist))
+								if(near)
 								{
-									dist = posx;
-									j = arena->cvs[k].field;
+									posx = DistBetween(arena->cvs[i].ships->Position.x,arena->cvs[i].ships->Position.y, 0, near->posxy[0][0], near->posxy[1][0], near->posalt[0], -1);
+
+									if (!arena->cvs[i].threatened && !(arena->frame % 600))
+									{
+										ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
+									}
 								}
+							}
+							else
+							{
+								DebugClient(__FILE__, __LINE__, TRUE, NULL);
 							}
 						}
 					}
+				}
+				else
+				{
+					DebugClient(__FILE__, __LINE__, TRUE, NULL);
+				}
 
-					// check nearest field
-					if(!j)
+				if (!setjmp(debug_buffer))
+				{
+					// CV Attack
+					for(ship = arena->cvs[i].ships; ship; ship = ship->next)
 					{
-						j = NearestField(ship->Position.x, ship->Position.y, ship->country, TRUE, FALSE, &dist);
-					}
-
-					if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cvs[i].field)
-					{
-						if (j < fields->value)
+						if (!setjmp(debug_buffer))
 						{
-							if (!arena->fields[j].closed)
+							if(near && posx > 0)
 							{
-								if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+								speed = sqrt(near->speedxyz[0][0]*near->speedxyz[0][0]+near->speedxyz[1][0]*near->speedxyz[1][0]+near->speedxyz[2][0]*near->speedxyz[2][0]);
+
+								if(posx <= 4000)
 								{
-									ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-									ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+									// % of hit
+									j = (int16_t)(-0.003 * (float)posx + 11.0);
+									if(j < 0)
+										j = 0;
+									j = (int16_t)((float)j * (-0.001 * speed + 1.3));
+									if(j < 0)
+										j = 0;
+
+									if((rand() % 100) < j) // hit
+										FireAck(ship->drone, near, posx, 0);
+									else // fail
+										FireAck(ship->drone, near, posx, 1);
 								}
-								else
-									CVFire(ship, arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
+								else if(!(arena->frame % 300)) // 3 sec
+								{
+									// % of hit
+									j = (int16_t)(-0.001 * (float)posx + 15.0);
+									if(j < 0)
+										j = 0;
+									j = (int16_t)((float)j * (-0.001 * speed + 1.3));
+									if(j < 0)
+										j = 0;
+
+									if((rand() % 100) < j) // hit
+										FireFlak(ship->drone, near, posx, 0);
+									else // fail
+										FireFlak(ship->drone, near, posx, 1);
+								}
 							}
 						}
 						else
 						{
-							if (!arena->cities[j - (int16_t)fields->value].closed)
+							DebugClient(__FILE__, __LINE__, TRUE, NULL);
+						}
+
+						if (!setjmp(debug_buffer))
+						{
+							if (!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
 							{
-								if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+								j = dist = 0;
+
+								if (!setjmp(debug_buffer))
 								{
-									ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
-									ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+									// check nearest CV
+									for(k = 0; k < cvs->value; k++)
+									{
+										if(ship->country != arena->cvs[k].country)
+										{
+											posx = DistBetween(ship->Position.x, ship->Position.y, 0, arena->fields[arena->cvs[k].field].posxyz[0], arena->fields[arena->cvs[k].field].posxyz[1], 0, (int32_t)cvrange->value);
+
+											if(posx > 0)
+											{
+												if(!dist || (posx < dist))
+												{
+													dist = posx;
+													j = arena->cvs[k].field;
+												}
+											}
+										}
+									}
 								}
 								else
-									CVFire(ship, arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1]);
+								{
+									DebugClient(__FILE__, __LINE__, TRUE, NULL);
+								}
+
+								if (!setjmp(debug_buffer))
+								{
+									// check nearest field
+									if(!j)
+									{
+										j = NearestField(ship->Position.x, ship->Position.y, ship->country, TRUE, FALSE, &dist);
+									}
+
+									if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cvs[i].field)
+									{
+										if (j < fields->value)
+										{
+											if (!arena->fields[j].closed)
+											{
+												if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+												{
+													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+												}
+												else
+													CVFire(ship, arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
+											}
+										}
+										else
+										{
+											if (!arena->cities[j - (int16_t)fields->value].closed)
+											{
+												if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+												{
+													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+												}
+												else
+													CVFire(ship, arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1]);
+											}
+										}
+									}
+								}
+								else
+								{
+									DebugClient(__FILE__, __LINE__, TRUE, NULL);
+								}
 							}
+						}
+						else
+						{
+							DebugClient(__FILE__, __LINE__, TRUE, NULL);
 						}
 					}
 				}
+				else
+				{
+					DebugClient(__FILE__, __LINE__, TRUE, NULL);
+				}
 			}
+		}
+		else
+		{
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 	}
 	else
