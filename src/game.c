@@ -4025,7 +4025,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x1D13:
 				if(!setjmp(debug_buffer))
 				{
-					ClientHDSerial(buffer, client);
+					; // ClientHDSerial(buffer, client); TODO New THL
 				}
 				else
 				{
@@ -4122,8 +4122,8 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						}
 					}
 
-					ClientIpaddr(client);
-					CheckTK(client);
+					// ClientIpaddr(client); TODO New THL
+					// CheckTK(client); TODO New THL, make tk check form players table
 
 					sprintf(my_query, "INSERT INTO online_players SET player_id = '%u', country = '%u', login_time = FROM_UNIXTIME(%u)", client->id, client->country, (u_int32_t)time(NULL));
 

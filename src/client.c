@@ -398,11 +398,11 @@ int ProcessClient(client_t *client)
 				}
 */
 
-				if(client->hdserial || wb3->value)
-				{
-					CheckBanned(client);
+				/*if(client->hdserial || wb3->value)
+				{ TODO New THL */
+					// CheckBanned(client); TODO New THL
 					ScoresCreate(client);
-				}
+				//} TODO New THL
 				client->arenafieldsok = 1;
 			}
 
@@ -1155,7 +1155,7 @@ int8_t CheckUserPasswd(client_t *client, u_int8_t *userpass) // userpass is supp
 		if (debug->value)
 			Com_Printf(VERBOSE_DEBUG, "User %s, Passwd %s\n", user, pwd);
 
-		sprintf(my_query, "SELECT * FROM players LEFT JOIN score_common ON players.id = score_common.player_id WHERE players.loginuser = '%s' and players.password = MD5('%s')", user, pwd);
+		sprintf(my_query, "SELECT * FROM players LEFT JOIN score_common ON players.id = score_common.player_id WHERE players.loginuser = '%s' and players.password = MD5('%s') AND players.ipaddr = '%s' AND TIMESTAMPDIFF(SECOND, players.lastseen, NOW()) < 1800", user, pwd, client->ip);
 
 		if (!d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
@@ -1694,9 +1694,9 @@ void UpdateClientFile(client_t *client)
 		return;
 	}
 
-	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', plane_id = '%u', fuel = '%d', ord = '%d', conv = '%d', easymode = '%d', radio = '%d', rank = '%d', lastseen = FROM_UNIXTIME(%u), ipaddr = '%s' WHERE id = '%u' LIMIT 1",
+	sprintf(my_query, "UPDATE players SET countrytime = '%u', country = '%d', plane_id = '%u', fuel = '%d', ord = '%d', conv = '%d', easymode = '%d', radio = '%d', rank = '%d' WHERE id = '%u' LIMIT 1",
 			client->countrytime, client->country, client->plane, client->fuel, client->ord, client->conv, client->easymode, client->radio[0], client->rank, // Elo rating
-			(u_int32_t)time(NULL), client->ip, client->id);
+			client->id);
 
 	if (d_mysql_query(&my_sock, my_query))
 	{
