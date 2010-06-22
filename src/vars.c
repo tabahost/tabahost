@@ -882,10 +882,10 @@ void Var_WriteVariables(char *path, client_t *client)
 u_int8_t UpdateArenaStatus(u_int8_t uptime)
 {
 	u_int8_t i, j;
-	var_t *upvars[51] =
+	var_t *upvars[52] =
 	{ airshowsmoke, blackout, contrail, countrytime, currday, currmonth, curryear, cvcapture, cvdelay, cvradarrange1, cvradarrange3, cvrange, cvs, cvsalvo, cvspeed, dayhours, easymode,
-			emulatecollision, enemyidlim, enemynames, enemyplanes, flakmax, flypenalty, friendlyfire, friendlyidlim, fueldiv, gunstats, iff, katyrange, mapname, midairs, mortars, mview, ottoaccuracy,
-			ottoadjust, ottoburstoff, ottoburston, ottoburstonmax, ottorange, ottoretarget, ottooverrides, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
+			emulatecollision, enemyidlim, enemynames, enemyplanes, flakmax, flypenalty, friendlyfire, friendlyidlim, fueldiv, gunstats, iff, katyrange, mapname, hostname, midairs, mortars, mview,
+			ottoaccuracy, ottoadjust, ottoburstoff, ottoburston, ottoburstonmax, ottorange, ottoretarget, ottooverrides, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
 			tanksrange, timemult, timeout, whitelist }; // TODO: remove paratroopers from DB
 
 	sprintf(my_query, "UPDATE arena_status SET");
