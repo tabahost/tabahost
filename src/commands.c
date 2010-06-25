@@ -1315,7 +1315,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			{
 				for (j = i = 0; i < fields->value; i++)
 				{
-					if (killcvtoreset->value || ((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)))
+					if (killcvtoreset->value || arena->fields[i].type <= FIELD_MAIN) // new rules || (arena->fields[i].type >= FIELD_WB3POST)))
 					{
 						if (arena->fields[i].country == arena->fields[field].country)
 							j++;
