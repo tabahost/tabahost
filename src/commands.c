@@ -1313,19 +1313,26 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			// check end of war (arena reset)
 			if (canreset->value && arena->fields[field].country /* to avoid reset by capt neutrals */)
 			{
-				for (j = i = 0; i < fields->value; i++)
+				for (k = j = i = 0; i < fields->value; i++)
 				{
-					if (killcvtoreset->value || arena->fields[i].type <= FIELD_MAIN) // new rules || (arena->fields[i].type >= FIELD_WB3POST)))
+					if ((killcvtoreset->value && (arena->fields[i].type >= FIELD_CV) && (arena->fields[i].type <= FIELD_SUBMARINE)) ||
+						(arena->fields[i].type <= FIELD_MAIN) ||
+						(arena->fields[i].type >= FIELD_WB3POST))
 					{
 						if (arena->fields[i].country == arena->fields[field].country)
+						{
 							j++;
+
+							if(!(arena->fields[i].type >= FIELD_WB3POST))
+								k++;
+						}
 					}
 
-					if (j > 2)
+					if(j > 2)
 						break;
 				}
 
-				if (j <= 2)
+				if (!j || ((j + k) <= 2))
 				{
 					BPrintf(RADIO_YELLOW, "*********************************");
 					BPrintf(RADIO_YELLOW, "*********    THE WAR    *********");
