@@ -1322,10 +1322,10 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 					{
 						if (arena->fields[i].country == arena->fields[field].country)
 						{
-							j++;
-
 							if(!((arena->fields[i].type >= FIELD_WB3POST) || ((arena->fields[i].type >= FIELD_CARGO) && (arena->fields[i].type <= FIELD_SUBMARINE))))
-								k++;
+								k++; // not airbase
+							else
+								j++; // airbase
 						}
 					}
 
