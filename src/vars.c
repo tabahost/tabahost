@@ -890,7 +890,7 @@ u_int8_t UpdateArenaStatus(u_int8_t uptime)
 
 	sprintf(my_query, "UPDATE arena_status SET");
 
-	for (i = 0, j = 0; i < 49; i++)
+	for (i = 0, j = 0; i < 52; i++)
 	{
 		if (upvars[i]->modified)
 		{
