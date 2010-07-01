@@ -901,7 +901,7 @@ u_int8_t UpdateArenaStatus(u_int8_t uptime)
 
 	if (uptime || j)
 	{
-		sprintf(my_query, "%s uptime = '%ud %.2d:%.2d:%.2d'", my_query, arena->frame/8640000, (arena->frame/360000)%24, (arena->frame/6000)%60, (arena->frame/100)%60);
+		sprintf(my_query, "%s uptime = '%ud %.2d:%.2d:%.2d' watchdog = NOW()", my_query, arena->frame/8640000, (arena->frame/360000)%24, (arena->frame/6000)%60, (arena->frame/100)%60);
 
 		if (d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
