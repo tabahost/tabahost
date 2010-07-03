@@ -388,69 +388,72 @@ void Cmd_Move(char *field, int country, client_t *client)
 	}
 	else // country
 	{
-//		if(!client->arenabuildsok || !SameSquadronOnline(TRUE) /* check if player of same squadron flying */)
-//		{
-			if (!client->arenabuildsok /* change country in login */ || (client->countrytime <= time(NULL)) || client->attr == 1)
+		if (!client->arenabuildsok /* change country in login */ || (client->countrytime <= time(NULL)) || client->attr == 1)
+		{
+			if (((country != 1) && (country != 3)) && client->attr != 1)
 			{
-				if (((country != 1) && (country != 3)) && client->attr != 1)
-				{
-					PPrintf(client, RADIO_YELLOW, "Invalid country");
-					return;
-				}
-
-				for (i = 0; i < maxentities->value; i++) // check for IP/Squadron sharing
-				{
-					if (clients[i].inuse && !clients[i].drone && clients[i].ready && &clients[i] != client)
-					{
-						if (clients[i].country /* already have a country */ && clients[i].country != country && !strcmp(clients[i].ip, client->ip) && !clients[i].thai)
-						{
-							country = clients[i].country;
-							PPrintf(client, RADIO_YELLOW, "Country forced to %s due IP Sharing with %s", GetCountry(country), clients[i].longnick);
-							break;
-						}
-						else if(clients[i].arenabuildsok /*not in login */ && clients[i].country /* already have a country */ &&
-								clients[i].squadron /*already have squadron*/ && clients[i].squadron == client->squadron /* same squadron */)
-						{
-							country = clients[i].country;
-							PPrintf(client, RADIO_YELLOW, "Country forced to %s due Squadron sharing with %s", GetCountry(country), clients[i].longnick);
-							break;
-						}
-					}
-				}
-
-				client->country = country;
-				client->hq = 0;
-				fieldn = FirstFieldCountry(country);
-				if (fieldn < 0)
-				{
-					nothq = 0;
-					client->field = 1;
-					client->hq = 1;
-					fieldn = 0;
-				}
-				else
-					client->field = fieldn+1;
-				BPrintf(RADIO_YELLOW, "%s joined the %s side", client->longnick, GetCountry(country)); // Country changed to %s
-
-				if (client->arenafieldsok && client->arenabuildsok)
-				{
-					if (client->hq)
-						client->countrytime = 0; // give a chance to player change country again if chosen wrong (country with no field)
-					else
-						client->countrytime = time(NULL) + countrytime->value;
-				}
-			}
-			else
-			{
-				PPrintf(client, RADIO_YELLOW, "Can't change country now, wait for %s", Com_TimeSeconds(client->countrytime - time(NULL)));
+				PPrintf(client, RADIO_YELLOW, "Invalid country");
 				return;
 			}
-//		}
-//		else
-//		{
-//			PPrintf(client, RADIO_YELLOW, "Can't change country while there are players from the same squadron flying", Com_TimeSeconds(client->countrytime - time(NULL)));
-//			return;
-//		}
+
+			for (i = 0; i < maxentities->value; i++) // check for IP/Squadron sharing
+			{
+				if (clients[i].inuse && !clients[i].drone && clients[i].ready && &clients[i] != client)
+				{
+					if (clients[i].country /* already have a country */ && clients[i].country != country && !strcmp(clients[i].ip, client->ip) && !clients[i].thai)
+					{
+						country = clients[i].country;
+						PPrintf(client, RADIO_YELLOW, "Country forced to %s due IP Sharing with %s", GetCountry(country), clients[i].longnick);
+						break;
+					}
+					else if(clients[i].arenabuildsok /*not in login */ && clients[i].country /* already have a country */ &&
+							clients[i].squadron /*already have squadron*/ && clients[i].squadron == client->squadron /* same squadron */)
+					{
+						country = clients[i].country;
+						PPrintf(client, RADIO_YELLOW, "Country forced to %s due Squadron sharing with %s", GetCountry(country), clients[i].longnick);
+						break;
+					}
+				}
+			}
+
+			client->country = country;
+			client->hq = 0;
+			fieldn = FirstFieldCountry(country);
+			if (fieldn < 0)
+			{
+				nothq = 0;
+				client->field = 1;
+				client->hq = 1;
+				fieldn = 0;
+			}
+			else
+				client->field = fieldn+1;
+			BPrintf(RADIO_YELLOW, "%s joined the %s side", client->longnick, GetCountry(country)); // Country changed to %s
+
+			if (client->arenafieldsok && client->arenabuildsok)
+			{
+				if (client->hq)
+					client->countrytime = 0; // give a chance to player change country again if chosen wrong (country with no field)
+				else
+					client->countrytime = time(NULL) + countrytime->value;
+			}
+
+			// Update online_players
+
+			sprintf(my_query, "UPDATE online_players SET country = '%u' WHERE player_id = '%u'", client->country, client->id);
+
+			if (d_mysql_query(&my_sock, my_query))
+			{
+				Com_Printf(VERBOSE_WARNING, "Cmd_Move(online_players): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+			}
+
+			UpdateClientFile(client);
+		}
+		else
+		{
+			PPrintf(client, RADIO_YELLOW, "Can't change country now, wait for %s", Com_TimeSeconds(client->countrytime - time(NULL)));
+			return;
+		}
 	}
 
 	move->packetid = htons(Com_WBhton(0x0403));

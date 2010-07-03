@@ -1734,7 +1734,6 @@ void ProcessCommands(char *command, client_t *client)
 					if(Com_Atoi(argv[0]) == 1 || Com_Atoi(argv[0]) == 3 || client->attr) // limit to Red and Gold for normal users
 					{
 						Cmd_Move(NULL, Com_Atoi(argv[0]), client);
-						UpdateClientFile(client);
 					}
 					else
 					{
@@ -8751,6 +8750,8 @@ void UpdateIngameClients(u_int8_t attr)
 	u_int8_t i = 0, j = 0, k = 0;
 	char file[128];
 	FILE *fp;
+
+	// Update ascii file
 
 	if (attr & FLAG_OP)
 	{
