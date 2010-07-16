@@ -1122,33 +1122,47 @@ void CheckArenaRules(void)
 
 								if(posx <= 4000)
 								{
-									// % of hit
-									j = (int16_t)(-0.003 * (float)posx + 11.0);
-									if(j < 0)
-										j = 0;
-									j = (int16_t)((float)j * (-0.001 * speed + 1.3));
-									if(j < 0)
-										j = 0;
+									if (!setjmp(debug_buffer))
+									{
+										// % of hit
+										j = (int16_t)(-0.003 * (float)posx + 11.0);
+										if(j < 0)
+											j = 0;
+										j = (int16_t)((float)j * (-0.001 * speed + 1.3));
+										if(j < 0)
+											j = 0;
 
-									if((rand() % 100) < j) // hit
-										FireAck(ship->drone, near, posx, 0);
-									else // fail
-										FireAck(ship->drone, near, posx, 1);
+										if((rand() % 100) < j) // hit
+											FireAck(ship->drone, near, posx, 0);
+										else // fail
+											FireAck(ship->drone, near, posx, 1);
+									}
+									else
+									{
+										DebugClient(__FILE__, __LINE__, TRUE, NULL);
+									}
 								}
 								else if(!(arena->frame % 300)) // 3 sec
 								{
-									// % of hit
-									j = (int16_t)(-0.001 * (float)posx + 15.0);
-									if(j < 0)
-										j = 0;
-									j = (int16_t)((float)j * (-0.001 * speed + 1.3));
-									if(j < 0)
-										j = 0;
+									if (!setjmp(debug_buffer))
+									{
+										// % of hit
+										j = (int16_t)(-0.001 * (float)posx + 15.0);
+										if(j < 0)
+											j = 0;
+										j = (int16_t)((float)j * (-0.001 * speed + 1.3));
+										if(j < 0)
+											j = 0;
 
-									if((rand() % 100) < j) // hit
-										FireFlak(ship->drone, near, posx, 0);
-									else // fail
-										FireFlak(ship->drone, near, posx, 1);
+										if((rand() % 100) < j) // hit
+											FireFlak(ship->drone, near, posx, 0);
+										else // fail
+											FireFlak(ship->drone, near, posx, 1);
+									}
+									else
+									{
+										DebugClient(__FILE__, __LINE__, TRUE, NULL);
+									}
 								}
 							}
 						}
