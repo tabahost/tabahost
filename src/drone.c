@@ -1312,6 +1312,24 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 	int32_t destx, desty, destz;
 	wb3delayedfuse_t *flak;
 
+	if(!dist)
+	{
+		Com_Printf(VERBOSE_WARNING, "FireFlak(dist) == 0");
+		return;
+	}
+
+	if(!source)
+	{
+		Com_Printf(VERBOSE_WARNING, "FireFlak(source) == NULL");
+		return;
+	}
+
+	if(!dest)
+	{
+		Com_Printf(VERBOSE_WARNING, "FireFlak(dest) == NULL");
+		return;
+	}
+
 	if (!setjmp(debug_buffer))
 	{
 		destx = dest->posxy[0][0];
