@@ -1312,47 +1312,61 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 	int32_t destx, desty, destz;
 	wb3delayedfuse_t *flak;
 
-	destx = dest->posxy[0][0];
-	desty = dest->posxy[1][0];
-	destz = dest->posalt[0];
-
-	memset(buffer, 0, sizeof(buffer));
-
-	flak = (wb3delayedfuse_t *) buffer;
-
-	// dispersion
-	velx = rand()%(dist / 12);
-	destx += (4 * dest->speedxyz[0][0]) + (Com_Pow(-1, rand()%2) * velx);
-	vely = rand()%(dist / 12);
-	desty += (4 * dest->speedxyz[1][0]) + (Com_Pow(-1, rand()%2) * vely);
-	velz = rand()%(dist / 12);
-	destz += (4 * dest->speedxyz[2][0]) + (Com_Pow(-1, rand()%2) * velz);
-
-	velx = (double)(destx - source->posxy[0][0]) * (pspeed / (double)dist);
-	vely = (double)(desty - source->posxy[1][0]) * (pspeed / (double)dist);
-	velz = (double)(destz - source->posalt[0]) * (pspeed / (double)dist);
-
-	AddBomb(0x01F9, destx, desty, destz, 146/*Flak*/, 1500, ((destz - source->posalt[0])*100/velz) /*timer*/, source);
-
-	flak->packetid = htons(Com_WBhton(0x1917));
-	flak->item = 146;
-	flak->id = htons(0x0800);
-	flak->posx = htonl(source->posxy[0][0]+200);
-	flak->posy = htonl(source->posxy[1][0]);
-	flak->alt = htonl(source->posalt[0] + 70);
-	flak->xspeed = htons(velx); // 550
-	flak->yspeed = htons(vely); // 1151  (total 1500)
-	flak->zspeed = htons(velz); // 788
-	flak->unknown1 = htonl(0x60);
-	flak->shortnick = htonl(source->shortnick);
-	flak->fusealt = htonl(destz);
-
-	for (i = 0; i < MAX_SCREEN; i++)
+	if (!setjmp(debug_buffer))
 	{
-		if (source->visible[i].client && !source->visible[i].client->drone)
+		destx = dest->posxy[0][0];
+		desty = dest->posxy[1][0];
+		destz = dest->posalt[0];
+
+		memset(buffer, 0, sizeof(buffer));
+
+		flak = (wb3delayedfuse_t *) buffer;
+
+		// dispersion
+		velx = rand()%(dist / 12);
+		destx += (4 * dest->speedxyz[0][0]) + (Com_Pow(-1, rand()%2) * velx);
+		vely = rand()%(dist / 12);
+		desty += (4 * dest->speedxyz[1][0]) + (Com_Pow(-1, rand()%2) * vely);
+		velz = rand()%(dist / 12);
+		destz += (4 * dest->speedxyz[2][0]) + (Com_Pow(-1, rand()%2) * velz);
+
+		if (!setjmp(debug_buffer))
 		{
-			SendPacket(buffer, sizeof(buffer), source->visible[i].client);
+			velx = (double)(destx - source->posxy[0][0]) * (pspeed / (double)dist);
+			vely = (double)(desty - source->posxy[1][0]) * (pspeed / (double)dist);
+			velz = (double)(destz - source->posalt[0]) * (pspeed / (double)dist);
+
+			AddBomb(0x01F9, destx, desty, destz, 146/*Flak*/, 1500, ((destz - source->posalt[0])*100/velz) /*timer*/, source);
+
+			flak->packetid = htons(Com_WBhton(0x1917));
+			flak->item = 146;
+			flak->id = htons(0x0800);
+			flak->posx = htonl(source->posxy[0][0]+200);
+			flak->posy = htonl(source->posxy[1][0]);
+			flak->alt = htonl(source->posalt[0] + 70);
+			flak->xspeed = htons(velx); // 550
+			flak->yspeed = htons(vely); // 1151  (total 1500)
+			flak->zspeed = htons(velz); // 788
+			flak->unknown1 = htonl(0x60);
+			flak->shortnick = htonl(source->shortnick);
+			flak->fusealt = htonl(destz);
 		}
+		else
+		{
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
+		}
+
+		for (i = 0; i < MAX_SCREEN; i++)
+		{
+			if (source->visible[i].client && !source->visible[i].client->drone)
+			{
+				SendPacket(buffer, sizeof(buffer), source->visible[i].client);
+			}
+		}
+	}
+	else
+	{
+		DebugClient(__FILE__, __LINE__, TRUE, NULL);
 	}
 }
 
