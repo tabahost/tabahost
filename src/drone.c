@@ -1314,19 +1314,19 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 
 	if(!dist)
 	{
-		Com_Printf(VERBOSE_WARNING, "FireFlak(dist) == 0");
+		Com_Printf(VERBOSE_WARNING, "FireFlak(dist) == 0\n");
 		return;
 	}
 
 	if(!source)
 	{
-		Com_Printf(VERBOSE_WARNING, "FireFlak(source) == NULL");
+		Com_Printf(VERBOSE_WARNING, "FireFlak(source) == NULL\n");
 		return;
 	}
 
 	if(!dest)
 	{
-		Com_Printf(VERBOSE_WARNING, "FireFlak(dest) == NULL");
+		Com_Printf(VERBOSE_WARNING, "FireFlak(dest) == NULL\n");
 		return;
 	}
 

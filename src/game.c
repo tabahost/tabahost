@@ -1114,6 +1114,11 @@ void CheckArenaRules(void)
 					// CV Attack
 					for(ship = arena->cvs[i].ships; ship; ship = ship->next)
 					{
+						if(!ship->drone)
+						{
+							Com_Printf(VERBOSE_WARNING, "CV Attack, ship->drone == NULL\n");
+							continue;
+						}
 						if (!setjmp(debug_buffer))
 						{
 							if(near && posx > 0)
@@ -8795,8 +8800,8 @@ void UpdateIngameClients(u_int8_t attr)
 	}
 	else
 	{
-		fprintf(fp, " Callsign   Side    Status     Country   Connection\n");
-		fprintf(fp, "====================================================\n");
+		fprintf(fp, " Callsign   Side    Status     Country       Connection\n");
+		fprintf(fp, "========================================================\n");
 
 		for (i = 0, j = 0; i < maxentities->value; i++)
 		{
@@ -8832,7 +8837,7 @@ void UpdateIngameClients(u_int8_t attr)
 						fprintf(fp, "CONNECTING  ");
 				}
 
-				fprintf(fp, "%-10s%s\n", GeoIP_country_name_by_addr(gi, clients[i].ip),
+				fprintf(fp, "%-14s%s\n", GeoIP_country_name_by_addr(gi, clients[i].ip),
 						!(clients[i].cancollide)?"":clients[i].connection == 0?"Stable":clients[i].connection == 1?"Fair":clients[i].connection == 2?"Unstable":"Poor");
 
 				for (k = 0; k < maxentities->value; k++) // add sharing IP
