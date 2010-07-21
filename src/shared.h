@@ -130,7 +130,8 @@ typedef unsigned int u_int32_t;
 #define MAX_CITYFIELD		17		// max cities linked to a field
 #define	MAX_HITBY			64		// max of players can get kill assist
 #define MAX_UINT32			(u_int32_t) 0xFFFFFFFF // max value for unsigned int 32 (4294967295UL)
-#define MAX_INT16			(int16_t) 0x7FFF // max valur for signed in 16 (32767)
+#define MAX_UINT16			(u_int16_t) 0xFFFF // max value for unsigned in 16 (65535)
+#define MAX_INT16			(int16_t) 0x7FFF // max value for signed in 16 (32767)
 #define MAX_RELATED			7		// max of drones user can mantain relationship
 #define	MAX_PLANES			210		// (126 = FHL v1.66) max of plane numbers (last plane number + 1)
 #define	MAX_WAYPOINTS		128		// max of waypoint a CV or Cargo Ship can make
@@ -271,7 +272,7 @@ typedef unsigned int u_int32_t;
 #define VERBOSE_WARNING			2		// warning messages
 #define VERBOSE_ERROR			3		// error messages
 #define VERBOSE_DEBUG_SCORES	4		// debug scores messages
-#define VERBOSE_DEBUG_DAMAGE	5		// debug damage messages
+#define VERBOSE_DAMAGE	5		// debug damage messages
 #define VERBOSE_DEBUG			6		// debug messages
 #define VERBOSE_MAX				6		// max
 #define VERBOSE_SMAX			"6"		// max string
@@ -285,7 +286,7 @@ typedef unsigned int u_int32_t;
 #define FILE_WARNING		"./logs/warning.log"
 #define FILE_ERROR			"./logs/error.log"
 #define FILE_DEBUG_SCORES	"./logs/debug_scores.log"
-#define FILE_DEBUG_DAMAGE	"./logs/debug_damage.log"
+#define FILE_DAMAGE			"./logs/damage.log"
 #define FILE_DEBUG			"./logs/debug.log"
 #define FILE_ONLINE			"./logs/online.log"
 #define FILE_CHAT			"./logs/chat.log"
@@ -890,7 +891,7 @@ typedef struct client_s
 
 	u_int8_t	field;			// which field player is
 	u_int8_t	hq;				// player moved to HQ
-	u_int8_t	infly;			// if client is in fly
+	u_int16_t	infly;			// if client is in fly (flight ID)
 	u_int16_t	plane;			// selected plane
 	u_int32_t	fuel;			// %fuel
 	u_int32_t	conv;			// convergency

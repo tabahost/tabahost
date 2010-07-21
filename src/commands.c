@@ -1080,7 +1080,8 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	client->dronetimer = arena->time; // stores time when client started flight
 	client->damaged = 0;
 
-	client->infly = 1;
+	while(!(client->infly = (rand() % MAX_UINT16)));
+
 	if (arcade->value)
 	{
 		client->commandos = 1;
@@ -1152,7 +1153,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	{
 		if (position != 100)
 		{
-			Com_Printf(VERBOSE_ALWAYS, "%s takeoff from f%d with plane %s ord %d country %s\n", client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
+			Com_Printf(VERBOSE_ALWAYS, "FLIGHT INIT: (%u) %s takeoff from f%d with plane %s ord %d country %s\n", client->infly, client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
 			ClearKillers(client);
 
 			Com_LogEvent(EVENT_TAKEOFF, client->id, 0);

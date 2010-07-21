@@ -850,10 +850,10 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 							if(!logfile[tverb])
 								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_DEBUG_SCORES);
 							break;
-						case VERBOSE_DEBUG_DAMAGE:
-							logfile[tverb] = fopen(FILE_DEBUG_DAMAGE, "a+");
+						case VERBOSE_DAMAGE:
+							logfile[tverb] = fopen(FILE_DAMAGE, "a+");
 							if(!logfile[tverb])
-								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_DEBUG_DAMAGE);
+								printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_DAMAGE);
 							break;
 						case VERBOSE_DEBUG:
 							logfile[tverb] = fopen(FILE_DEBUG, "a+");
@@ -916,12 +916,12 @@ void Com_Printf(int8_t verb, char *fmt, ...)
 				if (tverb && logfile[tverb])
 					fprintf(logfile[tverb], "DEBUG: SCORES: ");
 				break;
-			case VERBOSE_DEBUG_DAMAGE:
-				printf("DEBUG: DAMAGE: ");
+			case VERBOSE_DAMAGE:
+				printf("DAMAGE: ");
 				if (logfile[0])
-					fprintf(logfile[0], "DEBUG: DAMAGE: ");
+					fprintf(logfile[0], "DAMAGE: ");
 				if (tverb && logfile[tverb])
-					fprintf(logfile[tverb], "DEBUG: DAMAGE: ");
+					fprintf(logfile[tverb], "DAMAGE: ");
 				break;
 			case VERBOSE_DEBUG:
 				printf("DEBUG: ");

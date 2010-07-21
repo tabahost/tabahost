@@ -404,7 +404,7 @@ void CheckArenaRules(void)
 
 								if(arena->fields[i].hitby[j].damage < 0.0) // remove bomber
 								{
-									Com_Printf(VERBOSE_DEBUG_DAMAGE, "Field damage removed, remove bomber %d from list\n", arena->fields[i].hitby[j].longnick);
+									Com_Printf(VERBOSE_DAMAGE, "Field damage removed, remove bomber %d from list\n", arena->fields[i].hitby[j].longnick);
 									memset(&(arena->fields[i].hitby[j]), 0, sizeof(hitby_t));
 								}
 							}
@@ -422,7 +422,7 @@ void CheckArenaRules(void)
 							{
 								if(arena->fields[i].buildings[j].timer > 360000) // 1 hour
 								{
-									Com_Printf(VERBOSE_DEBUG_DAMAGE, "bugged building timer %d, set to 15min\n", arena->fields[i].buildings[j].timer);
+									Com_Printf(VERBOSE_DAMAGE, "bugged building timer %d, set to 15min\n", arena->fields[i].buildings[j].timer);
 									arena->fields[i].buildings[j].timer = 90000;
 								}
 							}
@@ -930,12 +930,12 @@ void CheckArenaRules(void)
 					arena->fields[i].closed = 1;
 					BPrintf(RADIO_YELLOW, "Field %d closed", i+1);
 
-					Com_Printf(VERBOSE_DEBUG_DAMAGE, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
+					Com_Printf(VERBOSE_DAMAGE, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
 					for (j = 0; j < MAX_BUILDINGS; j++)
 					{
 						if (arena->fields[i].buildings[j].field)
 						{
-							Com_Printf(VERBOSE_DEBUG_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
+							Com_Printf(VERBOSE_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
 						}
 						else
 							break;
@@ -954,12 +954,12 @@ void CheckArenaRules(void)
 				}
 				else if (arena->fields[i].closed && !close)
 				{
-					Com_Printf(VERBOSE_DEBUG_DAMAGE, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
+					Com_Printf(VERBOSE_DAMAGE, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
 					for (j = 0; j < MAX_BUILDINGS; j++)
 					{
 						if (arena->fields[i].buildings[j].field)
 						{
-							Com_Printf(VERBOSE_DEBUG_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
+							Com_Printf(VERBOSE_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
 						}
 						else
 							break;
@@ -4748,7 +4748,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 						Com_LogDescription(EVENT_DESC_FIELD, land, NULL);
 
-						Com_Printf(VERBOSE_ALWAYS, "%s landed at %s\n", client->longnick, field);
+						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s landed at %s\n", client->infly, client->longnick, field);
 						PPrintf(client, RADIO_YELLOW, "%s landed %s", client->longnick, field);
 
 						if (landingcapture->value && IsBomber(client))
@@ -4828,31 +4828,31 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 						if(arena->fields[land - 1].type == FIELD_CV)
 						{
-							Com_Printf(VERBOSE_ALWAYS, "%s at %s (CV)\n", client->longnick, field);
+							Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s at %s (CV)\n", client->infly, client->longnick, field);
 							PPrintf(client, RADIO_YELLOW, "%s at CV %s", client->longnick, field);
 						}
 						else
 						{
-							Com_Printf(VERBOSE_ALWAYS, "%s landed out of runway at %s\n", client->longnick, field);
+							Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s landed out of runway at %s\n", client->infly, client->longnick, field);
 							PPrintf(client, RADIO_YELLOW, "%s landed out of %s runway", client->longnick, field);
 						}
 					}
 					break;
 				case ENDFLIGHT_PILOTKILL:
 					client->status_damage |= STATUS_PILOT;
-					Com_Printf(VERBOSE_ALWAYS, "%s is killed in flight at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s is killed in flight at %s\n", client->infly, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					PPrintf(client, RADIO_YELLOW, "%s is killed in flight", client->longnick);
 					Kamikase(client);
 					break;
 				case ENDFLIGHT_CRASHED:
 					if (client->chute)
 					{
-						Com_Printf(VERBOSE_ALWAYS, "%s's plane crashed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s's plane crashed at %s\n", client->infly, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 						PPrintf(client, RADIO_YELLOW, "%s's plane crashed", client->longnick);
 					}
 					else
 					{
-						Com_Printf(VERBOSE_ALWAYS, "%s crashed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s crashed at %s\n", client->infly, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 						PPrintf(client, RADIO_YELLOW, "%s crashed", client->longnick);
 					}
 
@@ -4862,11 +4862,11 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						client->infly = 0;
 					break;
 				case ENDFLIGHT_DITCHFAILED:
-					Com_Printf(VERBOSE_ALWAYS, "%s failed to ditch at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s failed to ditch at %s\n", client->infly, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					PPrintf(client, RADIO_YELLOW, "%s failed to ditch", client->longnick);
 					break;
 				case ENDFLIGHT_BAILED:
-					Com_Printf(VERBOSE_ALWAYS, "%s sucessfully bailed at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s sucessfully bailed at %s\n", client->infly, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 					Com_LogEvent(EVENT_BAIL, client->id, 0);
 					Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4874,10 +4874,10 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					PPrintf(client, RADIO_YELLOW, "%s bailed", client->longnick);
 					break;
 				case ENDFLIGHT_ZERO:
-					Com_Printf(VERBOSE_WARNING, "PEndFlight(zero) %s\n", client->longnick);
+					Com_Printf(VERBOSE_WARNING, "FLIGHT END: (%u) PEndFlight(zero) %s\n", client->infly, client->longnick);
 					PPrintf(client, RADIO_GREEN, "End Flight ZERO, please report your crash/ditch to admin");
 				case ENDFLIGHT_DITCHED:
-					Com_Printf(VERBOSE_ALWAYS, "%s ditched at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s ditched at %s\n", client->infly, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 					Com_LogEvent(EVENT_DITCH, client->id, 0);
 					Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4891,7 +4891,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					if (!emulatecollision->value || arcade->value)
 					{
-						Com_Printf(VERBOSE_ALWAYS, "%s collided at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s collided at %s\n", client->infly, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 
 						Com_LogEvent(EVENT_COLLIDED, client->id, 0);
 						Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4964,11 +4964,11 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					}
 					break;
 				case ENDFLIGHT_PANCAKE:
-					Com_Printf(VERBOSE_ALWAYS, "%s became a pancake at %s\n", client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s became a pancake at %s\n", client->infly, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					PPrintf(client, RADIO_YELLOW, "%s became pancake", client->longnick);
 					break;
 				default:
-					Com_Printf(VERBOSE_WARNING, "%s(%s) PEndFlight() type unknown %d\n", client->longnick, client->ip, end);
+					Com_Printf(VERBOSE_WARNING, "FLIGHT END: (%u) %s(%s) PEndFlight() type unknown %d\n", client->infly, client->longnick, client->ip, end);
 					break;
 			}
 		}
@@ -5034,10 +5034,10 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				}
 			}
 
-			client->score.costscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status_damage = client->status_status = client->infly
-					= client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2]
-					= client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer
-					= client->score.penaltyscore = client->commandos = client->damaged = client->conn_sum = client->conn_count = client->conn_curravg = client->conn_lastavg = 0;
+			client->score.costscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status_damage = client->status_status = client->infly =
+					client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2] =
+					client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer =
+					client->score.penaltyscore = client->commandos = client->damaged = client->conn_sum = client->conn_count = client->conn_curravg = client->conn_lastavg = 0;
 
 			memset(client->skin, 0, sizeof(client->skin));
 
@@ -5677,7 +5677,7 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 			}
 			else
 			{
-				Com_Printf(VERBOSE_ALWAYS, "%s ejected at %s\n", client->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				Com_Printf(VERBOSE_ALWAYS, "FLIGHT EJECT: (%u) %s ejected at %s\n", client->infly, client->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			}
 
 			client->chute = 1;
@@ -6206,7 +6206,7 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 
 	hits = flakhit->hits;
 
-	Com_Printf(VERBOSE_DEBUG_DAMAGE, "PFlakHit hits %d\n", hits);
+	Com_Printf(VERBOSE_DAMAGE, "PFlakHit hits %d\n", hits);
 
 	if (!(pvictim = FindSClient(ntohl(flakhit->victim))))
 		return;
@@ -6260,7 +6260,7 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 		snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, flakhit->type, munition->he, munition->ap);
 		memset(gunstatsb, 0, sizeof(gunstatsb));
 		snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
-		Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s\n", gunstatsb);
+		Com_Printf(VERBOSE_DAMAGE, "HIT: %s\n", gunstatsb);
 		if (gunstats->value > 1 && pvictim->gunstat)
 			PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 	}
@@ -6387,7 +6387,7 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 		{
 			if (gunstats->value > 1 && client->gunstat)
 				PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
-			Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client?client->longnick:"-HOST-", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+			Com_Printf(VERBOSE_DAMAGE, "HIT: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client?client->longnick:"-HOST-", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
 		}
 //		else if (client->gunstat)
 //			PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
@@ -6527,7 +6527,7 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	{
 		if (gunstats->value > 1 && client->gunstat)
 			PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
-		Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client?client->longnick:"-HOST-", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+		Com_Printf(VERBOSE_DAMAGE, "HIT: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client?client->longnick:"-HOST-", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
 	}
 //	else if (client->gunstat)
 //		PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
@@ -6782,7 +6782,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if(damage < 0)
 			{
-				Com_Printf(VERBOSE_DEBUG_DAMAGE, "PHitPlane(damage he+ap) < 0, he = %d, ap = %d\n", he, ap);
+				Com_Printf(VERBOSE_DAMAGE, "PHitPlane(damage he+ap) < 0, he = %d, ap = %d\n", he, ap);
 			}
 
 			if (!setjmp(debug_buffer))
@@ -6806,7 +6806,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if(damage < 0)
 			{
-				Com_Printf(VERBOSE_DEBUG_DAMAGE, "PHitPlane(damage -= ap) < 0, damage = %d, ap = %d\n", damage, ap);
+				Com_Printf(VERBOSE_DAMAGE, "PHitPlane(damage -= ap) < 0, damage = %d, ap = %d\n", damage, ap);
 				damage = 0;
 			}
 
@@ -6816,7 +6816,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 //				if(pvictim->drone == DRONE_COMMANDOS)
 //				{
-//					Com_Printf(VERBOSE_DEBUG_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
+//					Com_Printf(VERBOSE_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
 //					sdamage = 59.0;
 //				}
 
@@ -6826,7 +6826,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG_DAMAGE, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage, ((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
+					Com_Printf(VERBOSE_DAMAGE, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage, ((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
 				}
 			}
 
@@ -6866,7 +6866,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, hitplane->type, munition->he, ap);
 			memset(gunstatsb, 0, sizeof(gunstatsb));
 			snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;%s%s", header, heb, ign, apb);
-			Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s\n", gunstatsb);
+			Com_Printf(VERBOSE_DAMAGE, "HIT: %s\n", gunstatsb);
 			if (gunstats->value > 1 && pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 		}
@@ -7038,7 +7038,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DEBUG_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he, ((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
+					Com_Printf(VERBOSE_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he, ((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
 				}
 			}
 		}
@@ -7068,7 +7068,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, hardhitplane->munition, munition->he, munition->ap);
 		memset(gunstatsb, 0, sizeof(gunstatsb));
 		snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
-		Com_Printf(VERBOSE_DEBUG_DAMAGE, "DM: %s\n", gunstatsb);
+		Com_Printf(VERBOSE_DAMAGE, "HIT: %s\n", gunstatsb);
 		if (gunstats->value > 1 && pvictim->gunstat)
 			PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 	}
@@ -7292,7 +7292,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 	//	}
 	if(!client)
 	{
-		Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(client) == NULL\n");
+		Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(client) == NULL\n");
 		return 0;
 	}
 
@@ -7305,7 +7305,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 	if(client->armor.apstop[place] < 0)
 	{
-		Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(apstop) < 0 place %d plane %d\n", place, client->plane);
+		Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apstop) < 0 place %d plane %d\n", place, client->plane);
 		return 0;
 	}
 
@@ -7314,14 +7314,14 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place] : ap;
 		if(apabsorb < 0)
 		{
-			Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(apabsorb) < 0 hitpoints %d apstop %d, place %u at line %u\n", client->armor.points[place], client->armor.apstop[place], place, __LINE__);
+			Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apabsorb) < 0 hitpoints %d apstop %d, place %u at line %u\n", client->armor.points[place], client->armor.apstop[place], place, __LINE__);
 			apabsorb = 0;
 		}
 		dmgprobe = he + apabsorb;
 
 		if(dmgprobe < 0 || dmgprobe > 1000000)
 		{
-			Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(dmgprobe) out of range (%u) at line %u\n", dmgprobe, __LINE__);
+			Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(dmgprobe) out of range (%u) at line %u\n", dmgprobe, __LINE__);
 			dmgprobe = 0;
 		}
 	}
@@ -7473,7 +7473,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 			if(apabsorb > ap)
 			{
-				Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddPlaneDamage(apabsorb) > ap at line %u (apabsorb = %d, ap = %u)\n", __LINE__, apabsorb, ap);
+				Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apabsorb) > ap at line %u (apabsorb = %d, ap = %u)\n", __LINE__, apabsorb, ap);
 				apabsorb = ap;
 			}
 
@@ -7603,7 +7603,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if(!building->field)
 	{
-		Com_Printf(VERBOSE_DEBUG_DAMAGE, "AddBuildingDamage() building %d has no field", building->id);
+		Com_Printf(VERBOSE_DAMAGE, "AddBuildingDamage() building %d has no field", building->id);
 		return 0;
 	}
 
@@ -8121,7 +8121,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 	{
 		if(status_damage & (1 << i))
 		{
-			Com_Printf(VERBOSE_ALWAYS, "%s lost %s\n", client->longnick, GetHitSite(i));
+			Com_Printf(VERBOSE_DAMAGE, "PART: (%u) %s lost %s\n", client->infly, client->longnick, GetHitSite(i));
 		}
 	}
 

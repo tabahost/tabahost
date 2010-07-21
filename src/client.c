@@ -1776,7 +1776,7 @@ void ClearKillers(client_t *client)
 
 	if (client)
 	{
-		Com_Printf(VERBOSE_DEBUG_DAMAGE, "Remove all killers from list\n");
+		Com_Printf(VERBOSE_DAMAGE, "Remove all killers from list\n");
 
 		for(i = 0; i < MAX_HITBY; i++)
 		{
@@ -1806,7 +1806,7 @@ void ClearBombers(u_int8_t field)
 
 	if (field < fields->value)
 	{
-		Com_Printf(VERBOSE_DEBUG_DAMAGE, "Remove all bombers from list\n");
+		Com_Printf(VERBOSE_DAMAGE, "Remove all bombers from list\n");
 
 		for(i = 0; i < MAX_HITBY; i++)
 		{

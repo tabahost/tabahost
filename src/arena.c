@@ -4492,7 +4492,7 @@ void AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client)
 {
 	int8_t bomber;
 
-	Com_Printf(VERBOSE_DEBUG_DAMAGE, "Field Damage: %u\n", damage);
+	Com_Printf(VERBOSE_DAMAGE, "Field Damage: %u\n", damage);
 
 	if(!client)
 		return;
