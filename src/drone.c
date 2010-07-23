@@ -84,7 +84,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 			clients[i].ready = 1;
 			clients[i].drone = type;
 			clients[i].country = country;
-			clients[i].infly = 1;
+			clients[i].inflight = 1;
 			switch (type)
 			{
 				case DRONE_FAU:
@@ -309,7 +309,7 @@ void DroneVisibleList(client_t *drone)
 	/* calculate distance */
 	for (k = i = 0; i < maxentities->value; i++)
 	{
-		if (drone != &clients[i] && clients[i].inuse && clients[i].infly && !clients[i].attached)
+		if (drone != &clients[i] && clients[i].inuse && clients[i].inflight && !clients[i].attached)
 		{
 			if ((clients[i].reldist = DistBetween(drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], clients[i].posxy[0][0], clients[i].posxy[1][0], clients[i].posalt[0], MAX_INT16)) >= 0)
 				carray[k++] = &clients[i];
@@ -1936,7 +1936,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 	{
 		for (i = 0; i < maxentities->value; i++) // check players near explosion
 		{
-			if (clients[i].inuse && clients[i].infly)
+			if (clients[i].inuse && clients[i].inflight)
 			{
 				if (clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
 					radius = 50;

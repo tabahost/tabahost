@@ -815,7 +815,7 @@ void SendMapDots(void)
 
 				for (k = 0; k < maxentities->value; k++)
 				{
-					if (clients[k].inuse && !clients[k].drone && clients[k].ready && (clients[k].thai || clients[k].attr == 1 || ((!clients[k].infly || clients[k].obradar) && clients[k].country == country)))
+					if (clients[k].inuse && !clients[k].drone && clients[k].ready && (clients[k].thai || clients[k].attr == 1 || ((!clients[k].inflight || clients[k].obradar) && clients[k].country == country)))
 					{
 						if(clients[k].thai) // SendMapDots
 						{				   // this case assume that all AI have access to all mapdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
@@ -840,7 +840,7 @@ void SendMapDots(void)
 				j = 0;
 			}
 
-			if (clients[i].inuse && clients[i].ready && clients[i].infly && !(clients[i].drone == DRONE_SHIP)) // mount dot packet
+			if (clients[i].inuse && clients[i].ready && clients[i].inflight && !(clients[i].drone == DRONE_SHIP)) // mount dot packet
 			{
 				if ((clients[i].country == country) && iff->value)
 				{
@@ -905,7 +905,7 @@ void SendCVDots(void)
 
 				for (k = 0; k < maxentities->value; k++)
 				{
-					if ((clients[k].country == 3 || clients[k].country == 1) && (clients[k].country == ship->country) && clients[k].inuse && !clients[k].drone && clients[k].ready) // && !clients[k].infly)
+					if ((clients[k].country == 3 || clients[k].country == 1) && (clients[k].country == ship->country) && clients[k].inuse && !clients[k].drone && clients[k].ready) // && !clients[k].inflight)
 					{
 						if(clients[k].thai) // SendCVDots
 						{				   // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
@@ -1056,7 +1056,7 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 	{
 		for (i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone && clients[i].infly && clients[i].obradar && clients[i].country == country)
+			if (clients[i].inuse && !clients[i].drone && clients[i].inflight && clients[i].obradar && clients[i].country == country)
 			{
 				x = (client->posxy[0][0] - clients[i].posxy[0][0]) / 10;
 				y = (client->posxy[1][0] - clients[i].posxy[1][0]) / 10;
@@ -3236,7 +3236,7 @@ void ChangeArena(char *map, client_t *client)
 
 			if (clients[i].socket)
 			{
-				if (clients[i].inuse && clients[i].infly)
+				if (clients[i].inuse && clients[i].inflight)
 				{
 					ScoresEndFlight(ENDFLIGHT_LANDED, 0, 0, 0, &clients[i]); // force client to land and simulate land scores
 				}
@@ -3840,7 +3840,7 @@ void WB3MapTopography(client_t *client)
 {
 	if (client->mapper) // if not mapper, may never get here
 	{
-		if (client->infly)
+		if (client->inflight)
 		{
 			if ((FLIGHT_TIME(client)/1000) > 2) // 2 seconds flight
 			{

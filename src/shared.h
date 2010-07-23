@@ -891,7 +891,7 @@ typedef struct client_s
 
 	u_int8_t	field;			// which field player is
 	u_int8_t	hq;				// player moved to HQ
-	u_int16_t	infly;			// if client is in fly (flight ID)
+	u_int16_t	inflight;		// if client is in flight (flight ID)
 	u_int16_t	plane;			// selected plane
 	u_int32_t	fuel;			// %fuel
 	u_int32_t	conv;			// convergency

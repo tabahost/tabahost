@@ -497,7 +497,7 @@ void RunFrame(void)
 				{
 					if(ProcessClient(&clients[i]) < 0)
 					{
-						if(clients[i].infly)
+						if(clients[i].inflight)
 						{
 							ScoresEvent(SCORE_DISCO, &clients[i], 0);
 

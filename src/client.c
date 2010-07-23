@@ -272,7 +272,7 @@ void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
 		fprintf(fp, "accelxyz[0]       = %10d  accelxyz[1]   = %10d  accelxyz[2]    = %10d\n", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
 		fprintf(fp, "angles[0]         = %10d  angles[1]     = %10d  angles[2]      = %10d\n", client->angles[0][0], client->angles[1][0], client->angles[2][0]);
 		fprintf(fp, "aspeeds[0]        = %10d  aspeeds[1]    = %10d  aspeeds[2]     = %10d\n", client->aspeeds[0][0], client->aspeeds[1][0], client->aspeeds[2][0]);
-		fprintf(fp, "field             = %10d  infly         = %10u  plane          = %10u\n", client->field, client->infly, client->plane);
+		fprintf(fp, "field             = %10d  inflight         = %10u  plane          = %10u\n", client->field, client->inflight, client->plane);
 		fprintf(fp, "fuel              = %10u  conv          = %10u  ord            = %10u\n", client->fuel, client->conv, client->ord);
 		fprintf(fp, "country           = %10u  countrytime   = %10u  mapdots        = %10u\n", client->country, client->countrytime, client->mapdots);
 		fprintf(fp, "easymode          = %10u  obradar       = %10d  mortars        = %10u\n", client->easymode, client->obradar, client->mortars);
@@ -482,7 +482,7 @@ int ProcessClient(client_t *client)
 					WB3DotCommand(client, ".clutterdistance 8500");
 				}
 
-				//				if(IsGround(client) && client->infly && !((arena->frame - client->frame) % 1000))
+				//				if(IsGround(client) && client->inflight && !((arena->frame - client->frame) % 1000))
 				//				{
 				//					WB3Mapper(client);
 				//				}
@@ -494,6 +494,7 @@ int ProcessClient(client_t *client)
 
 				if(client->cancollide && !((arena->frame - client->frame) % 6000)) // 60 seconds
 				{
+					Com_Printf(VERBOSE_ALWAYS, "%s connection quality: %s\n", client->longnick, client->connection == 0?"Stable":client->connection == 1?"Fair":client->connection == 2?"Unstable":"Poor");
 					PPrintf(client, RADIO_YELLOW, "Connection quality: %s", client->connection == 0?"Stable":client->connection == 1?"Fair":client->connection == 2?"Unstable":"Poor");
 				}
 
@@ -504,7 +505,7 @@ int ProcessClient(client_t *client)
 				}
 
 				// gunstat
-				if(client->gunstat && client->infly && !((arena->frame - client->frame) % 300)) // 3 seconds
+				if(client->gunstat && client->inflight && !((arena->frame - client->frame) % 300)) // 3 seconds
 				{
 					for(i = 0; i < 6; i++)
 					{
@@ -535,7 +536,7 @@ int ProcessClient(client_t *client)
 					}
 				}
 
-				if(predictpos->value && client->infly)
+				if(predictpos->value && client->inflight)
 				{
 					if((arena->time - client->postimer)> 600) // if client didnt send position packet in 500ms
 					{
@@ -555,12 +556,12 @@ int ProcessClient(client_t *client)
 
 				if(!((arena->frame - client->frame) % 10)) // 100ms
 				{
-					if((client->lograwdata || lograwposition->value) && !((arena->frame - client->frame) % 50) && client->infly)
+					if((client->lograwdata || lograwposition->value) && !((arena->frame - client->frame) % 50) && client->inflight)
 					{
 						LogRAWPosition(TRUE, client);
 					}
 
-					if(client->infly && !((arena->frame - client->frame) % 1000))
+					if(client->inflight && !((arena->frame - client->frame) % 1000))
 					{
 						LogPosition(client);
 					}
@@ -647,7 +648,7 @@ int ProcessClient(client_t *client)
 				}
 			}
 
-			if(!client->infly && !client->attr)
+			if(!client->inflight && !client->attr)
 			{
 				client->awaytimer++;
 
@@ -1954,7 +1955,7 @@ void ForceEndFlight(u_int8_t remdron, client_t *client)
 		}
 	}
 
-	client->status_damage = client->status_status = client->infly = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = 0;
+	client->status_damage = client->status_status = client->inflight = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer = 0;
 
 	ClearKillers(client);
 

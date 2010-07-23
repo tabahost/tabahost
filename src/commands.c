@@ -104,7 +104,7 @@ void Cmd_Ros(client_t *client)
 
 	if (client)
 	{
-		if (!client->infly)
+		if (!client->inflight)
 		{
 			SendFileSeq1(FILE_INGAME, "roster.asc", client);
 		}
@@ -1080,7 +1080,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	client->dronetimer = arena->time; // stores time when client started flight
 	client->damaged = 0;
 
-	while(!(client->infly = (rand() % MAX_UINT16)));
+	client->inflight = ((u_int32_t)time(NULL) % 604800) + 1; // one week
 
 	if (arcade->value)
 	{
@@ -1153,7 +1153,8 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	{
 		if (position != 100)
 		{
-			Com_Printf(VERBOSE_ALWAYS, "FLIGHT INIT: (%u) %s takeoff from f%d with plane %s ord %d country %s\n", client->infly, client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
+			Com_Printf(VERBOSE_ALWAYS, "FLIGHT INIT: (%u) %s takeoff from f%d with plane %s ord %d country %s\n", client->inflight, client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
+			PPrintf(RADIO_YELLOW, "START: Flight ID %u", client->inflight);
 			ClearKillers(client);
 
 			Com_LogEvent(EVENT_TAKEOFF, client->id, 0);
@@ -1202,6 +1203,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field is == Fx -1
 {
 	u_int8_t buffer[8];
+	u_int8_t oldcountry;
 	u_int16_t i, j, k;
 	captfield_t *capt;
 
@@ -1314,8 +1316,19 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			//			if(!j)
 			//				arena->fields[field].abletocapture = 1;
 
+			oldcountry = arena->fields[field].country;
+			arena->fields[field].country = country;
+
+			for (i = 0; i < MAX_BUILDINGS; i++)
+			{
+				if (arena->fields[field].buildings[i].field)
+					arena->fields[field].buildings[i].country = country;
+				else
+					break;
+			}
+
 			// check end of war (arena reset)
-			if (canreset->value && arena->fields[field].country /* to avoid reset by capt neutrals */)
+			if (canreset->value && oldcountry /* to avoid reset by capt neutrals */)
 			{
 				for (k = j = i = 0; i < fields->value; i++)
 				{
@@ -1333,11 +1346,11 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 						}
 					}
 
-					if(j > 2)
+					if(j > 1)
 						break;
 				}
 
-				if (!j || ((j + k) <= 2))
+				if (!j || ((j + k) < 2))
 				{
 					BPrintf(RADIO_YELLOW, "*********************************");
 					BPrintf(RADIO_YELLOW, "*********    THE WAR    *********");
@@ -1380,7 +1393,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 						{
 							if(ctf->value)
 							{
-								if(clients[i].ready && clients[i].infly && !clients[i].drone && clients[i].attr != 1)
+								if(clients[i].ready && clients[i].inflight && !clients[i].drone && clients[i].attr != 1)
 									ForceEndFlight(TRUE, &clients[i]);
 							}
 
@@ -1394,18 +1407,6 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 
 					return 1;
 				}
-			}
-
-			////////////
-
-			arena->fields[field].country = country;
-
-			for (i = 0; i < MAX_BUILDINGS; i++)
-			{
-				if (arena->fields[field].buildings[i].field)
-					arena->fields[field].buildings[i].country = country;
-				else
-					break;
 			}
 
 			if (arcade->value && rps->value) // set available planes w/o capture enemy planes
@@ -2447,7 +2448,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		}
 	}
 
-	if (!client || client->infly)
+	if (!client || client->inflight)
 	{
 		PPrintf(client, RADIO_YELLOW, "Field F%d: Country: %s, Type: %s, Status: %s", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
 
@@ -2611,7 +2612,7 @@ void Cmd_City(u_int8_t citynum, client_t *client)
 	type = arena->cities[citynum-1].type;
 	status = arena->cities[citynum-1].closed;
 
-	if (!client || client->infly)
+	if (!client || client->inflight)
 	{
 		PPrintf(client, RADIO_YELLOW, "City C%d: Country %s, Type: %s, Status: %s", citynum, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
 	}
@@ -2917,7 +2918,7 @@ void Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount)
 
 	for (i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone && clients[i].ready && !clients[i].infly)
+		if (clients[i].inuse && !clients[i].drone && clients[i].ready && !clients[i].inflight)
 			SendRPS(&clients[i]);
 	}
 }
@@ -4670,7 +4671,7 @@ void Cmd_Wings(u_int8_t mode, client_t *client)
 			PPrintf(client, RADIO_YELLOW, "Wings mode set to Echelon");
 			break;
 		default:
-			if (client->infly && !client->attached)
+			if (client->inflight && !client->attached)
 			{
 				PPrintf(client, RADIO_YELLOW, "You cannot disable wings while flying");
 				return;
@@ -4755,7 +4756,7 @@ void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
 	 }
 	 */
 
-	if (client->infly && !command)
+	if (client->inflight && !command)
 	{
 		PPrintf(client, RADIO_YELLOW, "You're already flying");
 		return;
@@ -5041,7 +5042,7 @@ void Cmd_Info(char *nick, client_t *client)
 	if (!client || client->attr & (FLAG_ADMIN | FLAG_OP))
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "User:%s IP:%s(%s) Country:%s Field:%d", info->longnick, info->ip, GeoIP_country_name_by_addr(gi, info->ip), GetCountry(info->country), info->field);
-		PPrintf(client, RADIO_LIGHTYELLOW, "Situation:%s Plane:%s Mod:%s ", info->infly ? IsGround(info) ? "In Ground" : "In Flight" : info->field ? !info->hq ? "Tower" : "HQ" : "Connecting",
+		PPrintf(client, RADIO_LIGHTYELLOW, "Situation:%s Plane:%s Mod:%s ", info->inflight ? IsGround(info) ? "In Ground" : "In Flight" : info->field ? !info->hq ? "Tower" : "HQ" : "Connecting",
 				GetPlaneName(info->plane), info->attr == 2 ? "OP" : info->attr == 1 ? "Admin" : "Normal");
 		PPrintf(client, RADIO_LIGHTYELLOW, "Squadron:%s", info->squadron ? Com_SquadronName(info->squadron) : "None");
 	}
@@ -5053,7 +5054,7 @@ void Cmd_Info(char *nick, client_t *client)
 		}
 		else
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "User:%s Field:%d Situation:%s Plane:%s", info->longnick, info->field, info->infly ? IsGround(info) ? "In Ground" : "In Flight"
+			PPrintf(client, RADIO_LIGHTYELLOW, "User:%s Field:%d Situation:%s Plane:%s", info->longnick, info->field, info->inflight ? IsGround(info) ? "In Ground" : "In Flight"
 					: info->field ? !info->hq ? "Tower" : "HQ" : "Connecting", GetPlaneName(info->plane));
 			PPrintf(client, RADIO_LIGHTYELLOW, "Squadron:%s", info->squadron ? Com_SquadronName(info->squadron) : "None");
 		}
@@ -5319,7 +5320,7 @@ void Cmd_Shanghai(u_int8_t *buffer, client_t *client)
 
 	if (student)
 	{
-		if (student->infly)
+		if (student->inflight)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "%s is already flying", student->longnick);
 			return;
@@ -5364,13 +5365,13 @@ void Cmd_View(client_t *victim, client_t *client)
 		}
 		else
 		{
-			if (client->infly)
+			if (client->inflight)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "You are already in flight");
 				return;
 			}
 
-			if (!victim->infly)
+			if (!victim->inflight)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Player is not in flight");
 				return;
@@ -5517,7 +5518,7 @@ void Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek)
 	if (!client)
 		return;
 
-	if (client->infly)
+	if (client->inflight)
 	{
 		snprintf(buffer, sizeof(buffer), "I'm a %s at %s angels%.0f(%.0fm) %s to %s(%.0f)", GetSmallPlaneName(client->plane), Com_Padloc(client->posxy[0][0], client->posxy[1][0]), WBAngels(client->posalt[0]),
 				WBAltMeters(client->posalt[0]), WBVSI(client->speedxyz[2][0], 0), WBRhumb(WBtoHdg(client->angles[2][0])), WBHeading(WBtoHdg(client->angles[2][0])) );
@@ -5569,7 +5570,7 @@ void Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client)
 	if (argc > 3)
 		argc = 3;
 
-	if (!client->infly)
+	if (!client->inflight)
 	{
 		PPrintf(client, RADIO_YELLOW, "You cannot spawn thanks while flying");
 		return;

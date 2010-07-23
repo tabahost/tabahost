@@ -496,7 +496,7 @@ void ScoreFieldCapture(u_int8_t field)
 
 				if (arena->fields[field].hitby[i].country == arena->fields[field].country) // if it WAS enemy
 				{
-					if((dbclient = FindDBClient(arena->fields[field].hitby[i].dbid)) && dbclient->infly)
+					if((dbclient = FindDBClient(arena->fields[field].hitby[i].dbid)) && dbclient->inflight)
 					{
 						Com_Printf(VERBOSE_DEBUG_SCORES, "InFlight\n");
 						dbclient->score.captscore += score;
@@ -525,7 +525,7 @@ void ScoreFieldCapture(u_int8_t field)
 				}
 				else if(friendlyfire->value)// friendly hit... tsc, tsc, tsc...
 				{
-					if((dbclient = FindDBClient(arena->fields[field].hitby[i].dbid)) && dbclient->infly)
+					if((dbclient = FindDBClient(arena->fields[field].hitby[i].dbid)) && dbclient->inflight)
 					{
 						Com_Printf(VERBOSE_DEBUG_SCORES, "Field Penalty InFlight\n");
 						dbclient->score.penaltyscore += score;
@@ -658,7 +658,7 @@ double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 
 					if (client->hitby[i].country != client->country) // if enemy
 					{
-						if((dbclient = FindDBClient(client->hitby[i].dbid)) && dbclient->infly)
+						if((dbclient = FindDBClient(client->hitby[i].dbid)) && dbclient->inflight)
 						{
 							dbclient->score.airscore += score;
 						}
@@ -687,7 +687,7 @@ double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 					{
 						if(friendlyfire->value)
 						{
-							if((dbclient = FindDBClient(client->hitby[i].dbid)) && dbclient->infly)
+							if((dbclient = FindDBClient(client->hitby[i].dbid)) && dbclient->inflight)
 							{
 								Com_Printf(VERBOSE_DEBUG_SCORES, "Kill Penalty InFlight\n");
 								dbclient->score.penaltyscore += score;
@@ -1133,7 +1133,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 	if(maneuver)
 		*maneuver = 0;
 
-	if (client->infly) // if not infly, cant be killed
+	if (client->inflight) // if not inflight, cant be killed
 	{
 		if(!client->damaged) // maneuver kill or nothing
 		{
