@@ -1154,7 +1154,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		if (position != 100)
 		{
 			Com_Printf(VERBOSE_ALWAYS, "FLIGHT INIT: (%u) %s takeoff from f%d with plane %s ord %d country %s\n", client->inflight, client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
-			PPrintf(RADIO_YELLOW, "START: Flight ID %u", client->inflight);
+			PPrintf(client, RADIO_YELLOW, "START: Flight ID %u", client->inflight);
 			ClearKillers(client);
 
 			Com_LogEvent(EVENT_TAKEOFF, client->id, 0);

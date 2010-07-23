@@ -5000,7 +5000,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 	{
 		if (!client->chute || (client->chute && ((end == ENDFLIGHT_PILOTKILL) || (end == ENDFLIGHT_BAILED) || (end == ENDFLIGHT_PANCAKE) || (end == ENDFLIGHT_DITCHFAILED))))
 		{
-			PPrintf(RADIO_YELLOW, "END: Flight ID %u", client->inflight);
+			PPrintf(client, RADIO_YELLOW, "END: Flight ID %u", client->inflight);
 			ScoresEndFlight(end, land, gunused, totalhits, client);
 
 			if (land && end == ENDFLIGHT_LANDED && arena->fields[land - 1].rps[client->plane] > -1 && client->plane < maxplanes && !client->tkstatus && !(client->plane >= 131 && client->plane <= 134))
