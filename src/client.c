@@ -333,13 +333,23 @@ int ProcessClient(client_t *client)
 
 	if (client->disconnect)
 	{
-		Com_Printf(VERBOSE_ALWAYS, "%s has requested to disconnect\n", client->longnick);
+		BPrintf(RADIO_YELLOW, "%s has requested to disconnect", client->longnick);
+
+		if(client->inflight)
+			Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s has requested to disconnect\n", client->inflight, client->longnick);
+		else
+			Com_Printf(VERBOSE_ALWAYS, "%s has requested to disconnect\n", client->longnick);
 		return -1;
 	}
 
 	if (client->bugged)
 	{
 		BPrintf(RADIO_YELLOW, "%s bugged, and will be kicked", client->longnick);
+
+		if(client->inflight)
+			Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s bugged, and will be kicked\n", client->inflight, client->longnick);
+		else
+			Com_Printf(VERBOSE_ALWAYS, "%s bugged, and will be kicked\n", client->longnick);
 		return -1;
 	}
 
@@ -347,7 +357,12 @@ int ProcessClient(client_t *client)
 
 	if (client->timeout >= MAX_TIMEOUT)
 	{
-		Com_Printf(VERBOSE_ALWAYS, "%s timed out\n", client->longnick);
+		BPrintf(RADIO_YELLOW, "%s timed out", client->longnick);
+
+		if(client->inflight)
+			Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s timed out\n", client->inflight, client->longnick);
+		else
+			Com_Printf(VERBOSE_ALWAYS, "%s timed out\n", client->longnick);
 		return -1;
 	}
 
@@ -578,15 +593,14 @@ int ProcessClient(client_t *client)
 							x = client->posalt[0] - nearplane->posalt[0];
 
 							if((y = sqrt(Com_Pow(x, 2) + Com_Pow(z, 2))) < 10) // 21
-
 							{
 								if(!nearplane->drone)
 									PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
-								Com_Printf(VERBOSE_ALWAYS, "%s collided emulated with %s\n", client, nearplane->longnick);
+								Com_Printf(VERBOSE_ALWAYS, "FLIGHT PART: (%u) %s collided emulated with %s\n", client->inflight, client->longnick, nearplane->longnick);
 
 
 								PPrintf(client, RADIO_DARKGREEN, "%s collided with you!!!", nearplane->longnick);
-								Com_Printf(VERBOSE_ALWAYS, "%s collided emulated with %s\n", nearplane->longnick, client);
+								Com_Printf(VERBOSE_ALWAYS, "FLIGHT PART: (%u) %s collided emulated with %s\n", nearplane->inflight, nearplane->longnick, client->longnick);
 
 								client->damaged = 1;
 								nearplane->damaged = 1;
@@ -689,7 +703,11 @@ int ProcessClient(client_t *client)
 							if(client && strlen(client->longnick))
 							{
 								BPrintf(RADIO_YELLOW, "%s broke connection", client->longnick);
-								Com_Printf(VERBOSE_ALWAYS, "%s broke connection\n", client->longnick);
+
+								if(client->inflight)
+									Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s broke connection\n", client->inflight, client->longnick);
+								else
+									Com_Printf(VERBOSE_ALWAYS, "%s broke connection\n", client->longnick);
 							}
 							z = -1;
 						}

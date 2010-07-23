@@ -4905,7 +4905,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 						if (nearplane)
 						{
-							Com_Printf(VERBOSE_ALWAYS, "%s collided with %s at %s\n", client->longnick, nearplane->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+							Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s collided with %s at %s\n", client->inflight, client->longnick, nearplane->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+							Com_Printf(VERBOSE_ALWAYS, "FLIGHT PART: (%u) %s collided with %s at %s\n", nearplane->inflight, nearplane->longnick, client->longnick, land ? field : Com_Padloc(nearplane->posxy[0][0], nearplane->posxy[1][0]));
 
 							Com_LogEvent(EVENT_COLLIDED, client->id, nearplane->id);
 							Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -5478,7 +5479,10 @@ void CheckMaxG(client_t *client)
 		if ((g > maxg) || (g < ming))
 		{
 			if (client->armor.points[PLACE_LWING] > 0)
+			{
 				PPrintf(client, RADIO_DARKGREEN, "Your left wing blown off due G overload");
+				Com_Printf(VERBOSE_DAMAGE, "PART: (%u) %s left wing blown off due G overload\n", client->inflight, client->longnick);
+			}
 			SendForceStatus((client->status_damage | STATUS_LWING), client->status_status, client);
 			client->damaged = 1;
 		}
@@ -5505,7 +5509,10 @@ void CheckMaxG(client_t *client)
 		if ((g > maxg) || (g < ming))
 		{
 			if (client->armor.points[PLACE_RWING] > 0)
+			{
 				PPrintf(client, RADIO_DARKGREEN, "Your right wing blown off due G overload");
+				Com_Printf(VERBOSE_DAMAGE, "PART: (%u) %s right wing blown off due G overload\n", client->inflight, client->longnick);
+			}
 			SendForceStatus((client->status_damage | STATUS_RWING), client->status_status, client);
 			client->damaged = 1;
 		}
