@@ -1354,6 +1354,12 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 			vely = (double)(desty - source->posxy[1][0]) * (pspeed / (double)dist);
 			velz = (double)(destz - source->posalt[0]) * (pspeed / (double)dist);
 
+			if(velz <= 0)
+			{
+				Com_Printf(VERBOSE_WARNING, "FireFlak(velz) <= 0\n");
+				velz = 1;
+			}
+
 			AddBomb(0x01F9, destx, desty, destz, 146/*Flak*/, 1500, ((destz - source->posalt[0])*100/velz) /*timer*/, source);
 
 			flak->packetid = htons(Com_WBhton(0x1917));
