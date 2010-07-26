@@ -892,10 +892,17 @@ u_int8_t UpdateArenaStatus(u_int8_t uptime)
 
 	for (i = 0, j = 0; i < 52; i++)
 	{
-		if (upvars[i]->modified)
+		if(upvars[i])
 		{
-			sprintf(my_query, "%s %s = '%s',", my_query, upvars[i]->name, upvars[i]->string);
-			j++;
+			if (upvars[i]->modified)
+			{
+				sprintf(my_query, "%s %s = '%s',", my_query, upvars[i]->name, upvars[i]->string);
+				j++;
+			}
+		}
+		else
+		{
+			Com_Printf(VERBOSE_WARNING, "UpdateArenaStatus(upvars[%u]) = NULL\n", i);
 		}
 	}
 
