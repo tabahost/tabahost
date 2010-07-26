@@ -1348,6 +1348,9 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 		velz = rand()%(dist / 12);
 		destz += (4 * dest->speedxyz[2][0]) + (Com_Pow(-1, rand()%2) * velz);
 
+		if(destz <= source->posalt[0])
+			destz = source->posalt[0] + 1;
+
 		if (!setjmp(debug_buffer))
 		{
 			velx = (double)(destx - source->posxy[0][0]) * (pspeed / (double)dist);
@@ -1357,7 +1360,7 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 			if(velz <= 0)
 			{
 				Com_Printf(VERBOSE_WARNING, "FireFlak(velz) <= 0\n");
-				velz = 1;
+				return;
 			}
 
 			AddBomb(0x01F9, destx, desty, destz, 146/*Flak*/, 1500, ((destz - source->posalt[0])*100/velz) /*timer*/, source);
