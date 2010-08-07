@@ -1356,11 +1356,11 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 					BPrintf(RADIO_YELLOW, "*********    THE WAR    *********");
 					BPrintf(RADIO_YELLOW, "*********    IS OVER    *********");
 					BPrintf(RADIO_YELLOW, "*********************************");
-					BPrintf(RADIO_YELLOW, "*********  ALLIES %s  *********", arena->fields[field].country == COUNTRY_RED?"LOST":" WON");
-					BPrintf(RADIO_YELLOW, "*********   AXIS  %s   *********", arena->fields[field].country == COUNTRY_GOLD?"LOST":"WON");
+					BPrintf(RADIO_YELLOW, "*********  ALLIES %s  *********", oldcountry == COUNTRY_RED?"LOST":" WON");
+					BPrintf(RADIO_YELLOW, "*********   AXIS  %s   *********", oldcountry == COUNTRY_GOLD?"LOST":"WON");
 					BPrintf(RADIO_YELLOW, "*********************************");
 
-					if(arena->fields[field].country == COUNTRY_RED) // Gold reset
+					if(oldcountry == COUNTRY_RED) // Gold reset
 					{
 						snprintf(buffer, sizeof(buffer), "%.f", resetsgold->value + 1);
 						Var_Set("resetsgold", buffer);
