@@ -894,10 +894,17 @@ u_int8_t UpdateArenaStatus(u_int8_t uptime)
 	{
 		if(upvars[i])
 		{
-			if (upvars[i]->modified)
+			if(upvars[i]->modified)
 			{
-				sprintf(my_query, "%s %s = '%s',", my_query, upvars[i]->name, upvars[i]->string);
-				j++;
+				if(upvars[i]->name && upvars[i]->string)
+				{
+					sprintf(my_query, "%s %s = '%s',", my_query, upvars[i]->name, upvars[i]->string);
+					j++;
+				}
+				else
+				{
+					Com_Printf(VERBOSE_WARNING, "UpdateArenaStatus(upvars[%u]->name) modified = %u, name = %s, string = %s, value = %.f\n", i, upvars[i]->modified, upvars[i]->name, upvars[i]->string, upvars[i]->value);
+				}
 			}
 		}
 		else

@@ -764,7 +764,7 @@ typedef struct var_s
 	char		*string;		// string stored in variable
 	char		*description;	// description
 	int			flags;			// variable flags
-	u_short		modified;		// it was recently changed?
+	u_int8_t	modified;		// it was recently changed?
 	double		min;			// variable min
 	double		max;			// variable max
 	double		value;			// variable value
