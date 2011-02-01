@@ -72,7 +72,7 @@ building_t *GetBuilding(u_int16_t id)
  Returns type of a field
  */
 
-char *GetFieldType(u_int8_t type)
+const char *GetFieldType(u_int8_t type)
 {
 	switch (type)
 	{
@@ -125,7 +125,7 @@ char *GetFieldType(u_int8_t type)
  Returns name of a building
  */
 
-char *GetBuildingType(u_int16_t type)
+const char *GetBuildingType(u_int16_t type)
 {
 	switch (type)
 	{

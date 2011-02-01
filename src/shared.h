@@ -2330,8 +2330,8 @@ u_int32_t GetRPSLag(u_int8_t country);
 //arena.c
 building_t	*GetBuilding(u_int16_t id);
 int32_t	GetFieldRadius(u_int8_t fieldtype);
-char	*GetFieldType(u_int8_t type);
-char	*GetBuildingType(u_int16_t type);
+const char *GetFieldType(u_int8_t type);
+const char *GetBuildingType(u_int16_t type);
 void	LoadArenaStatus(char *filename, client_t *client, u_int8_t reset);
 void	SaveArenaStatus(char *filename, client_t *client);
 void	SaveWebsiteData(void);

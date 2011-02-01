@@ -235,10 +235,10 @@ void memncat(u_int8_t **dest, u_int8_t *orig, u_int32_t destsize, u_int32_t orig
 
 char *asc2time(const struct tm *timeptr)
 {
-	static const char wday_name[7][3] =
+	static const char wday_name[7][4] =
 	{ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
-	static const char mon_name[12][3] =
+	static const char mon_name[12][4] =
 	{ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 	static char result[26];
 	snprintf(result, sizeof(result), "%.3s %.3s %02d %.2d:%.2d:%.2d %d", wday_name[timeptr->tm_wday], mon_name[timeptr->tm_mon], timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min, timeptr->tm_sec,
