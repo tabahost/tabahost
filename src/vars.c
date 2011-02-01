@@ -728,7 +728,7 @@ var_t *Var_Get(char *var_name, char *var_value, char *min, char *max, char *desc
 	if (!var_value)
 		return NULL;
 
-	var = Z_Malloc(sizeof(*var));
+	var = (var_t *) Z_Malloc(sizeof(*var));
 
 	if (var)
 	{

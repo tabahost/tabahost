@@ -3463,7 +3463,7 @@ void ProcessCommands(char *command, client_t *client)
 				*(u_int32_t *)(file + 2) = htonl(Com_Atoi(argv[0]));
 				*(u_int32_t *)(file + 6) = htonl(Com_Atoi(argv[1]));
 
-				SendPacket(file, 10, client);
+				SendPacket((u_int8_t *)file, 10, client);
 			}
 			return;
 		}
@@ -9072,7 +9072,7 @@ int32_t SendArenaNames(client_t *client)
 	sprintf(&(buffer[offset]), "*\n");
 	offset += 2;
 
-	n = Com_Send(client, buffer, (int)offset);
+	n = Com_Send(client, (u_int8_t *)buffer, (int)offset);
 
 	/*
 	 for(i = 0, i < 4, i++)
@@ -10852,7 +10852,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 	FILE *fp;
 	requestmedals_t *medals;
 	clientmedals_t *medals1;
-	clientmedals2_t *medals2;
+//	clientmedals2_t *medals2;
 	clientmedals3_t *medals3;
 
 	if (buffer)
@@ -11280,16 +11280,16 @@ void PHostVar(u_int8_t *buffer, client_t *client)
 	buffer[0] = 0x14;
 	buffer[1] = 0x13;
 	buffer[2] = strlen(message);
-	strcpy((buffer+3), message);
+	strcpy((char *)(buffer+3), message);
 	if (!strcmp(message, "TOTENABLED"))
 	{
 		buffer[buffer[2]+3] = strlen(dpitch->string);
-		strcpy((buffer+(buffer[2]+4)), dpitch->string);
+		strcpy((char *)(buffer+(buffer[2]+4)), dpitch->string);
 	}
 	else
 	{
 		buffer[buffer[2]+3] = strlen(droll->string);
-		strcpy((buffer+(buffer[2]+4)), droll->string);
+		strcpy((char *)(buffer+(buffer[2]+4)), droll->string);
 	}
 
 	Com_Printfhex(buffer, buffer[2]+buffer[buffer[2]+3]+4);

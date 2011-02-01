@@ -338,7 +338,7 @@ ship_t *MainShipTarget(u_int8_t group)
 		return NULL;
 	}
 
-	if(ship = MainShip(group))
+	if((ship = MainShip(group)))
 	{
 		// update field position
 		arena->fields[arena->cvs[group].field].posxyz[0] = ship->Position.x;
@@ -586,7 +586,7 @@ ship_t *AddShip(u_int8_t group, u_int8_t plane, u_int8_t country)
 	ship_t *ship;
 	ship_t *link;
 
-	ship = Z_Malloc(sizeof(ship_t));
+	ship = (ship_t *) Z_Malloc(sizeof(ship_t));
 
 	if(ship)
 	{

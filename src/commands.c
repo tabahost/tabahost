@@ -886,7 +886,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	u_int16_t i = 0, j = 0;
 	u_int8_t buffer[103];
 	u_int32_t rules = 0;
-	initflight_t *fly;
+	initflight_t *fly = NULL;
 	wb3initflight_t *wb3fly;
 	initflight2_t *fly2;
 
@@ -1362,13 +1362,13 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 
 					if(oldcountry == COUNTRY_RED) // Gold reset
 					{
-						snprintf(buffer, sizeof(buffer), "%.f", resetsgold->value + 1);
-						Var_Set("resetsgold", buffer);
+						snprintf((char *)buffer, sizeof(buffer), "%.f", resetsgold->value + 1);
+						Var_Set("resetsgold", (char *)buffer);
 					}
 					else // Red reset
 					{
-						snprintf(buffer, sizeof(buffer), "%.f", resetsred->value + 1);
-						Var_Set("resetsred", buffer);
+						snprintf((char *)buffer, sizeof(buffer), "%.f", resetsred->value + 1);
+						Var_Set("resetsred", (char *)buffer);
 					}
 
 					Com_LogEvent(EVENT_RESET, 0, 0);

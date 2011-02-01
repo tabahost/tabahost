@@ -1384,7 +1384,7 @@ char *CopyString(char *in)
 	if(!in)
 		return NULL;
 
-	out = Z_Malloc(strlen(in)+1);
+	out = (char *)Z_Malloc(strlen(in)+1);
 	strcpy(out, in);
 	return out;
 }

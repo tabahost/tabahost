@@ -2087,7 +2087,7 @@ void WB3ClientSkin(u_int8_t *buffer, client_t *client)
 
 	if(clientskin->msgsize < 64)
 	{
-		ps = &(clientskin->msg);
+		ps = (char*)&(clientskin->msg);
 
 		ps[clientskin->msgsize] = '\0';
 
