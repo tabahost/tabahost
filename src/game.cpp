@@ -3612,7 +3612,7 @@ void ProcessCommands(char *command, client_t *client)
  Begin Sending File Sequence
  */
 
-void SendFileSeq1(char *file, char *clifile, client_t *client)
+void SendFileSeq1(const char *file, const char *clifile, client_t *client)
 {
 	u_int8_t buffer[128];
 	u_int8_t filesize;
@@ -7105,7 +7105,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
  Returns the name of where client were hit
  */
 
-char *GetHitSite(u_int8_t id)
+const char *GetHitSite(u_int8_t id)
 {
 	switch (id)
 	{
@@ -7184,7 +7184,7 @@ char *GetHitSite(u_int8_t id)
  Returns the abreviated name of where client were hit
  */
 
-char *GetSmallHitSite(u_int8_t id)
+const char *GetSmallHitSite(u_int8_t id)
 {
 	switch (id)
 	{
@@ -8305,7 +8305,7 @@ void PRadioMessage(u_int8_t *buffer, client_t *client)
 	 Send a Dot command to client
 	 */
 
-void WB3DotCommand(client_t *client, char *fmt, ...)
+void WB3DotCommand(client_t *client, const char *fmt, ...)
 {
 	va_list argptr;
 	char msg[MAX_PRINTMSG];
@@ -8880,7 +8880,7 @@ void UpdateIngameClients(u_int8_t attr)
  Return country string using country number
  */
 
-char *GetCountry(u_int8_t country)
+const char *GetCountry(u_int8_t country)
 {
 	switch (country)
 	{
@@ -8903,7 +8903,7 @@ char *GetCountry(u_int8_t country)
  Return ranking string using ranking number
  */
 
-char *GetRanking(u_int8_t ranking)
+const char *GetRanking(u_int8_t ranking)
 {
 	switch (ranking)
 	{

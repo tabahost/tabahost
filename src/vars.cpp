@@ -693,7 +693,7 @@ void CheckVars(void)
  Set Flags for an existing variable
  */
 
-var_t *Var_SetFlags(char *var_name, int flags)
+var_t *Var_SetFlags(const char *var_name, int flags)
 {
 	var_t *var;
 
@@ -715,7 +715,7 @@ var_t *Var_SetFlags(char *var_name, int flags)
  Put a new variable at vars array or returns it if already exist
  */
 
-var_t *Var_Get(char *var_name, char *var_value, char *min, char *max, char *description, int flags)
+var_t *Var_Get(const char *var_name, const char *var_value, const char *min, const char *max, const char *description, int flags)
 {
 	var_t *var;
 
@@ -756,7 +756,7 @@ var_t *Var_Get(char *var_name, char *var_value, char *min, char *max, char *desc
  Find a variable at vars array and return a pointed to it
  */
 
-var_t *Var_FindVar(char *var_name)
+var_t *Var_FindVar(const char *var_name)
 {
 	var_t *var= NULL;
 
@@ -775,7 +775,7 @@ var_t *Var_FindVar(char *var_name)
  Change a variable value or creates a new one if it doesn't exists
  */
 
-var_t *Var_Set(char *var_name, char *value)
+var_t *Var_Set(const char *var_name, const char *value)
 {
 	var_t *var;
 
@@ -813,7 +813,7 @@ var_t *Var_Set(char *var_name, char *value)
  OBS: do not use it indiscriminately, may cause overprocessing
  */
 
-double Var_VariableValue(char *var_name)
+double Var_VariableValue(const char *var_name)
 {
 	var_t *var;
 
@@ -830,7 +830,7 @@ double Var_VariableValue(char *var_name)
  OBS: do not use it indiscriminately, may cause overprocessing
  */
 
-char *Var_VariableString(char *var_name)
+const char *Var_VariableString(const char *var_name)
 {
 	var_t *var;
 
@@ -846,7 +846,7 @@ char *Var_VariableString(char *var_name)
  Save all variables set with VAR_ARCHIVE flag in "path" file
  */
 
-void Var_WriteVariables(char *path, client_t *client)
+void Var_WriteVariables(const char *path, client_t *client)
 {
 	var_t *var;
 	char file[128];

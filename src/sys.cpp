@@ -178,7 +178,7 @@ void Sys_PrintTrace (void)
  Delete files. Syntaxe: "path/file"
  */
 
-void Sys_RemoveFiles(char *pathfile)
+void Sys_RemoveFiles(const char *pathfile)
 {
 	//FILE *fp;
 	DIR *dp;
@@ -501,7 +501,7 @@ char *Sys_ConsoleInput(void)
  Create a Lock file
  */
 
-int8_t Sys_LockFile(char *file)
+int8_t Sys_LockFile(const char *file)
 {
 	FILE *fp;
 
@@ -523,7 +523,7 @@ int8_t Sys_LockFile(char *file)
  Remove a Lock file
  */
 
-int8_t Sys_UnlockFile(char *file)
+int8_t Sys_UnlockFile(const char *file)
 {
 	return unlink(file);
 }
@@ -534,7 +534,7 @@ int8_t Sys_UnlockFile(char *file)
  Waits till LOCK file is gone
  */
 
-void Sys_WaitForLock(char *file)
+void Sys_WaitForLock(const char *file)
 {
 	FILE *fp;
 
@@ -555,7 +555,7 @@ void Sys_WaitForLock(char *file)
  Print a file in console
  */
 
-void Sys_Printfile(char *file)
+void Sys_Printfile(const char *file)
 {
 	char lock[128];
 	char buffer[1024];

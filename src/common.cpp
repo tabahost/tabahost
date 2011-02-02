@@ -51,7 +51,7 @@ void *Z_Malloc(u_int32_t size)
  Converts 6bytes ascii string to 4bytes wbnick
  */
 
-u_int32_t ascii2wbnick(char *playernick, u_int8_t attr)
+u_int32_t ascii2wbnick(const char *playernick, u_int8_t attr)
 {
 	nick_t wbnick;
 	u_int8_t buffer[7];
@@ -802,7 +802,7 @@ void Com_LogDescription(u_int32_t type, double value, char *string)
  Prints data in console and in logfile if enabled
  */
 
-void Com_Printf(int8_t verb, char *fmt, ...)
+void Com_Printf(int8_t verb, const char *fmt, ...)
 {
 	va_list argptr;
 	char msg[MAX_PRINTMSG];
@@ -1051,7 +1051,7 @@ int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
  This function flushes multiple statements results
  */
 
-void Com_MySQL_Flush(MYSQL *mysql, char *file, u_int32_t line)
+void Com_MySQL_Flush(MYSQL *mysql, const char *file, u_int32_t line)
 {
 	MYSQL_RES *result= NULL;
 	int16_t status = 0;
@@ -1157,7 +1157,7 @@ void Com_Printfhex(unsigned char *buffer, int len)
  Compares strings ignoring case
  */
 
-int Com_Stricmp(char *s1, char *s2)
+int Com_Stricmp(const char *s1, const char *s2)
 {
 	if (s1 && s2)
 	{
@@ -1377,7 +1377,7 @@ double AngleTo(int32_t origx, int32_t origy, int32_t destx, int32_t desty)
  Reserve memory space and copy
  */
 
-char *CopyString(char *in)
+char *CopyString(const char *in)
 {
 	char *out;
 
@@ -1486,7 +1486,7 @@ double Com_Deg(double angle)
  atoi handling NULL arrays
  */
 
-int Com_Atoi(char *string)
+int Com_Atoi(const char *string)
 {
 	if (string)
 		return atoi(string);
@@ -1503,7 +1503,7 @@ int Com_Atoi(char *string)
  atou handling NULL arrays
  */
 
-u_int32_t Com_Atou(char *string)
+u_int32_t Com_Atou(const char *string)
 {
 	u_int32_t result = 0;
 	u_int16_t i;
@@ -1539,7 +1539,7 @@ u_int32_t Com_Atou(char *string)
  atof handling NULL arrays
  */
 
-double Com_Atof(char *string)
+double Com_Atof(const char *string)
 {
 	if (string)
 		return atof(string);
@@ -1556,7 +1556,7 @@ double Com_Atof(char *string)
  Return the column value from given column name
  */
 
-char *Com_MyRow(char *string)
+char *Com_MyRow(const char *string)
 {
 	MYSQL_FIELD *fields;
 	u_int8_t i, num_fields;
@@ -1633,7 +1633,7 @@ char *Com_SquadronName(u_int32_t owner)
  strncmp handling null arrays
  */
 
-int Com_Strncmp(char *s1, char *s2, int n)
+int Com_Strncmp(const char *s1, const char *s2, int n)
 {
 	if (s1 && s2)
 	{
@@ -1659,7 +1659,7 @@ int Com_Strncmp(char *s1, char *s2, int n)
  Compares strings case sensitive
  */
 
-int Com_Strcmp(char *s1, char *s2)
+int Com_Strcmp(const char *s1, const char *s2)
 {
 	if (s1 && s2)
 	{

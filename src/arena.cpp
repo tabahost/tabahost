@@ -210,7 +210,7 @@ const char *GetBuildingType(u_int16_t type)
  Load arena status (fields, CV, city, etc)
  */
 
-void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
+void LoadArenaStatus(const char *filename, client_t *client, u_int8_t reset)
 {
 	u_int16_t i, j, k, l, group;
 	char file[128];
@@ -455,7 +455,7 @@ void LoadArenaStatus(char *filename, client_t *client, u_int8_t reset)
  Save arena status (fields, CV, city, etc)
  */
 
-void SaveArenaStatus(char *filename, client_t *client)
+void SaveArenaStatus(const char *filename, client_t *client)
 {
 	u_int16_t i, j, k, group;
 	char file[128];
@@ -658,7 +658,7 @@ void SaveWebsiteData(void)
  Load planes pool
  */
 
-void LoadPlanesPool(char *filename, client_t *client)
+void LoadPlanesPool(const char *filename, client_t *client)
 {
 	u_int8_t i, j;
 	char file[128];
@@ -706,7 +706,7 @@ void LoadPlanesPool(char *filename, client_t *client)
  Save planes pool
  */
 
-void SavePlanesPool(char *filename, client_t *client)
+void SavePlanesPool(const char *filename, client_t *client)
 {
 	u_int8_t i, j;
 	char file[128];
@@ -1348,7 +1348,7 @@ void LogCVsPosition(void)
  Get plane name from given number
  */
 
-char *GetPlaneName(u_int16_t plane)
+const char *GetPlaneName(u_int16_t plane)
 {
 	if (plane < maxplanes)
 		return arena->planedamage[plane].name;
@@ -1362,7 +1362,7 @@ char *GetPlaneName(u_int16_t plane)
  Get plane abreviated name from given number
  */
 
-char *GetSmallPlaneName(u_int16_t plane)
+const char *GetSmallPlaneName(u_int16_t plane)
 {
 	if (plane < maxplanes)
 		return arena->planedamage[plane].abbrev;
@@ -1376,9 +1376,9 @@ char *GetSmallPlaneName(u_int16_t plane)
  Get plane dir name from given number
  */
 
-char *GetPlaneDir(u_int16_t plane)
+const char *GetPlaneDir(u_int16_t plane)
 {
-	static char *directories[MAX_PLANES] = {NULL, /* 0 */ "f6f5", /* 1 */ "f4f4", /* 2 */ "fm2", /* 3 */ "f4u1d", /* 4 */ "zero?", /* 5 */
+	static const char *directories[MAX_PLANES] = {NULL, /* 0 */ "f6f5", /* 1 */ "f4f4", /* 2 */ "fm2", /* 3 */ "f4u1d", /* 4 */ "zero?", /* 5 */
 		"zero21?", /* 6 */ "zero52?", /* 7 */ "ki43", /* 8 */ "ki84", /* 9 */ "bf109e", /* 10 */ "bf109f", /* 11 */ "bf109g", /* 12 */ "109gr6", /* 13 */
 		"bf109k", /* 14 */ "bf110c", /* 15 */ "bf110g", /* 16 */ "fw1904", /* 17 */ "fw1908", /* 18 */ "fw190d", /* 19 */ "hurri1", /* 20 */
 		"hurri2", /* 21 */ "spit1", /* 22 */ "spit5", /* 23 */ "spit9", /* 24 */ "p38f", /* 25 */ "p38?", /* 26 */ "p38l", /* 27 */
@@ -1685,7 +1685,7 @@ void AddBomb(u_int16_t id, int32_t destx, int32_t desty, int32_t destz, u_int8_t
  Load RPS from file
  */
 
-void LoadRPS(char *path, client_t *client)
+void LoadRPS(const char *path, client_t *client)
 {
 	u_int8_t i, j, k;
 	char file[128];
@@ -1786,7 +1786,7 @@ void LoadRPS(char *path, client_t *client)
  TODO: FIXME: Function not used for a while
  */
 
-void SaveRPS(char *path, client_t *client)
+void SaveRPS(const char *path, client_t *client)
 {
 	char file[128];
 	u_int8_t i, j;
@@ -1871,7 +1871,7 @@ void ShowRPS(client_t *client)
  Load Mapcycle from file
  */
 
-void LoadMapcycle(char *path, client_t *client)
+void LoadMapcycle(const char *path, client_t *client)
 {
 	u_int8_t i;
 	char file[128];
@@ -4666,7 +4666,7 @@ void CrediteFactoryBuildings(city_t *city)
  Save Debug information before arena crashes
  */
 
-void DebugArena(char *file, u_int32_t line)
+void DebugArena(const char *file, u_int32_t line)
 {
 	char filename[128];
 	time_t ltime;

@@ -209,7 +209,7 @@ void RemoveClient(client_t *client)
  Save Debug information and kick player
  */
 
-void DebugClient(char *file, u_int32_t line, u_int8_t kick, client_t *client)
+void DebugClient(const char *file, u_int32_t line, u_int8_t kick, client_t *client)
 {
 	char filename[128];
 	time_t ltime;
@@ -1376,7 +1376,7 @@ client_t *FindLClient(char *longnick)
  Send a message to a player
  */
 
-int PPrintf(client_t *client, u_int16_t radio, char *fmt, ...)
+int PPrintf(client_t *client, u_int16_t radio, const char *fmt, ...)
 {
 	va_list argptr;
 	u_int8_t buffer[MAX_RADIOMSG]; // 75 is max size of a radio message
@@ -1456,7 +1456,7 @@ int PPrintf(client_t *client, u_int16_t radio, char *fmt, ...)
  Send a country message
  */
 
-void CPrintf(u_int8_t country, u_int16_t radio, char *fmt, ...)
+void CPrintf(u_int8_t country, u_int16_t radio, const char *fmt, ...)
 {
 	va_list argptr;
 	char msg[MAX_PRINTMSG];
@@ -1493,7 +1493,7 @@ void CPrintf(u_int8_t country, u_int16_t radio, char *fmt, ...)
  Send a broadcast message
  */
 
-void BPrintf(u_int16_t radio, char *fmt, ...)
+void BPrintf(u_int16_t radio, const char *fmt, ...)
 {
 	va_list argptr;
 	char msg[MAX_PRINTMSG];

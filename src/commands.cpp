@@ -60,7 +60,7 @@ void Cmd_LoadBatch(client_t *client)
  Executes a script file
  */
 
-void Cmd_LoadConfig(char *filename, client_t *client)
+void Cmd_LoadConfig(const char *filename, client_t *client)
 {
 	FILE *fp;
 	char file[128];
@@ -4743,7 +4743,7 @@ void Cmd_Wings(u_int8_t mode, client_t *client)
  start hmack
  */
 
-void Cmd_Hmack(client_t *client, char *command, u_int8_t tank)
+void Cmd_Hmack(client_t *client, const char *command, u_int8_t tank)
 {
 	client_t *drone;
 	u_int8_t i;
