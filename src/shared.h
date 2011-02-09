@@ -134,7 +134,6 @@ typedef unsigned int u_int32_t;
 #define MAX_INT16			(int16_t) 0x7FFF // max value for signed in 16 (32767)
 #define MAX_RELATED			7		// max of drones user can mantain relationship
 #define	MAX_PLANES			210		// (126 = FHL v1.66) max of plane numbers (last plane number + 1)
-#define	MAX_WAYPOINTS		128		// max of waypoint a CV or Cargo Ship can make
 #define MAX_CVS				8		// max CV groups
 #define MAX_MEDALS			20		// max number of medals player can be award
 #define MAX_BOMBS			256		// emulated bombs array
@@ -538,62 +537,42 @@ typedef struct building_s
 	int32_t		posz;
 } building_t;
 
-typedef struct doublePoint_s // TDoublePoint
-{
-	int32_t x;
-	int32_t y;
-} doublePoint_t;
+//typedef struct ship_s
+//{
+//	u_int8_t	plane;		// ship plane: KAGA, ENTERPRISE, Etc.
+//	u_int8_t	type;		// ship type: 0 = CV; 1 = CA; 2 = DD
+//	u_int8_t	country;	// ship country (1 = red, 3 = gold)
+//	u_int8_t	group;		// group index
+//	doublePoint_t Position;	// Position
+//	doublePoint_t Target;	// Target Position / Next waypoint
+//	int32_t	 radius;		// ship radius
+//	value2_t	Vel;			// Speed
+//	value2_t	Acel;		// Acceleration
+//	value1_t	Yaw;			// Heading
+//	value2_t	YawVel;			// Yaw change speed
+//	struct client_s	*drone;			// Drone that this boid is associated
+//	struct ship_s *next;		// pointer to next ship in chain list
+//} ship_t;
 
-typedef struct value1_s // TValue1
-{
-	double curr;
-	double target;
-} value1_t;
-
-typedef struct value2_s // TValue2
-{
-	double curr;
-	double target;
-	double max;
-	double min;
-} value2_t;
-
-typedef struct ship_s
-{
-	u_int8_t	plane;		// ship plane: KAGA, ENTERPRISE, Etc.
-	u_int8_t	type;		// ship type: 0 = CV; 1 = CA; 2 = DD
-	u_int8_t	country;	// ship country (1 = red, 3 = gold)
-	u_int8_t	group;		// group index
-	doublePoint_t Position;	// Position
-	doublePoint_t Target;	// Target Position / Next waypoint
-	int32_t	 radius;		// ship radius
-	value2_t	Vel;			// Speed
-	value2_t	Acel;		// Acceleration
-	value1_t	Yaw;			// Heading
-	value2_t	YawVel;			// Yaw change speed
-	struct client_s	*drone;			// Drone that this boid is associated
-	struct ship_s *next;		// pointer to next ship in chain list
-} ship_t;
-
-typedef struct cvs_s
-{
-	u_int8_t	id;				// CV ID
-	u_int8_t	field;			// field number of CV
-	u_int8_t	country;	// ship country (1 = red, 3 = gold)
-	u_int8_t	threatened;		// cv is being attacked?
-	u_int8_t	zigzag;			// next zigzag maneuver
-	u_int8_t	outofport;		// out of port (1st waypoint)
-	u_int8_t	prepared;		// cv is prepared?
-//	u_int8_t	stuck;			// stuck in land
-	char		logfile[64];	// logfile name
-	u_int8_t	fleetships[12];	// fleet ships, e.g: 73;77;77;77;78
-	u_int8_t	fleetshipstotal;
-	u_int8_t	wptotal;		// total of waypoints
-	u_int8_t	wpnum;			// num of actual waypoint
-	struct field_s *port;
-	int32_t		wp[MAX_WAYPOINTS][2]; // waypoints
-	ship_t		*ships;
-} cvs_t;
+//typedef struct cvs_s
+//{
+//	u_int8_t	id;				// CV ID
+//	u_int8_t	field;			// field number of CV
+//	u_int8_t	country;	// ship country (1 = red, 3 = gold)
+//	u_int8_t	threatened;		// cv is being attacked?
+//	u_int8_t	zigzag;			// next zigzag maneuver
+//	u_int8_t	outofport;		// out of port (1st waypoint)
+//	u_int8_t	prepared;		// cv is prepared?
+////	u_int8_t	stuck;			// stuck in land
+//	char		logfile[64];	// logfile name
+//	u_int8_t	fleetships[12];	// fleet ships, e.g: 73;77;77;77;78
+//	u_int8_t	fleetshipstotal;
+//	u_int8_t	wptotal;		// total of waypoints
+//	u_int8_t	wpnum;			// num of actual waypoint
+//	struct field_s *port;
+//	int32_t		wp[MAX_WAYPOINTS][2]; // waypoints
+//	ship_t		*ships;
+//} cvs_t;
 
 //typedef struct cv_s
 //{
@@ -650,7 +629,7 @@ typedef struct field_s
 	u_int32_t	ctfcount;
 	struct hitby_s	hitby[MAX_HITBY]; // players who hit field
 	//cv_t		*cv; // linked CV legacy
-	cvs_t		*cvs; // linked CV new
+//	cvs_t		*cvs; // linked CV new
 	struct city_s *city[MAX_CITYFIELD]; // linked city
 	double		rps[MAX_PLANES];
 	u_int8_t	rps_custom_rate[MAX_PLANES];
@@ -720,7 +699,7 @@ typedef struct arena_s
 	u_int32_t	scenario;		// scenario start frame
 	bool_t		thaisent[256];	// array of 256 bits. used in loops to check if already sent data to some THAI group;
 	munition_t	munition[MAX_MUNTYPE];		// ammo characteristics
-	cvs_t		cvs[MAX_CVS];	// New CV structures
+//	cvs_t		cvs[MAX_CVS];	// New CV structures
 	rps_t		rps[MAX_PLANES]; // planes to auto field update
 	mapcycle_t	mapcycle[16];	// list of maps to cycle
 	int8_t		mapnum;			// num of current map
@@ -957,7 +936,7 @@ typedef struct client_s
 	struct client_s *view;		// view what other player is doing
 	struct client_s *shanghai;	// what client is shanghai
 	struct client_s	*attached;	// who client is attached
-	ship_t		*deck;		// client is at CV Deck
+//	ship_t		*deck;		// client is at CV Deck
 
 	struct client_s	*gunnerview;	// which client player is viewing
 	struct client_s	*gunners[14];
@@ -2290,7 +2269,7 @@ void	SendOttoParams(client_t *client);
 void	SendOttoParams2(client_t *client);
 void	SendLastConfig(client_t *client);
 void	AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove);
-void	AddRemoveCVScreen(ship_t *ship, client_t *client, u_int8_t remove, u_int8_t unk1, u_int8_t cvnum);
+//void	AddRemoveCVScreen(ship_t *ship, client_t *client, u_int8_t remove, u_int8_t unk1, u_int8_t cvnum);
 void	SendScreenUpdates(client_t *client);
 void	SendDeckUpdates(client_t *client);
 int		CanHear(client_t *client1, client_t *client2, u_int32_t msgto);
@@ -2450,7 +2429,7 @@ int		ProcessDrone(client_t *drone);
 void	DroneGetTarget(client_t *drone);
 void	FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
 void	FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
-void	CVFire(ship_t *ship, int32_t destx, int32_t desty);
+//void	CVFire(ship_t *ship, int32_t destx, int32_t desty);
 void	ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz, client_t *client);
 void	SendDronePos(client_t *drone, client_t *client);
 void	SendXBombs(client_t *drone);
@@ -2461,19 +2440,19 @@ u_int32_t NewDroneName(client_t *client);
 void	LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_t *client);
 
 // cv.c
-void	RunShips_Walk(ship_t *B);
-double	RunShips_Angle(double ang);
-double	RunShips_AngleDef(double ang);
-void	RunShips_Yaw(ship_t *B, ship_t *CV);
-void	RunShips_ReTarget(ship_t *B, ship_t *CV, const double *A);
-void	RunShips(u_int8_t group, u_int8_t formation); // Call every 500ms
-int8_t	ProcessDroneShips(ship_t *ship);
-void	ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client);
-ship_t	*MainShipTarget(u_int8_t group);
-void	ReadCVWaypoints(u_int8_t num);
-void	ResetCV(u_int8_t group);
-ship_t	*RemoveShip(ship_t *ship);
-ship_t	*AddShip(u_int8_t group, u_int8_t plane, u_int8_t country);
+//void	RunShips_Walk(ship_t *B);
+//double	RunShips_Angle(double ang);
+//double	RunShips_AngleDef(double ang);
+//void	RunShips_Yaw(ship_t *B, ship_t *CV);
+//void	RunShips_ReTarget(ship_t *B, ship_t *CV, const double *A);
+//void	RunShips(u_int8_t group, u_int8_t formation); // Call every 500ms
+//int8_t	ProcessDroneShips(ship_t *ship);
+//void	ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client);
+//ship_t	*MainShipTarget(u_int8_t group);
+//void	ReadCVWaypoints(u_int8_t num);
+//void	ResetCV(u_int8_t group);
+//ship_t	*RemoveShip(ship_t *ship);
+//ship_t	*AddShip(u_int8_t group, u_int8_t plane, u_int8_t country);
 
 //commands.c
 void	Cmd_LoadBatch(client_t *client);

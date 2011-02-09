@@ -21,6 +21,7 @@
  ***/
 
 #include "shared.h"
+#include "cv.h"
 
 void RunShips_Walk(ship_t *B)
 {

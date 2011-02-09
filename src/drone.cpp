@@ -293,7 +293,7 @@ void RemoveDrone(client_t *drone)
 /**
  DroneVisibleList
 
- Makes drone visible lists like in SendPlayersNear()
+ Build drone visible lists like in SendPlayersNear()
  */
 
 void DroneVisibleList(client_t *drone)
