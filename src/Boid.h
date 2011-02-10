@@ -11,6 +11,8 @@
 #define CLASSID_BOID 0x87EF9895
 
 #include "shared.h"
+#include <list>
+using namespace std;
 
 typedef struct doublePoint_s // TDoublePoint
 {
@@ -38,10 +40,10 @@ class Boid
 		u_int32_t signature;
 
 	protected:
+
+		// Fica
 		u_int8_t plane; // ship plane: KAGA, ENTERPRISE, Etc.
-		u_int8_t type; // ship type: 0 = CV; 1 = CA; 2 = DD
 		u_int8_t country; // ship country (1 = red, 3 = gold)
-		u_int8_t group; // group index
 		doublePoint_t Position; // Position
 		doublePoint_t Target; // Target Position / Next waypoint
 		int32_t radius; // ship radius
@@ -50,7 +52,14 @@ class Boid
 		value1_t Yaw; // Heading
 		value2_t YawVel; // Yaw change speed
 		struct client_s *drone; // Drone that this Boid is associated with
-		//Boid *next; // pointer to next ship in chain list
+		Boid *leader;
+		list<Boid> followers;
+		
+		// Revisar
+		u_int8_t group; // group index
+		u_int8_t type; // ship type: 0 = CV; 1 = CA; 2 = DD
+		
+
 
 	public:
 		static u_int16_t boidCount;
@@ -60,16 +69,19 @@ class Boid
 		Boid();
 		virtual ~Boid();
 
+		bool operator==(const Boid &b);
+
 		double angle(double ang);
 		double angleDef(double ang);
 
 		int8_t processDroneBoid(); // boid interface with wb-drone
+		void setVelMax(double max);
 
 		void walk(); // make a move forward
 		void yaw(Boid *leader); // follower yaw
 		void yaw(); // leader yaw
 		void retarget(Boid *leader, const double *A); // follower retarget (target leader formation)
-		virtual bool retarget(int32_t x, int32_t y); // leader retarget (target next waypoint)
+		virtual bool retarget(doublePoint_t &wp); // leader retarget (target next waypoint)
 		void prepare(Boid *leader, const double *A); // follower prepare (point to formation)
 		void prepare(); // leader prepare (point to waypoint)
 };

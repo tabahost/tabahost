@@ -44,7 +44,7 @@ bool Ship::isLegal(const char *function)
  Leader ship retarget waypoint
  */
 
-bool Ship::retarget(int32_t x, int32_t y)
+bool Ship::retarget(doublePoint_t &wp)
 {
 	if(this->isLegal("Ship::retarget"))
 	{
@@ -64,11 +64,11 @@ bool Ship::retarget(int32_t x, int32_t y)
 //		ship->Target.x = arena->cvs[this->group].wp[arena->cvs[this->group].wpnum][0];
 //		ship->Target.y = arena->cvs[this->group].wp[arena->cvs[this->group].wpnum][1];
 
-		this->Target.x = x;
-		this->Target.y = y;
+		Target.x = wp.x;
+		Target.y = wp.y;
 
 		// Check waypoint
-		if((abs(this->Target.y - this->Position.y) > 70) || (abs(this->Target.x - this->Position.x) > 70))
+		if((abs(Target.y - Position.y) > 70) || (abs(Target.x - Position.x) > 70))
 			return true;
 		else
 		// Next waypoint

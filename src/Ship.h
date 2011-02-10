@@ -25,7 +25,7 @@ class Ship: private Boid
 		Ship();
 		virtual ~Ship();
 
-		bool retarget(int32_t x, int32_t y);
+		bool retarget(doublePoint_t &wp);
 };
 
 #endif /* SHIP_H_ */

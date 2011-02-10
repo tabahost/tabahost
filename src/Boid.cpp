@@ -26,7 +26,51 @@ Boid::~Boid()
 {
 	Com_Printf(VERBOSE_DEBUG, "Boid destructor\n");
 	boidCount--;
+	if(drone)
+		RemoveDrone(drone);
+
+	if(this == leader) // I'm the leader, so I must nominate other leader
+	{
+		if(!followers.empty()) // there is someone else
+		{
+			list<Boid>::iterator boid;
+
+			followers.front().leader = &followers.front(); // set new leader
+			followers.front().followers.clear(); // clear follower list to make sure
+
+			boid = followers.begin(); // get first boid
+			boid++; // skip the leader;
+			while(boid != followers.end()) // recreate the list on new leader
+			{
+				boid->leader = followers.front().leader;
+				leader->followers.push_back(*boid);
+			}
+
+			followers.clear();
+		}
+	}
+	else // I'm a follower, so I must ask leader to unregister myself
+	{
+		if(leader)
+			leader->followers.remove(*this);         
+	}
 	signature = 0;
+}
+
+bool Boid::operator==(const Boid &b)
+{ // example: a == b
+
+	if(this->isLegal("Boid::operator=="))
+	{
+		if(this == &b)
+			return true;
+		else
+			return false;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 /**
@@ -61,14 +105,14 @@ void Boid::walk()
 	else
 	{
 		// IncVeloc
-		this->Vel.curr = this->Vel.curr + this->Acel.curr;
-		if(this->Vel.curr > this->Vel.max)
-			this->Vel.curr = this->Vel.max;
-		else if(this->Vel.curr < this->Vel.min)
-			this->Vel.curr = this->Vel.min;
+		Vel.curr = Vel.curr + Acel.curr;
+		if(Vel.curr > Vel.max)
+			Vel.curr = Vel.max;
+		else if(Vel.curr < Vel.min)
+			Vel.curr = Vel.min;
 
-		this->Position.x = this->Position.x + this->Vel.curr * sin(this->Yaw.curr);
-		this->Position.y = this->Position.y + this->Vel.curr * cos(this->Yaw.curr);
+		Position.x = Position.x + Vel.curr * sin(Yaw.curr);
+		Position.y = Position.y + Vel.curr * cos(Yaw.curr);
 	}
 }
 
@@ -110,7 +154,7 @@ double Boid::angleDef(double ang)
 	}
 	else
 	{
-		ang = angle(ang);
+		ang = this->angle(ang);
 		if(ang > M_PI)
 			ang -= 2 * M_PI;
 		return ang;
@@ -133,49 +177,49 @@ void Boid::yaw(Boid *leader)
 	}
 	else
 	{
-		dx = this->Target.x - this->Position.x;
-		dy = this->Target.y - this->Position.y;
+		dx = Target.x - Position.x;
+		dy = Target.y - Position.y;
 
 		// ajusta angulo alvo
 		if(sqrt(dx * dx + dy * dy) < 100) // ship reached WP
 		{
 			if(leader)
-				this->Yaw.target = angle(leader->Yaw.curr);
+				Yaw.target = this->angle(leader->Yaw.curr);
 			else
-				this->Yaw.target = this->Yaw.curr;
+				Yaw.target = Yaw.curr;
 		}
 		else
 		{
-			this->Yaw.target = Com_Rad(AngleTo(this->Position.x, this->Position.y, this->Target.x, this->Target.y));
+			Yaw.target = Com_Rad(AngleTo(Position.x, Position.y, Target.x, Target.y));
 		}
 
-		this->Yaw.target = angle(this->Yaw.target);
+		Yaw.target = this->angle(Yaw.target);
 		// ajusta velocidade angular
-		// this->YawVel = this->Yawtarget-this->Yaw;
-		this->YawVel.curr = angleDef(this->Yaw.target - this->Yaw.curr);
-		if(this->YawVel.curr > this->YawVel.max)
-			this->YawVel.curr = this->YawVel.max;
-		else if(this->YawVel.curr < this->YawVel.min)
-			this->YawVel.curr = this->YawVel.min;
+		// YawVel = Yawtarget-Yaw;
+		YawVel.curr = this->angleDef(Yaw.target - Yaw.curr);
+		if(YawVel.curr > YawVel.max)
+			YawVel.curr = YawVel.max;
+		else if(YawVel.curr < YawVel.min)
+			YawVel.curr = YawVel.min;
 		// incrementa yaw
-		//if(MODULUS(this->Yaw.curr - this->Yaw.target) > (0.01 * M_PI))
-		this->Yaw.curr = angle(this->Yaw.curr + this->YawVel.curr);
+		//if(MODULUS(Yaw.curr - Yaw.target) > (0.01 * M_PI))
+		Yaw.curr = this->angle(Yaw.curr + YawVel.curr);
 		// ajusta velocidade
-		this->Vel.target = sqrt(dx * dx + dy * dy) / 3;
-		dx = this->Vel.max * (1 - MODULUS(angleDef(this->Yaw.target - this->Yaw.curr) / (0.5 * M_PI))); // 1 - xº/90º
+		Vel.target = sqrt(dx * dx + dy * dy) / 3;
+		dx = Vel.max * (1 - MODULUS(this->angleDef(Yaw.target - Yaw.curr) / (0.5 * M_PI))); // 1 - xº/90º
 
-		if(dx < this->Vel.min)
-			dx = this->Vel.min;
+		if(dx < Vel.min)
+			dx = Vel.min;
 
-		if(this->Vel.target > dx)
-			this->Vel.target = dx;
+		if(Vel.target > dx)
+			Vel.target = dx;
 
-		this->Acel.curr = this->Vel.target - this->Vel.curr; // controle P
-		if(this->Acel.curr > this->Acel.max)
-			this->Acel.curr = this->Acel.max;
-		else if(this->Acel.curr < this->Acel.min)
-			this->Acel.curr = this->Acel.min;
-		// this->Vel.curr = this->Vel.target;
+		Acel.curr = Vel.target - Vel.curr; // controle P
+		if(Acel.curr > Acel.max)
+			Acel.curr = Acel.max;
+		else if(Acel.curr < Acel.min)
+			Acel.curr = Acel.min;
+		// Vel.curr = Vel.target;
 	}
 }
 
@@ -205,8 +249,8 @@ void Boid::retarget(Boid *leader, const double *A)
 	}
 	else
 	{
-		this->Target.x = leader->Position.x + A[0] * sin(leader->Yaw.curr + A[1] * M_PI);
-		this->Target.y = leader->Position.y + A[0] * cos(leader->Yaw.curr + A[1] * M_PI);
+		Target.x = leader->Position.x + A[0] * sin(leader->Yaw.curr + A[1] * M_PI);
+		Target.y = leader->Position.y + A[0] * cos(leader->Yaw.curr + A[1] * M_PI);
 	}
 }
 
@@ -224,12 +268,12 @@ void Boid::prepare(Boid *leader, const double *A)
 	}
 	else
 	{
-		this->Yaw.target = leader->Yaw.target;
-		this->Yaw.curr = leader->Yaw.curr;
-		this->Target.x = leader->Position.x + A[0] * sin(leader->Yaw.curr + A[1] * M_PI);
-		this->Target.y = leader->Position.y + A[0] * cos(leader->Yaw.curr + A[1] * M_PI);
-		this->Position.x = this->Target.x;
-		this->Position.y = this->Target.y;
+		Yaw.target = leader->Yaw.target;
+		Yaw.curr = leader->Yaw.curr;
+		Target.x = leader->Position.x + A[0] * sin(leader->Yaw.curr + A[1] * M_PI);
+		Target.y = leader->Position.y + A[0] * cos(leader->Yaw.curr + A[1] * M_PI);
+		Position.x = Target.x;
+		Position.y = Target.y;
 	}
 }
 
@@ -241,9 +285,27 @@ void Boid::prepare() // main Boid
 	}
 	else
 	{
-		this->Yaw.target = Com_Rad(AngleTo(this->Position.x, this->Position.y, this->Target.x, this->Target.y));
-		this->Yaw.target = angle(this->Yaw.target);
-		this->Yaw.curr = this->Yaw.target;
+		Yaw.target = Com_Rad(AngleTo(Position.x, Position.y, Target.x, Target.y));
+		Yaw.target = this->angle(Yaw.target);
+		Yaw.curr = Yaw.target;
+	}
+}
+
+/**
+ Boid::setVelMax
+
+ Set Vel Max
+ */
+
+void Boid::setVelMax(double max)
+{
+	if(this->isLegal("Boid::setVelMax"))
+	{
+		return;
+	}
+	else
+	{
+		Vel.max = max;
 	}
 }
 
@@ -257,44 +319,51 @@ int8_t Boid::processDroneBoid()
 {
 	client_t *drone;
 
-	if(!(drone = this->drone)) // boid not linked with a drone
+	if(this->isLegal("Boid::processDroneBoid"))
 	{
 		return -1;
 	}
-
-	if(drone->bugged) // drone bugged, so boid must be deleted
+	else
 	{
-		BPrintf(RADIO_YELLOW, "DroneBoid %s bugged, and will be removed", drone->longnick);
-		return -1;
+		if(!(drone = this->drone)) // boid not linked with a drone
+		{
+			return -1;
+		}
+
+		if(drone->bugged) // drone bugged, so boid must be deleted
+		{
+			BPrintf(RADIO_YELLOW, "DroneBoid %s bugged, and will be removed", drone->longnick);
+			return -1;
+		}
+
+		// drone killed, so boid must be deleted
+		if(drone->status_damage & ((1 << PLACE_REARFUSE) | (1 << PLACE_CENTERFUSE) | (1 << PLACE_RGEAR) | (1 << PLACE_LGEAR)))
+		{
+			ScoresEvent(SCORE_KILLED, drone, 0);
+			return -1;
+		}
+
+		DroneVisibleList(drone);
+
+		drone->posxy[0][0] = Position.x; // X
+		drone->posxy[1][0] = Position.y; // Y
+		drone->posalt[0] = 0; // Z
+		drone->speedxyz[0][0] = Vel.curr * sin(Yaw.curr); // X
+		drone->speedxyz[1][0] = Vel.curr * cos(Yaw.curr); // Y
+		drone->speedxyz[2][0] = 0; // Z
+		drone->angles[0][0] = 0; // Roll
+		drone->angles[1][0] = 0; // Pitch
+		drone->angles[2][0] = 3600 - (int32_t) floor(Com_Deg(Yaw.curr) * 10); // Yaw
+		drone->accelxyz[0][0] = Acel.curr * sin(Yaw.curr); // X
+		drone->accelxyz[1][0] = Acel.curr * cos(Yaw.curr); // Y
+		drone->accelxyz[2][0] = 0; // Z
+		drone->aspeeds[0][0] = 0; // Roll
+		drone->aspeeds[1][0] = 0; // Pitch
+		drone->aspeeds[2][0] = 0;//(int32_t)floor(Com_Deg(YawVel.curr)); // debug * 2); // Yaw - degrees per second?
+
+		drone->offset = -500;
+		drone->timer += 500;
+
+		return 0;
 	}
-
-	// drone killed, so boid must be deleted
-	if(drone->status_damage & ((1 << PLACE_REARFUSE) | (1 << PLACE_CENTERFUSE) | (1 << PLACE_RGEAR) | (1 << PLACE_LGEAR)))
-	{
-		ScoresEvent(SCORE_KILLED, drone, 0);
-		return -1;
-	}
-
-	DroneVisibleList(drone);
-
-	drone->posxy[0][0] = this->Position.x; // X
-	drone->posxy[1][0] = this->Position.y; // Y
-	drone->posalt[0] = 0; // Z
-	drone->speedxyz[0][0] = this->Vel.curr * sin(this->Yaw.curr); // X
-	drone->speedxyz[1][0] = this->Vel.curr * cos(this->Yaw.curr); // Y
-	drone->speedxyz[2][0] = 0; // Z
-	drone->angles[0][0] = 0; // Roll
-	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = 3600 - (int32_t) floor(Com_Deg(this->Yaw.curr) * 10); // Yaw
-	drone->accelxyz[0][0] = this->Acel.curr * sin(this->Yaw.curr); // X
-	drone->accelxyz[1][0] = this->Acel.curr * cos(this->Yaw.curr); // Y
-	drone->accelxyz[2][0] = 0; // Z
-	drone->aspeeds[0][0] = 0; // Roll
-	drone->aspeeds[1][0] = 0; // Pitch
-	drone->aspeeds[2][0] = 0;//(int32_t)floor(Com_Deg(this->YawVel.curr)); // debug * 2); // Yaw - degrees per second?
-
-	drone->offset = -500;
-	drone->timer += 500;
-
-	return 0;
 }
