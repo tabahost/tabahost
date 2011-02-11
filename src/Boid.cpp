@@ -1,13 +1,9 @@
-/*
+/**
  * Boid.cpp
  *
- *  Created on: 03/02/2011
- *      Author: franz
+ *  @date 03/02/2011
+ *  @author franz
  */
-
-// #include <deque>
-// http://www.dreamincode.net/forums/topic/35344-c-deque-tutorial/
-// http://www.cplusplus.com/reference/stl/deque/
 
 #include "Boid.h"
 
@@ -18,6 +14,17 @@ Boid::Boid()
 	Com_Printf(VERBOSE_DEBUG, "Boid constructor\n");
 	signature = CLASSID_BOID;
 	leader = NULL;
+	boids.push_back(this);
+	boidCount++;
+}
+
+Boid::Boid(struct client_s *drone)
+{
+	Com_Printf(VERBOSE_DEBUG, "Boid constructor\n");
+	signature = CLASSID_BOID;
+	leader = NULL;
+	boids.push_back(this);
+	this->setDrone(drone);
 	boidCount++;
 }
 
@@ -26,6 +33,7 @@ Boid::Boid()
 Boid::~Boid()
 {
 	Com_Printf(VERBOSE_DEBUG, "Boid destructor\n");
+	boids.erase(this);
 	boidCount--;
 	if(drone)
 		RemoveDrone(drone);
@@ -38,9 +46,17 @@ Boid::~Boid()
 	{
 		if(!followers->empty()) // there is someone else
 		{
-			followers->front()->followers = followers; // give the member list to newleader
-			followers->front()->leader = NULL;
+			Boid *newleader;
+
+			newleader = followers->front();
+			newleader->followers = followers; // give the member list to newleader
+			newleader->leader = NULL;
 			followers->pop_front(); // remove newleader from list
+			followers->restart();
+			while(followers->next())
+			{
+				followers->current()->leader = newleader;
+			}
 			followers = NULL; // clean followers point just to assert that this is no longer anybody's leader
 		}
 	}
@@ -59,6 +75,21 @@ bool Boid::operator==(const Boid &b)
 		return true;
 	else
 		return false;
+}
+
+/**
+ Boid::isLegal
+
+ Class Validator
+ */
+
+void Boid::runBoids()
+{
+	boids.restart();
+	while(boids.next())
+	{
+		// do stuff
+	}
 }
 
 /**

@@ -59,6 +59,11 @@ class Boidlist
 		Boidlist(Boid *boid):count(1),it(NULL),first(new Boidnode(boid)),last(first){}; // create a list with one boid
 		virtual ~Boidlist(); // delete list
 
+		void restart(){it = first;};
+		Boid *prev(){it = it->prev; return it->value;};
+		Boid *next(){it = it->next; return it->value;};
+		Boid *current(){return it->value;};
+
 		void push_back(Boid *a){count++; if(last){last->next = new Boidnode(a); last->next->prev = last; last = last->next;} else {first = new Boidnode(a); last = first;}};
 		void push_front(Boid *a){count++; if(first){first->prev = new Boidnode(a); first->prev->next = first; first = first->prev;} else {first = new Boidnode(a); last = first;}};
 		Boid* front(){if(first) return first->value; else return NULL;};
@@ -96,11 +101,14 @@ class Boid
 
 
 	public:
-		static u_int16_t boidCount;
+		static u_int16_t boidCount; // may be obsolete because off Boidlist::count
+		static Boidlist boids;
+		static void runBoids();
 
 		virtual bool isLegal(const char *);
 
 		Boid();
+		Boid(struct client_s *drone);
 		virtual ~Boid();
 
 		bool operator==(const Boid &b);
@@ -108,6 +116,8 @@ class Boid
 
 		double angle(double ang);
 		double angleDef(double ang);
+
+		struct client_s *setDrone(struct client_s *drone){this->drone = drone; return drone;};
 
 		int8_t processDroneBoid(); // boid interface with wb-drone
 		void setVelMax(double max);
