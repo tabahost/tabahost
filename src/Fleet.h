@@ -10,8 +10,6 @@
 
 #define CLASSID_FLEET 0xEA466903
 
-#define	MAX_WAYPOINTS		128		// max of waypoint a Fleet can handle
-
 #include <list>
 #include "Boid.h"
 using namespace std;

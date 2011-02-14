@@ -12,7 +12,7 @@
 
 #include "Boid.h"
 
-class Ship: private Boid
+class Ship: protected Boid
 {
 	private:
 		u_int32_t signature;
@@ -25,7 +25,19 @@ class Ship: private Boid
 		Ship();
 		virtual ~Ship();
 
+		// virtuals
+		void loadWaypoints();
 		bool retarget(doublePoint_t &wp);
+
+		int8_t run(); // run frame
+
+
+//		void updateFieldPosition(); // if this group is a field (CV), update the field based on group leader position
+//		void calcWaypointsTo(int32_t x, int32_t y); // calc a path to xy destination, 1st waypoint is the origin
+//		void waypointStart(); // return waypoint counter to start (origin)
+//		void waypointNext(); // jump to next waypoint (if reach end, reload waypoints and jump to 2nd waypoint)
+//		void waypointChange(int32_t x, int32_t y, u_int16_t wp); // Change waypoint wp to new xy
+//		void waypointChange(int32_t x, int32_t y); // Change current waypoint to new xy
 };
 
 #endif /* SHIP_H_ */

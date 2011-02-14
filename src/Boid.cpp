@@ -14,16 +14,25 @@ Boid::Boid()
 	Com_Printf(VERBOSE_DEBUG, "Boid constructor\n");
 	signature = CLASSID_BOID;
 	leader = NULL;
+	threatened = 0;
+	outofport = 0;
+	prepared = 0;
+	wpnum = 1;
+	snprintf(logfile, sizeof(logfile), "%s,boid%u,%s,%u", mapname->string, group, GetCountry(country), (u_int32_t) time(NULL));
 	boids.push_back(this);
 	boidCount++;
 }
 
-Boid::Boid(struct client_s *drone)
+Boid::Boid(struct client_s *drone, Boid* leaderboid = NULL)
 {
-	Com_Printf(VERBOSE_DEBUG, "Boid constructor\n");
+	Com_Printf(VERBOSE_DEBUG, "Boid constructor drone\n");
 	signature = CLASSID_BOID;
-	leader = NULL;
+	threatened = 0;
+	outofport = 0;
+	prepared = 0;
+	wpnum = 1;
 	boids.push_back(this);
+	this->setLeader(leaderboid);
 	this->setDrone(drone);
 	boidCount++;
 }
@@ -38,9 +47,9 @@ Boid::~Boid()
 	if(drone)
 		RemoveDrone(drone);
 
-	if(leader) // I'm a follower, so I must ask leader to unregister myself
+	if(this->hasLeader()) // I'm a follower, so I must ask leader to unregister myself
 	{
-		leader->removeBoid(this);
+		leader->removeFollower(this);
 	}
 	else // I'm the leader, so I must nominate other leader
 	{
@@ -52,10 +61,12 @@ Boid::~Boid()
 			newleader->followers = followers; // give the member list to newleader
 			newleader->leader = NULL;
 			followers->pop_front(); // remove newleader from list
-			followers->restart();
-			while(followers->next())
+
+			u_int8_t i;
+			for(i = 0, followers->restart(); followers->next(); i++)
 			{
 				followers->current()->leader = newleader;
+				followers->current()->position = i; // reset the formation position
 			}
 			followers = NULL; // clean followers point just to assert that this is no longer anybody's leader
 		}
@@ -78,9 +89,9 @@ bool Boid::operator==(const Boid &b)
 }
 
 /**
- Boid::isLegal
+ Boid::runBoids
 
- Class Validator
+ Run all boids
  */
 
 void Boid::runBoids()
@@ -88,7 +99,10 @@ void Boid::runBoids()
 	boids.restart();
 	while(boids.next())
 	{
-		// do stuff
+		if(boids.current()->run() < 0)
+		{
+			boids.erase_del(boids.current());
+		}
 	}
 }
 
@@ -110,17 +124,46 @@ bool Boid::isLegal(const char *function)
 }
 
 /**
- Boid::removeBoid
+ Boid::addFollower
 
- Remove a boid from list
+ Remove a follower from list
  */
 
-void Boid::removeBoid(Boid *boid)
+void Boid::addFollower(Boid *follower)
 {
-	if(!this->isLegal("Boid::removeBoid"))
+	if(!this->isLegal("Boid::addFollower"))
 		return;
 
-	followers->erase(boid);
+	if(follower->hasLeader())
+	{
+		Com_Printf(VERBOSE_WARNING, "Boid::addFollower() %s already has a leader %s\n", follower->drone->longnick, follower->leader->drone->longnick);
+		return;
+	}
+
+	if(followers)
+	{
+		if(followers->back())
+			follower->setPosition(followers->back()->getPosition() + 1);
+		else
+			follower->setPosition(0);
+		follower->setLeader(this);
+		followers->push_back(follower);
+	}
+}
+
+/**
+ Boid::removeFollower
+
+ Remove a follower from list
+ */
+
+void Boid::removeFollower(Boid *follower)
+{
+	if(!this->isLegal("Boid::removeFollower"))
+		return;
+
+	if(followers)
+		followers->erase(follower);
 }
 
 /**
@@ -256,7 +299,7 @@ void Boid::yaw()
  Adjust next waypoint position in formation
  */
 
-void Boid::retarget(Boid *leader, const double *A)
+void Boid::retarget(const double *A)
 {
 	if(!this->isLegal("Boid::retarget"))
 		return;
@@ -268,10 +311,10 @@ void Boid::retarget(Boid *leader, const double *A)
 /**
  Boid::prepare
 
- Prepare boid before start walking
+ Prepare follower boid before start walking
  */
 
-void Boid::prepare(Boid *leader, const double *A)
+void Boid::prepare(const double *A)
 {
 	if(!this->isLegal("Boid::prepare"))
 		return;
@@ -284,6 +327,12 @@ void Boid::prepare(Boid *leader, const double *A)
 	Position.y = Target.y;
 }
 
+/**
+ Boid::prepare
+
+ Prepare leader boid before start walking
+ */
+
 void Boid::prepare() // main Boid
 {
 	if(!this->isLegal("Boid::prepare()"))
@@ -292,20 +341,6 @@ void Boid::prepare() // main Boid
 	Yaw.target = Com_Rad(AngleTo(Position.x, Position.y, Target.x, Target.y));
 	Yaw.target = this->angle(Yaw.target);
 	Yaw.curr = Yaw.target;
-}
-
-/**
- Boid::setVelMax
-
- Set Vel Max
- */
-
-void Boid::setVelMax(double max)
-{
-	if(!this->isLegal("Boid::setVelMax"))
-		return;
-
-	Vel.max = max;
 }
 
 /**
