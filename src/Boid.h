@@ -50,6 +50,7 @@ class Boid
 		u_int8_t group; // group index
 		u_int8_t type; // type: 0 = CV; 1 = CA; 2 = DD
 		u_int8_t formation; // which formation the group is using
+		char logfile[64]; // logfile name
 
 		// Individual variables
 		u_int8_t plane; // ship plane: KAGA, ENTERPRISE, Etc.
@@ -73,11 +74,10 @@ class Boid
 
 		// Follower exclusive
 		Boid *leader;
-		u_int8_t position; // boid position in formation
+		u_int8_t pos; // boid position in formation
 
 		// Revisar
 		//	u_int8_t	stuck;			// stuck in land
-		char logfile[64]; // logfile name
 		u_int8_t fleetships[12]; // fleet ships/planes/vehicles, e.g: 73;77;77;77;78
 		u_int8_t fleetshipstotal;
 		struct field_s *port;
@@ -87,11 +87,11 @@ class Boid
 		static u_int16_t boidCount; // may be obsolete because off Boidlist::count
 		static Boidlist boids;
 		static void runBoids();
+		static void removeGroup(u_int8_t group);
 
 		virtual bool isLegal(const char *);
 
 		Boid();
-		Boid(struct client_s *drone, Boid* leaderboid);
 		virtual ~Boid();
 
 		// tools
@@ -101,17 +101,23 @@ class Boid
 
 		// Variable set/access/test
 		void setVelMax(double a){Vel.max = a;};
-		void setPosition(u_int8_t a){position = a;};
-		u_int8_t getPosition(){return position;};
+		void setPosition(u_int8_t a){pos = a;};
+		void setCurrWaypoint(u_int8_t a){wpnum = a;};
+		u_int8_t getPosition(){return pos;};
 		void setPrepared(bool a){prepared = a;};
 		Boid *setLeader(Boid* a){leader = a; return a;};
+		void setCountry(u_int8_t a){country = a;};
+		void setFormation(u_int8_t a){formation = a;};
+		void setGroup(u_int8_t a){group = a;};
 		bool hasLeader(){return (leader != NULL);};
 		struct client_s *setDrone(struct client_s *a){drone = a; return a;};
 
 		// leader functions
 		void addFollower(Boid *follower);
 		void removeFollower(Boid *follower);
-		virtual void loadWaypoints();
+		virtual void loadWaypoints(u_int8_t wpnum);
+		void changeRoute(double angle /*0*/, u_int16_t distance /*10000*/, client_t *client);
+		void logPosition();
 
 		// follower functions
 		//void joinLeader(Boid *leader);

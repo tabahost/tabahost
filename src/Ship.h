@@ -12,7 +12,7 @@
 
 #include "Boid.h"
 
-class Ship: protected Boid
+class Ship: public Boid
 {
 	private:
 		u_int32_t signature;
@@ -25,10 +25,12 @@ class Ship: protected Boid
 		Ship();
 		virtual ~Ship();
 
-		// virtuals
-		void loadWaypoints();
-		bool retarget(doublePoint_t &wp);
+		// Game Interface
+		void processFieldBoid(); // boid interface with wb-field
 
+		// virtuals
+		void loadWaypoints(u_int8_t wpnum);
+		bool retarget(doublePoint_t &wp);
 		int8_t run(); // run frame
 
 

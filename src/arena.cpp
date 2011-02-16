@@ -1311,38 +1311,6 @@ void SendCVRoute(client_t *client, u_int8_t cvnum)
 */
 
 /**
- LogCVsPosition
-
- Log all CVs position
- */
-
-void LogCVsPosition(void)
-{
-	u_int8_t i;
-	FILE *fp;
-	char filename[128];
-
-	for (i = 0; i < cvs->value; i++)
-	{
-		if(arena->cvs[i].ships)
-		{
-			snprintf(filename, sizeof(filename), "./logs/players/%s.cvl", arena->cvs[i].logfile);
-
-			if (!(fp = fopen(filename, "a")))
-			{
-				Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", filename);
-			}
-			else
-			{
-				fprintf(fp, "%d;%d;%f;%f;%u;%u;%u\n", arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, arena->cvs[i].ships->Vel.curr, Com_Deg(arena->cvs[i].ships->Yaw.curr),
-						arena->cvs[i].threatened, arena->cvs[i].country, (u_int32_t)time(NULL));
-				fclose(fp);
-			}
-		}
-	}
-}
-
-/**
  GetPlaneName
 
  Get plane name from given number

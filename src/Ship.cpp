@@ -5,8 +5,11 @@
  *      Author: franz
  */
 
-// Ao criar o boid, executar:
-// 1) loadWaypoints()
+// Ao criar o boid:
+// 1) definir group
+// 2) executar loadWaypoints()
+// 3) definir field
+// 4) definir formation
 // após isto, está apto para entrar no loop run();
 
 #include "Ship.h"
@@ -48,7 +51,7 @@ bool Ship::isLegal(const char *function)
  Load waypoints (create or read from file)
  */
 
-void Ship::loadWaypoints()
+void Ship::loadWaypoints(u_int8_t wpnum = 1)
 {
 	char file[32];
 	u_int8_t i;
@@ -83,12 +86,28 @@ void Ship::loadWaypoints()
 		memset(buffer, 0, sizeof(buffer));
 	}
 
+	this->wpnum = wpnum;
+
 	if(!wptotal)
 	{
 		PPrintf(NULL, RADIO_YELLOW, "WARNING: ReadCVWaypoints() error reading \"%s\"", file);
 	}
 
 	fclose(fp);
+}
+
+/**
+ Ship::processFieldBoid
+
+ Boid interface with wb-field
+ */
+
+void Ship::processFieldBoid()
+{
+	// update field position
+	arena->fields[field].posxyz[0] = Position.x;
+	arena->fields[field].posxyz[1] = Position.y;
+	arena->fields[field].posxyz[2] = 59; // 18m
 }
 
 /**
@@ -102,42 +121,28 @@ bool Ship::retarget(doublePoint_t &wp)
 	if(!this->isLegal("Ship::retarget"))
 		return false;
 
-	// Fleet -> update arena->fields position
-	//		// update field position
-	//		arena->fields[arena->cvs[this->group].field].posxyz[0] = this->Position.x;
-	//		arena->fields[arena->cvs[this->group].field].posxyz[1] = this->Position.y;
-	//		arena->fields[arena->cvs[this->group].field].posxyz[2] = 59; // 18m
-
-	// Fleet -> recalculate waypoints for group
-	//		// update target waypoint (this may be changed manually or automatically for defensive maneuver)
-	//		ship->Target.x = arena->cvs[this->group].wp[arena->cvs[this->group].wpnum][0];
-	//		ship->Target.y = arena->cvs[this->group].wp[arena->cvs[this->group].wpnum][1];
+	this->processFieldBoid();
 
 	Target.x = wp.x;
 	Target.y = wp.y;
 
 	// Check waypoint
 	if((abs(Target.y - Position.y) > 70) || (abs(Target.x - Position.x) > 70))
+	{
 		return true;
-	else
-		// Next waypoint
+	}
+	else // Next waypoint
+	{
+		threatened = 0;
+		wpnum++;
+
+		if(wpnum == wptotal) // reset waypoint index
+			wpnum = 1;
+
+		this->loadWaypoints(wpnum); // reload waypoints from file
+
 		return false;
-
-	// Fleet
-	//		ReadCVWaypoints(this->group); // reload waypoints from file
-	//
-	//		if(arena->cvs[this->group].threatened)
-	//		{
-	//			arena->cvs[this->group].threatened = 0;
-	//		}
-	//
-	//		arena->cvs[this->group].wpnum++;
-	//
-	//		if(arena->cvs[this->group].wpnum == arena->cvs[this->group].wptotal) // reset waypoint index
-	//		{
-	//			arena->cvs[this->group].wpnum = 1;
-	//		}
-
+	}
 }
 
 /**
@@ -203,7 +208,7 @@ int8_t Ship::run()
 	}
 	else // I'm a follower
 	{
-		Boid::retarget(Form[formation][position]);
+		Boid::retarget(Form[formation][pos]);
 		this->yaw(leader);
 		this->walk();
 

@@ -413,18 +413,46 @@ void CreateAllShips(u_int8_t group)
 
 void ResetCV(u_int8_t group)
 {
+	Ship *leader, ship;
+	client_t *drone;
 	// CREATE ALL SHIPS AGAIN
 	Com_Printf(VERBOSE_DEBUG, "ResetCV() group %u\n", group);
 
-	ReadCVWaypoints(group);
-	RemoveAllShips(group);
-	CreateAllShips(group);
+	Boid::removeGroup(group);
 
-	arena->cvs[group].threatened = 0;
-	arena->cvs[group].outofport = 0;
-	arena->cvs[group].prepared = 0;
-	arena->cvs[group].wpnum = 1;
-	snprintf(arena->cvs[group].logfile, sizeof(arena->cvs[group].logfile), "%s,cv%u,%s,%u", mapname->string, arena->cvs[group].id, GetCountry(arena->cvs[group].country), (u_int32_t)time(NULL));
+	// Create leader
+	leader = new Ship();
+	leader->setGroup(group);
+	leader->loadWaypoints();
+	leader->setField(blabla);
+	leader->setFormation(blabla);
+	leader->setCountry(blabla);
+	leader->setPlane(blabla);
+	drone = AddDrone(DRONE_SHIP, leader->Position.x, leader->Position.y, 0, leader->country, leader->plane, NULL);
+	if(!drone)
+	{
+		delete leader;
+		Com_Printf(VERBOSE_WARNING, "ResetCV() group %u - error creating leader drone\n", group);
+		return;
+	}
+	else
+		ship->setDrone(drone);
+
+	for(;;)
+	{
+		ship = new Ship();
+		leader->addFollower(ship); // calls ship->setCountry(), ship->setPosition(), ship->setFormation(), ship->setLeader() and ship->setGroup()
+		ship->setPlane(blabla);
+		drone = AddDrone(DRONE_SHIP, ship->Position.x, ship->Position.y, 0, ship->country, ship->plane, NULL);
+		if(!drone)
+		{
+			delete ship;
+			Com_Printf(VERBOSE_WARNING, "ResetCV() group %u - error creating drone %u\n", group, i);
+			return;
+		}
+		else
+			ship->setDrone(drone);
+	}
 }
 
 /**

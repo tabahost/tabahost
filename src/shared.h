@@ -2330,7 +2330,6 @@ void	ClearMapDots(client_t *client);
 //void	SetCVRoute(cv_t *cv);
 //int32_t GetCVPos(cv_t *cv, u_int8_t xy);
 //void	SendCVRoute(client_t *client, u_int8_t cvnum);
-void	LogCVsPosition(void);
 void	ListWaypoints(client_t *client);
 const char *GetPlaneName(u_int16_t plane);
 const char *GetSmallPlaneName(u_int16_t plane);

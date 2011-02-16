@@ -14,26 +14,18 @@ Boid::Boid()
 	Com_Printf(VERBOSE_DEBUG, "Boid constructor\n");
 	signature = CLASSID_BOID;
 	leader = NULL;
-	threatened = 0;
-	outofport = 0;
-	prepared = 0;
+	drone = NULL;
+	group = 0;
+	threatened = false;
+	outofport = false;
+	prepared = false;
+	field = 0;
+	formation = 0;
+	pos = 0;
+	zigzag = 1;
 	wpnum = 1;
 	snprintf(logfile, sizeof(logfile), "%s,boid%u,%s,%u", mapname->string, group, GetCountry(country), (u_int32_t) time(NULL));
 	boids.push_back(this);
-	boidCount++;
-}
-
-Boid::Boid(struct client_s *drone, Boid* leaderboid = NULL)
-{
-	Com_Printf(VERBOSE_DEBUG, "Boid constructor drone\n");
-	signature = CLASSID_BOID;
-	threatened = 0;
-	outofport = 0;
-	prepared = 0;
-	wpnum = 1;
-	boids.push_back(this);
-	this->setLeader(leaderboid);
-	this->setDrone(drone);
 	boidCount++;
 }
 
@@ -60,13 +52,14 @@ Boid::~Boid()
 			newleader = followers->front();
 			newleader->followers = followers; // give the member list to newleader
 			newleader->leader = NULL;
+			newleader->loadWaypoints(wpnum);
 			followers->pop_front(); // remove newleader from list
 
 			u_int8_t i;
 			for(i = 0, followers->restart(); followers->next(); i++)
 			{
 				followers->current()->leader = newleader;
-				followers->current()->position = i; // reset the formation position
+				followers->current()->pos = i; // reset the formation position
 			}
 			followers = NULL; // clean followers point just to assert that this is no longer anybody's leader
 		}
@@ -102,6 +95,55 @@ void Boid::runBoids()
 		if(boids.current()->run() < 0)
 		{
 			boids.erase_del(boids.current());
+		}
+	}
+}
+
+/**
+ Boid::removeGroup
+
+ Remove all boids form a group
+ */
+
+void Boid::removeGroup(u_int8_t group)
+{
+	boids.restart();
+	while(boids.next())
+	{
+		if(boids.current()->group == group)
+		{
+			boids.erase_del(boids.current());
+		}
+	}
+}
+
+/**
+ Boid::logPosition
+
+ Log all leader position
+ */
+
+void Boid::logPosition()
+{
+	FILE *fp;
+	char filename[128];
+
+	boids.restart();
+	while(boids.next())
+	{
+		if(boids.current()->leader == NULL)
+		{
+			snprintf(filename, sizeof(filename), "./logs/players/%s.ail", logfile);
+
+			if(!(fp = fopen(filename, "a")))
+			{
+				Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", filename);
+			}
+			else
+			{
+				fprintf(fp, "%d;%d;%f;%f;%u;%u;%u\n", Position.x, Position.y, Vel.curr, Com_Deg(Yaw.curr), threatened, country, (u_int32_t) time(NULL));
+				fclose(fp);
+			}
 		}
 	}
 }
@@ -146,6 +188,9 @@ void Boid::addFollower(Boid *follower)
 			follower->setPosition(followers->back()->getPosition() + 1);
 		else
 			follower->setPosition(0);
+		follower->setCountry(country);
+		follower->setFormation(formation);
+		follower->setGroup(group);
 		follower->setLeader(this);
 		followers->push_back(follower);
 	}
@@ -296,7 +341,7 @@ void Boid::yaw()
 /**
  Boid::retarget
 
- Adjust next waypoint position in formation
+ Adjust follower next waypoint position in formation
  */
 
 void Boid::retarget(const double *A)
@@ -341,6 +386,68 @@ void Boid::prepare() // main Boid
 	Yaw.target = Com_Rad(AngleTo(Position.x, Position.y, Target.x, Target.y));
 	Yaw.target = this->angle(Yaw.target);
 	Yaw.curr = Yaw.target;
+}
+
+/**
+ Boid::changeRoute
+
+ Change route from client command or just by threat
+ */
+
+void Boid::changeRoute(double angle /*0*/, u_int16_t distance /*10000*/, client_t *client)
+{
+	int8_t angleoffset = 0;
+
+	Com_Printf(VERBOSE_DEBUG, "WP %d\n", wpnum);
+
+	if(!threatened) // step wpnum back, because its an automatic route change or first manual change
+	{
+		wpnum--;
+		threatened = 1;
+	}
+	// else // mantain wpnum, because is a manual route change
+
+	if(!client)
+	{
+		// grab the cvpos pathway angle
+		angle = AngleTo(Position.x, Position.y, wp[wpnum + 1].x, wp[wpnum + 1].y);
+
+		// change the route based in the pathway angle
+		if(rand() % 100 < 60) // zigzag
+		{
+			angleoffset = 45 * Com_Pow(-1, zigzag);
+
+			if(zigzag == 1)
+				zigzag = 2;
+			else
+				zigzag = 1;
+		}
+		else
+		{
+			angleoffset = 45 * Com_Pow(-1, rand() % 2);
+		}
+
+		// check if new waypoint is over land
+		if(GetHeightAt(Position.x + (10000 * sin(Com_Rad(angle + angleoffset))), Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
+		{
+			angleoffset *= -1;
+		}
+
+		angle += angleoffset;
+		distance = 2000;
+	}
+
+	wp[wpnum].x = Position.x + (distance * sin(Com_Rad(angle)));
+	wp[wpnum].y = Position.y + (distance * cos(Com_Rad(angle)));
+
+	if(client)
+	{
+		PPrintf(client, RADIO_YELLOW, "Waypoint changed to %s", Com_Padloc(wp[wpnum].x, wp[wpnum].y));
+		PPrintf(client, RADIO_YELLOW, "ETA: %s\"", Com_TimeSeconds(distance / Vel.curr));
+	}
+
+	// configure to next wpnum be that nearest to wp[lastwp][0]
+	// coded at threatened = 0;
 }
 
 /**

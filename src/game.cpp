@@ -1065,8 +1065,8 @@ void CheckArenaRules(void)
 
 	if (!setjmp(debug_buffer))
 	{
-		if (!(arena->frame % 6000)) // Log CVs position every 60sec
-			LogCVsPosition();
+		if (!(arena->frame % 6000)) // Log AI's position every 60sec
+			Boid::logPosition();
 
 		if (!setjmp(debug_buffer))
 		{
