@@ -77,9 +77,6 @@ class Boid
 		u_int8_t pos; // boid position in formation
 
 		// Revisar
-		//	u_int8_t	stuck;			// stuck in land
-		u_int8_t fleetships[12]; // fleet ships/planes/vehicles, e.g: 73;77;77;77;78
-		u_int8_t fleetshipstotal;
 		struct field_s *port;
 
 
@@ -109,6 +106,9 @@ class Boid
 		void setCountry(u_int8_t a){country = a;};
 		void setFormation(u_int8_t a){formation = a;};
 		void setGroup(u_int8_t a){group = a;};
+		void setField(u_int8_t a){field = a;};
+		void setPlane(u_int8_t a){plane = a;};
+		void setPort(field_s *a){port = a;};
 		bool hasLeader(){return (leader != NULL);};
 		struct client_s *setDrone(struct client_s *a){drone = a; return a;};
 

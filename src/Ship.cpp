@@ -146,6 +146,62 @@ bool Ship::retarget(doublePoint_t &wp)
 }
 
 /**
+ Ship::ResetShips
+
+ Reset ship formation
+ */
+
+void Ship::ResetShips(u_int8_t group)
+{
+	Ship *leader, *ship;
+	client_t *drone;
+	// CREATE ALL SHIPS AGAIN
+	Com_Printf(VERBOSE_DEBUG, "ResetCV() group %u\n", group);
+
+	removeGroup(group);
+
+	// Create leader
+	leader = new Ship();
+	leader->setGroup(group);
+	leader->loadWaypoints();
+	leader->setFormation(0);
+	leader->setPort(&(arena->fields[group-1]));
+	leader->setField(group-1);
+	leader->setCountry(arena->fields[group-1].country);
+	arena->fields[group-1].cv = leader;
+
+	leader->setPlane(arena->fields[group-1].fleetships[0]);
+
+	drone = AddDrone(DRONE_SHIP, leader->Position.x, leader->Position.y, 0, leader->country, leader->plane, NULL);
+	if(!drone)
+	{
+		delete leader;
+		Com_Printf(VERBOSE_WARNING, "ResetCV() group %u - error creating leader drone\n", group);
+		return;
+	}
+	else
+		ship->setDrone(drone);
+
+	for(u_int8_t i = 1; i < arena->fields[group-1].fleetshipstotal; i++)
+	{
+		ship = new Ship();
+		leader->addFollower(ship); // calls ship->setCountry(), ship->setPosition(), ship->setFormation(), ship->setLeader() and ship->setGroup()
+		ship->setPlane(arena->fields[group-1].fleetships[i]);
+		drone = AddDrone(DRONE_SHIP, ship->Position.x, ship->Position.y, 0, ship->country, ship->plane, NULL);
+		if(!drone)
+		{
+			delete ship;
+			Com_Printf(VERBOSE_WARNING, "ResetCV() group %u - error creating drone %u\n", group, i);
+			return;
+		}
+		else
+			ship->setDrone(drone);
+	}
+
+	return;
+}
+
+/**
  Ship::run
 
  Run frame

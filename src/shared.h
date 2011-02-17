@@ -46,6 +46,9 @@
  ****************************************************
  ****************************************************/
 
+#ifndef SHARED_H_
+#define SHARED_H_
+
 // Includes
 #include <ctype.h>
 #include <errno.h>
@@ -503,6 +506,10 @@ typedef unsigned int u_int32_t;
 #define	FORMATION_LASTERN	3
 #define	FORMATION_ECHELON	4
 
+// Classes
+
+class Boid;
+
 // Structures & Unions
 
 typedef struct bool_s
@@ -628,8 +635,9 @@ typedef struct field_s
 	u_int8_t	ctfwho;
 	u_int32_t	ctfcount;
 	struct hitby_s	hitby[MAX_HITBY]; // players who hit field
-	//cv_t		*cv; // linked CV legacy
-//	cvs_t		*cvs; // linked CV new
+	u_int8_t	fleetships[12]; // fleet ships/planes/vehicles, e.g: 73;77;77;77;78
+	u_int8_t	fleetshipstotal;
+	Boid		*cv; // linked CV legacy
 	struct city_s *city[MAX_CITYFIELD]; // linked city
 	double		rps[MAX_PLANES];
 	u_int8_t	rps_custom_rate[MAX_PLANES];
@@ -2449,7 +2457,7 @@ void	LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_
 //void	ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client);
 //ship_t	*MainShipTarget(u_int8_t group);
 //void	ReadCVWaypoints(u_int8_t num);
-//void	ResetCV(u_int8_t group);
+//void	ResetShips(u_int8_t group);
 //ship_t	*RemoveShip(ship_t *ship);
 //ship_t	*AddShip(u_int8_t group, u_int8_t plane, u_int8_t country);
 
@@ -2740,3 +2748,5 @@ extern	var_t		*ywindvelocity;	///
 extern	var_t		*zwindvelocity;	///
 
 extern	FILE		*logfile[MAX_LOGFILE];		/// general logfile
+
+#endif /* SHARED_H_ */

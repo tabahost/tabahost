@@ -19,6 +19,7 @@ class Ship: public Boid
 
 	public:
 		static u_int16_t shipCount;
+		static void ResetShips(u_int8_t group);
 
 		virtual bool isLegal(const char *);
 

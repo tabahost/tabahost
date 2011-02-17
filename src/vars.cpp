@@ -132,7 +132,7 @@ var_t *mortars; // extern
 var_t *mview; // extern
 var_t *notanks; // extern
 var_t *nowings; // extern
-var_t *obradar;	// extern
+var_t *obradar; // extern
 var_t *oldcapt; // extern
 var_t *ottoaccuracy; // set otto accuracy
 var_t *ottoacquirerange; // extern
@@ -280,7 +280,8 @@ void InitVars(void)
 	friendlydotstwr = Var_Get("friendlydotstwr", "1", "0", "1", "Radar friendly tower based on", VAR_ARCHIVE);
 	friendlyfire = Var_Get("friendlyfire", "1", "0", "1", "Enable friendly fire", VAR_ARCHIVE);
 	friendlyidlim = Var_Get("friendlyidlim", "1500", "0", "40500", "Maximum range for display of friendly name/plane icons", VAR_ARCHIVE);
-	friendlyidlimbomber = Var_Get("friendlyidlimbomber", "1500", "0", "40500", "Maximum range for display of friendly name/plane icons for bombers", VAR_ARCHIVE);
+	friendlyidlimbomber = Var_Get("friendlyidlimbomber", "1500", "0", "40500", "Maximum range for display of friendly name/plane icons for bombers",
+			VAR_ARCHIVE);
 	fueldiv = Var_Get("fueldiv", "100", "0.01", "10.0", "Modifies the fuel flow of aircraft. 1 = normal", VAR_ARCHIVE);
 	gruntcapture = Var_Get("gruntcapture", "1", "0", "1", "Allow grunts to be captured by driving vehicle", VAR_ARCHIVE);
 	gruntshoot = Var_Get("gruntshoot", "1", "0", "1", "Allow grunts to be shot", VAR_ARCHIVE);
@@ -320,12 +321,29 @@ void InitVars(void)
 	nowings = Var_Get("nowings", "0", "0", "1", "Don't allow players to use wingmen", VAR_ARCHIVE);
 	obradar = Var_Get("obradar", "6000", "0", "12000", "Set on-board radar range for planes that have radar", VAR_ARCHIVE); // D20
 	oldcapt = Var_Get("oldcapt", "1", "0", "1", "Enable old way to capture fields (destroy all structures and drop paras)", VAR_ARCHIVE);
-	ottoaccuracy = Var_Get("ottoaccuracy", "5", "1", "10", "A general accuracy setting, this affects the otto's accuracy, reaction time and tracking", VAR_ARCHIVE);
-	ottoacquirerange = Var_Get("ottoacquirerange", "1500", "0", "40500", "Range at which otto will acquire a target (call out and begin tracking)", VAR_ARCHIVE);
+	ottoaccuracy = Var_Get("ottoaccuracy", "5", "1", "10", "A general accuracy setting, this affects the otto's accuracy, reaction time and tracking",
+			VAR_ARCHIVE);
+	ottoacquirerange
+			= Var_Get("ottoacquirerange", "1500", "0", "40500", "Range at which otto will acquire a target (call out and begin tracking)", VAR_ARCHIVE);
 	ottoadjust = Var_Get("ottoadjust", "6", "1", "12", "Additional tweak value for accuracy/distance", VAR_ARCHIVE);
-	ottoburstoff = Var_Get("ottoburstoff", "1.0", "0.5", "5.0", "Determines the length of the pause in between bursts. Proportional to target distance so pause decreases with range", VAR_ARCHIVE);
-	ottoburston = Var_Get("ottoburston", "1.0", "0.5", "4.0", "Determines the length of a burst. Inverse to target distance so burst length increases as target gets nearer. Increasing this value increases the volume of fire", VAR_ARCHIVE);
-	ottoburstonmax = Var_Get("ottoburstonmax", "3.0", "0.5", "4.0", "Works with ottoburston parameter in determining burst length by factoring in the hit ratio, so that as hits are achieved burst time is increased. Increasing this value increases the chances of inflicting damage", VAR_ARCHIVE);
+	ottoburstoff = Var_Get("ottoburstoff", "1.0", "0.5", "5.0",
+			"Determines the length of the pause in between bursts. Proportional to target distance so pause decreases with range", VAR_ARCHIVE);
+	ottoburston
+			= Var_Get(
+					"ottoburston",
+					"1.0",
+					"0.5",
+					"4.0",
+					"Determines the length of a burst. Inverse to target distance so burst length increases as target gets nearer. Increasing this value increases the volume of fire",
+					VAR_ARCHIVE);
+	ottoburstonmax
+			= Var_Get(
+					"ottoburstonmax",
+					"3.0",
+					"0.5",
+					"4.0",
+					"Works with ottoburston parameter in determining burst length by factoring in the hit ratio, so that as hits are achieved burst time is increased. Increasing this value increases the chances of inflicting damage",
+					VAR_ARCHIVE);
 	ottooverrides = Var_Get("ottooverrides", "0", "0", "511", "Determines which otto settings a player can override", VAR_ARCHIVE);
 	ottorange = Var_Get("ottorange", "10", "1", "60", "Determines the range at which the otto will commence firing (x100 yd)", VAR_ARCHIVE);
 	ottoretarget = Var_Get("ottoretarget", "0.2", "0.0", "10.0", "Determines frequency in seconds at which otto will look for new targets", VAR_ARCHIVE);
@@ -399,11 +417,11 @@ void CheckVars(void)
 	u_int32_t date;
 	var_t *var;
 
-	if (logfile_active->modified)
+	if(logfile_active->modified)
 	{
 		modified = 1;
 
-		if ((!logfile_active->value))
+		if((!logfile_active->value))
 		{
 			for(i = 0; i < MAX_LOGFILE; i++)
 			{
@@ -416,13 +434,13 @@ void CheckVars(void)
 		}
 	}
 
-	if (database->modified || sqlserver->modified)
+	if(database->modified || sqlserver->modified)
 	{
 		modified = 1;
 
 		mysql_close(&my_sock);
 
-		if (!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, 3306, NULL /*unix_socket*/, 0))
+		if(!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, 3306, NULL /*unix_socket*/, 0))
 		{
 			BPrintf(RADIO_YELLOW, "ERROR: Sys_SQL_Init(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
 		}
@@ -442,20 +460,20 @@ void CheckVars(void)
 		GetTonnageToClose(FALSE);
 	}
 
-	if (dirname->modified)
+	if(dirname->modified)
 	{
 		modified = 1;
 
 		arena->mapnum = -1;
 
-		for (i = 0; i < MAX_MAPCYCLE; i++)
+		for(i = 0; i < MAX_MAPCYCLE; i++)
 		{
 
-			if (!Com_Strcmp(dirname->string, arena->mapcycle[i].mapname))
+			if(!Com_Strcmp(dirname->string, arena->mapcycle[i].mapname))
 			{
 				arena->mapnum = i;
 
-				date = (arena->year * 10000)+(arena->month * 100) + arena->day;
+				date = (arena->year * 10000) + (arena->month * 100) + arena->day;
 
 				//				if(arena->mapcycle[i].date > date)
 				break;
@@ -481,31 +499,31 @@ void CheckVars(void)
 		 */
 	}
 
-	if (countrytime->modified)
+	if(countrytime->modified)
 	{
 		modified = 1;
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 			{
 				clients[i].countrytime = time(NULL) + countrytime->value;
 			}
 		}
 	}
 
-	if (hideadmin->modified)
+	if(hideadmin->modified)
 	{
 		modified = 1;
 
 		date = 0;
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].attr == 1 && hideadmin->value)
+			if(clients[i].attr == 1 && hideadmin->value)
 				continue;
 
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 				date++;
 		}
 
@@ -514,31 +532,31 @@ void CheckVars(void)
 		UpdateIngameClients(0);
 	}
 
-	if (server_speeds->modified)
+	if(server_speeds->modified)
 	{
 		modified = 1;
 
-		if (server_speeds->value >= 100)
+		if(server_speeds->value >= 100)
 		{
 			Var_Set("server_speeds", "99");
 		}
 
-		if (server_speeds->value < 0)
+		if(server_speeds->value < 0)
 		{
 			Var_Set("server_speeds", "0");
 		}
 	}
 
-	if (timemult->modified)
+	if(timemult->modified)
 	{
 		modified = 1;
 
-		if (timemult->value >= 6000)
+		if(timemult->value >= 6000)
 		{
 			Var_Set("timemult", "5999");
 		}
 
-		if (timemult->value < 0)
+		if(timemult->value < 0)
 		{
 			Var_Set("timemult", "0");
 		}
@@ -546,15 +564,15 @@ void CheckVars(void)
 		CalcTimemultBasedOnTime();
 	}
 
-	if (weather->modified)
+	if(weather->modified)
 	{
 		modified = 1;
 
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 			{
 				if(clients[i].thai) // CheckVars
 				{
@@ -567,7 +585,7 @@ void CheckVars(void)
 				if((weather->value == 2) && !clients[i].rain)
 					WB3DotCommand(&clients[i], ".weather 0"); // cloudy
 				else
-					WB3DotCommand(&clients[i], ".weather %u", (u_int8_t)weather->value);
+					WB3DotCommand(&clients[i], ".weather %u", (u_int8_t) weather->value);
 			}
 		}
 	}
@@ -578,9 +596,9 @@ void CheckVars(void)
 
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 			{
 				if(clients[i].thai) // CheckVars
 				{
@@ -595,16 +613,16 @@ void CheckVars(void)
 		}
 	}
 
-	if (ottoaccuracy->modified || ottoacquirerange->modified || ottoadjust->modified || ottoburstoff->modified || ottoburston->modified
+	if(ottoaccuracy->modified || ottoacquirerange->modified || ottoadjust->modified || ottoburstoff->modified || ottoburston->modified
 			|| ottoburstonmax->modified || ottooverrides->modified || ottorange->modified || ottoretarget->modified)
 	{
 		modified = 1;
 
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 			{
 				if(clients[i].thai) // CheckVars
 				{
@@ -619,23 +637,21 @@ void CheckVars(void)
 		}
 	}
 
-	if (radaralt->modified || mapflags->modified || mapflagsfly->modified || mapflagstwr->modified || mapflagsown->modified
-			|| mapflagsenemy->modified || planeatradar->modified || friendlydotsfly->modified || enemydotsfly->modified
-			|| friendlydotstwr->modified || enemydotstwr->modified || planerangelimit->modified || enemyidlim->modified
-			|| friendlyidlim->modified || ammomult->modified || xwindvelocity->modified || ywindvelocity->modified
-			|| zwindvelocity->modified || maxpilotg->modified || ackmaxtrav->modified || altv->modified || fueldiv->modified
-			|| flakmax->modified || radarrange0->modified || radarrange1->modified || radarrange2->modified || radarrange3->modified
-			|| radarrange4->modified || structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified
-			|| planerangelimitbomber->modified || ackgrowco->modified || ackshrinkco->modified || arenaflags1->modified
-			|| arenaflags2->modified || clickrangelim->modified)
+	if(radaralt->modified || mapflags->modified || mapflagsfly->modified || mapflagstwr->modified || mapflagsown->modified || mapflagsenemy->modified
+			|| planeatradar->modified || friendlydotsfly->modified || enemydotsfly->modified || friendlydotstwr->modified || enemydotstwr->modified
+			|| planerangelimit->modified || enemyidlim->modified || friendlyidlim->modified || ammomult->modified || xwindvelocity->modified
+			|| ywindvelocity->modified || zwindvelocity->modified || maxpilotg->modified || ackmaxtrav->modified || altv->modified || fueldiv->modified
+			|| flakmax->modified || radarrange0->modified || radarrange1->modified || radarrange2->modified || radarrange3->modified || radarrange4->modified
+			|| structlim->modified || enemyidlimbomber->modified || friendlyidlimbomber->modified || planerangelimitbomber->modified || ackgrowco->modified
+			|| ackshrinkco->modified || arenaflags1->modified || arenaflags2->modified || clickrangelim->modified)
 	{
 		modified = 1;
 
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 			{
 				if(clients[i].thai) // CheckVars
 				{
@@ -650,15 +666,15 @@ void CheckVars(void)
 		}
 	}
 
-	if (arenaflags3->modified || wingstrikerng->modified)
+	if(arenaflags3->modified || wingstrikerng->modified)
 	{
 		modified = 1;
 
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 			{
 				if(clients[i].thai) // CheckVars
 				{
@@ -677,9 +693,9 @@ void CheckVars(void)
 	{
 		UpdateArenaStatus(FALSE);
 
-		for (var = var_vars; var; var = var->next)
+		for(var = var_vars; var; var = var->next)
 		{
-			if (var->modified)
+			if(var->modified)
 			{
 				var->modified = 0;
 			}
@@ -699,7 +715,7 @@ var_t *Var_SetFlags(const char *var_name, int flags)
 
 	var = Var_FindVar(var_name);
 
-	if (var)
+	if(var)
 	{
 		var->flags = flags;
 		return var;
@@ -707,7 +723,6 @@ var_t *Var_SetFlags(const char *var_name, int flags)
 
 	return NULL;
 }
-
 
 /**
  Var_Get
@@ -720,17 +735,17 @@ var_t *Var_Get(const char *var_name, const char *var_value, const char *min, con
 	var_t *var;
 
 	var = Var_FindVar(var_name);
-	if (var)
+	if(var)
 	{
 		return var;
 	}
 
-	if (!var_value)
+	if(!var_value)
 		return NULL;
 
 	var = (var_t *) Z_Malloc(sizeof(*var));
 
-	if (var)
+	if(var)
 	{
 		var->name = CopyString(var_name);
 		var->min = Com_Atof(min);
@@ -758,11 +773,11 @@ var_t *Var_Get(const char *var_name, const char *var_value, const char *min, con
 
 var_t *Var_FindVar(const char *var_name)
 {
-	var_t *var= NULL;
+	var_t *var = NULL;
 
-	for (var = var_vars; var; var = var->next)
+	for(var = var_vars; var; var = var->next)
 	{
-		if (!Com_Strcmp(var_name, var->name))
+		if(!Com_Strcmp(var_name, var->name))
 			return var;
 	}
 
@@ -780,15 +795,15 @@ var_t *Var_Set(const char *var_name, const char *value)
 	var_t *var;
 
 	var = Var_FindVar(var_name);
-	if (!var)
+	if(!var)
 	{ // create it
 		return Var_Get(var_name, value, "0", "0", NULL, 0);
 	}
 
-	if (var->flags & VAR_NOSET)
+	if(var->flags & VAR_NOSET)
 		return NULL;
 
-	if (!Com_Strcmp(value, var->string))
+	if(!Com_Strcmp(value, var->string))
 		return var; // not changed
 
 	if(var->min != var->max && (Com_Atof(value) > var->max || Com_Atof(value) < var->min))
@@ -818,7 +833,7 @@ double Var_VariableValue(const char *var_name)
 	var_t *var;
 
 	var = Var_FindVar(var_name);
-	if (!var)
+	if(!var)
 		return 0;
 	return Com_Atof(var->string);
 }
@@ -835,7 +850,7 @@ const char *Var_VariableString(const char *var_name)
 	var_t *var;
 
 	var = Var_FindVar(var_name);
-	if (!var)
+	if(!var)
 		return "";
 	return var->string;
 }
@@ -856,15 +871,15 @@ void Var_WriteVariables(const char *path, client_t *client)
 	strcpy(file, path);
 	strcat(file, ".cfg");
 
-	if (!(fp = fopen(file, "w")))
+	if(!(fp = fopen(file, "w")))
 	{
 		PPrintf(client, RADIO_YELLOW, "WARNING: Error opening %s\n", path);
 		return;
 	}
 
-	for (var = var_vars; var; var = var->next)
+	for(var = var_vars; var; var = var->next)
 	{
-		if (var->flags & VAR_ARCHIVE)
+		if(var->flags & VAR_ARCHIVE)
 		{
 			snprintf(buffer, sizeof(buffer), "set %s \"%s\"\n", var->name, var->string);
 			fprintf(fp, "%s", buffer);
@@ -882,15 +897,15 @@ void Var_WriteVariables(const char *path, client_t *client)
 u_int8_t UpdateArenaStatus(u_int8_t uptime)
 {
 	u_int8_t i, j;
-	var_t *upvars[52] =
-	{ airshowsmoke, blackout, contrail, countrytime, currday, currmonth, curryear, cvcapture, cvdelay, cvradarrange1, cvradarrange3, cvrange, cvs, cvsalvo, cvspeed, dayhours, easymode,
-			emulatecollision, enemyidlim, enemynames, enemyplanes, flakmax, flypenalty, friendlyfire, friendlyidlim, fueldiv, gunstats, iff, katyrange, mapname, hostname, midairs, mortars, mview,
-			ottoaccuracy, ottoadjust, ottoburstoff, ottoburston, ottoburstonmax, ottorange, ottoretarget, ottooverrides, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps,
-			tanksrange, timemult, timeout, whitelist }; // TODO: remove paratroopers from DB
+	var_t *upvars[52] = { airshowsmoke, blackout, contrail, countrytime, currday, currmonth, curryear, cvcapture, cvdelay, cvradarrange1, cvradarrange3,
+			cvrange, cvs, cvsalvo, cvspeed, dayhours, easymode, emulatecollision, enemyidlim, enemynames, enemyplanes, flakmax, flypenalty, friendlyfire,
+			friendlyidlim, fueldiv, gunstats, iff, katyrange, mapname, hostname, midairs, mortars, mview, ottoaccuracy, ottoadjust, ottoburstoff, ottoburston,
+			ottoburstonmax, ottorange, ottoretarget, ottooverrides, planerangelimit, radaralt, radarrange1, radarrange3, rebuildtime, rps, tanksrange,
+			timemult, timeout, whitelist }; // TODO: remove paratroopers from DB
 
 	sprintf(my_query, "UPDATE arena_status SET");
 
-	for (i = 0, j = 0; i < 52; i++)
+	for(i = 0, j = 0; i < 52; i++)
 	{
 		if(upvars[i])
 		{
@@ -903,7 +918,8 @@ u_int8_t UpdateArenaStatus(u_int8_t uptime)
 				}
 				else
 				{
-					Com_Printf(VERBOSE_WARNING, "UpdateArenaStatus(upvars[%u]->name) modified = %u, name = %s, string = %s, value = %.f\n", i, upvars[i]->modified, upvars[i]->name, upvars[i]->string, upvars[i]->value);
+					Com_Printf(VERBOSE_WARNING, "UpdateArenaStatus(upvars[%u]->name) modified = %u, name = %s, string = %s, value = %.f\n", i,
+							upvars[i]->modified, upvars[i]->name, upvars[i]->string, upvars[i]->value);
 				}
 			}
 		}
@@ -913,13 +929,15 @@ u_int8_t UpdateArenaStatus(u_int8_t uptime)
 		}
 	}
 
-	if (uptime || j)
+	if(uptime || j)
 	{
-		sprintf(my_query, "%s uptime = '%ud %.2d:%.2d:%.2d', watchdog = NOW()", my_query, arena->frame/8640000, (arena->frame/360000)%24, (arena->frame/6000)%60, (arena->frame/100)%60);
+		sprintf(my_query, "%s uptime = '%ud %.2d:%.2d:%.2d', watchdog = NOW()", my_query, arena->frame / 8640000, (arena->frame / 360000) % 24, (arena->frame
+				/ 6000) % 60, (arena->frame / 100) % 60);
 
-		if (d_mysql_query(&my_sock, my_query)) // query succeeded
+		if(d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			Com_Printf(VERBOSE_WARNING, "UpdateArenaStatus(): couldn't query UPDATE error %d: %s\nquery = %s\n", mysql_errno(&my_sock), mysql_error(&my_sock), my_query);
+			Com_Printf(VERBOSE_WARNING, "UpdateArenaStatus(): couldn't query UPDATE error %d: %s\nquery = %s\n", mysql_errno(&my_sock), mysql_error(&my_sock),
+					my_query);
 		}
 	}
 

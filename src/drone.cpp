@@ -33,13 +33,13 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 	int i = 0, j = 0;
 	u_int32_t shortnick;
 
-	if (client && !((client->attr & FLAG_ADMIN) && (type & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY))))
+	if(client && !((client->attr & FLAG_ADMIN) && (type & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY))))
 	{
 		if(type != DRONE_COMMANDOS)
 		{
-			for (i = 0; i < MAX_RELATED; i++)
+			for(i = 0; i < MAX_RELATED; i++)
 			{
-				if (client->related[i] && (client->related[i]->drone & type)) //	if(client->related[i]->drone & (DRONE_FAU | DRONE_WINGS2 | DRONE_HMACK))
+				if(client->related[i] && (client->related[i]->drone & type)) //	if(client->related[i]->drone & (DRONE_FAU | DRONE_WINGS2 | DRONE_HMACK))
 				{
 					PPrintf(client, RADIO_YELLOW, "You have such kind of drone already flying");
 					return NULL;
@@ -47,31 +47,31 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 			}
 		}
 
-		for (j = 0; j < MAX_RELATED; j++) // select an empty slot
+		for(j = 0; j < MAX_RELATED; j++) // select an empty slot
 		{
-			if (!client->related[j])
+			if(!client->related[j])
 				break;
 		}
 
-		if (j == MAX_RELATED)
+		if(j == MAX_RELATED)
 		{
 			PPrintf(client, RADIO_YELLOW, "Can't create a new drone for you now");
 			return NULL;
 		}
 	}
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (!clients[i].inuse)
+		if(!clients[i].inuse)
 		{
 			arena->numdrones++;
 
-			if (client)
+			if(client)
 				shortnick = ascii2wbnick(client->longnick, 1);
 			else
 				shortnick = NewDroneName(client);
 
-			if (client && !((client->attr & FLAG_ADMIN) && (type & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY))))
+			if(client && !((client->attr & FLAG_ADMIN) && (type & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY))))
 			{
 				client->related[j] = &clients[i]; // start relationship
 				clients[i].related[0] = client;
@@ -80,12 +80,12 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 				clients[i].related[0] = NULL;
 
 			clients[i].inuse = 1;
-			clients[i].id = DRONE_DBID_BASE + (rand()%1000);
+			clients[i].id = DRONE_DBID_BASE + (rand() % 1000);
 			clients[i].ready = 1;
 			clients[i].drone = type;
 			clients[i].country = country;
 			clients[i].inflight = 1;
-			switch (type)
+			switch(type)
 			{
 				case DRONE_FAU:
 					clients[i].plane = plane;
@@ -120,18 +120,18 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 				case DRONE_TANK2:
 				case DRONE_AAA:
 				case DRONE_KATY:
-					if (type & DRONE_TANK1)
+					if(type & DRONE_TANK1)
 					{
 						clients[i].posxy[0][0] = posx;
 						clients[i].posxy[1][0] = posy;
 					}
 					else
 					{
-						clients[i].posxy[0][0] = posx + (Com_Pow(-1, rand()%2) * ((rand()%50) + 100));
-						clients[i].posxy[1][0] = posy + (Com_Pow(-1, rand()%2) * ((rand()%50) + 100));
+						clients[i].posxy[0][0] = posx + (Com_Pow(-1, rand() % 2) * ((rand() % 50) + 100));
+						clients[i].posxy[1][0] = posy + (Com_Pow(-1, rand() % 2) * ((rand() % 50) + 100));
 					}
 
-					if (type & DRONE_KATY)
+					if(type & DRONE_KATY)
 					{
 						clients[i].plane = plane;
 						clients[i].dronetimer = DRONE_KATYSALVO * 3;
@@ -150,19 +150,19 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					break;
 				case DRONE_HTANK:
 				case DRONE_HMACK:
-					if (type & DRONE_HTANK)
+					if(type & DRONE_HTANK)
 						clients[i].plane = plane;
 					else
 						clients[i].plane = plane;
-					if (client->mapper)
+					if(client->mapper)
 					{
 						clients[i].posxy[0][0] = posx;
 						clients[i].posxy[1][0] = posy;
 					}
 					else
 					{
-						clients[i].posxy[0][0] = posx + (Com_Pow(-1, rand()%2) * (rand()%1000));
-						clients[i].posxy[1][0] = posy + (Com_Pow(-1, rand()%2) * (rand()%1000));
+						clients[i].posxy[0][0] = posx + (Com_Pow(-1, rand() % 2) * (rand() % 1000));
+						clients[i].posxy[1][0] = posy + (Com_Pow(-1, rand() % 2) * (rand() % 1000));
 					}
 					clients[i].posalt[0] = posz;
 					clients[i].status_damage = 0;
@@ -191,7 +191,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].shortnick = shortnick;
 					clients[i].dronelasttarget = MAX_BUILDINGS; // to avoid unrandomized first target at DroneGetTarget()
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
-					clients[i].dronetimer = 190*100;
+					clients[i].dronetimer = 190 * 100;
 					clients[i].ready = 0;
 					clients[i].countrytime = 100;
 					break;
@@ -217,7 +217,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 				default:
 					clients[i].plane = 1;
 			}
-			clients[i].frame = arena->frame + (rand()%1000);
+			clients[i].frame = arena->frame + (rand() % 1000);
 
 			clients[i].offset = 0;
 			clients[i].timer = arena->time;
@@ -229,7 +229,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 		}
 	}
 
-	if (i == maxentities->value)
+	if(i == maxentities->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Server reached max number of drones in arena");
 		return NULL;
@@ -250,19 +250,19 @@ void RemoveDrone(client_t *drone)
 {
 	u_int16_t i; //, slot;
 
-	if (!drone || !drone->inuse)
+	if(!drone || !drone->inuse)
 		return;
 
 	drone->inuse = 0;
 	arena->numdrones--;
 
-	for (i = 0; i < MAX_RELATED; i++)
+	for(i = 0; i < MAX_RELATED; i++)
 	{
-		if (drone->related[0])
+		if(drone->related[0])
 		{
-			if (drone->related[0]->related[i] == drone)
+			if(drone->related[0]->related[i] == drone)
 			{
-				if (drone->related[0]->attached == drone)
+				if(drone->related[0]->attached == drone)
 				{
 					ForceEndFlight(FALSE, drone->related[0]);
 				}
@@ -274,15 +274,15 @@ void RemoveDrone(client_t *drone)
 			break;
 	}
 
-	for (i = 0; i < MAX_BOMBS; i++)
+	for(i = 0; i < MAX_BOMBS; i++)
 	{
-		if (arena->bombs[i].from == drone)
+		if(arena->bombs[i].from == drone)
 		{
 			arena->bombs[i].from = NULL;
 		}
 	}
 
-	if (i == MAX_RELATED)
+	if(i == MAX_RELATED)
 		Com_Printf(VERBOSE_ALWAYS, "Server didnt find relationship between %s and his drone\n", drone->related[0] ? drone->related[0]->longnick : "(null)");
 
 	//	slot = drone->slot;
@@ -307,32 +307,33 @@ void DroneVisibleList(client_t *drone)
 	//		carray[i] = NULL;
 
 	/* calculate distance */
-	for (k = i = 0; i < maxentities->value; i++)
+	for(k = i = 0; i < maxentities->value; i++)
 	{
-		if (drone != &clients[i] && clients[i].inuse && clients[i].inflight && !clients[i].attached)
+		if(drone != &clients[i] && clients[i].inuse && clients[i].inflight && !clients[i].attached)
 		{
-			if ((clients[i].reldist = DistBetween(drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], clients[i].posxy[0][0], clients[i].posxy[1][0], clients[i].posalt[0], MAX_INT16)) >= 0)
+			if((clients[i].reldist = DistBetween(drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], clients[i].posxy[0][0], clients[i].posxy[1][0],
+					clients[i].posalt[0], MAX_INT16)) >= 0)
 				carray[k++] = &clients[i];
 		}
 	}
 
 	/* sort by dist*/
-	for (mid = k / 2; mid > 0; mid /= 2)
+	for(mid = k / 2; mid > 0; mid /= 2)
 	{
-		for (i = mid; i < k; i++)
+		for(i = mid; i < k; i++)
 		{
-			for (j = i - mid; j >= 0; j -= mid)
+			for(j = i - mid; j >= 0; j -= mid)
 			{
-				if (carray[j]->reldist <= carray[j+mid]->reldist) /* compare */
+				if(carray[j]->reldist <= carray[j + mid]->reldist) /* compare */
 					break;
 				temp = carray[j]; /* permute */
-				carray[j] = carray[j+mid];
-				carray[j+mid] = temp;
+				carray[j] = carray[j + mid];
+				carray[j + mid] = temp;
 			}
 		}
 	}
 
-	for (i = 0; i < MAX_SCREEN; i++)
+	for(i = 0; i < MAX_SCREEN; i++)
 	{
 		drone->visible[i].client = carray[i];
 	}
@@ -358,7 +359,7 @@ int ProcessDrone(client_t *drone)
 	if(drone->drone & DRONE_SHIP) // do not process ships
 		return 0;
 
-	if (drone->bugged)
+	if(drone->bugged)
 	{
 		BPrintf(RADIO_YELLOW, "Drone %s bugged, and will be removed", drone->longnick);
 		return -1;
@@ -366,10 +367,10 @@ int ProcessDrone(client_t *drone)
 
 	DroneVisibleList(drone);
 
-	switch (drone->drone)
+	switch(drone->drone)
 	{
 		case DRONE_FAU: // FAU
-			if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			if(drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
 				ScoresEvent(SCORE_KILLED, drone, 0);
 				//ScoresCheckKiller(drone, NULL);
@@ -377,22 +378,22 @@ int ProcessDrone(client_t *drone)
 				drone->dronetimer = 0;
 			}
 
-			if (drone->dronetimer)
+			if(drone->dronetimer)
 			{
-				if (!((arena->frame - drone->frame) % 50))
+				if(!((arena->frame - drone->frame) % 50))
 				{
-					drone->posxy[0][0] += drone->speedxyz[0][0]/2;
-					drone->posxy[1][0] += drone->speedxyz[1][0]/2;
-					drone->posalt[0] += drone->speedxyz[2][0]/2;
+					drone->posxy[0][0] += drone->speedxyz[0][0] / 2;
+					drone->posxy[1][0] += drone->speedxyz[1][0] / 2;
+					drone->posalt[0] += drone->speedxyz[2][0] / 2;
 				}
 
-				if (drone->posalt[0] >= 3000 && drone->speedxyz[2][0] > 0)
+				if(drone->posalt[0] >= 3000 && drone->speedxyz[2][0] > 0)
 				{
 					drone->speedxyz[2][0] = 0;
 					drone->angles[0][0] = 0;
 				}
 
-				if (drone->dronetimer == 3000 && !drone->speedxyz[2][0])
+				if(drone->dronetimer == 3000 && !drone->speedxyz[2][0])
 				{
 					drone->speedxyz[2][0] = -100;
 					drone->angles[0][0] = -80;
@@ -400,7 +401,7 @@ int ProcessDrone(client_t *drone)
 
 				drone->dronetimer--;
 
-				if (!((arena->frame - drone->frame) % 50) && drone->related[0] && drone->related[0]->attached == drone && !drone->related[0]->chute)
+				if(!((arena->frame - drone->frame) % 50) && drone->related[0] && drone->related[0]->attached == drone && !drone->related[0]->chute)
 				{
 					drone->related[0]->posxy[0][0] = drone->posxy[0][0];
 					drone->related[0]->posxy[1][0] = drone->posxy[1][0];
@@ -417,7 +418,7 @@ int ProcessDrone(client_t *drone)
 			}
 			break;
 		case DRONE_WINGS1:
-			if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			if(drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
 				ScoresEvent(SCORE_KILLED, drone, 0);
 				//ScoresCheckKiller(drone, NULL);
@@ -426,9 +427,9 @@ int ProcessDrone(client_t *drone)
 				return 0;
 			}
 
-			if (!((arena->frame - drone->frame) % 10))
+			if(!((arena->frame - drone->frame) % 10))
 			{
-				if (drone->related[0])
+				if(drone->related[0])
 				{
 					angle = WBtoHdg(drone->related[0]->angles[2][0]) * 10;
 
@@ -439,25 +440,25 @@ int ProcessDrone(client_t *drone)
 					 angle = drone->related[0]->angles[2][0];
 					 */
 
-					switch (drone->droneformation)
+					switch(drone->droneformation)
 					{
 						case FORMATION_VWING:
 							offset = 1350;
 
-							if (drone->droneformchanged)
+							if(drone->droneformchanged)
 							{
 								offset += drone->droneformchanged;
 
-								if (drone->droneformchanged < 0)
+								if(drone->droneformchanged < 0)
 								{
-									if (drone->droneformchanged > -10)
+									if(drone->droneformchanged > -10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged += 10;
 								}
 								else
 								{
-									if (drone->droneformchanged < 10)
+									if(drone->droneformchanged < 10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged -= 10;
@@ -467,20 +468,20 @@ int ProcessDrone(client_t *drone)
 						case FORMATION_LABREAST:
 							offset = 2700;
 
-							if (drone->droneformchanged)
+							if(drone->droneformchanged)
 							{
 								offset += drone->droneformchanged;
 
-								if (drone->droneformchanged < 0)
+								if(drone->droneformchanged < 0)
 								{
-									if (drone->droneformchanged > -10)
+									if(drone->droneformchanged > -10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged += 10;
 								}
 								else
 								{
-									if (drone->droneformchanged < 10)
+									if(drone->droneformchanged < 10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged -= 10;
@@ -490,20 +491,20 @@ int ProcessDrone(client_t *drone)
 						case FORMATION_LASTERN:
 							offset = 1800;
 
-							if (drone->droneformchanged)
+							if(drone->droneformchanged)
 							{
 								offset += drone->droneformchanged;
 
-								if (drone->droneformchanged < 0)
+								if(drone->droneformchanged < 0)
 								{
-									if (drone->droneformchanged > -10)
+									if(drone->droneformchanged > -10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged += 10;
 								}
 								else
 								{
-									if (drone->droneformchanged < 10)
+									if(drone->droneformchanged < 10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged -= 10;
@@ -513,20 +514,20 @@ int ProcessDrone(client_t *drone)
 						case FORMATION_ECHELON:
 							offset = 2250;
 
-							if (drone->droneformchanged)
+							if(drone->droneformchanged)
 							{
 								offset += drone->droneformchanged;
 
-								if (drone->droneformchanged < 0)
+								if(drone->droneformchanged < 0)
 								{
-									if (drone->droneformchanged > -10)
+									if(drone->droneformchanged > -10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged += 10;
 								}
 								else
 								{
-									if (drone->droneformchanged < 10)
+									if(drone->droneformchanged < 10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged -= 10;
@@ -535,7 +536,7 @@ int ProcessDrone(client_t *drone)
 							break;
 					}
 
-					if ((angle += offset) >= 3600)
+					if((angle += offset) >= 3600)
 						angle %= 3600;
 					angle /= 10;
 
@@ -544,7 +545,7 @@ int ProcessDrone(client_t *drone)
 
 					drone->posalt[0] = drone->related[0]->posalt[0];
 
-					if ((drone->status_status != drone->related[0]->status_status))// || (drone->status_damage != drone->related[0]->status_damage))
+					if((drone->status_status != drone->related[0]->status_status))// || (drone->status_damage != drone->related[0]->status_damage))
 					{
 						//drone->status_damage = drone->related[0]->status_damage;
 						drone->status_status = drone->related[0]->status_status;
@@ -572,7 +573,7 @@ int ProcessDrone(client_t *drone)
 			}
 			break;
 		case DRONE_WINGS2:
-			if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			if(drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
 				ScoresEvent(SCORE_KILLED, drone, 0);
 				//ScoresCheckKiller(drone, NULL);
@@ -581,9 +582,9 @@ int ProcessDrone(client_t *drone)
 				return 0;
 			}
 
-			if (!((arena->frame - drone->frame) % 10))
+			if(!((arena->frame - drone->frame) % 10))
 			{
-				if (drone->related[0])
+				if(drone->related[0])
 				{
 					angle = WBtoHdg(drone->related[0]->angles[2][0]) * 10;
 
@@ -594,26 +595,26 @@ int ProcessDrone(client_t *drone)
 					 angle = drone->related[0]->angles[2][0];
 					 */
 
-					switch (drone->droneformation)
+					switch(drone->droneformation)
 					{
 						case FORMATION_VWING:
 						case FORMATION_ECHELON:
 							offset = 2250;
 
-							if (drone->droneformchanged)
+							if(drone->droneformchanged)
 							{
 								offset += drone->droneformchanged;
 
-								if (drone->droneformchanged < 0)
+								if(drone->droneformchanged < 0)
 								{
-									if (drone->droneformchanged > -10)
+									if(drone->droneformchanged > -10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged += 10;
 								}
 								else
 								{
-									if (drone->droneformchanged < 10)
+									if(drone->droneformchanged < 10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged -= 10;
@@ -624,20 +625,20 @@ int ProcessDrone(client_t *drone)
 						case FORMATION_LABREAST:
 							offset = 2700;
 
-							if (drone->droneformchanged)
+							if(drone->droneformchanged)
 							{
 								offset += drone->droneformchanged;
 
-								if (drone->droneformchanged < 0)
+								if(drone->droneformchanged < 0)
 								{
-									if (drone->droneformchanged > -10)
+									if(drone->droneformchanged > -10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged += 10;
 								}
 								else
 								{
-									if (drone->droneformchanged < 10)
+									if(drone->droneformchanged < 10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged -= 10;
@@ -648,20 +649,20 @@ int ProcessDrone(client_t *drone)
 						case FORMATION_LASTERN:
 							offset = 1800;
 
-							if (drone->droneformchanged)
+							if(drone->droneformchanged)
 							{
 								offset += drone->droneformchanged;
 
-								if (drone->droneformchanged < 0)
+								if(drone->droneformchanged < 0)
 								{
-									if (drone->droneformchanged > -10)
+									if(drone->droneformchanged > -10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged += 10;
 								}
 								else
 								{
-									if (drone->droneformchanged < 10)
+									if(drone->droneformchanged < 10)
 										drone->droneformchanged = 0;
 									else
 										drone->droneformchanged -= 10;
@@ -671,20 +672,20 @@ int ProcessDrone(client_t *drone)
 							break;
 					}
 
-					if ((angle += offset) >= 3600)
+					if((angle += offset) >= 3600)
 						angle %= 3600;
 					angle /= 10;
 
-					if (drone->droneformation == FORMATION_VWING)
+					if(drone->droneformation == FORMATION_VWING)
 					{
-						if (drone->dronedistance > 1)
+						if(drone->dronedistance > 1)
 						{
 							drone->dronedistance -= 0.1;
 						}
 					}
 					else
 					{
-						if (drone->dronedistance < 2)
+						if(drone->dronedistance < 2)
 						{
 							drone->dronedistance += 0.1;
 						}
@@ -694,7 +695,7 @@ int ProcessDrone(client_t *drone)
 					drone->posxy[1][0] = drone->related[0]->posxy[1][0] + ((DRONE_DIST * drone->dronedistance) * cos(Com_Rad(angle)));
 					drone->posalt[0] = drone->related[0]->posalt[0];
 
-					if ((drone->status_status != drone->related[0]->status_status))// || (drone->status_damage != drone->related[0]->status_damage))
+					if((drone->status_status != drone->related[0]->status_status))// || (drone->status_damage != drone->related[0]->status_damage))
 					{
 						//drone->status_damage = drone->related[0]->status_damage;
 						drone->status_status = drone->related[0]->status_status;
@@ -725,7 +726,7 @@ int ProcessDrone(client_t *drone)
 		case DRONE_TANK2:
 		case DRONE_AAA:
 		case DRONE_KATY:
-			if (drone->status_damage)
+			if(drone->status_damage)
 			{
 				ScoresEvent(SCORE_KILLED, drone, 0);
 				//ScoresCheckKiller(drone, NULL);
@@ -737,22 +738,22 @@ int ProcessDrone(client_t *drone)
 			near = NULL;
 			ang = 0;
 
-			if (arena->fields[drone->dronefield].country == drone->country)
+			if(arena->fields[drone->dronefield].country == drone->country)
 				drone->dronetimer = 0;
 
-			if (drone->dronetimer)
+			if(drone->dronetimer)
 			{
 				j = NearestField(drone->posxy[0][0], drone->posxy[1][0], drone->country, TRUE, TRUE, &dist);
 
-				if (!((arena->frame - drone->frame) % 50))
+				if(!((arena->frame - drone->frame) % 50))
 				{
-					drone->posxy[0][0] += drone->speedxyz[0][0]/2;
-					drone->posxy[1][0] += drone->speedxyz[1][0]/2;
+					drone->posxy[0][0] += drone->speedxyz[0][0] / 2;
+					drone->posxy[1][0] += drone->speedxyz[1][0] / 2;
 					drone->posalt[0] = GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]);
 
-					if (drone->drone & DRONE_KATY)
+					if(drone->drone & DRONE_KATY)
 					{
-						if (drone->conv) // conv == katy salvo
+						if(drone->conv) // conv == katy salvo
 						{
 							ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0] + 13, drone->aim[0], drone->aim[1], drone->aim[2], drone);
 							drone->dronetimer--;
@@ -761,47 +762,49 @@ int ProcessDrone(client_t *drone)
 					}
 				}
 
-				if (!((arena->frame - drone->frame + rand()%500) % 500) && !drone->conv /*just for katy*/)
+				if(!((arena->frame - drone->frame + rand() % 500) % 500) && !drone->conv /*just for katy*/)
 				{
 					// adjust route towards field tower
-					ang = AngleTo(drone->posxy[0][0], drone->posxy[1][0], arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1]);
+					ang = AngleTo(drone->posxy[0][0], drone->posxy[1][0], arena->fields[drone->dronefield].posxyz[0],
+							arena->fields[drone->dronefield].posxyz[1]);
 
 					near = NearPlane(drone, drone->country, enemyidlim->value);
 				}
 
-				if (!((arena->frame - drone->frame) % 1000) && (drone->drone & (DRONE_TANK1 | DRONE_TANK2)))
+				if(!((arena->frame - drone->frame) % 1000) && (drone->drone & (DRONE_TANK1 | DRONE_TANK2)))
 				{
 					k = 0;
 
-					if ((j >= 0) && (dist < tanksrange->value))
+					if((j >= 0) && (dist < tanksrange->value))
 					{
 						// use dronetimer to count maxshots than remove drones
 
-						if (j < fields->value)
+						if(j < fields->value)
 						{
 							buildings = arena->fields[j].buildings;
 						}
 						else
 						{
-							buildings = arena->cities[j - (int16_t)fields->value].buildings;
+							buildings = arena->cities[j - (int16_t) fields->value].buildings;
 						}
 
-						for (i = 0; i < MAX_BUILDINGS; i++)
+						for(i = 0; i < MAX_BUILDINGS; i++)
 						{
-							if (!buildings[i].field)
+							if(!buildings[i].field)
 							{
 								break;
 							}
-							else if (!buildings[i].status && IsVitalBuilding(&(buildings[i]), TRUE))
+							else if(!buildings[i].status && IsVitalBuilding(&(buildings[i]), TRUE))
 							{
 								x = drone->posxy[0][0] - buildings[i].posx;
 								y = drone->posxy[1][0] - buildings[i].posy;
 
-								if ((abs(x) < tanksrange->value) && (abs(y) < tanksrange->value))
+								if((abs(x) < tanksrange->value) && (abs(y) < tanksrange->value))
 								{
-									if ((abs(x)> 200) && (abs(y)> 200))
+									if((abs(x) > 200) && (abs(y) > 200))
 									{
-										ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0] + 2, buildings[i].posx, buildings[i].posy, 0, drone);
+										ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0] + 2, buildings[i].posx, buildings[i].posy, 0,
+												drone);
 										drone->dronetimer--;
 										break;
 									}
@@ -813,36 +816,38 @@ int ProcessDrone(client_t *drone)
 							}
 						}
 					}
-					else if (near && (near->plane == 0x55 || near->plane == 0x65))
+					else if(near && (near->plane == 0x55 || near->plane == 0x65))
 					{
-						ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0] + 2, near->posxy[0][0], near->posxy[1][0], near->posxy[2][0], drone);
+						ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0] + 2, near->posxy[0][0], near->posxy[1][0], near->posxy[2][0],
+								drone);
 					}
 				}
 
-				if (ang)
+				if(ang)
 				{
-					if (drone->dronefield == j && (drone->drone & (DRONE_TANK1 | DRONE_TANK2))) // tanks reached the dest field
+					if(drone->dronefield == j && (drone->drone & (DRONE_TANK1 | DRONE_TANK2))) // tanks reached the dest field
 					{
-						if (dist < tanksrange->value && i < MAX_BUILDINGS)
+						if(dist < tanksrange->value && i < MAX_BUILDINGS)
 						{
 							ang += 75;
-							if (ang > 360)
+							if(ang > 360)
 							{
 								ang -= 360;
 							}
 
-							if (!drone->ord)
+							if(!drone->ord)
 							{
 								drone->ord = 1;
 
-								PPrintf(drone->related[0], RADIO_DARKGREEN, "Tank %s reached f%d", drone->longnick, drone->dronefield+1, dist);
-								Com_Printf(VERBOSE_ALWAYS, "Tank %s(%s) reached f%d\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-", drone->dronefield+1, dist);
+								PPrintf(drone->related[0], RADIO_DARKGREEN, "Tank %s reached f%d", drone->longnick, drone->dronefield + 1, dist);
+								Com_Printf(VERBOSE_ALWAYS, "Tank %s(%s) reached f%d\n", drone->longnick, drone->related[0] ? drone->related[0]->longnick
+										: "-HOST-", drone->dronefield + 1, dist);
 							}
 						}
-						else if (k) // no target far but near
+						else if(k) // no target far but near
 						{
 							ang += 180;
-							if (ang > 360)
+							if(ang > 360)
 							{
 								ang -= 360;
 							}
@@ -850,21 +855,22 @@ int ProcessDrone(client_t *drone)
 					}
 
 					// Evasive tick
-					if (near) // there is a enemy plane near
+					if(near) // there is a enemy plane near
 					{
-						planedist = DistBetween(drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], near->posxy[0][0], near->posxy[1][0], near->posalt[0], 4000);
+						planedist = DistBetween(drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], near->posxy[0][0], near->posxy[1][0],
+								near->posalt[0], 4000);
 
-						if (planedist >=0 && (drone->drone & DRONE_AAA))
+						if(planedist >= 0 && (drone->drone & DRONE_AAA))
 							FireAck(drone, near, planedist, 0);
 
 						drone->threatened = 1; // just for katy
 
-						if (drone->ord /*just for katy*/)
+						if(drone->ord /*just for katy*/)
 							ang += 80;
 
-						ang += 30 * Com_Pow(-1, rand()%2);
+						ang += 30 * Com_Pow(-1, rand() % 2);
 
-						if (ang > 360)
+						if(ang > 360)
 						{
 							ang -= 360;
 						}
@@ -875,39 +881,41 @@ int ProcessDrone(client_t *drone)
 					}
 				}
 
-				if (drone->drone & DRONE_KATY)
+				if(drone->drone & DRONE_KATY)
 				{
-					if (!((arena->frame - drone->frame) % 3000))
+					if(!((arena->frame - drone->frame) % 3000))
 					{
-						if (!drone->threatened)
+						if(!drone->threatened)
 						{
-							if (j > 0 && j == drone->dronefield)
+							if(j > 0 && j == drone->dronefield)
 							{
-								if (dist < katyrange->value)
+								if(dist < katyrange->value)
 								{
-									if (!drone->ord)
+									if(!drone->ord)
 									{
 										drone->ord = 1;
-										PPrintf(drone->related[0], RADIO_DARKGREEN, "Katyusha %s reached f%d", drone->longnick, drone->dronefield+1, dist);
-										Com_Printf(VERBOSE_ALWAYS, "Katyusha %s(%s) reached f%d\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-", drone->dronefield+1, dist);
+										PPrintf(drone->related[0], RADIO_DARKGREEN, "Katyusha %s reached f%d", drone->longnick, drone->dronefield + 1, dist);
+										Com_Printf(VERBOSE_ALWAYS, "Katyusha %s(%s) reached f%d\n", drone->longnick,
+												drone->related[0] ? drone->related[0]->longnick : "-HOST-", drone->dronefield + 1, dist);
 									}
 
-									if (j < fields->value)
+									if(j < fields->value)
 									{
 										buildings = arena->fields[j].buildings;
 									}
 									else
 									{
-										buildings = arena->cities[j - (int16_t)fields->value].buildings;
+										buildings = arena->cities[j - (int16_t) fields->value].buildings;
 									}
 
-									for (i = 0; i < MAX_BUILDINGS; i++)
+									for(i = 0; i < MAX_BUILDINGS; i++)
 									{
-										if (!buildings[i].field)
+										if(!buildings[i].field)
 										{
 											break;
 										}
-										else if (!buildings[i].status && (buildings[i].type == BUILD_RADAR || buildings[i].type == BUILD_RADIOHUT || buildings[i].type == BUILD_ANTENNA))
+										else if(!buildings[i].status && (buildings[i].type == BUILD_RADAR || buildings[i].type == BUILD_RADIOHUT
+												|| buildings[i].type == BUILD_ANTENNA))
 										{
 											drone->aim[0] = buildings[i].posx;
 											drone->aim[1] = buildings[i].posy;
@@ -923,12 +931,12 @@ int ProcessDrone(client_t *drone)
 					}
 				}
 
-				if (ang)
+				if(ang)
 				{
 					// set route
-					if (drone->drone & DRONE_KATY)
+					if(drone->drone & DRONE_KATY)
 					{
-						if (drone->threatened || !(j == drone->dronefield && dist < katyrange->value))
+						if(drone->threatened || !(j == drone->dronefield && dist < katyrange->value))
 						{
 							x = DRONE_TANK_SPEED * sin(Com_Rad(ang)) * -1;
 							y = DRONE_TANK_SPEED * cos(Com_Rad(ang));
@@ -938,7 +946,7 @@ int ProcessDrone(client_t *drone)
 					}
 					else
 					{
-						if (i < MAX_BUILDINGS || k || dist > 300 || drone->threatened)
+						if(i < MAX_BUILDINGS || k || dist > 300 || drone->threatened)
 						{
 							x = DRONE_TANK_SPEED * sin(Com_Rad(ang)) * -1;
 							y = DRONE_TANK_SPEED * cos(Com_Rad(ang));
@@ -947,7 +955,7 @@ int ProcessDrone(client_t *drone)
 							x = y = 0;
 					}
 
-					if ((ang *= 10) > 901)
+					if((ang *= 10) > 901)
 					{
 						ang -= 3600;
 					}
@@ -959,15 +967,17 @@ int ProcessDrone(client_t *drone)
 			}
 			else
 			{
-				if (drone->drone & DRONE_KATY)
+				if(drone->drone & DRONE_KATY)
 				{
 					PPrintf(drone->related[0], RADIO_DARKGREEN, "Katyusha %s finished its mission", drone->longnick);
-					Com_Printf(VERBOSE_ALWAYS, "Katyusha %s(%s) finished its mission\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-");
+					Com_Printf(VERBOSE_ALWAYS, "Katyusha %s(%s) finished its mission\n", drone->longnick, drone->related[0] ? drone->related[0]->longnick
+							: "-HOST-");
 				}
 				else
 				{
 					PPrintf(drone->related[0], RADIO_DARKGREEN, "Tank %s finished its mission", drone->longnick);
-					Com_Printf(VERBOSE_ALWAYS, "Tank %s(%s) finished its mission\n", drone->longnick, drone->related[0]?drone->related[0]->longnick:"-HOST-");
+					Com_Printf(VERBOSE_ALWAYS, "Tank %s(%s) finished its mission\n", drone->longnick, drone->related[0] ? drone->related[0]->longnick
+							: "-HOST-");
 				}
 				RemoveDrone(drone);
 				return 0;
@@ -976,17 +986,17 @@ int ProcessDrone(client_t *drone)
 
 		case DRONE_HTANK:
 		case DRONE_HMACK:
-			if (drone->status_damage)
+			if(drone->status_damage)
 			{
 				ScoresEvent(SCORE_KILLED, drone, 0);
 				//ScoresCheckKiller(client, NULL);
 				//ClearKillers(client);
 
-				if (drone->related[0])
+				if(drone->related[0])
 				{
-					if ((FLIGHT_TIME(drone->related[0])/10) < (u_int32_t)(flypenalty->value * 100))
+					if((FLIGHT_TIME(drone->related[0]) / 10) < (u_int32_t) (flypenalty->value * 100))
 					{
-						drone->related[0]->hmackpenalty = (flypenalty->value * 100) - (FLIGHT_TIME(drone->related[0])/10);
+						drone->related[0]->hmackpenalty = (flypenalty->value * 100) - (FLIGHT_TIME(drone->related[0]) / 10);
 						drone->related[0]->hmackpenaltyfield = drone->related[0]->field;
 					}
 				}
@@ -995,17 +1005,17 @@ int ProcessDrone(client_t *drone)
 				return 0;
 			}
 
-			if (!((arena->frame - drone->frame) % 50))
+			if(!((arena->frame - drone->frame) % 50))
 			{
-				if (drone->related[0])
+				if(drone->related[0])
 				{
-					drone->posxy[0][0] += drone->related[0]->speedxyz[0][0]/2;
-					drone->posxy[1][0] += drone->related[0]->speedxyz[1][0]/2;
+					drone->posxy[0][0] += drone->related[0]->speedxyz[0][0] / 2;
+					drone->posxy[1][0] += drone->related[0]->speedxyz[1][0] / 2;
 
 					//					if(!((arena->frame - drone->frame) % 200))
 					//						drone->posalt[0] = GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]);
 
-					if (drone->posalt[0])
+					if(drone->posalt[0])
 					{
 						drone->speedxyz[0][0] = drone->related[0]->speedxyz[0][0];
 						drone->speedxyz[1][0] = drone->related[0]->speedxyz[1][0];
@@ -1018,7 +1028,7 @@ int ProcessDrone(client_t *drone)
 
 					drone->angles[2][0] = drone->related[0]->angles[2][0];
 
-					if (drone->related[0]->attached == drone)
+					if(drone->related[0]->attached == drone)
 					{
 						drone->related[0]->posxy[0][0] = drone->posxy[0][0];
 						drone->related[0]->posxy[1][0] = drone->posxy[1][0];
@@ -1029,7 +1039,7 @@ int ProcessDrone(client_t *drone)
 			}
 			break;
 		case DRONE_COMMANDOS:
-			if (drone->status_damage)
+			if(drone->status_damage)
 			{
 				ScoresEvent(SCORE_KILLED, drone, 0);
 				//ScoresCheckKiller(drone, NULL);
@@ -1038,24 +1048,26 @@ int ProcessDrone(client_t *drone)
 				return 0;
 			}
 
-			if (drone->dronetimer)
+			if(drone->dronetimer)
 			{
-				if (!(drone->countrytime))
+				if(!(drone->countrytime))
 				{
-					if (arena->fields[drone->dronefield].country != drone->country)
+					if(arena->fields[drone->dronefield].country != drone->country)
 					{
 						if(!((arena->frame - drone->frame) % 50)) // drone fire tick every 500ms
 						{
 							DroneGetTarget(drone);
 
-							if (drone->dronelasttarget < MAX_BUILDINGS)
+							if(drone->dronelasttarget < MAX_BUILDINGS)
 							{
-								if (drone->related[0])
+								if(drone->related[0])
 								{
-									PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos aiming at %s, F%d",
-											GetBuildingType(arena->fields[drone->dronefield].buildings[drone->dronelasttarget].type), drone->dronefield+1);
+									PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos aiming at %s, F%d", GetBuildingType(
+											arena->fields[drone->dronefield].buildings[drone->dronelasttarget].type), drone->dronefield + 1);
 								}
-								ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
+								ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50,
+										arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx,
+										arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 								//							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 							}
 							else if(!oldcapt->value)
@@ -1066,14 +1078,15 @@ int ProcessDrone(client_t *drone)
 								if((1.0 * x * x + 1.0 * y * y) < (MORTAR_RANGE * MORTAR_RANGE))
 								{
 									ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50,
-										arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1], 0, drone);
+											arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1], 0, drone);
 								}
 								else // runs toward field center to get more targets or the field center for ToT
 								{
-									ang = AngleTo(drone->posxy[0][0], drone->posxy[1][0], arena->fields[drone->dronefield].posxyz[0], arena->fields[drone->dronefield].posxyz[1]);
+									ang = AngleTo(drone->posxy[0][0], drone->posxy[1][0], arena->fields[drone->dronefield].posxyz[0],
+											arena->fields[drone->dronefield].posxyz[1]);
 
-									drone->posxy[0][0] -= (int32_t)(7.0 * sin(Com_Rad(ang)));
-									drone->posxy[1][0] += (int32_t)(7.0 * cos(Com_Rad(ang)));
+									drone->posxy[0][0] -= (int32_t) (7.0 * sin(Com_Rad(ang)));
+									drone->posxy[1][0] += (int32_t) (7.0 * cos(Com_Rad(ang)));
 								}
 							}
 							else
@@ -1088,20 +1101,14 @@ int ProcessDrone(client_t *drone)
 					drone->countrytime--;
 				}
 
-				if (drone->countrytime > 36000) // remove drone if throw time is more than 6 minutes (bug)
+				if(drone->countrytime > 36000) // remove drone if throw time is more than 6 minutes (bug)
 				{
 					PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos has finished his bugged mission");
 					Com_Printf(VERBOSE_ALWAYS, "Commandos %s has finished his bugged mission\n", drone->longnick);
 					Com_Printf(VERBOSE_WARNING, "Commandos %s throw time %u, drone X %d, Y %d, Z %d, target X %d, Y %d, field %u, target %u\n",
-						drone->longnick, 
-						drone->countrytime,
-						drone->posxy[0][0],
-						drone->posxy[1][0],
-						GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50,
-						arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx,
-						arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy,
-						drone->dronefield,
-						drone->dronelasttarget);
+							drone->longnick, drone->countrytime, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0])
+									+ 50, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx,
+							arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, drone->dronefield, drone->dronelasttarget);
 					RemoveDrone(drone);
 				}
 
@@ -1115,7 +1122,7 @@ int ProcessDrone(client_t *drone)
 			}
 			break;
 		case DRONE_DEBUG:
-			if (drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
+			if(drone->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE))
 			{
 				ScoresEvent(SCORE_KILLED, drone, 0);
 				//ScoresCheckKiller(drone, NULL);
@@ -1140,9 +1147,9 @@ int ProcessDrone(client_t *drone)
 		drone->timer += 500;
 	}
 
-	if (!drone->related[0])
+	if(!drone->related[0])
 	{
-		if (drone->drone & (DRONE_FAU | DRONE_WINGS1 | DRONE_WINGS2 | DRONE_HMACK | DRONE_HTANK | DRONE_KATY | DRONE_EJECTED | DRONE_COMMANDOS | DRONE_DEBUG))
+		if(drone->drone & (DRONE_FAU | DRONE_WINGS1 | DRONE_WINGS2 | DRONE_HMACK | DRONE_HTANK | DRONE_KATY | DRONE_EJECTED | DRONE_COMMANDOS | DRONE_DEBUG))
 		{
 			Com_Printf(VERBOSE_WARNING, "Removed unrelated drone %s type %u\n", drone->longnick, drone->drone);
 			return -1;
@@ -1164,24 +1171,24 @@ void DroneGetTarget(client_t *drone)
 	u_int16_t i, j;
 	u_int16_t temp[MAX_BUILDINGS];
 
-	if (!drone || !drone->drone || (drone->dronelasttarget < MAX_BUILDINGS && !arena->fields[drone->dronefield].buildings[drone->dronelasttarget].status))
+	if(!drone || !drone->drone || (drone->dronelasttarget < MAX_BUILDINGS && !arena->fields[drone->dronefield].buildings[drone->dronelasttarget].status))
 		return;
 
-	for (i = 0, j = 0; i < MAX_BUILDINGS; i++)
+	for(i = 0, j = 0; i < MAX_BUILDINGS; i++)
 	{
-		if (!arena->fields[drone->dronefield].buildings[i].field)
+		if(!arena->fields[drone->dronefield].buildings[i].field)
 		{
 			break; // end of array
 		}
-		else if (!arena->fields[drone->dronefield].buildings[i].status && IsVitalBuilding(&(arena->fields[drone->dronefield].buildings[i]), oldcapt->value))
+		else if(!arena->fields[drone->dronefield].buildings[i].status && IsVitalBuilding(&(arena->fields[drone->dronefield].buildings[i]), oldcapt->value))
 		{
 			x = drone->posxy[0][0] - arena->fields[drone->dronefield].buildings[i].posx;
 			y = drone->posxy[1][0] - arena->fields[drone->dronefield].buildings[i].posy;
 
-			if (x < 10000 && x > -10000 && y < 10000 && y > -10000)
+			if(x < 10000 && x > -10000 && y < 10000 && y > -10000)
 			{
 				//if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < MORTAR_RANGE) 
-				if ((1.0*x*x + 1.0*y*y) < (MORTAR_RANGE * MORTAR_RANGE))
+				if((1.0 * x * x + 1.0 * y * y) < (MORTAR_RANGE * MORTAR_RANGE))
 				{
 					temp[j] = i;
 					j++;
@@ -1190,14 +1197,14 @@ void DroneGetTarget(client_t *drone)
 		}
 	}
 
-	if (!j)
+	if(!j)
 	{
 		drone->dronelasttarget = MAX_BUILDINGS;
 	}
 	else
 	{
 		i = rand() % j;
-		if (i < j)
+		if(i < j)
 			drone->dronelasttarget = temp[i];
 		else
 			drone->dronelasttarget = MAX_BUILDINGS;
@@ -1224,32 +1231,32 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 	desty = dest->posxy[1][0];
 	destz = dest->posalt[0];
 
-	if (dist > 4000)
+	if(dist > 4000)
 		return;
 
 	memset(buffer, 0, sizeof(buffer));
 
 	otto = (ottofiring_t *) buffer;
 
-	if (dist > 100)
+	if(dist > 100)
 	{
-		velx = rand()%(dist / 100);
-		destx += Com_Pow(-1, rand()%2) * velx;
-		vely = rand()%(dist / 100);
-		desty += Com_Pow(-1, rand()%2) * vely;
-		velz = rand()%(dist / 100);
-		destz += Com_Pow(-1, rand()%2) * velz;
+		velx = rand() % (dist / 100);
+		destx += Com_Pow(-1, rand() % 2) * velx;
+		vely = rand() % (dist / 100);
+		desty += Com_Pow(-1, rand() % 2) * vely;
+		velz = rand() % (dist / 100);
+		destz += Com_Pow(-1, rand() % 2) * velz;
 	}
 
-	velx = (double)((destx + dest->speedxyz[0][0]) - source->posxy[0][0]) * (pspeed / (double)dist);
-	vely = (double)((desty + dest->speedxyz[1][0]) - source->posxy[1][0]) * (pspeed / (double)dist);
-	velz = (double)((destz + dest->speedxyz[2][0]) - source->posalt[0]) * (pspeed / (double)dist);
+	velx = (double) ((destx + dest->speedxyz[0][0]) - source->posxy[0][0]) * (pspeed / (double) dist);
+	vely = (double) ((desty + dest->speedxyz[1][0]) - source->posxy[1][0]) * (pspeed / (double) dist);
+	velz = (double) ((destz + dest->speedxyz[2][0]) - source->posalt[0]) * (pspeed / (double) dist);
 
-	if (!animate)
+	if(!animate)
 	{
-		for(i = 0; dest->armor.points[part = (rand()%32)] <= 0 || part == PLACE_PILOT; i++)
+		for(i = 0; dest->armor.points[part = (rand() % 32)] <= 0 || part == PLACE_PILOT; i++)
 		{
-			if (i > 150)
+			if(i > 150)
 			{
 				Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: FireAck() Infinite loop detected, breaking off\n");
 				return;
@@ -1259,9 +1266,9 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 		AddPlaneDamage(part, 30, 0, NULL, NULL, dest);
 
 		j = AddKiller(dest, source);
-		if (j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
+		if(j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
 		{
-			sdamage = (double)(10.0 * logf(1.0 + 100.0 * 40.0 / (double)(((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+			sdamage = (double) (10.0 * logf(1.0 + 100.0 * 40.0 / (double) (((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
 
 			if(sdamage >= 0)
 			{
@@ -1269,7 +1276,8 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 			}
 			else
 			{
-				Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]));
+				Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0
+						: dest->armor.points[part]));
 			}
 		}
 
@@ -1289,9 +1297,9 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 
 	////////////
 
-	for (i = 0; i < MAX_SCREEN; i++)
+	for(i = 0; i < MAX_SCREEN; i++)
 	{
-		if (source->visible[i].client && !source->visible[i].client->drone)
+		if(source->visible[i].client && !source->visible[i].client->drone)
 		{
 			SendPacket(buffer, sizeof(buffer), source->visible[i].client);
 		}
@@ -1330,7 +1338,7 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 		return;
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
 		destx = dest->posxy[0][0];
 		desty = dest->posxy[1][0];
@@ -1341,21 +1349,21 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 		flak = (wb3delayedfuse_t *) buffer;
 
 		// dispersion
-		velx = rand()%(dist / 12);
-		destx += (4 * dest->speedxyz[0][0]) + (Com_Pow(-1, rand()%2) * velx);
-		vely = rand()%(dist / 12);
-		desty += (4 * dest->speedxyz[1][0]) + (Com_Pow(-1, rand()%2) * vely);
-		velz = rand()%(dist / 12);
-		destz += (4 * dest->speedxyz[2][0]) + (Com_Pow(-1, rand()%2) * velz);
+		velx = rand() % (dist / 12);
+		destx += (4 * dest->speedxyz[0][0]) + (Com_Pow(-1, rand() % 2) * velx);
+		vely = rand() % (dist / 12);
+		desty += (4 * dest->speedxyz[1][0]) + (Com_Pow(-1, rand() % 2) * vely);
+		velz = rand() % (dist / 12);
+		destz += (4 * dest->speedxyz[2][0]) + (Com_Pow(-1, rand() % 2) * velz);
 
 		if(destz <= source->posalt[0])
 			destz = source->posalt[0] + 1;
 
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			velx = (double)(destx - source->posxy[0][0]) * (pspeed / (double)dist);
-			vely = (double)(desty - source->posxy[1][0]) * (pspeed / (double)dist);
-			velz = (double)(destz - source->posalt[0]) * (pspeed / (double)dist);
+			velx = (double) (destx - source->posxy[0][0]) * (pspeed / (double) dist);
+			vely = (double) (desty - source->posxy[1][0]) * (pspeed / (double) dist);
+			velz = (double) (destz - source->posalt[0]) * (pspeed / (double) dist);
 
 			if(velz <= 0)
 			{
@@ -1363,12 +1371,12 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 				return;
 			}
 
-			AddBomb(0x01F9, destx, desty, destz, 146/*Flak*/, 1500, ((destz - source->posalt[0])*100/velz) /*timer*/, source);
+			AddBomb(0x01F9, destx, desty, destz, 146/*Flak*/, 1500, ((destz - source->posalt[0]) * 100 / velz) /*timer*/, source);
 
 			flak->packetid = htons(Com_WBhton(0x1917));
 			flak->item = 146;
 			flak->id = htons(0x0800);
-			flak->posx = htonl(source->posxy[0][0]+200);
+			flak->posx = htonl(source->posxy[0][0] + 200);
 			flak->posy = htonl(source->posxy[1][0]);
 			flak->alt = htonl(source->posalt[0] + 70);
 			flak->xspeed = htons(velx); // 550
@@ -1383,9 +1391,9 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 			DebugClient(__FILE__, __LINE__, TRUE, NULL);
 		}
 
-		for (i = 0; i < MAX_SCREEN; i++)
+		for(i = 0; i < MAX_SCREEN; i++)
 		{
-			if (source->visible[i].client && !source->visible[i].client->drone)
+			if(source->visible[i].client && !source->visible[i].client->drone)
 			{
 				SendPacket(buffer, sizeof(buffer), source->visible[i].client);
 			}
@@ -1423,7 +1431,7 @@ void CVFire(ship_t *ship, int32_t destx, int32_t desty)
 			break;
 	}
 
-	for (j = 0; j < i; j++)
+	for(j = 0; j < i; j++)
 	{
 		ThrowBomb(FALSE, ship->Position.x, ship->Position.y, 59, destx, desty, 0, NULL);
 	}
@@ -1446,119 +1454,120 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 	u_int8_t i;
 	u_int8_t buffer[31];
 
-	if (!animate)
+	if(!animate)
 	{
-		if (!(dist = sqrt(Com_Pow(origx - destx, 2) + Com_Pow(origy - desty, 2))))
+		if(!(dist = sqrt(Com_Pow(origx - destx, 2) + Com_Pow(origy - desty, 2))))
 		{
-			PPrintf(client ? client->related[0] : NULL, RADIO_YELLOW, "Error calculating distance (dist = 0, %s) %s", Com_Padloc(origx, origy), client ? client->longnick : "");
+			PPrintf(client ? client->related[0] : NULL, RADIO_YELLOW, "Error calculating distance (dist = 0, %s) %s", Com_Padloc(origx, origy),
+					client ? client->longnick : "");
 			return;
 		}
 
-		if (client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_KATY))) // COMMANDOS or MINEN
+		if(client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_KATY))) // COMMANDOS or MINEN
 		{
-			if (client->drone & DRONE_COMMANDOS)
+			if(client->drone & DRONE_COMMANDOS)
 			{
 				//dispersion
-				if (dist > 125)
+				if(dist > 125)
 				{
-					velx = rand()%(dist / 125); // old value = 50
-					destx += Com_Pow(-1, rand()%2) * velx;
-					vely = rand()%(dist / 125); // old value = 50
-					desty += Com_Pow(-1, rand()%2) * vely;
+					velx = rand() % (dist / 125); // old value = 50
+					destx += Com_Pow(-1, rand() % 2) * velx;
+					vely = rand() % (dist / 125); // old value = 50
+					desty += Com_Pow(-1, rand() % 2) * vely;
 				}
 			}
 		}
-		else if (client && (client->drone & DRONE_KATY)) // KATY
+		else if(client && (client->drone & DRONE_KATY)) // KATY
 		{
 			//dispersion
-			if (dist > 500)
+			if(dist > 500)
 			{
-				velx = rand()%(dist / 500);
-				destx += Com_Pow(-1, rand()%2) * velx;
-				vely = rand()%(dist / 500);
-				desty += Com_Pow(-1, rand()%2) * vely;
+				velx = rand() % (dist / 500);
+				destx += Com_Pow(-1, rand() % 2) * velx;
+				vely = rand() % (dist / 500);
+				desty += Com_Pow(-1, rand() % 2) * vely;
 			}
 		}
 		else // CV, TANKS
 		{
 			//dispersion
-			if (dist > 10)
+			if(dist > 10)
 			{
-				velx = rand()%(dist / 10);
-				destx += Com_Pow(-1, rand()%2) * velx;
-				vely = rand()%(dist / 10);
-				desty += Com_Pow(-1, rand()%2) * vely;
+				velx = rand() % (dist / 10);
+				destx += Com_Pow(-1, rand() % 2) * velx;
+				vely = rand() % (dist / 10);
+				desty += Com_Pow(-1, rand() % 2) * vely;
 			}
 		}
 
 		dist = sqrt(Com_Pow(origx - destx, 2) + Com_Pow(origy - desty, 2)); // this never get a negative number
 
-		if (client && (client->drone & DRONE_KATY))
+		if(client && (client->drone & DRONE_KATY))
 		{
 			angle = RocketAngle(dist);
 
-			if (angle < 0)
+			if(angle < 0)
 			{
 				PPrintf(client->related[0], RADIO_YELLOW, "Error on calculating katyusha launching angle");
 				return;
 			}
 		}
-		else if (client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
+		else if(client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
 			angle = 90.0 - Com_Deg(asin((GRAVITY * dist) / Com_Pow(MORTAR, 2)) / 2);
 		else
 		{
 			// CV, TANKS fire
-//			if((GetHeightAt(destx, desty) - GetHeightAt(origx, origy)) < 200)
-//			{
-				// knock down fire
-				angle = Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2);
+			//			if((GetHeightAt(destx, desty) - GetHeightAt(origx, origy)) < 200)
+			//			{
+			// knock down fire
+			angle = Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2);
 
-				angle += 0.004 * (GetHeightAt(destx, desty) - GetHeightAt(origx, origy));
-//			}
-//			else
-//			{
-				// smash fire
-//				angle = 90.0 - Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2);
-//			}
+			angle += 0.004 * (GetHeightAt(destx, desty) - GetHeightAt(origx, origy));
+			//			}
+			//			else
+			//			{
+			// smash fire
+			//				angle = 90.0 - Com_Deg(asin((GRAVITY * dist) / Com_Pow(1500, 2)) / 2);
+			//			}
 		}
 
-/*
-Desnivel:
+		/*
+		 Desnivel:
 
-Ttotal = (V + sqrt(V^2 - 2 * G * H))/G
+		 Ttotal = (V + sqrt(V^2 - 2 * G * H))/G
 
-*/
+		 */
 
 		//variable velz contains horizontal (XY) value
-		if (client && (client->drone & DRONE_KATY))
+		if(client && (client->drone & DRONE_KATY))
 			velz = 70 * cos(Com_Rad(angle));
-		else if (client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
+		else if(client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
 			velz = MORTAR * cos(Com_Rad(angle));
 		else // CV
 		{
 			velz = 1500 * cos(Com_Rad(angle)); // CV, TANKS fire
 		}
 
-		velx = (double)(destx - origx) * velz / dist;
-		vely = (double)(desty - origy) * velz / dist;
+		velx = (double) (destx - origx) * velz / dist;
+		vely = (double) (desty - origy) * velz / dist;
 
 		//variable velz contains vertical (Z) value
-		if (client && (client->drone & DRONE_KATY))
+		if(client && (client->drone & DRONE_KATY))
 			velz = 70 * sin(Com_Rad(angle));
-		else if (client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
+		else if(client && !(client->drone & (DRONE_TANK1 | DRONE_TANK2))) // COMMANDOS or MINEN
 			velz = MORTAR * sin(Com_Rad(angle));
 		else // CV
 		{
 			velz = 1500 * sin(Com_Rad(angle)); // CV, TANKS fire
 		}
 
-		if (client) // COMMANDOS or MINEN (or HKATY?)
+		if(client) // COMMANDOS or MINEN (or HKATY?)
 		{
-			if (client->drone & DRONE_COMMANDOS) // COMMANDOS
+			if(client->drone & DRONE_COMMANDOS) // COMMANDOS
 			{
 				client->countrytime = (double) 200 * velz / GRAVITY;
 
-				if (wb3->value)
+				if(wb3->value)
 					mun = MORTAR_BOMB; // 250kg AP
 				else
 					mun = 113; // Flare
@@ -1567,22 +1576,22 @@ Ttotal = (V + sqrt(V^2 - 2 * G * H))/G
 
 				client->countrytime += 100; // give one second to commandos change target.
 			}
-			else if (client->drone & (DRONE_TANK1 | DRONE_TANK2))
+			else if(client->drone & (DRONE_TANK1 | DRONE_TANK2))
 			{
 				dist = (double) 200 * velz / GRAVITY;
 
-				if (wb3->value)
+				if(wb3->value)
 					mun = 103; // 75mm M1897
 				else
 					mun = 112; // Bomb
 
 				AddBomb(0x01F9, destx, desty, GetHeightAt(destx, desty), mun/*Mortar*/, 1500, dist /*timer*/, client);
 			}
-			else if (client->drone & DRONE_KATY)
+			else if(client->drone & DRONE_KATY)
 			{
 				dist = RocketTime(angle) * 100;
 
-				if (dist < 0)
+				if(dist < 0)
 				{
 					PPrintf(client->related[0], RADIO_YELLOW, "Error on calculating Katyusha launching time");
 					return;
@@ -1596,7 +1605,7 @@ Ttotal = (V + sqrt(V^2 - 2 * G * H))/G
 			{
 				dist = (double) 200 * velz / GRAVITY;
 
-				if (wb3->value)
+				if(wb3->value)
 					mun = 88; // 250kg AP
 				else
 					mun = 113; // Flare
@@ -1618,9 +1627,9 @@ Ttotal = (V + sqrt(V^2 - 2 * G * H))/G
 
 	rocketbomb->packetid = htons(Com_WBhton(0x1900));
 
-	if (animate)
+	if(animate)
 	{
-		if (wb3->value)
+		if(wb3->value)
 			rocketbomb->item = 149 /* Flak */;
 		else
 			rocketbomb->item = 150 /* Hvy Flak */;
@@ -1637,7 +1646,7 @@ Ttotal = (V + sqrt(V^2 - 2 * G * H))/G
 	rocketbomb->unknown1 = htonl(0x20);
 	rocketbomb->shortnick = client ? htonl(client->shortnick) : 0;
 
-	if (client && !(client->drone & (DRONE_COMMANDOS | DRONE_TANK1 | DRONE_TANK2 | DRONE_KATY))) // MINEN
+	if(client && !(client->drone & (DRONE_COMMANDOS | DRONE_TANK1 | DRONE_TANK2 | DRONE_KATY))) // MINEN
 	{
 		SendPacket(buffer, sizeof(buffer), client);
 		rocketbomb->item = 150 /* Hvy Flak */;
@@ -1645,18 +1654,18 @@ Ttotal = (V + sqrt(V^2 - 2 * G * H))/G
 		rocketbomb->item = mun;
 	}
 
-	if (client) // COMMANDOS or MINEN or KATY
+	if(client) // COMMANDOS or MINEN or KATY
 		ProcessPacket(buffer, sizeof(buffer), client);
 	else // CV
 	{
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && clients[i].ready && !clients[i].drone)
+			if(clients[i].inuse && clients[i].ready && !clients[i].drone)
 			{
 				destx = clients[i].posxy[0][0] - origx;
 				desty = clients[i].posxy[1][0] - origy;
 
-				if ((abs(destx) < cvrange->value) && (abs(desty) < cvrange->value))
+				if((abs(destx) < cvrange->value) && (abs(desty) < cvrange->value))
 				{
 					SendPacket(buffer, sizeof(buffer), &clients[i]);
 				}
@@ -1678,7 +1687,7 @@ void SendDronePos(client_t *drone, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	wb3pos = (wb3planeposition_t *)buffer;
+	wb3pos = (wb3planeposition_t *) buffer;
 
 	wb3pos->packetid = htons(Com_WBhton(0x0E00));
 	wb3pos->timer = htonl(drone->timer);
@@ -1726,15 +1735,15 @@ void SendXBombs(client_t *drone)
 	rocketbomb->unknown1 = htonl(0x20);
 	rocketbomb->shortnick = htonl(drone->shortnick);
 
-	for (i = 0; i < 9; i++)
+	for(i = 0; i < 9; i++)
 	{
-		rocketbomb->id = htons(0x01F9+i);
-		rocketbomb->posx = htonl(drone->posxy[0][0]+800-(i*200));
-		rocketbomb->posy = htonl(drone->posxy[1][0]+800-(i*200));
+		rocketbomb->id = htons(0x01F9 + i);
+		rocketbomb->posx = htonl(drone->posxy[0][0] + 800 - (i * 200));
+		rocketbomb->posy = htonl(drone->posxy[1][0] + 800 - (i * 200));
 		ProcessPacket(buffer, sizeof(buffer), drone);
-		rocketbomb->id = htons(0x01F9+i);
-		rocketbomb->posx = htonl(drone->posxy[0][0]+800-(i*200));
-		rocketbomb->posy = htonl(drone->posxy[1][0]-800+(i*200));
+		rocketbomb->id = htons(0x01F9 + i);
+		rocketbomb->posx = htonl(drone->posxy[0][0] + 800 - (i * 200));
+		rocketbomb->posy = htonl(drone->posxy[1][0] - 800 + (i * 200));
 		ProcessPacket(buffer, sizeof(buffer), drone);
 	}
 }
@@ -1759,9 +1768,9 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 	double sdamage;
 	wb3tonnage_t *wb3tonnage;
 
-	wb3tonnage = (wb3tonnage_t *)buffer;
+	wb3tonnage = (wb3tonnage_t *) buffer;
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
 		if(client && !client->inuse) // player removed
 		{
@@ -1770,7 +1779,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 
 		munition = GetMunition(type);
 
-		if (!munition)
+		if(!munition)
 		{
 			Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", type, client ? client->plane : 0);
 			return 0;
@@ -1779,12 +1788,12 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 		min = GetMunition(81);
 		max = GetMunition(87);
 
-		if (max->he == min->he)
+		if(max->he == min->he)
 		{
 			Com_Printf(VERBOSE_WARNING, "HitStructsNear(): min->he == max->he\n");
 			radius = 0;
 		}
-		else if (munition->he < min->he)
+		else if(munition->he < min->he)
 		{
 			radius = 0;
 		}
@@ -1795,11 +1804,11 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 
 		radius += MIN_BOMBRADIUS;
 
-		if (!nuke)
-			if (radius > MAX_BOMBRADIUS)
+		if(!nuke)
+			if(radius > MAX_BOMBRADIUS)
 				radius = MAX_BOMBRADIUS;
 
-		if (gunstats->value > 1 && client->gunstat)
+		if(gunstats->value > 1 && client->gunstat)
 			PPrintf(client, RADIO_RED, "Radius %d", radius);
 
 		j = 0;
@@ -1810,11 +1819,11 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		for (field = 0; field < k; field++)
+		for(field = 0; field < k; field++)
 		{
-			if (field < fields->value)
+			if(field < fields->value)
 			{
 				a = x - arena->fields[field].posxyz[0];
 				b = y - arena->fields[field].posxyz[1];
@@ -1822,45 +1831,47 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 			}
 			else
 			{
-				a = x - arena->cities[field - (int16_t)fields->value].posxyz[0];
-				b = y - arena->cities[field - (int16_t)fields->value].posxyz[1];
-				fieldradius = GetFieldRadius(arena->cities[field - (int16_t)fields->value].type);
+				a = x - arena->cities[field - (int16_t) fields->value].posxyz[0];
+				b = y - arena->cities[field - (int16_t) fields->value].posxyz[1];
+				fieldradius = GetFieldRadius(arena->cities[field - (int16_t) fields->value].type);
 			}
 
-			if ((a >= (-1 * fieldradius) && a <= fieldradius) && (b >= (-1 * fieldradius) && b <= fieldradius))
+			if((a >= (-1 * fieldradius) && a <= fieldradius) && (b >= (-1 * fieldradius) && b <= fieldradius))
 			{
 				c = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2));
 
-				if (c < fieldradius)
+				if(c < fieldradius)
 				{
-					if((GetHeightAt(arena->fields[field].posxyz[0], arena->fields[field].posxyz[1]) - z) < (2*radius))
+					if((GetHeightAt(arena->fields[field].posxyz[0], arena->fields[field].posxyz[1]) - z) < (2 * radius))
 					{
-						if (field < fields->value)
+						if(field < fields->value)
 						{
 							wb3tonnage->ammo = type;
 							wb3tonnage->distance = htons(c);
-							wb3tonnage->field = htons(field+1);
+							wb3tonnage->field = htons(field + 1);
 							WB3TonnageOnTarget(buffer, client); // this add tonnage effect for emulated bombs
 
-							for (i = 0; i < MAX_BUILDINGS; i++)
+							for(i = 0; i < MAX_BUILDINGS; i++)
 							{
-								if (!arena->fields[field].buildings[i].field)
+								if(!arena->fields[field].buildings[i].field)
 								{
 									break;
 								}
-								else if (!arena->fields[field].buildings[i].status)
+								else if(!arena->fields[field].buildings[i].status)
 								{
 									a = x - arena->fields[field].buildings[i].posx;
 									b = y - arena->fields[field].buildings[i].posy;
-									if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
+									if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
 									{
-										if (gunstats->value > 1 && client->gunstat)
-											PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->fields[field].buildings[i].type), munition->he);
+										if(gunstats->value > 1 && client->gunstat)
+											PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->fields[field].buildings[i].type),
+													munition->he);
 
-										Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->fields[field].buildings[i].country) ? "friendly " : "",
-												GetBuildingType(arena->fields[field].buildings[i].type), munition->abbrev);
+										Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country
+												== arena->fields[field].buildings[i].country) ? "friendly " : "", GetBuildingType(
+												arena->fields[field].buildings[i].type), munition->abbrev);
 
-										if (client)
+										if(client)
 										{
 											Com_LogEvent(EVENT_HITSTRUCT, client->id, 0);
 											Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
@@ -1870,7 +1881,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 											Com_LogDescription(EVENT_DESC_AMMO, type, NULL);
 										}
 
-										if (!setjmp(debug_buffer))
+										if(!setjmp(debug_buffer))
 										{
 											damaged = AddBuildingDamage(&(arena->fields[field].buildings[i]), munition->he, munition->ap, client);
 										}
@@ -1878,7 +1889,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 										{
 											DebugClient(__FILE__, __LINE__, TRUE, client);
 										}
-										if (gunstats->value > 1 && client->gunstat)
+										if(gunstats->value > 1 && client->gunstat)
 											PPrintf(client, RADIO_GREEN, "Hit %s", GetBuildingType(arena->fields[field].buildings[i].type));
 										j++;
 									}
@@ -1889,24 +1900,26 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 						{
 							city = field - fields->value;
 
-							for (i = 0; i < MAX_BUILDINGS; i++)
+							for(i = 0; i < MAX_BUILDINGS; i++)
 							{
-								if (!arena->cities[city].buildings[i].field)
+								if(!arena->cities[city].buildings[i].field)
 								{
 									break;
 								}
-								else if (!arena->cities[city].buildings[i].status)
+								else if(!arena->cities[city].buildings[i].status)
 								{
 									a = x - arena->cities[city].buildings[i].posx;
 									b = y - arena->cities[city].buildings[i].posy;
-									if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
+									if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2)) < radius)
 									{
-										if (gunstats->value > 1 && client->gunstat)
-											PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->cities[city].buildings[i].type), munition->he);
+										if(gunstats->value > 1 && client->gunstat)
+											PPrintf(client, RADIO_GREEN, "Hit %s Damage %d", GetBuildingType(arena->cities[city].buildings[i].type),
+													munition->he);
 
-										Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country==arena->cities[city].buildings[i].country) ? "friendly " : "",
-												GetBuildingType(arena->cities[city].buildings[i].type), munition->abbrev);
-										if (client)
+										Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client ? client->longnick : "-HOST-", (client && client->country
+												== arena->cities[city].buildings[i].country) ? "friendly " : "", GetBuildingType(
+												arena->cities[city].buildings[i].type), munition->abbrev);
+										if(client)
 										{
 											Com_LogEvent(EVENT_HITSTRUCT, client->id, 0);
 											Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
@@ -1916,7 +1929,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 											Com_LogDescription(EVENT_DESC_AMMO, type, NULL);
 										}
 
-										if (!setjmp(debug_buffer))
+										if(!setjmp(debug_buffer))
 										{
 											AddBuildingDamage(&arena->cities[city].buildings[i], munition->he, munition->ap, client);
 										}
@@ -1941,13 +1954,13 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		for (i = 0; i < maxentities->value; i++) // check players near explosion
+		for(i = 0; i < maxentities->value; i++) // check players near explosion
 		{
-			if (clients[i].inuse && clients[i].inflight)
+			if(clients[i].inuse && clients[i].inflight)
 			{
-				if (clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
+				if(clients[i].drone & (DRONE_TANK1 | DRONE_TANK2))
 					radius = 50;
 				else
 					radius = 200;
@@ -1956,17 +1969,17 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 				b = y - clients[i].posxy[1][0];
 				c = z - clients[i].posalt[0];
 
-				if (a > (-1*radius) && a < radius && b > (-1*radius) && b < radius && c > (-1*radius) && c < radius)
+				if(a > (-1 * radius) && a < radius && b > (-1 * radius) && b < radius && c > (-1 * radius) && c < radius)
 				{
-					if (sqrt(Com_Pow(a, 2) + Com_Pow(b, 2) + Com_Pow(c, 2)) < radius)
+					if(sqrt(Com_Pow(a, 2) + Com_Pow(b, 2) + Com_Pow(c, 2)) < radius)
 					{
-						if (!setjmp(debug_buffer))
+						if(!setjmp(debug_buffer))
 						{
-							if (!(clients[i].drone && clients[i].related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+							if(!(clients[i].drone && clients[i].related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 							{
-								for(k = 0; clients[i].armor.points[part = (rand()%32)] <= 0 || part == PLACE_PILOT; k++)
+								for(k = 0; clients[i].armor.points[part = (rand() % 32)] <= 0 || part == PLACE_PILOT; k++)
 								{
-									if (k > 150)
+									if(k > 150)
 									{
 										Com_Printf(VERBOSE_WARNING, "DEBUG LOOP: HitStructsNear() Infinite loop detected, breaking off\n");
 										return 0;
@@ -1977,13 +1990,14 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 
 								AddPlaneDamage(part, munition->he, 0, NULL, NULL, &clients[i]);
 
-								PPrintf(&clients[i], RADIO_YELLOW, "You got hit by %s's flak", client?client->longnick:"-HOST-");
+								PPrintf(&clients[i], RADIO_YELLOW, "You got hit by %s's flak", client ? client->longnick : "-HOST-");
 
 								killer = AddKiller(&clients[i], client);
 
-								if (killer >= 0 && killer < MAX_HITBY && part >= 0 && part < 32)
+								if(killer >= 0 && killer < MAX_HITBY && part >= 0 && part < 32)
 								{
-									sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)munition->he / (double)(((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
+									sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) munition->he / (double) (((clients[i].armor.points[PLACE_CENTERFUSE]
+											<= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
 
 									if(sdamage >= 0)
 									{
@@ -1991,7 +2005,8 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 									}
 									else
 									{
-										Com_Printf(VERBOSE_WARNING, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he, ((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
+										Com_Printf(VERBOSE_WARNING, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he,
+												((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
 									}
 								}
 							}
@@ -2028,10 +2043,10 @@ void PFAUDamage(client_t *fau)
 
 	k = fields->value + cities->value;
 
-	for (i = 0; i < k; i++)
+	for(i = 0; i < k; i++)
 	{
 
-		if (i < fields->value)
+		if(i < fields->value)
 		{
 			a = fau->posxy[0][0] - arena->fields[i].posxyz[0];
 			b = fau->posxy[1][0] - arena->fields[i].posxyz[1];
@@ -2039,44 +2054,45 @@ void PFAUDamage(client_t *fau)
 		}
 		else
 		{
-			a = fau->posxy[0][0] - arena->cities[i - (int16_t)fields->value].posxyz[0];
-			b = fau->posxy[1][0] - arena->cities[i - (int16_t)fields->value].posxyz[1];
-			fieldradius = GetFieldRadius(arena->cities[i - (int16_t)fields->value].type);
+			a = fau->posxy[0][0] - arena->cities[i - (int16_t) fields->value].posxyz[0];
+			b = fau->posxy[1][0] - arena->cities[i - (int16_t) fields->value].posxyz[1];
+			fieldradius = GetFieldRadius(arena->cities[i - (int16_t) fields->value].type);
 		}
 
-		if ((a >= (-1 * fieldradius) && a <= fieldradius) && (b >= (-1 * fieldradius) && b <= fieldradius))
+		if((a >= (-1 * fieldradius) && a <= fieldradius) && (b >= (-1 * fieldradius) && b <= fieldradius))
 		{
-			if ((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < fieldradius)
+			if((dist = sqrt(Com_Pow(a, 2) + Com_Pow(b, 2))) < fieldradius)
 				break;
 		}
 	}
 
-	if (i < k)
+	if(i < k)
 	{
-		if (fau->related[0])
+		if(fau->related[0])
 		{
-			if (i < fields->value)
-				PPrintf(fau->related[0], RADIO_YELLOW, "V-1 hit F%d dist %d", i+1, dist);
+			if(i < fields->value)
+				PPrintf(fau->related[0], RADIO_YELLOW, "V-1 hit F%d dist %d", i + 1, dist);
 			else
-				PPrintf(fau->related[0], RADIO_YELLOW, "V-1 hit %s (C%d) dist %d", arena->cities[i - (int16_t)fields->value].name, i+1-(int16_t)fields->value, dist);
+				PPrintf(fau->related[0], RADIO_YELLOW, "V-1 hit %s (C%d) dist %d", arena->cities[i - (int16_t) fields->value].name, i + 1
+						- (int16_t) fields->value, dist);
 		}
 	}
-	else if (fau->related[0])
+	else if(fau->related[0])
 	{
 		PPrintf(fau->related[0], RADIO_YELLOW, "V-1 lost");
 	}
 
-	for (j = 0, k = 0; j < 9; j++)
+	for(j = 0, k = 0; j < 9; j++)
 	{
-		a = fau->posxy[0][0]+800-(j*200);
-		b = fau->posxy[1][0]+800-(j*200);
+		a = fau->posxy[0][0] + 800 - (j * 200);
+		b = fau->posxy[1][0] + 800 - (j * 200);
 		k += HitStructsNear(a, b, GetHeightAt(a, b), 87/*2000Kg GP*/, DRONE_FAU_SPEED, 0, fau->related[0]);
-		a = fau->posxy[0][0]+800-(j*200);
-		b = fau->posxy[1][0]-800+(j*200);
+		a = fau->posxy[0][0] + 800 - (j * 200);
+		b = fau->posxy[1][0] - 800 + (j * 200);
 		k += HitStructsNear(a, b, GetHeightAt(a, b), 87/*2000Kg GP*/, DRONE_FAU_SPEED, 0, fau->related[0]);
 	}
 
-	if (fau->related[0])
+	if(fau->related[0])
 		PPrintf(fau->related[0], RADIO_YELLOW, "Hit %d structures", k);
 }
 
@@ -2107,7 +2123,7 @@ u_int32_t NewDroneName(client_t *client)
 
 	Sys_WaitForLock(FILE_DRONENICKS_LOCK);
 
-	if (Sys_LockFile(FILE_DRONENICKS_LOCK) < 0)
+	if(Sys_LockFile(FILE_DRONENICKS_LOCK) < 0)
 	{
 		if(client)
 			return client->shortnick;
@@ -2115,14 +2131,14 @@ u_int32_t NewDroneName(client_t *client)
 			return ascii2wbnick("unamed", 1);
 	}
 
-	if ((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
+	if((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
 	{
 		Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", FILE_DRONENICKS);
 		nick = client->shortnick;
 	}
 	else
 	{
-		if (fgets(buffer, 8, fp) == NULL)
+		if(fgets(buffer, 8, fp) == NULL)
 		{
 			Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 			fclose(fp);
@@ -2135,12 +2151,12 @@ u_int32_t NewDroneName(client_t *client)
 
 		i = Com_Atoi(buffer);
 
-		j = (rand()%i) + 1; // random nick in list
+		j = (rand() % i) + 1; // random nick in list
 
 		k = 0;
-		while (k < j)
+		while(k < j)
 		{
-			if (fgets(buffer, 8, fp) == NULL)
+			if(fgets(buffer, 8, fp) == NULL)
 			{
 				Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 				fclose(fp);
@@ -2156,18 +2172,18 @@ u_int32_t NewDroneName(client_t *client)
 
 		nick = ascii2wbnick(buffer, 1);
 
-		for (k = 0; k < maxentities->value; k++) // check if nick is already in use
+		for(k = 0; k < maxentities->value; k++) // check if nick is already in use
 		{
-			if (clients[k].inuse)
-				if (clients[k].shortnick == nick) // nick in use
+			if(clients[k].inuse)
+				if(clients[k].shortnick == nick) // nick in use
 					break;
 		}
 
-		if (k != maxentities->value) // nick in use
+		if(k != maxentities->value) // nick in use
 		{
-			for (k = j; k < i; k++)
+			for(k = j; k < i; k++)
 			{
-				if (fgets(buffer, 8, fp) == NULL)
+				if(fgets(buffer, 8, fp) == NULL)
 				{
 					Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 					fclose(fp);
@@ -2180,13 +2196,13 @@ u_int32_t NewDroneName(client_t *client)
 
 				nick = ascii2wbnick(buffer, 1);
 
-				for (l = 0; l < maxentities->value; l++)
+				for(l = 0; l < maxentities->value; l++)
 				{
-					if (clients[l].shortnick == nick) // nick in use
+					if(clients[l].shortnick == nick) // nick in use
 						break;
 				}
 
-				if (l == maxentities->value)
+				if(l == maxentities->value)
 				{
 					fclose(fp);
 					Sys_UnlockFile(FILE_DRONENICKS_LOCK);
@@ -2197,7 +2213,7 @@ u_int32_t NewDroneName(client_t *client)
 
 			fclose(fp);
 
-			if ((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
+			if((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
 			{
 				Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", FILE_DRONENICKS);
 				Sys_UnlockFile(FILE_DRONENICKS_LOCK);
@@ -2209,7 +2225,7 @@ u_int32_t NewDroneName(client_t *client)
 			else
 			{
 				// crop end of ring
-				if (fgets(buffer, 8, fp) == NULL)
+				if(fgets(buffer, 8, fp) == NULL)
 				{
 					Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 					fclose(fp);
@@ -2220,9 +2236,9 @@ u_int32_t NewDroneName(client_t *client)
 						return ascii2wbnick("unamed", 1);
 				}
 
-				for (k = 0; k < j; k++)
+				for(k = 0; k < j; k++)
 				{
-					if (fgets(buffer, 8, fp) == NULL)
+					if(fgets(buffer, 8, fp) == NULL)
 					{
 						Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 						fclose(fp);
@@ -2235,13 +2251,13 @@ u_int32_t NewDroneName(client_t *client)
 
 					nick = ascii2wbnick(buffer, 0);//1);
 
-					for (l = 0; l < maxentities->value; l++) // start again from begin
+					for(l = 0; l < maxentities->value; l++) // start again from begin
 					{
-						if (clients[l].shortnick == nick) // nick in use
+						if(clients[l].shortnick == nick) // nick in use
 							break;
 					}
 
-					if (l == maxentities->value)
+					if(l == maxentities->value)
 					{
 						fclose(fp);
 						Sys_UnlockFile(FILE_DRONENICKS_LOCK);
@@ -2249,7 +2265,7 @@ u_int32_t NewDroneName(client_t *client)
 					}
 				}
 
-				if (k == j)
+				if(k == j)
 				{
 					if(client)
 						nick = client->shortnick;
@@ -2278,31 +2294,34 @@ void LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_
 	x = DRONE_TANK_SPEED * sin(Com_Rad(angle)) * -1;
 	y = DRONE_TANK_SPEED * cos(Com_Rad(angle));
 
-	if (angle < 0)
+	if(angle < 0)
 	{
 		angle += 360;
 	}
 
-	if ((angle *= 10) > 901)
+	if((angle *= 10) > 901)
 	{
 		angle -= 3600;
 	}
 
-	if ((drone = AddDrone(DRONE_TANK1, arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldfrom].posxyz[2], country, 101/*TANK*/, client)))
+	if((drone = AddDrone(DRONE_TANK1, arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldfrom].posxyz[2], country,
+			101/*TANK*/, client)))
 	{
 		drone->speedxyz[0][0] = x;
 		drone->speedxyz[1][0] = y;
 		drone->dronefield = fieldto;
 		drone->angles[2][0] = angle;
 	}
-	if ((drone = AddDrone(DRONE_TANK2, arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldfrom].posxyz[2], country, 101/*TANK*/, client)))
+	if((drone = AddDrone(DRONE_TANK2, arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldfrom].posxyz[2], country,
+			101/*TANK*/, client)))
 	{
 		drone->speedxyz[0][0] = x;
 		drone->speedxyz[1][0] = y;
 		drone->dronefield = fieldto;
 		drone->angles[2][0] = angle;
 	}
-	if ((drone = AddDrone(DRONE_AAA, arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldfrom].posxyz[2], country, 85/*AAA*/, client)))
+	if((drone = AddDrone(DRONE_AAA, arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldfrom].posxyz[2], country,
+			85/*AAA*/, client)))
 	{
 		drone->speedxyz[0][0] = x;
 		drone->speedxyz[1][0] = y;
@@ -2310,7 +2329,8 @@ void LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_
 		drone->angles[2][0] = angle;
 
 	}
-	if ((drone = AddDrone(DRONE_KATY, arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldfrom].posxyz[2], country, 85/*JEEP*/, client)))
+	if((drone = AddDrone(DRONE_KATY, arena->fields[fieldfrom].posxyz[0], arena->fields[fieldfrom].posxyz[1], arena->fields[fieldfrom].posxyz[2], country,
+			85/*JEEP*/, client)))
 	{
 		drone->speedxyz[0][0] = x;
 		drone->speedxyz[1][0] = y;
@@ -2318,5 +2338,5 @@ void LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_
 		drone->angles[2][0] = angle;
 	}
 
-	PPrintf(client, RADIO_YELLOW, "Armoured column launched to f%d", fieldto+1);
+	PPrintf(client, RADIO_YELLOW, "Armoured column launched to f%d", fieldto + 1);
 }

@@ -97,10 +97,10 @@ int main(int argc, char *argv[])
 	Cmd_LoadConfig("config", NULL);
 	Cmd_LoadConfig("autoexec", NULL);
 
-	for (newsocket = 1; newsocket < argc; newsocket++)
+	for(newsocket = 1; newsocket < argc; newsocket++)
 	{
-		if (*argv[newsocket] == '+')
-			Var_Set(argv[newsocket]+1, argv[newsocket+1]);
+		if(*argv[newsocket] == '+')
+			Var_Set(argv[newsocket] + 1, argv[newsocket + 1]);
 
 	}
 
@@ -134,12 +134,12 @@ int main(int argc, char *argv[])
 	Com_Printf(VERBOSE_ALWAYS, "This is free software, and you are welcome to redistribute\n");
 	Com_Printf(VERBOSE_ALWAYS, "it under certain conditions; For details type 'license' command\n");
 	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
-	Com_Printf(VERBOSE_ALWAYS, "Starting Server. Version: %s - Build %s %s\n", VERSION,__DATE__,__TIME__ );
+	Com_Printf(VERBOSE_ALWAYS, "Starting Server. Version: %s - Build %s %s\n", VERSION, __DATE__, __TIME__);
 	Com_Printf(VERBOSE_ALWAYS, "***************************************************************\n");
 
 	Sys_SQL_Init(); // startting SQL after InitTCPNet 'cause WSAStartup() in windows
 	Sys_GeoIP_Init(); // Starts GeoIP module
-//	Lua_Init(); // LUA init
+	//	Lua_Init(); // LUA init
 
 	InitClients();
 	InitArena();
@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
 	oldtime = Sys_Milliseconds();
 	sync = 10;
 
-	while (!stop)
+	while(!stop)
 	{
 		if(!setjmp(debug_buffer))
 		{
@@ -183,9 +183,9 @@ int main(int argc, char *argv[])
 			{
 				if(sync)
 #ifdef _WIN32
-				sleep(10);
+					sleep(10);
 #else
-				usleep(10000);
+					usleep(10000);
 #endif
 				arena->time = Sys_Milliseconds();
 				if(oldtime > arena->time)
@@ -195,7 +195,7 @@ int main(int argc, char *argv[])
 				}
 
 				time = arena->time - oldtime;
-			}while (time < sync); // server fps = 100
+			} while(time < sync); // server fps = 100
 
 			if(arena->frame < (u_int32_t) 429496200UL /*49 days*/) // change: reset Sys_Milliseconds and frame, every changearena
 			{
@@ -214,10 +214,10 @@ int main(int argc, char *argv[])
 			if(checksync > arena->frame)
 			{
 				sync = 0;
-				if((checksync - arena->frame)> 30000)
+				if((checksync - arena->frame) > 30000)
 				{
 					Com_Printf(VERBOSE_WARNING, "Clock Forwards\n");
-					arena->frame= checksync;
+					arena->frame = checksync;
 				}
 			}
 			else
@@ -225,7 +225,7 @@ int main(int argc, char *argv[])
 				sync = 10;
 			}
 
-			if(arena->frame> checksync)
+			if(arena->frame > checksync)
 			{
 				Com_Printf(VERBOSE_WARNING, "server frame unsynchronized\n");
 				arena->frame = checksync;
@@ -236,7 +236,7 @@ int main(int argc, char *argv[])
 
 			if(time > overload->value)
 			{
-				Com_Printf(VERBOSE_WARNING, "possible server overload (%d ms / %d ms)\n", time, (int32_t)overload->value);
+				Com_Printf(VERBOSE_WARNING, "possible server overload (%d ms / %d ms)\n", time, (int32_t) overload->value);
 				arena->overload = 100;
 			}
 		}
@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
 
 		if(!setjmp(debug_buffer))
 		{
-			if ((newsocket = accept(sockfd, (struct sockaddr *) &cli_addr, &clisize)) == -1)
+			if((newsocket = accept(sockfd, (struct sockaddr *) &cli_addr, &clisize)) == -1)
 			{
 #ifdef _WIN32
 				if ((err = WSAGetLastError()) != WSAEWOULDBLOCK)
@@ -277,7 +277,7 @@ int main(int argc, char *argv[])
 					ExitServer(1);
 				}
 #else
-				if (errno != EWOULDBLOCK)
+				if(errno != EWOULDBLOCK)
 				{
 					Com_Printf(VERBOSE_ERROR, "accept()\n");
 					//				ConnError(errno);
@@ -295,7 +295,7 @@ int main(int argc, char *argv[])
 					ExitServer(1);
 				}
 #else
-				if (ioctl(newsocket, FIONBIO, &ioctlv) == -1)
+				if(ioctl(newsocket, FIONBIO, &ioctlv) == -1)
 				{
 					Com_Printf(VERBOSE_ERROR, "setting nonblocking socket (newsocket) (code %d)\n", errno);
 					ConnError(errno);
@@ -346,45 +346,45 @@ void UpdateLocalArenaslist(void)
 	u_int16_t offset;
 	u_int8_t i, j;
 
-	cli_len = (u_int32_t)sizeof(struct sockaddr_in);
+	cli_len = (u_int32_t) sizeof(struct sockaddr_in);
 
 	memset(buffer, 0, sizeof(buffer));
 
-	if ((n = recvfrom(udpfd, buffer, MAX_UDPDATA, 0, (struct sockaddr *)&cli_addr, &cli_len)) > 0)
+	if((n = recvfrom(udpfd, buffer, MAX_UDPDATA, 0, (struct sockaddr *) &cli_addr, &cli_len)) > 0)
 	{
-		if (ntohl(*(long *) buffer) == n)
+		if(ntohl(*(long *) buffer) == n)
 		{
 			offset = 4;
 
-			a_mapname = (char *)(buffer + offset);
+			a_mapname = (char *) (buffer + offset);
 			offset += strlen(a_mapname) + 1;
-			a_hostdomain = (char *)(buffer + offset);
+			a_hostdomain = (char *) (buffer + offset);
 			offset += strlen(a_hostdomain) + 1;
-			a_hostname = (char *)(buffer + offset);
+			a_hostname = (char *) (buffer + offset);
 			offset += strlen(a_hostname) + 1;
-			a_numplayers = ntohl(*(long *)(buffer + offset));
+			a_numplayers = ntohl(*(long *) (buffer + offset));
 			offset += 4;
-			a_maxclients = ntohl(*(long *)(buffer + offset));
+			a_maxclients = ntohl(*(long *) (buffer + offset));
 			offset += 4;
 
 			curr_time = time(NULL);
 
-			for (i = 0; i < MAX_ARENASLIST; i++)
+			for(i = 0; i < MAX_ARENASLIST; i++)
 			{
-				if ((arenaslist[i].time || arenaslist[i].logintime) && ((curr_time - arenaslist[i].time) > 10)) // 10 seconds timeout
+				if((arenaslist[i].time || arenaslist[i].logintime) && ((curr_time - arenaslist[i].time) > 10)) // 10 seconds timeout
 				{
 					arenaslist[i].logintime = 0;
 					arenaslist[i].time = 0;
 				}
 			}
 
-			for (i = 0, j = 0; i < MAX_ARENASLIST; i++)
+			for(i = 0, j = 0; i < MAX_ARENASLIST; i++)
 			{
-				if (arenaslist[i].time) // slot filled
+				if(arenaslist[i].time) // slot filled
 				{
-					if (strlen(a_hostdomain) && strlen(arenaslist[i].hostdomain))
+					if(strlen(a_hostdomain) && strlen(arenaslist[i].hostdomain))
 					{
-						if (!strcmp(a_hostdomain, arenaslist[i].hostdomain)) // arena match
+						if(!strcmp(a_hostdomain, arenaslist[i].hostdomain)) // arena match
 						{
 							j = i;
 							break;
@@ -397,7 +397,7 @@ void UpdateLocalArenaslist(void)
 				}
 			}
 
-			if (!(!j && i)) // found arena or not found but still empty slot
+			if(!(!j && i)) // found arena or not found but still empty slot
 			{
 				// update arena status
 				strcpy(arenaslist[j].mapname, a_mapname);
@@ -407,7 +407,7 @@ void UpdateLocalArenaslist(void)
 				arenaslist[j].maxclients = a_maxclients;
 				memcpy(arenaslist[j].array, (buffer + offset), ((a_numplayers * 5) > 1000) ? 1000 : (a_numplayers * 5));
 				arenaslist[j].time = curr_time;
-				if (!arenaslist[j].logintime)
+				if(!arenaslist[j].logintime)
 					arenaslist[j].logintime = curr_time;
 			}
 		}
@@ -427,14 +427,14 @@ void RunFrame(void)
 	static u_int32_t all, arn, cli;
 	u_int32_t time_before = 0, time_after_arena = 0, time_after_clients = 0;
 
-	if (server_speeds->value)
+	if(server_speeds->value)
 		time_before = Sys_Milliseconds();
 
 	CheckVars();
 
-	if (!(arena->frame % 3000))
+	if(!(arena->frame % 3000))
 	{
-		if (mysql_ping(&my_sock))
+		if(mysql_ping(&my_sock))
 		{
 			Com_Printf(VERBOSE_WARNING, "RunFrame(): mysql_ping() error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
@@ -456,12 +456,12 @@ void RunFrame(void)
 		}
 	}
 
-	if (!(arena->frame % 12000))
+	if(!(arena->frame % 12000))
 	{
 		UpdateArenaStatus(TRUE);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
 		CheckArenaRules();
 	}
@@ -471,7 +471,7 @@ void RunFrame(void)
 	}
 
 	if(server_speeds->value)
-	time_after_arena = Sys_Milliseconds();
+		time_after_arena = Sys_Milliseconds();
 
 	for(i = 0; i < maxentities->value; i++)
 	{
@@ -528,11 +528,11 @@ void RunFrame(void)
 		do
 		{
 			console = Sys_ConsoleInput();
-			if (console)
+			if(console)
 			{
 				ProcessCommands(console, NULL);
 			}
-		}while(console);
+		} while(console);
 	}
 
 	if(server_speeds->value)
@@ -543,9 +543,10 @@ void RunFrame(void)
 		arn += (time_after_arena - time_before);
 		cli += (time_after_clients - time_after_arena);
 
-		if(!(arena->frame % (int)(100/server_speeds->value)))
+		if(!(arena->frame % (int) (100 / server_speeds->value)))
 		{
-			printf("all:%3i arn:%3i cli:%3i sent: %.3f recv: %.3f time: %u\n", all, arn, cli, (double)arena->sent/1000, (double)arena->recv/1000, arena->time);
+			printf("all:%3i arn:%3i cli:%3i sent: %.3f recv: %.3f time: %u\n", all, arn, cli, (double) arena->sent / 1000, (double) arena->recv / 1000,
+					arena->time);
 			fflush(stdout);
 
 			all = arn = cli = 0;
@@ -566,7 +567,7 @@ void BackupArenaStatus(void)
 	u_int8_t i;
 	char date[8];
 
-	if (arena)
+	if(arena)
 	{
 		snprintf(date, sizeof(date), "%d", arena->year);
 		Var_Set("curryear", date);
@@ -582,7 +583,7 @@ void BackupArenaStatus(void)
 
 	for(i = 0; i < MAX_LOGFILE; i++)
 	{
-		if (logfile[i])
+		if(logfile[i])
 		{
 			fflush(logfile[i]);
 			//		fclose(logfile);
@@ -602,7 +603,7 @@ void ExitServer(int status)
 	u_int16_t i;
 	var_t *var;
 
-	if (!stop)
+	if(!stop)
 		stop = 1;
 	else
 		return;
@@ -615,14 +616,14 @@ void ExitServer(int status)
 
 	Sys_GeoIP_Close();
 
-//	Lua_TestLua();
-//	Lua_Close();
+	//	Lua_TestLua();
+	//	Lua_Close();
 
 	Sys_SQL_Close();
 
 	Com_Printf(VERBOSE_ALWAYS, "Closing server socket\n"); /*********/
 
-	if (sockfd)
+	if(sockfd)
 		Com_Close(&sockfd);
 
 #ifdef _WIN32
@@ -631,11 +632,11 @@ void ExitServer(int status)
 
 	Com_Printf(VERBOSE_ALWAYS, "Closing clients sockets\n"); /*********/
 
-	if (clients)
+	if(clients)
 	{
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone && clients[i].socket)
+			if(clients[i].inuse && !clients[i].drone && clients[i].socket)
 			{
 				Com_Close(&(clients[i].socket));
 			}
@@ -648,20 +649,20 @@ void ExitServer(int status)
 	free(clients);
 
 	// free arena
-	if (arena)
+	if(arena)
 	{
 		free(arena->fields);
 		free(arena->cities);
 	}
 
-	if (arena)
+	if(arena)
 	{
 		free(arena);
 	}
 
 	// free vars
 
-	while (var_vars)
+	while(var_vars)
 	{
 		free(var_vars->name);
 		free(var_vars->string);

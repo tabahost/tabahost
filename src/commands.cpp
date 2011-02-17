@@ -36,7 +36,7 @@ void Cmd_LoadBatch(client_t *client)
 
 	snprintf(file, sizeof(file), "./batch/%s.cfg", client->longnick);
 
-	if ((fp = fopen(file, "r")) == NULL)
+	if((fp = fopen(file, "r")) == NULL)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "WARNING: Cannot execute file \"%s\"", file);
 		Com_Printf(VERBOSE_WARNING, "Couldn't execute file \"%s\"\n", file);
@@ -45,7 +45,7 @@ void Cmd_LoadBatch(client_t *client)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Executing batch file");
 
-		while (fgets(command, sizeof(command), fp) != NULL)
+		while(fgets(command, sizeof(command), fp) != NULL)
 		{
 			ProcessCommands(command, client);
 		}
@@ -69,9 +69,9 @@ void Cmd_LoadConfig(const char *filename, client_t *client)
 	strcpy(file, filename);
 	strcat(file, ".cfg");
 
-	if ((fp = fopen(file, "r")) == NULL)
+	if((fp = fopen(file, "r")) == NULL)
 	{
-		if (client)
+		if(client)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "WARNING: Cannot execute file \"%s\"", file);
 		}
@@ -82,7 +82,7 @@ void Cmd_LoadConfig(const char *filename, client_t *client)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Executing config file \"%s\"", file);
 
-		while (fgets(command, sizeof(command), fp) != NULL)
+		while(fgets(command, sizeof(command), fp) != NULL)
 		{
 			ProcessCommands(command, NULL);
 		}
@@ -102,9 +102,9 @@ void Cmd_Ros(client_t *client)
 {
 	u_int8_t red, green, gold, purp, unk, i;
 
-	if (client)
+	if(client)
 	{
-		if (!client->inflight)
+		if(!client->inflight)
 		{
 			SendFileSeq1(FILE_INGAME, "roster.asc", client);
 		}
@@ -112,14 +112,14 @@ void Cmd_Ros(client_t *client)
 	else
 		Sys_Printfile(FILE_INGAME);
 
-	for (red = green = gold = purp = unk = i = 0; i < maxentities->value; i++)
+	for(red = green = gold = purp = unk = i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].attr == 1 && hideadmin->value)
+		if(clients[i].attr == 1 && hideadmin->value)
 			continue;
 
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			switch (clients[i].country)
+			switch(clients[i].country)
 			{
 				case 0:
 					unk++;
@@ -155,43 +155,47 @@ void Cmd_Ammo(client_t *client, u_int8_t arg, char *arg2)
 {
 	u_int8_t i;
 
-	if (!arg2)
+	if(!arg2)
 	{
-		for (i = 0; i < maxmuntype; i++)
+		for(i = 0; i < maxmuntype; i++)
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "%d-%s, he %d, ap %d, decay %d, type %d", i, arena->munition[i].name, arena->munition[i].he, arena->munition[i].ap, arena->munition[i].decay,
-					arena->munition[i].type);
+			PPrintf(client, RADIO_LIGHTYELLOW, "%d-%s, he %d, ap %d, decay %d, type %d", i, arena->munition[i].name, arena->munition[i].he,
+					arena->munition[i].ap, arena->munition[i].decay, arena->munition[i].type);
 		}
 	}
 	else
 	{
-		if (*arg2 == 'h')
+		if(*arg2 == 'h')
 		{
 			arg2++;
 			arena->munition[arg].he = Com_Atoi(arg2);
 			PPrintf(client, RADIO_LIGHTYELLOW, "HE of %s(%u) was changed to %d", arena->munition[arg].name, arg, arena->munition[arg].he);
-			Com_Printf(VERBOSE_ATTENTION, "HE of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].he, client ? client->longnick : "-HOST-");
+			Com_Printf(VERBOSE_ATTENTION, "HE of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].he,
+					client ? client->longnick : "-HOST-");
 		}
-		else if (*arg2 == 'a')
+		else if(*arg2 == 'a')
 		{
 			arg2++;
 			arena->munition[arg].ap = Com_Atoi(arg2);
 			PPrintf(client, RADIO_LIGHTYELLOW, "AP of %s(%u) was changed to %u", arena->munition[arg].name, arg, arena->munition[arg].ap);
-			Com_Printf(VERBOSE_ATTENTION, "AP of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].ap, client ? client->longnick : "-HOST-");
+			Com_Printf(VERBOSE_ATTENTION, "AP of %s(%u) was changed to %u by %s\n", arena->munition[arg].name, arg, arena->munition[arg].ap,
+					client ? client->longnick : "-HOST-");
 		}
-		else if (*arg2 == 'd')
+		else if(*arg2 == 'd')
 		{
 			arg2++;
 			arena->munition[arg].decay = Com_Atoi(arg2);
 			PPrintf(client, RADIO_LIGHTYELLOW, "Decay of %s(%u) was changed to %u", arena->munition[arg].name, arg, arena->munition[arg].decay);
-			Com_Printf(VERBOSE_ATTENTION, "Decay of %s(%u) was changed to %d by %s\n", arena->munition[arg].name, arg, arena->munition[arg].decay, client ? client->longnick : "-HOST-");
+			Com_Printf(VERBOSE_ATTENTION, "Decay of %s(%u) was changed to %d by %s\n", arena->munition[arg].name, arg, arena->munition[arg].decay,
+					client ? client->longnick : "-HOST-");
 		}
-		else if (*arg2 == 't')
+		else if(*arg2 == 't')
 		{
 			arg2++;
 			arena->munition[arg].decay = Com_Atoi(arg2);
 			PPrintf(client, RADIO_LIGHTYELLOW, "Type of %s(%u) was changed to %u", arena->munition[arg].name, arg, arena->munition[arg].type);
-			Com_Printf(VERBOSE_ATTENTION, "Type of %s(%u) was changed to %d by %s\n", arena->munition[arg].name, arg, arena->munition[arg].type, client ? client->longnick : "-HOST-");
+			Com_Printf(VERBOSE_ATTENTION, "Type of %s(%u) was changed to %d by %s\n", arena->munition[arg].name, arg, arena->munition[arg].type,
+					client ? client->longnick : "-HOST-");
 		}
 		else
 		{
@@ -206,23 +210,24 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 	int16_t i = 0;
 	u_int16_t time;
 
-	if (!row)
+	if(!row)
 	{
 		my_query[0] = 0;
 
 		time = Sys_Milliseconds();
 
-		if (mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
+		if(mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
 			Com_Printf(VERBOSE_ERROR, "%d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
-		for (i = 0; i < maxmuntype; i++)
+		for(i = 0; i < maxmuntype; i++)
 		{
-			sprintf(my_query, "%sUPDATE munitions SET he = '%d', ap = '%u', decay = '%d', name = '%s', abbrev = '%s', muntype = '%d' WHERE id = '%u' LIMIT 1", my_query, arena->munition[i].he,
-					arena->munition[i].ap, arena->munition[i].decay, arena->munition[i].name, arena->munition[i].abbrev, arena->munition[i].type, i);
+			sprintf(my_query, "%sUPDATE munitions SET he = '%d', ap = '%u', decay = '%d', name = '%s', abbrev = '%s', muntype = '%d' WHERE id = '%u' LIMIT 1",
+					my_query, arena->munition[i].he, arena->munition[i].ap, arena->munition[i].decay, arena->munition[i].name, arena->munition[i].abbrev,
+					arena->munition[i].type, i);
 
-			if ((i && !(i % 30)) || i == (maxmuntype - 1))
+			if((i && !(i % 30)) || i == (maxmuntype - 1))
 			{
-				if (d_mysql_query(&my_sock, my_query))
+				if(d_mysql_query(&my_sock, my_query))
 				{
 					Com_Printf(VERBOSE_WARNING, "Cmd_Saveammo(): couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
 					// TODO: FIXME: add sleep here?
@@ -231,7 +236,7 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 				}
 				else
 				{
-					Com_MySQL_Flush(&my_sock,__FILE__ , __LINE__);
+					Com_MySQL_Flush(&my_sock, __FILE__, __LINE__);
 				}
 
 				my_query[0] = '\0';
@@ -252,8 +257,8 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 		mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_OFF);
 
 		time = Sys_Milliseconds() - time;
-		Com_Printf(VERBOSE_DEBUG, "SaveAmmo(): Query Time %.3fsec\n", (double)(time)/1000);
-		PPrintf(client, RADIO_YELLOW, "Query Time %.3fsec\n", (double)(time)/1000);
+		Com_Printf(VERBOSE_DEBUG, "SaveAmmo(): Query Time %.3fsec\n", (double) (time) / 1000);
+		PPrintf(client, RADIO_YELLOW, "Query Time %.3fsec\n", (double) (time) / 1000);
 	}
 	else
 	{
@@ -262,13 +267,8 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 		if(i >= 0 && i < maxmuntype)
 		{
 			sprintf(my_query, "UPDATE munitions SET he = '%d', ap = '%u', decay = '%d', name = '%s', abbrev = '%s', muntype = '%d' WHERE id = '%u' LIMIT 1",
-			arena->munition[i].he,
-			arena->munition[i].ap,
-			arena->munition[i].decay,
-			arena->munition[i].name,
-			arena->munition[i].abbrev,
-			arena->munition[i].type,
-			i);
+					arena->munition[i].he, arena->munition[i].ap, arena->munition[i].decay, arena->munition[i].name, arena->munition[i].abbrev,
+					arena->munition[i].type, i);
 
 			if(Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 
@@ -297,21 +297,23 @@ void Cmd_VarList(client_t *client, char *string)
 	var_t *var;
 	u_int8_t i = 0;
 
-	for (var = var_vars; var; var = var->next)
+	for(var = var_vars; var; var = var->next)
 	{
 		if(client && (var->flags & VAR_ADMIN) && client->attr == FLAG_OP)
 			continue;
 
-		if (!string)
+		if(!string)
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "%s %s \"%s\"", var->flags & VAR_ARCHIVE ? var->flags & VAR_NOSET ? "*" : "+" : var->flags & VAR_NOSET ? "x" : " ", var->name, var->string);
+			PPrintf(client, RADIO_LIGHTYELLOW, "%s %s \"%s\"", var->flags & VAR_ARCHIVE ? var->flags & VAR_NOSET ? "*" : "+" : var->flags & VAR_NOSET ? "x"
+					: " ", var->name, var->string);
 			i++;
 		}
 		else
 		{
-			if (!Com_Strncmp(var->name, string, strlen(string)))
+			if(!Com_Strncmp(var->name, string, strlen(string)))
 			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "%s %s \"%s\"", var->flags & VAR_ARCHIVE ? var->flags & VAR_NOSET ? "*" : "+" : var->flags & VAR_NOSET ? "x" : " ", var->name, var->string);
+				PPrintf(client, RADIO_LIGHTYELLOW, "%s %s \"%s\"", var->flags & VAR_ARCHIVE ? var->flags & VAR_NOSET ? "*" : "+" : var->flags & VAR_NOSET ? "x"
+						: " ", var->name, var->string);
 				i++;
 			}
 		}
@@ -335,16 +337,16 @@ void Cmd_Move(char *field, int country, client_t *client)
 	memset(buffer, 0, sizeof(buffer));
 	move = (move_t *) buffer;
 
-	if (field)
+	if(field)
 	{
 		client->hq = 0;
 
-		if (tolower(*field) == 'f')
+		if(tolower(*field) == 'f')
 		{
 			field++;
 		}
 
-		if (!Com_Stricmp(field, "hq"))
+		if(!Com_Stricmp(field, "hq"))
 		{
 			nothq = 0;
 			client->field = 1;
@@ -356,17 +358,17 @@ void Cmd_Move(char *field, int country, client_t *client)
 		}
 		else
 		{
-			fieldn = Com_Atoi(field)-1;
+			fieldn = Com_Atoi(field) - 1;
 
-			if (fieldn >= fields->value || fieldn < 0)
+			if(fieldn >= fields->value || fieldn < 0)
 			{
 				PPrintf(client, RADIO_YELLOW, "Invalid field");
 				return;
 			}
 
-			if (arena->fields[fieldn].country == client->country || client->attr == 1)
+			if(arena->fields[fieldn].country == client->country || client->attr == 1)
 			{
-				if (!arena->fields[fieldn].closed || client->attr == 1)
+				if(!arena->fields[fieldn].closed || client->attr == 1)
 				{
 					client->field = fieldn + 1;
 					// client->deck = NULL;
@@ -380,7 +382,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 			}
 			else
 			{
-				if ((arena->fields[fieldn].type <= FIELD_SUBMARINE) || (arena->fields[fieldn].type >= FIELD_WB3POST))
+				if((arena->fields[fieldn].type <= FIELD_SUBMARINE) || (arena->fields[fieldn].type >= FIELD_WB3POST))
 					PPrintf(client, RADIO_YELLOW, "This field is not from your country");
 				return;
 			}
@@ -388,26 +390,27 @@ void Cmd_Move(char *field, int country, client_t *client)
 	}
 	else // country
 	{
-		if (!client->arenabuildsok /* change country in login */ || (client->countrytime <= time(NULL)) || client->attr == 1)
+		if(!client->arenabuildsok /* change country in login */|| (client->countrytime <= time(NULL)) || client->attr == 1)
 		{
-			if (((country != 1) && (country != 3)) && client->attr != 1)
+			if(((country != 1) && (country != 3)) && client->attr != 1)
 			{
 				PPrintf(client, RADIO_YELLOW, "Invalid country");
 				return;
 			}
 
-			for (i = 0; i < maxentities->value; i++) // check for IP/Squadron sharing
+			for(i = 0; i < maxentities->value; i++) // check for IP/Squadron sharing
 			{
-				if (clients[i].inuse && !clients[i].drone && clients[i].ready && &clients[i] != client)
+				if(clients[i].inuse && !clients[i].drone && clients[i].ready && &clients[i] != client)
 				{
-					if (clients[i].country /* already have a country */ && clients[i].country != country && !strcmp(clients[i].ip, client->ip) && !clients[i].thai)
+					if(clients[i].country /* already have a country */&& clients[i].country != country && !strcmp(clients[i].ip, client->ip)
+							&& !clients[i].thai)
 					{
 						country = clients[i].country;
 						PPrintf(client, RADIO_YELLOW, "Country forced to %s due IP Sharing with %s", GetCountry(country), clients[i].longnick);
 						break;
 					}
-					else if(clients[i].arenabuildsok /*not in login */ && clients[i].country /* already have a country */ &&
-							clients[i].squadron /*already have squadron*/ && clients[i].squadron == client->squadron /* same squadron */)
+					else if(clients[i].arenabuildsok /*not in login */&& clients[i].country /* already have a country */&& clients[i].squadron
+							/*already have squadron*/&& clients[i].squadron == client->squadron /* same squadron */)
 					{
 						country = clients[i].country;
 						PPrintf(client, RADIO_YELLOW, "Country forced to %s due Squadron sharing with %s", GetCountry(country), clients[i].longnick);
@@ -419,7 +422,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 			client->country = country;
 			client->hq = 0;
 			fieldn = FirstFieldCountry(country);
-			if (fieldn < 0)
+			if(fieldn < 0)
 			{
 				nothq = 0;
 				client->field = 1;
@@ -427,12 +430,12 @@ void Cmd_Move(char *field, int country, client_t *client)
 				fieldn = 0;
 			}
 			else
-				client->field = fieldn+1;
+				client->field = fieldn + 1;
 			BPrintf(RADIO_YELLOW, "%s joined the %s side", client->longnick, GetCountry(country)); // Country changed to %s
 
-			if (client->arenafieldsok && client->arenabuildsok)
+			if(client->arenafieldsok && client->arenabuildsok)
 			{
-				if (client->hq)
+				if(client->hq)
 					client->countrytime = 0; // give a chance to player change country again if chosen wrong (country with no field)
 				else
 					client->countrytime = time(NULL) + countrytime->value;
@@ -442,7 +445,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 
 			sprintf(my_query, "UPDATE online_players SET country = '%u' WHERE player_id = '%u'", client->country, client->id);
 
-			if (d_mysql_query(&my_sock, my_query))
+			if(d_mysql_query(&my_sock, my_query))
 			{
 				Com_Printf(VERBOSE_WARNING, "Cmd_Move(online_players): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
@@ -492,66 +495,67 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 	memset(message, 0, sizeof(message));
 	plane = (plane_t *) buffer;
 
-	if (client->field > fields->value)
+	if(client->field > fields->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid Field F%u", client->field);
 	}
 
-	if (planenumber)
+	if(planenumber)
 	{
-		if (planenumber < 999)
+		if(planenumber < 999)
 		{
-			if (!GetPlaneName(planenumber) || planenumber == PLANE_FAU)
+			if(!GetPlaneName(planenumber) || planenumber == PLANE_FAU)
 			{
 				PPrintf(client, RADIO_YELLOW, "Invalid plane");
 				return;
 			}
 
-			if (client->plane != planenumber)
+			if(client->plane != planenumber)
 			{
 				client->ord = 0;
-				if (arcade->value)
+				if(arcade->value)
 					snprintf(message, sizeof(message), "You selected %s (N%d)", GetPlaneName(planenumber), planenumber);
 				else
-					snprintf(message, sizeof(message), "You selected %s (N%d), %d left", GetPlaneName(planenumber), planenumber, (int16_t)arena->fields[client->field - 1].rps[planenumber]);
+					snprintf(message, sizeof(message), "You selected %s (N%d), %d left", GetPlaneName(planenumber), planenumber,
+							(int16_t) arena->fields[client->field - 1].rps[planenumber]);
 			}
 
 			client->plane = planenumber;
 		}
 		else
 		{
-			if (arcade->value)
+			if(arcade->value)
 				snprintf(message, sizeof(message), "Your plane is %s (N%d)", GetPlaneName(client->plane), client->plane);
 			else
-				snprintf(message, sizeof(message), "Your plane is %s (N%d), %d left", GetPlaneName(client->plane), client->plane, (int16_t)arena->fields[client->field - 1].rps[client->plane]);
+				snprintf(message, sizeof(message), "Your plane is %s (N%d), %d left", GetPlaneName(client->plane), client->plane,
+						(int16_t) arena->fields[client->field - 1].rps[client->plane]);
 		}
 
-//		if (rps->value && strlen(message) && !arcade->value)
-//		{
-//			rpsreplace = (u_int32_t)(rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000));
-//			sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace/100));
-//		}
+		//		if (rps->value && strlen(message) && !arcade->value)
+		//		{
+		//			rpsreplace = (u_int32_t)(rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000));
+		//			sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace/100));
+		//		}
 
-		if (rps->value && strlen(message) && !arcade->value)
+		if(rps->value && strlen(message) && !arcade->value)
 		{
 			if(arena->fields[client->field - 1].rps_custom_rate[client->plane])
 				rpsreplace = (rps->value * 6000) / arena->fields[client->field - 1].rps_custom_rate[client->plane];
 			else
 				rpsreplace = (rps->value * 6000) / arena->rps[client->plane].pool[arena->fields[client->field - 1].type - 1];
 
-			if(!((arena->fields[client->field - 1].country == 1 && arena->rps[client->plane].country & 0x01) ||
-				(arena->fields[client->field - 1].country == 2 && arena->rps[client->plane].country & 0x02) ||
-				(arena->fields[client->field - 1].country == 3 && arena->rps[client->plane].country & 0x04) ||
-				(arena->fields[client->field - 1].country == 4 && arena->rps[client->plane].country & 0x08)))
+			if(!((arena->fields[client->field - 1].country == 1 && arena->rps[client->plane].country & 0x01) || (arena->fields[client->field - 1].country == 2
+					&& arena->rps[client->plane].country & 0x02) || (arena->fields[client->field - 1].country == 3 && arena->rps[client->plane].country & 0x04)
+					|| (arena->fields[client->field - 1].country == 4 && arena->rps[client->plane].country & 0x08)))
 			{
-				rpsreplace = 0 ;
+				rpsreplace = 0;
 			}
 
 			if(rpsreplace)
 			{
 				rpsreplace -= (arena->frame % rpsreplace);
 
-				sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace/100));
+				sprintf(message, "%s (%s to replace)", message, Com_TimeSeconds(rpsreplace / 100));
 			}
 			else
 			{
@@ -559,13 +563,13 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 			}
 		}
 
-		if (strlen(message))
+		if(strlen(message))
 			PPrintf(client, RADIO_YELLOW, "%s", message);
 	}
 
 	plane->packetid = htons(Com_WBhton(0x0415));
 	plane->plane = htons(client->plane);
-	plane->conv = htons(client->conv*3);
+	plane->conv = htons(client->conv * 3);
 	plane->fuel = htons(client->fuel);
 	plane->ord = htons(client->ord);
 
@@ -580,11 +584,11 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 
 void Cmd_Fuel(int8_t fuel, client_t *client)
 {
-	if (client->fuel != fuel)
+	if(client->fuel != fuel)
 	{
-		if (fuel < 0)
+		if(fuel < 0)
 			fuel = 0;
-		if (fuel > 100)
+		if(fuel > 100)
 			fuel = 100;
 
 		client->fuel = fuel;
@@ -603,11 +607,11 @@ void Cmd_Fuel(int8_t fuel, client_t *client)
 
 void Cmd_Conv(u_int16_t distance, client_t *client)
 {
-	if (client->conv != distance)
+	if(client->conv != distance)
 	{
-		if (distance < 100)
+		if(distance < 100)
 			distance = 100;
-		if (distance > 999)
+		if(distance > 999)
 			distance = 999;
 
 		client->conv = distance;
@@ -624,7 +628,7 @@ void Cmd_Conv(u_int16_t distance, client_t *client)
 
 void Cmd_Ord(u_int8_t ord, client_t *client)
 {
-	if (client->ord != ord)
+	if(client->ord != ord)
 	{
 		client->ord = ord;
 		Cmd_Plane(0, client);
@@ -641,7 +645,7 @@ void Cmd_Ord(u_int8_t ord, client_t *client)
 void Cmd_Easy(u_int8_t easy, client_t *client)
 {
 
-	if (easymode->value) // enabled or forced easy mode
+	if(easymode->value) // enabled or forced easy mode
 	{
 		if(easymode->value == 2) // forced easy mode
 		{
@@ -655,9 +659,9 @@ void Cmd_Easy(u_int8_t easy, client_t *client)
 
 			client->easymode = easy;
 
-			if (client->easymode == 2)
+			if(client->easymode == 2)
 				PPrintf(client, RADIO_YELLOW, "Relaxed flight mode enabled");
-			else if (client->easymode == 1)
+			else if(client->easymode == 1)
 				PPrintf(client, RADIO_YELLOW, "Easy flight mode enabled");
 			else
 				PPrintf(client, RADIO_YELLOW, "Easy flight mode disabled");
@@ -684,22 +688,22 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 	int16_t num_rows;
 	u_int16_t i;
 
-	if (!(ctk = FindLClient(tkiller)))
+	if(!(ctk = FindLClient(tkiller)))
 	{
 		sprintf(my_query, "SELECT id, teamkiller FROM players WHERE longnick = '%s'", tkiller);
 
-		if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+		if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 		{
-			if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+			if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 			{
-				if ((my_row = mysql_fetch_row(my_result)))
+				if((my_row = mysql_fetch_row(my_result)))
 				{
 					id = Com_Atou(Com_MyRow("id"));
 					oldvalue = Com_Atou(Com_MyRow("teamkiller"));
 				}
 				else
 				{
-					if (!mysql_errno(&my_sock))
+					if(!mysql_errno(&my_sock))
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "Player %s not found", tkiller);
 					}
@@ -727,7 +731,7 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 		}
 		else
 		{
-			if (mysql_errno(&my_sock))
+			if(mysql_errno(&my_sock))
 			{
 				Com_Printf(VERBOSE_WARNING, "Cmd_TK(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
@@ -740,11 +744,11 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 		id = ctk->id;
 	}
 
-	if (id)
+	if(id)
 	{
-		if (oldvalue == newvalue)
+		if(oldvalue == newvalue)
 		{
-			if (oldvalue)
+			if(oldvalue)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Player %s is already marked as a team killer", tkiller);
 			}
@@ -757,34 +761,34 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 		}
 		else
 		{
-			if (!ctk && client) // clear SQL flood check if player id was get from DB
+			if(!ctk && client) // clear SQL flood check if player id was get from DB
 			{
 				client->lastsql = 0;
 			}
 
 			sprintf(my_query, "UPDATE players SET teamkiller = '%u' WHERE id = '%u'", newvalue, id);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query))
+			if(!Com_MySQL_Query(client, &my_sock, my_query))
 			{
-				if (newvalue)
+				if(newvalue)
 				{
-					if (ctk && !client)
+					if(ctk && !client)
 						BPrintf(RADIO_LIGHTYELLOW, "*** %s became a Team Killer!!! (%d friends killed) ***", ctk->longnick, ctk->tklimit);
 					else
-						BPrintf(RADIO_LIGHTYELLOW, "%s was set as TK by %s", tkiller, client?client->longnick:"-HOST-");
+						BPrintf(RADIO_LIGHTYELLOW, "%s was set as TK by %s", tkiller, client ? client->longnick : "-HOST-");
 
 					Com_Printf(VERBOSE_ATTENTION, "%s was set as TK by %s\n", tkiller, client ? client->longnick : "-HOST-");
 				}
 				else
 				{
-					if (ctk)
+					if(ctk)
 						PPrintf(ctk, RADIO_YELLOW, "*** Congratulations, your TK status was removed by %s***", client ? client->longnick : "-HOST-");
 					else
 						PPrintf(client, RADIO_YELLOW, "You removed TK status from %s", tkiller);
 					Com_Printf(VERBOSE_ATTENTION, "%s has removed TK from %s\n", client ? client->longnick : "-HOST-", tkiller);
 				}
 
-				if (ctk)
+				if(ctk)
 				{
 					ctk->tkstatus = newvalue;
 					ctk->wings = 0;
@@ -799,29 +803,31 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 				Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKid): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
-			if (wb3->value)
-				sprintf(my_query,
+			if(wb3->value)
+				sprintf(
+						my_query,
 						"SELECT ipaddress.id FROM players, players_ipaddress, ipaddress WHERE players.id = '%u' AND players.id = players_ipaddress.player_id AND ipaddress.id = players_ipaddress.ipaddress_id",
 						id);
 			else
-				sprintf(my_query,
+				sprintf(
+						my_query,
 						"SELECT hdserials.id FROM players, players_hdserials, hdserials WHERE players.id = '%u' AND players.id = players_hdserials.player_id AND hdserials.id = players_hdserials.hdserial_id",
 						id);
 
-			if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+			if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 			{
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if ((num_rows = mysql_num_rows(my_result)) > 0)
+					if((num_rows = mysql_num_rows(my_result)) > 0)
 					{
-						if (wb3->value)
+						if(wb3->value)
 							sprintf(my_query, "UPDATE ipaddress SET teamkiller='%u' WHERE id IN(", newvalue);
 						else
 							sprintf(my_query, "UPDATE hdserials SET teamkiller='%u' WHERE id IN(", newvalue);
 
-						for (i = 0; i < num_rows; i++)
+						for(i = 0; i < num_rows; i++)
 						{
-							if ((my_row = mysql_fetch_row(my_result)))
+							if((my_row = mysql_fetch_row(my_result)))
 							{
 								sprintf(my_query, "%s'%u'", my_query, Com_Atou(Com_MyRow("id")));
 							}
@@ -829,17 +835,19 @@ void Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client) // twin of Cmd_B
 							{
 								mysql_free_result(my_result);
 								my_result = NULL;
-								Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(
+										&my_sock));
 								break;
 							}
 
-							if (i == (num_rows - 1))
+							if(i == (num_rows - 1))
 							{
 								strcat(my_query, ")");
 
-								if (d_mysql_query(&my_sock, my_query))
+								if(d_mysql_query(&my_sock, my_query))
 								{
-									Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "Cmd_TK(TKhd): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock),
+											mysql_error(&my_sock));
 									return;
 								}
 							}
@@ -892,13 +900,13 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	wb3fly = (wb3initflight_t *)buffer;
+	wb3fly = (wb3initflight_t *) buffer;
 
 	wb3fly->packetid = htons(Com_WBhton(0x0401));
 
-	if (!(client->attr & (FLAG_ADMIN | FLAG_OP)))
+	if(!(client->attr & (FLAG_ADMIN | FLAG_OP)))
 	{
-		if (!allowtakeoff->value)
+		if(!allowtakeoff->value)
 		{
 			PPrintf(client, RADIO_YELLOW, "Takeoff was blocked by administrators");
 
@@ -906,7 +914,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			SendPacket(buffer, 69 + 12, client);
 			return 1;
 		}
-		else if (!client->lives)
+		else if(!client->lives)
 		{
 			PPrintf(client, RADIO_YELLOW, "You are killed and cannot fly");
 			wb3fly->error = htons(0x03);
@@ -915,7 +923,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		}
 	}
 
-	if (client->tkstatus && !IsBomber(client))
+	if(client->tkstatus && !IsBomber(client))
 	{
 		PPrintf(client, RADIO_YELLOW, "You are a team killer, you must fly bomber");
 		wb3fly->error = htons(0x07);
@@ -923,7 +931,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		return 1;
 	}
 
-	if (client->field > fields->value)
+	if(client->field > fields->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid Field F%u", client->field);
 		wb3fly->error = htons(0x02);
@@ -931,7 +939,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		return 1;
 	}
 
-	if ((arena->fields[client->field-1].country != client->country) && (client->attr != 1))
+	if((arena->fields[client->field - 1].country != client->country) && (client->attr != 1))
 	{
 		PPrintf(client, RADIO_YELLOW, "This field is not from your country");
 		wb3fly->error = htons(0x02);
@@ -939,7 +947,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		return 1;
 	}
 
-	if (arena->fields[client->field-1].closed && client->attr != 1)
+	if(arena->fields[client->field - 1].closed && client->attr != 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You cannot take off - This field is closed");
 		wb3fly->error = htons(0x08);
@@ -947,7 +955,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		return 1;
 	}
 
-	if (!GetPlaneName(client->plane) || client->plane == PLANE_FAU)
+	if(!GetPlaneName(client->plane) || client->plane == PLANE_FAU)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid plane");
 		wb3fly->error = htons(0x07);
@@ -955,9 +963,10 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		return 1;
 	}
 
-	if (position != 100)
+	if(position != 100)
 	{
-		if ((arena->fields[client->field - 1].rps[client->plane] > -1 && arena->fields[client->field - 1].rps[client->plane] < 1) && !client->attached && client->attr != 1)
+		if((arena->fields[client->field - 1].rps[client->plane] > -1 && arena->fields[client->field - 1].rps[client->plane] < 1) && !client->attached
+				&& client->attr != 1)
 		{
 			PPrintf(client, RADIO_YELLOW, "Plane not available");
 			wb3fly->error = htons(0x07);
@@ -966,7 +975,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		}
 	}
 
-	if (client->flypenalty && client->flypenaltyfield == client->field && !client->attached && client->attr != 1)
+	if(client->flypenalty && client->flypenaltyfield == client->field && !client->attached && client->attr != 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You can't take off from this field for %s", Com_TimeSeconds(client->flypenalty));
 		wb3fly->error = htons(0x09);
@@ -974,47 +983,47 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		return 1;
 	}
 
-	if (client->attr & FLAG_ADMIN)
+	if(client->attr & FLAG_ADMIN)
 	{
 		rules = (FLAG_AIRSHOWSMOKE | FLAG_ENEMYNAMES | FLAG_ENEMYPLANES);
 	}
 	else
 	{
-		if (midairs->value)
+		if(midairs->value)
 			rules |= FLAG_MIDAIRS;
-		if (blackout->value)
+		if(blackout->value)
 			rules |= FLAG_BLACKOUT;
-		if (airshowsmoke->value)
+		if(airshowsmoke->value)
 			rules |= FLAG_AIRSHOWSMOKE;
-		if (client->easymode)
+		if(client->easymode)
 			rules |= FLAG_EASYMODE;
-		if (client->easymode == 2)
+		if(client->easymode == 2)
 			rules |= FLAG_EASYMODE2;
-		if (enemynames->value)
+		if(enemynames->value)
 			rules |= FLAG_ENEMYNAMES;
-		if (enemyplanes->value)
+		if(enemyplanes->value)
 			rules |= FLAG_ENEMYPLANES;
-		if (enableottos->value)
+		if(enableottos->value)
 			rules |= FLAG_ENABLEOTTOS;
 	}
 
-	if (client->attached)
+	if(client->attached)
 	{
-		if (client->attached->drone & (DRONE_HMACK | DRONE_HTANK))
+		if(client->attached->drone & (DRONE_HMACK | DRONE_HTANK))
 		{
 			wb3fly->alt = htonl(arena->fields[client->field - 1].posxyz[2]);
 		}
 
-		if (i == MAX_RELATED)
+		if(i == MAX_RELATED)
 		{
 			wb3fly->alt = htonl(0x0102);
 		}
 	}
-	else if ((arena->fields[client->field - 1].type == FIELD_CARGO || arena->fields[client->field - 1].type == FIELD_SUBMARINE) && !startalt->value)
+	else if((arena->fields[client->field - 1].type == FIELD_CARGO || arena->fields[client->field - 1].type == FIELD_SUBMARINE) && !startalt->value)
 	{
 		wb3fly->alt = htonl(30);
 	}
-	else if (arena->fields[client->field - 1].type == FIELD_DD && !startalt->value)
+	else if(arena->fields[client->field - 1].type == FIELD_DD && !startalt->value)
 	{
 		wb3fly->alt = htonl(70);
 	}
@@ -1023,16 +1032,16 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		wb3fly->alt = htonl(startalt->value);
 	}
 
-	if (!wb3->value)
+	if(!wb3->value)
 	{
-		if (arena->fields[client->field - 1].type == FIELD_CV || arena->fields[client->field - 1].type == FIELD_CARGO || arena->fields[client->field - 1].type == FIELD_DD
-				|| arena->fields[client->field - 1].type == FIELD_SUBMARINE || client->attached)
+		if(arena->fields[client->field - 1].type == FIELD_CV || arena->fields[client->field - 1].type == FIELD_CARGO || arena->fields[client->field - 1].type
+				== FIELD_DD || arena->fields[client->field - 1].type == FIELD_SUBMARINE || client->attached)
 		{
 			fly->runway = 0;
 		}
 		else
 		{
-			fly->runway = htonl((rand()%3)+1);
+			fly->runway = htonl((rand() % 3) + 1);
 		}
 	}
 
@@ -1043,24 +1052,24 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 		wb3fly->field = 0;
 	else
 		wb3fly->field = htons(client->field - 1);
-	wb3fly->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
-	wb3fly->bulletradius2 = htons((u_int16_t)(bulletradius->value * 10));
-	wb3fly->gunrad = htons((u_int16_t)(gunrad->value * 10));
-	wb3fly->bulletradius3 = htons((u_int16_t)(bulletradius->value * 10));
+	wb3fly->bulletradius1 = htons((u_int16_t) (bulletradius->value * 10));
+	wb3fly->bulletradius2 = htons((u_int16_t) (bulletradius->value * 10));
+	wb3fly->gunrad = htons((u_int16_t) (gunrad->value * 10));
+	wb3fly->bulletradius3 = htons((u_int16_t) (bulletradius->value * 10));
 	wb3fly->unknown10 = htonl(100); // same value from wb3requestfly_t unk4 (100)
 	wb3fly->unknown11 = htonl(900); // same value from wb3requestfly_t unk5 (900)
 	wb3fly->rules = htonl(rules);
 	wb3fly->attachedpos = htonl(position);
 	wb3fly->numofarrays = 1;
 
-	if (client->attached)
+	if(client->attached)
 	{
 		wb3fly->plane = htons(client->attached->plane);
 		j = wb3fly->numofarrays;
 
-		for (i = 0; i < j; i++)
+		for(i = 0; i < j; i++)
 		{
-			fly2 = (initflight2_t *)(buffer + 69 + (12 * i));
+			fly2 = (initflight2_t *) (buffer + 69 + (12 * i));
 			fly2->ord = 0;
 		}
 	}
@@ -1070,9 +1079,9 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 		j = wb3fly->numofarrays;
 
-		for (i = 0; i < j; i++)
+		for(i = 0; i < j; i++)
 		{
-			fly2 = (initflight2_t *)(buffer + 69 + (12 * i));
+			fly2 = (initflight2_t *) (buffer + 69 + (12 * i));
 			fly2->ord = client->ord;
 		}
 	}
@@ -1080,9 +1089,9 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	client->dronetimer = arena->time; // stores time when client started flight
 	client->damaged = 0;
 
-	client->inflight = ((u_int32_t)time(NULL) % 604800) + 1; // one week
+	client->inflight = ((u_int32_t) time(NULL) % 604800) + 1; // one week
 
-	if (arcade->value)
+	if(arcade->value)
 	{
 		client->commandos = 1;
 	}
@@ -1094,13 +1103,14 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	client->status_damage = 0; // to force player not appear damaged after takeoff
 	client->chute = 0; // to assure client is not flagged as chute
 
-	snprintf(client->logfile, sizeof(client->logfile), "%s,%s,%s,%s,%u", mapname->string, client->longnick, GetSmallPlaneName(client->plane), GetCountry(client->country), (u_int32_t)time(NULL));
+	snprintf(client->logfile, sizeof(client->logfile), "%s,%s,%s,%s,%u", mapname->string, client->longnick, GetSmallPlaneName(client->plane), GetCountry(
+			client->country), (u_int32_t) time(NULL));
 
 	client->obradar = 0;
 
-	if (arena->year >= 1944)
+	if(arena->year >= 1944)
 	{
-		switch (client->plane)
+		switch(client->plane)
 		{
 			case 1: /*f6f5*/
 			case 4: /*f4u1d*/
@@ -1123,16 +1133,16 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 			case 114: /*109g2eto*/
 			case 125: /*ki44iib*/
 			case 220: /*a67*/
-				client->obradar = (int32_t)obradar->value;
+				client->obradar = (int32_t) obradar->value;
 				break;
 			default:
 				client->obradar = 0;
 		}
 	}
 
-	if (!client->attached)
+	if(!client->attached)
 	{
-		if (IsCargo(client))
+		if(IsCargo(client))
 			client->mortars = mortars->value;
 
 		Cmd_Plane(client->plane, client);
@@ -1144,16 +1154,17 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	SendPacket(buffer, 69 + (12 * j /*num of arrays*/), client);
 
-	if (client->lives > 0)
+	if(client->lives > 0)
 	{
 		PPrintf(client, RADIO_YELLOW, "%d li%s left", client->lives, client->lives == 1 ? "fe" : "ves");
 	}
 
-	if (!(client->attached && client->attached->drone & DRONE_FAU))
+	if(!(client->attached && client->attached->drone & DRONE_FAU))
 	{
-		if (position != 100)
+		if(position != 100)
 		{
-			Com_Printf(VERBOSE_ALWAYS, "FLIGHT INIT: (%u) %s takeoff from f%d with plane %s ord %d country %s\n", client->inflight, client->longnick, client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
+			Com_Printf(VERBOSE_ALWAYS, "FLIGHT INIT: (%u) %s takeoff from f%d with plane %s ord %d country %s\n", client->inflight, client->longnick,
+					client->field, GetSmallPlaneName(client->plane), client->ord, GetCountry(client->country));
 			PPrintf(client, RADIO_YELLOW, "START: Flight ID %u", client->inflight);
 			ClearKillers(client);
 
@@ -1169,11 +1180,11 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	client->lastscore = 0; // TODO: score, position fix?
 
-	if (position != 100)
+	if(position != 100)
 	{
-		if (arena->fields[client->field - 1].rps[client->plane] != -1)
+		if(arena->fields[client->field - 1].rps[client->plane] != -1)
 		{
-			if ((client->plane < maxplanes) && !client->tkstatus)
+			if((client->plane < maxplanes) && !client->tkstatus)
 				arena->fields[client->field - 1].rps[client->plane]--;
 		}
 	}
@@ -1186,9 +1197,9 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 
 	SendOttoParams(client);
 	//if (!wb3->value)
-		SendExecutablesCheck(2, client);
+	SendExecutablesCheck(2, client);
 
-	if (!client->attached && client->wings && IsBomber(client))
+	if(!client->attached && client->wings && IsBomber(client))
 		DroneWings(client);
 
 	return 0;
@@ -1207,18 +1218,18 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 	u_int16_t i, j, k;
 	captfield_t *capt;
 
-	if (field >= (fields->value + cities->value))
+	if(field >= (fields->value + cities->value))
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid field/city");
 		return 0;
 	}
 
-	if (field >= fields->value) // capture just a city
+	if(field >= fields->value) // capture just a city
 	{
-		if (field < (fields->value + cities->value))
+		if(field < (fields->value + cities->value))
 		{
-			field -= (u_int16_t)fields->value;
-			if (arena->cities[field].field)
+			field -= (u_int16_t) fields->value;
+			if(arena->cities[field].field)
 			{
 				PPrintf(client, RADIO_YELLOW, "You need to capture F%d to capture this city", arena->cities[field].field->number);
 			}
@@ -1226,9 +1237,9 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			{
 				arena->cities[field].country = country;
 
-				for (i = 0; i < MAX_BUILDINGS; i++)
+				for(i = 0; i < MAX_BUILDINGS; i++)
 				{
-					if (arena->cities[field].buildings[i].field)
+					if(arena->cities[field].buildings[i].field)
 					{
 						arena->cities[field].buildings[i].country = country;
 					}
@@ -1243,7 +1254,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 		return 0;
 	}
 
-	if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
+	if(arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 	{
 		//~ if(!client) // a real capture
 		//~ {
@@ -1251,11 +1262,11 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 		//~ Cmd_Seta(buffer, 0, -1, 0); // remove all planes from a sunk CV
 		//~ }
 
-		if (!client && cvcapture->value) // makes cv be captured to enemy if friendly killed
+		if(!client && cvcapture->value) // makes cv be captured to enemy if friendly killed
 		{
-			if (arena->fields[field].country == country)
+			if(arena->fields[field].country == country)
 			{
-				if (country == COUNTRY_GOLD)
+				if(country == COUNTRY_GOLD)
 					country = COUNTRY_RED;
 				else
 					country = COUNTRY_GOLD;
@@ -1265,37 +1276,37 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 
 	memset(buffer, 0, sizeof(buffer));
 
-	capt = (captfield_t *)buffer;
+	capt = (captfield_t *) buffer;
 
 	capt->packetid = htons(Com_WBhton(0x0306));
 	capt->field = htons(field);
 	capt->country = htonl(country);
 
-	if (client)
+	if(client)
 	{
 		SendPacket(buffer, sizeof(buffer), client);
 	}
 	else
 	{
-		if (arena->fields[field].country != country)
+		if(arena->fields[field].country != country)
 		{
 			arena->fields[field].ctf = country;
 			arena->fields[field].ctfcount = arena->frame;
 
-			BPrintf(RADIO_YELLOW, "System: FIELDF%d has been captured by the %s", field+1, GetCountry(country));
+			BPrintf(RADIO_YELLOW, "System: FIELDF%d has been captured by the %s", field + 1, GetCountry(country));
 
-			for (/*j = */i = 0; i < MAX_CITYFIELD; i++) // Capture field and it captures the cities
+			for(/*j = */i = 0; i < MAX_CITYFIELD; i++) // Capture field and it captures the cities
 			{
-				if (arena->fields[field].city[i])
+				if(arena->fields[field].city[i])
 				{
-					if (arena->fields[field].city[i]->country > 0 && arena->fields[field].city[i]->country <= 4)
+					if(arena->fields[field].city[i]->country > 0 && arena->fields[field].city[i]->country <= 4)
 						DebiteFactoryBuildings(arena->fields[field].city[i]);
 
 					arena->fields[field].city[i]->country = country;
 
-					for (k = 0; k < MAX_BUILDINGS; k++)
+					for(k = 0; k < MAX_BUILDINGS; k++)
 					{
-						if (arena->fields[field].city[i]->buildings[k].field)
+						if(arena->fields[field].city[i]->buildings[k].field)
 						{
 							arena->fields[field].city[i]->buildings[k].country = country;
 						}
@@ -1305,7 +1316,7 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 
 					SendFieldStatus((arena->fields[field].city[i]->number - 1) + fields->value, NULL);
 
-					if (country > 0 && country <= 4)
+					if(country > 0 && country <= 4)
 						CrediteFactoryBuildings(arena->fields[field].city[i]);
 
 					//					if(arena->fields[field].city[i]->needtoclose)
@@ -1319,27 +1330,26 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			oldcountry = arena->fields[field].country;
 			arena->fields[field].country = country;
 
-			for (i = 0; i < MAX_BUILDINGS; i++)
+			for(i = 0; i < MAX_BUILDINGS; i++)
 			{
-				if (arena->fields[field].buildings[i].field)
+				if(arena->fields[field].buildings[i].field)
 					arena->fields[field].buildings[i].country = country;
 				else
 					break;
 			}
 
 			// check end of war (arena reset)
-			if (canreset->value && oldcountry /* to avoid reset by capt neutrals */)
+			if(canreset->value && oldcountry /* to avoid reset by capt neutrals */)
 			{
-				for (k = j = i = 0; i < fields->value; i++)
+				for(k = j = i = 0; i < fields->value; i++)
 				{
-					if ((killcvtoreset->value && (arena->fields[i].type == FIELD_CV)) ||
-						(arena->fields[i].type <= FIELD_MAIN) ||
-						(arena->fields[i].type >= FIELD_WB3POST) ||
-						((arena->fields[i].type >= FIELD_CARGO) && (arena->fields[i].type <= FIELD_SUBMARINE)))
+					if((killcvtoreset->value && (arena->fields[i].type == FIELD_CV)) || (arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type
+							>= FIELD_WB3POST) || ((arena->fields[i].type >= FIELD_CARGO) && (arena->fields[i].type <= FIELD_SUBMARINE)))
 					{
-						if (arena->fields[i].country == oldcountry)
+						if(arena->fields[i].country == oldcountry)
 						{
-							if(!((arena->fields[i].type >= FIELD_WB3POST) || ((arena->fields[i].type >= FIELD_CARGO) && (arena->fields[i].type <= FIELD_SUBMARINE))))
+							if(!((arena->fields[i].type >= FIELD_WB3POST) || ((arena->fields[i].type >= FIELD_CARGO) && (arena->fields[i].type
+									<= FIELD_SUBMARINE))))
 								k++; // not airbase
 							else
 								j++; // airbase
@@ -1350,33 +1360,33 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 						break;
 				}
 
-				if (!j || ((j + k) < 2))
+				if(!j || ((j + k) < 2))
 				{
 					BPrintf(RADIO_YELLOW, "*********************************");
 					BPrintf(RADIO_YELLOW, "*********    THE WAR    *********");
 					BPrintf(RADIO_YELLOW, "*********    IS OVER    *********");
 					BPrintf(RADIO_YELLOW, "*********************************");
-					BPrintf(RADIO_YELLOW, "*********  ALLIES %s  *********", oldcountry == COUNTRY_RED?"LOST":" WON");
-					BPrintf(RADIO_YELLOW, "*********   AXIS  %s   *********", oldcountry == COUNTRY_GOLD?"LOST":"WON");
+					BPrintf(RADIO_YELLOW, "*********  ALLIES %s  *********", oldcountry == COUNTRY_RED ? "LOST" : " WON");
+					BPrintf(RADIO_YELLOW, "*********   AXIS  %s   *********", oldcountry == COUNTRY_GOLD ? "LOST" : "WON");
 					BPrintf(RADIO_YELLOW, "*********************************");
 
 					if(oldcountry == COUNTRY_RED) // Gold reset
 					{
-						snprintf((char *)buffer, sizeof(buffer), "%.f", resetsgold->value + 1);
-						Var_Set("resetsgold", (char *)buffer);
+						snprintf((char *) buffer, sizeof(buffer), "%.f", resetsgold->value + 1);
+						Var_Set("resetsgold", (char *) buffer);
 					}
 					else // Red reset
 					{
-						snprintf((char *)buffer, sizeof(buffer), "%.f", resetsred->value + 1);
-						Var_Set("resetsred", (char *)buffer);
+						snprintf((char *) buffer, sizeof(buffer), "%.f", resetsred->value + 1);
+						Var_Set("resetsred", (char *) buffer);
 					}
 
 					Com_LogEvent(EVENT_RESET, 0, 0);
 					Com_LogDescription(EVENT_DESC_TERRAIN, 0, mapname->string);
 
-					if (changemaponreset->value)
+					if(changemaponreset->value)
 					{
-						if (!arena->countdown)
+						if(!arena->countdown)
 						{
 							arena->countdown = 18001; // 3 minutes
 						}
@@ -1386,10 +1396,10 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 						LoadArenaStatus(dirname->string, NULL, 1);
 					}
 
-					for (i = 0; i < maxentities->value; i++)
+					for(i = 0; i < maxentities->value; i++)
 					{
 
-						if (clients[i].inuse)
+						if(clients[i].inuse)
 						{
 							if(ctf->value)
 							{
@@ -1397,10 +1407,10 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 									ForceEndFlight(TRUE, &clients[i]);
 							}
 
-							if (clients[i].drone & (DRONE_HMACK | DRONE_HTANK | DRONE_EJECTED))
+							if(clients[i].drone & (DRONE_HMACK | DRONE_HTANK | DRONE_EJECTED))
 								RemoveDrone(&clients[i]);
 
-							if (clients[i].drone & (DRONE_COMMANDOS))
+							if(clients[i].drone & (DRONE_COMMANDOS))
 								clients[i].dronetimer = 0;
 						}
 					}
@@ -1409,15 +1419,15 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 				}
 			}
 
-			if (arcade->value && rps->value) // set available planes w/o capture enemy planes
+			if(arcade->value && rps->value) // set available planes w/o capture enemy planes
 				UpdateRPS(0);
 		}
 
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 			{
 				if(clients[i].thai) // Cmd_Capt
 				{
@@ -1447,16 +1457,16 @@ void Cmd_White(char *user, u_int8_t white, client_t *client)
 {
 	u_int32_t id = 0;
 	u_int8_t all = 0;
-	client_t *puser= NULL;
+	client_t *puser = NULL;
 
-	if (!strcmp(user, "all"))
+	if(!strcmp(user, "all"))
 	{
 		all = 1;
 	}
 
-	if (!all)
+	if(!all)
 	{
-		if ((puser = FindLClient(user)))
+		if((puser = FindLClient(user)))
 		{
 			id = puser->id;
 		}
@@ -1464,13 +1474,13 @@ void Cmd_White(char *user, u_int8_t white, client_t *client)
 		{
 			sprintf(my_query, "SELECT id FROM players WHERE longnick = '%s'", user);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+			if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 			{
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if (mysql_num_rows(my_result) > 0)
+					if(mysql_num_rows(my_result) > 0)
 					{
-						if ((my_row = mysql_fetch_row(my_result)))
+						if((my_row = mysql_fetch_row(my_result)))
 						{
 							id = Com_Atou(Com_MyRow("id"));
 						}
@@ -1495,22 +1505,22 @@ void Cmd_White(char *user, u_int8_t white, client_t *client)
 			}
 			else
 			{
-				if (mysql_errno(&my_sock))
+				if(mysql_errno(&my_sock))
 					Com_Printf(VERBOSE_WARNING, "Cmd_White(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 		}
 	}
 
-	if (id || all)
+	if(id || all)
 	{
 		sprintf(my_query, "UPDATE players SET white = '%u'", white);
 
-		if (!all)
+		if(!all)
 		{
 			sprintf(my_query, "%s WHERE id = '%u'", my_query, id);
 		}
 
-		if (!d_mysql_query(&my_sock, my_query))
+		if(!d_mysql_query(&my_sock, my_query))
 		{
 			PPrintf(client, RADIO_YELLOW, "%s changed \'white\' attribute from \'%s\' to %u\n", client ? client->longnick : "-HOST-", user, white);
 		}
@@ -1532,13 +1542,13 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 {
 	u_int32_t id;
 	u_int8_t attr;
-	client_t *puser= NULL;
+	client_t *puser = NULL;
 
-	if (client)
+	if(client)
 	{
-		if (client->attr & FLAG_OP)
+		if(client->attr & FLAG_OP)
 		{
-			if (mod == 1)
+			if(mod == 1)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "You are not authorized to give this privilege");
 				return;
@@ -1548,36 +1558,36 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 
 	sprintf(my_query, "SELECT id, attr FROM players WHERE longnick = '%s'", user);
 
-	if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+	if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 	{
-		if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+		if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 		{
-			if (mysql_num_rows(my_result) > 0)
+			if(mysql_num_rows(my_result) > 0)
 			{
-				if ((my_row = mysql_fetch_row(my_result)))
+				if((my_row = mysql_fetch_row(my_result)))
 				{
 					id = Com_Atou(Com_MyRow("id"));
 					attr = Com_Atou(Com_MyRow("attr"));
 
-					if (mod < 0)
+					if(mod < 0)
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "\"%s\" is \"%s\"", user, attr == 1 ? "Admin" : attr == 2 ? "OP" : attr == 0 ? "Player" : "Unknown");
 					}
 					else
 					{
-						if (attr != mod)
+						if(attr != mod)
 						{
 							sprintf(my_query, "UPDATE players SET attr = '%u' WHERE id = '%u' ", mod, id);
 
-							if (!d_mysql_query(&my_sock, my_query))
+							if(!d_mysql_query(&my_sock, my_query))
 							{
-								if ((puser = FindLClient(user)))
+								if((puser = FindLClient(user)))
 								{
-									if (((attr == 0 || attr == 2) && mod == 1) || ((attr == 1) && (mod == 2 || mod == 0)))
+									if(((attr == 0 || attr == 2) && mod == 1) || ((attr == 1) && (mod == 2 || mod == 0)))
 									{
-										if (mod == 1 && hideadmin->value)
+										if(mod == 1 && hideadmin->value)
 											arena->numplayers--;
-										else if (hideadmin->value)
+										else if(hideadmin->value)
 											arena->numplayers++;
 
 										PPrintf(puser, RADIO_LIGHTYELLOW, "Your attributes are changed, please restart your game");
@@ -1588,10 +1598,12 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 									puser->shortnick = ascii2wbnick(puser->longnick, puser->attr);
 								}
 
-								if (client)
-									PPrintf(client, RADIO_YELLOW, "Attributes of %s changed to %s\n", user, mod == 1 ? "Admin" : mod == 2 ? "OP" : mod == 0 ? "Player" : "Unknown");
+								if(client)
+									PPrintf(client, RADIO_YELLOW, "Attributes of %s changed to %s\n", user, mod == 1 ? "Admin" : mod == 2 ? "OP"
+											: mod == 0 ? "Player" : "Unknown");
 
-								Com_Printf(VERBOSE_ATTENTION, "Attributes of %s changed to %s by %s\n", user, mod == 1 ? "Admin" : mod == 2 ? "OP" : mod == 0 ? "Player" : "Unknown", client ? client->longnick : "-HOST-");
+								Com_Printf(VERBOSE_ATTENTION, "Attributes of %s changed to %s by %s\n", user, mod == 1 ? "Admin" : mod == 2 ? "OP"
+										: mod == 0 ? "Player" : "Unknown", client ? client->longnick : "-HOST-");
 							}
 							else
 							{
@@ -1600,7 +1612,8 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 						}
 						else
 						{
-							PPrintf(client, RADIO_LIGHTYELLOW, "%s is already %s", user, attr == 1 ? "an Admin" : attr == 2 ? "an OP" : attr == 0 ? "a Player" : "an Unknown");
+							PPrintf(client, RADIO_LIGHTYELLOW, "%s is already %s", user, attr == 1 ? "an Admin" : attr == 2 ? "an OP" : attr == 0 ? "a Player"
+									: "an Unknown");
 						}
 					}
 				}
@@ -1625,7 +1638,7 @@ void Cmd_Chmod(char *user, int8_t mod, client_t *client)
 	}
 	else
 	{
-		if (mysql_errno(&my_sock))
+		if(mysql_errno(&my_sock))
 			Com_Printf(VERBOSE_WARNING, "Cmd_Chmod(check): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 }
@@ -1642,55 +1655,55 @@ void Cmd_Part(char *argv[], u_int8_t argc, client_t *client)
 	u_int16_t j;
 	client_t *player;
 
-	if (!argv[0])
+	if(!argv[0])
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "usage: .part <planenum>|<player> <part> [h<hitpo> a<apstop> i<immun> u<parent>]");
 	}
 	else
 	{
-		if (argv[1])
+		if(argv[1])
 		{
 			part = Com_Atoi(argv[1]);
 
-			if (part >= MAX_PLACE)
+			if(part >= MAX_PLACE)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid part number %d", part);
 				return;
 			}
 		}
 
-		if (isdigit(*argv[0])) // plane number
+		if(isdigit(*argv[0])) // plane number
 		{
 			j = Com_Atoi(argv[0]);
 
-			if (!GetPlaneName(j))
+			if(!GetPlaneName(j))
 			{
 				PPrintf(client, RADIO_YELLOW, "Invalid plane %d", j);
 				return;
 			}
 
-			if (argv[1])
+			if(argv[1])
 			{
-				if (argc > 2)
+				if(argc > 2)
 				{
-					for (i = 2; i < argc; i++) // pass thru all remain args (h, a, i, u)
+					for(i = 2; i < argc; i++) // pass thru all remain args (h, a, i, u)
 					{
-						if (tolower(*argv[i]) == 'h')
+						if(tolower(*argv[i]) == 'h')
 						{
 							argv[i]++;
 							arena->planedamage[j].points[part] = Com_Atoi(argv[i]);
 						}
-						else if (tolower(*argv[i]) == 'a')
+						else if(tolower(*argv[i]) == 'a')
 						{
 							argv[i]++;
 							arena->planedamage[j].apstop[part] = Com_Atoi(argv[i]);
 						}
-						else if (tolower(*argv[i]) == 'i')
+						else if(tolower(*argv[i]) == 'i')
 						{
 							argv[i]++;
 							arena->planedamage[j].imunity[part] = Com_Atoi(argv[i]);
 						}
-						else if (tolower(*argv[i]) == 'u')
+						else if(tolower(*argv[i]) == 'u')
 						{
 							argv[i]++;
 							arena->planedamage[j].parent[part] = Com_Atoi(argv[i]);
@@ -1699,16 +1712,18 @@ void Cmd_Part(char *argv[], u_int8_t argc, client_t *client)
 				}
 				else
 				{
-					PPrintf(client, RADIO_LIGHTYELLOW, "%s %s h=%d a=%d i=%d u=%d(%s)", GetSmallPlaneName(j), GetSmallHitSite(part), arena->planedamage[j].points[part],
-							arena->planedamage[j].apstop[part], arena->planedamage[j].imunity[part], arena->planedamage[j].parent[part], GetSmallHitSite(arena->planedamage[j].parent[part]));
+					PPrintf(client, RADIO_LIGHTYELLOW, "%s %s h=%d a=%d i=%d u=%d(%s)", GetSmallPlaneName(j), GetSmallHitSite(part),
+							arena->planedamage[j].points[part], arena->planedamage[j].apstop[part], arena->planedamage[j].imunity[part],
+							arena->planedamage[j].parent[part], GetSmallHitSite(arena->planedamage[j].parent[part]));
 				}
 			}
 			else
 			{
-				for (part = 0; part < MAX_PLACE; part++)
+				for(part = 0; part < MAX_PLACE; part++)
 				{
-					PPrintf(client, RADIO_LIGHTYELLOW, "%s %d(%s) h=%d a=%d i=%d u=%d(%s)", GetSmallPlaneName(j), part, GetSmallHitSite(part), arena->planedamage[j].points[part],
-							arena->planedamage[j].apstop[part], arena->planedamage[j].imunity[part], arena->planedamage[j].parent[part], GetSmallHitSite(arena->planedamage[j].parent[part]));
+					PPrintf(client, RADIO_LIGHTYELLOW, "%s %d(%s) h=%d a=%d i=%d u=%d(%s)", GetSmallPlaneName(j), part, GetSmallHitSite(part),
+							arena->planedamage[j].points[part], arena->planedamage[j].apstop[part], arena->planedamage[j].imunity[part],
+							arena->planedamage[j].parent[part], GetSmallHitSite(arena->planedamage[j].parent[part]));
 				}
 			}
 		}
@@ -1716,36 +1731,36 @@ void Cmd_Part(char *argv[], u_int8_t argc, client_t *client)
 		{
 			player = FindLClient(argv[0]);
 
-			if (!player)
+			if(!player)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Player not found");
 				return;
 			}
 
-			if (argv[1])
+			if(argv[1])
 			{
-				if (argc > 2)
+				if(argc > 2)
 				{
-					for (i = 2; i < argc; i++) // pass thru all remain args (h, a, i, u)
+					for(i = 2; i < argc; i++) // pass thru all remain args (h, a, i, u)
 					{
-						if (tolower(*argv[i]) == 'h')
+						if(tolower(*argv[i]) == 'h')
 						{
 							argv[i]++;
 							player->armor.points[part] = Com_Atoi(argv[i]);
 
 							// FIX: if argv[i] == Zero, explode part
 						}
-						else if (tolower(*argv[i]) == 'a')
+						else if(tolower(*argv[i]) == 'a')
 						{
 							argv[i]++;
 							player->armor.apstop[part] = Com_Atoi(argv[i]);
 						}
-						else if (tolower(*argv[i]) == 'i')
+						else if(tolower(*argv[i]) == 'i')
 						{
 							argv[i]++;
 							player->armor.imunity[part] = Com_Atoi(argv[i]);
 						}
-						else if (tolower(*argv[i]) == 'u')
+						else if(tolower(*argv[i]) == 'u')
 						{
 							argv[i]++;
 							player->armor.parent[part] = Com_Atoi(argv[i]);
@@ -1754,16 +1769,17 @@ void Cmd_Part(char *argv[], u_int8_t argc, client_t *client)
 				}
 				else
 				{
-					PPrintf(client, RADIO_LIGHTYELLOW, "%s %s h=%d a=%d i=%d u=%d(%s)", player->longnick, GetSmallHitSite(part), player->armor.points[part], player->armor.apstop[part],
-							player->armor.imunity[part], player->armor.parent[part], GetSmallHitSite(player->armor.parent[part]));
+					PPrintf(client, RADIO_LIGHTYELLOW, "%s %s h=%d a=%d i=%d u=%d(%s)", player->longnick, GetSmallHitSite(part), player->armor.points[part],
+							player->armor.apstop[part], player->armor.imunity[part], player->armor.parent[part], GetSmallHitSite(player->armor.parent[part]));
 				}
 			}
 			else
 			{
-				for (part = 0; part < MAX_PLACE; part++)
+				for(part = 0; part < MAX_PLACE; part++)
 				{
-					PPrintf(client, RADIO_LIGHTYELLOW, "%s %d(%s) h=%d a=%d i=%d u=%d(%s)", player->longnick, part, GetSmallHitSite(part), player->armor.points[part], player->armor.apstop[part],
-							player->armor.imunity[part], player->armor.parent[part], GetSmallHitSite(player->armor.parent[part]));
+					PPrintf(client, RADIO_LIGHTYELLOW, "%s %d(%s) h=%d a=%d i=%d u=%d(%s)", player->longnick, part, GetSmallHitSite(part),
+							player->armor.points[part], player->armor.apstop[part], player->armor.imunity[part], player->armor.parent[part], GetSmallHitSite(
+									player->armor.parent[part]));
 				}
 			}
 		}
@@ -1781,7 +1797,7 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 	building_t *build;
 	int16_t i, j, field;
 
-	if (!argv[0])
+	if(!argv[0])
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "=========B=U=I=L=D=I=N=G=========");
 		PPrintf(client, RADIO_LIGHTYELLOW, "1-50 CAL Ack  18-Bridge");
@@ -1801,7 +1817,8 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 		PPrintf(client, RADIO_LIGHTYELLOW, "15-Cruiser    32-Spawn Point");
 		PPrintf(client, RADIO_LIGHTYELLOW, "16-Cargo Ship 33-House");
 		PPrintf(client, RADIO_LIGHTYELLOW, "17-Submarine  34-Rock");
-		PPrintf(client, RADIO_LIGHTYELLOW, "usage: .decl <buildID> f<field> [<type>&|x<value>&|y<value>&|z<value>]\nOBS:if already field declared you can change type using only <type>");
+		PPrintf(client, RADIO_LIGHTYELLOW,
+				"usage: .decl <buildID> f<field> [<type>&|x<value>&|y<value>&|z<value>]\nOBS:if already field declared you can change type using only <type>");
 		PPrintf(client, RADIO_LIGHTYELLOW, "============F=I=E=L=D============");
 		PPrintf(client, RADIO_LIGHTYELLOW, "1-Small       11-Port");
 		PPrintf(client, RADIO_LIGHTYELLOW, "2-Medium      12-Convoy");
@@ -1821,210 +1838,214 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 		PPrintf(client, RADIO_LIGHTYELLOW, "11-Port       15-Open field");
 		PPrintf(client, RADIO_LIGHTYELLOW, "usage: .decl c<city> [<type>&|x<value>&|y<value>&|z<value>&|l<field>]");
 	}
-	else if (!argv[1]) // print current set for given attribute
+	else if(!argv[1]) // print current set for given attribute
 	{
-		if (tolower(*argv[0]) == 'f')
+		if(tolower(*argv[0]) == 'f')
 		{
 			argv[0]++;
-			if ((i = Com_Atoi(argv[0])) <= fields->value)
-				PPrintf(client, RADIO_LIGHTYELLOW, "Field %d, type %s, x=%d, y=%d, z=%d, r=%d", arena->fields[i-1].number, GetFieldType(arena->fields[i-1].type), arena->fields[i-1].posxyz[0],
-						arena->fields[i-1].posxyz[1], arena->fields[i-1].posxyz[2], arena->fields[i-1].radius);
+			if((i = Com_Atoi(argv[0])) <= fields->value)
+				PPrintf(client, RADIO_LIGHTYELLOW, "Field %d, type %s, x=%d, y=%d, z=%d, r=%d", arena->fields[i - 1].number, GetFieldType(
+						arena->fields[i - 1].type), arena->fields[i - 1].posxyz[0], arena->fields[i - 1].posxyz[1], arena->fields[i - 1].posxyz[2],
+						arena->fields[i - 1].radius);
 			else
 				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid Field");
 			return;
 		}
-		else if (tolower(*argv[0]) == 'c')
+		else if(tolower(*argv[0]) == 'c')
 		{
 			argv[0]++;
-			if ((i = Com_Atoi(argv[0])) <= cities->value)
+			if((i = Com_Atoi(argv[0])) <= cities->value)
 			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "City %d, type %s, x=%d, y=%d, z=%d, f=%d, c=%d, ctr=%d\nn=%s", i, GetFieldType(arena->cities[i-1].type), arena->cities[i-1].posxyz[0],
-						arena->cities[i-1].posxyz[1], arena->cities[i-1].posxyz[2], arena->cities[i-1].field ? arena->cities[i-1].field->number : 0, arena->cities[i-1].needtoclose,
-						arena->cities[i-1].country, arena->cities[i-1].name);
+				PPrintf(client, RADIO_LIGHTYELLOW, "City %d, type %s, x=%d, y=%d, z=%d, f=%d, c=%d, ctr=%d\nn=%s", i, GetFieldType(arena->cities[i - 1].type),
+						arena->cities[i - 1].posxyz[0], arena->cities[i - 1].posxyz[1], arena->cities[i - 1].posxyz[2],
+						arena->cities[i - 1].field ? arena->cities[i - 1].field->number : 0, arena->cities[i - 1].needtoclose, arena->cities[i - 1].country,
+						arena->cities[i - 1].name);
 			}
 			else
 				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid City");
 			return;
 		}
 
-		if (!(build = GetBuilding(Com_Atoi(argv[0]))))
+		if(!(build = GetBuilding(Com_Atoi(argv[0]))))
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "Building is not assigned to a field");
 		}
 		else
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "Type: %s, Field: %c%d, x=%d, y=%d, z=%d, %s", GetBuildingType(build->type),
-					((build->fieldtype <= FIELD_SUBMARINE) || (build->fieldtype >= FIELD_WB3POST)) ? 'f' : 'c', build->field, build->posx, build->posy, build->posz, build->infield?"IN":"OUT");
-			PPrintf(client, RADIO_LIGHTYELLOW, "Hitpoints: %d, APstop: %d, Imunity: %d", build->armor, GetBuildingAPstop(build->type, client), GetBuildingImunity(build->type, client));
+			PPrintf(client, RADIO_LIGHTYELLOW, "Type: %s, Field: %c%d, x=%d, y=%d, z=%d, %s", GetBuildingType(build->type), ((build->fieldtype
+					<= FIELD_SUBMARINE) || (build->fieldtype >= FIELD_WB3POST)) ? 'f' : 'c', build->field, build->posx, build->posy, build->posz,
+					build->infield ? "IN" : "OUT");
+			PPrintf(client, RADIO_LIGHTYELLOW, "Hitpoints: %d, APstop: %d, Imunity: %d", build->armor, GetBuildingAPstop(build->type, client),
+					GetBuildingImunity(build->type, client));
 		}
 	}
 	else
 	{
-		if (tolower(*argv[0]) == 'f') // set field attributes
+		if(tolower(*argv[0]) == 'f') // set field attributes
 		{
 			argv[0]++;
 
-			if (Com_Atoi(argv[0]) > fields->value)
+			if(Com_Atoi(argv[0]) > fields->value)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid Field");
 				return;
 			}
 
-			for (i = 1; i < argc; i++)
+			for(i = 1; i < argc; i++)
 			{
-				if (tolower(*argv[i]) == 'x')
+				if(tolower(*argv[i]) == 'x')
 				{
 					argv[i]++;
-					arena->fields[Com_Atoi(argv[0])-1].posxyz[0] = Com_Atoi(argv[i]);
+					arena->fields[Com_Atoi(argv[0]) - 1].posxyz[0] = Com_Atoi(argv[i]);
 				}
-				else if (tolower(*argv[i]) == 'y')
+				else if(tolower(*argv[i]) == 'y')
 				{
 					argv[i]++;
-					arena->fields[Com_Atoi(argv[0])-1].posxyz[1] = Com_Atoi(argv[i]);
+					arena->fields[Com_Atoi(argv[0]) - 1].posxyz[1] = Com_Atoi(argv[i]);
 				}
-				else if (tolower(*argv[i]) == 'z')
+				else if(tolower(*argv[i]) == 'z')
 				{
 					argv[i]++;
-					arena->fields[Com_Atoi(argv[0])-1].posxyz[2] = Com_Atoi(argv[i]);
+					arena->fields[Com_Atoi(argv[0]) - 1].posxyz[2] = Com_Atoi(argv[i]);
 				}
-				else if (tolower(*argv[i]) == 'r')
+				else if(tolower(*argv[i]) == 'r')
 				{
 					argv[i]++;
-					arena->fields[Com_Atoi(argv[0])-1].radius = Com_Atou(argv[i]);
+					arena->fields[Com_Atoi(argv[0]) - 1].radius = Com_Atou(argv[i]);
 				}
-				else if (tolower(*argv[i]) == 'c')
+				else if(tolower(*argv[i]) == 'c')
 				{
 					argv[i]++;
 
 					i = Com_Atoi(argv[i]);
 
-					if (i && i > cities->value)
+					if(i && i > cities->value)
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "Invalid city");
 						return;
 					}
 
-					for (j = 0; j < MAX_CITYFIELD; j++)
+					for(j = 0; j < MAX_CITYFIELD; j++)
 					{
-						if (arena->fields[Com_Atoi(argv[0])-1].city[j] == &arena->cities[i - 1])
+						if(arena->fields[Com_Atoi(argv[0]) - 1].city[j] == &arena->cities[i - 1])
 							break;
 					}
 
-					if (j == MAX_CITYFIELD)
+					if(j == MAX_CITYFIELD)
 					{
-						for (j = 0; j < MAX_CITYFIELD; j++)
+						for(j = 0; j < MAX_CITYFIELD; j++)
 						{
-							if (!arena->fields[Com_Atoi(argv[0])-1].city[j])
+							if(!arena->fields[Com_Atoi(argv[0]) - 1].city[j])
 							{
-								arena->fields[Com_Atoi(argv[0])-1].city[j] = &arena->cities[i - 1];
-								arena->cities[i - 1].field = &arena->fields[Com_Atoi(argv[0])-1];
+								arena->fields[Com_Atoi(argv[0]) - 1].city[j] = &arena->cities[i - 1];
+								arena->cities[i - 1].field = &arena->fields[Com_Atoi(argv[0]) - 1];
 							}
 						}
 					}
 				}
 				else
 				{
-					arena->fields[Com_Atoi(argv[0])-1].type = Com_Atoi(argv[i]);
-					SetBFieldType(arena->fields[Com_Atoi(argv[0])-1].buildings, Com_Atoi(argv[i]));
+					arena->fields[Com_Atoi(argv[0]) - 1].type = Com_Atoi(argv[i]);
+					SetBFieldType(arena->fields[Com_Atoi(argv[0]) - 1].buildings, Com_Atoi(argv[i]));
 				}
 			}
 		}
-		else if (tolower(*argv[0]) == 'c') // set cities attributes
+		else if(tolower(*argv[0]) == 'c') // set cities attributes
 		{
 			argv[0]++;
 
-			if (Com_Atoi(argv[0]) > cities->value)
+			if(Com_Atoi(argv[0]) > cities->value)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid city");
 				return;
 			}
 
-			for (i = 1; i < argc; i++)
+			for(i = 1; i < argc; i++)
 			{
-				if (tolower(*argv[i]) == 'x')
+				if(tolower(*argv[i]) == 'x')
 				{
 					argv[i]++;
-					arena->cities[Com_Atoi(argv[0])-1].posxyz[0] = Com_Atoi(argv[i]);
+					arena->cities[Com_Atoi(argv[0]) - 1].posxyz[0] = Com_Atoi(argv[i]);
 				}
-				else if (tolower(*argv[i]) == 'y')
+				else if(tolower(*argv[i]) == 'y')
 				{
 					argv[i]++;
-					arena->cities[Com_Atoi(argv[0])-1].posxyz[1] = Com_Atoi(argv[i]);
+					arena->cities[Com_Atoi(argv[0]) - 1].posxyz[1] = Com_Atoi(argv[i]);
 				}
-				else if (tolower(*argv[i]) == 'z')
+				else if(tolower(*argv[i]) == 'z')
 				{
 					argv[i]++;
-					arena->cities[Com_Atoi(argv[0])-1].posxyz[2] = Com_Atoi(argv[i]);
+					arena->cities[Com_Atoi(argv[0]) - 1].posxyz[2] = Com_Atoi(argv[i]);
 				}
-				else if (tolower(*argv[i]) == 'f')
+				else if(tolower(*argv[i]) == 'f')
 				{
 					argv[i]++;
 
 					i = Com_Atoi(argv[i]);
 
-					if (i && i > fields->value)
+					if(i && i > fields->value)
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "Invalid field");
 						return;
 					}
 
-					if (arena->cities[Com_Atoi(argv[0])-1].field)
+					if(arena->cities[Com_Atoi(argv[0]) - 1].field)
 					{
-						for (j = 0; j < MAX_CITYFIELD; j++)
+						for(j = 0; j < MAX_CITYFIELD; j++)
 						{
-							if (arena->cities[Com_Atoi(argv[0])-1].field->city[j] == &arena->cities[Com_Atoi(argv[0]) - 1])
+							if(arena->cities[Com_Atoi(argv[0]) - 1].field->city[j] == &arena->cities[Com_Atoi(argv[0]) - 1])
 							{
-								arena->cities[Com_Atoi(argv[0])-1].field->city[j] = 0;
+								arena->cities[Com_Atoi(argv[0]) - 1].field->city[j] = 0;
 								break;
 							}
 						}
 
-						arena->cities[Com_Atoi(argv[0])-1].field = 0;
+						arena->cities[Com_Atoi(argv[0]) - 1].field = 0;
 					}
 
-					for (j = 0; j < MAX_CITYFIELD; j++)
+					for(j = 0; j < MAX_CITYFIELD; j++)
 					{
-						if (!arena->fields[i - 1].city[j])
+						if(!arena->fields[i - 1].city[j])
 						{
-							arena->cities[Com_Atoi(argv[0])-1].field = &arena->fields[i - 1];
+							arena->cities[Com_Atoi(argv[0]) - 1].field = &arena->fields[i - 1];
 							arena->fields[i - 1].city[j] = &arena->cities[Com_Atoi(argv[0]) - 1];
 							break;
 						}
 					}
 
-					if (j == MAX_CITYFIELD)
+					if(j == MAX_CITYFIELD)
 						Com_Printf(VERBOSE_WARNING, "Cmd_Decl(): Couldnt attach city to field\n");
 
 				}
-				else if (tolower(*argv[i]) == 'c')
+				else if(tolower(*argv[i]) == 'c')
 				{
 					argv[i]++;
 
-					arena->cities[Com_Atoi(argv[0])-1].needtoclose = Com_Atoi(argv[i]);
+					arena->cities[Com_Atoi(argv[0]) - 1].needtoclose = Com_Atoi(argv[i]);
 				}
-				else if (tolower(*argv[i]) == 'n')
+				else if(tolower(*argv[i]) == 'n')
 				{
 					argv[i]++;
 
-					strcpy(arena->cities[Com_Atoi(argv[0])-1].name, argv[i]);
+					strcpy(arena->cities[Com_Atoi(argv[0]) - 1].name, argv[i]);
 				}
 				else
 				{
-					arena->cities[Com_Atoi(argv[0])-1].type = Com_Atoi(argv[i]);
-					SetBFieldType(arena->cities[Com_Atoi(argv[0])-1].buildings, Com_Atoi(argv[i]));
+					arena->cities[Com_Atoi(argv[0]) - 1].type = Com_Atoi(argv[i]);
+					SetBFieldType(arena->cities[Com_Atoi(argv[0]) - 1].buildings, Com_Atoi(argv[i]));
 				}
 			}
 		}
 		else // struct attributes
 		{
-			for (i = 1; i < argc; i++)
+			for(i = 1; i < argc; i++)
 			{
-				if (tolower(*argv[i]) == 'f')
+				if(tolower(*argv[i]) == 'f')
 				{
-					if (strlen(argv[i]) > 1)
+					if(strlen(argv[i]) > 1)
 					{
 						argv[i]++;
-						if (!isdigit(*argv[i]))
+						if(!isdigit(*argv[i]))
 						{
 							PPrintf(client, RADIO_LIGHTYELLOW, "Invalid argument");
 							return;
@@ -2036,17 +2057,17 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 						return;
 					}
 
-					if (GetBuilding(Com_Atoi(argv[0])))
+					if(GetBuilding(Com_Atoi(argv[0])))
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "Building %s already assigned to a field or city", argv[0]);
 					}
 					else
 					{
-						field = Com_Atoi(argv[i])-1;
+						field = Com_Atoi(argv[i]) - 1;
 
-						for (j = 0; j < MAX_BUILDINGS; j++)
+						for(j = 0; j < MAX_BUILDINGS; j++)
 						{
-							if (!arena->fields[field].buildings[j].field)
+							if(!arena->fields[field].buildings[j].field)
 							{
 								arena->fields[field].buildings[j].field = field + 1;
 								arena->fields[field].buildings[j].fieldtype = arena->fields[field].type;
@@ -2056,12 +2077,12 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 						}
 					}
 				}
-				else if (tolower(*argv[i]) == 'c')
+				else if(tolower(*argv[i]) == 'c')
 				{
-					if (strlen(argv[i]) > 1)
+					if(strlen(argv[i]) > 1)
 					{
 						argv[i]++;
-						if (!isdigit(*argv[i]))
+						if(!isdigit(*argv[i]))
 						{
 							PPrintf(client, RADIO_LIGHTYELLOW, "Invalid Argument");
 							return;
@@ -2073,17 +2094,17 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 						return;
 					}
 
-					if (GetBuilding(Com_Atoi(argv[0])))
+					if(GetBuilding(Com_Atoi(argv[0])))
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "Building %s already assigned to a field or city", argv[0]);
 					}
 					else
 					{
-						field = Com_Atoi(argv[i])-1;
+						field = Com_Atoi(argv[i]) - 1;
 
-						for (j = 0; j < MAX_BUILDINGS; j++)
+						for(j = 0; j < MAX_BUILDINGS; j++)
 						{
-							if (!arena->cities[field].buildings[j].field)
+							if(!arena->cities[field].buildings[j].field)
 							{
 								arena->cities[field].buildings[j].field = field + 1;
 								arena->cities[field].buildings[j].fieldtype = arena->cities[field].type;
@@ -2095,23 +2116,23 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 				}
 				else
 				{
-					if (!(build = GetBuilding(Com_Atoi(argv[0]))))
+					if(!(build = GetBuilding(Com_Atoi(argv[0]))))
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "Building %d is not assigned to a field", Com_Atoi(argv[0]));
 					}
 					else
 					{
-						if (tolower(*argv[i]) == 'x')
+						if(tolower(*argv[i]) == 'x')
 						{
 							argv[i]++;
 							build->posx = Com_Atoi(argv[i]);
 						}
-						else if (tolower(*argv[i]) == 'y')
+						else if(tolower(*argv[i]) == 'y')
 						{
 							argv[i]++;
 							build->posy = Com_Atoi(argv[i]);
 						}
-						else if (tolower(*argv[i]) == 'z')
+						else if(tolower(*argv[i]) == 'z')
 						{
 							argv[i]++;
 							build->posz = Com_Atoi(argv[i]);
@@ -2133,7 +2154,7 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 
  Make a Pingtest call
  */
- 
+
 void Cmd_Pingtest(u_int16_t frame, client_t *client)
 {
 	buildstatus_t *buildstatus;
@@ -2150,7 +2171,7 @@ void Cmd_Pingtest(u_int16_t frame, client_t *client)
 		buildstatus->country = arena->fields[1].country;
 	else
 		buildstatus->country = arena->fields[0].country;
-	if (!frame)
+	if(!frame)
 		client->pingtest = arena->time;
 
 	SendPacket(buffer, sizeof(buffer), client);
@@ -2167,17 +2188,17 @@ void Cmd_Undecl(u_int16_t id, client_t *client)
 	u_int16_t i, j;
 	building_t *build, *buildings;
 
-	if (id == 0xffff)
+	if(id == 0xffff)
 	{
-		for (i = 0; i < fields->value; i++)
+		for(i = 0; i < fields->value; i++)
 		{
-			for (j = 0; j < MAX_BUILDINGS; j++)
+			for(j = 0; j < MAX_BUILDINGS; j++)
 				arena->fields[i].buildings[j].field = 0;
 		}
 
-		for (i = 0; i < cities->value; i++)
+		for(i = 0; i < cities->value; i++)
 		{
-			for (j = 0; j < MAX_BUILDINGS; j++)
+			for(j = 0; j < MAX_BUILDINGS; j++)
 				arena->cities[i].buildings[j].field = 0;
 		}
 
@@ -2185,7 +2206,7 @@ void Cmd_Undecl(u_int16_t id, client_t *client)
 	}
 	else
 	{
-		if (!(build = GetBuilding(id)))
+		if(!(build = GetBuilding(id)))
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "Building not declared yet");
 			return;
@@ -2193,7 +2214,7 @@ void Cmd_Undecl(u_int16_t id, client_t *client)
 
 		i = build->field - 1;
 
-		if ((build->fieldtype <= FIELD_SUBMARINE) || (build->fieldtype <= FIELD_WB3POST))
+		if((build->fieldtype <= FIELD_SUBMARINE) || (build->fieldtype <= FIELD_WB3POST))
 		{
 			buildings = arena->fields[i].buildings;
 		}
@@ -2202,31 +2223,31 @@ void Cmd_Undecl(u_int16_t id, client_t *client)
 			buildings = arena->cities[i].buildings;
 		}
 
-		for (j = 0; j < MAX_BUILDINGS; j++)
+		for(j = 0; j < MAX_BUILDINGS; j++)
 		{
-			if (buildings[j].id == id)
+			if(buildings[j].id == id)
 			{
 				buildings[j].field = 0;
 
-				if (++j < MAX_BUILDINGS)
+				if(++j < MAX_BUILDINGS)
 				{
-					while (buildings[j].field)
+					while(buildings[j].field)
 					{
-						buildings[j-1].field = buildings[j].field;
-						buildings[j-1].fieldtype = buildings[j].fieldtype;
-						buildings[j-1].country = buildings[j].country;
-						buildings[j-1].id = buildings[j].id;
-						buildings[j-1].type = buildings[j].type;
-						buildings[j-1].status = buildings[j].status;
-						buildings[j-1].timer = buildings[j].timer;
-						buildings[j-1].armor = buildings[j].armor;
-						buildings[j-1].posx = buildings[j].posx;
-						buildings[j-1].posy = buildings[j].posy;
-						buildings[j-1].posz = buildings[j].posz;
+						buildings[j - 1].field = buildings[j].field;
+						buildings[j - 1].fieldtype = buildings[j].fieldtype;
+						buildings[j - 1].country = buildings[j].country;
+						buildings[j - 1].id = buildings[j].id;
+						buildings[j - 1].type = buildings[j].type;
+						buildings[j - 1].status = buildings[j].status;
+						buildings[j - 1].timer = buildings[j].timer;
+						buildings[j - 1].armor = buildings[j].armor;
+						buildings[j - 1].posx = buildings[j].posx;
+						buildings[j - 1].posy = buildings[j].posy;
+						buildings[j - 1].posz = buildings[j].posz;
 
 						buildings[j].field = 0;
 
-						if (++j >= MAX_BUILDINGS)
+						if(++j >= MAX_BUILDINGS)
 							break;
 					}
 				}
@@ -2248,8 +2269,8 @@ void Cmd_Time(u_int16_t time, char *mult, client_t *client)
 	arenatime_t *arenatime;
 	u_int8_t buffer[5];
 
-	hour = time/100;
-	minute = time%100;
+	hour = time / 100;
+	minute = time % 100;
 
 	memset(buffer, 0, sizeof(buffer));
 
@@ -2259,22 +2280,22 @@ void Cmd_Time(u_int16_t time, char *mult, client_t *client)
 	arenatime->hour = arena->hour = hour;
 	arenatime->minute = arena->minute = minute;
 
-	if (mult)
+	if(mult)
 	{
 		Var_Set("timemult", mult);
 	}
 
 	arenatime->mult = arena->multiplier;
 
-	if (client)
+	if(client)
 	{
 		SendPacket(buffer, sizeof(buffer), client);
 	}
 	else
 	{
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone && clients[i].ready)
+			if(clients[i].inuse && !clients[i].drone && clients[i].ready)
 			{
 				SendPacket(buffer, sizeof(buffer), &clients[i]);
 			}
@@ -2291,28 +2312,28 @@ void Cmd_Time(u_int16_t time, char *mult, client_t *client)
 void Cmd_Date(u_int16_t year, u_int8_t month, u_int8_t day, client_t *client)
 {
 
-	if (!month || month > 12)
+	if(!month || month > 12)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Invalid month");
 		return;
 	}
 
-	if (day > 28) // check days
+	if(day > 28) // check days
 	{
-		if (month == 2 && (year % 4))
+		if(month == 2 && (year % 4))
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "Invalid day");
 			return;
 		}
 
-		if (day > 30)
+		if(day > 30)
 		{
-			if ((month == 4 || month == 6 || month == 9 || month == 11))
+			if((month == 4 || month == 6 || month == 9 || month == 11))
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid day");
 				return;
 			}
-			else if (day > 31)
+			else if(day > 31)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid day");
 				return;
@@ -2343,10 +2364,10 @@ void Cmd_Field(u_int8_t field, client_t *client)
 	FILE *fp;
 	char buffer[32];
 
-	if (!field)
+	if(!field)
 	{
 		// Prints all fields status
-		if (!(fp = fopen("./fields/fields.txt", "wb")))
+		if(!(fp = fopen("./fields/fields.txt", "wb")))
 		{
 			PPrintf(client, RADIO_YELLOW, "WARNING: Cmd_Field() Couldn't open file \"./fields/fields.txt\"");
 		}
@@ -2365,11 +2386,11 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 			for(i = 0; i < fields->value; i++)
 			{
-				fprintf(fp, "F%d%s%9s%9s", i+1, i < 9 ? " " :"", GetCountry(arena->fields[i].country), GetFieldType(arena->fields[i].type));
+				fprintf(fp, "F%d%s%9s%9s", i + 1, i < 9 ? " " : "", GetCountry(arena->fields[i].country), GetFieldType(arena->fields[i].type));
 
-				if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
+				if(arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 				{
-					if (arena->fields[field].cvs->ships)
+					if(arena->fields[field].cvs->ships)
 						fprintf(fp, "%.3f ft/s", arena->fields[field].cvs->ships->Vel.curr);
 					else
 						Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
@@ -2381,12 +2402,12 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 				build_total = build_alive = 0;
 
-				for (j = 0; j < MAX_BUILDINGS; j++)
+				for(j = 0; j < MAX_BUILDINGS; j++)
 				{
-					if (!arena->fields[i].buildings[j].field)
+					if(!arena->fields[i].buildings[j].field)
 						break;
 
-					if (IsVitalBuilding(&(arena->fields[i].buildings[j]), oldcapt->value))
+					if(IsVitalBuilding(&(arena->fields[i].buildings[j]), oldcapt->value))
 					{
 						if(!arena->fields[i].buildings[j].status)
 							build_alive++;
@@ -2394,22 +2415,22 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					}
 				}
 
-				fprintf(fp, "%5.0f%%%4d/%02d", (double)build_alive*100/build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
+				fprintf(fp, "%5.0f%%%4d/%02d", (double) build_alive * 100 / build_total, arena->fields[i].paras, GetFieldParas(arena->fields[i].type));
 				//fprintf(fp, "%s", buffer);
 
 				if(!oldcapt->value)
 				{
-					fprintf(fp, "%6.0f%6.0f\n", arena->fields[i].tonnage, GetTonnageToClose(i+1));
+					fprintf(fp, "%6.0f%6.0f\n", arena->fields[i].tonnage, GetTonnageToClose(i + 1));
 				}
 				else
 				{
 					fprintf(fp, "\n");
 				}
 
-//				if (status)
-//				{
-//					fprintf(fp, "ABLE TO CAPTURE: %s\n", arena->fields[field].abletocapture ? "Yes" : "No");
-//				}
+				//				if (status)
+				//				{
+				//					fprintf(fp, "ABLE TO CAPTURE: %s\n", arena->fields[field].abletocapture ? "Yes" : "No");
+				//				}
 			}
 
 			fclose(fp);
@@ -2420,7 +2441,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		return;
 	}
 
-	if (field > fields->value)
+	if(field > fields->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid field");
 		return;
@@ -2434,12 +2455,12 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 	build_total = build_alive = 0;
 
-	for (i = 0; i < MAX_BUILDINGS; i++)
+	for(i = 0; i < MAX_BUILDINGS; i++)
 	{
-		if (!arena->fields[field].buildings[i].field)
+		if(!arena->fields[field].buildings[i].field)
 			break;
 
-		if (IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
+		if(IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
 		{
 			if(!arena->fields[field].buildings[i].status)
 				build_alive++;
@@ -2448,29 +2469,33 @@ void Cmd_Field(u_int8_t field, client_t *client)
 		}
 	}
 
-	if (!client || client->inflight)
+	if(!client || client->inflight)
 	{
-		PPrintf(client, RADIO_YELLOW, "Field F%d: Country: %s, Type: %s, Status: %s", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
+		PPrintf(client, RADIO_YELLOW, "Field F%d: Country: %s, Type: %s, Status: %s", field + 1, GetCountry(country), GetFieldType(type), status ? "Closed"
+				: "Open");
 
 		if(!oldcapt->value)
 		{
-			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras, ToT: %.2f, TTC: %.2f", (double)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type), arena->fields[field].tonnage, GetTonnageToClose(field+1));
+			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras, ToT: %.2f, TTC: %.2f", (double) build_alive * 100 / build_total, arena->fields[field].paras,
+					GetFieldParas(arena->fields[field].type), arena->fields[field].tonnage, GetTonnageToClose(field + 1));
 		}
 		else
 		{
-			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras", (double)build_alive*100/build_total, arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
+			PPrintf(client, RADIO_YELLOW, "%.2f%% up, %d/%d paras", (double) build_alive * 100 / build_total, arena->fields[field].paras, GetFieldParas(
+					arena->fields[field].type));
 		}
 
-		if (status)
+		if(status)
 		{
 			reup = MAX_UINT32;
 
-			for (i = 0; i < MAX_BUILDINGS; i++)
+			for(i = 0; i < MAX_BUILDINGS; i++)
 			{
-				if (!arena->fields[field].buildings[i].field)
+				if(!arena->fields[field].buildings[i].field)
 					break;
 
-				if (arena->fields[field].buildings[i].status && arena->fields[field].buildings[i].timer < reup && IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
+				if(arena->fields[field].buildings[i].status && arena->fields[field].buildings[i].timer < reup && IsVitalBuilding(
+						&(arena->fields[field].buildings[i]), oldcapt->value))
 				{
 					reup = arena->fields[field].buildings[i].timer;
 				}
@@ -2493,9 +2518,9 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					}
 				}
 
-				tonnage_recover = (1.0 + (((double)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(field+1) / (24.0 * rebuildtime->value / 9.0);
+				tonnage_recover = (1.0 + (((double) c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(field + 1) / (24.0 * rebuildtime->value / 9.0);
 
-				treup = ((arena->fields[field].tonnage - GetTonnageToClose(field+1)) * 6000) / tonnage_recover;
+				treup = ((arena->fields[field].tonnage - GetTonnageToClose(field + 1)) * 6000) / tonnage_recover;
 
 				if(treup < reup)
 				{
@@ -2505,35 +2530,36 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				}
 			}
 
-			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup/100), arena->fields[field].abletocapture ? "Yes" : "No");
+			PPrintf(client, RADIO_YELLOW, "Reopen in %s, Able to capture: %s", Com_TimeSeconds(reup / 100), arena->fields[field].abletocapture ? "Yes" : "No");
 		}
 	}
 	else
 	{
 		memset(buffer, 0, sizeof(buffer));
 
-		snprintf(buffer, sizeof(buffer), "./fields/field%d.txt", field+1);
+		snprintf(buffer, sizeof(buffer), "./fields/field%d.txt", field + 1);
 
-		if (!(fp = fopen(buffer, "wb")))
+		if(!(fp = fopen(buffer, "wb")))
 		{
 			PPrintf(client, RADIO_YELLOW, "WARNING: Cmd_Field() Couldn't open file \"%s\"", buffer);
 		}
 		else
 		{
-			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\nPARAS: %d/%d\n\n", field+1, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open", arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
+			fprintf(fp, "FIELD F%d\nCOUNTRY: %s\nTYPE: %s\nSTATUS: %s\nPARAS: %d/%d\n\n", field + 1, GetCountry(country), GetFieldType(type), status ? "Closed"
+					: "Open", arena->fields[field].paras, GetFieldParas(arena->fields[field].type));
 			if(!oldcapt->value)
 			{
-				fprintf(fp, "TONNAGE ON TARGET: %.2f\nTONNAGE TO CLOSE: %.2f\n", arena->fields[field].tonnage, GetTonnageToClose(field+1));
+				fprintf(fp, "TONNAGE ON TARGET: %.2f\nTONNAGE TO CLOSE: %.2f\n", arena->fields[field].tonnage, GetTonnageToClose(field + 1));
 			}
 
-			if (status)
+			if(status)
 			{
 				fprintf(fp, "ABLE TO CAPTURE: %s\n", arena->fields[field].abletocapture ? "Yes" : "No");
 			}
 
-			if (arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
+			if(arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 			{
-				if (arena->fields[field].cvs->ships)
+				if(arena->fields[field].cvs->ships)
 					fprintf(fp, "CONVOY SPEED: %.3f ft/s\n\n", arena->fields[field].cvs->ships->Vel.curr);
 				else
 					Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
@@ -2543,17 +2569,18 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				fputc('\n', fp);
 			}
 
-			for (i = 0; i < MAX_BUILDINGS; i++)
+			for(i = 0; i < MAX_BUILDINGS; i++)
 			{
-				if (arena->fields[field].buildings[i].field)
+				if(arena->fields[field].buildings[i].field)
 				{
-					if (IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
+					if(IsVitalBuilding(&(arena->fields[field].buildings[i]), oldcapt->value))
 					{
-						fprintf(fp, "%s %s", GetBuildingType(arena->fields[field].buildings[i].type), arena->fields[field].buildings[i].timer ? "DESTROYED" : "LIVES");
+						fprintf(fp, "%s %s", GetBuildingType(arena->fields[field].buildings[i].type), arena->fields[field].buildings[i].timer ? "DESTROYED"
+								: "LIVES");
 
-						if (arena->fields[field].buildings[i].timer)
-							if ((arena->fields[field].type <= FIELD_MAIN) || (arena->fields[field].type >= FIELD_WB3POST))
-								fprintf(fp, " (%s)\n", Com_TimeSeconds(arena->fields[field].buildings[i].timer/100));
+						if(arena->fields[field].buildings[i].timer)
+							if((arena->fields[field].type <= FIELD_MAIN) || (arena->fields[field].type >= FIELD_WB3POST))
+								fprintf(fp, " (%s)\n", Com_TimeSeconds(arena->fields[field].buildings[i].timer / 100));
 							else
 								fprintf(fp, " DESTROYED\n");
 						else
@@ -2564,14 +2591,15 @@ void Cmd_Field(u_int8_t field, client_t *client)
 					break;
 			}
 
-			for (i = 0; i < MAX_CITYFIELD; i++)
+			for(i = 0; i < MAX_CITYFIELD; i++)
 			{
-				if (arena->fields[field].city[i])
+				if(arena->fields[field].city[i])
 				{
-					if (arena->fields[field].city[i]->needtoclose)
+					if(arena->fields[field].city[i]->needtoclose)
 					{
-						fprintf(fp, "%s (c%d) (%s) %s \n", arena->fields[field].city[i]->name, arena->fields[field].city[i]->number, Com_Padloc(arena->fields[field].city[i]->posxyz[0],
-								arena->fields[field].city[i]->posxyz[1]), arena->fields[field].city[i]->closed ? "CLOSED" : "OPEN");
+						fprintf(fp, "%s (c%d) (%s) %s \n", arena->fields[field].city[i]->name, arena->fields[field].city[i]->number, Com_Padloc(
+								arena->fields[field].city[i]->posxyz[0], arena->fields[field].city[i]->posxyz[1]),
+								arena->fields[field].city[i]->closed ? "CLOSED" : "OPEN");
 					}
 				}
 			}
@@ -2596,25 +2624,26 @@ void Cmd_City(u_int8_t citynum, client_t *client)
 	FILE *fp;
 	char buffer[32];
 
-	if (!citynum)
+	if(!citynum)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid argument");
 		return;
 	}
 
-	if (citynum > cities->value)
+	if(citynum > cities->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid City");
 		return;
 	}
 
-	country = arena->cities[citynum-1].country;
-	type = arena->cities[citynum-1].type;
-	status = arena->cities[citynum-1].closed;
+	country = arena->cities[citynum - 1].country;
+	type = arena->cities[citynum - 1].type;
+	status = arena->cities[citynum - 1].closed;
 
-	if (!client || client->inflight)
+	if(!client || client->inflight)
 	{
-		PPrintf(client, RADIO_YELLOW, "City C%d: Country %s, Type: %s, Status: %s", citynum, GetCountry(country), GetFieldType(type), status ? "Closed" : "Open");
+		PPrintf(client, RADIO_YELLOW, "City C%d: Country %s, Type: %s, Status: %s", citynum, GetCountry(country), GetFieldType(type), status ? "Closed"
+				: "Open");
 	}
 	else
 	{
@@ -2622,21 +2651,23 @@ void Cmd_City(u_int8_t citynum, client_t *client)
 
 		snprintf(buffer, sizeof(buffer), "./fields/city%d.txt", citynum);
 
-		if (!(fp = fopen(buffer, "wb")))
+		if(!(fp = fopen(buffer, "wb")))
 		{
 			PPrintf(client, RADIO_YELLOW, "WARNING: Cmd_Field() Cannot open file \"%s\"", buffer);
 		}
 
-		fprintf(fp, "CITY C%d\nNAME: %s\nCOUNTRY: %s\nTYPE: %s\nLINKED TO: F%d\nPOSITION: %s\nNEED TO CLOSE:%s\nSTATUS: %s\n\n", citynum, arena->cities[citynum-1].name, GetCountry(country),
-				GetFieldType(type), arena->cities[citynum-1].field ? arena->cities[citynum-1].field->number : 0, Com_Padloc(arena->cities[citynum-1].posxyz[0], arena->cities[citynum-1].posxyz[1]),
-				arena->cities[citynum-1].needtoclose ? "Yes" : "No", status ? "Closed" : "Open");
+		fprintf(fp, "CITY C%d\nNAME: %s\nCOUNTRY: %s\nTYPE: %s\nLINKED TO: F%d\nPOSITION: %s\nNEED TO CLOSE:%s\nSTATUS: %s\n\n", citynum, arena->cities[citynum
+				- 1].name, GetCountry(country), GetFieldType(type), arena->cities[citynum - 1].field ? arena->cities[citynum - 1].field->number : 0,
+				Com_Padloc(arena->cities[citynum - 1].posxyz[0], arena->cities[citynum - 1].posxyz[1]), arena->cities[citynum - 1].needtoclose ? "Yes" : "No",
+				status ? "Closed" : "Open");
 		citynum--;
 
-		for (i = 0; i < MAX_BUILDINGS; i++)
+		for(i = 0; i < MAX_BUILDINGS; i++)
 		{
-			if (arena->cities[citynum].buildings[i].field)
+			if(arena->cities[citynum].buildings[i].field)
 			{
-				fprintf(fp, "%s %s\n", GetBuildingType(arena->cities[citynum].buildings[i].type), arena->cities[citynum].buildings[i].timer ? "DESTROYED" : "LIVES");
+				fprintf(fp, "%s %s\n", GetBuildingType(arena->cities[citynum].buildings[i].type), arena->cities[citynum].buildings[i].timer ? "DESTROYED"
+						: "LIVES");
 			}
 			else
 				break;
@@ -2671,13 +2702,13 @@ void Cmd_StartDrone(u_int32_t field, u_int32_t plane, double angle, client_t *cl
 		return;
 	}
 
-	if (angle*10 > 3599)
+	if(angle * 10 > 3599)
 	{
 		PPrintf(client, RADIO_YELLOW, "angle: 0<->359.9 degrees");
 		return;
 	}
 
-	if (client && client->attr == 1)
+	if(client && client->attr == 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You're an Admin, you can't start V-1");
 		return;
@@ -2685,7 +2716,7 @@ void Cmd_StartDrone(u_int32_t field, u_int32_t plane, double angle, client_t *cl
 
 	drone = AddDrone(DRONE_FAU, arena->fields[field - 1].posxyz[0], arena->fields[field - 1].posxyz[1], arena->fields[field - 1].posxyz[2], 2, plane, client);
 
-	if (!drone)
+	if(!drone)
 		return;
 
 	drone->speedxyz[0][0] = 300 * sin(Com_Rad(angle)) * -1;
@@ -2697,13 +2728,13 @@ void Cmd_StartDrone(u_int32_t field, u_int32_t plane, double angle, client_t *cl
 
 	angle = 360.0 - angle;
 
-	if ((angle *= 10) > 901)
+	if((angle *= 10) > 901)
 	{
 		angle -= 3600;
 	}
 
 	drone->angles[2][0] = angle;
-	drone->dronetimer = (double)dist*100/300;
+	drone->dronetimer = (double) dist * 100 / 300;
 }
 
 /**
@@ -2717,59 +2748,59 @@ void Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *cli
 	client_t *drone;
 	u_int32_t time;
 
-	if (arena->fields[client->field-1].closed)
+	if(arena->fields[client->field - 1].closed)
 	{
 		PPrintf(client, RADIO_YELLOW, "This field is closed");
 		return;
 	}
 
-	if (arena->fields[client->field-1].country != client->country)
+	if(arena->fields[client->field - 1].country != client->country)
 	{
 		PPrintf(client, RADIO_YELLOW, "This field is not from your country");
 		return;
 	}
 
-	if (client->tkstatus)
+	if(client->tkstatus)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are a team killer, you cannot use V-1");
 		return;
 	}
 
-	if (arena->fields[client->field-1].warehouse)
+	if(arena->fields[client->field - 1].warehouse)
 	{
 		PPrintf(client, RADIO_YELLOW, "You can't launch V-1 from this field. Warehouse is destroyed!");
 		return;
 	}
 
-	if (angle*10 > 3599)
+	if(angle * 10 > 3599)
 	{
 		PPrintf(client, RADIO_YELLOW, "angle: 0<->359.9 degrees");
 		return;
 	}
 
-	if ((dist < 30000) || (dist > 158400))
+	if((dist < 30000) || (dist > 158400))
 	{
 		PPrintf(client, RADIO_YELLOW, "dist: 30,000<->158,400 feet");
 		return;
 	}
 
-	if (arena->year < 1944)
+	if(arena->year < 1944)
 	{
 		PPrintf(client, RADIO_YELLOW, "We don't have V-1 before 1944");
 		return;
 	}
 
-	if (client->attr == 1)
+	if(client->attr == 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You're an Admin, you can't start V-1");
 		return;
 	}
 
-	if ((arena->fields[client->field - 1].rps[PLANE_FAU] > -1 && arena->fields[client->field - 1].rps[PLANE_FAU] < 1))
+	if((arena->fields[client->field - 1].rps[PLANE_FAU] > -1 && arena->fields[client->field - 1].rps[PLANE_FAU] < 1))
 	{
-		if (rps->value)
+		if(rps->value)
 		{
-			time = ((u_int32_t)(rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000)))/100;
+			time = ((u_int32_t) (rps->value * 6000) - (arena->frame % (u_int32_t) (rps->value * 6000))) / 100;
 		}
 		else
 		{
@@ -2779,14 +2810,15 @@ void Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *cli
 		PPrintf(client, RADIO_YELLOW, "No FAU available, wait %s", Com_TimeSeconds(time));
 		return;
 	}
-	else if (arena->fields[client->field - 1].rps[PLANE_FAU] >= 1)
+	else if(arena->fields[client->field - 1].rps[PLANE_FAU] >= 1)
 	{
 		arena->fields[client->field - 1].rps[PLANE_FAU]--;
 	}
 
-	drone = AddDrone(DRONE_FAU, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1], arena->fields[client->field - 1].posxyz[2], client->country, PLANE_FAU, client);
+	drone = AddDrone(DRONE_FAU, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1],
+			arena->fields[client->field - 1].posxyz[2], client->country, PLANE_FAU, client);
 
-	if (!drone)
+	if(!drone)
 		return;
 
 	Com_LogEvent(EVENT_FAU, client->id, 0);
@@ -2804,15 +2836,15 @@ void Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *cli
 
 	angle = 360.0 - angle;
 
-	if ((angle *= 10) > 901)
+	if((angle *= 10) > 901)
 	{
 		angle -= 3600;
 	}
 
 	drone->angles[2][0] = angle;
-	drone->dronetimer = (double)dist*100/DRONE_FAU_SPEED;
+	drone->dronetimer = (double) dist * 100 / DRONE_FAU_SPEED;
 
-	if (attached)
+	if(attached)
 	{
 		client->attached = drone;
 		SendGunnerStatusChange(drone, 2, client); // define position to be attached in drone
@@ -2838,19 +2870,19 @@ void Cmd_Say(char *argv[], u_int8_t argc, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	for (i = 0, len = 0; i < argc; i++)
+	for(i = 0, len = 0; i < argc; i++)
 	{
-		if ((len += strlen(argv[i])) < 256)
+		if((len += strlen(argv[i])) < 256)
 		{
 			strcat(buffer, argv[i]);
-			if (i < argc-1)
+			if(i < argc - 1)
 				buffer[strlen(buffer)] = ' ';
 		}
 		else
 			break;
 	}
 
-	if (!client)
+	if(!client)
 		BPrintf(RADIO_BLUE, "%s", buffer);
 	else
 		PPrintf(client, RADIO_YELLOW, "%s", buffer); // echo
@@ -2866,59 +2898,60 @@ void Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount)
 {
 	int16_t ftype, fnum, i, j;
 
-	if (tolower(*field) == 'f')
+	if(tolower(*field) == 'f')
 	{
 		field++;
 
-		if ((fnum = Com_Atoi(field)) > 0)
+		if((fnum = Com_Atoi(field)) > 0)
 		{
-			if (plane > 0 && plane < maxplanes)
-				arena->fields[fnum-1].rps[plane] = amount;
-			else if (plane < 0)
+			if(plane > 0 && plane < maxplanes)
+				arena->fields[fnum - 1].rps[plane] = amount;
+			else if(plane < 0)
 			{
-				for (i = 0; i < maxplanes; i++)
-					arena->fields[fnum-1].rps[i] = amount;
+				for(i = 0; i < maxplanes; i++)
+					arena->fields[fnum - 1].rps[i] = amount;
 			}
 		}
-		else if (fnum < 0)
+		else if(fnum < 0)
 		{
-			for (i = 0; i < fields->value; i++)
+			for(i = 0; i < fields->value; i++)
 			{
-				if (fnum == -2 && (arena->fields[i].type == FIELD_CV || arena->fields[i].type == FIELD_CARGO || arena->fields[i].type == FIELD_DD || arena->fields[i].type == FIELD_SUBMARINE))
+				if(fnum == -2 && (arena->fields[i].type == FIELD_CV || arena->fields[i].type == FIELD_CARGO || arena->fields[i].type == FIELD_DD
+						|| arena->fields[i].type == FIELD_SUBMARINE))
 					continue;
 
-				if (plane > 0 && plane < maxplanes)
+				if(plane > 0 && plane < maxplanes)
 					arena->fields[i].rps[plane] = amount;
-				else if (plane < 0)
+				else if(plane < 0)
 				{
-					for (j = 0; j < maxplanes; j++)
+					for(j = 0; j < maxplanes; j++)
 						arena->fields[i].rps[j] = amount;
 				}
 			}
 
 		}
 	}
-	else if (tolower(*field) == 't')
+	else if(tolower(*field) == 't')
 	{
 		field++;
 
-		if ((ftype = Com_Atoi(field) > FIELD_SUBMARINE))
+		if((ftype = Com_Atoi(field) > FIELD_SUBMARINE))
 			ftype = FIELD_SUBMARINE;
-		if (ftype < FIELD_LITTLE)
+		if(ftype < FIELD_LITTLE)
 			ftype = FIELD_LITTLE;
 
-		for (i = 0; i < fields->value; i++)
+		for(i = 0; i < fields->value; i++)
 		{
-			if ((arena->fields[i].type == ftype) && (arena->fields[i].country == country))
+			if((arena->fields[i].type == ftype) && (arena->fields[i].country == country))
 			{
 				arena->fields[i].rps[plane] = amount;
 			}
 		}
 	}
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone && clients[i].ready && !clients[i].inflight)
+		if(clients[i].inuse && !clients[i].drone && clients[i].ready && !clients[i].inflight)
 			SendRPS(&clients[i]);
 	}
 }
@@ -2940,12 +2973,12 @@ void Cmd_Show(client_t *client)
 
 	Sys_WaitForLock(filename);
 
-	if (Sys_LockFile(filename) < 0)
+	if(Sys_LockFile(filename) < 0)
 		return;
 
 	filename[strlen(filename) - 5] = '\0';
 
-	if ((fp = fopen(filename, "wb")) == NULL)
+	if((fp = fopen(filename, "wb")) == NULL)
 	{
 		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
 	}
@@ -3028,8 +3061,8 @@ void Cmd_Score(char *player, client_t *client)
 	char nickname[7];
 	double ratio1, ratio2, ratio3, ratio4, csortie;
 	FILE *fp;
-	MYSQL_RES *temp_result= NULL;
-	MYSQL_ROW temp_row= NULL;
+	MYSQL_RES *temp_result = NULL;
+	MYSQL_ROW temp_row = NULL;
 
 	memset(filename, 0, sizeof(filename));
 	memset(nickname, 0, sizeof(nickname));
@@ -3040,33 +3073,33 @@ void Cmd_Score(char *player, client_t *client)
 
 	Sys_WaitForLock(filename);
 
-	if (Sys_LockFile(filename) < 0)
+	if(Sys_LockFile(filename) < 0)
 		return;
 
 	filename[strlen(filename) - 5] = '\0';
 
-	if ((fp = fopen(filename, "wb")))
+	if((fp = fopen(filename, "wb")))
 	{
 		player_id = 0;
 
-		if (strcmp(nickname, client->longnick)) // if player want someone else's score 
+		if(strcmp(nickname, client->longnick)) // if player want someone else's score
 		{
 			debug_querytime = Sys_Milliseconds();
 
 			sprintf(my_query, "SELECT id FROM players WHERE longnick = '%s'", nickname);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query))
+			if(!Com_MySQL_Query(client, &my_sock, my_query))
 			{
 				Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[1]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if ((my_row = mysql_fetch_row(my_result)))
+					if((my_row = mysql_fetch_row(my_result)))
 					{
 						player_id = Com_Atou(Com_MyRow("id"));
 					}
 					else
 					{
-						if (!mysql_errno(&my_sock))
+						if(!mysql_errno(&my_sock))
 						{
 							PPrintf(client, RADIO_YELLOW, "Player %s doesn't exists", nickname);
 						}
@@ -3098,7 +3131,7 @@ void Cmd_Score(char *player, client_t *client)
 			player_id = client->id;
 		}
 
-		if (player_id)
+		if(player_id)
 		{
 			debug_querytime = Sys_Milliseconds();
 
@@ -3108,25 +3141,26 @@ void Cmd_Score(char *player, client_t *client)
 			 players.country, score_common.flyred, score_common.flygold, score_common.flighttime, score_common.totalscore, score_common.lastscore, squads.name
 			 ********************************************************/
 
-			sprintf(my_query,
+			sprintf(
+					my_query,
 					"SELECT players.country, players.rank, score_common.flyred, score_common.flygold, score_common.flighttime, score_common.totalscore, score_common.lastscore, squads.name FROM players INNER JOIN score_common ON players.id = score_common.player_id LEFT JOIN squads ON players.squad_owner = squads.owner WHERE players.id = '%u'",
 					player_id);
 
-			if (!(player_id == client->id ? Com_MySQL_Query(client, &my_sock, my_query) : d_mysql_query(&my_sock, my_query)))
+			if(!(player_id == client->id ? Com_MySQL_Query(client, &my_sock, my_query) : d_mysql_query(&my_sock, my_query)))
 			{
 				Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[2]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
 
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if ((my_row = mysql_fetch_row(my_result)))
+					if((my_row = mysql_fetch_row(my_result)))
 					{
 						csortie = Com_Atou(Com_MyRow("flyred")) + Com_Atou(Com_MyRow("flygold"));
 
-						if (Com_Atoi(Com_MyRow("country")) == 1)
+						if(Com_Atoi(Com_MyRow("country")) == 1)
 						{
 							csortie = Com_Atof(Com_MyRow("flyred")) / csortie;
 						}
-						else if (Com_Atoi(Com_MyRow("country")) == 3)
+						else if(Com_Atoi(Com_MyRow("country")) == 3)
 						{
 							csortie = Com_Atof(Com_MyRow("flygold")) / csortie;
 						}
@@ -3137,26 +3171,26 @@ void Cmd_Score(char *player, client_t *client)
 
 						h = m = s = 0;
 
-						if (ftime / 3600)
+						if(ftime / 3600)
 						{
 							h = ftime / 3600;
 
 							ftime = ftime - (3600 * h);
 						}
-						if (ftime / 60)
+						if(ftime / 60)
 						{
 							m = ftime / 60;
 
 							ftime = ftime - (60 * m);
 						}
-						if (ftime)
+						if(ftime)
 						{
 							s = ftime;
 						}
 
 						fprintf(fp, "======================\n");
-						fprintf(fp, "Game ID: %s\nFlying for: %s (%.2f%% of sorties)\n\nSquad: %s\n\n", nickname, GetCountry(Com_Atoi(Com_MyRow("country"))), csortie,
-								Com_MyRow("name") ? Com_MyRow("name") : "None");
+						fprintf(fp, "Game ID: %s\nFlying for: %s (%.2f%% of sorties)\n\nSquad: %s\n\n", nickname, GetCountry(Com_Atoi(Com_MyRow("country"))),
+								csortie, Com_MyRow("name") ? Com_MyRow("name") : "None");
 						fprintf(fp, "FLIGHT TIME: %uh %um %us\nTOTAL SCORE: %10.3f\n\n", h, m, s, Com_Atof(Com_MyRow("totalscore")));
 						fprintf(fp, "Last mission: %8.3f\n", Com_Atof(Com_MyRow("lastscore")));
 						fprintf(fp, "Elo Rating: %u\n", Com_Atou(Com_MyRow("rank")));
@@ -3169,28 +3203,31 @@ void Cmd_Score(char *player, client_t *client)
 
 					/*********************************************************************/
 
-					if (!mysql_errno(&my_sock))
+					if(!mysql_errno(&my_sock))
 					{
 						debug_querytime = Sys_Milliseconds();
 						sprintf(my_query, "SELECT * FROM score_fighter WHERE player_id = '%u'", player_id);
 
-						if (!d_mysql_query(&my_sock, my_query))
+						if(!d_mysql_query(&my_sock, my_query))
 						{
 							Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[4]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-							if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+							if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 							{
-								if ((my_row = mysql_fetch_row(my_result)))
+								if((my_row = mysql_fetch_row(my_result)))
 								{
-									if (Com_Atof(Com_MyRow("fighter_score")) || Com_Atof(Com_MyRow("jabo_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow("cost_score")))
+									if(Com_Atof(Com_MyRow("fighter_score")) || Com_Atof(Com_MyRow("jabo_score")) || Com_Atof(Com_MyRow("capt_score"))
+											|| Com_Atof(Com_MyRow("cost_score")))
 									{
 										fprintf(fp, "(+) FIGHTER score: %10.3f\n", Com_Atof(Com_MyRow("fighter_score")));
 										fprintf(fp, "(+) JABO    score: %10.3f\n", Com_Atof(Com_MyRow("jabo_score")));
 										fprintf(fp, "(+) CAPTURE score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
 										fprintf(fp, "(-) COSTS   score: %10.3f\n", Com_Atof(Com_MyRow("cost_score")));
-										fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("fighter_score")) + Com_Atof(Com_MyRow("jabo_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
+										fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("fighter_score")) + Com_Atof(Com_MyRow("jabo_score"))
+												+ Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
 
 										debug_querytime = Sys_Milliseconds();
-										sprintf(my_query,
+										sprintf(
+												my_query,
 												"SELECT players.longnick \
 															FROM players \
 															RIGHT JOIN score_kills ON players.id = score_kills.victim_id \
@@ -3199,22 +3236,23 @@ void Cmd_Score(char *player, client_t *client)
 												player_id);
 
 										fprintf(fp, "\nLast Air Victories:   ");
-										if (!d_mysql_query(&my_sock, my_query))
+										if(!d_mysql_query(&my_sock, my_query))
 										{
 											Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[5]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-											if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+											if((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 											{
-												if ((num_rows = mysql_num_rows(temp_result)) > 0)
+												if((num_rows = mysql_num_rows(temp_result)) > 0)
 												{
-													for (i = 0; i < num_rows; i++)
+													for(i = 0; i < num_rows; i++)
 													{
-														if ((temp_row = mysql_fetch_row(temp_result)))
+														if((temp_row = mysql_fetch_row(temp_result)))
 														{
 															fprintf(fp, " %s", temp_row[0] ? temp_row[0] : "-HOST-");
 														}
 														else
 														{
-															Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(
+																	&my_sock), mysql_error(&my_sock));
 														}
 													}
 												}
@@ -3225,17 +3263,20 @@ void Cmd_Score(char *player, client_t *client)
 											}
 											else
 											{
-												Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+												Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock),
+														mysql_error(&my_sock));
 											}
 										}
 										else
 										{
-											Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+											Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock),
+													mysql_error(&my_sock));
 										}
 
 										debug_querytime = Sys_Milliseconds();
 
-										sprintf(my_query,
+										sprintf(
+												my_query,
 												"SELECT players.longnick \
 															FROM players \
 															RIGHT JOIN score_kills ON players.id = score_kills.player_id \
@@ -3244,22 +3285,23 @@ void Cmd_Score(char *player, client_t *client)
 												player_id);
 
 										fprintf(fp, "\nLast Air Defeats for: ");
-										if (!d_mysql_query(&my_sock, my_query))
+										if(!d_mysql_query(&my_sock, my_query))
 										{
 											Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[6]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-											if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+											if((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 											{
-												if ((num_rows = mysql_num_rows(temp_result)) > 0)
+												if((num_rows = mysql_num_rows(temp_result)) > 0)
 												{
-													for (i = 0; i < num_rows; i++)
+													for(i = 0; i < num_rows; i++)
 													{
-														if ((temp_row = mysql_fetch_row(temp_result)))
+														if((temp_row = mysql_fetch_row(temp_result)))
 														{
 															fprintf(fp, " %s", temp_row[0] ? temp_row[0] : "-HOST-");
 														}
 														else
 														{
-															Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): Couldn't Fetch Row, error %d: %s\n",
+																	mysql_errno(&my_sock), mysql_error(&my_sock));
 														}
 													}
 												}
@@ -3270,38 +3312,44 @@ void Cmd_Score(char *player, client_t *client)
 											}
 											else
 											{
-												Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+												Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock),
+														mysql_error(&my_sock));
 											}
 										}
 										else
 										{
-											Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+											Com_Printf(VERBOSE_WARNING, "Cmd_Score(fikilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock),
+													mysql_error(&my_sock));
 										}
 
 										ratio1 = Com_Atou(Com_MyRow("gunhits"));
-										if (Com_Atou(Com_MyRow("gunused")))
+										if(Com_Atou(Com_MyRow("gunused")))
 											ratio1 /= Com_Atou(Com_MyRow("gunused"));
 										else
 											ratio1 = 0;
 
 										ratio2 = Com_Atou(Com_MyRow("bombhits"));
-										if (Com_Atou(Com_MyRow("bombused")))
+										if(Com_Atou(Com_MyRow("bombused")))
 											ratio2 /= Com_Atou(Com_MyRow("bombused"));
 										else
 											ratio2 = 0;
 
 										ratio3 = Com_Atou(Com_MyRow("rockethits"));
-										if (Com_Atou(Com_MyRow("rocketused")))
+										if(Com_Atou(Com_MyRow("rocketused")))
 											ratio3 /= Com_Atou(Com_MyRow("rocketused"));
 										else
 											ratio3 = 0;
 
-										fprintf(fp, "\n\nSorties : %4u  Planes Downed      : %4u\n", Com_Atou(Com_MyRow("sorties")), Com_Atou(Com_MyRow("kills")));
+										fprintf(fp, "\n\nSorties : %4u  Planes Downed      : %4u\n", Com_Atou(Com_MyRow("sorties")), Com_Atou(
+												Com_MyRow("kills")));
 										fprintf(fp, "Landed  : %4u  Tank Destroyed     : %4u\n", Com_Atou(Com_MyRow("landed")), Com_Atoi(Com_MyRow("killtank")));
 										fprintf(fp, "Ditched : %4u  Assists            : %4u\n", Com_Atou(Com_MyRow("ditched")), Com_Atou(Com_MyRow("assists")));
-										fprintf(fp, "Bailed  : %4u  Current Streak     : %4u\n", Com_Atou(Com_MyRow("bailed")), Com_Atou(Com_MyRow("curr_streak")));
-										fprintf(fp, "Captured: %4u  Longest Streak     : %4u\n", Com_Atou(Com_MyRow("captured")), Com_Atou(Com_MyRow("long_streak")));
-										fprintf(fp, "Killed  : %4u  Collided           : %4u\n\n", Com_Atou(Com_MyRow("killed")), Com_Atou(Com_MyRow("collided")));
+										fprintf(fp, "Bailed  : %4u  Current Streak     : %4u\n", Com_Atou(Com_MyRow("bailed")), Com_Atou(Com_MyRow(
+												"curr_streak")));
+										fprintf(fp, "Captured: %4u  Longest Streak     : %4u\n", Com_Atou(Com_MyRow("captured")), Com_Atou(Com_MyRow(
+												"long_streak")));
+										fprintf(fp, "Killed  : %4u  Collided           : %4u\n\n", Com_Atou(Com_MyRow("killed")), Com_Atou(
+												Com_MyRow("collided")));
 										fprintf(fp, "                Network Discos     : %4d\n", Com_Atou(Com_MyRow("disco")));
 										fprintf(fp, "                V-1 Down           : %4d\n", Com_Atoi(Com_MyRow("killfau")));
 										fprintf(fp, "                Hmack Destroyed    : %4d\n", Com_Atoi(Com_MyRow("killhmack")));
@@ -3312,8 +3360,10 @@ void Cmd_Score(char *player, client_t *client)
 										fprintf(fp, "                Ships Sunk         : %4d\n", Com_Atoi(Com_MyRow("ships")));
 										fprintf(fp, "                CVs Sunk           : %4d\n\n", Com_Atoi(Com_MyRow("cvs")));
 										fprintf(fp, "ACCURACY\n\n         GUNS    BOMBS  ROCKETS\n");
-										fprintf(fp, "HIT  :    %4u    %4u    %4u\n", Com_Atou(Com_MyRow("gunhits")), Com_Atou(Com_MyRow("bombhits")), Com_Atou(Com_MyRow("rockethits")));
-										fprintf(fp, "USED :    %4u    %4u    %4u\n", Com_Atou(Com_MyRow("gunused")), Com_Atou(Com_MyRow("bombused")), Com_Atou(Com_MyRow("rocketused")));
+										fprintf(fp, "HIT  :    %4u    %4u    %4u\n", Com_Atou(Com_MyRow("gunhits")), Com_Atou(Com_MyRow("bombhits")), Com_Atou(
+												Com_MyRow("rockethits")));
+										fprintf(fp, "USED :    %4u    %4u    %4u\n", Com_Atou(Com_MyRow("gunused")), Com_Atou(Com_MyRow("bombused")), Com_Atou(
+												Com_MyRow("rocketused")));
 										fprintf(fp, "RATIO:   %.3f   %.3f   %.3f\n", ratio1, ratio2, ratio3);
 										fprintf(fp, "=========================================\n\n");
 									}
@@ -3323,29 +3373,32 @@ void Cmd_Score(char *player, client_t *client)
 								my_result = NULL;
 								my_row = NULL;
 
-								if (!mysql_errno(&my_sock))
+								if(!mysql_errno(&my_sock))
 								{
 									debug_querytime = Sys_Milliseconds();
 									sprintf(my_query, "SELECT * FROM score_bomber WHERE player_id = '%u'", player_id);
 
-									if (!d_mysql_query(&my_sock, my_query))
+									if(!d_mysql_query(&my_sock, my_query))
 									{
 										Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[7]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-										if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+										if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 										{
-											if ((my_row = mysql_fetch_row(my_result)))
+											if((my_row = mysql_fetch_row(my_result)))
 											{
-												if (Com_Atof(Com_MyRow("bomber_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow("rescue_score")) || Com_Atof(Com_MyRow("cost_score")))
+												if(Com_Atof(Com_MyRow("bomber_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow(
+														"rescue_score")) || Com_Atof(Com_MyRow("cost_score")))
 												{
 													fprintf(fp, "(+) BOMBER  score: %10.3f\n", Com_Atof(Com_MyRow("bomber_score")));
 													fprintf(fp, "(+) CAPTURE score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
 													fprintf(fp, "(+) RESCUE  score: %10.3f\n", Com_Atof(Com_MyRow("rescue_score")));
 													fprintf(fp, "(-) COSTS   score: %10.3f\n", Com_Atof(Com_MyRow("cost_score")));
-													fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("bomber_score")) + Com_Atof(Com_MyRow("rescue_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
+													fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("bomber_score")) + Com_Atof(Com_MyRow(
+															"rescue_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
 
 													debug_querytime = Sys_Milliseconds();
 
-													sprintf(my_query,
+													sprintf(
+															my_query,
 															"SELECT players.longnick \
 																		FROM players \
 																		RIGHT JOIN score_kills ON players.id = score_kills.victim_id \
@@ -3354,22 +3407,24 @@ void Cmd_Score(char *player, client_t *client)
 															player_id);
 
 													fprintf(fp, "\nLast Air Victories:   ");
-													if (!d_mysql_query(&my_sock, my_query))
+													if(!d_mysql_query(&my_sock, my_query))
 													{
-														Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[8]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-														if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+														Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[8]: %u milliseconds\n", Sys_Milliseconds()
+																- debug_querytime);
+														if((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 														{
-															if ((num_rows = mysql_num_rows(temp_result)) > 0)
+															if((num_rows = mysql_num_rows(temp_result)) > 0)
 															{
-																for (i = 0; i < num_rows; i++)
+																for(i = 0; i < num_rows; i++)
 																{
-																	if ((temp_row = mysql_fetch_row(temp_result)))
+																	if((temp_row = mysql_fetch_row(temp_result)))
 																	{
 																		fprintf(fp, " %s", temp_row[0] ? temp_row[0] : "-HOST-");
 																	}
 																	else
 																	{
-																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): Couldn't Fetch Row, error %d: %s\n",
+																				mysql_errno(&my_sock), mysql_error(&my_sock));
 																	}
 																}
 															}
@@ -3380,17 +3435,20 @@ void Cmd_Score(char *player, client_t *client)
 														}
 														else
 														{
-															Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): my_result == NULL error %d: %s\n", mysql_errno(
+																	&my_sock), mysql_error(&my_sock));
 														}
 													}
 													else
 													{
-														Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+														Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokills): couldn't query SELECT error %d: %s\n", mysql_errno(
+																&my_sock), mysql_error(&my_sock));
 													}
 
 													debug_querytime = Sys_Milliseconds();
 
-													sprintf(my_query,
+													sprintf(
+															my_query,
 															"SELECT players.longnick \
 																		FROM players \
 																		RIGHT JOIN score_kills ON players.id = score_kills.player_id \
@@ -3399,22 +3457,24 @@ void Cmd_Score(char *player, client_t *client)
 															player_id);
 
 													fprintf(fp, "\nLast Air Defeats for: ");
-													if (!d_mysql_query(&my_sock, my_query))
+													if(!d_mysql_query(&my_sock, my_query))
 													{
-														Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[9]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-														if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+														Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[9]: %u milliseconds\n", Sys_Milliseconds()
+																- debug_querytime);
+														if((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 														{
-															if ((num_rows = mysql_num_rows(temp_result)) > 0)
+															if((num_rows = mysql_num_rows(temp_result)) > 0)
 															{
-																for (i = 0; i < num_rows; i++)
+																for(i = 0; i < num_rows; i++)
 																{
-																	if ((temp_row = mysql_fetch_row(temp_result)))
+																	if((temp_row = mysql_fetch_row(temp_result)))
 																	{
 																		fprintf(fp, " %s", temp_row[0] ? temp_row[0] : "-HOST-");
 																	}
 																	else
 																	{
-																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): Couldn't Fetch Row, error %d: %s\n",
+																				mysql_errno(&my_sock), mysql_error(&my_sock));
 																	}
 																}
 															}
@@ -3425,44 +3485,52 @@ void Cmd_Score(char *player, client_t *client)
 														}
 														else
 														{
-															Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): my_result == NULL error %d: %s\n", mysql_errno(
+																	&my_sock), mysql_error(&my_sock));
 														}
 													}
 													else
 													{
-														Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+														Com_Printf(VERBOSE_WARNING, "Cmd_Score(bokilleds): couldn't query SELECT error %d: %s\n", mysql_errno(
+																&my_sock), mysql_error(&my_sock));
 													}
 
 													ratio1 = Com_Atou(Com_MyRow("gunhits"));
-													if (Com_Atou(Com_MyRow("gunused")))
+													if(Com_Atou(Com_MyRow("gunused")))
 														ratio1 /= Com_Atou(Com_MyRow("gunused"));
 													else
 														ratio1 = 0;
 
 													ratio2 = Com_Atou(Com_MyRow("bombhits"));
-													if (Com_Atou(Com_MyRow("bombused")))
+													if(Com_Atou(Com_MyRow("bombused")))
 														ratio2 /= Com_Atou(Com_MyRow("bombused"));
 													else
 														ratio2 = 0;
 
 													ratio3 = Com_Atou(Com_MyRow("rockethits"));
-													if (Com_Atou(Com_MyRow("rocketused")))
+													if(Com_Atou(Com_MyRow("rocketused")))
 														ratio3 /= Com_Atou(Com_MyRow("rocketused"));
 													else
 														ratio3 = 0;
 
 													ratio4 = Com_Atou(Com_MyRow("torphits"));
-													if (Com_Atou(Com_MyRow("torpused")))
+													if(Com_Atou(Com_MyRow("torpused")))
 														ratio4 /= Com_Atou(Com_MyRow("torpused"));
 													else
 														ratio4 = 0;
 
-													fprintf(fp, "\n\nSorties : %4u  Planes Downed      : %4u\n", Com_Atou(Com_MyRow("sorties")), Com_Atou(Com_MyRow("kills")));
-													fprintf(fp, "Landed  : %4u  Tank Destroyed     : %4u\n", Com_Atou(Com_MyRow("landed")), Com_Atoi(Com_MyRow("killtank")));
-													fprintf(fp, "Ditched : %4u  Assists            : %4u\n", Com_Atou(Com_MyRow("ditched")), Com_Atou(Com_MyRow("assists")));
-													fprintf(fp, "Bailed  : %4u  Current Streak     : %4u\n", Com_Atou(Com_MyRow("bailed")), Com_Atou(Com_MyRow("curr_streak")));
-													fprintf(fp, "Captured: %4u  Longest Streak     : %4u\n", Com_Atou(Com_MyRow("captured")), Com_Atou(Com_MyRow("long_streak")));
-													fprintf(fp, "Killed  : %4u  Collided           : %4u\n\n", Com_Atou(Com_MyRow("killed")), Com_Atou(Com_MyRow("collided")));
+													fprintf(fp, "\n\nSorties : %4u  Planes Downed      : %4u\n", Com_Atou(Com_MyRow("sorties")), Com_Atou(
+															Com_MyRow("kills")));
+													fprintf(fp, "Landed  : %4u  Tank Destroyed     : %4u\n", Com_Atou(Com_MyRow("landed")), Com_Atoi(Com_MyRow(
+															"killtank")));
+													fprintf(fp, "Ditched : %4u  Assists            : %4u\n", Com_Atou(Com_MyRow("ditched")), Com_Atou(
+															Com_MyRow("assists")));
+													fprintf(fp, "Bailed  : %4u  Current Streak     : %4u\n", Com_Atou(Com_MyRow("bailed")), Com_Atou(Com_MyRow(
+															"curr_streak")));
+													fprintf(fp, "Captured: %4u  Longest Streak     : %4u\n", Com_Atou(Com_MyRow("captured")), Com_Atou(
+															Com_MyRow("long_streak")));
+													fprintf(fp, "Killed  : %4u  Collided           : %4u\n\n", Com_Atou(Com_MyRow("killed")), Com_Atou(
+															Com_MyRow("collided")));
 													fprintf(fp, "                Network Discos     : %4d\n", Com_Atou(Com_MyRow("disco")));
 													fprintf(fp, "                Rescued Comrades   : %4d\n", Com_Atoi(Com_MyRow("rescue")));
 													fprintf(fp, "                Hmack Destroyed    : %4d\n", Com_Atoi(Com_MyRow("killhmack")));
@@ -3474,10 +3542,10 @@ void Cmd_Score(char *player, client_t *client)
 													fprintf(fp, "                Ships Sunk         : %4d\n", Com_Atoi(Com_MyRow("ships")));
 													fprintf(fp, "                CVs Sunk           : %4d\n\n", Com_Atoi(Com_MyRow("cvs")));
 													fprintf(fp, "ACCURACY\n\n         GUNS    BOMBS  ROCKETS  TORPEDOES\n");
-													fprintf(fp, "HIT  :    %4u    %4u    %4u    %4u\n", Com_Atou(Com_MyRow("gunhits")), Com_Atou(Com_MyRow("bombhits")),
-															Com_Atou(Com_MyRow("rockethits")), Com_Atou(Com_MyRow("torphits")));
-													fprintf(fp, "USED :    %4u    %4u    %4u    %4u\n", Com_Atou(Com_MyRow("gunused")), Com_Atou(Com_MyRow("bombused")),
-															Com_Atou(Com_MyRow("rocketused")), Com_Atou(Com_MyRow("torpused")));
+													fprintf(fp, "HIT  :    %4u    %4u    %4u    %4u\n", Com_Atou(Com_MyRow("gunhits")), Com_Atou(Com_MyRow(
+															"bombhits")), Com_Atou(Com_MyRow("rockethits")), Com_Atou(Com_MyRow("torphits")));
+													fprintf(fp, "USED :    %4u    %4u    %4u    %4u\n", Com_Atou(Com_MyRow("gunused")), Com_Atou(Com_MyRow(
+															"bombused")), Com_Atou(Com_MyRow("rocketused")), Com_Atou(Com_MyRow("torpused")));
 													fprintf(fp, "RATIO:   %.3f   %.3f   %.3f   %.3f\n", ratio1, ratio2, ratio3, ratio4);
 													fprintf(fp, "=========================================\n\n");
 												}
@@ -3487,29 +3555,33 @@ void Cmd_Score(char *player, client_t *client)
 											my_result = NULL;
 											my_row = NULL;
 
-											if (!mysql_errno(&my_sock))
+											if(!mysql_errno(&my_sock))
 											{
 												debug_querytime = Sys_Milliseconds();
 												sprintf(my_query, "SELECT * FROM score_ground WHERE player_id = '%u'", player_id);
 
-												if (!d_mysql_query(&my_sock, my_query))
+												if(!d_mysql_query(&my_sock, my_query))
 												{
 													Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[10]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-													if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+													if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 													{
-														if ((my_row = mysql_fetch_row(my_result)))
+														if((my_row = mysql_fetch_row(my_result)))
 														{
-															if (Com_Atof(Com_MyRow("ground_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow("cost_score")) || Com_Atof(Com_MyRow("rescue_score")))
+															if(Com_Atof(Com_MyRow("ground_score")) || Com_Atof(Com_MyRow("capt_score")) || Com_Atof(Com_MyRow(
+																	"cost_score")) || Com_Atof(Com_MyRow("rescue_score")))
 															{
 																fprintf(fp, "(+) GROUND  score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")));
 																fprintf(fp, "(+) CAPTURE score: %10.3f\n", Com_Atof(Com_MyRow("capt_score")));
 																fprintf(fp, "(+) RESCUE  score: %10.3f\n", Com_Atof(Com_MyRow("rescue_score")));
 																fprintf(fp, "(-) COSTS   score: %10.3f\n", Com_Atof(Com_MyRow("cost_score")));
-																fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")) + Com_Atof(Com_MyRow("rescue_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow("cost_score")));
+																fprintf(fp, "(=) TOTAL   score: %10.3f\n", Com_Atof(Com_MyRow("ground_score")) + Com_Atof(
+																		Com_MyRow("rescue_score")) + Com_Atof(Com_MyRow("capt_score")) - Com_Atof(Com_MyRow(
+																		"cost_score")));
 
 																debug_querytime = Sys_Milliseconds();
 
-																sprintf(my_query,
+																sprintf(
+																		my_query,
 																		"SELECT players.longnick \
 																					FROM players \
 																					RIGHT JOIN score_kills ON players.id = score_kills.victim_id \
@@ -3518,23 +3590,25 @@ void Cmd_Score(char *player, client_t *client)
 																		player_id);
 
 																fprintf(fp, "\nLast Air Victories:   ");
-																if (!d_mysql_query(&my_sock, my_query))
+																if(!d_mysql_query(&my_sock, my_query))
 																{
-																	Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[11]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-																	if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+																	Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[11]: %u milliseconds\n", Sys_Milliseconds()
+																			- debug_querytime);
+																	if((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 																	{
-																		if ((num_rows = mysql_num_rows(temp_result)) > 0)
+																		if((num_rows = mysql_num_rows(temp_result)) > 0)
 																		{
-																			for (i = 0; i < num_rows; i++)
+																			for(i = 0; i < num_rows; i++)
 																			{
-																				if ((temp_row = mysql_fetch_row(temp_result)))
+																				if((temp_row = mysql_fetch_row(temp_result)))
 																				{
 																					fprintf(fp, " %s", temp_row[0] ? temp_row[0] : "-HOST-");
 																				}
 																				else
 																				{
-																					Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkills): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock),
-																							mysql_error(&my_sock));
+																					Com_Printf(VERBOSE_WARNING,
+																							"Cmd_Score(grkills): Couldn't Fetch Row, error %d: %s\n",
+																							mysql_errno(&my_sock), mysql_error(&my_sock));
 																				}
 																			}
 																		}
@@ -3545,17 +3619,20 @@ void Cmd_Score(char *player, client_t *client)
 																	}
 																	else
 																	{
-																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkills): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkills): my_result == NULL error %d: %s\n",
+																				mysql_errno(&my_sock), mysql_error(&my_sock));
 																	}
 																}
 																else
 																{
-																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkills): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkills): couldn't query SELECT error %d: %s\n",
+																			mysql_errno(&my_sock), mysql_error(&my_sock));
 																}
 
 																debug_querytime = Sys_Milliseconds();
 
-																sprintf(my_query,
+																sprintf(
+																		my_query,
 																		"SELECT players.longnick \
 																					FROM players \
 																					RIGHT JOIN score_kills ON players.id = score_kills.player_id \
@@ -3564,23 +3641,25 @@ void Cmd_Score(char *player, client_t *client)
 																		player_id);
 
 																fprintf(fp, "\nLast Air Defeats for: ");
-																if (!d_mysql_query(&my_sock, my_query))
+																if(!d_mysql_query(&my_sock, my_query))
 																{
-																	Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[12]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-																	if ((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+																	Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[12]: %u milliseconds\n", Sys_Milliseconds()
+																			- debug_querytime);
+																	if((temp_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 																	{
-																		if ((num_rows = mysql_num_rows(temp_result)) > 0)
+																		if((num_rows = mysql_num_rows(temp_result)) > 0)
 																		{
-																			for (i = 0; i < num_rows; i++)
+																			for(i = 0; i < num_rows; i++)
 																			{
-																				if ((temp_row = mysql_fetch_row(temp_result)))
+																				if((temp_row = mysql_fetch_row(temp_result)))
 																				{
 																					fprintf(fp, " %s", temp_row[0] ? temp_row[0] : "-HOST-");
 																				}
 																				else
 																				{
-																					Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkilleds): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock),
-																							mysql_error(&my_sock));
+																					Com_Printf(VERBOSE_WARNING,
+																							"Cmd_Score(grkilleds): Couldn't Fetch Row, error %d: %s\n",
+																							mysql_errno(&my_sock), mysql_error(&my_sock));
 																				}
 																			}
 																		}
@@ -3591,25 +3670,32 @@ void Cmd_Score(char *player, client_t *client)
 																	}
 																	else
 																	{
-																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkilleds): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkilleds): my_result == NULL error %d: %s\n",
+																				mysql_errno(&my_sock), mysql_error(&my_sock));
 																	}
 																}
 																else
 																{
-																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkilleds): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(grkilleds): couldn't query SELECT error %d: %s\n",
+																			mysql_errno(&my_sock), mysql_error(&my_sock));
 																}
 
 																ratio1 = Com_Atou(Com_MyRow("gunhits"));
-																if (Com_Atou(Com_MyRow("gunused")))
+																if(Com_Atou(Com_MyRow("gunused")))
 																	ratio1 /= Com_Atou(Com_MyRow("gunused"));
 																else
 																	ratio1 = 0;
 
-																fprintf(fp, "\n\nSorties : %4u  Planes Downed      : %4u\n", Com_Atou(Com_MyRow("sorties")), Com_Atou(Com_MyRow("kills")));
-																fprintf(fp, "Ended   : %4u  Tank Destroyed     : %4u\n", Com_Atou(Com_MyRow("landed")), Com_Atoi(Com_MyRow("killtank")));
-																fprintf(fp, "Ditched : %4u  Assists            : %4u\n", Com_Atou(Com_MyRow("ditched")), Com_Atou(Com_MyRow("assists")));
-																fprintf(fp, "Captured: %4u  Current Streak     : %4u\n", Com_Atou(Com_MyRow("captured")), Com_Atou(Com_MyRow("curr_streak")));
-																fprintf(fp, "Killed  : %4u  Longest Streak     : %4u\n", Com_Atou(Com_MyRow("killed")), Com_Atou(Com_MyRow("long_streak")));
+																fprintf(fp, "\n\nSorties : %4u  Planes Downed      : %4u\n", Com_Atou(Com_MyRow("sorties")),
+																		Com_Atou(Com_MyRow("kills")));
+																fprintf(fp, "Ended   : %4u  Tank Destroyed     : %4u\n", Com_Atou(Com_MyRow("landed")),
+																		Com_Atoi(Com_MyRow("killtank")));
+																fprintf(fp, "Ditched : %4u  Assists            : %4u\n", Com_Atou(Com_MyRow("ditched")),
+																		Com_Atou(Com_MyRow("assists")));
+																fprintf(fp, "Captured: %4u  Current Streak     : %4u\n", Com_Atou(Com_MyRow("captured")),
+																		Com_Atou(Com_MyRow("curr_streak")));
+																fprintf(fp, "Killed  : %4u  Longest Streak     : %4u\n", Com_Atou(Com_MyRow("killed")),
+																		Com_Atou(Com_MyRow("long_streak")));
 																fprintf(fp, "                Collided           : %4u\n\n", Com_Atou(Com_MyRow("collided")));
 																fprintf(fp, "                Network Discos     : %4u\n\n", Com_Atou(Com_MyRow("disco")));
 																fprintf(fp, "                Rescued Comrades   : %4d\n", Com_Atoi(Com_MyRow("rescue")));
@@ -3633,34 +3719,45 @@ void Cmd_Score(char *player, client_t *client)
 														my_result = NULL;
 														my_row = NULL;
 
-														if (!mysql_errno(&my_sock))
+														if(!mysql_errno(&my_sock))
 														{
 															debug_querytime = Sys_Milliseconds();
 															sprintf(my_query, "SELECT * FROM score_penalty WHERE player_id = '%u'", player_id);
 
-															if (!d_mysql_query(&my_sock, my_query))
+															if(!d_mysql_query(&my_sock, my_query))
 															{
-																Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[13]: %u milliseconds\n", Sys_Milliseconds() - debug_querytime);
-																if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+																Com_Printf(VERBOSE_DEBUG, "Cmd_Score() Query[13]: %u milliseconds\n", Sys_Milliseconds()
+																		- debug_querytime);
+																if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 																{
-																	if ((my_row = mysql_fetch_row(my_result)))
+																	if((my_row = mysql_fetch_row(my_result)))
 																	{
-																		if (Com_Atof(Com_MyRow("penalty_score")))
+																		if(Com_Atof(Com_MyRow("penalty_score")))
 																		{
 																			fprintf(fp, "      *** FRIENDLY CASUALITIES ***\n");
 																			fprintf(fp, "===(will be debited from Total score)===\n");
 																			fprintf(fp, "PENALTY            %10.3f\n\n", Com_Atof(Com_MyRow("penalty_score")));
 
-																			fprintf(fp, "Friendly Planes Downed             : %4u\n", Com_Atou(Com_MyRow("kills")));
-																			fprintf(fp, "Friendly Tank Destroyed            : %4u\n", Com_Atou(Com_MyRow("killtank")));
-																			fprintf(fp, "Friendly V-1 Downed                : %4u\n", Com_Atou(Com_MyRow("killfau")));
-																			fprintf(fp, "Friendly Hmack Destroyed           : %4u\n", Com_Atou(Com_MyRow("killhmack")));
-																			fprintf(fp, "Friendly Katyusha Destroyed        : %4u\n", Com_Atou(Com_MyRow("killkaty")));
-																			fprintf(fp, "Friendly Commandos Killed          : %4u\n", Com_Atou(Com_MyRow("killcommandos")));
-																			fprintf(fp, "Friendly Acks Destroyed            : %4u\n", Com_Atou(Com_MyRow("acks")));
-																			fprintf(fp, "Friendly Buildings Destroyed       : %4u\n", Com_Atou(Com_MyRow("buildings")));
-																			fprintf(fp, "Friendly Ships Sunk                : %4u\n", Com_Atou(Com_MyRow("ships")));
-																			fprintf(fp, "Friendly CVs Sunk                  : %4u\n\n", Com_Atou(Com_MyRow("cvs")));
+																			fprintf(fp, "Friendly Planes Downed             : %4u\n", Com_Atou(Com_MyRow(
+																					"kills")));
+																			fprintf(fp, "Friendly Tank Destroyed            : %4u\n", Com_Atou(Com_MyRow(
+																					"killtank")));
+																			fprintf(fp, "Friendly V-1 Downed                : %4u\n", Com_Atou(Com_MyRow(
+																					"killfau")));
+																			fprintf(fp, "Friendly Hmack Destroyed           : %4u\n", Com_Atou(Com_MyRow(
+																					"killhmack")));
+																			fprintf(fp, "Friendly Katyusha Destroyed        : %4u\n", Com_Atou(Com_MyRow(
+																					"killkaty")));
+																			fprintf(fp, "Friendly Commandos Killed          : %4u\n", Com_Atou(Com_MyRow(
+																					"killcommandos")));
+																			fprintf(fp, "Friendly Acks Destroyed            : %4u\n", Com_Atou(
+																					Com_MyRow("acks")));
+																			fprintf(fp, "Friendly Buildings Destroyed       : %4u\n", Com_Atou(Com_MyRow(
+																					"buildings")));
+																			fprintf(fp, "Friendly Ships Sunk                : %4u\n", Com_Atou(Com_MyRow(
+																					"ships")));
+																			fprintf(fp, "Friendly CVs Sunk                  : %4u\n\n", Com_Atou(Com_MyRow(
+																					"cvs")));
 																		}
 																	}
 
@@ -3668,7 +3765,7 @@ void Cmd_Score(char *player, client_t *client)
 																	my_result = NULL;
 																	my_row = NULL;
 
-																	if (!mysql_errno(&my_sock))
+																	if(!mysql_errno(&my_sock))
 																	{
 																		fprintf(fp, "                   Score System by Sonicx\n");
 																		fprintf(fp, "==========\n");
@@ -3677,69 +3774,87 @@ void Cmd_Score(char *player, client_t *client)
 																	}
 																	else
 																	{
-																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-																		PPrintf(client, RADIO_YELLOW, "Cmd_Score(penalty): Couldn't Fetch Row, please contact admin");
+																		Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): Couldn't Fetch Row, error %d: %s\n",
+																				mysql_errno(&my_sock), mysql_error(&my_sock));
+																		PPrintf(client, RADIO_YELLOW,
+																				"Cmd_Score(penalty): Couldn't Fetch Row, please contact admin");
 																	}
 																}
 																else
 																{
-																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-																	PPrintf(client, RADIO_YELLOW, "Cmd_Score(penalty, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
+																	Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): my_result == NULL error %d: %s\n",
+																			mysql_errno(&my_sock), mysql_error(&my_sock));
+																	PPrintf(client, RADIO_YELLOW,
+																			"Cmd_Score(penalty, NULL): SQL Error (%d), please contact admin", mysql_errno(
+																					&my_sock));
 																}
 															}
 															else
 															{
-																Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-																PPrintf(client, RADIO_YELLOW, "Cmd_Score(penalty): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
+																Com_Printf(VERBOSE_WARNING, "Cmd_Score(penalty): Query error error %d: %s\n", mysql_errno(
+																		&my_sock), mysql_error(&my_sock));
+																PPrintf(client, RADIO_YELLOW, "Cmd_Score(penalty): SQL Error (%d), please contact admin",
+																		mysql_errno(&my_sock));
 															}
 														}
 														else
 														{
-															Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+															Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): Couldn't Fetch Row, error %d: %s\n", mysql_errno(
+																	&my_sock), mysql_error(&my_sock));
 															PPrintf(client, RADIO_YELLOW, "Cmd_Score(ground): Couldn't Fetch Row, please contact admin");
 														}
 													}
 													else
 													{
-														Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-														PPrintf(client, RADIO_YELLOW, "Cmd_Score(ground, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
+														Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): my_result == NULL error %d: %s\n",
+																mysql_errno(&my_sock), mysql_error(&my_sock));
+														PPrintf(client, RADIO_YELLOW, "Cmd_Score(ground, NULL): SQL Error (%d), please contact admin",
+																mysql_errno(&my_sock));
 													}
 												}
 												else
 												{
-													Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-													PPrintf(client, RADIO_YELLOW, "Cmd_Score(ground): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
+													Com_Printf(VERBOSE_WARNING, "Cmd_Score(ground): Query error error %d: %s\n", mysql_errno(&my_sock),
+															mysql_error(&my_sock));
+													PPrintf(client, RADIO_YELLOW, "Cmd_Score(ground): SQL Error (%d), please contact admin", mysql_errno(
+															&my_sock));
 												}
 
 											}
 											else
 											{
-												Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+												Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock),
+														mysql_error(&my_sock));
 												PPrintf(client, RADIO_YELLOW, "Cmd_Score(bomber): Couldn't Fetch Row, please contact admin");
 											}
 										}
 										else
 										{
-											Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-											PPrintf(client, RADIO_YELLOW, "Cmd_Score(bomber, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
+											Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): my_result == NULL error %d: %s\n", mysql_errno(&my_sock),
+													mysql_error(&my_sock));
+											PPrintf(client, RADIO_YELLOW, "Cmd_Score(bomber, NULL): SQL Error (%d), please contact admin",
+													mysql_errno(&my_sock));
 										}
 
 									}
 									else
 									{
-										Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+										Com_Printf(VERBOSE_WARNING, "Cmd_Score(bomber): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+												&my_sock));
 										PPrintf(client, RADIO_YELLOW, "Cmd_Score(bomber): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 									}
 								}
 								else
 								{
-									Com_Printf(VERBOSE_WARNING, "Cmd_Score(fighter): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "Cmd_Score(fighter): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+											&my_sock));
 									PPrintf(client, RADIO_YELLOW, "Cmd_Score(fighter): Couldn't Fetch Row, please contact admin");
 								}
 							}
 							else
 							{
-								Com_Printf(VERBOSE_WARNING, "Cmd_Score(fighter): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Score(fighter): my_result == NULL error %d: %s\n", mysql_errno(&my_sock),
+										mysql_error(&my_sock));
 								PPrintf(client, RADIO_YELLOW, "Cmd_Score(fighter, NULL): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 							}
 						}
@@ -3764,7 +3879,7 @@ void Cmd_Score(char *player, client_t *client)
 			}
 			else
 			{
-				if (mysql_errno(&my_sock))
+				if(mysql_errno(&my_sock))
 				{
 					Com_Printf(VERBOSE_WARNING, "Cmd_Score(header): Query error error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					PPrintf(client, RADIO_YELLOW, "Cmd_Score(header): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
@@ -3810,10 +3925,10 @@ void Cmd_Clear(client_t *client)
 	sprintf(my_query, "%s; INSERT INTO score_penalty (player_id) VALUES ('%u')", my_query, client->id);
 	sprintf(my_query, "%s; INSERT INTO score_common (player_id) VALUES ('%u')", my_query, client->id);
 
-	if (mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
+	if(mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
 		Com_Printf(VERBOSE_ERROR, "%d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
-	if (!Com_MySQL_Query(client, &my_sock, my_query))
+	if(!Com_MySQL_Query(client, &my_sock, my_query))
 	{
 		client->lastscore = client->streakscore = client->killstod = client->structstod = client->ranking = 0;
 
@@ -3849,7 +3964,7 @@ void Cmd_Whoare(u_int8_t radio, client_t *client)
 {
 	u_int8_t i;
 
-	if (!radio || radio > 99)
+	if(!radio || radio > 99)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid radio channel");
 		return;
@@ -3857,20 +3972,20 @@ void Cmd_Whoare(u_int8_t radio, client_t *client)
 
 	PPrintf(client, RADIO_YELLOW, "Who are in channel %d:", radio);
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone && clients[i].ready && client != &clients[i])
+		if(clients[i].inuse && !clients[i].drone && clients[i].ready && client != &clients[i])
 		{
-			if (radio < 50)
+			if(radio < 50)
 			{
-				if (clients[i].radio[0] == radio && clients[i].country == client->country)
+				if(clients[i].radio[0] == radio && clients[i].country == client->country)
 				{
 					PPrintf(client, RADIO_YELLOW, "%s, country %s", clients[i].longnick, GetCountry(clients[i].country));
 				}
 			}
 			else
 			{
-				if (clients[i].radio[0] == radio)
+				if(clients[i].radio[0] == radio)
 				{
 					PPrintf(client, RADIO_YELLOW, "%s, country %s", clients[i].longnick, GetCountry(clients[i].country));
 				}
@@ -3889,37 +4004,37 @@ void Cmd_Invite(char *nick, client_t *client)
 {
 	client_t *invited;
 
-	if (client->attr == 1)
+	if(client->attr == 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You're an Admin, you can't create a squadron");
 		return;
 	}
 
-	if (!(invited = FindLClient(nick)))
+	if(!(invited = FindLClient(nick)))
 	{
 		PPrintf(client, RADIO_YELLOW, "User is not online");
 		return;
 	}
 
-	if (invited == client)
+	if(invited == client)
 	{
 		PPrintf(client, RADIO_YELLOW, "You can't invite yourself");
 		return;
 	}
 
-	if (invited->attr == 1)
+	if(invited->attr == 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You can't invite Administrators");
 		return;
 	}
 
-	if (!client->squadron)
+	if(!client->squadron)
 	{
 		invited->invite = client;
 	}
 	else // join existing squad
 	{
-		if (client->squad_flag & SQUADRON_INVITE)
+		if(client->squad_flag & SQUADRON_INVITE)
 		{
 			invited->invite = client;
 		}
@@ -3942,20 +4057,19 @@ void Cmd_Invite(char *nick, client_t *client)
 
 void Cmd_Jsquad(client_t *client)
 {
-	if (client->attr == 1)
+	if(client->attr == 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You're an Admin, you can't join a squadron");
 		return;
 	}
 
-	if (client->invite && !client->squadron)
+	if(client->invite && !client->squadron)
 	{
-		if (client->invite->squadron) // squadron already exists
+		if(client->invite->squadron) // squadron already exists
 		{
-			sprintf(my_query, "UPDATE players SET squad_owner = '%u', squad_flag = '%u' WHERE id = '%u'", client->invite->squadron,
-			SQUADRON_INVITE, client->id);
+			sprintf(my_query, "UPDATE players SET squad_owner = '%u', squad_flag = '%u' WHERE id = '%u'", client->invite->squadron, SQUADRON_INVITE, client->id);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query))
+			if(!Com_MySQL_Query(client, &my_sock, my_query))
 			{
 				client->squadron = client->invite->squadron;
 				client->squad_flag = SQUADRON_INVITE;
@@ -3966,7 +4080,7 @@ void Cmd_Jsquad(client_t *client)
 			}
 			else
 			{
-				if (mysql_errno(&my_sock))
+				if(mysql_errno(&my_sock))
 				{
 					PPrintf(client, RADIO_YELLOW, "Cmd_Jsquad(join): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 					Com_Printf(VERBOSE_WARNING, "Cmd_Jsquad(join): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
@@ -3979,17 +4093,19 @@ void Cmd_Jsquad(client_t *client)
 		{
 			sprintf(my_query, "INSERT INTO squads (owner) VALUES ('%u')", client->invite->id);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query))
+			if(!Com_MySQL_Query(client, &my_sock, my_query))
 			{
 				//				id = (u_int32_t)mysql_insert_id(&my_sock); // from old DB model
 
-				sprintf(my_query, "UPDATE players SET squad_owner = '%u', squad_flag = '%d' WHERE id = '%u'; UPDATE players SET squad_owner = '%u', squad_flag = '%u' WHERE id = '%u'",
+				sprintf(
+						my_query,
+						"UPDATE players SET squad_owner = '%u', squad_flag = '%d' WHERE id = '%u'; UPDATE players SET squad_owner = '%u', squad_flag = '%u' WHERE id = '%u'",
 						client->invite->id, SQUADRON_INVITE, client->id, client->invite->id, (SQUADRON_INVITE | SQUADRON_REMOVE), client->invite->id);
 
-				if (mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
+				if(mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
 					Com_Printf(VERBOSE_ERROR, "%d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
-				if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+				if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 				{
 					client->invite->squadron = client->invite->id;
 					client->invite->squad_flag = SQUADRON_INVITE | SQUADRON_REMOVE;
@@ -3998,7 +4114,7 @@ void Cmd_Jsquad(client_t *client)
 
 					Com_MySQL_Flush(&my_sock, __FILE__, __LINE__);
 
-					PPrintf(client->invite, RADIO_YELLOW,"%s joined your squadron" , client->longnick);
+					PPrintf(client->invite, RADIO_YELLOW, "%s joined your squadron", client->longnick);
 					PPrintf(client, RADIO_YELLOW, "You have joined a squadron");
 				}
 				else
@@ -4021,7 +4137,7 @@ void Cmd_Jsquad(client_t *client)
 					Com_Printf(VERBOSE_WARNING, "Cmd_Jsquad(new): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
 				else
-				return;
+					return;
 			}
 
 		}
@@ -4046,13 +4162,13 @@ void Cmd_Jsquad(client_t *client)
 
 void Cmd_Name(char *name, client_t *client) // twin of Cmd_Slogan
 {
-	if (!client->squadron)
+	if(!client->squadron)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are not in any squadron");
 		return;
 	}
 
-	if (client->squadron != client->id)
+	if(client->squadron != client->id)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are not the squadron leader");
 		return;
@@ -4060,7 +4176,7 @@ void Cmd_Name(char *name, client_t *client) // twin of Cmd_Slogan
 
 	sprintf(my_query, "UPDATE squads SET name = '%s' WHERE owner = '%u'", name, client->id);
 
-	if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+	if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Squadron name updated");
 	}
@@ -4079,13 +4195,13 @@ void Cmd_Name(char *name, client_t *client) // twin of Cmd_Slogan
 
 void Cmd_Slogan(char *motto, client_t *client) // twin of Cmd_Name
 {
-	if (!client->squadron)
+	if(!client->squadron)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are not in any squadron");
 		return;
 	}
 
-	if (client->squadron != client->id)
+	if(client->squadron != client->id)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are not the squadron leader");
 		return;
@@ -4093,7 +4209,7 @@ void Cmd_Slogan(char *motto, client_t *client) // twin of Cmd_Name
 
 	sprintf(my_query, "UPDATE squads SET motto = '%s' WHERE owner = '%u'", motto, client->id);
 
-	if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+	if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Squadron motto updated");
 	}
@@ -4116,17 +4232,17 @@ void Cmd_Remove(char *nick, client_t *client)
 	u_int32_t remid;
 	u_int32_t remsquad_owner;
 
-	if (!client || client->squadron)
+	if(!client || client->squadron)
 	{
-		if (!client || (client->squad_flag & SQUADRON_REMOVE))
+		if(!client || (client->squad_flag & SQUADRON_REMOVE))
 		{
 			sprintf(my_query, "SELECT id, squad_owner FROM players WHERE longnick = '%s'", nick);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+			if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 			{
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if ((my_row = mysql_fetch_row(my_result))) // player 'found'
+					if((my_row = mysql_fetch_row(my_result))) // player 'found'
 					{
 						remid = Com_Atou(Com_MyRow("id"));
 						remsquad_owner = Com_Atou(Com_MyRow("squad_owner"));
@@ -4135,16 +4251,16 @@ void Cmd_Remove(char *nick, client_t *client)
 						my_result = NULL;
 						my_row = NULL;
 
-						if (client)
+						if(client)
 						{
-							if (client->squadron != remsquad_owner)
+							if(client->squadron != remsquad_owner)
 							{
 								PPrintf(client, RADIO_LIGHTYELLOW, "Player %s not found", nick); // if player is not from the same squadron (and not a console command), so, player 'is not found'
 								return;
 							}
 						}
 
-						if (remid == remsquad_owner)
+						if(remid == remsquad_owner)
 						{
 							PPrintf(client, RADIO_LIGHTYELLOW, "You cannot remove squadron leader");
 						}
@@ -4152,28 +4268,29 @@ void Cmd_Remove(char *nick, client_t *client)
 						{
 							sprintf(my_query, "UPDATE players SET squad_owner = '0', squad_flag = '0' WHERE id = '%u'", remid);
 
-							if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+							if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 							{
 								PPrintf(client, RADIO_LIGHTYELLOW, "%s has been removed from squadron", nick);
 
-								if ((removed = FindLClient(nick)))
+								if((removed = FindLClient(nick)))
 								{
 									removed->squadron = 0;
 									removed->squad_flag = 0;
 
-									if (client != removed)
+									if(client != removed)
 										PPrintf(removed, RADIO_YELLOW, "You've been excluded from your squadron by %s", client ? client->longnick : "-HOST-");
 								}
 							}
 							else
 							{
-								Com_Printf(VERBOSE_WARNING, "Cmd_Remove(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Remove(update): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+										&my_sock));
 							}
 						}
 					}
 					else
 					{
-						if (!mysql_errno(&my_sock))
+						if(!mysql_errno(&my_sock))
 						{
 							PPrintf(client, RADIO_LIGHTYELLOW, "Player %s not found", nick);
 						}
@@ -4194,7 +4311,7 @@ void Cmd_Remove(char *nick, client_t *client)
 			}
 			else
 			{
-				if (mysql_errno(&my_sock))
+				if(mysql_errno(&my_sock))
 				{
 					Com_Printf(VERBOSE_WARNING, "Cmd_Remove(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
@@ -4210,7 +4327,7 @@ void Cmd_Remove(char *nick, client_t *client)
 		PPrintf(client, RADIO_YELLOW, "You are not in any squadron");
 	}
 
-	if (mysql_errno(&my_sock))
+	if(mysql_errno(&my_sock))
 		PPrintf(client, RADIO_YELLOW, "Cmd_Remove(): SQL Error(%d), please contact admin", mysql_errno(&my_sock));
 }
 
@@ -4222,13 +4339,13 @@ void Cmd_Remove(char *nick, client_t *client)
 
 void Cmd_Withdraw(client_t *client)
 {
-	if (!client || !client->squadron)
+	if(!client || !client->squadron)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are not in any squadron");
 		return;
 	}
 
-	if (client->squadron == client->id) // squad leader
+	if(client->squadron == client->id) // squad leader
 	{
 		PPrintf(client, RADIO_YELLOW, "You are the squadron leader, you can only disband");
 	}
@@ -4236,7 +4353,7 @@ void Cmd_Withdraw(client_t *client)
 	{
 		sprintf(my_query, "UPDATE players SET squad_owner = '0', squad_flag = '0' WHERE id = '%u'", client->id);
 
-		if (!Com_MySQL_Query(client, &my_sock, my_query))
+		if(!Com_MySQL_Query(client, &my_sock, my_query))
 		{
 			client->squadron = 0;
 			client->squad_flag = 0;
@@ -4249,7 +4366,7 @@ void Cmd_Withdraw(client_t *client)
 		}
 	}
 
-	if (mysql_errno(&my_sock))
+	if(mysql_errno(&my_sock))
 		PPrintf(client, RADIO_YELLOW, "Cmd_Withdraw(): SQL Error(%d), please contact admin", mysql_errno(&my_sock));
 }
 
@@ -4265,33 +4382,35 @@ void Cmd_Disband(client_t *client)
 	int16_t num_rows;
 	client_t *member;
 
-	if (!client || !client->squadron)
+	if(!client || !client->squadron)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are not in any squadron");
 		return;
 	}
 
-	if (client->squadron == client->id) // squad leader
+	if(client->squadron == client->id) // squad leader
 	{
-		sprintf(my_query, "SELECT players.id, players.longnick FROM players, squads WHERE squads.owner = '%u' AND players.id != '%u' AND players.squad_owner = squads.owner", client->squadron,
-				client->id);
+		sprintf(
+				my_query,
+				"SELECT players.id, players.longnick FROM players, squads WHERE squads.owner = '%u' AND players.id != '%u' AND players.squad_owner = squads.owner",
+				client->squadron, client->id);
 
 		// remove all members
-		if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+		if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+			if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 			{
-				if ((num_rows = mysql_num_rows(my_result)) > 0)
+				if((num_rows = mysql_num_rows(my_result)) > 0)
 				{
 					sprintf(my_query, "UPDATE players SET squad_owner='0', squad_flag='0' WHERE id IN(");
 
-					for (i = 0; i < num_rows; i++)
+					for(i = 0; i < num_rows; i++)
 					{
-						if ((my_row = mysql_fetch_row(my_result)))
+						if((my_row = mysql_fetch_row(my_result)))
 						{
 							sprintf(my_query, "%s'%u'", my_query, Com_Atou(Com_MyRow("id")));
 
-							if ((member = FindLClient(Com_MyRow("longnick"))))
+							if((member = FindLClient(Com_MyRow("longnick"))))
 							{
 								member->squadron = 0;
 								member->squad_flag = 0;
@@ -4303,17 +4422,19 @@ void Cmd_Disband(client_t *client)
 						{
 							mysql_free_result(my_result);
 							my_result = NULL;
-							Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remallup): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remallup): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(
+									&my_sock));
 							break;
 						}
 
-						if (i == (num_rows - 1))
+						if(i == (num_rows - 1))
 						{
 							strcat(my_query, ")");
 
-							if (d_mysql_query(&my_sock, my_query))
+							if(d_mysql_query(&my_sock, my_query))
 							{
-								Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remallup): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Disband(remallup): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock),
+										mysql_error(&my_sock));
 								return;
 							}
 						}
@@ -4345,7 +4466,7 @@ void Cmd_Disband(client_t *client)
 		// remove squadron
 		sprintf(my_query, "DELETE FROM squads WHERE owner = '%u'", client->squadron);
 
-		if (!d_mysql_query(&my_sock, my_query))
+		if(!d_mysql_query(&my_sock, my_query))
 		{
 			PPrintf(client, RADIO_YELLOW, "Your squadron has been disbanded");
 		}
@@ -4357,7 +4478,7 @@ void Cmd_Disband(client_t *client)
 		// clear leader ids
 		sprintf(my_query, "UPDATE players SET squad_owner='0', squad_flag='0' WHERE id ='%u'", client->id);
 
-		if (!d_mysql_query(&my_sock, my_query))
+		if(!d_mysql_query(&my_sock, my_query))
 		{
 			client->squadron = 0;
 			client->squad_flag = 0;
@@ -4384,31 +4505,31 @@ void Cmd_Psq(char *nick, u_int8_t attr, client_t *client)
 	char *id;
 	client_t *cnick;
 
-	if (!strcmp(nick, client->longnick))
+	if(!strcmp(nick, client->longnick))
 	{
 		PPrintf(client, RADIO_YELLOW, "You cannot change your own privileges");
 		return;
 	}
 
-	if (client->squadron)
+	if(client->squadron)
 	{
-		if (client->id == client->squadron) // player is squadron leader
+		if(client->id == client->squadron) // player is squadron leader
 		{
 			sprintf(my_query, "SELECT id FROM players WHERE squad_owner = '%u' AND longnick = '%s'", client->id, nick);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+			if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 			{
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if ((my_row = mysql_fetch_row(my_result)))
+					if((my_row = mysql_fetch_row(my_result)))
 					{
-						if ((id = Com_MyRow("id")))
+						if((id = Com_MyRow("id")))
 						{
 							sprintf(my_query, "UPDATE players SET squad_flag = '%u' WHERE id = '%s'", attr, id);
 
-							if (!d_mysql_query(&my_sock, my_query))
+							if(!d_mysql_query(&my_sock, my_query))
 							{
-								if ((cnick = FindLClient(nick)))
+								if((cnick = FindLClient(nick)))
 								{
 									cnick->squad_flag = attr;
 								}
@@ -4439,7 +4560,7 @@ void Cmd_Psq(char *nick, u_int8_t attr, client_t *client)
 			}
 			else
 			{
-				if (mysql_errno(&my_sock))
+				if(mysql_errno(&my_sock))
 				{
 					Com_Printf(VERBOSE_WARNING, "Cmd_Psq(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
@@ -4450,7 +4571,7 @@ void Cmd_Psq(char *nick, u_int8_t attr, client_t *client)
 			PPrintf(client, RADIO_YELLOW, "You are not the squadron leader");
 		}
 
-		if (mysql_errno(&my_sock))
+		if(mysql_errno(&my_sock))
 			PPrintf(client, RADIO_YELLOW, "Cmd_Psq(): SQL Error(%d), please contact admin", mysql_errno(&my_sock));
 	}
 	else
@@ -4471,17 +4592,17 @@ void Cmd_Hls(client_t *client)
 	u_int16_t i, j;
 	hls_t *hls;
 
-	if (!client->squadron)
+	if(!client->squadron)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are not in any squadron");
 		return;
 	}
 
-	for (i = 0, j = 0; i < maxentities->value; i++)
+	for(i = 0, j = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			if (clients[i].squadron == client->squadron)
+			if(clients[i].squadron == client->squadron)
 				j++;
 		}
 	}
@@ -4493,35 +4614,35 @@ void Cmd_Hls(client_t *client)
 	hls->packetid = htons(Com_WBhton(0x0419));
 	hls->num = j; // free 'j' variable
 
-	for (i = 0, j = 0; i < maxentities->value; i++)
+	for(i = 0, j = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			if (clients[i].squadron == client->squadron)
+			if(clients[i].squadron == client->squadron)
 			{
-				hls = (hls_t *) (buffer+(4*j));
+				hls = (hls_t *) (buffer + (4 * j));
 
-				if (!client->hls)
+				if(!client->hls)
 					hls->nick = htonl(clients[i].shortnick);
 				else
 					hls->nick = 0;
 
 				j++;
 
-				if (j == 256)
+				if(j == 256)
 					break;
 			}
 		}
 	}
 
-	hls = (hls_t *) (buffer+(4*j));
+	hls = (hls_t *) (buffer + (4 * j));
 
-	if (!client->hls)
+	if(!client->hls)
 		hls->nick = htonl(client->shortnick);
 	else
 		hls->nick = 0;
 
-	if (client->hls)
+	if(client->hls)
 	{
 		PPrintf(client, RADIO_YELLOW, "hightlightsquad mode is off");
 		client->hls = 0;
@@ -4532,7 +4653,7 @@ void Cmd_Hls(client_t *client)
 		client->hls = 1;
 	}
 
-	SendPacket(buffer, 7+(4*j), client);
+	SendPacket(buffer, 7 + (4 * j), client);
 }
 
 /**
@@ -4549,7 +4670,7 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 	FILE *fp;
 	char buffer[32];
 
-	if (field > fields->value)
+	if(field > fields->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid Field F%u", field);
 		return;
@@ -4557,9 +4678,9 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 
 	j = field - 1;
 
-	if (client)
+	if(client)
 	{
-		if (arena->fields[j].country != client->country && !(client->attr & (FLAG_OP | FLAG_ADMIN)))
+		if(arena->fields[j].country != client->country && !(client->attr & (FLAG_OP | FLAG_ADMIN)))
 		{
 			PPrintf(client, RADIO_YELLOW, "This field is not from your country");
 			return;
@@ -4570,7 +4691,7 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 
 	snprintf(buffer, sizeof(buffer), "./fields/availf%d.txt", field);
 
-	if (!(fp = fopen(buffer, "wb")))
+	if(!(fp = fopen(buffer, "wb")))
 	{
 		PPrintf(client, RADIO_YELLOW, "WARNING: Cmd_Listavail() Couldn't open file \"%s\"", buffer);
 	}
@@ -4579,41 +4700,43 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 		fprintf(fp, "          Available planes for F%d\n", field);
 		fprintf(fp, "==============================================\n");
 
-		for (i = 1; i < maxplanes; i++)
+		for(i = 1; i < maxplanes; i++)
 		{
-			if (arena->fields[j].rps[i])
+			if(arena->fields[j].rps[i])
 			{
-				if (GetSmallPlaneName(i))
+				if(GetSmallPlaneName(i))
 				{
-					if (rps->value && !arcade->value)
+					if(rps->value && !arcade->value)
 					{
 						if(arena->fields[j].rps_custom_rate[i])
 							rpsreplace = (rps->value * 6000) / arena->fields[j].rps_custom_rate[i];
 						else
 							rpsreplace = (rps->value * 6000) / arena->rps[i].pool[arena->fields[j].type - 1];
 
-						if(!((arena->fields[j].country == 1 && arena->rps[i].country & 0x01) ||
-							(arena->fields[j].country == 2 && arena->rps[i].country & 0x02) ||
-							(arena->fields[j].country == 3 && arena->rps[i].country & 0x04) ||
-							(arena->fields[j].country == 4 && arena->rps[i].country & 0x08)))
+						if(!((arena->fields[j].country == 1 && arena->rps[i].country & 0x01) || (arena->fields[j].country == 2 && arena->rps[i].country & 0x02)
+								|| (arena->fields[j].country == 3 && arena->rps[i].country & 0x04) || (arena->fields[j].country == 4 && arena->rps[i].country
+								& 0x08)))
 						{
-							rpsreplace = 0 ;
+							rpsreplace = 0;
 						}
 
 						if(rpsreplace)
 						{
 							rpsreplace -= (arena->frame % rpsreplace);
 
-							fprintf(fp, "%-11s(N%d)%s %3d avail%8s to replace\n", GetSmallPlaneName(i), i, (i < 10)?"  ":(i < 100)?" ":"",(int16_t)arena->fields[j].rps[i], Com_TimeSeconds(rpsreplace/100));
+							fprintf(fp, "%-11s(N%d)%s %3d avail%8s to replace\n", GetSmallPlaneName(i), i, (i < 10) ? "  " : (i < 100) ? " " : "",
+									(int16_t) arena->fields[j].rps[i], Com_TimeSeconds(rpsreplace / 100));
 						}
-						else if (arena->fields[j].rps[i] >= 1)
+						else if(arena->fields[j].rps[i] >= 1)
 						{
-							fprintf(fp, "%-11s(N%d)%s %3d avail  no replacement\n", GetSmallPlaneName(i), i, (i < 10)?"  ":(i < 100)?" ":"", (int16_t)arena->fields[j].rps[i]);
+							fprintf(fp, "%-11s(N%d)%s %3d avail  no replacement\n", GetSmallPlaneName(i), i, (i < 10) ? "  " : (i < 100) ? " " : "",
+									(int16_t) arena->fields[j].rps[i]);
 						}
 					}
-					else if (arena->fields[j].rps[i] >= 1 || arena->fields[j].rps[i] == -1)
+					else if(arena->fields[j].rps[i] >= 1 || arena->fields[j].rps[i] == -1)
 					{
-						fprintf(fp, "%-11s(N%d)%s %3d avail\n", GetSmallPlaneName(i), i, (i < 10)?"  ":(i < 100)?" ":"", (int16_t)arena->fields[j].rps[i]);
+						fprintf(fp, "%-11s(N%d)%s %3d avail\n", GetSmallPlaneName(i), i, (i < 10) ? "  " : (i < 100) ? " " : "",
+								(int16_t) arena->fields[j].rps[i]);
 					}
 				}
 			}
@@ -4627,11 +4750,11 @@ void Cmd_Listavail(u_int8_t field, client_t *client)
 			Sys_Printfile(buffer);
 	}
 
-//	if (rps->value)
-//	{
-//		time = (u_int32_t)((rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000)))/100;
-//		PPrintf(client, RADIO_YELLOW, "Time for replace: %s", Com_TimeSeconds(time));
-//	}
+	//	if (rps->value)
+	//	{
+	//		time = (u_int32_t)((rps->value * 6000) - (arena->frame % (u_int32_t)(rps->value * 6000)))/100;
+	//		PPrintf(client, RADIO_YELLOW, "Time for replace: %s", Com_TimeSeconds(time));
+	//	}
 }
 
 /**
@@ -4646,13 +4769,13 @@ void Cmd_Wings(u_int8_t mode, client_t *client)
 	int16_t oldangle = 0;
 	int16_t newangle;
 
-	if (client->tkstatus)
+	if(client->tkstatus)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are a team killer, you cannot use Wingmen");
 		return;
 	}
 
-	switch (mode)
+	switch(mode)
 	{
 		case FORMATION_VWING:
 			newangle = 1350;
@@ -4671,7 +4794,7 @@ void Cmd_Wings(u_int8_t mode, client_t *client)
 			PPrintf(client, RADIO_YELLOW, "Wings mode set to Echelon");
 			break;
 		default:
-			if (client->inflight && !client->attached)
+			if(client->inflight && !client->attached)
 			{
 				PPrintf(client, RADIO_YELLOW, "You cannot disable wings while flying");
 				return;
@@ -4686,7 +4809,7 @@ void Cmd_Wings(u_int8_t mode, client_t *client)
 
 	client->wings = 1;
 
-	switch (client->droneformation)
+	switch(client->droneformation)
 	{
 		case FORMATION_VWING:
 			oldangle = 1350;
@@ -4704,26 +4827,26 @@ void Cmd_Wings(u_int8_t mode, client_t *client)
 			break;
 	}
 
-	for (i = 0; i < MAX_RELATED; i++)
+	for(i = 0; i < MAX_RELATED; i++)
 	{
-		if (client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+		if(client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 		{
 			client->related[i]->droneformation = mode;
 
-			if (client->related[i]->drone == DRONE_WINGS2)
+			if(client->related[i]->drone == DRONE_WINGS2)
 			{
-				if (client->droneformation == FORMATION_VWING)
+				if(client->droneformation == FORMATION_VWING)
 				{
 					oldangle = 2250;
 				}
 
-				if (mode == FORMATION_VWING)
+				if(mode == FORMATION_VWING)
 				{
 					newangle = 2250;
 				}
 			}
 
-			if (!client->related[i]->droneformchanged)
+			if(!client->related[i]->droneformchanged)
 			{
 				client->related[i]->droneformchanged = oldangle - newangle;
 			}
@@ -4756,63 +4879,63 @@ void Cmd_Hmack(client_t *client, const char *command, u_int8_t tank)
 	 }
 	 */
 
-	if (client->inflight && !command)
+	if(client->inflight && !command)
 	{
 		PPrintf(client, RADIO_YELLOW, "You're already flying");
 		return;
 	}
 
-	if (client->attr == 1)
+	if(client->attr == 1)
 	{
 		PPrintf(client, RADIO_YELLOW, "You're an Admin, you can't start a %s", tank ? "tank" : "hmack");
 		return;
 	}
 
-	if (!command)
+	if(!command)
 	{
-		if (arena->fields[client->field-1].closed)
+		if(arena->fields[client->field - 1].closed)
 		{
 			PPrintf(client, RADIO_YELLOW, "This field is closed");
 			return;
 		}
 
-		if (arena->fields[client->field-1].country != client->country)
+		if(arena->fields[client->field - 1].country != client->country)
 		{
 			PPrintf(client, RADIO_YELLOW, "This field is not from your country");
 			return;
 		}
 
-		if (client->tkstatus)
+		if(client->tkstatus)
 		{
 			PPrintf(client, RADIO_YELLOW, "You are a team killer, you must fly bomber");
 			return;
 		}
 
-		if (arena->fields[client->field-1].type == FIELD_CV)
+		if(arena->fields[client->field - 1].type == FIELD_CV)
 		{
 			PPrintf(client, RADIO_YELLOW, "You can't start a %s from CV", tank ? "TANK" : "Human Ack");
 			return;
 		}
 
-		if (client->hmackpenalty && client->hmackpenaltyfield == client->field && client->attr != 1)
+		if(client->hmackpenalty && client->hmackpenaltyfield == client->field && client->attr != 1)
 		{
 			PPrintf(client, RADIO_YELLOW, "You can't take off from this field for %s", Com_TimeSeconds(client->hmackpenalty / 100));
 			return;
 		}
 
-		if (tank)
-			drone
-					= AddDrone(DRONE_HTANK, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1], arena->fields[client->field - 1].posxyz[2], client->country, 101/*TANK*/, client);
+		if(tank)
+			drone = AddDrone(DRONE_HTANK, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1], arena->fields[client->field
+					- 1].posxyz[2], client->country, 101/*TANK*/, client);
 		else
 		{
-			if (client->mapper)
-				drone = AddDrone(DRONE_HMACK, client->posxy[0][0], client->posxy[1][0], 0, client->country, 79/*OPEL*/,client);
+			if(client->mapper)
+				drone = AddDrone(DRONE_HMACK, client->posxy[0][0], client->posxy[1][0], 0, client->country, 79/*OPEL*/, client);
 			else
-				drone
-						= AddDrone(DRONE_HMACK, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1], arena->fields[client->field - 1].posxyz[2], client->country, 85/*JEEP*/,client);
+				drone = AddDrone(DRONE_HMACK, arena->fields[client->field - 1].posxyz[0], arena->fields[client->field - 1].posxyz[1],
+						arena->fields[client->field - 1].posxyz[2], client->country, 85/*JEEP*/, client);
 		}
 
-		if (!drone)
+		if(!drone)
 			return;
 
 		client->attached = drone;
@@ -4841,90 +4964,90 @@ void Cmd_Hmack(client_t *client, const char *command, u_int8_t tank)
 	}
 	else
 	{
-		for (i = 0; i < MAX_RELATED; i++)
+		for(i = 0; i < MAX_RELATED; i++)
 		{
-			if (client->related[i] && (client->related[i]->drone & (DRONE_HMACK | DRONE_HTANK)))
+			if(client->related[i] && (client->related[i]->drone & (DRONE_HMACK | DRONE_HTANK)))
 			{
-				if (!Com_Stricmp(command, "speed"))
+				if(!Com_Stricmp(command, "speed"))
 				{
 					angle = WBtoHdg(client->angles[2][0]);
 
-					if (client->posalt[0])
+					if(client->posalt[0])
 					{
 						client->speedxyz[0][0] = (client->hmackgear + 1) * -25 * sin(Com_Rad(angle));
 						client->speedxyz[1][0] = (client->hmackgear + 1) * 25 * cos(Com_Rad(angle));
 					}
 				}
-				else if (!Com_Stricmp(command, "run"))
+				else if(!Com_Stricmp(command, "run"))
 				{
-					if (client->speedxyz[0][0] || client->speedxyz[1][0])
+					if(client->speedxyz[0][0] || client->speedxyz[1][0])
 						client->hmackgear = 1;
 
 					Cmd_Hmack(client, "speed", 0);
 				}
-				else if (!Com_Stricmp(command, "stop"))
+				else if(!Com_Stricmp(command, "stop"))
 				{
 					client->speedxyz[0][0] = 0;
 					client->speedxyz[1][0] = 0;
 					client->hmackgear = 0;
 				}
-				else if (command[0] == '+')
+				else if(command[0] == '+')
 				{
 					command++;
-					if (client->angles[2][0] < 0)
+					if(client->angles[2][0] < 0)
 						client->angles[2][0] += 3600;
 
-					if ((client->angles[2][0] += (Com_Atof(command) * 10)) >= 3600)
+					if((client->angles[2][0] += (Com_Atof(command) * 10)) >= 3600)
 						client->angles[2][0] %= 3600;
 
-					if (client->angles[2][0] > 901)
+					if(client->angles[2][0] > 901)
 					{
 						client->angles[2][0] -= 3600;
 					}
 
-					if (client->speedxyz[0][0] || client->speedxyz[1][0])
+					if(client->speedxyz[0][0] || client->speedxyz[1][0])
 						Cmd_Hmack(client, "speed", 0);
 				}
-				else if (command[0] == '-')
+				else if(command[0] == '-')
 				{
 					command++;
-					if (client->angles[2][0] < 0)
+					if(client->angles[2][0] < 0)
 						client->angles[2][0] += 3600;
 
-					if ((client->angles[2][0] -= (Com_Atof(command) * 10)) < 0)
+					if((client->angles[2][0] -= (Com_Atof(command) * 10)) < 0)
 						client->angles[2][0] = (3600 + client->angles[2][0]);
 
-					if (client->angles[2][0] > 901)
+					if(client->angles[2][0] > 901)
 					{
 						client->angles[2][0] -= 3600;
 					}
 
-					if (client->speedxyz[0][0] || client->speedxyz[1][0])
+					if(client->speedxyz[0][0] || client->speedxyz[1][0])
 						Cmd_Hmack(client, "speed", 0);
 				}
 				else
 				{
-					if ((angle = (Com_Atof(command) * 10)) > 3599)
+					if((angle = (Com_Atof(command) * 10)) > 3599)
 					{
 						PPrintf(client, RADIO_YELLOW, "angle: 0<->359.9 degrees");
 						return;
 					}
 
-					if (angle > 901)
+					if(angle > 901)
 					{
 						angle -= 3600;
 					}
 
 					client->angles[2][0] = angle;
 
-					if (client->speedxyz[0][0] || client->speedxyz[1][0])
+					if(client->speedxyz[0][0] || client->speedxyz[1][0])
 						Cmd_Hmack(client, "speed", 0);
 				}
 				break;
 			}
 		}
 
-		if (i == MAX_RELATED)
+		if(i == MAX_RELATED)
 		{
 			PPrintf(client, RADIO_YELLOW, "You are not in a human ack");
 		}
@@ -4946,13 +5069,13 @@ void Cmd_Commandos(client_t *client)
 
 	dist = 0;
 
-	if (!IsCargo(client))
+	if(!IsCargo(client))
 	{
 		PPrintf(client, RADIO_YELLOW, "Commandos are available only for cargo planes");
 		return;
 	}
 
-	if (client->tkstatus)
+	if(client->tkstatus)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are a team killer, you cannot drop commandos");
 		return;
@@ -4960,43 +5083,44 @@ void Cmd_Commandos(client_t *client)
 
 	height = GetHeightAt(client->posxy[0][0], client->posxy[1][0]);
 
-	Com_Printf(VERBOSE_DEBUG, "%s Commandos at X %u Y %u Z %u - %s\n", client->longnick, client->posxy[0][0], client->posxy[1][0], height, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+	Com_Printf(VERBOSE_DEBUG, "%s Commandos at X %u Y %u Z %u - %s\n", client->longnick, client->posxy[0][0], client->posxy[1][0], height, Com_Padloc(
+			client->posxy[0][0], client->posxy[1][0]));
 
-	if (!height)
+	if(!height)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are above water, commandos is not a SEAL");
 		return;
 	}
 
-	for (i = 0; i < fields->value; i++)
+	for(i = 0; i < fields->value; i++)
 	{
 		x = client->posxy[0][0] - arena->fields[i].posxyz[0];
 		y = client->posxy[1][0] - arena->fields[i].posxyz[1];
 
-		if ((x >= -10000 && x <= 10000) && (y >= -10000 && y <= 10000))
+		if((x >= -10000 && x <= 10000) && (y >= -10000 && y <= 10000))
 		{
 			dist = sqrt(Com_Pow(x, 2) + Com_Pow(y, 2));
 
-			if ((arena->fields[i].type == FIELD_WB3POST && dist < 1000) || (arena->fields[i].type == FIELD_WB3VILLAGE && dist < 2700) || (arena->fields[i].type == FIELD_WB3TOWN && dist < 3600)
-					|| (arena->fields[i].type <= FIELD_MAIN && dist < arena->fields[i].radius))
+			if((arena->fields[i].type == FIELD_WB3POST && dist < 1000) || (arena->fields[i].type == FIELD_WB3VILLAGE && dist < 2700) || (arena->fields[i].type
+					== FIELD_WB3TOWN && dist < 3600) || (arena->fields[i].type <= FIELD_MAIN && dist < arena->fields[i].radius))
 			{
-				PPrintf(client, RADIO_YELLOW, "Too near to field f%d, acks would kill Commandos", i+1);
+				PPrintf(client, RADIO_YELLOW, "Too near to field f%d, acks would kill Commandos", i + 1);
 				return;
 			}
-			if (dist < 10000)
+			if(dist < 10000)
 				break;
 		}
 	}
 
-	if (i < fields->value)
+	if(i < fields->value)
 	{
-		if (arena->fields[i].country == client->country)
+		if(arena->fields[i].country == client->country)
 		{
 			PPrintf(client, RADIO_YELLOW, "You can't drop commandos at your own airfield");
 			return;
 		}
 
-		if (client->commandos)
+		if(client->commandos)
 		{
 			client->commandos--;
 		}
@@ -5008,12 +5132,12 @@ void Cmd_Commandos(client_t *client)
 
 		drone = AddDrone(DRONE_COMMANDOS, client->posxy[0][0], client->posxy[1][0], height, client->country, 61/*chute*/, client);
 
-		if (!drone)
+		if(!drone)
 			return;
 
 		drone->dronefield = i;
 
-		PPrintf(client, RADIO_YELLOW, "Commandos dropped at field f%d (dist %d)", i+1, dist);
+		PPrintf(client, RADIO_YELLOW, "Commandos dropped at field f%d (dist %d)", i + 1, dist);
 		Com_Printf(VERBOSE_ALWAYS, "Commandos %s dropped at field f%d (dist %d)\n", drone->longnick);
 	}
 	else
@@ -5033,29 +5157,32 @@ void Cmd_Info(char *nick, client_t *client)
 {
 	client_t *info;
 
-	if (!(info = FindLClient(nick)))
+	if(!(info = FindLClient(nick)))
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "User not found");
 		return;
 	}
 
-	if (!client || client->attr & (FLAG_ADMIN | FLAG_OP))
+	if(!client || client->attr & (FLAG_ADMIN | FLAG_OP))
 	{
-		PPrintf(client, RADIO_LIGHTYELLOW, "User:%s IP:%s(%s) Country:%s Field:%d", info->longnick, info->ip, GeoIP_country_name_by_addr(gi, info->ip), GetCountry(info->country), info->field);
-		PPrintf(client, RADIO_LIGHTYELLOW, "Situation:%s Plane:%s Mod:%s ", info->inflight ? IsGround(info) ? "In Ground" : "In Flight" : info->field ? !info->hq ? "Tower" : "HQ" : "Connecting",
-				GetPlaneName(info->plane), info->attr == 2 ? "OP" : info->attr == 1 ? "Admin" : "Normal");
+		PPrintf(client, RADIO_LIGHTYELLOW, "User:%s IP:%s(%s) Country:%s Field:%d", info->longnick, info->ip, GeoIP_country_name_by_addr(gi, info->ip),
+				GetCountry(info->country), info->field);
+		PPrintf(client, RADIO_LIGHTYELLOW, "Situation:%s Plane:%s Mod:%s ", info->inflight ? IsGround(info) ? "In Ground" : "In Flight"
+				: info->field ? !info->hq ? "Tower" : "HQ" : "Connecting", GetPlaneName(info->plane), info->attr == 2 ? "OP" : info->attr == 1 ? "Admin"
+				: "Normal");
 		PPrintf(client, RADIO_LIGHTYELLOW, "Squadron:%s", info->squadron ? Com_SquadronName(info->squadron) : "None");
 	}
 	else
 	{
-		if (client->country != info->country)
+		if(client->country != info->country)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "This user is not from your country");
 		}
 		else
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "User:%s Field:%d Situation:%s Plane:%s", info->longnick, info->field, info->inflight ? IsGround(info) ? "In Ground" : "In Flight"
-					: info->field ? !info->hq ? "Tower" : "HQ" : "Connecting", GetPlaneName(info->plane));
+			PPrintf(client, RADIO_LIGHTYELLOW, "User:%s Field:%d Situation:%s Plane:%s", info->longnick, info->field,
+					info->inflight ? IsGround(info) ? "In Ground" : "In Flight" : info->field ? !info->hq ? "Tower" : "HQ" : "Connecting", GetPlaneName(
+							info->plane));
 			PPrintf(client, RADIO_LIGHTYELLOW, "Squadron:%s", info->squadron ? Com_SquadronName(info->squadron) : "None");
 		}
 	}
@@ -5075,28 +5202,28 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 	u_int8_t oldvalue;
 	u_int16_t i;
 
-	if (!strcmp(nick, "franz-") || !strcmp(nick, "vibora"))
+	if(!strcmp(nick, "franz-") || !strcmp(nick, "vibora"))
 	{
 		PPrintf(client, RADIO_YELLOW, "%s is a good guy and cannot be banned", nick);
 		return;
 	}
 
-	if (!(cban = FindLClient(nick)))
+	if(!(cban = FindLClient(nick)))
 	{
 		sprintf(my_query, "SELECT id, banned FROM players WHERE longnick = '%s'", nick);
 
-		if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+		if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 		{
-			if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+			if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 			{
-				if ((my_row = mysql_fetch_row(my_result)))
+				if((my_row = mysql_fetch_row(my_result)))
 				{
 					id = Com_Atou(Com_MyRow("id"));
 					oldvalue = Com_Atou(Com_MyRow("banned"));
 				}
 				else
 				{
-					if (!mysql_errno(&my_sock))
+					if(!mysql_errno(&my_sock))
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "Player %s not found", nick);
 					}
@@ -5124,7 +5251,7 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 		}
 		else
 		{
-			if (mysql_errno(&my_sock))
+			if(mysql_errno(&my_sock))
 			{
 				Com_Printf(VERBOSE_WARNING, "Cmd_Ban(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
@@ -5138,11 +5265,11 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 		id = cban->id;
 	}
 
-	if (id)
+	if(id)
 	{
-		if (oldvalue == newvalue)
+		if(oldvalue == newvalue)
 		{
-			if (oldvalue)
+			if(oldvalue)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Player %s is already banned", nick);
 			}
@@ -5155,23 +5282,23 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 		}
 		else
 		{
-			if (!cban && client) // clear SQL flood check if player id was get from DB
+			if(!cban && client) // clear SQL flood check if player id was get from DB
 			{
 				client->lastsql = 0;
 			}
 
 			sprintf(my_query, "UPDATE players SET banned = %u WHERE id = '%u'", newvalue, id);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query))
+			if(!Com_MySQL_Query(client, &my_sock, my_query))
 			{
-				if (newvalue)
+				if(newvalue)
 				{
-					BPrintf(RADIO_LIGHTYELLOW, "%s was banned by %s", nick, client?client->longnick:"-HOST-");
+					BPrintf(RADIO_LIGHTYELLOW, "%s was banned by %s", nick, client ? client->longnick : "-HOST-");
 					Com_Printf(VERBOSE_ATTENTION, "%s was banned by %s\n", nick, client ? client->longnick : "-HOST-");
 				}
 				else
 				{
-					BPrintf(RADIO_LIGHTYELLOW, "%s was unbanned by %s", nick, client?client->longnick:"-HOST-");
+					BPrintf(RADIO_LIGHTYELLOW, "%s was unbanned by %s", nick, client ? client->longnick : "-HOST-");
 					Com_Printf(VERBOSE_ATTENTION, "%s was unbanned by %s\n", nick, client ? client->longnick : "-HOST-");
 				}
 				/*
@@ -5183,21 +5310,22 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 				Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banid): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
-			sprintf(my_query,
+			sprintf(
+					my_query,
 					"SELECT hdserials.id FROM players, players_hdserials, hdserials WHERE players.id = '%u' AND players.id = players_hdserials.player_id AND hdserials.id = players_hdserials.hdserial_id",
 					id);
 
-			if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+			if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 			{
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if ((num_rows = mysql_num_rows(my_result)) > 0)
+					if((num_rows = mysql_num_rows(my_result)) > 0)
 					{
 						sprintf(my_query, "UPDATE hdserials SET banned='%u' WHERE id IN(", newvalue);
 
-						for (i = 0; i < num_rows; i++)
+						for(i = 0; i < num_rows; i++)
 						{
-							if ((my_row = mysql_fetch_row(my_result)))
+							if((my_row = mysql_fetch_row(my_result)))
 							{
 								sprintf(my_query, "%s'%u'", my_query, Com_Atou(Com_MyRow("id")));
 							}
@@ -5205,17 +5333,19 @@ void Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client) // twin of Cmd_TK
 							{
 								mysql_free_result(my_result);
 								my_result = NULL;
-								Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+								Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(
+										&my_sock));
 								break;
 							}
 
-							if (i == (num_rows - 1))
+							if(i == (num_rows - 1))
 							{
 								strcat(my_query, ")");
 
-								if (d_mysql_query(&my_sock, my_query))
+								if(d_mysql_query(&my_sock, my_query))
 								{
-									Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "Cmd_Ban(banhd): Couldn't query UPDATE id %d error %d: %s\n", i, mysql_errno(&my_sock),
+											mysql_error(&my_sock));
 									return;
 								}
 							}
@@ -5263,13 +5393,13 @@ void Cmd_Gclear(char *nick, client_t *client)
 	u_int8_t buffer[8];
 	reqgunnerlist_t *gunner;
 
-	if (strcmp(nick, "0"))
+	if(strcmp(nick, "0"))
 	{
-		for (i = 0; i < 7; i++)
+		for(i = 0; i < 7; i++)
 		{
-			if (client->gunners[i])
+			if(client->gunners[i])
 			{
-				if (!strcmp(client->gunners[i]->longnick, nick))
+				if(!strcmp(client->gunners[i]->longnick, nick))
 				{
 					PPrintf(client, RADIO_LIGHTYELLOW, "%s removed from gunner's list", client->gunners[i]->longnick);
 					client->gunners[i] = 0;
@@ -5278,13 +5408,13 @@ void Cmd_Gclear(char *nick, client_t *client)
 			}
 		}
 
-		for (i = 7; i < 14; i++)
+		for(i = 7; i < 14; i++)
 		{
-			if (client->gunners[i])
+			if(client->gunners[i])
 				break;
 		}
 
-		if (i == 14) // no gunners found in request list
+		if(i == 14) // no gunners found in request list
 		{
 			gunner = (reqgunnerlist_t *) buffer;
 			gunner->unknown1 = htons(0x0006);
@@ -5295,7 +5425,7 @@ void Cmd_Gclear(char *nick, client_t *client)
 	}
 	else
 	{
-		for (i = 0; i < 14; i++)
+		for(i = 0; i < 14; i++)
 		{
 			client->gunners[i] = 0;
 		}
@@ -5318,15 +5448,15 @@ void Cmd_Shanghai(u_int8_t *buffer, client_t *client)
 
 	student = FindSClient(ntohl(shanghai->nick));
 
-	if (student)
+	if(student)
 	{
-		if (student->inflight)
+		if(student->inflight)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "%s is already flying", student->longnick);
 			return;
 		}
 
-		if (student->country != client->country)
+		if(student->country != client->country)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "%s is not from your country", student->longnick);
 			return;
@@ -5335,7 +5465,7 @@ void Cmd_Shanghai(u_int8_t *buffer, client_t *client)
 		PPrintf(client, RADIO_LIGHTYELLOW, "%s has been added to shanghai", student->longnick);
 		PPrintf(student, RADIO_LIGHTYELLOW, "%s added you as shanghai", client->longnick);
 
-		if (debug->value)
+		if(debug->value)
 			PPrintf(client, RADIO_RED, "DEBUG: %d", ntohs(shanghai->unknown1));
 		client->shanghai = student;
 	}
@@ -5356,30 +5486,30 @@ void Cmd_View(client_t *victim, client_t *client)
 {
 	u_int8_t i;
 
-	if (victim)
+	if(victim)
 	{
-		if (victim->view)
+		if(victim->view)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "%s is already viewing %s", victim->view->longnick, victim->longnick);
 			return;
 		}
 		else
 		{
-			if (client->inflight)
+			if(client->inflight)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "You are already in flight");
 				return;
 			}
 
-			if (!victim->inflight)
+			if(!victim->inflight)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Player is not in flight");
 				return;
 			}
 
-			for (i = 0; i < MAX_SCREEN; i++)
+			for(i = 0; i < MAX_SCREEN; i++)
 			{
-				if (client->visible[i].client == victim)
+				if(client->visible[i].client == victim)
 				{
 					PPrintf(client, RADIO_LIGHTYELLOW, "Player is in visible list, change field and try again");
 					return;
@@ -5397,9 +5527,9 @@ void Cmd_View(client_t *victim, client_t *client)
 	}
 	else
 	{
-		if (client->attached)
+		if(client->attached)
 		{
-			if (client->attached->view == client)
+			if(client->attached->view == client)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "You have stopped viewing %s", client->attached->longnick);
 				client->attached->view = NULL;
@@ -5421,9 +5551,9 @@ void Cmd_Minen(u_int32_t dist, double angle, client_t *client)
 {
 	int32_t destx, desty;
 
-	if (client->mortars)
+	if(client->mortars)
 	{
-		if (dist > 6000)
+		if(dist > 6000)
 		{
 			PPrintf(client, RADIO_YELLOW, "Mortar's maximum range is 6000 ft");
 			return;
@@ -5456,36 +5586,36 @@ void Cmd_Tanks(char *field, client_t *client)
 {
 	u_int8_t fieldn;
 
-	if (client->tkstatus)
+	if(client->tkstatus)
 	{
 		PPrintf(client, RADIO_YELLOW, "You are a team killer, you cannot use tanks");
 		return;
 	}
 
-	if (tolower(*field) == 'f')
+	if(tolower(*field) == 'f')
 	{
 		field++;
-		fieldn = Com_Atoi(field)-1;
+		fieldn = Com_Atoi(field) - 1;
 
-		if (fieldn >= fields->value)
+		if(fieldn >= fields->value)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "Invalid field");
 			return;
 		}
 
-		if (arena->fields[fieldn].type >= FIELD_CV && arena->fields[fieldn].type <= FIELD_SUBMARINE)
+		if(arena->fields[fieldn].type >= FIELD_CV && arena->fields[fieldn].type <= FIELD_SUBMARINE)
 		{
 			PPrintf(client, RADIO_YELLOW, "You can't launch a column to a CV");
 			return;
 		}
 
-		if (arena->fields[client->field - 1].type >= FIELD_CV && arena->fields[client->field - 1].type <= FIELD_SUBMARINE)// && !client->attr) // !client->attr only for JAVA SCENARIO
+		if(arena->fields[client->field - 1].type >= FIELD_CV && arena->fields[client->field - 1].type <= FIELD_SUBMARINE)// && !client->attr) // !client->attr only for JAVA SCENARIO
 		{
 			PPrintf(client, RADIO_YELLOW, "You can't launch a column from a CV");
 			return;
 		}
 
-		if (arena->fields[fieldn].country != client->country)
+		if(arena->fields[fieldn].country != client->country)
 		{
 			Com_LogEvent(EVENT_TANKS, client->id, 0);
 			Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
@@ -5515,19 +5645,20 @@ void Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek)
 {
 	char buffer[128];
 
-	if (!client)
+	if(!client)
 		return;
 
-	if (client->inflight)
+	if(client->inflight)
 	{
-		snprintf(buffer, sizeof(buffer), "I'm a %s at %s angels%.0f(%.0fm) %s to %s(%.0f)", GetSmallPlaneName(client->plane), Com_Padloc(client->posxy[0][0], client->posxy[1][0]), WBAngels(client->posalt[0]),
-				WBAltMeters(client->posalt[0]), WBVSI(client->speedxyz[2][0], 0), WBRhumb(WBtoHdg(client->angles[2][0])), WBHeading(WBtoHdg(client->angles[2][0])) );
+		snprintf(buffer, sizeof(buffer), "I'm a %s at %s angels%.0f(%.0fm) %s to %s(%.0f)", GetSmallPlaneName(client->plane), Com_Padloc(client->posxy[0][0],
+				client->posxy[1][0]), WBAngels(client->posalt[0]), WBAltMeters(client->posalt[0]), WBVSI(client->speedxyz[2][0], 0), WBRhumb(WBtoHdg(
+				client->angles[2][0])), WBHeading(WBtoHdg(client->angles[2][0])));
 	}
 	else
 	{
 		snprintf(buffer, sizeof(buffer), "I'm at tower");
 
-		if (!client->hq)
+		if(!client->hq)
 		{
 			sprintf(buffer, "%s F%d", buffer, client->field);
 		}
@@ -5537,14 +5668,14 @@ void Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek)
 		}
 	}
 
-	if (peek)
+	if(peek)
 	{
 		PPrintf(peek, RADIO_LIGHTYELLOW, "%s %s", client->longnick, buffer);
 		PPrintf(client, RADIO_LIGHTYELLOW, "%s got your position", peek->longnick);
 	}
 	else
 	{
-		if (!freq)
+		if(!freq)
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "(echo) %s", buffer);
 		}
@@ -5567,15 +5698,15 @@ void Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client)
 	double score;
 	client_t *pclient;
 
-	if (argc > 3)
+	if(argc > 3)
 		argc = 3;
 
-	if (!client->inflight)
+	if(!client->inflight)
 	{
 		PPrintf(client, RADIO_YELLOW, "You cannot spawn thanks while flying");
 		return;
 	}
-	if (client->lastscore > 0)
+	if(client->lastscore > 0)
 		score = client->lastscore / 10;
 	else
 	{
@@ -5583,27 +5714,28 @@ void Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client)
 		return;
 	}
 
-	for (i = 0; i < argc; i++)
+	for(i = 0; i < argc; i++)
 	{
-		if ((pclient = FindLClient(argv[i])))
+		if((pclient = FindLClient(argv[i])))
 		{
 			Com_LogEvent(EVENT_THANKS, client->id, pclient->id);
 			Com_LogDescription(EVENT_THANKS, score, NULL);
 
 			pclient->streakscore += score;
-			sprintf(my_query, "UPDATE score_common SET totalscore = totalscore + '%.3f', streakscore = '%.3f' WHERE player_id = '%u'", score, pclient->streakscore, pclient->id);
+			sprintf(my_query, "UPDATE score_common SET totalscore = totalscore + '%.3f', streakscore = '%.3f' WHERE player_id = '%u'", score,
+					pclient->streakscore, pclient->id);
 
-			if (d_mysql_query(&my_sock, my_query))
+			if(d_mysql_query(&my_sock, my_query))
 			{
 				Com_Printf(VERBOSE_WARNING, "Cmd_Thanks(sum): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
 
 			client->streakscore -= score;
 			client->lastscore -= score;
-			sprintf(my_query, "UPDATE score_common SET totalscore = totalscore + '%.3f', streakscore = '%.3f', lastscore = '%.3f' WHERE player_id = '%u'", score, pclient->streakscore,
-					client->lastscore, pclient->id);
+			sprintf(my_query, "UPDATE score_common SET totalscore = totalscore + '%.3f', streakscore = '%.3f', lastscore = '%.3f' WHERE player_id = '%u'",
+					score, pclient->streakscore, client->lastscore, pclient->id);
 
-			if (d_mysql_query(&my_sock, my_query))
+			if(d_mysql_query(&my_sock, my_query))
 			{
 				Com_Printf(VERBOSE_WARNING, "Cmd_Thanks(sub): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 			}
@@ -5624,7 +5756,7 @@ void Cmd_Restore(u_int8_t field, client_t *client)
 {
 	u_int16_t i;
 
-	if (!field || field > fields->value)
+	if(!field || field > fields->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid Field");
 		return;
@@ -5633,11 +5765,11 @@ void Cmd_Restore(u_int8_t field, client_t *client)
 	arena->fields[field - 1].tonnage = 0;
 	arena->fields[field - 1].paras = 0;
 
-	for (i = 0; i < MAX_BUILDINGS; i++)
+	for(i = 0; i < MAX_BUILDINGS; i++)
 	{
-		if (arena->fields[field - 1].buildings[i].field)
+		if(arena->fields[field - 1].buildings[i].field)
 		{
-			if (arena->fields[field - 1].buildings[i].status)
+			if(arena->fields[field - 1].buildings[i].status)
 				arena->fields[field - 1].buildings[i].timer = 1;
 		}
 		else
@@ -5657,7 +5789,7 @@ void Cmd_Destroy(u_int8_t field, int32_t time, client_t *client)
 {
 	u_int16_t i;
 
-	if (!field || field > fields->value)
+	if(!field || field > fields->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Invalid Field");
 		return;
@@ -5672,9 +5804,9 @@ void Cmd_Destroy(u_int8_t field, int32_t time, client_t *client)
 		time = 0;
 	}
 
-	for (i = 0; i < MAX_BUILDINGS; i++)
+	for(i = 0; i < MAX_BUILDINGS; i++)
 	{
-		if (arena->fields[field - 1].buildings[i].field)
+		if(arena->fields[field - 1].buildings[i].field)
 		{
 			arena->fields[field - 1].buildings[i].status = 2;
 			arena->fields[field - 1].buildings[i].timer = time;
@@ -5696,9 +5828,9 @@ void Cmd_Destroy(u_int8_t field, int32_t time, client_t *client)
 
 void Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client)
 {
-	if (client->deck)
+	if(client->deck)
 	{
-		if (distance <= 20000 && distance >= 5000)
+		if(distance <= 20000 && distance >= 5000)
 			ChangeCVRoute(&(arena->cvs[client->deck->group]), angle, distance, client);
 		else
 			PPrintf(client, RADIO_LIGHTYELLOW, "Distance limited to 5000 - 20000 feets");
@@ -5721,7 +5853,8 @@ void Cmd_UTC(client_t *client)
 	time(&ltime);
 	timeptr = gmtime(&ltime);
 
-	PPrintf(client, RADIO_YELLOW, "%d-%02d-%02d %.2d:%.2d:%.2dZ", 1900 + timeptr->tm_year, timeptr->tm_mon + 1, timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min, timeptr->tm_sec);
+	PPrintf(client, RADIO_YELLOW, "%d-%02d-%02d %.2d:%.2d:%.2dZ", 1900 + timeptr->tm_year, timeptr->tm_mon + 1, timeptr->tm_mday, timeptr->tm_hour,
+			timeptr->tm_min, timeptr->tm_sec);
 }
 
 /**
@@ -5738,9 +5871,9 @@ void Cmd_Lives(char *nick, int8_t amount, client_t *client)
 
 	snprintf(buffer, sizeof(buffer), "UPDATE players SET lives = %d", amount);
 
-	if (nick)
+	if(nick)
 	{
-		if ((player = FindLClient(nick)))
+		if((player = FindLClient(nick)))
 		{
 			sprintf(buffer, "%s WHERE longnick = '%s'", buffer, nick);
 			PPrintf(client, RADIO_LIGHTYELLOW, "Lives of %s set to %d", nick, amount);
@@ -5755,16 +5888,16 @@ void Cmd_Lives(char *nick, int8_t amount, client_t *client)
 	else
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Lives of all set to %d", amount);
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && clients[i].ready && !clients[i].drone)
+			if(clients[i].inuse && clients[i].ready && !clients[i].drone)
 			{
 				clients[i].lives = amount;
 			}
 		}
 	}
 
-	if (d_mysql_query(&my_sock, buffer)) // query succeeded
+	if(d_mysql_query(&my_sock, buffer)) // query succeeded
 	{
 		Com_Printf(VERBOSE_WARNING, "Cmd_Life(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
@@ -5781,23 +5914,23 @@ void Cmd_Reload(client_t *client)
 	int8_t field;
 	u_int32_t distance;
 
-	if (!canreload->value)
+	if(!canreload->value)
 	{
 		PPrintf(client, RADIO_YELLOW, "Command disabled by Administrator");
 		return;
 	}
 
-	if ((FLIGHT_TIME(client)/1000) < 600)
+	if((FLIGHT_TIME(client) / 1000) < 600)
 	{
-		if (!(client->speedxyz[0][0] + client->speedxyz[1][0] + client->speedxyz[2][0]))
+		if(!(client->speedxyz[0][0] + client->speedxyz[1][0] + client->speedxyz[2][0]))
 		{
 			field = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, FALSE, &distance);
 
-			if (field >= 0 && arena->fields[field].country == client->country)
+			if(field >= 0 && arena->fields[field].country == client->country)
 			{
-				if (distance < arena->fields[field].radius)
+				if(distance < arena->fields[field].radius)
 				{
-					if (!(client->status_damage))
+					if(!(client->status_damage))
 					{
 						client->field = field + 1;
 
@@ -5840,19 +5973,19 @@ void Cmd_CheckWaypoints(client_t *client)
 {
 	u_int8_t i, j;
 
-	for (i = 0; i < cvs->value; i++)
+	for(i = 0; i < cvs->value; i++)
 	{
 		ReadCVWaypoints(i);
 
-		for (j = 1; j < arena->cvs[i].wptotal; j++)
+		for(j = 1; j < arena->cvs[i].wptotal; j++)
 		{
-			if (!IsVisible(arena->cvs[i].wp[j][0], arena->cvs[i].wp[j][1], 5, arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5))
+			if(!IsVisible(arena->cvs[i].wp[j][0], arena->cvs[i].wp[j][1], 5, arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5))
 			{
 				PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> %u] error", i, j - 1, j);
 			}
 		}
 
-		if (!IsVisible(arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5, arena->cvs[i].wp[1][0], arena->cvs[i].wp[1][1], 5))
+		if(!IsVisible(arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5, arena->cvs[i].wp[1][0], arena->cvs[i].wp[1][1], 5))
 			PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> 1] error", i, j - 1);
 	}
 }
@@ -5881,17 +6014,16 @@ void Cmd_Flare(client_t *client)
 	drop->unknown1 = htonl(0x20);
 	drop->shortnick = htonl(client->shortnick);
 
-
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					SendPacket(buffer, sizeof(buffer), &clients[i]);
 					break;
@@ -5955,33 +6087,35 @@ void Cmd_CheckBuildings(client_t *client)
 {
 	u_int16_t i, j;
 
-	for (i = 0; i < fields->value; i++)
+	for(i = 0; i < fields->value; i++)
 	{
 		if(arena->fields[i].paras > GetFieldParas(arena->fields[i].type))
 		{
-			Com_Printf(VERBOSE_WARNING, "Field %d paras bugged %d\n", i+1, arena->fields[i].paras);
+			Com_Printf(VERBOSE_WARNING, "Field %d paras bugged %d\n", i + 1, arena->fields[i].paras);
 			arena->fields[i].paras = GetFieldParas(arena->fields[i].type);
 		}
 
-		if(arena->fields[i].tonnage > (GetTonnageToClose(i+1) * 2.4))
+		if(arena->fields[i].tonnage > (GetTonnageToClose(i + 1) * 2.4))
 		{
-			Com_Printf(VERBOSE_WARNING, "Field %d tonnage bugged %.3f/%.3f\n", i+1, arena->fields[i].tonnage, (GetTonnageToClose(i+1) * 2.4));
-			arena->fields[i].tonnage = (GetTonnageToClose(i+1) * 2.4);
+			Com_Printf(VERBOSE_WARNING, "Field %d tonnage bugged %.3f/%.3f\n", i + 1, arena->fields[i].tonnage, (GetTonnageToClose(i + 1) * 2.4));
+			arena->fields[i].tonnage = (GetTonnageToClose(i + 1) * 2.4);
 		}
 
-		for (j = 0; j < MAX_BUILDINGS; j++)
+		for(j = 0; j < MAX_BUILDINGS; j++)
 		{
-			if (arena->fields[i].buildings[j].field)
+			if(arena->fields[i].buildings[j].field)
 			{
-				if (arena->fields[i].buildings[j].field != (i + 1))
+				if(arena->fields[i].buildings[j].field != (i + 1))
 				{
-					Com_Printf(VERBOSE_WARNING, "Building id %d at f%d with wrong field index: f%d\n", arena->fields[i].buildings[j].id, i + 1, arena->fields[i].buildings[j].field);
+					Com_Printf(VERBOSE_WARNING, "Building id %d at f%d with wrong field index: f%d\n", arena->fields[i].buildings[j].id, i + 1,
+							arena->fields[i].buildings[j].field);
 					arena->fields[i].buildings[j].field = (i + 1);
 				}
 
-				if (arena->fields[i].buildings[j].country != arena->fields[i].country)
+				if(arena->fields[i].buildings[j].country != arena->fields[i].country)
 				{
-					Com_Printf(VERBOSE_WARNING, "Building id %d at f%d differ country value (b%d;f%d)\n", arena->fields[i].buildings[j].id, i + 1, arena->fields[i].buildings[j].country, arena->fields[i].country);
+					Com_Printf(VERBOSE_WARNING, "Building id %d at f%d differ country value (b%d;f%d)\n", arena->fields[i].buildings[j].id, i + 1,
+							arena->fields[i].buildings[j].country, arena->fields[i].country);
 					arena->fields[i].buildings[j].country = arena->fields[i].country;
 				}
 			}

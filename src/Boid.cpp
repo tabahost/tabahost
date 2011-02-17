@@ -15,6 +15,7 @@ Boid::Boid()
 	signature = CLASSID_BOID;
 	leader = NULL;
 	drone = NULL;
+	port = NULL;
 	group = 0;
 	threatened = false;
 	outofport = false;

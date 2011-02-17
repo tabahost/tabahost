@@ -20,14 +20,15 @@
  *
  ***/
 
+#include "Ship.h"
 #include "shared.h"
 
 client_t *clients; // extern
 arena_t *arena; // extern
 arenaslist_t arenaslist[MAX_ARENASLIST]; // extern
 MYSQL my_sock; // extern
-MYSQL_RES *my_result= NULL; // extern
-MYSQL_ROW my_row= NULL; // extern
+MYSQL_RES *my_result = NULL; // extern
+MYSQL_ROW my_row = NULL; // extern
 u_int32_t my_id = 0; // extern
 char my_query[MAX_QUERY]; // extern
 u_int32_t factorybuildings[4]; // extern
@@ -61,16 +62,15 @@ u_int8_t mainbuffer[MAX_RECVDATA]; //extern
 
  */
 
-u_int16_t packets_tab[210][3] =
-{
-		/*// THL
-		{ 0xFB00, 0xFB00, 0xFB00 }, // thlGET_CRC
-		{ 0xFB01, 0xFB01, 0xFB01 }, // thlGET_CRC_RESPONSE
-		{ 0xFB02, 0xFB02, 0xFB02 }, // thl
-		{ 0xFB03, 0xFB03, 0xFB03 }, // thl
-		*/
+u_int16_t packets_tab[210][3] = {
+/*// THL
+ { 0xFB00, 0xFB00, 0xFB00 }, // thlGET_CRC
+ { 0xFB01, 0xFB01, 0xFB01 }, // thlGET_CRC_RESPONSE
+ { 0xFB02, 0xFB02, 0xFB02 }, // thl
+ { 0xFB03, 0xFB03, 0xFB03 }, // thl
+ */
 
-		// WB2   WB2007  WB2008
+// WB2   WB2007  WB2008
 		{ 0x0200, 0x0400, 0xFFFF }, // pcNEW_USER
 		{ 0x0201, 0x0401, 0x0809 }, // pcSTART_FLIGHT *
 		{ 0x0202, 0x0402, 0x080A }, // pcEXIT_FLIGHT =
@@ -322,19 +322,20 @@ void CheckArenaRules(void)
 
 	// Emulated Bombs tick
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		for (i = 0; i < MAX_BOMBS; i++)
+		for(i = 0; i < MAX_BOMBS; i++)
 		{
-			if (arena->bombs[i].id)
+			if(arena->bombs[i].id)
 			{
-				if (arena->bombs[i].timer > 0)
+				if(arena->bombs[i].timer > 0)
 				{
 					arena->bombs[i].timer--;
 				}
 				else
 				{
-					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].destz, arena->bombs[i].type, arena->bombs[i].speed, 0, arena->bombs[i].from);
+					HitStructsNear(arena->bombs[i].destx, arena->bombs[i].desty, arena->bombs[i].destz, arena->bombs[i].type, arena->bombs[i].speed, 0,
+							arena->bombs[i].from);
 					arena->bombs[i].id = 0;
 				}
 			}
@@ -347,9 +348,9 @@ void CheckArenaRules(void)
 
 	// buildings tick
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		for (i = 0; i < fields->value; i++)
+		for(i = 0; i < fields->value; i++)
 		{
 			if(rebuildtime->value < 9999)
 			{
@@ -370,15 +371,13 @@ void CheckArenaRules(void)
 						}
 					}
 
-					tonnage_recover = (1.0 + (((double)c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(i+1) / (24.0 * rebuildtime->value / 9.0);
+					tonnage_recover = (1.0 + (((double) c_cities / totalcities) - 0.5) / 2.0) * GetTonnageToClose(i + 1) / (24.0 * rebuildtime->value / 9.0);
 
 					if(!tonnage_recover)
 					{
-						Com_Printf(VERBOSE_WARNING, "CheckArenaRules(tonnage_recover = 0) (1.0 + (((double)%u / %u) - 0.5) / 2.0) * %u / (24.0 * %.3f / 9.0)\n",
-							c_cities,
-							totalcities,
-							GetTonnageToClose(i+1),
-							rebuildtime->value);
+						Com_Printf(VERBOSE_WARNING,
+								"CheckArenaRules(tonnage_recover = 0) (1.0 + (((double)%u / %u) - 0.5) / 2.0) * %u / (24.0 * %.3f / 9.0)\n", c_cities,
+								totalcities, GetTonnageToClose(i + 1), rebuildtime->value);
 					}
 
 					arena->fields[i].tonnage -= tonnage_recover;
@@ -412,11 +411,11 @@ void CheckArenaRules(void)
 					}
 				}
 
-				for (j = 0; j < MAX_BUILDINGS; j++)
+				for(j = 0; j < MAX_BUILDINGS; j++)
 				{
-					if (arena->fields[i].buildings[j].field)
+					if(arena->fields[i].buildings[j].field)
 					{
-						if (arena->fields[i].buildings[j].status)
+						if(arena->fields[i].buildings[j].status)
 						{
 							if(!ctf->value)
 							{
@@ -427,27 +426,27 @@ void CheckArenaRules(void)
 								}
 							}
 
-							if (arena->fields[i].buildings[j].type < BUILD_CV || arena->fields[i].buildings[j].type > BUILD_SUBMARINE)
+							if(arena->fields[i].buildings[j].type < BUILD_CV || arena->fields[i].buildings[j].type > BUILD_SUBMARINE)
 								arena->fields[i].buildings[j].timer--;
 
-							if (arena->fields[i].buildings[j].timer <= 0)
+							if(arena->fields[i].buildings[j].timer <= 0)
 							{
 								arena->fields[i].buildings[j].timer = 0;
 								arena->fields[i].buildings[j].status = 0;
 								arena->fields[i].buildings[j].armor = GetBuildingArmor(arena->fields[i].buildings[j].type, NULL);
 
-//								if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
-//									SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
+								//								if ((arena->fields[i].buildings[j].type >= BUILD_CV) && (arena->fields[i].buildings[j].type <= BUILD_SUBMARINE))
+								//									SinkBoat(TRUE, &arena->fields[i].buildings[j], NULL);
 
 								SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status, NULL);
 
-								if (arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
+								if(arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
 								{
 									//							close = arena->fields[i].abletocapture;
 									Cmd_Capt(i, arena->fields[i].country, NULL);
 									//							arena->fields[i].abletocapture = close;
 								}
-								else if (arena->fields[i].buildings[j].type == BUILD_WARE) // to cancel warehouse effect
+								else if(arena->fields[i].buildings[j].type == BUILD_WARE) // to cancel warehouse effect
 								{
 									arena->fields[i].warehouse = 0;
 								}
@@ -467,29 +466,28 @@ void CheckArenaRules(void)
 			}
 		}
 
-		if (!(arena->frame % 100))
+		if(!(arena->frame % 100))
 		{
-			for (i = 0; i < cities->value; i++)
+			for(i = 0; i < cities->value; i++)
 			{
-				for (j = 0; j < MAX_BUILDINGS; j++)
+				for(j = 0; j < MAX_BUILDINGS; j++)
 				{
-					if (arena->cities[i].buildings[j].field)
+					if(arena->cities[i].buildings[j].field)
 					{
-						if (arena->cities[i].buildings[j].status)
+						if(arena->cities[i].buildings[j].status)
 						{
 							dist = GetFactoryReupTime(arena->cities[i].buildings[j].country);
 
-							if (arena->frame < arena->cities[i].buildings[j].timer)
+							if(arena->frame < arena->cities[i].buildings[j].timer)
 								posx = MAX_UINT32 - arena->cities[i].buildings[j].timer + arena->frame;
 							else
 								posx = arena->frame - arena->cities[i].buildings[j].timer;
 
-							if ((u_int32_t)posx > dist)
+							if((u_int32_t) posx > dist)
 							{
 								factorybuildingsup[arena->cities[i].buildings[j].country - 1]++;
 								arena->cities[i].buildings[j].status = 0;
-								arena->cities[i].buildings[j].armor = GetBuildingArmor(arena->cities[i].buildings[j].type,
-								NULL);
+								arena->cities[i].buildings[j].armor = GetBuildingArmor(arena->cities[i].buildings[j].type, NULL);
 
 								SetBuildingStatus(&arena->cities[i].buildings[j], arena->cities[i].buildings[j].status, NULL);
 							}
@@ -508,11 +506,11 @@ void CheckArenaRules(void)
 
 	// weather
 
-	if (metar->value)
+	if(metar->value)
 	{
-		if (!(arena->frame % 30000)) // 5 minutes
+		if(!(arena->frame % 30000)) // 5 minutes
 		{
-			if (!setjmp(debug_buffer))
+			if(!setjmp(debug_buffer))
 			{
 				ProcessMetarWeather();
 			}
@@ -522,34 +520,34 @@ void CheckArenaRules(void)
 			}
 		}
 	}
-	else if (!(arena->frame % 60000)) // 10 minutes
+	else if(!(arena->frame % 60000)) // 10 minutes
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			switch ((int)weather->value)
+			switch((int) weather->value)
 			{
 				case 0: // clouded
-					if (rand()%3) // 66.6% keep clouded
+					if(rand() % 3) // 66.6% keep clouded
 						break;
 
-					if (rand()%2) // change weather
+					if(rand() % 2) // change weather
 						Var_Set("weather", "3"); // partialy clouded
 					else
 						Var_Set("weather", "2"); // rain
 					break;
 				case 1: // clear
-					if (!rand()%3) // 66.6% keep clear
+					if(!rand() % 3) // 66.6% keep clear
 						Var_Set("weather", "3"); // partialy clouded
 					break;
 				case 2: // rain
-					if (rand()%3) // 33.3% keep raining
+					if(rand() % 3) // 33.3% keep raining
 						Var_Set("weather", "0"); // clouded
 					break;
 				case 3: // partialy clouded
-					if (rand()%3) // 66.6% keep partialy clouded
+					if(rand() % 3) // 66.6% keep partialy clouded
 						break;
 
-					if (rand()%2) // change weather
+					if(rand() % 2) // change weather
 						Var_Set("weather", "1"); // clear
 					else
 						Var_Set("weather", "0"); // clouded
@@ -565,17 +563,16 @@ void CheckArenaRules(void)
 		}
 	}
 
-
 	// time
 
-	if (!(arena->frame % (int)(6000/arena->multiplier)))
+	if(!(arena->frame % (int) (6000 / arena->multiplier)))
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			if (arena->minute == 59) // check minutes
+			if(arena->minute == 59) // check minutes
 			{
 				arena->minute = 0;
-				if (arena->hour == 23)
+				if(arena->hour == 23)
 					arena->hour = 0;
 				else
 					arena->hour++;
@@ -584,58 +581,58 @@ void CheckArenaRules(void)
 			else
 				arena->minute++;
 
-			if (arena->hour - (7 - ((int)dayhours->value%10)/2) == dayhours->value) // check hours
+			if(arena->hour - (7 - ((int) dayhours->value % 10) / 2) == dayhours->value) // check hours
 			{
-				arena->hour = (7 - ((int)dayhours->value%10)/2);
+				arena->hour = (7 - ((int) dayhours->value % 10) / 2);
 				arena->day++;
-				Cmd_Time((arena->hour*100)+arena->minute, NULL, NULL);
+				Cmd_Time((arena->hour * 100) + arena->minute, NULL, NULL);
 			}
 
-			if (arena->minute == 0)
+			if(arena->minute == 0)
 			{
-				if ((arena->hour - (7 - ((int)dayhours->value%10)/2)) == (dayhours->value - 1)) // change timemult 1h before next day
+				if((arena->hour - (7 - ((int) dayhours->value % 10) / 2)) == (dayhours->value - 1)) // change timemult 1h before next day
 				{
 					CalcTimemultBasedOnTime();
 				}
-				else if (((7 - ((int)dayhours->value%10)/2) + 1) == arena->hour) // change timemult 1h after a new day
+				else if(((7 - ((int) dayhours->value % 10) / 2) + 1) == arena->hour) // change timemult 1h after a new day
 				{
 					CalcTimemultBasedOnTime();
 				}
 			}
 
-			if (arena->minute == 30 && (arena->hour == 5 || arena->hour == 18)) // time to change iconrange
+			if(arena->minute == 30 && (arena->hour == 5 || arena->hour == 18)) // time to change iconrange
 			{
 				Com_Printf(VERBOSE_ALWAYS, "Time: %2d:%02d - Changing iconrange\n", arena->hour, arena->minute);
-				for (i = 0; i < maxentities->value; i++)
+				for(i = 0; i < maxentities->value; i++)
 				{
-					if (clients[i].inuse && clients[i].ready && !clients[i].drone)
+					if(clients[i].inuse && clients[i].ready && !clients[i].drone)
 					{
 						SendArenaRules(&clients[i]);
 					}
 				}
 			}
 
-			if (arena->day > 28) // check days
+			if(arena->day > 28) // check days
 			{
-				if (arena->month == 2 && (arena->year % 4))
+				if(arena->month == 2 && (arena->year % 4))
 				{
 					arena->day = 1;
 					arena->month++;
 				}
 
-				if (arena->day >= 30)
+				if(arena->day >= 30)
 				{
-					if (arena->month == 2)
+					if(arena->month == 2)
 					{
 						arena->day = 1;
 						arena->month++;
 					}
-					else if ((arena->month == 4 || arena->month == 6 || arena->month == 9 || arena->month == 11) && arena->day == 31)
+					else if((arena->month == 4 || arena->month == 6 || arena->month == 9 || arena->month == 11) && arena->day == 31)
 					{
 						arena->day = 1;
 						arena->month++;
 					}
-					else if (arena->day == 32)
+					else if(arena->day == 32)
 					{
 						arena->day = 1;
 						arena->month++;
@@ -643,22 +640,22 @@ void CheckArenaRules(void)
 				}
 			}
 
-			if (arena->month > 12)
+			if(arena->month > 12)
 			{
 				arena->month = 1;
 				arena->year++;
 			}
 
-			if (arena->hour - (7 - ((int)dayhours->value%10)/2) == dayhours->value) // check hours
+			if(arena->hour - (7 - ((int) dayhours->value % 10) / 2) == dayhours->value) // check hours
 				BPrintf(RADIO_YELLOW, "Current Date: %04d/%02d/%02d", arena->year, arena->month, arena->day);
 
-			if (!(arena->frame % (int)((360000 * dayhours->value) /timemult->value))) // set date and dayhours every day
+			if(!(arena->frame % (int) ((360000 * dayhours->value) / timemult->value))) // set date and dayhours every day
 			{
-				if (arena->month >= 1 && arena->month <= 3) // winter
+				if(arena->month >= 1 && arena->month <= 3) // winter
 				{
 					Var_Set("dayhours", "10");
 				}
-				else if (arena->month >= 7 && arena->month <= 9) // summer
+				else if(arena->month >= 7 && arena->month <= 9) // summer
 				{
 					Var_Set("dayhours", "14");
 				}
@@ -670,9 +667,9 @@ void CheckArenaRules(void)
 				WB3DotCommand(NULL, ".date %u %u %u", arena->month, arena->day, arena->year);
 			}
 
-			if (!mapcycle->value)
+			if(!mapcycle->value)
 			{
-				if ((arena->year >= endyear->value) && (arena->month >= endmonth->value) && (arena->day >= endday->value))
+				if((arena->year >= endyear->value) && (arena->month >= endmonth->value) && (arena->day >= endday->value))
 				{
 					arena->year = inityear->value;
 					arena->month = initmonth->value;
@@ -689,11 +686,11 @@ void CheckArenaRules(void)
 		}
 	}
 
-	if (!(arena->frame % 3000)) // 30 seconds
+	if(!(arena->frame % 3000)) // 30 seconds
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			Cmd_Time((arena->hour*100)+arena->minute, NULL, NULL);
+			Cmd_Time((arena->hour * 100) + arena->minute, NULL, NULL);
 		}
 		else
 		{
@@ -701,14 +698,13 @@ void CheckArenaRules(void)
 		}
 	}
 
-
 	// Scenario Tick
 
-	if (arena->scenario)
+	if(arena->scenario)
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			if (!((arena->frame - arena->scenario) % 6000)) // every minute
+			if(!((arena->frame - arena->scenario) % 6000)) // every minute
 			{
 				// try to execute tX.cfg files
 				snprintf(file, sizeof(file), "./arenas/%s/t%u", dirname->string, (arena->frame - arena->scenario) / 6000);
@@ -723,11 +719,11 @@ void CheckArenaRules(void)
 
 	// CTF tick
 
-	if (ctf->value && !(arena->frame % 100) /*1 sec*/)
+	if(ctf->value && !(arena->frame % 100) /*1 sec*/)
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			for (i = 0; i < fields->value; i++)
+			for(i = 0; i < fields->value; i++)
 			{
 				dominated = 0;
 
@@ -735,12 +731,13 @@ void CheckArenaRules(void)
 				{
 					if(clients[j].inuse && clients[j].ready && clients[j].inflight && !clients[j].drone && IsGround(&clients[j]))
 					{
-						if(DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], 0, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], 0, ctf->value) >= 0)
+						if(DistBetween(clients[j].posxy[0][0], clients[j].posxy[1][0], 0, arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], 0, ctf->value)
+								>= 0)
 						{ // if client in capture range...
 							dominated = 1;
 
 							if(arena->fields[i].ctf != clients[j].country)
-							{	// if not dominating, dominate and zero counter
+							{ // if not dominating, dominate and zero counter
 								arena->fields[i].ctf = clients[j].country;
 								arena->fields[i].ctfwho = j;
 
@@ -748,7 +745,7 @@ void CheckArenaRules(void)
 								{
 									if((arena->frame - arena->fields[i].ctfcount) > 100 /*1 sec*/)
 									{
-										BPrintf(RADIO_YELLOW, "F%d capture counter reset", i+1);
+										BPrintf(RADIO_YELLOW, "F%d capture counter reset", i + 1);
 									}
 
 									arena->fields[i].ctfcount = arena->frame;
@@ -766,14 +763,14 @@ void CheckArenaRules(void)
 					{
 						if((arena->frame - arena->fields[i].ctfcount) == 100 /*1 sec*/)
 						{
-							BPrintf(RADIO_YELLOW, "F%d capture counter started", i+1);
+							BPrintf(RADIO_YELLOW, "F%d capture counter started", i + 1);
 						}
 
 						if((arena->frame - arena->fields[i].ctfcount) >= 3000 /*30 sec*/)
 						{
 							if(clients[arena->fields[i].ctfwho].inuse && (clients[arena->fields[i].ctfwho].country != arena->fields[i].country))
 							{
-								CaptureField(i+1, &(clients[arena->fields[i].ctfwho]));
+								CaptureField(i + 1, &(clients[arena->fields[i].ctfwho]));
 							}
 						}
 					}
@@ -782,7 +779,7 @@ void CheckArenaRules(void)
 				{
 					if((arena->fields[i].ctf != arena->fields[i].country) && (arena->frame - arena->fields[i].ctfcount) > 100 /*1 sec*/)
 					{
-						BPrintf(RADIO_YELLOW, "F%d capture counter reset", i+1);
+						BPrintf(RADIO_YELLOW, "F%d capture counter reset", i + 1);
 					}
 
 					arena->fields[i].ctfcount = arena->frame;
@@ -798,21 +795,21 @@ void CheckArenaRules(void)
 
 	// field closed, enabletocapture, radioalert, etc...
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		for (i = 0; i < fields->value; i++)
+		for(i = 0; i < fields->value; i++)
 		{
-			if (!(arena->frame % 3000) && !arcade->value) // tank alert
+			if(!(arena->frame % 3000) && !arcade->value) // tank alert
 			{
-				for (j = 0; j < MAX_BUILDINGS; j++)
+				for(j = 0; j < MAX_BUILDINGS; j++)
 				{
-					if (!arena->fields[i].buildings[j].field)
+					if(!arena->fields[i].buildings[j].field)
 					{
 						break;
 					}
-					else if (arena->fields[i].buildings[j].type == BUILD_RADIOHUT || arena->fields[i].buildings[j].type == BUILD_ANTENNA)
+					else if(arena->fields[i].buildings[j].type == BUILD_RADIOHUT || arena->fields[i].buildings[j].type == BUILD_ANTENNA)
 					{
-						if (arena->fields[i].buildings[j].status)
+						if(arena->fields[i].buildings[j].status)
 						{
 							arena->fields[i].alert = 0;
 							j = -1;
@@ -821,16 +818,17 @@ void CheckArenaRules(void)
 					}
 				}
 
-				if (j > 0)
+				if(j > 0)
 				{
-					for (j = 0; j < maxentities->value; j++)
+					for(j = 0; j < maxentities->value; j++)
 					{
-						if (clients[j].inuse && clients[j].country != arena->fields[i].country &&(clients[j].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY)))
+						if(clients[j].inuse && clients[j].country != arena->fields[i].country && (clients[j].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA
+								| DRONE_KATY)))
 						{
-							if (sqrt(Com_Pow(clients[j].posxy[0][0] - arena->fields[i].posxyz[0], 2) + Com_Pow(clients[j].posxy[1][0] - arena->fields[i].posxyz[1], 2)) < 9000)
+							if(sqrt(Com_Pow(clients[j].posxy[0][0] - arena->fields[i].posxyz[0], 2) + Com_Pow(clients[j].posxy[1][0]
+									- arena->fields[i].posxyz[1], 2)) < 9000)
 							{
-								CPrintf(arena->fields[i].country,
-								RADIO_GREEN, "ALERT!!! ALERT!!! Enemy column has been seen near F%d", i+1);
+								CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! Enemy column has been seen near F%d", i + 1);
 								break;
 							}
 						}
@@ -838,19 +836,19 @@ void CheckArenaRules(void)
 				}
 			}
 
-			if (arena->fields[i].alert && !arcade->value) // attack alert
+			if(arena->fields[i].alert && !arcade->value) // attack alert
 			{
-				if (arena->fields[i].alert + 3000 <= arena->frame)
+				if(arena->fields[i].alert + 3000 <= arena->frame)
 				{
-					for (j = 0; j < MAX_BUILDINGS; j++)
+					for(j = 0; j < MAX_BUILDINGS; j++)
 					{
-						if (!arena->fields[i].buildings[j].field)
+						if(!arena->fields[i].buildings[j].field)
 						{
 							break;
 						}
-						else if (arena->fields[i].buildings[j].type == BUILD_RADIOHUT || arena->fields[i].buildings[j].type == BUILD_ANTENNA)
+						else if(arena->fields[i].buildings[j].type == BUILD_RADIOHUT || arena->fields[i].buildings[j].type == BUILD_ANTENNA)
 						{
-							if (arena->fields[i].buildings[j].status)
+							if(arena->fields[i].buildings[j].status)
 							{
 								arena->fields[i].alert = 0;
 								break;
@@ -858,25 +856,26 @@ void CheckArenaRules(void)
 						}
 					}
 
-					if (arena->fields[i].alert)
+					if(arena->fields[i].alert)
 					{
-						CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d is under attack!!!", i+1);
+						CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d is under attack!!!", i + 1);
 						arena->fields[i].alert = 0;
 					}
 				}
 			}
 
-			if (arena->fields[i].warehouse && !arcade->value) // warehouse effect
+			if(arena->fields[i].warehouse && !arcade->value) // warehouse effect
 			{
-				if ((arena->fields[i].warehouse + 60000) <= arena->frame)
+				if((arena->fields[i].warehouse + 60000) <= arena->frame)
 				{
-					for (j = 0; j < MAX_BUILDINGS; j++)
+					for(j = 0; j < MAX_BUILDINGS; j++)
 					{
-						if (!arena->fields[i].buildings[j].field)
+						if(!arena->fields[i].buildings[j].field)
 						{
 							break;
 						}
-						else if ((arena->fields[i].buildings[j].type >= BUILD_50CALACK && arena->fields[i].buildings[j].type <= BUILD_88MMFLAK) || (arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
+						else if((arena->fields[i].buildings[j].type >= BUILD_50CALACK && arena->fields[i].buildings[j].type <= BUILD_88MMFLAK)
+								|| (arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
 						{
 							arena->fields[i].buildings[j].status = 2;
 							arena->fields[i].buildings[j].timer += 60000; // 10min // changed = to +=
@@ -889,17 +888,17 @@ void CheckArenaRules(void)
 			}
 
 			// Check field closed
-			if ((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) //!= FIELD_CV && arena->fields[i].type != FIELD_CARGO && arena->fields[i].type != FIELD_DD && arena->fields[i].type != FIELD_SUBMARINE)
+			if((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) //!= FIELD_CV && arena->fields[i].type != FIELD_CARGO && arena->fields[i].type != FIELD_DD && arena->fields[i].type != FIELD_SUBMARINE)
 			{
 				close = 1;
 				vitals = arena->fields[i].vitals;
 				arena->fields[i].vitals = 0;
 
-				for (j = 0; j < MAX_BUILDINGS; j++)
+				for(j = 0; j < MAX_BUILDINGS; j++)
 				{
-					if (arena->fields[i].buildings[j].field)
+					if(arena->fields[i].buildings[j].field)
 					{
-						if (!arena->fields[i].buildings[j].status && IsVitalBuilding(&(arena->fields[i].buildings[j]), oldcapt->value)) // Vital building UP, field not closed
+						if(!arena->fields[i].buildings[j].status && IsVitalBuilding(&(arena->fields[i].buildings[j]), oldcapt->value)) // Vital building UP, field not closed
 						{
 							arena->fields[i].vitals = 1;
 							close = 0;
@@ -914,36 +913,37 @@ void CheckArenaRules(void)
 				{
 					if(!oldcapt->value)
 					{
-						CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i+1);
+						CPrintf(arena->fields[i].country, RADIO_GREEN, "ALERT!!! ALERT!!! F%d has all defences down!!!", i + 1);
 						CPrintf(arena->fields[i].country, RADIO_GREEN, "Destroy hangars to avoid planes to be taken by enemies!!!");
 					}
 				}
 
 				if(!oldcapt->value)
 				{
-					if(arena->fields[i].tonnage < GetTonnageToClose(i+1))
+					if(arena->fields[i].tonnage < GetTonnageToClose(i + 1))
 						close = 0;
 				}
 
-				if (!arena->fields[i].closed && close)
+				if(!arena->fields[i].closed && close)
 				{
 					arena->fields[i].closed = 1;
-					BPrintf(RADIO_YELLOW, "Field %d closed", i+1);
+					BPrintf(RADIO_YELLOW, "Field %d closed", i + 1);
 
 					Com_Printf(VERBOSE_DAMAGE, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
-					for (j = 0; j < MAX_BUILDINGS; j++)
+					for(j = 0; j < MAX_BUILDINGS; j++)
 					{
-						if (arena->fields[i].buildings[j].field)
+						if(arena->fields[i].buildings[j].field)
 						{
-							Com_Printf(VERBOSE_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
+							Com_Printf(VERBOSE_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type),
+									arena->fields[i].buildings[j].timer);
 						}
 						else
 							break;
 					}
 
-					for (j = 0; j < MAX_BUILDINGS; j++)
+					for(j = 0; j < MAX_BUILDINGS; j++)
 					{
-						if (arena->fields[i].buildings[j].field)
+						if(arena->fields[i].buildings[j].field)
 						{
 							if(arena->fields[i].buildings[j].status)
 								arena->fields[i].buildings[j].timer += 60000;
@@ -952,31 +952,32 @@ void CheckArenaRules(void)
 							break;
 					}
 				}
-				else if (arena->fields[i].closed && !close)
+				else if(arena->fields[i].closed && !close)
 				{
 					Com_Printf(VERBOSE_DAMAGE, "frame %u, close = %d, closed = %d\n", arena->frame, close, arena->fields[i].closed);
-					for (j = 0; j < MAX_BUILDINGS; j++)
+					for(j = 0; j < MAX_BUILDINGS; j++)
 					{
-						if (arena->fields[i].buildings[j].field)
+						if(arena->fields[i].buildings[j].field)
 						{
-							Com_Printf(VERBOSE_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type), arena->fields[i].buildings[j].timer);
+							Com_Printf(VERBOSE_DAMAGE, "building %s, timer %d\n", GetBuildingType(arena->fields[i].buildings[j].type),
+									arena->fields[i].buildings[j].timer);
 						}
 						else
 							break;
 					}
 
-					for (j = 0; j < MAX_CITYFIELD; j++)
+					for(j = 0; j < MAX_CITYFIELD; j++)
 					{
-						if (arena->fields[i].city[j] && arena->fields[i].city[j]->needtoclose)
+						if(arena->fields[i].city[j] && arena->fields[i].city[j]->needtoclose)
 						{
-							if (!arena->fields[i].city[j]->closed)
+							if(!arena->fields[i].city[j]->closed)
 								break;
 						}
 					}
 
-					if (j == MAX_CITYFIELD)
+					if(j == MAX_CITYFIELD)
 					{
-						if(((int16_t)spawnred->value != (i+1)) && ((int16_t)spawngold->value != (i+1))) // if not a spawnfield
+						if(((int16_t) spawnred->value != (i + 1)) && ((int16_t) spawngold->value != (i + 1))) // if not a spawnfield
 						{
 							if(!arena->fields[i].abletocapture)
 							{
@@ -988,25 +989,25 @@ void CheckArenaRules(void)
 
 					arena->fields[i].closed = 0;
 					arena->fields[i].warehouse = 0; // to avoid field be reclosed by warehouse effect
-					BPrintf(RADIO_YELLOW, "Field %d reopened", i+1);
+					BPrintf(RADIO_YELLOW, "Field %d reopened", i + 1);
 				}
 			}
 			else
 				arena->fields[i].closed = 0;
 		}
 
-		for (i = 0; i < cities->value; i++)
+		for(i = 0; i < cities->value; i++)
 		{
 			close = 1;
 
-			for (j = 0; j < MAX_BUILDINGS; j++)
+			for(j = 0; j < MAX_BUILDINGS; j++)
 			{
-				if (arena->cities[i].buildings[j].field)
+				if(arena->cities[i].buildings[j].field)
 				{
 					/*				if(!arena->cities[i].buildings[j].status &&
 					 arena->cities[i].buildings[j].type >= BUILD_BRIDGE && arena->cities[i].buildings[j].type <= BUILD_CRANE)
 					 */
-					if (!arena->cities[i].buildings[j].status && IsVitalBuilding(&(arena->cities[i].buildings[j]), oldcapt->value)) // Vital building UP, field not closed
+					if(!arena->cities[i].buildings[j].status && IsVitalBuilding(&(arena->cities[i].buildings[j]), oldcapt->value)) // Vital building UP, field not closed
 
 					{
 						close = 0;
@@ -1017,39 +1018,39 @@ void CheckArenaRules(void)
 					break;
 			}
 
-			if (close)
+			if(close)
 			{
-				if (!arena->cities[i].closed)
+				if(!arena->cities[i].closed)
 				{
-					BPrintf(RADIO_YELLOW, "%s closed (c%d) (f%d)", arena->cities[i].name, i+1, arena->cities[i].field?arena->cities[i].field->number:-1);
+					BPrintf(RADIO_YELLOW, "%s closed (c%d) (f%d)", arena->cities[i].name, i + 1, arena->cities[i].field ? arena->cities[i].field->number : -1);
 					arena->cities[i].closed = 1;
 
-					if (arena->cities[i].field)
+					if(arena->cities[i].field)
 					{
-						for (j = 0; j < MAX_CITYFIELD; j++)
+						for(j = 0; j < MAX_CITYFIELD; j++)
 						{
-							if (arena->cities[i].field->city[j] && arena->cities[i].field->city[j]->needtoclose)
+							if(arena->cities[i].field->city[j] && arena->cities[i].field->city[j]->needtoclose)
 							{
-								if (!arena->cities[i].field->city[j]->closed)
+								if(!arena->cities[i].field->city[j]->closed)
 									break;
 							}
 						}
 
-						if (j == MAX_CITYFIELD)
+						if(j == MAX_CITYFIELD)
 							arena->cities[i].field->abletocapture = 1;
 					}
 				}
 			}
 			else
 			{
-				if (arena->cities[i].closed)
+				if(arena->cities[i].closed)
 				{
-					BPrintf(RADIO_YELLOW, "%s reopened (c%d) (f%d)", arena->cities[i].name, i+1, arena->cities[i].field?arena->cities[i].field->number:-1);
+					BPrintf(RADIO_YELLOW, "%s reopened (c%d) (f%d)", arena->cities[i].name, i + 1, arena->cities[i].field ? arena->cities[i].field->number : -1);
 					arena->cities[i].closed = 0;
 
-					if (arena->cities[i].field)
+					if(arena->cities[i].field)
 					{
-						if (arena->cities[i].needtoclose)
+						if(arena->cities[i].needtoclose)
 							arena->cities[i].field->abletocapture = 0;
 					}
 				}
@@ -1063,35 +1064,36 @@ void CheckArenaRules(void)
 
 	// CV tick
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if (!(arena->frame % 6000)) // Log AI's position every 60sec
+		if(!(arena->frame % 6000)) // Log AI's position every 60sec
 			Boid::logPosition();
 
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			for (i = 0; i < cvs->value; i++)
+			for(i = 0; i < cvs->value; i++)
 			{
 				near = NULL;
 
-				if (!setjmp(debug_buffer))
+				if(!setjmp(debug_buffer))
 				{
 					if(!(arena->frame % 50)) // 500ms
 					{
 						RunShips(i, 0);
 
 						// check if there are enemies around
-						if (arena->cvs[i].ships && arena->cvs[i].ships->drone)
+						if(arena->cvs[i].ships && arena->cvs[i].ships->drone)
 						{
 							near = NearPlane(arena->cvs[i].ships->drone, arena->cvs[i].country, 15000);
 
-							if (!setjmp(debug_buffer))
+							if(!setjmp(debug_buffer))
 							{
 								if(near)
 								{
-									posx = DistBetween(arena->cvs[i].ships->Position.x,arena->cvs[i].ships->Position.y, 0, near->posxy[0][0], near->posxy[1][0], near->posalt[0], -1);
+									posx = DistBetween(arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, near->posxy[0][0],
+											near->posxy[1][0], near->posalt[0], -1);
 
-									if (!arena->cvs[i].threatened && !(arena->frame % 600))
+									if(!arena->cvs[i].threatened && !(arena->frame % 600))
 									{
 										ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
 									}
@@ -1109,7 +1111,7 @@ void CheckArenaRules(void)
 					DebugClient(__FILE__, __LINE__, TRUE, NULL);
 				}
 
-				if (!setjmp(debug_buffer))
+				if(!setjmp(debug_buffer))
 				{
 					// CV Attack
 					for(ship = arena->cvs[i].ships; ship; ship = ship->next)
@@ -1119,27 +1121,29 @@ void CheckArenaRules(void)
 							Com_Printf(VERBOSE_WARNING, "CV Attack, ship->drone == NULL\n");
 							continue;
 						}
-						if (!setjmp(debug_buffer))
+						if(!setjmp(debug_buffer))
 						{
 							if(near && posx > 0)
 							{
-								speed = sqrt(near->speedxyz[0][0]*near->speedxyz[0][0]+near->speedxyz[1][0]*near->speedxyz[1][0]+near->speedxyz[2][0]*near->speedxyz[2][0]);
+								speed = sqrt(near->speedxyz[0][0] * near->speedxyz[0][0] + near->speedxyz[1][0] * near->speedxyz[1][0] + near->speedxyz[2][0]
+										* near->speedxyz[2][0]);
 
 								if(posx <= 4000)
 								{
-									if (!setjmp(debug_buffer))
+									if(!setjmp(debug_buffer))
 									{
 										// % of hit
-										j = (int16_t)(-0.003 * (float)posx + 11.0);
+										j = (int16_t) (-0.003 * (float) posx + 11.0);
 										if(j < 0)
 											j = 0;
-										j = (int16_t)((float)j * (-0.001 * speed + 1.3));
+										j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
 										if(j < 0)
 											j = 0;
 
 										if((rand() % 100) < j) // hit
 											FireAck(ship->drone, near, posx, 0);
-										else // fail
+										else
+											// fail
 											FireAck(ship->drone, near, posx, 1);
 									}
 									else
@@ -1149,19 +1153,20 @@ void CheckArenaRules(void)
 								}
 								else if(!(arena->frame % 300)) // 3 sec
 								{
-									if (!setjmp(debug_buffer))
+									if(!setjmp(debug_buffer))
 									{
 										// % of hit
-										j = (int16_t)(-0.001 * (float)posx + 15.0);
+										j = (int16_t) (-0.001 * (float) posx + 15.0);
 										if(j < 0)
 											j = 0;
-										j = (int16_t)((float)j * (-0.001 * speed + 1.3));
+										j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
 										if(j < 0)
 											j = 0;
 
 										if((rand() % 100) < j) // hit
 											FireFlak(ship->drone, near, posx, 0);
-										else // fail
+										else
+											// fail
 											FireFlak(ship->drone, near, posx, 1);
 									}
 									else
@@ -1176,20 +1181,21 @@ void CheckArenaRules(void)
 							DebugClient(__FILE__, __LINE__, TRUE, NULL);
 						}
 
-						if (!setjmp(debug_buffer))
+						if(!setjmp(debug_buffer))
 						{
-							if (!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
+							if(!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
 							{
 								j = dist = 0;
 
-								if (!setjmp(debug_buffer))
+								if(!setjmp(debug_buffer))
 								{
 									// check nearest CV
 									for(k = 0; k < cvs->value; k++)
 									{
 										if(ship->country != arena->cvs[k].country)
 										{
-											posx = DistBetween(ship->Position.x, ship->Position.y, 0, arena->fields[arena->cvs[k].field].posxyz[0], arena->fields[arena->cvs[k].field].posxyz[1], 0, (int32_t)cvrange->value);
+											posx = DistBetween(ship->Position.x, ship->Position.y, 0, arena->fields[arena->cvs[k].field].posxyz[0],
+													arena->fields[arena->cvs[k].field].posxyz[1], 0, (int32_t) cvrange->value);
 
 											if(posx > 0)
 											{
@@ -1207,7 +1213,7 @@ void CheckArenaRules(void)
 									DebugClient(__FILE__, __LINE__, TRUE, NULL);
 								}
 
-								if (!setjmp(debug_buffer))
+								if(!setjmp(debug_buffer))
 								{
 									// check nearest field
 									if(!j)
@@ -1215,16 +1221,20 @@ void CheckArenaRules(void)
 										j = NearestField(ship->Position.x, ship->Position.y, ship->country, TRUE, FALSE, &dist);
 									}
 
-									if (j >= 0 && dist < (u_int32_t)cvrange->value && j != arena->cvs[i].field)
+									if(j >= 0 && dist < (u_int32_t) cvrange->value && j != arena->cvs[i].field)
 									{
-										if (j < fields->value)
+										if(j < fields->value)
 										{
-											if (!arena->fields[j].closed)
+											if(!arena->fields[j].closed)
 											{
-												if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+												if(arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
 												{
-													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0],
+															arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2],
+															arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1],
+															arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0],
+															arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
 												}
 												else
 													CVFire(ship, arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
@@ -1232,15 +1242,23 @@ void CheckArenaRules(void)
 										}
 										else
 										{
-											if (!arena->cities[j - (int16_t)fields->value].closed)
+											if(!arena->cities[j - (int16_t) fields->value].closed)
 											{
-												if (arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+												if(arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
 												{
-													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
-													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1], arena->cities[j - (int16_t)fields->value].posxyz[2], NULL);
+													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0],
+															arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2],
+															arena->cities[j - (int16_t) fields->value].posxyz[0],
+															arena->cities[j - (int16_t) fields->value].posxyz[1],
+															arena->cities[j - (int16_t) fields->value].posxyz[2], NULL);
+													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1],
+															arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t) fields->value].posxyz[0],
+															arena->cities[j - (int16_t) fields->value].posxyz[1],
+															arena->cities[j - (int16_t) fields->value].posxyz[2], NULL);
 												}
 												else
-													CVFire(ship, arena->cities[j - (int16_t)fields->value].posxyz[0], arena->cities[j - (int16_t)fields->value].posxyz[1]);
+													CVFire(ship, arena->cities[j - (int16_t) fields->value].posxyz[0], arena->cities[j
+															- (int16_t) fields->value].posxyz[1]);
 											}
 										}
 									}
@@ -1275,11 +1293,11 @@ void CheckArenaRules(void)
 
 	// RPS Tick
 
-	if (rps->value)
+	if(rps->value)
 	{
-		if (!(arena->frame % 6000)) // every minute
+		if(!(arena->frame % 6000)) // every minute
 		{
-			if (!setjmp(debug_buffer))
+			if(!setjmp(debug_buffer))
 			{
 				UpdateRPS(1);
 			}
@@ -1292,9 +1310,9 @@ void CheckArenaRules(void)
 
 	// Map dots
 
-	if (!(arena->frame % 200)) // 2 seconds
+	if(!(arena->frame % 200)) // 2 seconds
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
 			SendMapDots();
 		}
@@ -1306,9 +1324,9 @@ void CheckArenaRules(void)
 
 	// CV dots
 
-	if (!(arena->frame % 500)) // 5 seconds
+	if(!(arena->frame % 500)) // 5 seconds
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
 			SendCVDots();
 		}
@@ -1320,58 +1338,58 @@ void CheckArenaRules(void)
 
 	// Change Arena
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if (arena->mapnum >= 0 && mapcycle->value)
+		if(arena->mapnum >= 0 && mapcycle->value)
 		{
-			dist = (arena->year * 10000)+(arena->month * 100) + arena->day;
+			dist = (arena->year * 10000) + (arena->month * 100) + arena->day;
 
-			if (arena->mapcycle[arena->mapnum].date == dist) // this is the changemap day!
+			if(arena->mapcycle[arena->mapnum].date == dist) // this is the changemap day!
 			{
-				if (!arena->countdown)
+				if(!arena->countdown)
 				{
 					arena->countdown = 18001; // 3 minutes
 				}
 			}
 		}
 
-		if (mapcycle->value && !(arena->frame % 60000)) // Warn players time left to change arena every 10 minutes
+		if(mapcycle->value && !(arena->frame % 60000)) // Warn players time left to change arena every 10 minutes
 		{
 			i = TimetoNextArena();
 
-			if (i > 0 && i < 3)
+			if(i > 0 && i < 3)
 			{
-				if (i > 1)
+				if(i > 1)
 					BPrintf(RADIO_YELLOW, "Next arena will be loaded in %u virtual days", i);
 				else
 					BPrintf(RADIO_YELLOW, "Next arena will be loaded next virtual day", i);
 			}
 		}
 
-		if (arena->countdown)
+		if(arena->countdown)
 		{
 			arena->countdown--;
 
-			if (arena->countdown < 6000)
+			if(arena->countdown < 6000)
 			{
-				if (!(arena->countdown % 1000)) // each 10 secs
+				if(!(arena->countdown % 1000)) // each 10 secs
 				{
 					BPrintf(RADIO_YELLOW, "Arena will be changed in %u seconds", arena->countdown / 100);
 				}
 			}
-			else if (!(arena->countdown % 6000)) // each minute
+			else if(!(arena->countdown % 6000)) // each minute
 			{
-				BPrintf(RADIO_YELLOW, "Arena will be changed in %s", Com_TimeSeconds(arena->countdown/100), arena->countdown/100);
+				BPrintf(RADIO_YELLOW, "Arena will be changed in %s", Com_TimeSeconds(arena->countdown / 100), arena->countdown / 100);
 				BPrintf(RADIO_YELLOW, "Your don't need to land, your score will be saved");
 			}
 
-			if (arena->countdown == 1)
+			if(arena->countdown == 1)
 			{
 
 				arena->mapnum++;
 				arena->countdown = 0;
 
-				if ((arena->mapnum) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum)].date)
+				if((arena->mapnum) == MAX_MAPCYCLE || !arena->mapcycle[(arena->mapnum)].date)
 				{
 					NewWar(); // set mapnum to zero, backup scores, reset scores, etc
 				}
@@ -1380,7 +1398,7 @@ void CheckArenaRules(void)
 					BackupScores(COLLECT_MAP);
 					sprintf(my_query, "UPDATE score_common SET killstod = '0', structstod = '0'");
 
-					if (d_mysql_query(&my_sock, my_query)) // query succeeded
+					if(d_mysql_query(&my_sock, my_query)) // query succeeded
 					{
 						Com_Printf(VERBOSE_WARNING, "MapChange: couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
@@ -1397,21 +1415,21 @@ void CheckArenaRules(void)
 
 	// Tatical drones tick
 
-	if (!notanks->value && !arcade->value)
+	if(!notanks->value && !arcade->value)
 	{
-		if (!(arena->frame % 100))
+		if(!(arena->frame % 100))
 		{
-			if (!setjmp(debug_buffer))
+			if(!setjmp(debug_buffer))
 			{
-				if (rand() % 2)
+				if(rand() % 2)
 					close = 1; // red
 				else
 					close = 3; // gold
 
 				// check all arena for total of drones
-				for (i = 0, j = 0; i < maxentities->value; i++)
+				for(i = 0, j = 0; i < maxentities->value; i++)
 				{
-					if (clients[i].inuse && (clients[i].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY)) && clients[i].country == close)
+					if(clients[i].inuse && (clients[i].drone & (DRONE_TANK1 | DRONE_TANK2 | DRONE_AAA | DRONE_KATY)) && clients[i].country == close)
 					{
 						j++;
 					}
@@ -1419,24 +1437,23 @@ void CheckArenaRules(void)
 
 				dist = 20;
 
-				if (j < 6)
+				if(j < 6)
 				{
-					while (close)
+					while(close)
 					{
-						i = rand() % (u_int16_t)fields->value;
+						i = rand() % (u_int16_t) fields->value;
 
-						if (((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) && arena->fields[i].country == close)
+						if(((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) && arena->fields[i].country == close)
 						{
-							j = NearestField(arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], close, FALSE,
-							FALSE, NULL);
+							j = NearestField(arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], close, FALSE, FALSE, NULL);
 
-							if (j >= 0)
+							if(j >= 0)
 								LaunchTanks(i, j, close, NULL); //close -> country
 
 							close = 0;
 						}
 
-						if (dist)
+						if(dist)
 						{
 							dist--;
 						}
@@ -1456,9 +1473,9 @@ void CheckArenaRules(void)
 
 	// Arenalist update
 
-	if (!(arena->frame % 500)) // 5 sec
+	if(!(arena->frame % 500)) // 5 sec
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
 			NoopArenalist();
 		}
@@ -1470,14 +1487,14 @@ void CheckArenaRules(void)
 
 	// Online Players
 
-	if (!(arena->frame % 100)) // 1 sec
+	if(!(arena->frame % 100)) // 1 sec
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
 			players_num += arena->numplayers;
 			players_count++;
 
-			if (!(arena->frame % 30000)) // 5 min
+			if(!(arena->frame % 30000)) // 5 min
 			{
 				Com_Printf(VERBOSE_ONLINE, "Online Players: %.3f\n", (double) players_num / players_count);
 				players_num = players_count = 0;
@@ -1491,15 +1508,15 @@ void CheckArenaRules(void)
 
 	// Country index tick
 
-	if (!(arena->frame % 6000)) // 1 min
+	if(!(arena->frame % 6000)) // 1 min
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
 			reds = golds = 0;
 
 			for(i = 0; i < maxentities->value; i++)
 			{
-				if (clients[i].inuse && !clients[i].drone)
+				if(clients[i].inuse && !clients[i].drone)
 				{
 					if(clients[i].country == COUNTRY_RED)
 						reds++;
@@ -1509,8 +1526,8 @@ void CheckArenaRules(void)
 				}
 			}
 
-			arena->redindex = 1 + (0.4 * (golds > 10?10:golds) / 10);
-			arena->goldindex = 1 + (0.4 * (reds > 10?10:reds) / 10);
+			arena->redindex = 1 + (0.4 * (golds > 10 ? 10 : golds) / 10);
+			arena->goldindex = 1 + (0.4 * (reds > 10 ? 10 : reds) / 10);
 		}
 		else
 		{
@@ -1520,9 +1537,9 @@ void CheckArenaRules(void)
 
 	// File descriptors tick
 
-	if (!(arena->frame % 6000)) // 1 min
+	if(!(arena->frame % 6000)) // 1 min
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
 			for(i = 0; i < MAX_LOGFILE; i++)
 			{
@@ -1540,12 +1557,11 @@ void CheckArenaRules(void)
 		}
 	}
 
-
 	// Backup Tick
 
-	if (!(arena->frame % 30000)) // 5 min
+	if(!(arena->frame % 30000)) // 5 min
 	{
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
 			BackupArenaStatus();
 			Cmd_CheckBuildings(NULL); // DEBUG
@@ -1557,25 +1573,25 @@ void CheckArenaRules(void)
 	}
 
 	// ConnStatistics tick
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if (!(arena->frame % 100)) // 1 sec
+		if(!(arena->frame % 100)) // 1 sec
 		{
 			ConnStatistics(NULL, 0, 1);
 
-			if (!(arena->frame % 500)) // 5 sec
+			if(!(arena->frame % 500)) // 5 sec
 			{
 				ConnStatistics(NULL, 0, 5);
 
-				if (!(arena->frame % 1000)) // 10 sec
+				if(!(arena->frame % 1000)) // 10 sec
 				{
 					ConnStatistics(NULL, 0, 10);
 
-					if (!(arena->frame % 3000)) // 30 sec
+					if(!(arena->frame % 3000)) // 30 sec
 					{
 						ConnStatistics(NULL, 0, 30);
 
-						if (!(arena->frame % 6000)) // 60 sec
+						if(!(arena->frame % 6000)) // 60 sec
 						{
 							ConnStatistics(NULL, 0, 60);
 						}
@@ -1605,9 +1621,9 @@ void ProcessMetarWeather(void)
 	char *token;
 	char value[8];
 
-	if ((fp = fopen("./cron/weather.cfg", "r")))
+	if((fp = fopen("./cron/weather.cfg", "r")))
 	{
-		if (!fgets(buffer, sizeof(buffer), fp))
+		if(!fgets(buffer, sizeof(buffer), fp))
 		{
 			Com_Printf(VERBOSE_WARNING, "Unexpected end of weather.cfg\n");
 			fclose(fp);
@@ -1615,26 +1631,24 @@ void ProcessMetarWeather(void)
 		}
 		else
 		{
-			angle = Com_Atof((char *)strtok(buffer, ";"));
-			wind = Com_Atof((char *)strtok(NULL, ";"));
+			angle = Com_Atof((char *) strtok(buffer, ";"));
+			wind = Com_Atof((char *) strtok(NULL, ";"));
 
 			xwind = wind * sin(Com_Rad(angle));
-			snprintf(value, sizeof(value), "%d", (int32_t)(xwind+0.5));
+			snprintf(value, sizeof(value), "%d", (int32_t) (xwind + 0.5));
 			Var_Set("xwindvelocity", value);
 
 			ywind = wind * cos(Com_Rad(angle));
-			snprintf(value, sizeof(value), "%d", (int32_t)(ywind+0.5));
+			snprintf(value, sizeof(value), "%d", (int32_t) (ywind + 0.5));
 			Var_Set("ywindvelocity", value);
 
-			token = (char *)strtok(NULL, ";");
+			token = (char *) strtok(NULL, ";");
 			strcpy(value, token ? token : "0");
 			weather = Com_Atoi(value);
 			Var_Set("weather", value);
 
-			BPrintf(RADIO_WEATHER, "Weather: %s, Wind: %.2fKm/h from %s",
-			(!weather)?"Cloudy":(weather == 1)?"Clear":(weather == 2)?"Raining":"Partialy Cloudy",
-			(wind * 1.09728),
-			WBRhumb(angle));
+			BPrintf(RADIO_WEATHER, "Weather: %s, Wind: %.2fKm/h from %s", (!weather) ? "Cloudy" : (weather == 1) ? "Clear" : (weather == 2) ? "Raining"
+					: "Partialy Cloudy", (wind * 1.09728), WBRhumb(angle));
 
 			fclose(fp);
 		}
@@ -1666,10 +1680,10 @@ void ProcessCommands(char *command, client_t *client)
 
 	memset(argv, 0, sizeof(argv));
 
-	if (!Com_Strncmp(command, "//", 2)) // break command if commented
+	if(!Com_Strncmp(command, "//", 2)) // break command if commented
 		return;
 
-	if (command[0] == '\n')
+	if(command[0] == '\n')
 		return;
 
 	size = strlen(command);
@@ -1680,37 +1694,37 @@ void ProcessCommands(char *command, client_t *client)
 		return;
 	}
 
-	while (command[--size] == ' ' || command[size] == '\n' || command[size] == '\t' || command[size] == '\r')
+	while(command[--size] == ' ' || command[size] == '\n' || command[size] == '\t' || command[size] == '\r')
 		//Remove ending spaces
 		;
 
-	if (size < 0)
+	if(size < 0)
 		return;
 
 	command[++size] = '\0';
 
 	//Search for args
-	for (i=0; i < size; i++)
+	for(i = 0; i < size; i++)
 	{
-		if (command[i] == ' ') // break command and args
+		if(command[i] == ' ') // break command and args
 		{
 			command[i++] = '\0';
-			while (command[i] == ' ')
+			while(command[i] == ' ')
 				// remove spaces between command, args
 				i++;
 
-			if (command[i] == '\"') // quoted string
+			if(command[i] == '\"') // quoted string
 			{
 				i++;
 
-				if (argc < 10)
+				if(argc < 10)
 				{
 					argv[argc] = &(command[i]);
 					Com_ParseString(argv[argc]);
 					argc++;
 				}
 
-				while (command[i] != '\"')
+				while(command[i] != '\"')
 
 					i++;
 
@@ -1718,10 +1732,10 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			else
 			{
-				if (!Com_Strncmp(&(command[i]), "//", 2)) // break args if commented
+				if(!Com_Strncmp(&(command[i]), "//", 2)) // break args if commented
 					break;
 
-				if (argc < 10)
+				if(argc < 10)
 				{
 					argv[argc] = &(command[i]);
 					Com_ParseString(argv[argc]);
@@ -1731,7 +1745,7 @@ void ProcessCommands(char *command, client_t *client)
 		}
 	}
 
-	if (!client) // if not client may (must) be console command
+	if(!client) // if not client may (must) be console command
 	{
 		permission = 3;
 	}
@@ -1742,13 +1756,13 @@ void ProcessCommands(char *command, client_t *client)
 
 	// commands that everyone can execute
 
-	if (client) // commands that console shall not to execute (players can execute)
+	if(client) // commands that console shall not to execute (players can execute)
 	{
-		if (!Com_Stricmp(command, "country"))
+		if(!Com_Stricmp(command, "country"))
 		{
-			if (!client->inflight || (client->attr & FLAG_ADMIN))
+			if(!client->inflight || (client->attr & FLAG_ADMIN))
 			{
-				if (argv[0])
+				if(argv[0])
 				{
 					if(Com_Atoi(argv[0]) == 1 || Com_Atoi(argv[0]) == 3 || client->attr) // limit to Red and Gold for normal users
 					{
@@ -1771,11 +1785,11 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "mov") || !Com_Stricmp(command, "move"))
+		else if(!Com_Stricmp(command, "mov") || !Com_Stricmp(command, "move"))
 		{
-			if (!client->inflight || client->attr == 1)
+			if(!client->inflight || client->attr == 1)
 			{
-				if (argv[0])
+				if(argv[0])
 					Cmd_Move(argv[0], client->country, client);
 				else
 					PPrintf(client, RADIO_YELLOW, "usage: .mov [F<field number>|HQ]");
@@ -1786,17 +1800,17 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "echo"))
+		else if(!Com_Stricmp(command, "echo"))
 		{
-			if (argv[0])
+			if(argv[0])
 				Cmd_Say(argv, argc, client);
 			else
 				PPrintf(client, RADIO_YELLOW, "usage: .echo <message with max of 10 words>");
 			return;
 		}
-		else if (!Com_Stricmp(command, "plane"))
+		else if(!Com_Stricmp(command, "plane"))
 		{
-			if (argv[0])
+			if(argv[0])
 				Cmd_Plane(Com_Atoi(argv[0]), client);
 			else
 			{
@@ -1805,9 +1819,9 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "warp") && (permission & (FLAG_ADMIN | FLAG_OP)))
+		else if(!Com_Stricmp(command, "warp") && (permission & (FLAG_ADMIN | FLAG_OP)))
 		{
-			if (argv[0])
+			if(argv[0])
 			{
 				client->warp = Com_Atoi(argv[0]) * 100; // convert seconds to frames
 				client->warptimer = client->warp;
@@ -1818,9 +1832,9 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "fuel"))
+		else if(!Com_Stricmp(command, "fuel"))
 		{
-			if (argv[0])
+			if(argv[0])
 				Cmd_Fuel(Com_Atoi(argv[0]), client);
 			else
 			{
@@ -1829,9 +1843,9 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "conv"))
+		else if(!Com_Stricmp(command, "conv"))
 		{
-			if (argv[0])
+			if(argv[0])
 			{
 				Cmd_Conv(Com_Atoi(argv[0]), client);
 				UpdateClientFile(client);
@@ -1843,9 +1857,9 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "ord"))
+		else if(!Com_Stricmp(command, "ord"))
 		{
-			if (argv[0])
+			if(argv[0])
 				Cmd_Ord(Com_Atoi(argv[0]), client);
 			else
 			{
@@ -1854,18 +1868,16 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "forecast"))
+		else if(!Com_Stricmp(command, "forecast"))
 		{
 			wind = sqrt(Com_Pow(xwindvelocity->value, 2) + Com_Pow(ywindvelocity->value, 2));
 			angle = Com_Deg(atan2(xwindvelocity->value, ywindvelocity->value));
 
-			PPrintf(client, RADIO_WEATHER, "Weather: %s, Wind: %.2fKm/h from %s",
-				(!weather->value)?"Cloudy":(weather->value == 1)?"Clear":(weather->value == 2)?"Raining":"Partialy Cloudy",
-				(wind * 1.09728),
-				WBRhumb(angle));
+			PPrintf(client, RADIO_WEATHER, "Weather: %s, Wind: %.2fKm/h from %s", (!weather->value) ? "Cloudy" : (weather->value == 1) ? "Clear"
+					: (weather->value == 2) ? "Raining" : "Partialy Cloudy", (wind * 1.09728), WBRhumb(angle));
 			return;
 		}
-		else if (!Com_Stricmp(command, "rain"))
+		else if(!Com_Stricmp(command, "rain"))
 		{
 			if(client->rain)
 			{
@@ -1878,14 +1890,14 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				PPrintf(client, RADIO_YELLOW, "Rain enabled");
 				Com_Printf(VERBOSE_ATTENTION, "%s enabled rain\n", client->longnick);
-				WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
+				WB3DotCommand(client, ".weather %u", (u_int8_t) weather->value);
 				client->rain = 1;
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "reload"))
+		else if(!Com_Stricmp(command, "reload"))
 		{
-			if (!arcade->value)
+			if(!arcade->value)
 			{
 				Cmd_Reload(client);
 			}
@@ -1896,13 +1908,14 @@ void ProcessCommands(char *command, client_t *client)
 
 			return;
 		}
-		else if (!Com_Stricmp(command, "pingtest"))
+		else if(!Com_Stricmp(command, "pingtest"))
 		{
 			if(argv[0])
 			{
 				if((pclient = FindLClient(argv[0])))
 				{
-					PPrintf(client, RADIO_YELLOW, "%s connection quality is currently: %s", pclient->longnick, !(pclient->cancollide)?"Not available":pclient->connection == 0?"Stable":pclient->connection == 1?"Fair":pclient->connection == 2?"Unstable":"Poor");
+					PPrintf(client, RADIO_YELLOW, "%s connection quality is currently: %s", pclient->longnick, !(pclient->cancollide) ? "Not available"
+							: pclient->connection == 0 ? "Stable" : pclient->connection == 1 ? "Fair" : pclient->connection == 2 ? "Unstable" : "Poor");
 				}
 				else
 				{
@@ -1910,7 +1923,8 @@ void ProcessCommands(char *command, client_t *client)
 				}
 			}
 			else
-				PPrintf(client, RADIO_YELLOW, "Your connection quality is currently: %s", !(client->cancollide)?"Not available":client->connection == 0?"Stable":client->connection == 1?"Fair":client->connection == 2?"Unstable":"Poor");
+				PPrintf(client, RADIO_YELLOW, "Your connection quality is currently: %s", !(client->cancollide) ? "Not available"
+						: client->connection == 0 ? "Stable" : client->connection == 1 ? "Fair" : client->connection == 2 ? "Unstable" : "Poor");
 			//Cmd_Pingtest(0, client);
 			return;
 		}
@@ -1928,17 +1942,17 @@ void ProcessCommands(char *command, client_t *client)
 				return;
 			}
 		}
-		else if (!Com_Stricmp(command, "easy"))
+		else if(!Com_Stricmp(command, "easy"))
 		{
-			if (argv[0])
+			if(argv[0])
 				Cmd_Easy(Com_Atoi(argv[0]), client);
 			else
 				PPrintf(client, RADIO_YELLOW, "usage: .easy [1|0]");
 			return;
 		}
-		else if (!Com_Stricmp(command, "kill"))
+		else if(!Com_Stricmp(command, "kill"))
 		{
-			if (client->attached && client->attached->drone & (DRONE_HMACK | DRONE_HTANK))
+			if(client->attached && client->attached->drone & (DRONE_HMACK | DRONE_HTANK))
 			{
 				PPrintf(client, RADIO_YELLOW, "You can't kill yourself in hmack, hit 'bail out'(enter) 3 times");
 				return;
@@ -1946,15 +1960,15 @@ void ProcessCommands(char *command, client_t *client)
 			SendForceStatus(STATUS_PILOT, client->status_status, client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "fly"))
+		else if(!Com_Stricmp(command, "fly"))
 		{
-			if (!client->inflight || client->attr == 1)
+			if(!client->inflight || client->attr == 1)
 			{
-				if (!Cmd_Fly(0, client))
+				if(!Cmd_Fly(0, client))
 				{
-					if (client->shanghai) // start shanghai flight
+					if(client->shanghai) // start shanghai flight
 					{
-						if (client->shanghai->ready && !client->shanghai->inflight)
+						if(client->shanghai->ready && !client->shanghai->inflight)
 						{
 							client->shanghai->attached = client;
 							Com_Printf(VERBOSE_ALWAYS, "%s start flight with %s in shanghai\n", client->longnick, client->shanghai->longnick);
@@ -1962,13 +1976,13 @@ void ProcessCommands(char *command, client_t *client)
 						}
 					}
 
-					if (HaveGunner(client->plane))
+					if(HaveGunner(client->plane))
 					{
-						for (i = 0; i < 7; i++) // start gunners flight
+						for(i = 0; i < 7; i++) // start gunners flight
 						{
-							if (client->gunners[i])
+							if(client->gunners[i])
 							{
-								if (client->gunners[i]->ready && !client->gunners[i]->inflight)
+								if(client->gunners[i]->ready && !client->gunners[i]->inflight)
 								{
 									client->gunners[i]->attached = client;
 									Cmd_Fly(GunPos(i, 1), client->gunners[i]);
@@ -1984,16 +1998,16 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "motd"))
+		else if(!Com_Stricmp(command, "motd"))
 		{
 			snprintf(file, sizeof(file), "motd.txt");
 
-			if ((fp = fopen(file, "r")) == NULL)
+			if((fp = fopen(file, "r")) == NULL)
 			{
 				// Couldn't open general motd.txt, try arena motd
 				snprintf(file, sizeof(file), "./arenas/%s/motd.txt", dirname->string);
 
-				if ((fp = fopen(file, "r")) == NULL)
+				if((fp = fopen(file, "r")) == NULL)
 				{
 					// Couldn't even open arena motd, print error
 					Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", file);
@@ -2012,9 +2026,9 @@ void ProcessCommands(char *command, client_t *client)
 			SendFileSeq1(file, "motd.txt", client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "show"))
+		else if(!Com_Stricmp(command, "show"))
 		{
-			if (!client->inflight)
+			if(!client->inflight)
 			{
 				Cmd_Show(client);
 			}
@@ -2024,9 +2038,9 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "gunstat"))
+		else if(!Com_Stricmp(command, "gunstat"))
 		{
-			if (client->gunstat)
+			if(client->gunstat)
 			{
 				client->gunstat = 0;
 				PPrintf(client, RADIO_YELLOW, "gunstat disabled");
@@ -2038,40 +2052,41 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "challenge"))
+		else if(!Com_Stricmp(command, "challenge"))
 		{
 			return;
 		}
-		else if (!Com_Stricmp(command, "score"))
+		else if(!Com_Stricmp(command, "score"))
 		{
-			if (!client->inflight)
+			if(!client->inflight)
 			{
-				if (argv[0])
+				if(argv[0])
 					Cmd_Score(argv[0], client);
 				else
 					Cmd_Score(NULL, client);
 			}
 			else
 			{
-				PPrintf(client, RADIO_YELLOW, "Current flight score: %.3f", client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore - client->score.penaltyscore - client->score.costscore);
+				PPrintf(client, RADIO_YELLOW, "Current flight score: %.3f", client->score.airscore + client->score.groundscore + client->score.captscore
+						+ client->score.rescuescore - client->score.penaltyscore - client->score.costscore);
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "sqscore") || !Com_Stricmp(command, "medals") || !Com_Stricmp(command, "medal"))
+		else if(!Com_Stricmp(command, "sqscore") || !Com_Stricmp(command, "medals") || !Com_Stricmp(command, "medal"))
 		{
 			PClientMedals(NULL, client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "help"))
+		else if(!Com_Stricmp(command, "help"))
 		{
 			SendFileSeq1("help.txt", "helpcommands.asc", client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "startfau"))
+		else if(!Com_Stricmp(command, "startfau"))
 		{
-			if (!client->inflight)
+			if(!client->inflight)
 			{
-				if (!argv[2])
+				if(!argv[2])
 				{
 					PPrintf(client, RADIO_YELLOW, "usage: .startfau <distance> <azimute> <0|1>");
 				}
@@ -2084,7 +2099,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_YELLOW, "You can't launch V-1 while flying");
 			return;
 		}
-		else if (!Com_Stricmp(command, "hmack"))
+		else if(!Com_Stricmp(command, "hmack"))
 		{
 			//			if (wb3->value)
 			//			{
@@ -2093,19 +2108,19 @@ void ProcessCommands(char *command, client_t *client)
 			//				return;
 			//			}
 
-			if (!argv[0])
+			if(!argv[0])
 			{
 				Cmd_Hmack(client, NULL, 0);
 			}
 			else
 			{
-				if (!Com_Stricmp(argv[0], "move"))
+				if(!Com_Stricmp(argv[0], "move"))
 				{
-					if (client->attr == FLAG_OP)
+					if(client->attr == FLAG_OP)
 					{
-						for (i = 0; i < MAX_RELATED; i++)
+						for(i = 0; i < MAX_RELATED; i++)
 						{
-							if (client->related[i]->drone == DRONE_HMACK)
+							if(client->related[i]->drone == DRONE_HMACK)
 							{
 								client->related[i]->posxy[0][0] = Com_Atoi(argv[1]);
 								client->related[i]->posxy[1][0] = Com_Atoi(argv[2]);
@@ -2119,15 +2134,15 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "tank"))
+		else if(!Com_Stricmp(command, "tank"))
 		{
-			if (wb3->value)
+			if(wb3->value)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "This command not available in WB3");
 				return;
 			}
 
-			if (!argv[0])
+			if(!argv[0])
 			{
 				Cmd_Hmack(client, NULL, 1);
 			}
@@ -2137,17 +2152,17 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "tanks"))
+		else if(!Com_Stricmp(command, "tanks"))
 		{
-			if (!notanks->value)
+			if(!notanks->value)
 			{
-				if (!argv[0])
+				if(!argv[0])
 				{
 					PPrintf(client, RADIO_LIGHTYELLOW, "usage: .tanks f<field>");
 				}
 				else
 				{
-					if (client->inflight && !(client->attr & FLAG_ADMIN))
+					if(client->inflight && !(client->attr & FLAG_ADMIN))
 					{
 						PPrintf(client, RADIO_YELLOW, "You can't start tanks while flying");
 					}
@@ -2163,28 +2178,28 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "commandos"))
+		else if(!Com_Stricmp(command, "commandos"))
 		{
-			if (!client->inflight)
+			if(!client->inflight)
 			{
 				PPrintf(client, RADIO_YELLOW, "You can't start commandos at tower");
 				return;
 			}
 
-			if (client->chute)
+			if(client->chute)
 			{
 				PPrintf(client, RADIO_YELLOW, "You don't have walkie-talkie to contact your commandos");
 				return;
 			}
 
-			for (j = i = 0; i < MAX_RELATED; i++)
+			for(j = i = 0; i < MAX_RELATED; i++)
 			{
 				/*				if(client->related[i] && (client->related[i]->drone & DRONE_FAU))
 				 {
 				 PPrintf(client, RADIO_YELLOW, "You can't start commandos with a V-1 flying");
 				 return;
 				 }*/
-				if (client->related[i] && (client->related[i]->drone & DRONE_COMMANDOS))
+				if(client->related[i] && (client->related[i]->drone & DRONE_COMMANDOS))
 				{
 					j++;
 
@@ -2199,27 +2214,19 @@ void ProcessCommands(char *command, client_t *client)
 			Cmd_Commandos(client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "printlogbuffer"))
+		else if(!Com_Stricmp(command, "printlogbuffer"))
 		{
 			Com_PrintLogBuffer(client);
 		}
-		else if (!Com_Stricmp(command, "traffic"))
+		else if(!Com_Stricmp(command, "traffic"))
 		{
-			PPrintf(client, RADIO_YELLOW, "Traffic: %d;%d;%d;%d;%d %d;%d;%d;%d;%d",
-					client->sendcount[0][0],
-					client->sendcount[1][0]/5,
-					client->sendcount[2][0]/10,
-					client->sendcount[3][0]/30,
-					client->sendcount[4][0]/60,
-					client->recvcount[0][0],
-					client->recvcount[1][0]/5,
-					client->recvcount[2][0]/10,
-					client->recvcount[3][0]/30,
-					client->recvcount[4][0]/60);
+			PPrintf(client, RADIO_YELLOW, "Traffic: %d;%d;%d;%d;%d %d;%d;%d;%d;%d", client->sendcount[0][0], client->sendcount[1][0] / 5,
+					client->sendcount[2][0] / 10, client->sendcount[3][0] / 30, client->sendcount[4][0] / 60, client->recvcount[0][0], client->recvcount[1][0]
+							/ 5, client->recvcount[2][0] / 10, client->recvcount[3][0] / 30, client->recvcount[4][0] / 60);
 		}
-		else if (!Com_Stricmp(command, "minen"))
+		else if(!Com_Stricmp(command, "minen"))
 		{
-			if (!argv[1])
+			if(!argv[1])
 			{
 				PPrintf(client, RADIO_YELLOW, "usage: .minen <distance> <azimuth>");
 				return;
@@ -2230,30 +2237,30 @@ void ProcessCommands(char *command, client_t *client)
 				return;
 			}
 		}
-		else if (!Com_Stricmp(command, "pos"))
+		else if(!Com_Stricmp(command, "pos"))
 		{
-			if (client->attr & (FLAG_ADMIN | FLAG_OP))
-				PPrintf(client, RADIO_LIGHTYELLOW, "X %d Y %d Z %d - P %d R %d Y %d", client->posxy[0][0], client->posxy[1][0], client->posalt[0], client->angles[0][0], client->angles[1][0],
-						client->angles[2][0]);
+			if(client->attr & (FLAG_ADMIN | FLAG_OP))
+				PPrintf(client, RADIO_LIGHTYELLOW, "X %d Y %d Z %d - P %d R %d Y %d", client->posxy[0][0], client->posxy[1][0], client->posalt[0],
+						client->angles[0][0], client->angles[1][0], client->angles[2][0]);
 
-			if (!arcade->value)
+			if(!arcade->value)
 			{
-				if (!argv[0])
+				if(!argv[0])
 					Cmd_Pos(0, client, NULL);
 				else
 				{
-					if (strlen(argv[0]) >= 6)
+					if(strlen(argv[0]) >= 6)
 					{
-						if ((pclient = FindLClient(argv[0])))
+						if((pclient = FindLClient(argv[0])))
 						{
-							if (client->attr & (FLAG_ADMIN | FLAG_OP))
+							if(client->attr & (FLAG_ADMIN | FLAG_OP))
 							{
-								if (!((pclient->attr & FLAG_ADMIN) && (client->attr | FLAG_OP) && hideadmin->value))
+								if(!((pclient->attr & FLAG_ADMIN) && (client->attr | FLAG_OP) && hideadmin->value))
 									Cmd_Pos(0, pclient, client);
 							}
 							else
 							{
-								if (client->squadron && client->squadron == pclient->squadron)
+								if(client->squadron && client->squadron == pclient->squadron)
 								{
 									Cmd_Pos(0, pclient, client);
 								}
@@ -2278,13 +2285,13 @@ void ProcessCommands(char *command, client_t *client)
 			//			CPrintf(client->country, RADIO_LIGHTYELLOW, "%s Position: %.2f, %.2f, Alt %d [x %d y %d]", client->longnick, (double)(client->posxy[0][0] - 633157) / -105592, (double)(client->posxy[1][0] + 633157) / 105592, client->posalt[0], client->posxy[0][0], client->posxy[1][0]);
 			return;
 		}
-		else if (!Com_Stricmp(command, "thanks"))
+		else if(!Com_Stricmp(command, "thanks"))
 		{
-			if (!arcade->value)
+			if(!arcade->value)
 			{
-				if (!client->inflight)
+				if(!client->inflight)
 				{
-					if (!argv[0])
+					if(!argv[0])
 					{
 						PPrintf(client, RADIO_LIGHTYELLOW, "usage: .thanks <nick> [<nick> <nick>]");
 					}
@@ -2305,9 +2312,9 @@ void ProcessCommands(char *command, client_t *client)
 
 			return;
 		}
-		else if (!Com_Stricmp(command, "gclear"))
+		else if(!Com_Stricmp(command, "gclear"))
 		{
-			if (!argv[0])
+			if(!argv[0])
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .gclear <nick>");
 			}
@@ -2317,20 +2324,20 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "clear"))
+		else if(!Com_Stricmp(command, "clear"))
 		{
 			Cmd_Clear(client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "time") && !(permission & (FLAG_ADMIN | FLAG_OP))) // .time for normal users
+		else if(!Com_Stricmp(command, "time") && !(permission & (FLAG_ADMIN | FLAG_OP))) // .time for normal users
 		{
 			PPrintf(client, RADIO_LIGHTYELLOW, "Current time is: %2d:%02d", arena->hour, arena->minute);
 			PPrintf(client, RADIO_LIGHTYELLOW, "%04d/%02d/%02d", arena->year, arena->month, arena->day);
 			return;
 		}
-		else if (!Com_Stricmp(command, "invite") || !Com_Stricmp(command, "inv"))
+		else if(!Com_Stricmp(command, "invite") || !Com_Stricmp(command, "inv"))
 		{
-			if (!argv[0])
+			if(!argv[0])
 			{
 				PPrintf(client, RADIO_YELLOW, "usage: .invite <nick>");
 			}
@@ -2340,22 +2347,22 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "jsquad"))
+		else if(!Com_Stricmp(command, "jsquad"))
 		{
 			Cmd_Jsquad(client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "name") || !Com_Stricmp(command, "nam"))
+		else if(!Com_Stricmp(command, "name") || !Com_Stricmp(command, "nam"))
 		{
-			if (!argv[0])
+			if(!argv[0])
 			{
 				PPrintf(client, RADIO_YELLOW, "usage: .name <squadron name>");
 			}
 			else
 			{
-				for (i = 1; i < 10; i++)
+				for(i = 1; i < 10; i++)
 				{
-					if (argv[i])
+					if(argv[i])
 					{
 						*(argv[i] - 1) = 0x20;
 					}
@@ -2376,17 +2383,17 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "slogan") || !Com_Stricmp(command, "slo"))
+		else if(!Com_Stricmp(command, "slogan") || !Com_Stricmp(command, "slo"))
 		{
-			if (!argv[0])
+			if(!argv[0])
 			{
 				PPrintf(client, RADIO_YELLOW, "usage: .slogan <squadron motto>");
 			}
 			else
 			{
-				for (i = 1; i < 10; i++)
+				for(i = 1; i < 10; i++)
 				{
-					if (argv[i])
+					if(argv[i])
 					{
 						*(argv[i] - 1) = 0x20;
 					}
@@ -2398,9 +2405,9 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "remove"))
+		else if(!Com_Stricmp(command, "remove"))
 		{
-			if (!argv[0])
+			if(!argv[0])
 			{
 				PPrintf(client, RADIO_YELLOW, "usage: .remove <member nick>");
 			}
@@ -2410,38 +2417,38 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "withdraw") || !Com_Stricmp(command, "with"))
+		else if(!Com_Stricmp(command, "withdraw") || !Com_Stricmp(command, "with"))
 		{
 			Cmd_Withdraw(client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "disband"))
+		else if(!Com_Stricmp(command, "disband"))
 		{
 			Cmd_Disband(client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "test")) // TODO: Misc: debug dot commands
+		else if(!Com_Stricmp(command, "test")) // TODO: Misc: debug dot commands
 		{
 			WB3ConfigFM(client);
 
-			if (!argv[0])
+			if(!argv[0])
 				PPrintf(client, RADIO_LIGHTYELLOW, "Usage: .test <command> <4 values>");
-			else if (!argv[1])
+			else if(!argv[1])
 				WB3DotCommand(client, ".%s", argv[0]);
-			else if (!argv[2])
+			else if(!argv[2])
 				WB3DotCommand(client, ".%s %s", argv[0], argv[1]);
-			else if (!argv[3])
+			else if(!argv[3])
 				WB3DotCommand(client, ".%s %s %s", argv[0], argv[1], argv[2]);
-			else if (!argv[4])
+			else if(!argv[4])
 				WB3DotCommand(client, ".%s %s %s %s", argv[0], argv[1], argv[2], argv[3]);
-			else if (!argv[5])
+			else if(!argv[5])
 				WB3DotCommand(client, ".%s %s %s %s %s", argv[0], argv[1], argv[2], argv[3], argv[4]);
 
 			return;
 		}
-		else if (!Com_Stricmp(command, "psq"))
+		else if(!Com_Stricmp(command, "psq"))
 		{
-			if (!argv[1])
+			if(!argv[1])
 			{
 				PPrintf(client, RADIO_YELLOW, "usage: .psq <nick> <permissions>");
 			}
@@ -2451,18 +2458,18 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			return;
 		}
-		else if (!Com_Stricmp(command, "hls"))
+		else if(!Com_Stricmp(command, "hls"))
 		{
 			Cmd_Hls(client);
 			return;
 		}
-		else if (!Com_Stricmp(command, "wings"))
+		else if(!Com_Stricmp(command, "wings"))
 		{
-			if (!arcade->value)
+			if(!arcade->value)
 			{
-				if (!nowings->value)
+				if(!nowings->value)
 				{
-					if (!argv[0])
+					if(!argv[0])
 					{
 						PPrintf(client, RADIO_YELLOW, "usage: .wings <formation>");
 						PPrintf(client, RADIO_YELLOW, "0: Disable Wingmen");
@@ -2486,19 +2493,19 @@ void ProcessCommands(char *command, client_t *client)
 
 			return;
 		}
-		else if (!Com_Stricmp(command, "room"))
+		else if(!Com_Stricmp(command, "room"))
 		{
-			if (client->inflight)
+			if(client->inflight)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "You can't use this command while flying");
 			}
 			else
 			{
-				for (i = 0; i < maxentities->value; i++)
+				for(i = 0; i < maxentities->value; i++)
 				{
-					if (clients[i].inuse && !clients[i].drone && clients[i].ready)
+					if(clients[i].inuse && !clients[i].drone && clients[i].ready)
 					{
-						if (clients[i].field == client->field)
+						if(clients[i].field == client->field)
 							PPrintf(client, RADIO_YELLOW, "%s, country %s", clients[i].longnick, GetCountry(clients[i].country));
 					}
 				}
@@ -2508,9 +2515,9 @@ void ProcessCommands(char *command, client_t *client)
 	}
 
 	// commands that console can execute
-	if (!Com_Stricmp(command, "version"))
+	if(!Com_Stricmp(command, "version"))
 	{
-		PPrintf(client, RADIO_LIGHTYELLOW, "Tabajara Host Server version %s, build %s %s", VERSION, __DATE__, __TIME__ );
+		PPrintf(client, RADIO_LIGHTYELLOW, "Tabajara Host Server version %s, build %s %s", VERSION, __DATE__, __TIME__);
 		return;
 	}
 	if(!Com_Stricmp(command, "license"))
@@ -2535,20 +2542,18 @@ void ProcessCommands(char *command, client_t *client)
 			if(arena->mapnum >= 0 && mapcycle->value)
 			{
 				if(arena->mapcycle[arena->mapnum + 1].date)
-				i = arena->mapnum + 1;
+					i = arena->mapnum + 1;
 				else
-				i = 0;
-				PPrintf(client, RADIO_YELLOW, "Next Arena: %s in %04d/%02d/%02d",
-				arena->mapcycle[i].mapname,
-				arena->mapcycle[arena->mapnum].date / 10000,
-				(arena->mapcycle[arena->mapnum].date - ((arena->mapcycle[arena->mapnum].date / 10000) * 10000)) / 100,
-				(arena->mapcycle[arena->mapnum].date - ((arena->mapcycle[arena->mapnum].date / 100) * 100)));
+					i = 0;
+				PPrintf(client, RADIO_YELLOW, "Next Arena: %s in %04d/%02d/%02d", arena->mapcycle[i].mapname, arena->mapcycle[arena->mapnum].date / 10000,
+						(arena->mapcycle[arena->mapnum].date - ((arena->mapcycle[arena->mapnum].date / 10000) * 10000)) / 100,
+						(arena->mapcycle[arena->mapnum].date - ((arena->mapcycle[arena->mapnum].date / 100) * 100)));
 
 				if(mapcycle->value)
-				PPrintf(client, RADIO_YELLOW, "%d virtual days left", TimetoNextArena());
+					PPrintf(client, RADIO_YELLOW, "%d virtual days left", TimetoNextArena());
 			}
 			else
-			PPrintf(client, RADIO_YELLOW, "Mapcycle not active");
+				PPrintf(client, RADIO_YELLOW, "Mapcycle not active");
 		}
 		else
 		{
@@ -2567,14 +2572,16 @@ void ProcessCommands(char *command, client_t *client)
 				{
 					if(arena->mapcycle[i].date)
 					{
-						PPrintf(client, RADIO_YELLOW, "%u: %s comes out at %04d/%02d/%02d", i+1, arena->mapcycle[i].mapname, arena->mapcycle[i].date / 10000, (arena->mapcycle[i].date - ((arena->mapcycle[i].date / 10000) * 10000)) / 100, (arena->mapcycle[i].date - ((arena->mapcycle[i].date / 100) * 100)));
+						PPrintf(client, RADIO_YELLOW, "%u: %s comes out at %04d/%02d/%02d", i + 1, arena->mapcycle[i].mapname, arena->mapcycle[i].date / 10000,
+								(arena->mapcycle[i].date - ((arena->mapcycle[i].date / 10000) * 10000)) / 100, (arena->mapcycle[i].date
+										- ((arena->mapcycle[i].date / 100) * 100)));
 					}
 					else
-					break;
+						break;
 				}
 			}
 			else
-			PPrintf(client, RADIO_YELLOW, "Mapcycle not active");
+				PPrintf(client, RADIO_YELLOW, "Mapcycle not active");
 		}
 		else
 		{
@@ -2609,7 +2616,7 @@ void ProcessCommands(char *command, client_t *client)
 				}
 			}
 			else
-			Sys_Printfile(FILE_OP);
+				Sys_Printfile(FILE_OP);
 		}
 		else
 		{
@@ -2632,7 +2639,7 @@ void ProcessCommands(char *command, client_t *client)
 				}
 			}
 			else
-			Sys_Printfile(FILE_ADMIN);
+				Sys_Printfile(FILE_ADMIN);
 		}
 		else
 		{
@@ -2656,7 +2663,7 @@ void ProcessCommands(char *command, client_t *client)
 			else
 			{
 				if(tolower(*argv[0]) == 'f')
-				argv[0]++; // ignore compiler error
+					argv[0]++; // ignore compiler error
 
 				Cmd_Field(Com_Atoi(argv[0]), client);
 			}
@@ -2685,7 +2692,7 @@ void ProcessCommands(char *command, client_t *client)
 		else
 		{
 			if(tolower(*argv[0]) == 'c')
-			argv[0]++; // ignore compiler error
+				argv[0]++; // ignore compiler error
 
 			Cmd_City(Com_Atoi(argv[0]), client);
 		}
@@ -2714,7 +2721,7 @@ void ProcessCommands(char *command, client_t *client)
 				for(i = 0; i < maxentities->value; i++)
 				{
 					if(clients[i].inuse && clients[i].drone && !clients[i].related[0])
-					RemoveDrone(&clients[i]);
+						RemoveDrone(&clients[i]);
 				}
 				PPrintf(NULL, RADIO_YELLOW, "All unrelated drones removed");
 			}
@@ -2735,9 +2742,9 @@ void ProcessCommands(char *command, client_t *client)
 		if(!arcade->value)
 		{
 			if(argv[0])
-			Cmd_Whoare(Com_Atoi(argv[0]), client);
+				Cmd_Whoare(Com_Atoi(argv[0]), client);
 			else if(client)
-			Cmd_Whoare(client->radio[0], client);
+				Cmd_Whoare(client->radio[0], client);
 			else
 			{
 				printf("usage: whoare <channel 1-99>\n");
@@ -2782,10 +2789,10 @@ void ProcessCommands(char *command, client_t *client)
 			if(!argv[0] || (client && !client->attr))
 			{
 				if(client)
-				PPrintf(client, RADIO_YELLOW, "You have %d li%s", client->lives, client->lives == 1?"fe":"ves");
+					PPrintf(client, RADIO_YELLOW, "You have %d li%s", client->lives, client->lives == 1 ? "fe" : "ves");
 
 				if(!client || client->attr)
-				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .lives <nick|all> <amount>");
+					PPrintf(client, RADIO_LIGHTYELLOW, "usage: .lives <nick|all> <amount>");
 			}
 			else if(!argv[1])
 			{
@@ -2795,7 +2802,7 @@ void ProcessCommands(char *command, client_t *client)
 				}
 				else
 				{
-					PPrintf(client, RADIO_YELLOW, "%s has %d li%s", pclient->longnick, pclient->lives, pclient->lives == 1?"fe":"ves");
+					PPrintf(client, RADIO_YELLOW, "%s has %d li%s", pclient->longnick, pclient->lives, pclient->lives == 1 ? "fe" : "ves");
 				}
 				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .lives <nick|all> <amount>");
 			}
@@ -2823,17 +2830,18 @@ void ProcessCommands(char *command, client_t *client)
 
 	if(permission & (FLAG_ADMIN | FLAG_OP) && arena && arena->frame > 100)
 	{
-		Com_Printf(VERBOSE_ATTENTION, "OPCMD: %s(%s) - .%s %s %s %s %s %s %s\n", client?client->longnick:"-HOST-", client?client->ip:"", command, argv[0]?argv[0]:"", argv[1]?argv[1]:"", argv[2]?argv[2]:"", argv[3]?argv[3]:"", argv[4]?argv[4]:"", argv[5]?argv[5]:"");
+		Com_Printf(VERBOSE_ATTENTION, "OPCMD: %s(%s) - .%s %s %s %s %s %s %s\n", client ? client->longnick : "-HOST-", client ? client->ip : "", command,
+				argv[0] ? argv[0] : "", argv[1] ? argv[1] : "", argv[2] ? argv[2] : "", argv[3] ? argv[3] : "", argv[4] ? argv[4] : "", argv[5] ? argv[5] : "");
 	}
 
-	if (permission & FLAG_ADMIN) // commands that only ADMIN's can execute
+	if(permission & FLAG_ADMIN) // commands that only ADMIN's can execute
 	{
 		if(!Com_Stricmp(command, "say"))
 		{
 			if(argv[0])
-			Cmd_Say(argv, argc, NULL);
+				Cmd_Say(argv, argc, NULL);
 			else
-			PPrintf(client, RADIO_YELLOW, "usage: .say <message with max of 10 words>");
+				PPrintf(client, RADIO_YELLOW, "usage: .say <message with max of 10 words>");
 			return;
 		}
 		if(!Com_Stricmp(command, "force"))
@@ -2843,7 +2851,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_YELLOW, "usage: .force <status> <player's nick>");
 			}
 			else
-			SendForceStatus((1 << Com_Atoi(argv[0])), 0, FindLClient(argv[1]));
+				SendForceStatus((1 << Com_Atoi(argv[0])), 0, FindLClient(argv[1]));
 
 			return;
 		}
@@ -2904,7 +2912,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .reset <filename>");
 			}
 			else
-			LoadArenaStatus(argv[0], client, 1);
+				LoadArenaStatus(argv[0], client, 1);
 			return;
 		}
 		if(!Com_Stricmp(command, "savearena"))
@@ -2918,17 +2926,17 @@ void ProcessCommands(char *command, client_t *client)
 				SaveArenaStatus(argv[0], client);
 			}
 
-			PPrintf(client, RADIO_LIGHTYELLOW, "Arena saved in \"%s.arn\"", argv[0]?argv[0]:"arena");
+			PPrintf(client, RADIO_LIGHTYELLOW, "Arena saved in \"%s.arn\"", argv[0] ? argv[0] : "arena");
 			return;
 		}
 		if(!Com_Stricmp(command, "saveconfig"))
 		{
 			if(!argv[0])
-			Var_WriteVariables("config", client);
+				Var_WriteVariables("config", client);
 			else
-			Var_WriteVariables(argv[0], client);
+				Var_WriteVariables(argv[0], client);
 
-			PPrintf(client, RADIO_LIGHTYELLOW, "Config saved in \"%s.cfg\"", argv[0]?argv[0]:"config");
+			PPrintf(client, RADIO_LIGHTYELLOW, "Config saved in \"%s.cfg\"", argv[0] ? argv[0] : "config");
 			return;
 		}
 		if(!Com_Stricmp(command, "quit"))
@@ -3025,7 +3033,8 @@ void ProcessCommands(char *command, client_t *client)
 						return;
 					}
 
-					PPrintf(client, RADIO_YELLOW, "City c%d (%s) captured to %s", arena->cities[i].number, &arena->cities[i].name, GetCountry(Com_Atoi(argv[1])));
+					PPrintf(client, RADIO_YELLOW, "City c%d (%s) captured to %s", arena->cities[i].number, &arena->cities[i].name,
+							GetCountry(Com_Atoi(argv[1])));
 					i += fields->value;
 				}
 				else
@@ -3040,9 +3049,9 @@ void ProcessCommands(char *command, client_t *client)
 
 				if(Cmd_Capt(i, Com_Atoi(argv[1]), NULL))
 				{
-					Com_LogEvent(EVENT_ADM_CAPT, client?client->id:0, 0);
+					Com_LogEvent(EVENT_ADM_CAPT, client ? client->id : 0, 0);
 					Com_LogDescription(EVENT_DESC_COUNTRY, Com_Atoi(argv[1]), NULL);
-					Com_LogDescription(EVENT_DESC_FIELD, i+1, NULL);
+					Com_LogDescription(EVENT_DESC_FIELD, i + 1, NULL);
 					Com_LogDescription(EVENT_DESC_TERRAIN, 0, mapname->string);
 				}
 			}
@@ -3056,15 +3065,16 @@ void ProcessCommands(char *command, client_t *client)
 				Cmd_Ammo(client, 0, 0);
 				PPrintf(client, RADIO_YELLOW, "usage: .ammo <id> <h|a|d|t[number]>");
 			}
-			else if (!argv[1])
+			else if(!argv[1])
 			{
 				munition_t *munition;
 				munition = GetMunition(Com_Atoi(argv[0]));
 
 				if(munition)
-				PPrintf(client, RADIO_LIGHTYELLOW, "name: %s, he %d, ap %d, decay %d, type %d", munition->name, munition->he, munition->ap, munition->decay, munition->type);
+					PPrintf(client, RADIO_LIGHTYELLOW, "name: %s, he %d, ap %d, decay %d, type %d", munition->name, munition->he, munition->ap,
+							munition->decay, munition->type);
 				else
-				PPrintf(client, RADIO_LIGHTYELLOW, "Invalid Ammo");
+					PPrintf(client, RADIO_LIGHTYELLOW, "Invalid Ammo");
 			}
 			else
 			{
@@ -3084,9 +3094,9 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .chmod <nick> [0|1|2]");
 			}
 			else if(!argv[1])
-			Cmd_Chmod(argv[0], -1, client);
+				Cmd_Chmod(argv[0], -1, client);
 			else
-			Cmd_Chmod(argv[0], Com_Atoi(argv[1]), client);
+				Cmd_Chmod(argv[0], Com_Atoi(argv[1]), client);
 
 			return;
 		}
@@ -3112,18 +3122,18 @@ void ProcessCommands(char *command, client_t *client)
 					PPrintf(client, RADIO_LIGHTYELLOW, "You can't undeclare this structure (reason: program definitions)");
 				}
 				else
-				Cmd_Undecl(Com_Atoi(argv[0]), client);
+					Cmd_Undecl(Com_Atoi(argv[0]), client);
 			}
 			else
-			PPrintf(client, RADIO_LIGHTYELLOW, "usage: .undecl <BuildID | all>");
+				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .undecl <BuildID | all>");
 			return;
 		}
 		else if(!Com_Stricmp(command, "varlist"))
 		{
 			if(argv[0])
-			Cmd_VarList(client, argv[0]);
+				Cmd_VarList(client, argv[0]);
 			else
-			Cmd_VarList(client, NULL);
+				Cmd_VarList(client, NULL);
 			return;
 		}
 		else if(!Com_Stricmp(command, "loadarena"))
@@ -3133,7 +3143,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .loadarena <filename>");
 			}
 			else
-			LoadArenaStatus(argv[0], client, 0);
+				LoadArenaStatus(argv[0], client, 0);
 			return;
 		}
 		else if(!Com_Stricmp(command, "loadconfig"))
@@ -3143,7 +3153,7 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .loadconfig <filename>");
 			}
 			else
-			Cmd_LoadConfig(argv[0], client);
+				Cmd_LoadConfig(argv[0], client);
 			return;
 		}
 		else if(!Com_Stricmp(command, "loadbatch") && client)
@@ -3161,7 +3171,7 @@ void ProcessCommands(char *command, client_t *client)
 
 			PPrintf(client, RADIO_YELLOW, "Scenario Timeline Started");
 			if(client)
-			Com_Printf(VERBOSE_ALWAYS, "Scenario Timeline Started\n");
+				Com_Printf(VERBOSE_ALWAYS, "Scenario Timeline Started\n");
 			arena->scenario = arena->frame;
 
 			snprintf(file, sizeof(file), "./arenas/%s/t0", dirname->string);
@@ -3173,7 +3183,7 @@ void ProcessCommands(char *command, client_t *client)
 		{
 			PPrintf(client, RADIO_YELLOW, "Scenario Timeline Stopped");
 			if(client)
-			Com_Printf(VERBOSE_ALWAYS, "Scenario Timeline Stopped\n");
+				Com_Printf(VERBOSE_ALWAYS, "Scenario Timeline Stopped\n");
 			arena->scenario = 0;
 			snprintf(file, sizeof(file), "./arenas/%s/t999", dirname->string);
 			Cmd_LoadConfig(file, NULL);
@@ -3216,18 +3226,18 @@ void ProcessCommands(char *command, client_t *client)
 				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .date <yyyy> <mm> <dd>");
 			}
 			else
-			Cmd_Date(Com_Atoi(argv[0]), Com_Atoi(argv[1]), Com_Atoi(argv[2]), client);
+				Cmd_Date(Com_Atoi(argv[0]), Com_Atoi(argv[1]), Com_Atoi(argv[2]), client);
 
 			return;
 		}
 		else if(!Com_Stricmp(command, "view") && client)
 		{
-			if(client->attr && (client->attr & (u_int8_t)mview->value))
+			if(client->attr && (client->attr & (u_int8_t) mview->value))
 			{
 				if(!argv[0])
-				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .view [<nick>|exit]");
+					PPrintf(client, RADIO_LIGHTYELLOW, "usage: .view [<nick>|exit]");
 				else
-				Cmd_View(FindLClient(argv[0]), client);
+					Cmd_View(FindLClient(argv[0]), client);
 			}
 			else
 			{
@@ -3239,7 +3249,8 @@ void ProcessCommands(char *command, client_t *client)
 		else if(!Com_Stricmp(command, "gunners") && client)
 		{
 			for(i = 0; i < 14; i++)
-			PPrintf(client, RADIO_LIGHTYELLOW, "%02d: %s, %d", i, client->gunners[i]?client->gunners[i]->longnick:"empty", client->gunners[i]?client->gunners[i]->shortnick:0);
+				PPrintf(client, RADIO_LIGHTYELLOW, "%02d: %s, %d", i, client->gunners[i] ? client->gunners[i]->longnick : "empty",
+						client->gunners[i] ? client->gunners[i]->shortnick : 0);
 			return;
 		}
 		else if(!Com_Stricmp(command, "numplayers"))
@@ -3260,8 +3271,8 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			else if(!Com_Stricmp(argv[0], "all"))
 			{
-				Com_Printf(VERBOSE_ATTENTION, "All users were kicked out by %s\n", client?client->longnick:"-HOST-");
-				BPrintf(RADIO_YELLOW, "ATTENTION: All users were kicked out by %s\n", client?client->longnick:"-HOST-");
+				Com_Printf(VERBOSE_ATTENTION, "All users were kicked out by %s\n", client ? client->longnick : "-HOST-");
+				BPrintf(RADIO_YELLOW, "ATTENTION: All users were kicked out by %s\n", client ? client->longnick : "-HOST-");
 
 				for(i = 0; i < maxentities->value; i++)
 				{
@@ -3273,8 +3284,8 @@ void ProcessCommands(char *command, client_t *client)
 			}
 			else
 			{
-				Com_Printf(VERBOSE_ATTENTION, "%s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
-				BPrintf(RADIO_YELLOW, "ATTENTION: %s was kicked out by %s\n", argv[0], client?client->longnick:"-HOST-");
+				Com_Printf(VERBOSE_ATTENTION, "%s was kicked out by %s\n", argv[0], client ? client->longnick : "-HOST-");
+				BPrintf(RADIO_YELLOW, "ATTENTION: %s was kicked out by %s\n", argv[0], client ? client->longnick : "-HOST-");
 
 				RemoveClient(FindLClient(argv[0]));
 			}
@@ -3287,11 +3298,8 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if(!Com_Stricmp(command, "uptime"))
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "System up since %ud %.2d:%.2d:%.2d",
-			arena->frame/8640000,
-			(arena->frame/360000)%24,
-			(arena->frame/6000)%60,
-			(arena->frame/100)%60);
+			PPrintf(client, RADIO_LIGHTYELLOW, "System up since %ud %.2d:%.2d:%.2d", arena->frame / 8640000, (arena->frame / 360000) % 24,
+					(arena->frame / 6000) % 60, (arena->frame / 100) % 60);
 			return;
 		}
 		else if(!Com_Stricmp(command, "tk"))
@@ -3360,7 +3368,7 @@ void ProcessCommands(char *command, client_t *client)
 			else
 			{
 				if(tolower(*argv[0]) == 'f')
-				argv[0]++;
+					argv[0]++;
 
 				Cmd_Restore(Com_Atoi(argv[0]), client);
 			}
@@ -3375,14 +3383,14 @@ void ProcessCommands(char *command, client_t *client)
 			else if(!argv[1])
 			{
 				if(tolower(*argv[0]) == 'f')
-				argv[0]++;
+					argv[0]++;
 
 				Cmd_Destroy(Com_Atoi(argv[0]), 10, client);
 			}
 			else
 			{
 				if(tolower(*argv[0]) == 'f')
-				argv[0]++;
+					argv[0]++;
 
 				Cmd_Destroy(Com_Atoi(argv[0]), Com_Atoi(argv[1]), client);
 			}
@@ -3391,11 +3399,11 @@ void ProcessCommands(char *command, client_t *client)
 		else if(!Com_Stricmp(command, "changecvroute") && client)
 		{
 			if(argv[1])
-			Cmd_ChangeCVRoute(Com_Atof(argv[0]), Com_Atoi(argv[1]), client);
-			else if (argv[0])
-			Cmd_ChangeCVRoute(Com_Atof(argv[0]), 5000, client);
+				Cmd_ChangeCVRoute(Com_Atof(argv[0]), Com_Atoi(argv[1]), client);
+			else if(argv[0])
+				Cmd_ChangeCVRoute(Com_Atof(argv[0]), 5000, client);
 			else
-			PPrintf(client, RADIO_LIGHTYELLOW, "usage: .changecvroute <azimute> [distance]");
+				PPrintf(client, RADIO_LIGHTYELLOW, "usage: .changecvroute <azimute> [distance]");
 			return;
 		}
 		else if(!Com_Stricmp(command, "changecountry"))
@@ -3438,12 +3446,14 @@ void ProcessCommands(char *command, client_t *client)
 				{
 					Cmd_Seta(argv[0], Com_Atoi(argv[1]), Com_Atoi(argv[2]), Com_Atoi(argv[3]));
 					if(client)
-					BPrintf(RADIO_LIGHTYELLOW, "Amount of plane %s changed to %d at %s fields by %s", Com_Atoi(argv[1]) < 0?"All":GetPlaneName(Com_Atoi(argv[1])), Com_Atoi(argv[2]), GetFieldType(Com_Atoi(argv[0]+1)), client?client->longnick:"-HOST-");
+						BPrintf(RADIO_LIGHTYELLOW, "Amount of plane %s changed to %d at %s fields by %s", Com_Atoi(argv[1]) < 0 ? "All" : GetPlaneName(
+								Com_Atoi(argv[1])), Com_Atoi(argv[2]), GetFieldType(Com_Atoi(argv[0] + 1)), client ? client->longnick : "-HOST-");
 				}
 				else
 				{
 					if(client)
-					BPrintf(RADIO_LIGHTYELLOW, "Amount of plane %s changed to %d at %s by %s", Com_Atoi(argv[1]) < 0?"All":GetPlaneName(Com_Atoi(argv[1])), Com_Atoi(argv[2]), argv[0], client?client->longnick:"-HOST-");
+						BPrintf(RADIO_LIGHTYELLOW, "Amount of plane %s changed to %d at %s by %s", Com_Atoi(argv[1]) < 0 ? "All" : GetPlaneName(Com_Atoi(
+								argv[1])), Com_Atoi(argv[2]), argv[0], client ? client->longnick : "-HOST-");
 
 					Cmd_Seta(argv[0], 0, Com_Atoi(argv[1]), Com_Atoi(argv[2]));
 				}
@@ -3459,11 +3469,11 @@ void ProcessCommands(char *command, client_t *client)
 		{
 			if(argv[1])
 			{
-				*(u_int16_t *)(file) = htons(0x030A);
-				*(u_int32_t *)(file + 2) = htonl(Com_Atoi(argv[0]));
-				*(u_int32_t *)(file + 6) = htonl(Com_Atoi(argv[1]));
+				*(u_int16_t *) (file) = htons(0x030A);
+				*(u_int32_t *) (file + 2) = htonl(Com_Atoi(argv[0]));
+				*(u_int32_t *) (file + 6) = htonl(Com_Atoi(argv[1]));
 
-				SendPacket((u_int8_t *)file, 10, client);
+				SendPacket((u_int8_t *) file, 10, client);
 			}
 			return;
 		}
@@ -3525,9 +3535,9 @@ void ProcessCommands(char *command, client_t *client)
 		{
 			for(i = 0; i < cvs->value; i++)
 			{
-				PPrintf(client, RADIO_LIGHTYELLOW, "Reseting CV %u", i);
+				PPrintf(client, RADIO_LIGHTYELLOW, "Reseting CV %u", fields->value + i + 1);
 
-				ResetCV(i);
+				Ship::ResetShips(fields->value + i + 1);
 			}
 			return;
 		}
@@ -3575,7 +3585,7 @@ void ProcessCommands(char *command, client_t *client)
 			if(!argv[0])
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "\"%s\":\"%s\" (min: %.2f - max %.2f)", var->name, var->string, var->min, var->max);
-				PPrintf(client, RADIO_LIGHTYELLOW, "%s", var->description?var->description:"No description");
+				PPrintf(client, RADIO_LIGHTYELLOW, "%s", var->description ? var->description : "No description");
 			}
 			else
 			{
@@ -3591,11 +3601,11 @@ void ProcessCommands(char *command, client_t *client)
 				}
 				else
 				{
-					Com_LogEvent(EVENT_ADM_ALTVAR, client?client->id:0, 0);
+					Com_LogEvent(EVENT_ADM_ALTVAR, client ? client->id : 0, 0);
 					sprintf(command, "%s = %s", var->name, var->string);
 					Com_LogDescription(EVENT_DESC_VAR, 0, command);
 
-					BPrintf(RADIO_LIGHTYELLOW, "\"%s\" changed to \"%s\" by %s", var->name, var->string, client?client->longnick:"-HOST-");
+					BPrintf(RADIO_LIGHTYELLOW, "\"%s\" changed to \"%s\" by %s", var->name, var->string, client ? client->longnick : "-HOST-");
 				}
 			}
 
@@ -3624,7 +3634,7 @@ void SendFileSeq1(const char *file, const char *clifile, client_t *client)
 
 	filesize = strlen(file);
 
-	if (filesize > sizeof(client->file))
+	if(filesize > sizeof(client->file))
 	{
 		Com_Printf(VERBOSE_WARNING, "filename overflowed\n");
 		return;
@@ -3632,14 +3642,14 @@ void SendFileSeq1(const char *file, const char *clifile, client_t *client)
 
 	memcpy(client->file, file, filesize);
 
-	sendfile = (sendfile1_t *)buffer;
+	sendfile = (sendfile1_t *) buffer;
 
 	sendfile->packetid = htons(Com_WBhton(0x1603));
 	sendfile->transaction = 0x01;
 	sendfile->msgsize = filesize;
 	memcpy(&(sendfile->msg), file, sendfile->msgsize);
 
-	sendfile = (sendfile1_t *)(buffer+1+filesize);
+	sendfile = (sendfile1_t *) (buffer + 1 + filesize);
 
 	sendfile->msgsize = strlen(clifile);
 
@@ -3652,14 +3662,14 @@ void SendFileSeq1(const char *file, const char *clifile, client_t *client)
 	//memcpy(&(sendfile->msg), "DISPLAY.TXT", sendfile->msgsize);
 	//	}
 
-	sendfile = (sendfile1_t *)(buffer+filesize+sendfile->msgsize);
+	sendfile = (sendfile1_t *) (buffer + filesize + sendfile->msgsize);
 
 	sendfile->unknown2 = htonl(0x0A);
 	sendfile->unknown3 = htonl(0x0200);
 
 	PPrintf(client, RADIO_YELLOW, "Sending file");
 
-	SendPacket(buffer, 13+sendfile->msgsize+filesize, client);
+	SendPacket(buffer, 13 + sendfile->msgsize + filesize, client);
 }
 
 void SendFileSeq3(client_t *client)
@@ -3671,20 +3681,20 @@ void SendFileSeq3(client_t *client)
 
 	Sys_WaitForLock(strcat(client->file, ".LOCK"));
 
-	if (Sys_LockFile(client->file) < 0)
+	if(Sys_LockFile(client->file) < 0)
 	{
 		Sys_UnlockFile(client->file);
-		client->file[strlen(client->file)-5] = '\0';
+		client->file[strlen(client->file) - 5] = '\0';
 		return;
 	}
 
-	client->file[strlen(client->file)-5] = '\0';
+	client->file[strlen(client->file) - 5] = '\0';
 
-	if (!(fp = fopen(client->file, "r")))
+	if(!(fp = fopen(client->file, "r")))
 	{
 		Com_Printf(VERBOSE_ALWAYS, "Error opening file %s\n", client->file);
 		Sys_UnlockFile(strcat(client->file, ".LOCK"));
-		client->file[strlen(client->file)-5] = '\0';
+		client->file[strlen(client->file) - 5] = '\0';
 		return;
 	}
 	else
@@ -3694,7 +3704,7 @@ void SendFileSeq3(client_t *client)
 
 		fseek(fp, 0, SEEK_END);
 		size = ftell(fp);
-		if (size <= 0)
+		if(size <= 0)
 		{
 			Com_Printf(VERBOSE_ALWAYS, "Error getting size of file %s\n", client->file);
 			return;
@@ -3704,11 +3714,11 @@ void SendFileSeq3(client_t *client)
 	fclose(fp);
 
 	Sys_UnlockFile(strcat(client->file, ".LOCK"));
-	client->file[strlen(client->file)-5] = '\0';
+	client->file[strlen(client->file) - 5] = '\0';
 
 	memset(buffer, 0, sizeof(buffer));
 
-	sendfile = (sendfile3_t *)buffer;
+	sendfile = (sendfile3_t *) buffer;
 
 	sendfile->packetid = htons(Com_WBhton(0x1601));
 	sendfile->transaction = 0x01;
@@ -3718,7 +3728,7 @@ void SendFileSeq3(client_t *client)
 	// change this sequence to CeilDiv();
 	client->fileframe = FloorDiv(size, 512) + 1;
 
-	if (!(size % (512)))
+	if(!(size % (512)))
 	{
 		client->fileframe--;
 	}
@@ -3735,16 +3745,16 @@ void SendFileSeq5(u_int16_t seek, client_t *client)
 
 	sendfile5_t *sendfile;
 
-	if (seek >= client->fileframe)
+	if(seek >= client->fileframe)
 	{
-		if (!client->loginkey)
+		if(!client->loginkey)
 			SendFileSeq7(client);
 		return;
 	}
 
 	memset(buffer, 0, sizeof(buffer));
 
-	sendfile = (sendfile5_t *)buffer;
+	sendfile = (sendfile5_t *) buffer;
 
 	sendfile->packetid = htons(Com_WBhton(0x1605));
 	sendfile->transaction = 0x01;
@@ -3752,49 +3762,49 @@ void SendFileSeq5(u_int16_t seek, client_t *client)
 	sendfile->frame = htonl(seek);
 
 	Sys_WaitForLock(strcat(client->file, ".LOCK"));
-	if (Sys_LockFile(client->file) < 0)
+	if(Sys_LockFile(client->file) < 0)
 	{
 		Sys_UnlockFile(client->file);
-		client->file[strlen(client->file)-5] = '\0';
+		client->file[strlen(client->file) - 5] = '\0';
 		return;
 	}
-	client->file[strlen(client->file)-5] = '\0';
+	client->file[strlen(client->file) - 5] = '\0';
 
-	if (!(fp = fopen(client->file, "r")))
+	if(!(fp = fopen(client->file, "r")))
 	{
 		Com_Printf(VERBOSE_ALWAYS, "Error opening file %s\n", client->file);
 		Sys_UnlockFile(strcat(client->file, ".LOCK"));
-		client->file[strlen(client->file)-5] = '\0';
+		client->file[strlen(client->file) - 5] = '\0';
 		return;
 	}
 
-	if (fseek(fp, 512*seek, SEEK_SET))
+	if(fseek(fp, 512 * seek, SEEK_SET))
 	{
 		Com_Printf(VERBOSE_WARNING, "Couldn't fseek() file \"%s\"\n", client->file);
 		fclose(fp);
 
 		Sys_UnlockFile(strcat(client->file, ".LOCK"));
-		client->file[strlen(client->file)-5] = '\0';
+		client->file[strlen(client->file) - 5] = '\0';
 		return;
 	}
 
-	sendfile->msgsize = htons(size=fread(&(sendfile->msg), 1, 512, fp));
+	sendfile->msgsize = htons(size = fread(&(sendfile->msg), 1, 512, fp));
 
 	fclose(fp);
 
 	Sys_UnlockFile(strcat(client->file, ".LOCK"));
-	client->file[strlen(client->file)-5] = '\0';
+	client->file[strlen(client->file) - 5] = '\0';
 
-	SendPacket(buffer, 10+size, client);
+	SendPacket(buffer, 10 + size, client);
 }
 
 void SendFileSeq6(u_int8_t *buffer, client_t *client)
 {
 	sendfile6_t *sendfile;
 
-	sendfile = (sendfile6_t *)buffer;
+	sendfile = (sendfile6_t *) buffer;
 
-	SendFileSeq5(ntohl(sendfile->frame)+1, client);
+	SendFileSeq5(ntohl(sendfile->frame) + 1, client);
 }
 
 void SendFileSeq7(client_t *client)
@@ -3805,7 +3815,7 @@ void SendFileSeq7(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	sendfile = (sendfile7_t *)buffer;
+	sendfile = (sendfile7_t *) buffer;
 
 	sendfile->packetid = htons(Com_WBhton(0x1607));
 	sendfile->unknown1 = htons(0x01);
@@ -3832,14 +3842,14 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 	if(!client || !client->inuse)
 		return 0;
 
-	if (!client->drone)
+	if(!client->drone)
 	{
-		if (client->loginkey)
+		if(client->loginkey)
 		{
-			if (debug->value)
+			if(debug->value)
 			{
 				Com_Printf(VERBOSE_DEBUG, "<<<--- ");
-				Com_Printfhex(buffer, len+1);
+				Com_Printfhex(buffer, len + 1);
 			}
 
 			wbcrypt(buffer, client->key, len, FALSE); // decrypting message
@@ -3849,14 +3859,14 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			wbcrypt(buffer, client->key, len, TRUE); // decrypting message
 		}
 
-		if (debug->value)
+		if(debug->value)
 		{
 			Com_Printf(VERBOSE_DEBUG, "<<<--- ");
-			Com_Printfhex(buffer, len+1);
+			Com_Printfhex(buffer, len + 1);
 		}
 	}
 
-	if ((buffer[len] == CheckSum(buffer, len)) || client->drone) // lenth element == checksum
+	if((buffer[len] == CheckSum(buffer, len)) || client->drone) // lenth element == checksum
 	{
 		//		if(wb3->value && client->loginkey)
 		//		{
@@ -3867,16 +3877,16 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 		Com_WBntoh(&n);
 
-		if (!client->drone)
+		if(!client->drone)
 		{
-			if (n != 0x0E00) // TODO: Bug: THAI still being kicked
+			if(n != 0x0E00) // TODO: Bug: THAI still being kicked
 				client->awaytimer = 0;
 		}
 
-		switch (n)
+		switch(n)
 		{
 			case 0x0018:
-				if (!setjmp(debug_buffer))
+				if(!setjmp(debug_buffer))
 				{
 					WB3AiMount(buffer, client);
 				}
@@ -3886,7 +3896,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				}
 				break;
 			case 0x002C:
-				if (!setjmp(debug_buffer))
+				if(!setjmp(debug_buffer))
 				{
 					WB3ClientSkin(buffer, client);
 				}
@@ -3896,7 +3906,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				}
 				break;
 			case 0x0402:
-				if (!setjmp(debug_buffer))
+				if(!setjmp(debug_buffer))
 				{
 					PEndFlight(buffer, len, client);
 				}
@@ -4028,7 +4038,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x0310:
 				if(!setjmp(debug_buffer))
 				{
-				PPrintf(client, RADIO_GREEN, "DEBUG: arnaCONFIG_FLIGHTMODEL()");
+					PPrintf(client, RADIO_GREEN, "DEBUG: arnaCONFIG_FLIGHTMODEL()");
 				}
 				else
 				{
@@ -4038,7 +4048,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x1406:
 				if(!setjmp(debug_buffer))
 				{
-				PHostVar(buffer, client);
+					PHostVar(buffer, client);
 				}
 				else
 				{
@@ -4079,7 +4089,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(client->attached)
-					PSwitchOttoPos(buffer, client);
+						PSwitchOttoPos(buffer, client);
 				}
 				else
 				{
@@ -4125,27 +4135,27 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					//SendArenaRules(client);
 					WB3SendGruntConfig(client);
 					WB3ArenaConfig2(client);
-					if(((u_int8_t)weather->value == 2) && !client->rain)
+					if(((u_int8_t) weather->value == 2) && !client->rain)
 						WB3DotCommand(client, ".weather 0"); // cloudy
 					else
-						WB3DotCommand(client, ".weather %u", (u_int8_t)weather->value);
+						WB3DotCommand(client, ".weather %u", (u_int8_t) weather->value);
 					WB3DotCommand(client, ".date %u %u %u", arena->month, arena->day, arena->year);
 					WB3DotCommand(client, ".weathereffects 1");
 					WB3NWAttachSlot(client);
 
 					SendOttoParams(client);
 					if(!wb3->value)
-					SendExecutablesCheck(1, client);
+						SendExecutablesCheck(1, client);
 					SendLastConfig(client);
 
 					snprintf(file, sizeof(file), "motd.txt");
 
-					if ((fp = fopen(file, "r")) == NULL)
+					if((fp = fopen(file, "r")) == NULL)
 					{
 						// Couldn't open general motd.txt, try arena motd
 						snprintf(file, sizeof(file), "./arenas/%s/motd.txt", dirname->string);
 
-						if ((fp = fopen(file, "r")) == NULL)
+						if((fp = fopen(file, "r")) == NULL)
 						{
 							// Couldn't even open arena motd, print error
 							Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", file);
@@ -4165,11 +4175,9 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						SendFileSeq1(file, "motd.txt", client);
 
 					PPrintf(client, RADIO_YELLOW, "Tabajara Host version %s, build %s %s", VERSION, __DATE__, __TIME__);
-					PPrintf(client, RADIO_YELLOW, "Last Reset: %s (%s x %s) %s",
-						(arena->lastreset==1)?GetCountry(1):GetCountry(3),
-						(arena->lastreset==1)?resetsred->string:resetsgold->string,
-						(arena->lastreset==1)?resetsgold->string:resetsred->string,
-						(arena->lastreset==1)?GetCountry(3):GetCountry(1));
+					PPrintf(client, RADIO_YELLOW, "Last Reset: %s (%s x %s) %s", (arena->lastreset == 1) ? GetCountry(1) : GetCountry(3), (arena->lastreset
+							== 1) ? resetsred->string : resetsgold->string, (arena->lastreset == 1) ? resetsgold->string : resetsred->string, (arena->lastreset
+							== 1) ? GetCountry(3) : GetCountry(1));
 
 					if(!(client->attr == 1 && hideadmin->value))
 					{
@@ -4199,13 +4207,14 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 					// ClientIpaddr(client); TODO New THL
 					// CheckTK(client); TODO New THL, make tk check form players table
 
-					sprintf(my_query, "INSERT INTO online_players SET player_id = '%u', country = '%u', login_time = FROM_UNIXTIME(%u)", client->id, client->country, (u_int32_t)time(NULL));
+					sprintf(my_query, "INSERT INTO online_players SET player_id = '%u', country = '%u', login_time = FROM_UNIXTIME(%u)", client->id,
+							client->country, (u_int32_t) time(NULL));
 
 					if(d_mysql_query(&my_sock, my_query)) // query succeeded
 
 					{
 						if(mysql_errno(&my_sock) != 1062)
-						Com_Printf(VERBOSE_WARNING, "LOGIN: couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "LOGIN: couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 					}
 				}
 				else
@@ -4249,7 +4258,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(client->inflight)
-					PPlaneStatus(buffer, client);
+						PPlaneStatus(buffer, client);
 				}
 				else
 				{
@@ -4349,7 +4358,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 			case 0x2000:
 				if(!setjmp(debug_buffer))
 				{
-					PNewNick(buffer+2, client);
+					PNewNick(buffer + 2, client);
 				}
 				else
 				{
@@ -4432,7 +4441,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(client->inflight)
-					PHitPlane(buffer, client);
+						PHitPlane(buffer, client);
 				}
 				else
 				{
@@ -4453,7 +4462,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(client->inflight)
-					PHitPlane(buffer, client);
+						PHitPlane(buffer, client);
 				}
 				else
 				{
@@ -4514,7 +4523,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(client->ready)
-					SendFileSeq3(client);
+						SendFileSeq3(client);
 				}
 				else
 				{
@@ -4536,7 +4545,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(client->ready)
-					SendFileSeq6(buffer, client);
+						SendFileSeq6(buffer, client);
 				}
 				else
 				{
@@ -4547,8 +4556,8 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(debug->value)
-					Com_Printf(VERBOSE_DEBUG, "160A\n");
-					memset(buffer+2, 0, 8);
+						Com_Printf(VERBOSE_DEBUG, "160A\n");
+					memset(buffer + 2, 0, 8);
 					buffer[1] = 0x0B; // FRANZ verificar WB2008
 					SendPacket(buffer, 10, client);
 				}
@@ -4561,8 +4570,8 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 				if(!setjmp(debug_buffer))
 				{
 					if(client->ready && client->attr & (FLAG_ADMIN | FLAG_OP))
-					PPrintf(client, RADIO_LIGHTYELLOW, "Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
-					Com_Printf(VERBOSE_WARNING, "Unknown packet %04X, WB %d", n, (u_int8_t)wb3->value);
+						PPrintf(client, RADIO_LIGHTYELLOW, "Unknown packet %04X, WB %d", n, (u_int8_t) wb3->value);
+					Com_Printf(VERBOSE_WARNING, "Unknown packet %04X, WB %d", n, (u_int8_t) wb3->value);
 					Com_Printfhex(buffer, len);
 				}
 				else
@@ -4591,10 +4600,10 @@ void PingTest(u_int8_t *buffer, client_t *client)
 	pingtest_t *pingtest;
 	u_int16_t frame;
 
-	pingtest = (pingtest_t *)buffer;
+	pingtest = (pingtest_t *) buffer;
 	frame = htons(pingtest->frame);
 
-	if ((++frame) < 12)
+	if((++frame) < 12)
 	{
 		Cmd_Pingtest(frame, client);
 	}
@@ -4618,28 +4627,28 @@ void PReqBomberList(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	list = (reqbomberlist_t *)buffer;
+	list = (reqbomberlist_t *) buffer;
 
 	list->packetid = htons(Com_WBhton(0x0407));
 	list->unknown1 = 3;
 
-	for (j = 0, i = 0; i < maxentities->value; i++)
+	for(j = 0, i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && clients[i].ready && !clients[i].inflight && HaveGunner(clients[i].plane) && clients[i].country == client->country)
+		if(clients[i].inuse && clients[i].ready && !clients[i].inflight && HaveGunner(clients[i].plane) && clients[i].country == client->country)
 		{
-			list = (reqbomberlist_t *)(buffer+(4*j));
+			list = (reqbomberlist_t *) (buffer + (4 * j));
 			list->nick = htonl(clients[i].shortnick);
 			j++;
 		}
 	}
 
-	list = (reqbomberlist_t *)buffer;
+	list = (reqbomberlist_t *) buffer;
 	list->numofnicks = j;
 
-	if (debug->value)
+	if(debug->value)
 		PPrintf(client, RADIO_RED, "DEBUG: 0x0407: Available list (%d players)", j);
 
-	SendPacket(buffer, (4*j)+4, client);
+	SendPacket(buffer, (4 * j) + 4, client);
 }
 
 /**
@@ -4658,23 +4667,23 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 	endflight_t *endflight = 0;
 	client_t *nearplane;
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		endflight = (endflight_t *)buffer;
+		endflight = (endflight_t *) buffer;
 
 		end = ntohs(endflight->type);
 		gunused = ntohs(endflight->gunused);
 		land = ntohs(endflight->field);
 
-		if (end != 0x01)
+		if(end != 0x01)
 		{
 			land = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, TRUE, &dist);
 
-			if (land < 0)
+			if(land < 0)
 			{
 				land = FirstFieldCountry(client->country);
 
-				if (land < 0)
+				if(land < 0)
 				{
 					land = 1;
 				}
@@ -4688,9 +4697,9 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				land += 1;
 			}
 
-			if (land <= fields->value && dist > arena->fields[land-1].radius) // no fields found, or too far
+			if(land <= fields->value && dist > arena->fields[land - 1].radius) // no fields found, or too far
 			{
-				if (arena->fields[client->field - 1].country == client->country)
+				if(arena->fields[client->field - 1].country == client->country)
 				{
 					snprintf(field, sizeof(field), "f%d", client->field);
 				}
@@ -4698,7 +4707,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				{
 					land = FirstFieldCountry(client->country);
 
-					if (land < 0)
+					if(land < 0)
 					{
 						land = 1;
 					}
@@ -4723,26 +4732,26 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
 		totalhits = client->hits[0] + client->hits[1] + client->hits[2] + client->hits[3] + client->hits[4] + client->hits[5];
 
-		if (totalhits && !gunused)
+		if(totalhits && !gunused)
 			gunused = totalhits * 2;
 
-		if (!client->attached)
+		if(!client->attached)
 		{
-			if (client->attr == 2)
+			if(client->attr == 2)
 				PPrintf(client, RADIO_RED, "DEBUG: end flight code %d", end);
 
-			switch (end)
+			switch(end)
 			{
 				case ENDFLIGHT_LANDED:
 					Com_LogEvent(EVENT_LAND, client->id, 0);
 					Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
 					Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
 
-					if (land)
+					if(land)
 					{
 						snprintf(field, sizeof(field), "f%d", land);
 
@@ -4751,15 +4760,15 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s landed at %s\n", client->inflight, client->longnick, field);
 						PPrintf(client, RADIO_YELLOW, "%s landed %s", client->longnick, field);
 
-						if (landingcapture->value && IsBomber(client))
+						if(landingcapture->value && IsBomber(client))
 						{
-							if ((arena->fields[land - 1].country != client->country) && arena->fields[land - 1].abletocapture && arena->fields[land - 1].closed)
+							if((arena->fields[land - 1].country != client->country) && arena->fields[land - 1].abletocapture && arena->fields[land - 1].closed)
 							{
 								i = 1;
 
-								for (j = 0; j < MAX_RELATED; j++) // dont capture if bomber has wingmen
+								for(j = 0; j < MAX_RELATED; j++) // dont capture if bomber has wingmen
 								{
-									if (client->related[j] && (client->related[j]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+									if(client->related[j] && (client->related[j]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 									{
 										i = 0;
 										break;
@@ -4767,22 +4776,24 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 								}
 
 								// dont capture field if plane is damaged
-								if (client->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE | STATUS_LGEAR | STATUS_RGEAR))
+								if(client->status_damage & (STATUS_RWING | STATUS_LWING | STATUS_CENTERFUSE | STATUS_REARFUSE | STATUS_LGEAR | STATUS_RGEAR))
 								{
 									i = 0;
 								}
 
-								for (j = 0; j < MAX_BUILDINGS; j++)
+								for(j = 0; j < MAX_BUILDINGS; j++)
 								{
-									if (arena->fields[land - 1].buildings[j].field)
+									if(arena->fields[land - 1].buildings[j].field)
 									{
-										if (arena->fields[land - 1].buildings[j].status)
+										if(arena->fields[land - 1].buildings[j].status)
 										{
-											if (arena->fields[land - 1].buildings[j].type == BUILD_TOWER)
+											if(arena->fields[land - 1].buildings[j].type == BUILD_TOWER)
 											{
-												PPrintf(client, RADIO_RED, "Distance %d", DistBetween(client->posxy[0][0], client->posxy[1][0], 0, arena->fields[land - 1].buildings[j].posx, arena->fields[land - 1].buildings[j].posy, 0, 1000));
+												PPrintf(client, RADIO_RED, "Distance %d", DistBetween(client->posxy[0][0], client->posxy[1][0], 0,
+														arena->fields[land - 1].buildings[j].posx, arena->fields[land - 1].buildings[j].posy, 0, 1000));
 
-												j = DistBetween(client->posxy[0][0], client->posxy[1][0], 0, arena->fields[land - 1].buildings[j].posx, arena->fields[land - 1].buildings[j].posy, 0, 1000);
+												j = DistBetween(client->posxy[0][0], client->posxy[1][0], 0, arena->fields[land - 1].buildings[j].posx,
+														arena->fields[land - 1].buildings[j].posy, 0, 1000);
 
 												if(j > 300 /* D1 */)
 													i = 0;
@@ -4795,7 +4806,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 										break;
 								}
 
-								if (i)
+								if(i)
 								{
 									CaptureField(land, client);
 								}
@@ -4806,11 +4817,11 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					{
 						land = NearestField(client->posxy[0][0], client->posxy[1][0], 0, FALSE, TRUE, NULL);
 
-						if (land < 0)
+						if(land < 0)
 						{
 							land = FirstFieldCountry(client->country);
 
-							if (land < 0)
+							if(land < 0)
 							{
 								land = 1;
 							}
@@ -4840,33 +4851,38 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					break;
 				case ENDFLIGHT_PILOTKILL:
 					client->status_damage |= STATUS_PILOT;
-					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s is killed in flight at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s is killed in flight at %s\n", client->inflight, client->longnick, land ? field
+							: Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 					PPrintf(client, RADIO_YELLOW, "%s is killed in flight", client->longnick);
 					Kamikase(client);
 					break;
 				case ENDFLIGHT_CRASHED:
-					if (client->chute)
+					if(client->chute)
 					{
-						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s's plane crashed at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s's plane crashed at %s\n", client->inflight, client->longnick, land ? field
+								: Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 						PPrintf(client, RADIO_YELLOW, "%s's plane crashed", client->longnick);
 					}
 					else
 					{
-						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s crashed at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s crashed at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(
+								client->posxy[0][0], client->posxy[1][0]));
 						PPrintf(client, RADIO_YELLOW, "%s crashed", client->longnick);
 					}
 
 					Kamikase(client);
 
-					if (client->chute)
+					if(client->chute)
 						client->inflight = 0;
 					break;
 				case ENDFLIGHT_DITCHFAILED:
-					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s failed to ditch at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s failed to ditch at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(
+							client->posxy[0][0], client->posxy[1][0]));
 					PPrintf(client, RADIO_YELLOW, "%s failed to ditch", client->longnick);
 					break;
 				case ENDFLIGHT_BAILED:
-					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s sucessfully bailed at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s sucessfully bailed at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(
+							client->posxy[0][0], client->posxy[1][0]));
 
 					Com_LogEvent(EVENT_BAIL, client->id, 0);
 					Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4877,7 +4893,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					Com_Printf(VERBOSE_WARNING, "FLIGHT END: (%u) PEndFlight(zero) %s\n", client->inflight, client->longnick);
 					PPrintf(client, RADIO_GREEN, "End Flight ZERO, please report your crash/ditch to admin");
 				case ENDFLIGHT_DITCHED:
-					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s ditched at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s ditched at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(
+							client->posxy[0][0], client->posxy[1][0]));
 
 					Com_LogEvent(EVENT_DITCH, client->id, 0);
 					Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4889,9 +4906,10 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 
 					client->cancollide = -1;
 
-					if (!emulatecollision->value || arcade->value)
+					if(!emulatecollision->value || arcade->value)
 					{
-						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s collided at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+						Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s collided at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(
+								client->posxy[0][0], client->posxy[1][0]));
 
 						Com_LogEvent(EVENT_COLLIDED, client->id, 0);
 						Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4903,10 +4921,12 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					{
 						nearplane = NearPlane(client, client->country, 300);
 
-						if (nearplane)
+						if(nearplane)
 						{
-							Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s collided with %s at %s\n", client->inflight, client->longnick, nearplane->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
-							Com_Printf(VERBOSE_ALWAYS, "FLIGHT PART: (%u) %s collided with %s at %s\n", nearplane->inflight, nearplane->longnick, client->longnick, land ? field : Com_Padloc(nearplane->posxy[0][0], nearplane->posxy[1][0]));
+							Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s collided with %s at %s\n", client->inflight, client->longnick, nearplane->longnick,
+									land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+							Com_Printf(VERBOSE_ALWAYS, "FLIGHT PART: (%u) %s collided with %s at %s\n", nearplane->inflight, nearplane->longnick,
+									client->longnick, land ? field : Com_Padloc(nearplane->posxy[0][0], nearplane->posxy[1][0]));
 
 							Com_LogEvent(EVENT_COLLIDED, client->id, nearplane->id);
 							Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -4914,50 +4934,50 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 							Com_LogDescription(EVENT_DESC_VCPLANE, nearplane->plane, NULL);
 							Com_LogDescription(EVENT_DESC_VCCTRY, nearplane->country, NULL);
 
-							if (!nearplane->drone) // TODO: collision: Score fix
+							if(!nearplane->drone) // TODO: collision: Score fix
 							{
 								PPrintf(nearplane, RADIO_DARKGREEN, "%s collided with you!!!", client->longnick);
 								/*
-								if (IsFighter(client))
-								{
-									sprintf(my_query, "UPDATE score_fighter");
-								}
-								if (IsBomber(client))
-								{
-									sprintf(my_query, "UPDATE score_bomber");
-								}
-								else if (IsGround(client))
-								{
-									sprintf(my_query, "UPDATE score_ground");
-								}
-								else
-								{
-									Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
-									sprintf(my_query, "UPDATE score_fighter");
-								}
+								 if (IsFighter(client))
+								 {
+								 sprintf(my_query, "UPDATE score_fighter");
+								 }
+								 if (IsBomber(client))
+								 {
+								 sprintf(my_query, "UPDATE score_bomber");
+								 }
+								 else if (IsGround(client))
+								 {
+								 sprintf(my_query, "UPDATE score_ground");
+								 }
+								 else
+								 {
+								 Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+								 sprintf(my_query, "UPDATE score_fighter");
+								 }
 
-								sprintf(my_query, "%s SET collided = collided + '1' WHERE player_id = '%u'", my_query, nearplane->id);
+								 sprintf(my_query, "%s SET collided = collided + '1' WHERE player_id = '%u'", my_query, nearplane->id);
 
-								if (d_mysql_query(&my_sock, my_query)) // query succeeded
-								{
-									Com_Printf(VERBOSE_WARNING, "Collided(near): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
-								}
-								*/
+								 if (d_mysql_query(&my_sock, my_query)) // query succeeded
+								 {
+								 Com_Printf(VERBOSE_WARNING, "Collided(near): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+								 }
+								 */
 							}
 
 							nearplane->cancollide = -1;
 
 							nearplane->hitby[0].dbid = client->id;
-							nearplane->hitby[0].damage = (double)MAX_UINT32;  // TODO: Score: collision: change this
+							nearplane->hitby[0].damage = (double) MAX_UINT32; // TODO: Score: collision: change this
 							client->hitby[0].dbid = nearplane->id;
-							client->hitby[0].damage = (double)MAX_UINT32;  // TODO: Score: collision: change this
+							client->hitby[0].damage = (double) MAX_UINT32; // TODO: Score: collision: change this
 
 							client->damaged = 1;
 							nearplane->damaged = 1;
 
-							if (rand()%2)
+							if(rand() % 2)
 								SendForceStatus(STATUS_LWING, nearplane->status_status, nearplane);
-							else if (rand()%2)
+							else if(rand() % 2)
 								SendForceStatus(STATUS_RWING, nearplane->status_status, nearplane);
 							else
 								SendForceStatus(STATUS_REARFUSE, nearplane->status_status, nearplane);
@@ -4965,7 +4985,8 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					}
 					break;
 				case ENDFLIGHT_PANCAKE:
-					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s became a pancake at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+					Com_Printf(VERBOSE_ALWAYS, "FLIGHT END: (%u) %s became a pancake at %s\n", client->inflight, client->longnick, land ? field : Com_Padloc(
+							client->posxy[0][0], client->posxy[1][0]));
 					PPrintf(client, RADIO_YELLOW, "%s became pancake", client->longnick);
 					break;
 				default:
@@ -4979,13 +5000,13 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		for (i = 0; i < MAX_RELATED; i++)
+		for(i = 0; i < MAX_RELATED; i++)
 		{
-			if (client->related[i])
+			if(client->related[i])
 			{
-				if (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2 | DRONE_HMACK | DRONE_HTANK | DRONE_EJECTED))
+				if(client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2 | DRONE_HMACK | DRONE_HTANK | DRONE_EJECTED))
 				{
 					RemoveDrone(client->related[i]);
 				}
@@ -4997,25 +5018,27 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if (!client->chute || (client->chute && ((end == ENDFLIGHT_PILOTKILL) || (end == ENDFLIGHT_BAILED) || (end == ENDFLIGHT_PANCAKE) || (end == ENDFLIGHT_DITCHFAILED))))
+		if(!client->chute || (client->chute && ((end == ENDFLIGHT_PILOTKILL) || (end == ENDFLIGHT_BAILED) || (end == ENDFLIGHT_PANCAKE) || (end
+				== ENDFLIGHT_DITCHFAILED))))
 		{
 			PPrintf(client, RADIO_YELLOW, "END: Flight ID %u", client->inflight);
 			ScoresEndFlight(end, land, gunused, totalhits, client);
 
-			if (land && end == ENDFLIGHT_LANDED && arena->fields[land - 1].rps[client->plane] > -1 && client->plane < maxplanes && !client->tkstatus && !(client->plane >= 131 && client->plane <= 134))
+			if(land && end == ENDFLIGHT_LANDED && arena->fields[land - 1].rps[client->plane] > -1 && client->plane < maxplanes && !client->tkstatus
+					&& !(client->plane >= 131 && client->plane <= 134))
 				arena->fields[land - 1].rps[client->plane]++;
 
-			if (!client->attached)
+			if(!client->attached)
 			{
-				if (HaveGunner(client->plane)) // ends gunners flight
+				if(HaveGunner(client->plane)) // ends gunners flight
 				{
-					for (i = 0; i < 7; i++)
+					for(i = 0; i < 7; i++)
 					{
-						if (client->gunners[i])
+						if(client->gunners[i])
 						{
-							if (client->gunners[i]->attached == client)
+							if(client->gunners[i]->attached == client)
 							{
 								PEndFlight(buffer, len, client->gunners[i]);
 							}
@@ -5023,23 +5046,26 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 					}
 				}
 
-				if (client->shanghai) // ends shanghai flight
+				if(client->shanghai) // ends shanghai flight
 				{
-					if (client->shanghai->attached == client)
+					if(client->shanghai->attached == client)
 						PEndFlight(buffer, len, client->shanghai);
 				}
 
-				if (client->view) // ends view flight
+				if(client->view) // ends view flight
 				{
-					if (client->view->attached == client)
+					if(client->view->attached == client)
 						PEndFlight(buffer, len, client->view);
 				}
 			}
 
-			client->score.costscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore = client->killssortie = client->status_damage = client->status_status = client->inflight =
-					client->hits[0] = client->hits[1] = client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1] = client->hitstaken[2] =
-					client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute = client->obradar = client->mortars = client->cancollide = client->fueltimer =
-					client->score.penaltyscore = client->commandos = client->damaged = client->conn_sum = client->conn_count = client->conn_curravg = client->conn_lastavg = 0;
+			client->score.costscore = client->score.airscore = client->score.groundscore = client->score.captscore = client->score.rescuescore
+					= client->killssortie = client->status_damage = client->status_status = client->inflight = client->hits[0] = client->hits[1]
+							= client->hits[2] = client->hits[3] = client->hits[4] = client->hits[5] = client->hitstaken[0] = client->hitstaken[1]
+									= client->hitstaken[2] = client->hitstaken[3] = client->hitstaken[4] = client->hitstaken[5] = client->chute
+											= client->obradar = client->mortars = client->cancollide = client->fueltimer = client->score.penaltyscore
+													= client->commandos = client->damaged = client->conn_sum = client->conn_count = client->conn_curravg
+															= client->conn_lastavg = 0;
 
 			memset(client->skin, 0, sizeof(client->skin));
 
@@ -5053,9 +5079,9 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 			SendGunnerStatusChange(client, 0, client);
 			SendAttachList(NULL, client); // TODO: TODO: FIXME: send actual list or emptylist?
 
-			if (land && end != 0x01)
+			if(land && end != 0x01)
 			{
-				if (arena->fields[client->field - 1].country == client->country)
+				if(arena->fields[client->field - 1].country == client->country)
 				{
 					snprintf(field, sizeof(field), "f%d", client->field);
 				}
@@ -5063,7 +5089,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 				{
 					land = FirstFieldCountry(client->country);
 
-					if (land < 0)
+					if(land < 0)
 					{
 						land = 1;
 					}
@@ -5106,7 +5132,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	oldpostimer = client->postimer;
 	client->postimer = arena->time; // set the time when last position packet has been received
 
-	if (attached)
+	if(attached)
 	{
 		plane2 = (planeposition2_t *) buffer;
 		clientoffset = client->clienttimer - ntohl(plane2->timer);
@@ -5134,14 +5160,14 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 	{
 		BackupPosition(client, FALSE);
 
-		if (!client->mapper)
+		if(!client->mapper)
 		{
 			client->posxy[0][0] = ntohl(wb3plane->posx);
 			client->posxy[1][0] = ntohl(wb3plane->posy);
 		}
 		client->posalt[0] = ntohl(wb3plane->alt);
 		//		client->atradar = ntohs(wb3plane->radar);
-		if (!client->predict)
+		if(!client->predict)
 		{
 			clientoffset = client->clienttimer - ntohl(wb3plane->timer);
 			client->clienttimer = ntohl(wb3plane->timer);
@@ -5156,7 +5182,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				if(clientoffset < -600)
 				{
 					near = NearPlane(client, client->country, planerangelimit->value);
-					Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, clientoffset, near?"enemy near":"");
+					Com_Printf(VERBOSE_DEBUG, "%s possible client-side overload (offset = %d) %s\n", client->longnick, clientoffset, near ? "enemy near" : "");
 				}
 
 				if(client->postimer != oldpostimer) // not received in bolus
@@ -5171,11 +5197,11 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 					{
 						if(!client->conn_lastavg)
 						{
-							client->conn_lastavg = (double)client->conn_sum / client->conn_count;
+							client->conn_lastavg = (double) client->conn_sum / client->conn_count;
 						}
 						else
 						{
-							client->conn_lastavg = 0.5 * client->conn_lastavg + 0.5 * (double)client->conn_sum / client->conn_count;
+							client->conn_lastavg = 0.5 * client->conn_lastavg + 0.5 * (double) client->conn_sum / client->conn_count;
 						}
 
 						client->conn_sum = 10 * client->conn_lastavg;
@@ -5188,7 +5214,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 						// 	//if(MODULUS(conn_avgdiff) > 100)
 						// }
 
-						client->conn_curravg = (double)client->conn_sum / client->conn_count;
+						client->conn_curravg = (double) client->conn_sum / client->conn_count;
 						// Com_Printf(VERBOSE_DEBUG, "%s current avg: %.3f\n", client->longnick, client->conn_curravg);
 
 						if(client->conn_curravg > 175)
@@ -5213,9 +5239,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 
 		i = 0;
 
-		if (client->predict)
+		if(client->predict)
 		{
-			if (client->predict > 5)
+			if(client->predict > 5)
 				i = 5;
 			else
 				i = client->predict;
@@ -5223,7 +5249,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			client->predict--;
 		}
 
-		if (client->inflight)
+		if(client->inflight)
 		{
 			client->speedxyz[0][i] = ntohs(wb3plane->xspeed);
 			client->speedxyz[1][i] = ntohs(wb3plane->yspeed);
@@ -5238,7 +5264,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			client->aspeeds[1][i] = ntohs(wb3plane->rollangspeed);
 			client->aspeeds[2][i] = ntohs(wb3plane->yawangspeed);
 
-			if ((client->lograwdata || lograwposition->value) && client->inflight)
+			if((client->lograwdata || lograwposition->value) && client->inflight)
 			{
 				LogRAWPosition(FALSE, client);
 			}
@@ -5259,13 +5285,13 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			client->aspeeds[2][0] = 0;
 		}
 
-		if (!wb3->value)
+		if(!wb3->value)
 		{
-			if ((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value)) // allow contrail during day
+			if((arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value)) // allow contrail during day
 			{
 				client->status_damage |= (STATUS_LFUEL | STATUS_RFUEL);
 
-				if (!client->contrail)
+				if(!client->contrail)
 				{
 					PPrintf(client, RADIO_LIGHTYELLOW, "You are in contrail area");
 					client->contrail = 1;
@@ -5274,17 +5300,17 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 			else // remove contrail if night
 			{ // TODO: WB2: remove fuel leak at night
-				if (client->armor.points[PLACE_LFUEL] > 0) // 0x4000
+				if(client->armor.points[PLACE_LFUEL] > 0) // 0x4000
 				{
 					client->status_damage &= 0xFFFFBFFF;
 				}
 
-				if (client->armor.points[PLACE_RFUEL] > 0) // 0x8000
+				if(client->armor.points[PLACE_RFUEL] > 0) // 0x8000
 				{
 					client->status_damage &= 0xFFFF7FFF;
 				}
 
-				if (client->contrail)
+				if(client->contrail)
 				{
 					PPrintf(client, RADIO_LIGHTYELLOW, "Your contrail is not visible anymore");
 					client->contrail = 0;
@@ -5296,19 +5322,19 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 		// ackstar rules
 		if(ackstardisable->value)
 		{
-			if (client->inflight && ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) < 1000) && IsBomber(client))
+			if(client->inflight && ((client->posalt[0] - GetHeightAt(client->posxy[0][0], client->posxy[1][0])) < 1000) && IsBomber(client))
 			{
-				if (client->ackstarcount > 4)
+				if(client->ackstarcount > 4)
 				{
-					for (i = 0; i < MAX_RELATED; i++)
+					for(i = 0; i < MAX_RELATED; i++)
 					{
-						if (client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+						if(client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 						{
 							field = NearestField(client->posxy[0][0], client->posxy[1][0], (client->country == 1) ? 3 : 1, FALSE, FALSE, &distance);
 
-							if (field >= 0 && field < fields->value && distance < arena->fields[field].radius)
+							if(field >= 0 && field < fields->value && distance < arena->fields[field].radius)
 							{
-								if (!client->ackstar)
+								if(!client->ackstar)
 								{
 									client->ackstar = 1;
 									SendOttoParams(client);
@@ -5317,7 +5343,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 							}
 							else
 							{
-								if (client->ackstar)
+								if(client->ackstar)
 								{
 									client->ackstar = 0;
 									SendOttoParams(client);
@@ -5335,7 +5361,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 			else
 			{
-				if (client->ackstar)
+				if(client->ackstar)
 				{
 					client->ackstarcount = client->ackstar = 0;
 					SendOttoParams(client);
@@ -5344,13 +5370,13 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 		}
 
-		if (client->inflight && !client->attached && !IsGround(client))
+		if(client->inflight && !client->attached && !IsGround(client))
 		{
-			if (!client->cancollide && !arcade->value)
+			if(!client->cancollide && !arcade->value)
 			{
-				if ((FLIGHT_TIME(client)/1000) > 10)
+				if((FLIGHT_TIME(client) / 1000) > 10)
 				{
-					if ((client->posalt[0] - arena->fields[client->field - 1].posxyz[2]) > 15)
+					if((client->posalt[0] - arena->fields[client->field - 1].posxyz[2]) > 15)
 					{
 						if(midairs->value)
 						{
@@ -5372,7 +5398,7 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 				}
 			}
 
-			if (((client->armor.points[PLACE_LWING] < arena->planedamage[client->plane].points[PLACE_LWING]) || (client->armor.points[PLACE_RWING]
+			if(((client->armor.points[PLACE_LWING] < arena->planedamage[client->plane].points[PLACE_LWING]) || (client->armor.points[PLACE_RWING]
 					< arena->planedamage[client->plane].points[PLACE_RWING])))
 				CheckMaxG(client);
 		}
@@ -5401,22 +5427,22 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 
 	client->timer = client->clienttimer + client->basetimer;
 
-	if (client->mapper)
+	if(client->mapper)
 	{
-		if (!(client->mapper % 5))
+		if(!(client->mapper % 5))
 			WB3MapTopography(client);
 		client->mapper++;
 	}
 
-	if (client->inflight)
+	if(client->inflight)
 	{
-		if (HaveGunner(client->plane))
+		if(HaveGunner(client->plane))
 		{
-			for (i = 0; i < 7; i++) // start gunners flight
+			for(i = 0; i < 7; i++) // start gunners flight
 			{
-				if (client->gunners[i])
+				if(client->gunners[i])
 				{
-					if (client->gunners[i]->attached == client)
+					if(client->gunners[i]->attached == client)
 					{
 						client->gunners[i]->posxy[0][0] = client->posxy[0][0];
 						client->gunners[i]->posxy[1][0] = client->posxy[1][0];
@@ -5427,9 +5453,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 		}
 
-		if (client->shanghai)
+		if(client->shanghai)
 		{
-			if (client->shanghai->attached == client)
+			if(client->shanghai->attached == client)
 			{
 				client->shanghai->posxy[0][0] = client->posxy[0][0];
 				client->shanghai->posxy[1][0] = client->posxy[1][0];
@@ -5438,9 +5464,9 @@ void PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached)
 			}
 		}
 
-		if (client->view)
+		if(client->view)
 		{
-			if (client->view->attached == client)
+			if(client->view->attached == client)
 			{
 				client->view->posxy[0][0] = client->posxy[0][0];
 				client->view->posxy[1][0] = client->posxy[1][0];
@@ -5464,21 +5490,23 @@ void CheckMaxG(client_t *client)
 
 	g = 0;
 
-	if (!(client->status_damage & STATUS_LWING) || !(client->status_damage & STATUS_RWING))
+	if(!(client->status_damage & STATUS_LWING) || !(client->status_damage & STATUS_RWING))
 	{
 		g = ClientG(client);
 	}
 
-	if (!(client->status_damage & STATUS_LWING))
+	if(!(client->status_damage & STATUS_LWING))
 	{
-		maxg = (double)(arena->planedamage[client->plane].positiveG * client->armor.points[PLACE_LWING] / arena->planedamage[client->plane].points[PLACE_LWING]) + 1.5;
-		ming = (double)((arena->planedamage[client->plane].negativeG * client->armor.points[PLACE_LWING] / arena->planedamage[client->plane].points[PLACE_LWING]) * -1) - 1.5;
+		maxg = (double) (arena->planedamage[client->plane].positiveG * client->armor.points[PLACE_LWING]
+				/ arena->planedamage[client->plane].points[PLACE_LWING]) + 1.5;
+		ming = (double) ((arena->planedamage[client->plane].negativeG * client->armor.points[PLACE_LWING]
+				/ arena->planedamage[client->plane].points[PLACE_LWING]) * -1) - 1.5;
 
 		//		PPrintf(client, RADIO_WHITE, "left min %.3f max %.3f", ming, maxg);
 
-		if ((g > maxg) || (g < ming))
+		if((g > maxg) || (g < ming))
 		{
-			if (client->armor.points[PLACE_LWING] > 0)
+			if(client->armor.points[PLACE_LWING] > 0)
 			{
 				PPrintf(client, RADIO_DARKGREEN, "Your left wing blown off due G overload");
 				Com_Printf(VERBOSE_DAMAGE, "PART: (%u) %s left wing blown off due G overload\n", client->inflight, client->longnick);
@@ -5488,9 +5516,9 @@ void CheckMaxG(client_t *client)
 		}
 		else
 		{
-			if ((maxg - g) < gwarning->value || (g - ming) < gwarning->value)
+			if((maxg - g) < gwarning->value || (g - ming) < gwarning->value)
 			{
-				if (client->armor.points[PLACE_LWING] > 0)
+				if(client->armor.points[PLACE_LWING] > 0)
 				{
 					WB3DotCommand(client, ".playsoundfile sounds/gexceed.wav");
 					//PPrintf(client, RADIO_DARKGREEN, "Warning! Your left wing is about to fall!");
@@ -5499,16 +5527,18 @@ void CheckMaxG(client_t *client)
 		}
 	}
 
-	if (!(client->status_damage & STATUS_RWING))
+	if(!(client->status_damage & STATUS_RWING))
 	{
-		maxg = (double)(arena->planedamage[client->plane].positiveG * client->armor.points[PLACE_RWING] / arena->planedamage[client->plane].points[PLACE_RWING]) + 1.5;
-		ming = (double)((arena->planedamage[client->plane].negativeG * client->armor.points[PLACE_RWING] / arena->planedamage[client->plane].points[PLACE_RWING]) * -1) - 1.5;
+		maxg = (double) (arena->planedamage[client->plane].positiveG * client->armor.points[PLACE_RWING]
+				/ arena->planedamage[client->plane].points[PLACE_RWING]) + 1.5;
+		ming = (double) ((arena->planedamage[client->plane].negativeG * client->armor.points[PLACE_RWING]
+				/ arena->planedamage[client->plane].points[PLACE_RWING]) * -1) - 1.5;
 
 		//		PPrintf(client, RADIO_WHITE, "right min %.3f max %.3f", ming, maxg);
 
-		if ((g > maxg) || (g < ming))
+		if((g > maxg) || (g < ming))
 		{
-			if (client->armor.points[PLACE_RWING] > 0)
+			if(client->armor.points[PLACE_RWING] > 0)
 			{
 				PPrintf(client, RADIO_DARKGREEN, "Your right wing blown off due G overload");
 				Com_Printf(VERBOSE_DAMAGE, "PART: (%u) %s right wing blown off due G overload\n", client->inflight, client->longnick);
@@ -5518,9 +5548,9 @@ void CheckMaxG(client_t *client)
 		}
 		else
 		{
-			if ((maxg - g) < gwarning->value || (g - ming) < gwarning->value)
+			if((maxg - g) < gwarning->value || (g - ming) < gwarning->value)
 			{
-				if (client->armor.points[PLACE_RWING] > 0)
+				if(client->armor.points[PLACE_RWING] > 0)
 				{
 					WB3DotCommand(client, ".playsoundfile sounds/gexceed.wav");
 					//PPrintf(client, RADIO_DARKGREEN, "Warning! Your right wing is about to fall!");
@@ -5540,8 +5570,8 @@ double ClientG(client_t *client)
 {
 	double Ax, Ay, Az, g, pitch, roll, yaw, hyaw;
 
-	pitch = (double)((double)client->angles[0][0] / 10);
-	roll = (double)((double)client->angles[1][0] / 10);
+	pitch = (double) ((double) client->angles[0][0] / 10);
+	roll = (double) ((double) client->angles[1][0] / 10);
 
 	yaw = WBtoHdg(client->angles[2][0]);
 
@@ -5550,46 +5580,46 @@ double ClientG(client_t *client)
 	///////////
 	////////// Ay
 
-//	PPrintf(client, RADIO_GREEN, "Pitch %.2f, Roll %.2f, Yaw %.2f", pitch, roll, yaw);
-//	PPrintf(client, RADIO_RED, "AccX %d, AccY %d, Accz %d", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
+	//	PPrintf(client, RADIO_GREEN, "Pitch %.2f, Roll %.2f, Yaw %.2f", pitch, roll, yaw);
+	//	PPrintf(client, RADIO_RED, "AccX %d, AccY %d, Accz %d", client->accelxyz[0][0], client->accelxyz[1][0], client->accelxyz[2][0]);
 
 	// WB3 Stuff
 	pitch *= -1;
 
 	hyaw = yaw;
 
-	if (yaw > 180)
+	if(yaw > 180)
 		hyaw = 360 - yaw;
 
 	// pitch influence
-	if (pitch > 0)
-		Ay = ((90 - hyaw) * 2) - Com_Deg(asin(sin(Com_Rad(90+pitch)) * cos(Com_Rad(hyaw))));
+	if(pitch > 0)
+		Ay = ((90 - hyaw) * 2) - Com_Deg(asin(sin(Com_Rad(90 + pitch)) * cos(Com_Rad(hyaw))));
 	else
-		Ay = Com_Deg(asin(sin(Com_Rad(90+pitch)) * cos(Com_Rad(hyaw))));
+		Ay = Com_Deg(asin(sin(Com_Rad(90 + pitch)) * cos(Com_Rad(hyaw))));
 
-	if (hyaw > 90)
+	if(hyaw > 90)
 	{
 		Ay = MODULUS((90 - hyaw) * 2) + Ay;
 	}
 
-	if (MODULUS(roll)> 90)
+	if(MODULUS(roll) > 90)
 	{
 		Ay = MODULUS((90 - hyaw) * 2) - Ay;
 	}
 	///
 	// roll influence
 
-	if (roll > 0)
-		if (hyaw > 90)
+	if(roll > 0)
+		if(hyaw > 90)
 			g = ((180 - hyaw) * 2) - Com_Deg(asin(MODULUS(sin(Com_Rad(90+roll))) * sin(Com_Rad(hyaw))));
 		else
 			g = (hyaw * 2) - Com_Deg(asin(MODULUS(sin(Com_Rad(90+roll))) * sin(Com_Rad(hyaw))));
 	else
 		g = Com_Deg(asin(MODULUS(sin(Com_Rad(90+roll))) * sin(Com_Rad(hyaw))));
 
-	if ((yaw > 180) && (yaw < 360))
+	if((yaw > 180) && (yaw < 360))
 	{
-		if (hyaw > 90)
+		if(hyaw > 90)
 			g = ((180 - hyaw) * 2) - g;
 		else
 			g = (hyaw * 2) - g;
@@ -5600,44 +5630,44 @@ double ClientG(client_t *client)
 	////////// Ax
 	hyaw = yaw + 90;
 
-	if (hyaw >= 360)
+	if(hyaw >= 360)
 		hyaw -= 360;
 
 	yaw = hyaw;
 
-	if (yaw > 180)
+	if(yaw > 180)
 		hyaw = 360 - yaw;
 
 	// pitch influence
 
-	if (pitch > 0)
-		Ax = ((90 - hyaw) * 2) - Com_Deg(asin(sin(Com_Rad(90+pitch)) * cos(Com_Rad(hyaw))));
+	if(pitch > 0)
+		Ax = ((90 - hyaw) * 2) - Com_Deg(asin(sin(Com_Rad(90 + pitch)) * cos(Com_Rad(hyaw))));
 	else
-		Ax = Com_Deg(asin(sin(Com_Rad(90+pitch)) * cos(Com_Rad(hyaw))));
+		Ax = Com_Deg(asin(sin(Com_Rad(90 + pitch)) * cos(Com_Rad(hyaw))));
 
-	if (hyaw > 90)
+	if(hyaw > 90)
 	{
 		Ax = MODULUS((90 - hyaw) * 2) + Ax;
 	}
 
-	if (MODULUS(roll)> 90)
+	if(MODULUS(roll) > 90)
 	{
 		Ax = MODULUS((90 - hyaw) * 2) - Ax;
 	}
 	///
 	// roll influence
 
-	if (roll > 0)
-		if (hyaw > 90)
+	if(roll > 0)
+		if(hyaw > 90)
 			g = ((180 - hyaw) * 2) - Com_Deg(asin(MODULUS(sin(Com_Rad(90+roll))) * sin(Com_Rad(hyaw))));
 		else
 			g = (hyaw * 2) - Com_Deg(asin(MODULUS(sin(Com_Rad(90+roll))) * sin(Com_Rad(hyaw))));
 	else
 		g = Com_Deg(asin(MODULUS(sin(Com_Rad(90+roll))) * sin(Com_Rad(hyaw))));
 
-	if ((yaw > 180) && (yaw < 360))
+	if((yaw > 180) && (yaw < 360))
 	{
-		if (hyaw > 90)
+		if(hyaw > 90)
 			g = ((180 - hyaw) * 2) - g;
 		else
 			g = (hyaw * 2) - g;
@@ -5650,9 +5680,10 @@ double ClientG(client_t *client)
 	// WB3 stuff
 	Ay = 180 - Ay;
 
-	g = (((double)client->accelxyz[0][0]/31) * cos(Com_Rad(Ax))) + (((double)client->accelxyz[1][0]/31) * cos(Com_Rad(Ay))) + ((((double)client->accelxyz[2][0]/31) + 1) * cos(Com_Rad(Az)));
+	g = (((double) client->accelxyz[0][0] / 31) * cos(Com_Rad(Ax))) + (((double) client->accelxyz[1][0] / 31) * cos(Com_Rad(Ay)))
+			+ ((((double) client->accelxyz[2][0] / 31) + 1) * cos(Com_Rad(Az)));
 
-//	PPrintf(client, RADIO_WHITE, "Ax %.3f Ay %.3f Az %.3f G %.3f", Ax, Ay, Az, g);
+	//	PPrintf(client, RADIO_WHITE, "Ax %.3f Ay %.3f Az %.3f G %.3f", Ax, Ay, Az, g);
 
 	return g;
 }
@@ -5669,23 +5700,22 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 	chutepos_t *chute;
 	u_int32_t basetimer;
 
-	chute = (chutepos_t *)buffer;
+	chute = (chutepos_t *) buffer;
 
-	if (client->inflight)
+	if(client->inflight)
 	{
-		if (!client->chute)
+		if(!client->chute)
 		{
 			PPrintf(client, RADIO_YELLOW, "%s ejected", client->longnick);
 
-			if (printeject->value)
+			if(printeject->value)
 			{
-				BPrintf(RADIO_YELLOW, "%s ejected at %s",
-				client->longnick,
-				Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				BPrintf(RADIO_YELLOW, "%s ejected at %s", client->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
 			}
 			else
 			{
-				Com_Printf(VERBOSE_ALWAYS, "FLIGHT EJECT: (%u) %s ejected at %s\n", client->inflight, client->longnick, Com_Padloc(client->posxy[0][0], client->posxy[1][0]));
+				Com_Printf(VERBOSE_ALWAYS, "FLIGHT EJECT: (%u) %s ejected at %s\n", client->inflight, client->longnick, Com_Padloc(client->posxy[0][0],
+						client->posxy[1][0]));
 			}
 
 			client->chute = 1;
@@ -5694,22 +5724,22 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 			Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
 			Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
 
-			if (!client->attached)
+			if(!client->attached)
 			{
 				AddDrone(DRONE_EJECTED, client->posxy[0][0], client->posxy[1][0], client->posalt[0], client->country, client->plane, client);
 			}
-			else if (!client->attached->drone)
+			else if(!client->attached->drone)
 			{
-				for (i = 0; i < 7; i++)
+				for(i = 0; i < 7; i++)
 				{
-					if (client->attached->gunners[i] == client)
+					if(client->attached->gunners[i] == client)
 					{
 						client->attached->gunners[i] = NULL;
 						break;
 					}
 				}
 
-				if (client->attached->view == client)
+				if(client->attached->view == client)
 					client->attached->view = NULL;
 
 				client->attached = NULL;
@@ -5724,21 +5754,22 @@ void PChutePos(u_int8_t *buffer, client_t *client)
 			 */
 		}
 
-		for (i = 0; i < MAX_RELATED; i++)
+		for(i = 0; i < MAX_RELATED; i++)
 		{
-			if (client->related[i])
-				if (client->related[i]->drone & DRONE_EJECTED)
+			if(client->related[i])
+				if(client->related[i]->drone & DRONE_EJECTED)
 					break;
 		}
 
-		if (i < MAX_RELATED)
+		if(i < MAX_RELATED)
 		{
 			client->related[i]->posxy[0][0] = ntohl(chute->posx);
 			client->related[i]->posxy[1][0] = ntohl(chute->posy);
 			client->related[i]->posalt[0] = ntohl(chute->alt);
-			client->related[i]->speedxyz[0][0] = client->related[i]->speedxyz[1][0] = client->related[i]->speedxyz[2][0] = client->related[i]->accelxyz[0][0] = client->related[i]->accelxyz[1][0]
-					= client->related[i]->accelxyz[2][0] = client->related[i]->angles[0][0] = client->related[i]->angles[1][0] = client->related[i]->angles[2][0] = client->related[i]->aspeeds[0][0]
-							= client->related[i]->aspeeds[1][0] = client->related[i]->aspeeds[2][0] = 0;
+			client->related[i]->speedxyz[0][0] = client->related[i]->speedxyz[1][0] = client->related[i]->speedxyz[2][0] = client->related[i]->accelxyz[0][0]
+					= client->related[i]->accelxyz[1][0] = client->related[i]->accelxyz[2][0] = client->related[i]->angles[0][0]
+							= client->related[i]->angles[1][0] = client->related[i]->angles[2][0] = client->related[i]->aspeeds[0][0]
+									= client->related[i]->aspeeds[1][0] = client->related[i]->aspeeds[2][0] = 0;
 
 			client->related[i]->offset = client->clienttimer - ntohl(chute->timer);
 
@@ -5786,24 +5817,24 @@ void WB3GunnerUpdate(u_int8_t *buffer, client_t *client)
 
 	memset(packet, 0, sizeof(packet));
 
-	gunnerupdate = (wb3gunnerupdate_t *)buffer;
-	updategunner = (wb3updategunner_t *)packet;
+	gunnerupdate = (wb3gunnerupdate_t *) buffer;
+	updategunner = (wb3updategunner_t *) packet;
 
 	updategunner->packetid = htons(Com_WBhton(0x0007));
 	updategunner->gun = ntohs(gunnerupdate->gun);
 	updategunner->pitch = gunnerupdate->pitch;
 	updategunner->yaw = gunnerupdate->yaw;
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					updategunner->slot = j;
 					SendPacket(packet, sizeof(packet), &clients[i]);
@@ -5825,12 +5856,12 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 	planestatus1_t *status;
 	u_int8_t i, j;
 
-	if (client->attached || client->chute)
+	if(client->attached || client->chute)
 		return;
 
-	if (buffer)
+	if(buffer)
 	{
-		status = (planestatus1_t *)buffer;
+		status = (planestatus1_t *) buffer;
 
 		if(client->status_damage != htonl(status->status_damage)) // TODO: Collision: check when new damage from client, possible collision detection
 		{
@@ -5840,19 +5871,19 @@ void PPlaneStatus(u_int8_t *buffer, client_t *client)
 		client->status_status = htonl(status->status_status);
 	}
 
-	if (!wb3->value && (arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value))
+	if(!wb3->value && (arena->hour >= 6 && arena->hour <= 18) && (client->posalt[0] > contrail->value))
 		client->status_damage |= (STATUS_LFUEL | STATUS_RFUEL);
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					SendPlaneStatus(client, &clients[i]);
 					break;
@@ -5877,22 +5908,22 @@ void WB3FireSuppression(u_int8_t *buffer, client_t *client)
 
 	memset(packet, 0, sizeof(packet));
 
-	firesupression = (wb3firesupression_t *)buffer;
-	supressfire = (wb3supressfire_t *)packet;
+	firesupression = (wb3firesupression_t *) buffer;
+	supressfire = (wb3supressfire_t *) packet;
 
 	supressfire->packetid = htons(Com_WBhton(0x0022));
 	supressfire->supress = firesupression->supress;
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					supressfire->slot = j;
 					SendPacket(packet, sizeof(packet), &clients[i]);
@@ -5916,7 +5947,7 @@ void WB3SupressFire(u_int8_t slot, client_t *client)
 
 	memset(packet, 0, sizeof(packet));
 
-	supressfire = (wb3supressfire_t *)packet;
+	supressfire = (wb3supressfire_t *) packet;
 
 	supressfire->packetid = htons(Com_WBhton(0x0022));
 	supressfire->slot = slot;
@@ -5924,7 +5955,6 @@ void WB3SupressFire(u_int8_t slot, client_t *client)
 
 	SendPacket(packet, sizeof(packet), client);
 }
-
 
 /**
  WB3ExternalAmmoCnt
@@ -5937,20 +5967,20 @@ void WB3ExternalAmmoCnt(u_int8_t *buffer, u_int16_t len, client_t *client)
 	wb3externalammocnt_t *ammocnt;
 	u_int8_t i, j;
 
-	ammocnt = (wb3externalammocnt_t *)buffer;
+	ammocnt = (wb3externalammocnt_t *) buffer;
 
 	ammocnt->packetid = htons(Com_WBhton(0x0024));
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					SendPacket(buffer, len, &clients[i]);
 					break;
@@ -5970,7 +6000,7 @@ void PSetRadioChannel(u_int8_t *buffer, client_t *client)
 {
 	setradiochannel_t *radio;
 
-	radio = (setradiochannel_t *)buffer;
+	radio = (setradiochannel_t *) buffer;
 
 	client->radio[ntohs(radio->radionum) - 1] = ntohs(radio->channel);
 }
@@ -5981,7 +6011,7 @@ void PSetRadioChannel(u_int8_t *buffer, client_t *client)
  Process client informing it dropped some item
  */
 
-void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *client)
+void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/client_t *client)
 {
 	rocketbomb_t *drop;
 	u_int8_t i;
@@ -5990,7 +6020,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 	int16_t speed, z, x, y;
 	int32_t destx, desty, alt;
 
-	drop = (rocketbomb_t *)buffer;
+	drop = (rocketbomb_t *) buffer;
 
 	/*
 	 if(client->drone & DRONE_COMMANDOS)
@@ -6001,27 +6031,27 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 
 	drop->packetid = htons(Com_WBhton(0x1900));
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					SendPacket(buffer, len, &clients[i]);
 
-					if (drop->item == 103 /* 75mm M1897 */)
+					if(drop->item == 103 /* 75mm M1897 */)
 					{
 						drop->item = 149 /* Flak */;
 						SendPacket(buffer, len, &clients[i]);
 						drop->item = 103 /* 75mm M1897 */;
 					}
 
-					if (drop->item == 88) /* 250kg AP */
+					if(drop->item == 88) /* 250kg AP */
 					{
 						drop->item = 149 /* Flak */;
 						SendPacket(buffer, len, &clients[i]);
@@ -6043,16 +6073,16 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 		}
 	}
 
-	for (i = 0; i < MAX_RELATED; i++)
+	for(i = 0; i < MAX_RELATED; i++)
 	{
-		if (client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+		if(client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 		{
 			drop->posx = htonl(client->related[i]->posxy[0][0]);
 			drop->posy = htonl(client->related[i]->posxy[1][0]);
 
-			drop->id = htons(ntohs(drop->id) + (500 * (i+1)));
+			drop->id = htons(ntohs(drop->id) + (500 * (i + 1)));
 
-			if (drop->item != 132 /*barrage*/ && drop->item != 114 /*para*/&& (drop->item < 137 || drop->item > 140)/*torpedoes (avoid nuke effect)*/)
+			if(drop->item != 132 /*barrage*/&& drop->item != 114 /*para*/&& (drop->item < 137 || drop->item > 140)/*torpedoes (avoid nuke effect)*/)
 			{
 				dist = 0;
 
@@ -6060,29 +6090,29 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 
 				if(j >= 0 && j < fields->value && dist < arena->fields[j].radius)
 				{
-					if (j < fields->value)
+					if(j < fields->value)
 						alt = ntohl(drop->alt) - arena->fields[j].posxyz[2]; // TODO: FIXME: calculate destx desty and GetHeightAt()
 					else
-						alt = ntohl(drop->alt) - arena->cities[j - (int16_t)fields->value].posxyz[2]; // TODO: FIXME: calculate destx desty and GetHeightAt()
+						alt = ntohl(drop->alt) - arena->cities[j - (int16_t) fields->value].posxyz[2]; // TODO: FIXME: calculate destx desty and GetHeightAt()
 				}
 				else
 					alt = ntohl(drop->alt);
 
-				if (alt < 0)
+				if(alt < 0)
 					alt = 0;
 
 				x = ntohs(drop->xspeed);
 				y = ntohs(drop->yspeed);
 				z = ntohs(drop->zspeed);
 
-				if (drop->item > 56 && drop->item < 65) // TODO: FIXME: this is a tentative to correct rocket hit
+				if(drop->item > 56 && drop->item < 65) // TODO: FIXME: this is a tentative to correct rocket hit
 				{
 					x *= 4;
 					y *= 4;
 					z *= 4;
 				}
 
-				speed = sqrt(Com_Pow(z, 2) + (double)(2 * GRAVITY * alt));
+				speed = sqrt(Com_Pow(z, 2) + (double) (2 * GRAVITY * alt));
 				time = (z + speed) / GRAVITY;
 
 				destx = ntohl(drop->posx);
@@ -6103,7 +6133,7 @@ void PDropItem(u_int8_t *buffer, u_int8_t len, /*u_int8_t fuse,*/ client_t *clie
 
 	//score
 
-	if (!client->drone)
+	if(!client->drone)
 	{
 		Com_LogEvent(EVENT_DROP, client->id, 0);
 		Com_LogDescription(EVENT_DESC_PLPLANE, client->plane, NULL);
@@ -6125,13 +6155,14 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 	u_int16_t field, distance;
 	wb3tonnage_t *wb3tonnage;
 
-	wb3tonnage = (wb3tonnage_t *)buffer;
+	wb3tonnage = (wb3tonnage_t *) buffer;
 
 	if(!client)
 		return;
 
-	if (client->attr)
-		PPrintf(client, RADIO_GREEN, "DEBUG: tonnage ammoID: %d, field: %d, distance: %d", wb3tonnage->ammo, ntohs(wb3tonnage->field), ntohs(wb3tonnage->distance));
+	if(client->attr)
+		PPrintf(client, RADIO_GREEN, "DEBUG: tonnage ammoID: %d, field: %d, distance: %d", wb3tonnage->ammo, ntohs(wb3tonnage->field), ntohs(
+				wb3tonnage->distance));
 
 	if(!oldcapt->value)
 	{
@@ -6140,15 +6171,15 @@ void WB3TonnageOnTarget(u_int8_t *buffer, client_t *client)
 			field = ntohs(wb3tonnage->field);
 			distance = ntohs(wb3tonnage->distance);
 
-			if(field && field <= fields->value && distance < arena->fields[field-1].radius)
+			if(field && field <= fields->value && distance < arena->fields[field - 1].radius)
 			{
-				if(client->country != arena->fields[field-1].country)
+				if(client->country != arena->fields[field - 1].country)
 				{
-					AddFieldDamage(field-1, ammo->he, client);
-					arena->fields[field-1].tonnage += (ammo->he / 50);
+					AddFieldDamage(field - 1, ammo->he, client);
+					arena->fields[field - 1].tonnage += (ammo->he / 50);
 
-					if(arena->fields[field-1].tonnage >= (GetTonnageToClose(field) * 2.4))
-						arena->fields[field-1].tonnage = (GetTonnageToClose(field) * 2.4);
+					if(arena->fields[field - 1].tonnage >= (GetTonnageToClose(field) * 2.4))
+						arena->fields[field - 1].tonnage = (GetTonnageToClose(field) * 2.4);
 				}
 			}
 		}
@@ -6169,20 +6200,20 @@ void PRemoveDropItem(u_int8_t *buffer, u_int8_t len, client_t *client)
 {
 	u_int8_t i, j;
 	weapondestroy_t *weapondestroy;
-	weapondestroy = (weapondestroy_t *)buffer;
+	weapondestroy = (weapondestroy_t *) buffer;
 
 	weapondestroy->packetid = htons(Com_WBhton(0x1906));
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 
 					SendPacket(buffer, len, &clients[i]);
@@ -6210,18 +6241,18 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 	char gunstatsb[512];
 	int8_t killer = 0;
 
-	flakhit = (flakhit_t *)buffer;
+	flakhit = (flakhit_t *) buffer;
 
 	hits = flakhit->hits;
 
 	Com_Printf(VERBOSE_DAMAGE, "PFlakHit hits %d\n", hits);
 
-	if (!(pvictim = FindSClient(ntohl(flakhit->victim))))
+	if(!(pvictim = FindSClient(ntohl(flakhit->victim))))
 		return;
 
 	munition = GetMunition(flakhit->type);
 
-	if (!munition)
+	if(!munition)
 	{
 		Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", flakhit->type, client->plane);
 		return;
@@ -6229,47 +6260,50 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 
 	PPrintf(pvictim, RADIO_DARKGREEN, "You are hit by %s (%d)", munition->name, hits);
 
-	if (!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+	if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 		killer = AddKiller(pvictim, client);
 
 	//	for(i = 0; i < hits; i++)
 	//	{
 	i = 0;
-	flakhit = (flakhit_t *)(buffer+(4*i));
+	flakhit = (flakhit_t *) (buffer + (4 * i));
 
-	if (!pvictim->inuse)
+	if(!pvictim->inuse)
 		return;
 
-	if (killer >= 0)
+	if(killer >= 0)
 		pvictim->hitby[killer].damage += munition->he;
 
-	if (client != pvictim)
+	if(client != pvictim)
 	{
 		Com_Printf(VERBOSE_WARNING, "PFlakHit(client!=pvictim) client = %s, pvictim = %s\n", client->longnick, pvictim->longnick);
 	}
 
 	Com_Printf(VERBOSE_ALWAYS, "-HOST- Flakhit %s with %s\n", pvictim->longnick, munition->abbrev);
 
-	if (gunstats->value)
+	if(gunstats->value)
 	{
 		memset(heb, 0, sizeof(heb));
 		AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, heb, NULL, pvictim);
 
-		if (gunstats->value > 1 && client->gunstat && (client != pvictim))
+		if(gunstats->value > 1 && client->gunstat && (client != pvictim))
 		{
 			memset(header, 0, sizeof(header));
-			snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, flakhit->type, munition->he, munition->ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
+			snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, flakhit->type, munition->he, munition->ap, pvictim->longnick,
+					GetSmallPlaneName(pvictim->plane));
 			memset(gunstatsb, 0, sizeof(gunstatsb));
 			snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
 			PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
 		}
 
 		memset(header, 0, sizeof(header));
-		snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, flakhit->type, munition->he, munition->ap);
+		snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client == pvictim ? "-HOST-" : client->longnick, client == pvictim ? ""
+				: GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, flakhit->type, munition->he,
+				munition->ap);
 		memset(gunstatsb, 0, sizeof(gunstatsb));
 		snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
 		Com_Printf(VERBOSE_DAMAGE, "HIT: (%u) %s\n", pvictim->inflight, gunstatsb);
-		if (gunstats->value > 1 && pvictim->gunstat)
+		if(gunstats->value > 1 && pvictim->gunstat)
 			PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 	}
 	else
@@ -6294,15 +6328,15 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 	munition_t *munition;
 	building_t *building;
 
-	hitstructure = (hitstructure_t *)buffer;
+	hitstructure = (hitstructure_t *) buffer;
 
 	hits = hitstructure->hits;
 
 	building = GetBuilding(htons(hitstructure->build));
 
-	if (!building)
+	if(!building)
 	{
-		if (gunstats->value > 1 && client->gunstat)
+		if(gunstats->value > 1 && client->gunstat)
 			PPrintf(client, RADIO_LIGHTYELLOW, "Building %d not declared", htons(hitstructure->build));
 
 		Com_Printf(VERBOSE_WARNING, "Building %d not declared", htons(hitstructure->build));
@@ -6310,18 +6344,18 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 		return;
 	}
 
-	if (building->country == client->country)
+	if(building->country == client->country)
 	{
 		if(oldcapt->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 		{
-			if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
+			if(arcade->value || !friendlyfire->value || !teamkillstructs->value)
 			{
 				return;
 			}
-			else if (client->tkstatus)
+			else if(client->tkstatus)
 			{
 				PPrintf(client, RADIO_YELLOW, "You've hit again a friendly structure, please don't do that...");
-				if (client->inflight)
+				if(client->inflight)
 					ForceEndFlight(TRUE, client);
 				return;
 			}
@@ -6330,15 +6364,15 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 		Com_Printf(VERBOSE_ALWAYS, "%s hit friendly %s\n", client->longnick, GetBuildingType(building->type));
 	}
 
-	if (building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE)
+	if(building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE)
 	{
-		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->fields[building->field - 1].posxyz[0], arena->fields[building->field - 1].posxyz[1],
-				arena->fields[building->field - 1].posxyz[2], -1);
+		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->fields[building->field - 1].posxyz[0],
+				arena->fields[building->field - 1].posxyz[1], arena->fields[building->field - 1].posxyz[2], -1);
 	}
 	else
 		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], building->posx, building->posy, building->posz, -1);
 
-	if (distance < 0)
+	if(distance < 0)
 	{
 		Com_Printf(VERBOSE_WARNING, "PHitStructure(): %s(%s) sent invalid distance\n", client->longnick, client->ip);
 		distance = 0;
@@ -6346,70 +6380,72 @@ void PHitStructure(u_int8_t *buffer, client_t *client)
 
 	distance /= 300; // convert feets to yards
 
-//	j = hits; // to avoid log hits several times
+	//	j = hits; // to avoid log hits several times
 
-	for (i = 0; i < hits; i++)
+	for(i = 0; i < hits; i++)
 	{
-		hitstructure = (hitstructure_t *)(buffer+4*i);
+		hitstructure = (hitstructure_t *) (buffer + 4 * i);
 
 		munition = GetMunition(hitstructure->munition);
 
-		if (!munition)
+		if(!munition)
 		{
 			Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hitstructure->munition, client->plane);
 			return;
 		}
 
-		if((((double)munition->decay * distance) + munition->ap) > 0)
-			ap = ((double)munition->decay * distance) + munition->ap;
+		if((((double) munition->decay * distance) + munition->ap) > 0)
+			ap = ((double) munition->decay * distance) + munition->ap;
 		else
 			ap = 0;
 
 		damaged = AddBuildingDamage(building, munition->he, ap, client);
 
-//		if (j == hits)
-//		{
-//			Com_Printf(VERBOSE_ALWAYS, "%s %shit %u rounds at %s with %s\n", client->longnick, building->country==client->country ? "friendly " : "", hits, GetBuildingType(building->type), munition->abbrev);
-//			j = 0;
-//		}
+		//		if (j == hits)
+		//		{
+		//			Com_Printf(VERBOSE_ALWAYS, "%s %shit %u rounds at %s with %s\n", client->longnick, building->country==client->country ? "friendly " : "", hits, GetBuildingType(building->type), munition->abbrev);
+		//			j = 0;
+		//		}
 
-		if (IsBomber(client) && client->wings)
+		if(IsBomber(client) && client->wings)
 		{
-			for (j = 0, hits = 0; j < MAX_RELATED; j++)
+			for(j = 0, hits = 0; j < MAX_RELATED; j++)
 			{
-				if (client->related[j] && (client->related[j]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+				if(client->related[j] && (client->related[j]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 					hits++;
 			}
 
-			if (hits)
+			if(hits)
 				hits = (rand() % hits) + 1;
 
-			while (hits)
+			while(hits)
 			{
 				damaged += AddBuildingDamage(building, munition->he, ap, client);
 				hits--;
 			}
 		}
 
-		if (gunstats->value)
+		if(gunstats->value)
 		{
-			if (gunstats->value > 1 && client->gunstat)
-				PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
-			Com_Printf(VERBOSE_DAMAGE, "HIT: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client?client->longnick:"-HOST-", munition->name, hitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+			if(gunstats->value > 1 && client->gunstat)
+				PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hitstructure->munition, munition->he, munition->ap,
+						GetBuildingType(building->type), building->id, building->armor);
+			Com_Printf(VERBOSE_DAMAGE, "HIT: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client ? client->longnick : "-HOST-", munition->name, hitstructure->munition,
+					munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
 		}
-//		else if (client->gunstat)
-//			PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
+		//		else if (client->gunstat)
+		//			PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 	}
 
-/** WB2 CV
-	if (building->field <= fields->value)
-	{
-		if (building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE && damaged)
-		{
-			CheckBoatDamage(building, client);
-		}
-	}
-*/
+	/** WB2 CV
+	 if (building->field <= fields->value)
+	 {
+	 if (building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE && damaged)
+	 {
+	 CheckBoatDamage(building, client);
+	 }
+	 }
+	 */
 }
 
 /**
@@ -6428,9 +6464,9 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	building_t *building;
 	building_t tempbuild;
 
-	hardhitstructure = (hardhitstructure_t *)buffer;
+	hardhitstructure = (hardhitstructure_t *) buffer;
 
-	if (hardhitstructure->munition >= maxmuntype)
+	if(hardhitstructure->munition >= maxmuntype)
 	{
 		Com_Printf(VERBOSE_WARNING, "PHardHitStructure(): Munition ID overflow %d. maxmuntype=%d\n", hardhitstructure->munition, MAX_MUNTYPE);
 		return;
@@ -6438,9 +6474,9 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	building = GetBuilding(htons(hardhitstructure->build));
 
-	if (!building)
+	if(!building)
 	{
-		if (gunstats->value > 1 && client->gunstat)
+		if(gunstats->value > 1 && client->gunstat)
 			PPrintf(client, RADIO_LIGHTYELLOW, "Building %d not declared", htons(hardhitstructure->build));
 
 		Com_Printf(VERBOSE_WARNING, "Building %d not declared\n", htons(hardhitstructure->build));
@@ -6453,24 +6489,24 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	munition = GetMunition(hardhitstructure->munition);
 
-	if (!munition)
+	if(!munition)
 	{
 		Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hardhitstructure->munition, client->plane);
 		return;
 	}
 
-	if (building->country == client->country)
+	if(building->country == client->country)
 	{
 		if(oldcapt->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 		{
-			if (arcade->value || !friendlyfire->value || !teamkillstructs->value)
+			if(arcade->value || !friendlyfire->value || !teamkillstructs->value)
 			{
 				return;
 			}
-			else if (client->tkstatus)
+			else if(client->tkstatus)
 			{
 				PPrintf(client, RADIO_YELLOW, "You've hit again a friendly structure, please don't do that...");
-				if (client->inflight)
+				if(client->inflight)
 					ForceEndFlight(TRUE, client);
 				return;
 			}
@@ -6484,18 +6520,19 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 	Com_LogDescription(EVENT_DESC_FIELD, building->field, NULL);
 	Com_LogDescription(EVENT_DESC_AMMO, hardhitstructure->munition, NULL);
 
-	if (hardhitstructure->munition == 114 /*paras*/&& ((building->fieldtype <= FIELD_MAIN) || (building->fieldtype >= FIELD_WB3POST)))
+	if(hardhitstructure->munition == 114 /*paras*/&& ((building->fieldtype <= FIELD_MAIN) || (building->fieldtype >= FIELD_WB3POST)))
 	{
-		if ((arena->fields[building->field - 1].country != client->country) && arena->fields[building->field - 1].abletocapture && arena->fields[building->field - 1].closed)
+		if((arena->fields[building->field - 1].country != client->country) && arena->fields[building->field - 1].abletocapture && arena->fields[building->field
+				- 1].closed)
 		{
 			arena->fields[building->field - 1].paras++;
 
 			PPrintf(client, RADIO_YELLOW, "Paras count: %d", arena->fields[building->field - 1].paras);
 			Com_Printf(VERBOSE_ALWAYS, "%s paras count f%d = %d\n", client->longnick, building->field, arena->fields[building->field - 1].paras);
 
-			AddFieldDamage(building->field-1, GetBuildingArmor(BUILD_TOWER, client), client);
+			AddFieldDamage(building->field - 1, GetBuildingArmor(BUILD_TOWER, client), client);
 
-			if (arena->fields[building->field - 1].paras >= GetFieldParas(arena->fields[building->field - 1].type))
+			if(arena->fields[building->field - 1].paras >= GetFieldParas(arena->fields[building->field - 1].type))
 			{
 				AddBuildingDamage(building, GetBuildingArmor(BUILD_TOWER, client), 1, client);
 				CaptureField(building->field, client);
@@ -6513,11 +6550,10 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 		{
 			HardHit(hardhitstructure->munition, (client->country == building->country), client);
 
-			if (client->country == building->country && !client->msgtimer)
+			if(client->country == building->country && !client->msgtimer)
 			{
-				CPrintf(client->country,
-				RADIO_GREEN, "ALERT!!! ALERT!!! %s hit friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
-						building->field);
+				CPrintf(client->country, RADIO_GREEN, "ALERT!!! ALERT!!! %s hit friendly structure at %s%d", client->longnick, (building->fieldtype
+						> FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F", building->field);
 
 				// client->msgtimer = 1000;
 			}
@@ -6526,31 +6562,34 @@ void PHardHitStructure(u_int8_t *buffer, client_t *client)
 
 	he = munition->he;
 
-	if ((building->type == BUILD_CV) && (hardhitstructure->munition > 136) && (hardhitstructure->munition < 140) && (ntohs(hardhitstructure->speed) < 100)) // to avoid powerfull torpedoes that can down buildings for a long time
+	if((building->type == BUILD_CV) && (hardhitstructure->munition > 136) && (hardhitstructure->munition < 140) && (ntohs(hardhitstructure->speed) < 100)) // to avoid powerfull torpedoes that can down buildings for a long time
 		he *= 79;
 
 	i = AddBuildingDamage(building, he, munition->ap, client);
 
-	if (gunstats->value)
+	if(gunstats->value)
 	{
-		if (gunstats->value > 1 && client->gunstat)
-			PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
-		Com_Printf(VERBOSE_DAMAGE, "HIT: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client?client->longnick:"-HOST-", munition->name, hardhitstructure->munition, munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
+		if(gunstats->value > 1 && client->gunstat)
+			PPrintf(client, RADIO_LIGHTYELLOW, "%s(%u)[%de,%da];%s(%d)[%d]", munition->name, hardhitstructure->munition, munition->he, munition->ap,
+					GetBuildingType(building->type), building->id, building->armor);
+		Com_Printf(VERBOSE_DAMAGE, "HIT: %s %s(%u)[%de,%da];%s(%d)[%d]\n", client ? client->longnick : "-HOST-", munition->name, hardhitstructure->munition,
+				munition->he, munition->ap, GetBuildingType(building->type), building->id, building->armor);
 	}
-//	else if (client->gunstat)
-//		PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
+	//	else if (client->gunstat)
+	//		PPrintf(client, RADIO_GREEN, "Hit %s with %s", GetBuildingType(building->type), munition->name);
 
-	Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client->longnick, client->country ==building->country ? "friendly " : "", GetBuildingType(building->type), munition->abbrev);
+	Com_Printf(VERBOSE_ALWAYS, "%s %shit %s with %s\n", client->longnick, client->country == building->country ? "friendly " : "", GetBuildingType(
+			building->type), munition->abbrev);
 
-/** WB2 CV
-	if (building->field <= fields->value)
-	{
-		if (building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE && i)
-		{
-			CheckBoatDamage(building, client);
-		}
-	}
-*/
+	/** WB2 CV
+	 if (building->field <= fields->value)
+	 {
+	 if (building->fieldtype >= FIELD_CV && building->fieldtype <= FIELD_SUBMARINE && i)
+	 {
+	 CheckBoatDamage(building, client);
+	 }
+	 }
+	 */
 }
 
 /**
@@ -6578,24 +6617,24 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	char apb[128];
 	char gunstatsb[512];
 
-	hitplane = (hitplane_t *)buffer;
+	hitplane = (hitplane_t *) buffer;
 
-	if (!(pvictim = FindSClient(ntohl(hitplane->victim))))
+	if(!(pvictim = FindSClient(ntohl(hitplane->victim))))
 		return;
 
 	if(!pvictim->drone && pvictim->chute) /// Ignore ChuteKill
 		return;
 
-	if (!pvictim->inuse)
+	if(!pvictim->inuse)
 		return;
 
-	if ((client == pvictim)) // ack hit
+	if((client == pvictim)) // ack hit
 	{
-		if ((val = NearestField(client->posxy[0][0], client->posxy[1][0], 0, TRUE, TRUE, &dist)) >= 0)
+		if((val = NearestField(client->posxy[0][0], client->posxy[1][0], 0, TRUE, TRUE, &dist)) >= 0)
 		{
 			distance = (double) dist;
-			distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], (client->posxy[0][0] > 0 ? client->posxy[0][0] - distance : client->posxy[0][0] + distance),
-					client->posxy[1][0], 0, -1);
+			distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], (client->posxy[0][0] > 0 ? client->posxy[0][0] - distance
+					: client->posxy[0][0] + distance), client->posxy[1][0], 0, -1);
 		}
 		else
 		{
@@ -6605,39 +6644,40 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	}
 	else
 	{
-		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], pvictim->posxy[0][0], pvictim->posxy[1][0], pvictim->posalt[0], MAX_INT16);
+		distance = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], pvictim->posxy[0][0], pvictim->posxy[1][0], pvictim->posalt[0],
+				MAX_INT16);
 
-		if (client->attached && distance <= 4000)
+		if(client->attached && distance <= 4000)
 		{
 			FireAck(client, pvictim, distance, 1);
 		}
 	}
 
-	if (distance < 0)
+	if(distance < 0)
 	{
 		Com_Printf(VERBOSE_WARNING, "PHitPlane(): %s(%s) sent invalid distance\n", client->longnick, client->ip);
 		distance = 0;
 	}
 
-	if (arcade->value || !friendlyfire->value || client->tkstatus) //&& pvictim != client)
+	if(arcade->value || !friendlyfire->value || client->tkstatus) //&& pvictim != client)
 	{
-		if (pvictim->country == client->country)
+		if(pvictim->country == client->country)
 		{
-			if (!(!client->tkstatus && pvictim->tkstatus))
+			if(!(!client->tkstatus && pvictim->tkstatus))
 				pvictim = client;
 		}
 	}
 
 	distance /= 300; // convert feets to yards
 
-	if (!pvictim->drone)
+	if(!pvictim->drone)
 		SendPings(hitplane->hits, hitplane->type, pvictim); // Send hit pings
 
 	hits2 = hits = hitplane->hits;
 
 	munition = GetMunition(hitplane->type);
 
-	if (!munition)
+	if(!munition)
 	{
 		Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hitplane->type, client->plane);
 		return;
@@ -6655,17 +6695,17 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		pvictim->hitstakenstat[munition->caliber - 1] += hits;
 	}
 
-	if (!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+	if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 	{
-		if (pvictim != client) //not a ack hit
+		if(pvictim != client) //not a ack hit
 		{
-			for (i = 0; i < MAX_RELATED; i++)
+			for(i = 0; i < MAX_RELATED; i++)
 			{
-				if (pvictim->related[i] && (pvictim->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+				if(pvictim->related[i] && (pvictim->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 					break;
 			}
 
-			if (i < MAX_RELATED)
+			if(i < MAX_RELATED)
 				pvictim = pvictim->related[i]; // send damage to first wingman
 			//	return; // dont hit plane if with wingmans
 		}
@@ -6674,33 +6714,32 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 	}
 
 	// Random damage while there are wingmans
-	if (IsBomber(client) && client->wings)
+	if(IsBomber(client) && client->wings)
 	{
-		for (i = 0, j = 0; i < MAX_RELATED; i++)
+		for(i = 0, j = 0; i < MAX_RELATED; i++)
 		{
-			if (client->related[j] && (client->related[j]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+			if(client->related[j] && (client->related[j]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 				j++;
 		}
 
-		if (j)
+		if(j)
 			hits *= (rand() % j) + 1; // random damage multiply according with wings number
 	}
 
 	memset(buffer, 0, sizeof(buffer));
 
-
-	for (i = 0; i < hits; i++)
+	for(i = 0; i < hits; i++)
 	{
-		for (j = i; j >= hits2;)
+		for(j = i; j >= hits2;)
 		{
 			j -= hits2;
 		}
 
-		hitplane = (hitplane_t *)(buffer + (8 * j));
+		hitplane = (hitplane_t *) (buffer + (8 * j));
 
 		munition = GetMunition(hitplane->type);
 
-		if (!munition)
+		if(!munition)
 		{
 			Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hitplane->type, client->plane);
 			return;
@@ -6708,52 +6747,52 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 		// Begin Needle pre-processing
 
-		for (j = 0; j < 5; j++)
+		for(j = 0; j < 5; j++)
 		{
 			needle[j] = -1;
 		}
 
 		memset(ign, 0, sizeof(ign));
 
-		for (j = 0, k = 0; j < 5; j++)
+		for(j = 0, k = 0; j < 5; j++)
 		{
-			if (hitplane->place[j] < 0)
+			if(hitplane->place[j] < 0)
 			{
 				continue;
 			}
 
-			if (hitplane->place[j] >= MAX_PLACE)
+			if(hitplane->place[j] >= MAX_PLACE)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "invalid place %d", hitplane->place[j]);
 				Com_Printf(VERBOSE_WARNING, "PHitPlane(): invalid place\n");
 				continue;
 			}
 
-			if (pvictim->armor.points[hitplane->place[j]] < 0)
+			if(pvictim->armor.points[hitplane->place[j]] < 0)
 			{
-//				PPrintf(client, RADIO_LIGHTYELLOW, "unused place %d, plane %s(%d)", hitplane->place[j], GetSmallPlaneName(pvictim->plane), pvictim->plane);
+				//				PPrintf(client, RADIO_LIGHTYELLOW, "unused place %d, plane %s(%d)", hitplane->place[j], GetSmallPlaneName(pvictim->plane), pvictim->plane);
 				Com_Printf(VERBOSE_WARNING, "PHitPlane(): unused place %d plane %d\n", hitplane->place[j], pvictim->plane);
 				continue; // unused part
 			}
 
-//			if (!IsGround(pvictim))
-//			{
-//				if (hitplane->place[j] >= PLACE_ELEVATOR && hitplane->place[j] <= PLACE_VSTAB) /* thin element */
-//				{
-//					if (j < 4) // not last layer
-//					{
-//						if (hitplane->place[j + 1] >= 0) // there is anything after thin element
-//						{
-//							sprintf((ign + strlen(ign)), "(%s=%d)", GetSmallHitSite(hitplane->place[j]), pvictim->armor.points[hitplane->place[j]]);
-//							continue;
-//						}
-//					}
-//				}
-//			}
+			//			if (!IsGround(pvictim))
+			//			{
+			//				if (hitplane->place[j] >= PLACE_ELEVATOR && hitplane->place[j] <= PLACE_VSTAB) /* thin element */
+			//				{
+			//					if (j < 4) // not last layer
+			//					{
+			//						if (hitplane->place[j + 1] >= 0) // there is anything after thin element
+			//						{
+			//							sprintf((ign + strlen(ign)), "(%s=%d)", GetSmallHitSite(hitplane->place[j]), pvictim->armor.points[hitplane->place[j]]);
+			//							continue;
+			//						}
+			//					}
+			//				}
+			//			}
 
-			if (munition->he < 100 && distance > 2.0 && pvictim->plane != 61 /*CHUTE*/)
+			if(munition->he < 100 && distance > 2.0 && pvictim->plane != 61 /*CHUTE*/)
 			{
-				if (hitplane->place[j] == PLACE_PILOTARMOR || hitplane->place[j] == PLACE_PILOT)
+				if(hitplane->place[j] == PLACE_PILOTARMOR || hitplane->place[j] == PLACE_PILOT)
 				{
 					sprintf((ign + strlen(ign)), "(%s=%d)", GetSmallHitSite(hitplane->place[j]), pvictim->armor.points[hitplane->place[j]]);
 					continue;
@@ -6765,25 +6804,25 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 		// End Needle pre-processing
 
-		he = (u_int16_t)munition->he;
+		he = (u_int16_t) munition->he;
 
-		if((((double)munition->decay * distance) + munition->ap) > 0)
-			ap = ((double)munition->decay * distance) + munition->ap;
+		if((((double) munition->decay * distance) + munition->ap) > 0)
+			ap = ((double) munition->decay * distance) + munition->ap;
 		else
 			ap = 0;
 
-		if (gunstats->value)
+		if(gunstats->value)
 		{
 			memset(heb, 0, sizeof(heb));
 			memset(apb, 0, sizeof(apb));
 		}
 
-		for (j = 0; j < 5; j++)
+		for(j = 0; j < 5; j++)
 		{
-			if (needle[j] < 0)
+			if(needle[j] < 0)
 				break;
 
-			if (needle[j] >= MAX_PLACE || pvictim->armor.points[needle[j]] <= 0)
+			if(needle[j] >= MAX_PLACE || pvictim->armor.points[needle[j]] <= 0)
 				continue;
 
 			damage = (he + ap);
@@ -6793,9 +6832,9 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				Com_Printf(VERBOSE_DAMAGE, "PHitPlane(damage he+ap) < 0, he = %d, ap = %d\n", he, ap);
 			}
 
-			if (!setjmp(debug_buffer))
+			if(!setjmp(debug_buffer))
 			{
-				if (gunstats->value)
+				if(gunstats->value)
 				{
 					ap = AddPlaneDamage(needle[j], he, ap, (heb + strlen(heb)), (apb + strlen(apb)), pvictim);
 				}
@@ -6820,13 +6859,14 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 
 			if(needle[j] >= 0 && needle[j] < MAX_PLACE && killer >= 0 && killer < MAX_HITBY)
 			{
-				sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)damage / (double)(((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]) + 1.0)));
+				sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) damage / (double) (((pvictim->armor.points[needle[j]] <= 0) ? 0
+						: pvictim->armor.points[needle[j]]) + 1.0)));
 
-//				if(pvictim->drone == DRONE_COMMANDOS)
-//				{
-//					Com_Printf(VERBOSE_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
-//					sdamage = 59.0;
-//				}
+				//				if(pvictim->drone == DRONE_COMMANDOS)
+				//				{
+				//					Com_Printf(VERBOSE_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
+				//					sdamage = 59.0;
+				//				}
 
 				if(sdamage >= 0)
 				{
@@ -6834,57 +6874,61 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DAMAGE, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage, ((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
+					Com_Printf(VERBOSE_DAMAGE, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage,
+							((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
 				}
 			}
 
-			if (ap == 0)
+			if(ap == 0)
 				break;
 
 			he = 0;
 		}
 
-		if (gunstats->value)
+		if(gunstats->value)
 		{
-//			hitplane = (hitplane_t *)buffer;
+			//			hitplane = (hitplane_t *)buffer;
 
-//			munition = GetMunition(hitplane->type);
+			//			munition = GetMunition(hitplane->type);
 
-//			if (!munition)
-//			{
-//				Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hitplane->type, client->plane);
-//				return;
-//			}
+			//			if (!munition)
+			//			{
+			//				Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hitplane->type, client->plane);
+			//				return;
+			//			}
 
-			if((((double)munition->decay * distance) + munition->ap) > 0)
-				ap = ((double)munition->decay * distance) + munition->ap;
+			if((((double) munition->decay * distance) + munition->ap) > 0)
+				ap = ((double) munition->decay * distance) + munition->ap;
 			else
 				ap = 0;
 
-			if (gunstats->value > 1 && client->gunstat && (client != pvictim))
+			if(gunstats->value > 1 && client->gunstat && (client != pvictim))
 			{
 				memset(header, 0, sizeof(header));
-				snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, hitplane->type, munition->he, ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
+				snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, hitplane->type, munition->he, ap, pvictim->longnick,
+						GetSmallPlaneName(pvictim->plane));
 				memset(gunstatsb, 0, sizeof(gunstatsb));
 				snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;%s%s", header, heb, ign, apb);
 				PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
 			}
 
 			memset(header, 0, sizeof(header));
-			snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, hitplane->type, munition->he, ap);
+			snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client == pvictim ? "-HOST-" : client->longnick, client == pvictim ? ""
+					: GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, hitplane->type, munition->he,
+					ap);
 			memset(gunstatsb, 0, sizeof(gunstatsb));
 			snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;%s%s", header, heb, ign, apb);
 			Com_Printf(VERBOSE_DAMAGE, "HIT: (%u) %s\n", pvictim->inflight, gunstatsb);
-			if (gunstats->value > 1 && pvictim->gunstat)
+			if(gunstats->value > 1 && pvictim->gunstat)
 				PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 		}
 	}
 
-	if (killer >=0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
+	if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 	{
-		for (i = 0; i < MAX_HITBY; i++) // check who hit player
+		for(i = 0; i < MAX_HITBY; i++) // check who hit player
 		{
-			if (pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
+			if(pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
 			{
 				totaldamage += pvictim->hitby[i].damage;
 			}
@@ -6903,9 +6947,9 @@ void WB3FuelConsumed(u_int8_t *buffer, client_t *client)
 {
 	wb3fuelconsumed_t *fuelconsumed;
 
-	fuelconsumed = (wb3fuelconsumed_t *)buffer;
+	fuelconsumed = (wb3fuelconsumed_t *) buffer;
 
-	if (client->attr) // TODO: Scores: debite fuel consumed from scores
+	if(client->attr) // TODO: Scores: debite fuel consumed from scores
 		PPrintf(client, RADIO_RED, "fuel = %u", ntohl(fuelconsumed->amount));
 }
 
@@ -6919,20 +6963,20 @@ void WB3DelayedFuse(u_int8_t *buffer, client_t *client)
 	wb3delayedfuse_t *wb3delayedfuse;
 	u_int16_t i, j;
 
-	wb3delayedfuse = (wb3delayedfuse_t *)buffer;
+	wb3delayedfuse = (wb3delayedfuse_t *) buffer;
 
 	wb3delayedfuse->packetid = htons(Com_WBhton(0x1917));
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					SendPacket(buffer, 35, &clients[i]);
 					break;
@@ -6954,7 +6998,7 @@ void SendPings(u_int8_t hits, u_int8_t type, client_t *client)
 
 	memset(bufferping, 0, sizeof(bufferping));
 
-	pings = (pings_t *)bufferping;
+	pings = (pings_t *) bufferping;
 
 	pings->packetid = htons(Com_WBhton(0x1907));
 	pings->hits = hits;
@@ -6984,24 +7028,24 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 
 	hardhitplane = (hardhitplane_t *) buffer;
 
-	if (!(pvictim = FindSClient(ntohl(hardhitplane->victim))))
+	if(!(pvictim = FindSClient(ntohl(hardhitplane->victim))))
 		return;
 
-	if (arcade->value || !friendlyfire->value || client->tkstatus)// && pvictim != client)
+	if(arcade->value || !friendlyfire->value || client->tkstatus)// && pvictim != client)
 	{
-		if (pvictim->country == client->country)
+		if(pvictim->country == client->country)
 		{
-			if (!(!client->tkstatus && pvictim->tkstatus))
+			if(!(!client->tkstatus && pvictim->tkstatus))
 				pvictim = client;
 		}
 	}
 
-	if (!pvictim->drone)
+	if(!pvictim->drone)
 		SendPings(1, hardhitplane->munition, pvictim);
 
 	munition = GetMunition(hardhitplane->munition);
 
-	if (!munition)
+	if(!munition)
 	{
 		Com_Printf(VERBOSE_WARNING, "Unknown munition ID %d, plane %d\n", hardhitplane->munition, client->plane);
 		return;
@@ -7021,24 +7065,26 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		pvictim->hitstakenstat[munition->caliber - 1]++;
 	}
 
-	Com_Printf(VERBOSE_ALWAYS, "%s %shardhit %s with %s (%u damage)\n", client->longnick, client->country == pvictim->country ? "friendly " : "", pvictim->longnick, munition->abbrev, he);
+	Com_Printf(VERBOSE_ALWAYS, "%s %shardhit %s with %s (%u damage)\n", client->longnick, client->country == pvictim->country ? "friendly " : "",
+			pvictim->longnick, munition->abbrev, he);
 
 	HardHit(hardhitplane->munition, !((pvictim->country != client->country) || pvictim->tkstatus), client);
 
-	if (!wb3->value && (pvictim->plane == 101 /*TANK*/|| pvictim->plane == 85 /*JEEP*/) && hardhitplane->munition == 56)
+	if(!wb3->value && (pvictim->plane == 101 /*TANK*/|| pvictim->plane == 85 /*JEEP*/) && hardhitplane->munition == 56)
 	{
 		he /= 3;
 	}
 
-	if (!(client == pvictim && hardhitplane->munition < 99 && hardhitplane->munition > 55)) // avoid bomb killers
+	if(!(client == pvictim && hardhitplane->munition < 99 && hardhitplane->munition > 55)) // avoid bomb killers
 	{
-		if (!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+		if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 		{
 			killer = AddKiller(pvictim, client);
 
-			if (hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
+			if(hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
 			{
-				sdamage = (double)(10.0 * logf(1.0 + 100.0 * (double)he / (double)(((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]) + 1.0)));
+				sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) he / (double) (((pvictim->armor.points[hardhitplane->place] <= 0) ? 0
+						: pvictim->armor.points[hardhitplane->place]) + 1.0)));
 
 				if(sdamage >= 0)
 				{
@@ -7046,38 +7092,42 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 				}
 				else
 				{
-					Com_Printf(VERBOSE_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he, ((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
+					Com_Printf(VERBOSE_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he,
+							((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
 				}
 			}
 		}
 	}
 
-	for (i = 0; i < MAX_RELATED; i++)
+	for(i = 0; i < MAX_RELATED; i++)
 	{
-		if (pvictim->related[i] && (pvictim->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+		if(pvictim->related[i] && (pvictim->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 			return; // not hit plane if with wingmans
 	}
 
-	if (gunstats->value)
+	if(gunstats->value)
 	{
 		memset(heb, 0, sizeof(heb));
 		AddPlaneDamage(hardhitplane->place, he, 0, heb, NULL, pvictim);
 
-		if (gunstats->value > 1 && client->gunstat && (client != pvictim))
+		if(gunstats->value > 1 && client->gunstat && (client != pvictim))
 		{
 			memset(header, 0, sizeof(header));
-			snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, hardhitplane->munition, munition->he, munition->ap, pvictim->longnick, GetSmallPlaneName(pvictim->plane));
+			snprintf(header, sizeof(header), "%s(%u)[%de%dp]%s%s", munition->abbrev, hardhitplane->munition, munition->he, munition->ap, pvictim->longnick,
+					GetSmallPlaneName(pvictim->plane));
 			memset(gunstatsb, 0, sizeof(gunstatsb));
 			snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
 			PPrintf(client, RADIO_GREEN, "%s", gunstatsb);
 		}
 
 		memset(header, 0, sizeof(header));
-		snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client==pvictim?"-HOST-":client->longnick, client==pvictim?"":GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, hardhitplane->munition, munition->he, munition->ap);
+		snprintf(header, sizeof(header), "%s(%s)->%s(%s)%s(%u)[%de%dp]", client == pvictim ? "-HOST-" : client->longnick, client == pvictim ? ""
+				: GetSmallPlaneName(client->plane), pvictim->longnick, GetSmallPlaneName(pvictim->plane), munition->abbrev, hardhitplane->munition,
+				munition->he, munition->ap);
 		memset(gunstatsb, 0, sizeof(gunstatsb));
 		snprintf(gunstatsb, sizeof(gunstatsb), "%s;%s;", header, heb);
 		Com_Printf(VERBOSE_DAMAGE, "HIT: (%u) %s\n", pvictim->inflight, gunstatsb);
-		if (gunstats->value > 1 && pvictim->gunstat)
+		if(gunstats->value > 1 && pvictim->gunstat)
 			PPrintf(pvictim, RADIO_PURPLE, "%s", gunstatsb);
 	}
 	else
@@ -7085,11 +7135,11 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		AddPlaneDamage(hardhitplane->place, he, 0, NULL, NULL, pvictim);
 	}
 
-	if (killer >=0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
+	if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 	{
-		for (i = 0; i < MAX_HITBY; i++) // check who hit player
+		for(i = 0; i < MAX_HITBY; i++) // check who hit player
 		{
-			if (pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
+			if(pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
 			{
 				totaldamage += pvictim->hitby[i].damage;
 			}
@@ -7107,7 +7157,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 
 const char *GetHitSite(u_int8_t id)
 {
-	switch (id)
+	switch(id)
 	{
 		case PLACE_RIGHTGUN:
 			return "right gun";
@@ -7186,7 +7236,7 @@ const char *GetHitSite(u_int8_t id)
 
 const char *GetSmallHitSite(u_int8_t id)
 {
-	switch (id)
+	switch(id)
 	{
 		case PLACE_RIGHTGUN:
 			return "rgn";
@@ -7265,9 +7315,9 @@ const char *GetSmallHitSite(u_int8_t id)
 
 munition_t *GetMunition(u_int8_t id)
 {
-	if (id < maxmuntype)
+	if(id < maxmuntype)
 	{
-		if (arena->munition[id].he < 0)
+		if(arena->munition[id].he < 0)
 		{
 			Com_Printf(VERBOSE_WARNING, "GetMunition(): Unused weapon (he = -1) ID %u\n", id);
 
@@ -7304,7 +7354,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		return 0;
 	}
 
-	if (place >= MAX_PLACE)
+	if(place >= MAX_PLACE)
 	{
 		PPrintf(client, RADIO_LIGHTYELLOW, "Unknown hit place 0x%X", place);
 		//		depth--;
@@ -7317,12 +7367,13 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		return 0;
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
 		apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place] : ap;
 		if(apabsorb < 0)
 		{
-			Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apabsorb) < 0 hitpoints %d apstop %d, place %u at line %u\n", client->armor.points[place], client->armor.apstop[place], place, __LINE__);
+			Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apabsorb) < 0 hitpoints %d apstop %d, place %u at line %u\n", client->armor.points[place],
+					client->armor.apstop[place], place, __LINE__);
 			apabsorb = 0;
 		}
 		dmgprobe = he + apabsorb;
@@ -7339,22 +7390,22 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		return 0;
 	}
 
-	if (!(dmgprobe < client->armor.imunity[place])) // hit makes damage
+	if(!(dmgprobe < client->armor.imunity[place])) // hit makes damage
 	{
-		if (dmgprobe >= client->armor.points[place]) // hit destroy part
+		if(dmgprobe >= client->armor.points[place]) // hit destroy part
 		{
-			if (he)
+			if(he)
 			{
 				he = dmgprobe - client->armor.points[place];
 			}
 
-			if (client->armor.points[place])
+			if(client->armor.points[place])
 			{
-				if (!setjmp(debug_buffer))
+				if(!setjmp(debug_buffer))
 				{
-					if (place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL) // fuel will leak
+					if(place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL) // fuel will leak
 					{
-						if (!client->fueltimer)
+						if(!client->fueltimer)
 							client->fueltimer = 1;
 					}
 
@@ -7362,7 +7413,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 					client->armor.points[place] = 0;
 					SendForceStatus((1 << place), client->status_status, client);
 
-					if (!client->inuse || !client->inflight) // drone killed
+					if(!client->inuse || !client->inflight) // drone killed
 					{
 						// depth--;
 						return 0;
@@ -7374,25 +7425,25 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 					return 0;
 				}
 			}
-			else if (place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL && (dmgprobe - apabsorb)) // fuel is leaking
+			else if(place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL && (dmgprobe - apabsorb)) // fuel is leaking
 			{
-				if (!setjmp(debug_buffer))
+				if(!setjmp(debug_buffer))
 				{
-					if (client->fueltimer > 1000)
+					if(client->fueltimer > 1000)
 					{
 						client->damaged = 1;
 
-						if (place == PLACE_LFUEL)
+						if(place == PLACE_LFUEL)
 						{
 							client->armor.points[PLACE_LWING] = 0;
 							SendForceStatus((1 << PLACE_LWING), client->status_status, client);
 						}
-						else if (place == PLACE_RFUEL)
+						else if(place == PLACE_RFUEL)
 						{
 							client->armor.points[PLACE_RWING] = 0;
 							SendForceStatus((1 << PLACE_RWING), client->status_status, client);
 						}
-						else if (place == PLACE_CENTERFUEL)
+						else if(place == PLACE_CENTERFUEL)
 						{
 							client->armor.points[PLACE_CENTERFUSE] = 0;
 							SendForceStatus((1 << PLACE_CENTERFUSE), client->status_status, client);
@@ -7412,11 +7463,11 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		}
 		else // hit damage part but not destroy it
 		{
-			if (!setjmp(debug_buffer))
+			if(!setjmp(debug_buffer))
 			{
-				if (gunstats->value)
+				if(gunstats->value)
 				{
-					if (he && phe)
+					if(he && phe)
 						sprintf(phe, "|%s=%d-(%d+%d)|", GetSmallHitSite(place), client->armor.points[place], he, apabsorb/*dmgprobe*/);
 				}
 
@@ -7424,11 +7475,11 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 				client->damaged = 1; // FIXME: this is a temporary fix for kills attribution
 
-//				if (gunstats->value)
-//				{
-//					if (he && phe)
-//						sprintf(phe, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
-//				}
+				//				if (gunstats->value)
+				//				{
+				//					if (he && phe)
+				//						sprintf(phe, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
+				//				}
 
 				he = 0;
 			}
@@ -7439,14 +7490,14 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 			}
 		}
 
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			if (gunstats->value)
+			if(gunstats->value)
 			{
-				if (ap && pap)
+				if(ap && pap)
 					sprintf(pap, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
 
-				if (he && phe)
+				if(he && phe)
 					sprintf(phe, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
 			}
 		}
@@ -7456,19 +7507,19 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 			return 0;
 		}
 
-		if (!setjmp(debug_buffer))
+		if(!setjmp(debug_buffer))
 		{
-			if (he)
+			if(he)
 			{
-				if (client->armor.parent[place] >= 0)
+				if(client->armor.parent[place] >= 0)
 				{
-					if (client->armor.parent[place] >= MAX_PLACE)
+					if(client->armor.parent[place] >= MAX_PLACE)
 						BPrintf(RADIO_RED, "DEBUG: invalid parent %d, place %d", client->armor.parent[place], place);
 					else
 					{
-						if (gunstats->value)
+						if(gunstats->value)
 						{
-							if (phe)
+							if(phe)
 								AddPlaneDamage(client->armor.parent[place], he, 0, (phe + strlen(phe)), 0, client);
 						}
 						else
@@ -7577,14 +7628,17 @@ double RebuildTime(building_t *building)
 		}
 	}
 
-	rebuild = 6000 * rebuildtime->value * Com_Log(GetBuildingArmor(building->type, NULL), 40) *
-		(1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0));
+	rebuild = 6000 * rebuildtime->value * Com_Log(GetBuildingArmor(building->type, NULL), 40) * (1 - (posts ? (const_pos * c_posts / posts) : 0)
+			- (ports ? (const_por * c_ports / ports) : 0) - (villages ? (const_v * c_villages / villages) : 0) - (towns ? (const_t * c_towns / towns) : 0));
 
 	if(rebuild < 10000 /*10 seconds*/|| rebuild > 360000 /*50min*/)
 	{
 		Com_Printf(VERBOSE_WARNING, "RebuildTime(rebuild) rebuild error %d\n", rebuild);
-		Com_Printf(VERBOSE_WARNING, "RebuildTime(rebuild) post: %d, %f, %f, port: %d, %f, %f, village: %d, %f, %f, town: %d, %f, %f\n", posts, const_pos, c_posts, ports, const_por, c_ports, villages, const_v, c_villages, towns, const_t, c_towns);
-		Com_Printf(VERBOSE_WARNING, "RebuildTime(rebuild) %f, Log %f, %f\n", rebuildtime->value, Com_Log(GetBuildingArmor(building->type, NULL), 40), (1 - (posts?(const_pos * c_posts / posts):0) - (ports?(const_por * c_ports / ports):0) - (villages?(const_v * c_villages / villages):0) - (towns?(const_t * c_towns / towns):0)));
+		Com_Printf(VERBOSE_WARNING, "RebuildTime(rebuild) post: %d, %f, %f, port: %d, %f, %f, village: %d, %f, %f, town: %d, %f, %f\n", posts, const_pos,
+				c_posts, ports, const_por, c_ports, villages, const_v, c_villages, towns, const_t, c_towns);
+		Com_Printf(VERBOSE_WARNING, "RebuildTime(rebuild) %f, Log %f, %f\n", rebuildtime->value, Com_Log(GetBuildingArmor(building->type, NULL), 40), (1
+				- (posts ? (const_pos * c_posts / posts) : 0) - (ports ? (const_por * c_ports / ports) : 0)
+				- (villages ? (const_v * c_villages / villages) : 0) - (towns ? (const_t * c_towns / towns) : 0)));
 		rebuild = 90000; // 15min
 	}
 
@@ -7603,10 +7657,10 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	int32_t score;
 	u_int16_t i;
 
-	if (!building)
+	if(!building)
 		return 0;
 
-	if (building->status)
+	if(building->status)
 		return 0;
 
 	if(!building->field)
@@ -7617,11 +7671,11 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if(oldcapt->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 	{
-		if (client && (client->country == building->country) && !teamkillstructs->value)
+		if(client && (client->country == building->country) && !teamkillstructs->value)
 			return 0;
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
 		dmgprobe = GetBuildingAPstop(building->type, NULL);
 		apabsorb = (ap > dmgprobe) ? dmgprobe : ap;
@@ -7632,9 +7686,9 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if (dmgprobe < (int32_t)GetBuildingImunity(building->type, NULL))
+		if(dmgprobe < (int32_t) GetBuildingImunity(building->type, NULL))
 			return 0;
 	}
 	else
@@ -7642,36 +7696,37 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if (building->type == BUILD_CARGO || building->type == BUILD_DESTROYER || building->type == BUILD_SUBMARINE)
+		if(building->type == BUILD_CARGO || building->type == BUILD_DESTROYER || building->type == BUILD_SUBMARINE)
 		{
-			if (building->fieldtype >= FIELD_CARGO && building->fieldtype <= FIELD_SUBMARINE) // if is cargo, dd or submarine convoy
+			if(building->fieldtype >= FIELD_CARGO && building->fieldtype <= FIELD_SUBMARINE) // if is cargo, dd or submarine convoy
 			{
-				for (i = 0; i < MAX_BUILDINGS; i++)
+				for(i = 0; i < MAX_BUILDINGS; i++)
 				{
-					if (arena->fields[building->field - 1].buildings[i].field)
+					if(arena->fields[building->field - 1].buildings[i].field)
 					{
-						if (arena->fields[building->field - 1].buildings[i].type == BUILD_CARGO || arena->fields[building->field - 1].buildings[i].type == BUILD_DESTROYER
-								|| arena->fields[building->field - 1].buildings[i].type == BUILD_SUBMARINE)
+						if(arena->fields[building->field - 1].buildings[i].type == BUILD_CARGO || arena->fields[building->field - 1].buildings[i].type
+								== BUILD_DESTROYER || arena->fields[building->field - 1].buildings[i].type == BUILD_SUBMARINE)
 						{ // found the 1st ship (that carries the number)
-							if (building == &(arena->fields[building->field - 1].buildings[i]))
+							if(building == &(arena->fields[building->field - 1].buildings[i]))
 							{
-								for (i++; i < MAX_BUILDINGS; i++)
+								for(i++; i < MAX_BUILDINGS; i++)
 								{
-									if (arena->fields[building->field - 1].buildings[i].field)
+									if(arena->fields[building->field - 1].buildings[i].field)
 									{
-										if (arena->fields[building->field - 1].buildings[i].type == BUILD_CARGO || arena->fields[building->field - 1].buildings[i].type == BUILD_DESTROYER
+										if(arena->fields[building->field - 1].buildings[i].type == BUILD_CARGO
+												|| arena->fields[building->field - 1].buildings[i].type == BUILD_DESTROYER
 												|| arena->fields[building->field - 1].buildings[i].type == BUILD_SUBMARINE)
 										{
-											if (!arena->fields[building->field - 1].buildings[i].status) // check if another ship is alive, so 1st ship cannot be sunk
+											if(!arena->fields[building->field - 1].buildings[i].status) // check if another ship is alive, so 1st ship cannot be sunk
 												return 0;
 										}
 									}
 									else
 									{
-										Com_Printf(VERBOSE_ALWAYS, "Main Ship (%d) destroyed (F%d) by %s %s\n", building->id, building->field, client ? (client->drone ? "drone" : "player") : "-HOST-",
-												client ? client->longnick : "");
+										Com_Printf(VERBOSE_ALWAYS, "Main Ship (%d) destroyed (F%d) by %s %s\n", building->id, building->field,
+												client ? (client->drone ? "drone" : "player") : "-HOST-", client ? client->longnick : "");
 										break;
 									}
 								}
@@ -7691,19 +7746,19 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if (!oldcapt->value /*ToT enabled*/ || IsVitalBuilding(building, oldcapt->value)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
+		if(!oldcapt->value /*ToT enabled*/|| IsVitalBuilding(building, oldcapt->value)) // TODO: Score: unbeta: DM: add AP to all type 1 guns
 		{
 			if(oldcapt->value || (ap)) // this adds damage by bombs if oldcapt or by bullets if ToT enabled
 			{
 				if(!client || (client->country != building->country))
 				{
-					AddFieldDamage(building->field-1, dmgprobe, client);
-					arena->fields[building->field-1].tonnage += (dmgprobe / 50);
+					AddFieldDamage(building->field - 1, dmgprobe, client);
+					arena->fields[building->field - 1].tonnage += (dmgprobe / 50);
 
-					if(arena->fields[building->field-1].tonnage >= (GetTonnageToClose(building->field) * 2.4))
-						arena->fields[building->field-1].tonnage = (GetTonnageToClose(building->field) * 2.4);
+					if(arena->fields[building->field - 1].tonnage >= (GetTonnageToClose(building->field) * 2.4))
+						arena->fields[building->field - 1].tonnage = (GetTonnageToClose(building->field) * 2.4);
 				}
 			}
 		}
@@ -7713,7 +7768,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
 		score = dmgprobe < building->armor ? dmgprobe : building->armor;
 		score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
@@ -7723,11 +7778,11 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
 		if(score && client)
 		{
-			if (client->country != building->country)
+			if(client->country != building->country)
 			{
 				ScoresEvent(SCORE_STRUCTDAMAGE, client, score);
 			}
@@ -7742,12 +7797,11 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		DebugClient(__FILE__, __LINE__, TRUE, client);
 	}
 
-
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if ((int32_t)building->armor <= dmgprobe)
+		if((int32_t) building->armor <= dmgprobe)
 		{
-			if ((building->type == BUILD_FENCE) || (building->type == BUILD_ROCK) || (building->type == BUILD_TREE))
+			if((building->type == BUILD_FENCE) || (building->type == BUILD_ROCK) || (building->type == BUILD_TREE))
 			{
 				building->status = 2;
 			}
@@ -7756,10 +7810,10 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 				building->status = 1;
 			}
 
-			if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
+			if((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
 			{
 				//armor = GetBuildingArmor(building->type, client);
-				building->timer = (int32_t)(RebuildTime(building) / ((building->country == COUNTRY_RED)?arena->redindex:arena->goldindex));//(u_int32_t) (Com_Log(dmgprobe, 17) * Com_Log(armor, 17) * (rebuildtime->value * 100)); // (double)((double)(armor + dmgprobe - building->armor)/(double)armor) * (double)(rebuildtime->value * 100);
+				building->timer = (int32_t) (RebuildTime(building) / ((building->country == COUNTRY_RED) ? arena->redindex : arena->goldindex));//(u_int32_t) (Com_Log(dmgprobe, 17) * Com_Log(armor, 17) * (rebuildtime->value * 100)); // (double)((double)(armor + dmgprobe - building->armor)/(double)armor) * (double)(rebuildtime->value * 100);
 				//if (building->timer > (u_int32_t)(rebuildtime->value * 1200))
 				//	building->timer = (rebuildtime->value * 1200);
 				building->armor = 0;
@@ -7770,7 +7824,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 				building->timer = arena->frame;
 			}
 
-			if (client && !client->drone)
+			if(client && !client->drone)
 			{
 				Com_LogEvent(EVENT_KILLSTRUCT, client->id, 0);
 				Com_LogDescription(EVENT_DESC_PLCTRY, client->country, NULL);
@@ -7780,23 +7834,22 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 				if(oldcapt->value || arena->fields[building->field - 1].vitals || building->type != BUILD_HANGAR)
 				{
-					if (client->country == building->country)
+					if(client->country == building->country)
 					{
 						client->structstod--;
 
-						CPrintf(client->country,
-						RADIO_GREEN, "ALERT!!! ALERT!!! %s destroyed friendly structure at %s%d", client->longnick, (building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F",
-								building->field);
+						CPrintf(client->country, RADIO_GREEN, "ALERT!!! ALERT!!! %s destroyed friendly structure at %s%d", client->longnick,
+								(building->fieldtype > FIELD_SUBMARINE && building->fieldtype < FIELD_WB3POST) ? "C" : "F", building->field);
 
-						if (!client->tkstatus) // if player is not TK yet, increase tklimit
+						if(!client->tkstatus) // if player is not TK yet, increase tklimit
 						{
-							if (teamkiller->value)
+							if(teamkiller->value)
 								client->tklimit++;
 						}
 
-						if (client->tklimit > 5)
+						if(client->tklimit > 5)
 						{
-							if (!client->tkstatus)
+							if(!client->tkstatus)
 								Cmd_TK(client->longnick, TRUE, NULL);
 							else
 								; // TODO: FIXME: BAN CLIENT UNTIL END OF TOD
@@ -7807,40 +7860,41 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 						client->structstod++;
 					}
 
-					if (client->country != building->country)
+					if(client->country != building->country)
 					{
 						ScoresEvent(SCORE_STRUCTURE, client, building->type);
 					}
 					else
 					{
-						ScoresEvent(SCORE_STRUCTURE, client, (int32_t)(-1 * building->type));
+						ScoresEvent(SCORE_STRUCTURE, client, (int32_t) (-1 * building->type));
 					}
 				}
 
-				if ((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
+				if((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST))
 				{
-//					if (building->type >= BUILD_CV && building->type <= BUILD_CARGO)
-//					{
-//						SinkBoat(FALSE, building, NULL);
-//						PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
-//
-//						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
-//					}
-//					else
-					if (IsVitalBuilding(building, oldcapt->value))
+					//					if (building->type >= BUILD_CV && building->type <= BUILD_CARGO)
+					//					{
+					//						SinkBoat(FALSE, building, NULL);
+					//						PPrintf(client, RADIO_YELLOW, "You destroyed %s", GetBuildingType(building->type));
+					//
+					//						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d\n", client->longnick, GetBuildingType(building->type), building->field);
+					//					}
+					//					else
+					if(IsVitalBuilding(building, oldcapt->value))
 					{
-						PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s", GetBuildingType(building->type), Com_TimeSeconds(building->timer/100));
+						PPrintf(client, RADIO_YELLOW, "You destroyed %s for %s", GetBuildingType(building->type), Com_TimeSeconds(building->timer / 100));
 
-						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d for %s\n", client->longnick, GetBuildingType(building->type), building->field, Com_TimeSeconds(building->timer /100));
+						Com_Printf(VERBOSE_ALWAYS, "%s destroyed %s at F%d for %s\n", client->longnick, GetBuildingType(building->type), building->field,
+								Com_TimeSeconds(building->timer / 100));
 					}
 
-					if (!arcade->value)
+					if(!arcade->value)
 					{
-						if (building->type == BUILD_HANGAR)
+						if(building->type == BUILD_HANGAR)
 						{
 							ReducePlanes(building->field);
 						}
-						else if (building->type == BUILD_WARE)
+						else if(building->type == BUILD_WARE)
 						{
 							arena->fields[building->field - 1].warehouse = arena->frame;
 							// IncreaseAcksReup(building->field); // obsolete
@@ -7868,9 +7922,9 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 	}
 	// radio alert
 
-	if (!setjmp(debug_buffer))
+	if(!setjmp(debug_buffer))
 	{
-		if (((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST)) && !arena->fields[building->field - 1].alert)
+		if(((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST)) && !arena->fields[building->field - 1].alert)
 		{
 			arena->fields[building->field - 1].alert = arena->frame;
 		}
@@ -7893,16 +7947,16 @@ void SendFieldStatus(u_int16_t field, client_t *client)
 {
 	u_int16_t i;
 
-	if (field < fields->value)
+	if(field < fields->value)
 	{
-		for (i = 0; i < MAX_BUILDINGS; i++)
+		for(i = 0; i < MAX_BUILDINGS; i++)
 		{
-			if (arena->fields[field].buildings[i].field)
+			if(arena->fields[field].buildings[i].field)
 			{
-				if (arena->fields[field].buildings[i].status)
+				if(arena->fields[field].buildings[i].status)
 				{
-//					if ((arena->fields[field].buildings[i].type > BUILD_CV) && (arena->fields[field].buildings[i].type <= BUILD_SUBMARINE))
-//						SinkBoat(FALSE, &arena->fields[field].buildings[i], client);
+					//					if ((arena->fields[field].buildings[i].type > BUILD_CV) && (arena->fields[field].buildings[i].type <= BUILD_SUBMARINE))
+					//						SinkBoat(FALSE, &arena->fields[field].buildings[i], client);
 
 					SetBuildingStatus(&arena->fields[field].buildings[i], 2, client);
 				}
@@ -7919,13 +7973,13 @@ void SendFieldStatus(u_int16_t field, client_t *client)
 	{
 		field -= fields->value;
 
-		if (field < cities->value)
+		if(field < cities->value)
 		{
-			for (i = 0; i < MAX_BUILDINGS; i++)
+			for(i = 0; i < MAX_BUILDINGS; i++)
 			{
-				if (arena->cities[field].buildings[i].field)
+				if(arena->cities[field].buildings[i].field)
 				{
-					if (arena->cities[field].buildings[i].status)
+					if(arena->cities[field].buildings[i].status)
 					{
 						SetBuildingStatus(&arena->cities[field].buildings[i], 2, client);
 					}
@@ -7962,7 +8016,7 @@ void SetBuildingStatus(building_t *building, u_int8_t status, client_t *client)
 	buildstatus->status = status;
 	buildstatus->country = building->country;
 
-	if (client)
+	if(client)
 	{
 		SendPacket(buffer, sizeof(buffer), client);
 	}
@@ -7970,9 +8024,9 @@ void SetBuildingStatus(building_t *building, u_int8_t status, client_t *client)
 	{
 		memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone && clients[i].ready)
+			if(clients[i].inuse && !clients[i].drone && clients[i].ready)
 			{
 				if(clients[i].thai) // SetBuildingStatus
 				{
@@ -7998,7 +8052,7 @@ void SetPlaneDamage(u_int16_t plane, client_t *client)
 {
 	u_int8_t i;
 
-	for (i = 0; i < MAX_PLACE; i++)
+	for(i = 0; i < MAX_PLACE; i++)
 	{
 		client->armor.points[i] = arena->planedamage[plane].points[i];
 		client->armor.apstop[i] = arena->planedamage[plane].apstop[i];
@@ -8020,8 +8074,8 @@ void PFireMG(u_int8_t *buffer, u_int8_t len, client_t *client)
 	u_int32_t guntype;
 	u_int8_t i, j;
 
-	wb3firemg = (wb3firemg_t *)buffer;
-	firemg = (firemg_t *)buffer;
+	wb3firemg = (wb3firemg_t *) buffer;
+	firemg = (firemg_t *) buffer;
 
 	firemg->packetid = htons(Com_WBhton(0x1909));
 
@@ -8030,24 +8084,24 @@ void PFireMG(u_int8_t *buffer, u_int8_t len, client_t *client)
 	firemg->sumguntype = htonl(guntype);
 	firemg->slot = i;
 
-	for (i = 0; i < MAX_RELATED; i++)
+	for(i = 0; i < MAX_RELATED; i++)
 	{
-		if (client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+		if(client->related[i] && (client->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 		{
 			PFireMG(buffer, len, client->related[i]);
 		}
 	}
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					firemg->slot = j;
 
@@ -8071,26 +8125,26 @@ void POttoFiring(u_int8_t *buffer, u_int8_t len, client_t *client)
 	ottofiring_t *otto;
 	u_int8_t i, j, k;
 
-	otto = (ottofiring_t *)buffer;
+	otto = (ottofiring_t *) buffer;
 
 	otto->packetid = htons(Com_WBhton(0x1900));
 
-	for (i = 0; i < maxentities->value; i++)
+	for(i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].inuse && !clients[i].drone)
+		if(clients[i].inuse && !clients[i].drone)
 		{
-			for (j = 0; j < MAX_SCREEN; j++)
+			for(j = 0; j < MAX_SCREEN; j++)
 			{
-				if (!clients[i].visible[j].client)
+				if(!clients[i].visible[j].client)
 					continue;
 
-				if (client == clients[i].visible[j].client)
+				if(client == clients[i].visible[j].client)
 				{
 					SendPacket(buffer, len, &clients[i]);
 
-					for (k = 0; k < MAX_RELATED; k++)
+					for(k = 0; k < MAX_RELATED; k++)
 					{
-						if (client->related[k] && (client->related[k]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+						if(client->related[k] && (client->related[k]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
 						{
 							otto->posx = htonl(client->related[k]->posxy[0][0]);
 							otto->posy = htonl(client->related[k]->posxy[1][0]);
@@ -8120,7 +8174,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 	u_int8_t i;
 	planestatus1_t *status;
 
-	if (!client || !client->inflight)
+	if(!client || !client->inflight)
 		return;
 
 	// DM log
@@ -8134,7 +8188,7 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 	}
 
 	// Begin parse status_damage
-	if (status_damage & STATUS_REARFUSE)
+	if(status_damage & STATUS_REARFUSE)
 	{
 		status_damage |= STATUS_HSTAB | STATUS_VSTAB;
 
@@ -8142,28 +8196,28 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 		client->armor.points[PLACE_VSTAB] = 0;
 	}
 
-	if (status_damage & STATUS_HSTAB)
+	if(status_damage & STATUS_HSTAB)
 	{
 		status_damage |= STATUS_ELEVATOR;
 
 		client->armor.points[PLACE_ELEVATOR] = 0;
 	}
 
-	if (status_damage & STATUS_VSTAB)
+	if(status_damage & STATUS_VSTAB)
 	{
 		status_damage |= STATUS_RUDDER;
 
 		client->armor.points[PLACE_RUDDER] = 0;
 	}
 
-	if (status_damage & STATUS_LWING)
+	if(status_damage & STATUS_LWING)
 	{
 		status_damage |= STATUS_LAILERON;
 
 		client->armor.points[PLACE_LAILERON] = 0;
 	}
 
-	if (status_damage & STATUS_RWING)
+	if(status_damage & STATUS_RWING)
 	{
 		status_damage |= STATUS_RAILERON;
 
@@ -8174,16 +8228,16 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 	client->status_damage |= status_damage;
 	client->status_status |= status_status;
 
-//	if (client->drone)
-//	{
-		PPlaneStatus(NULL, client);
-//	}
-//	else
+	//	if (client->drone)
+	//	{
+	PPlaneStatus(NULL, client);
+	//	}
+	//	else
 	if(!client->drone)
 	{
 		memset(buffer, 0, sizeof(buffer));
 
-		status = (planestatus1_t *)buffer;
+		status = (planestatus1_t *) buffer;
 
 		status->packetid = htons(Com_WBhton(0x0E02));
 		status->status_damage = htonl(status_damage);
@@ -8206,7 +8260,7 @@ void SendPlaneStatus(client_t *plane, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	status = (planestatus2_t *)buffer;
+	status = (planestatus2_t *) buffer;
 
 	status->packetid = htons(Com_WBhton(0x0002));
 	status->slot = GetSlot(plane, client);
@@ -8230,9 +8284,9 @@ void PRadioMessage(u_int8_t *buffer, client_t *client)
 	u_int8_t size;
 	u_int32_t msgto, msgfrom;
 
-	radiomessage = (radiomessage_t *)buffer;
+	radiomessage = (radiomessage_t *) buffer;
 
-	if (!radiomessage->msgsize)
+	if(!radiomessage->msgsize)
 		return;
 
 	msgto = ntohl(radiomessage->msgto);
@@ -8240,26 +8294,26 @@ void PRadioMessage(u_int8_t *buffer, client_t *client)
 	message = &(radiomessage->message);
 	size = radiomessage->msgsize;
 
-	if (!size)
+	if(!size)
 	{
 		Com_Printf(VERBOSE_WARNING, "%s(%s) sent message with size Zero\n", client->longnick, client->ip);
 		return;
 	}
 
-	if (msgfrom < 1000)
+	if(msgfrom < 1000)
 	{
 		Com_Printf(VERBOSE_WARNING, "%s(%s) invalid nick (%X)\n", client->longnick, client->ip, msgfrom);
 		return;
 	}
 
-	if (msgfrom == client->shortnick)
+	if(msgfrom == client->shortnick)
 	{
-		if (size > (MAX_RADIOMSG - 11))
+		if(size > (MAX_RADIOMSG - 11))
 			size = (MAX_RADIOMSG - 12);
 
-		if (!strncasecmp(client->lastmsg, message, size)) // possible flood
+		if(!strncasecmp(client->lastmsg, message, size)) // possible flood
 		{
-			if ((arena->time - client->lastmsgtime) < 2000)
+			if((arena->time - client->lastmsgtime) < 2000)
 				return;
 		}
 
@@ -8267,9 +8321,9 @@ void PRadioMessage(u_int8_t *buffer, client_t *client)
 		strncpy(client->lastmsg, message, size);
 		client->lastmsgtime = arena->time;
 
-		if (*message == '.')
+		if(*message == '.')
 		{
-			if (!setjmp(debug_buffer))
+			if(!setjmp(debug_buffer))
 			{
 				PRadioCommand(message, size, client);
 			}
@@ -8281,29 +8335,29 @@ void PRadioMessage(u_int8_t *buffer, client_t *client)
 		else
 		{
 			if(client->tkstatus)
-				{
-					size += 4;
-					message -= 4;
-					message[0] = '(';
-					message[1] = 'T';
-					message[2] = 'K';
-					message[3] = ')';
-				}
-
-				PrintRadioMessage(msgto, msgfrom, message, size, client);
+			{
+				size += 4;
+				message -= 4;
+				message[0] = '(';
+				message[1] = 'T';
+				message[2] = 'K';
+				message[3] = ')';
 			}
-		}
-		else
-		{
-			Com_Printf(VERBOSE_WARNING, "%s(%s) message nick (%X) doesnt match with ingame nick (%X)\n", client->longnick, client->ip, msgfrom, client->shortnick);
+
+			PrintRadioMessage(msgto, msgfrom, message, size, client);
 		}
 	}
+	else
+	{
+		Com_Printf(VERBOSE_WARNING, "%s(%s) message nick (%X) doesnt match with ingame nick (%X)\n", client->longnick, client->ip, msgfrom, client->shortnick);
+	}
+}
 
-	/**
-	 WB3DotCommand
+/**
+ WB3DotCommand
 
-	 Send a Dot command to client
-	 */
+ Send a Dot command to client
+ */
 
 void WB3DotCommand(client_t *client, const char *fmt, ...)
 {
@@ -8317,7 +8371,7 @@ void WB3DotCommand(client_t *client, const char *fmt, ...)
 	vsprintf(msg, fmt, argptr);
 	va_end(argptr);
 
-	wb3dotcmd = (wb3dotcmd_t *)buffer;
+	wb3dotcmd = (wb3dotcmd_t *) buffer;
 
 	memset(buffer, 0, sizeof(buffer));
 
@@ -8326,15 +8380,15 @@ void WB3DotCommand(client_t *client, const char *fmt, ...)
 
 	memcpy(&(wb3dotcmd->message), msg, wb3dotcmd->msgsize);
 
-	if (client)
+	if(client)
 	{
 		SendPacket(buffer, wb3dotcmd->msgsize + 7, client);
 	}
 	else
 	{
-		for (i = 0; i < maxentities->value; i++)
+		for(i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].inuse && !clients[i].drone)
+			if(clients[i].inuse && !clients[i].drone)
 			{
 				SendPacket(buffer, wb3dotcmd->msgsize + 7, &clients[i]);
 			}
@@ -8362,13 +8416,13 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 		return;
 	}
 
-	if (msgto == 201 && !(client->attr & (FLAG_ADMIN | FLAG_OP)))
+	if(msgto == 201 && !(client->attr & (FLAG_ADMIN | FLAG_OP)))
 	{
 		PPrintf(client, RADIO_YELLOW, "Superuser channel - not permitted");
 		return;
 	}
 
-	if (!broadcast->value && msgto == 100)
+	if(!broadcast->value && msgto == 100)
 	{
 		PPrintf(client, RADIO_YELLOW, "Broadcast channel disabled");
 		return;
@@ -8377,28 +8431,28 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 	memset(buffer, 0, sizeof(buffer));
 
 	//	buffer[0] = 0x12; // set packet ID
-	radiomessage = (radiomessage_t *)buffer;
+	radiomessage = (radiomessage_t *) buffer;
 
 	radiomessage->packetid = htons(Com_WBhton(0x1200));
 	radiomessage->msgto = htonl(msgto);
 	radiomessage->msgfrom = htonl(msgfrom);
-	radiomessage->msgsize = ((msgsize>64) ? 64 : msgsize);
+	radiomessage->msgsize = ((msgsize > 64) ? 64 : msgsize);
 	memcpy(&(radiomessage->message), message, radiomessage->msgsize);
 
-	if (msgto > 0xFF) // Private Message
+	if(msgto > 0xFF) // Private Message
 	{
 		radiomessage->msgto = htonl(0xC8);
 
-		if ((toClient = FindSClient(msgto)))
+		if((toClient = FindSClient(msgto)))
 		{
-			if (toClient->drone)
+			if(toClient->drone)
 			{
 				PPrintf(client, RADIO_YELLOW, "You can't send a message to drones");
 				return;
 			}
 
-			if(!(client->squadron == 732 /*vlamik*/ && toClient->squadron == 1581 /*robtec*/) &&
-				!(client->squadron == 1581 /*robtec*/ && toClient->squadron == 732 /*vlamik*/))
+			if(!(client->squadron == 732 /*vlamik*/&& toClient->squadron == 1581 /*robtec*/) && !(client->squadron == 1581 /*robtec*/&& toClient->squadron
+					== 732 /*vlamik*/))
 			{
 				SendPacket(buffer, radiomessage->msgsize + 11, toClient);
 				SendPacket(buffer, radiomessage->msgsize + 11, client);
@@ -8416,7 +8470,7 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 	}
 	else // General Message
 	{
-		if ((msgto == 110) && !client->squadron)
+		if((msgto == 110) && !client->squadron)
 		{
 			PPrintf(client, RADIO_YELLOW, "You are not in any squadron");
 			return;
@@ -8424,22 +8478,22 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 
 		n = 0;
 
-		if (msgto == 111)
+		if(msgto == 111)
 		{
 			n = 1;
 
-			if (client->attached)
+			if(client->attached)
 			{
-				if (client->attached->drone)
+				if(client->attached->drone)
 				{
 					PPrintf(client, RADIO_YELLOW, "You can't chat with drones");
 					return;
 				}
 				else
 				{
-					for (i = 0; i < 7; i++)
+					for(i = 0; i < 7; i++)
 					{
-						if (client->attached->gunners[i] && client->attached->gunners[i]->inflight)
+						if(client->attached->gunners[i] && client->attached->gunners[i]->inflight)
 						{
 							SendPacket(buffer, radiomessage->msgsize + 11, client->attached->gunners[i]);
 						}
@@ -8450,18 +8504,18 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 			}
 			else
 			{
-				if (HaveGunner(client->plane) && client->inflight)
+				if(HaveGunner(client->plane) && client->inflight)
 				{
-					for (i = 0; i < 7; i++)
+					for(i = 0; i < 7; i++)
 					{
-						if (client->gunners[i] && client->gunners[i]->inflight)
+						if(client->gunners[i] && client->gunners[i]->inflight)
 						{
 							SendPacket(buffer, radiomessage->msgsize + 11, client->gunners[i]);
 							n = 2;
 						}
 					}
 
-					if (n == 2)
+					if(n == 2)
 					{
 						SendPacket(buffer, radiomessage->msgsize + 11, client);
 					}
@@ -8473,18 +8527,18 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 			}
 		}
 
-		if (!n)
+		if(!n)
 		{
 			memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-			for (i = 0; i < maxentities->value; i++)
+			for(i = 0; i < maxentities->value; i++)
 			{
-				if (clients[i].inuse && !clients[i].drone && clients[i].ready)
+				if(clients[i].inuse && !clients[i].drone && clients[i].ready)
 				{
-					if ((n=CanHear(client, &clients[i], msgto)) > 0)
+					if((n = CanHear(client, &clients[i], msgto)) > 0)
 					{
-						if((client->squadron == 732 /*vlamik*/ && clients[i].squadron == 1581 /*robtec*/) ||
-							(client->squadron == 1581 /*robtec*/ && clients[i].squadron == 732 /*vlamik*/))
+						if((client->squadron == 732 /*vlamik*/&& clients[i].squadron == 1581 /*robtec*/) || (client->squadron == 1581
+						/*robtec*/&& clients[i].squadron == 732 /*vlamik*/))
 							continue;
 
 						if(clients[i].thai) // PrintRadioMessage
@@ -8498,12 +8552,12 @@ void PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8
 						SendPacket(buffer, radiomessage->msgsize + 11, &clients[i]);
 					}
 				}
-				if (n<0)
+				if(n < 0)
 					break;
 			}
 		}
 
-		if (n >= 0)
+		if(n >= 0)
 		{
 			message[msgsize] = '\0';
 			Com_Printf(VERBOSE_CHAT, "%s:(%d)%s\n", client->longnick, msgto, message);
@@ -8530,15 +8584,15 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 	memset(loginname, 0, sizeof(loginname));
 	memset(packet, 0, sizeof(packet));
 
-	nickpacket = (insertnick_t *)packet;
+	nickpacket = (insertnick_t *) packet;
 
-	memcpy(loginname, buffer+1, buffer[0]);
+	memcpy(loginname, buffer + 1, buffer[0]);
 	loginname[31] = '\0';
 
 	Com_Printf(VERBOSE_ALWAYS, "LOGINNAME %s\n", loginname);
 
 	memset(nickname, 0, sizeof(nickname));
-	memcpy(nickname, buffer+2+buffer[0], 6);
+	memcpy(nickname, buffer + 2 + buffer[0], 6);
 
 	strncpy(nickname, wbnick2ascii(ascii2wbnick(nickname, 0)), 6);
 
@@ -8546,15 +8600,15 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 
 	nickpacket->packetid = htons(Com_WBhton(0x2001));
 
-	if (!(strstr(nickname, "=") || (ascii2wbnick(nickname, 0) < 1000)))
+	if(!(strstr(nickname, "=") || (ascii2wbnick(nickname, 0) < 1000)))
 	{
 		sprintf(my_query, "SELECT longnick FROM players WHERE longnick = '%s'", nickname);
 
-		if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+		if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 		{
-			if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+			if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 			{
-				if (!mysql_num_rows(my_result))
+				if(!mysql_num_rows(my_result))
 				{
 					mysql_free_result(my_result);
 					my_result = NULL;
@@ -8563,13 +8617,13 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 
 					Sys_WaitForLock(FILE_DRONENICKS_LOCK);
 
-					if (!(Sys_LockFile(FILE_DRONENICKS_LOCK) < 0))
+					if(!(Sys_LockFile(FILE_DRONENICKS_LOCK) < 0))
 					{
-						if ((fp = fopen(FILE_DRONENICKS, "r")))
+						if((fp = fopen(FILE_DRONENICKS, "r")))
 						{
-							while (fgets(tempnick, sizeof(tempnick), fp) != NULL)
+							while(fgets(tempnick, sizeof(tempnick), fp) != NULL)
 							{
-								if (!Com_Strncmp(tempnick, nickname, 6))
+								if(!Com_Strncmp(tempnick, nickname, 6))
 								{
 									found = 1;
 									break;
@@ -8578,15 +8632,15 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 							fclose(fp);
 							Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 
-							if (!found)
+							if(!found)
 							{
 								sprintf(my_query, "SELECT id FROM players WHERE loginuser = '%s'", client->loginuser);
 
-								if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+								if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 								{
-									if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+									if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 									{
-										if ((my_row = mysql_fetch_row(my_result)))
+										if((my_row = mysql_fetch_row(my_result)))
 										{
 											client->id = Com_Atou(Com_MyRow("id"));
 
@@ -8598,7 +8652,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 
 											sprintf(my_query, "UPDATE players SET longnick = '%s' WHERE id = '%u'", client->longnick, client->id);
 
-											if (!d_mysql_query(&my_sock, my_query))
+											if(!d_mysql_query(&my_sock, my_query))
 											{
 												Com_LogEvent(EVENT_CREATE, client->id, 0);
 												Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);
@@ -8611,9 +8665,10 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 											}
 											else
 											{
-												Com_Printf(VERBOSE_WARNING, "PNewNick(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+												Com_Printf(VERBOSE_WARNING, "PNewNick(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock),
+														mysql_error(&my_sock));
 												nickpacket->msgsize = 23;
-												memcpy( &(nickpacket->msg), "SQL Error query(update)", 23);
+												memcpy(&(nickpacket->msg), "SQL Error query(update)", 23);
 											}
 										}
 										else
@@ -8621,14 +8676,16 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 											mysql_free_result(my_result);
 											my_result = NULL;
 
-											Com_Printf(VERBOSE_WARNING, "PNewNick(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+											Com_Printf(VERBOSE_WARNING, "PNewNick(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+													&my_sock));
 											nickpacket->msgsize = 19;
 											memcpy(&(nickpacket->msg), "SQL Error fetch(id)", 19);
 										}
 									}
 									else
 									{
-										Com_Printf(VERBOSE_WARNING, "PNewNick(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+										Com_Printf(VERBOSE_WARNING, "PNewNick(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+												&my_sock));
 
 										nickpacket->msgsize = 20;
 										memcpy(&(nickpacket->msg), "SQL Error result(id)", 20);
@@ -8636,7 +8693,8 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 								}
 								else
 								{
-									Com_Printf(VERBOSE_WARNING, "PNewNick(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "PNewNick(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+											&my_sock));
 
 									nickpacket->msgsize = 19;
 									memcpy(&(nickpacket->msg), "SQL Error query(id)", 19);
@@ -8650,8 +8708,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 						}
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n",
-							FILE_DRONENICKS);
+							Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", FILE_DRONENICKS);
 							Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 
 							nickpacket->msgsize = 21;
@@ -8660,8 +8717,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 					}
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Couldn't lock file \"%s\"\n",
-						FILE_DRONENICKS);
+						Com_Printf(VERBOSE_WARNING, "Couldn't lock file \"%s\"\n", FILE_DRONENICKS);
 
 						nickpacket->msgsize = 21;
 						memcpy(&(nickpacket->msg), "Error lock drone nick", 21);
@@ -8699,7 +8755,7 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 	}
 
 	nickpacket->allow = 0;
-	SendPacket(packet, 4+nickpacket->msgsize, client);
+	SendPacket(packet, 4 + nickpacket->msgsize, client);
 }
 
 /**
@@ -8717,9 +8773,9 @@ int32_t SendCopyright(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	copyrighta = (copyrighta_t *)(buffer);
+	copyrighta = (copyrighta_t *) (buffer);
 
-	if (client->loginkey)
+	if(client->loginkey)
 	{
 		copyrighta->packetid = htons(Com_WBhton(0x0D00));
 		copyrighta->gameversion = htonl(0x4BF47); // htonl(0x4B54B);
@@ -8730,25 +8786,25 @@ int32_t SendCopyright(client_t *client)
 		copyrighta->gameversion = htonl(0x4BF47); // htonl(0x43B55);
 	}
 	copyrighta->nicksize = strlen(client->longnick);
-	if (copyrighta->nicksize)
+	if(copyrighta->nicksize)
 		memcpy(&(copyrighta->nick), client->longnick, copyrighta->nicksize);
 
-	offset = 7+copyrighta->nicksize;
+	offset = 7 + copyrighta->nicksize;
 	buffer[offset++] = 0x3D;
 
-	if (client->loginkey)
-		memcpy( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved", 61); // DO NOT change this line
+	if(client->loginkey)
+		memcpy(&(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved", 61); // DO NOT change this line
 	else
-		memcpy( &(buffer[offset]), "Copyright (C) 2009 iEntertainment Network All Rights Reserved", 61);
+		memcpy(&(buffer[offset]), "Copyright (C) 2009 iEntertainment Network All Rights Reserved", 61);
 
-	copyrightb = (copyrightb_t *)(buffer+offset+61);
+	copyrightb = (copyrightb_t *) (buffer + offset + 61);
 	copyrightb->cryptkey = htonl(client->key);
 	copyrightb->mapnamesize = strlen(mapname->string); // mapnamesize
 	memcpy(&(copyrightb->mapname), mapname->string, copyrightb->mapnamesize); // mapname
 
-	offset = offset+66+copyrightb->mapnamesize;
+	offset = offset + 66 + copyrightb->mapnamesize;
 
-	if (client->loginkey) // gameversion
+	if(client->loginkey) // gameversion
 	{
 		buffer[offset++] = 0x00;
 		buffer[offset++] = 0x04;
@@ -8763,7 +8819,7 @@ int32_t SendCopyright(client_t *client)
 		buffer[offset] = 0x47;
 	}
 
-	return SendPacket(buffer, 78+copyrighta->nicksize+copyrightb->mapnamesize, client);
+	return SendPacket(buffer, 78 + copyrighta->nicksize + copyrightb->mapnamesize, client);
 }
 
 /**
@@ -8780,11 +8836,11 @@ void UpdateIngameClients(u_int8_t attr)
 
 	// Update ascii file
 
-	if (attr & FLAG_OP)
+	if(attr & FLAG_OP)
 	{
 		strcpy(file, FILE_OP);
 	}
-	else if (attr & FLAG_ADMIN)
+	else if(attr & FLAG_ADMIN)
 	{
 		strcpy(file, FILE_ADMIN);
 	}
@@ -8797,12 +8853,12 @@ void UpdateIngameClients(u_int8_t attr)
 
 	Sys_WaitForLock(file);
 
-	if (Sys_LockFile(file) < 0)
+	if(Sys_LockFile(file) < 0)
 		return;
 
 	file[strlen(file) - 5] = '\0';
 
-	if (!(fp = fopen(file, "wb")))
+	if(!(fp = fopen(file, "wb")))
 	{
 		Com_Printf(VERBOSE_WARNING, "Couldn't create file \"%s\"\n", file);
 	}
@@ -8811,12 +8867,12 @@ void UpdateIngameClients(u_int8_t attr)
 		fprintf(fp, " Callsign   Side    Status     Country       Connection\n");
 		fprintf(fp, "========================================================\n");
 
-		for (i = 0, j = 0; i < maxentities->value; i++)
+		for(i = 0, j = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].attr == 1 && hideadmin->value)
+			if(clients[i].attr == 1 && hideadmin->value)
 				continue;
 
-			if (clients[i].inuse && !clients[i].drone && (attr ? clients[i].attr & attr : 1))
+			if(clients[i].inuse && !clients[i].drone && (attr ? clients[i].attr & attr : 1))
 			{
 				j++;
 				fprintf(fp, "  %-10s%-7s", clients[i].longnick, GetCountry(clients[i].country));
@@ -8825,18 +8881,18 @@ void UpdateIngameClients(u_int8_t attr)
 				{
 					fprintf(fp, "In Chat     ");
 				}
-				else if (clients[i].inflight)
+				else if(clients[i].inflight)
 				{
-					if (IsGround(&clients[i]))
+					if(IsGround(&clients[i]))
 						fprintf(fp, "In Ground   ");
 					else
 						fprintf(fp, "In Flight   ");
 				}
 				else
 				{
-					if (clients[i].field)
+					if(clients[i].field)
 					{
-						if (!clients[i].hq)
+						if(!clients[i].hq)
 							fprintf(fp, "FIELD F%03d  ", clients[i].field);
 						else
 							fprintf(fp, "   HQ       ");
@@ -8845,14 +8901,14 @@ void UpdateIngameClients(u_int8_t attr)
 						fprintf(fp, "CONNECTING  ");
 				}
 
-				fprintf(fp, "%-14s%s\n", GeoIP_country_name_by_addr(gi, clients[i].ip),
-						!(clients[i].cancollide)?"":clients[i].connection == 0?"Stable":clients[i].connection == 1?"Fair":clients[i].connection == 2?"Unstable":"Poor");
+				fprintf(fp, "%-14s%s\n", GeoIP_country_name_by_addr(gi, clients[i].ip), !(clients[i].cancollide) ? "" : clients[i].connection == 0 ? "Stable"
+						: clients[i].connection == 1 ? "Fair" : clients[i].connection == 2 ? "Unstable" : "Poor");
 
-				for (k = 0; k < maxentities->value; k++) // add sharing IP
+				for(k = 0; k < maxentities->value; k++) // add sharing IP
 				{
-					if (clients[k].inuse && !clients[k].drone && clients[k].ready && &clients[i] != &clients[k] && !clients[k].thai)
+					if(clients[k].inuse && !clients[k].drone && clients[k].ready && &clients[i] != &clients[k] && !clients[k].thai)
 					{
-						if (!strcmp(clients[k].ip, clients[i].ip))
+						if(!strcmp(clients[k].ip, clients[i].ip))
 						{
 							fprintf(fp, "\\--> Sharing IP with %s\n", clients[k].longnick);
 							break;
@@ -8863,7 +8919,7 @@ void UpdateIngameClients(u_int8_t attr)
 		}
 	}
 
-	if (!j)
+	if(!j)
 	{
 		fprintf(fp, "             There is no player online\n");
 	}
@@ -8882,7 +8938,7 @@ void UpdateIngameClients(u_int8_t attr)
 
 const char *GetCountry(u_int8_t country)
 {
-	switch (country)
+	switch(country)
 	{
 		case 1:
 			return "Red";
@@ -8905,7 +8961,7 @@ const char *GetCountry(u_int8_t country)
 
 const char *GetRanking(u_int8_t ranking)
 {
-	switch (ranking)
+	switch(ranking)
 	{
 		case 0:
 			return "Novice";
@@ -9023,7 +9079,7 @@ int32_t SendArenaNames(client_t *client)
 	 wb3->value?mapname->string:"\n");
 	 */
 
-	for (i = 0; i < MAX_ARENASLIST; i++)
+	for(i = 0; i < MAX_ARENASLIST; i++)
 	{
 		p_arenas[i] = &(arenaslist[i]);
 	}
@@ -9031,28 +9087,29 @@ int32_t SendArenaNames(client_t *client)
 	do // Bubble sort
 	{
 		i = 0;
-		for (j = 1; j < MAX_ARENASLIST; j++)
+		for(j = 1; j < MAX_ARENASLIST; j++)
 		{
-			if (p_arenas[j-1]->logintime > p_arenas[j]->logintime)
+			if(p_arenas[j - 1]->logintime > p_arenas[j]->logintime)
 			{
-				p_arenas_temp = p_arenas[j-1];
-				p_arenas[j-1] = p_arenas[j];
+				p_arenas_temp = p_arenas[j - 1];
+				p_arenas[j - 1] = p_arenas[j];
 				p_arenas[j] = p_arenas_temp;
 				i++;
 			}
 		}
-	} while (i);
+	} while(i);
 
 	// make compatible with WB 2008, remove to WB2007
-	if (wb3->value == 2)
+	if(wb3->value == 2)
 	{
-		sprintf( &(buffer[offset]), "Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2009 Tabajara Host\n$Welcome to the Free Public Arenas!\n$\n");
+		sprintf(&(buffer[offset]),
+				"Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2009 Tabajara Host\n$Welcome to the Free Public Arenas!\n$\n");
 		offset += 139;
 	}
 
-	for (i = 0; i < MAX_ARENASLIST; i++)
+	for(i = 0; i < MAX_ARENASLIST; i++)
 	{
-		if (p_arenas[i]->time)
+		if(p_arenas[i]->time)
 		{
 			// 2008: MAIN:72.232.165.203:wb3abmain:0:300:025:3004:arnabob:atoll
 			//       Practice:72.232.165.203:wfprac:0:300:000:3005:arnalst3:atoll
@@ -9061,9 +9118,9 @@ int32_t SendArenaNames(client_t *client)
 			sprintf(&(buffer[offset]), "%s:%s:%d:Free:%d:%d:00000000:%s:%s%s", p_arenas[i]->hostname, p_arenas[i]->hostdomain, p_arenas[i]->logintime, // dirname->string,
 					p_arenas[i]->maxclients, p_arenas[i]->numplayers, "arnalst3", wb3->value ? p_arenas[i]->mapname : "\n", wb3->value ? "\n" : "");
 
-			for (; offset < 1024; offset++)
+			for(; offset < 1024; offset++)
 			{
-				if (!buffer[offset])
+				if(!buffer[offset])
 					break;
 			}
 		}
@@ -9072,7 +9129,7 @@ int32_t SendArenaNames(client_t *client)
 	sprintf(&(buffer[offset]), "*\n");
 	offset += 2;
 
-	n = Com_Send(client, (u_int8_t *)buffer, (int)offset);
+	n = Com_Send(client, (u_int8_t *) buffer, (int) offset);
 
 	/*
 	 for(i = 0, i < 4, i++)
@@ -9100,7 +9157,7 @@ void SendPlayersNames(client_t *client)
 	arenaslist_t *p_arenas_temp, *p_arenas[MAX_ARENASLIST];
 	u_int8_t i, j;
 
-	for (i = 0; i < MAX_ARENASLIST; i++)
+	for(i = 0; i < MAX_ARENASLIST; i++)
 	{
 		p_arenas[i] = &(arenaslist[i]);
 	}
@@ -9108,27 +9165,27 @@ void SendPlayersNames(client_t *client)
 	do // Bubble sort
 	{
 		i = 0;
-		for (j = 1; j < MAX_ARENASLIST; j++)
+		for(j = 1; j < MAX_ARENASLIST; j++)
 		{
-			if (p_arenas[j-1]->logintime > p_arenas[j]->logintime)
+			if(p_arenas[j - 1]->logintime > p_arenas[j]->logintime)
 			{
-				p_arenas_temp = p_arenas[j-1];
-				p_arenas[j-1] = p_arenas[j];
+				p_arenas_temp = p_arenas[j - 1];
+				p_arenas[j - 1] = p_arenas[j];
 				p_arenas[j] = p_arenas_temp;
 				i++;
 			}
 		}
-	} while (i);
+	} while(i);
 
 	memset(buffer, 0, sizeof(buffer));
 	temp = offset = 0;
 
-	for (i = 0, j = 0; i < MAX_ARENASLIST; i++)
+	for(i = 0, j = 0; i < MAX_ARENASLIST; i++)
 	{
-		if (p_arenas[i]->time)
+		if(p_arenas[i]->time)
 		{
 			buffer[offset++] = j; // arena index
-			*(int16_t *) (buffer+offset) = htons(p_arenas[i]->numplayers);
+			*(int16_t *) (buffer + offset) = htons(p_arenas[i]->numplayers);
 			offset += 2;
 
 			memcpy(&buffer[offset], p_arenas[i]->array, ((p_arenas[i]->numplayers * 5) > 1000) ? 1000 : (p_arenas[i]->numplayers * 5)); // nicks+country list
@@ -9180,48 +9237,50 @@ void SendPlayersNear(client_t *client)
 	//		carray[i] = NULL;
 
 	/* calculate distance */
-	for (k = i = 0; i < maxentities->value; i++)
+	for(k = i = 0; i < maxentities->value; i++)
 	{
-		if (client != &clients[i] && clients[i].inuse && clients[i].inflight && !clients[i].attached && !(clients[i].drone == DRONE_EJECTED && clients[i].related[0] == client))
+		if(client != &clients[i] && clients[i].inuse && clients[i].inflight && !clients[i].attached && !(clients[i].drone == DRONE_EJECTED
+				&& clients[i].related[0] == client))
 		{
-			if ((clients[i].reldist = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], clients[i].posxy[0][0], clients[i].posxy[1][0], clients[i].posalt[0], MAX_INT16)) >= 0)
+			if((clients[i].reldist = DistBetween(client->posxy[0][0], client->posxy[1][0], client->posalt[0], clients[i].posxy[0][0], clients[i].posxy[1][0],
+					clients[i].posalt[0], MAX_INT16)) >= 0)
 				carray[k++] = &clients[i];
 		}
 	}
 
 	/* sort by dist*/
-	for (mid = k / 2; mid > 0; mid /= 2)
+	for(mid = k / 2; mid > 0; mid /= 2)
 	{
-		for (i = mid; i < k; i++)
+		for(i = mid; i < k; i++)
 		{
-			for (j = i - mid; j >= 0; j -= mid)
+			for(j = i - mid; j >= 0; j -= mid)
 			{
-				if (carray[j]->reldist <= carray[j+mid]->reldist) /* compare */
+				if(carray[j]->reldist <= carray[j + mid]->reldist) /* compare */
 					break;
 				temp = carray[j]; /* permute */
-				carray[j] = carray[j+mid];
-				carray[j+mid] = temp;
+				carray[j] = carray[j + mid];
+				carray[j + mid] = temp;
 			}
 		}
 	}
 
 	k = (k < (MAX_SCREEN - 1) ? k : (MAX_SCREEN - 1));
 
-	for (j = 0; j < MAX_SCREEN; j++) /* check for removing from list */
+	for(j = 0; j < MAX_SCREEN; j++) /* check for removing from list */
 	{
-		if ((j != (MAX_SCREEN - 1)) || (FLIGHT_TIME(client) > 15000))
+		if((j != (MAX_SCREEN - 1)) || (FLIGHT_TIME(client) > 15000))
 		{
-			if (client->visible[j].client)
+			if(client->visible[j].client)
 			{
-				for (i = 0; i < k; i++)
+				for(i = 0; i < k; i++)
 				{
-					if (client->visible[j].client == carray[i])
+					if(client->visible[j].client == carray[i])
 					{
 						i = -1;
 						break;
 					}
 				}
-				if (i >= 0) // not found on 'nearplanes' array
+				if(i >= 0) // not found on 'nearplanes' array
 				{
 					AddRemovePlaneScreen(client->visible[j].client, client, TRUE); // remove plane from screen
 					client->visible[j].client = NULL; // remove plane from array
@@ -9230,35 +9289,35 @@ void SendPlayersNear(client_t *client)
 		}
 	}
 
-	for (i = 0; i < k; i++) /* check for entering in list */
+	for(i = 0; i < k; i++) /* check for entering in list */
 	{
-		for (j = 0; j < (MAX_SCREEN - 1); j++) // MAX_SCREEN - 1 => Last slot is reserved for attach plane
+		for(j = 0; j < (MAX_SCREEN - 1); j++) // MAX_SCREEN - 1 => Last slot is reserved for attach plane
 		{
-			if (client->attached == carray[i])
+			if(client->attached == carray[i])
 			{
-				if (client->visible[MAX_SCREEN - 1].client)
+				if(client->visible[MAX_SCREEN - 1].client)
 				{
 					j = -1;
 					break;
 				}
 			}
-			else if (carray[i] == client->visible[j].client)
+			else if(carray[i] == client->visible[j].client)
 			{
 				j = -1;
 				break;
 			}
 		}
-		if (j >= 0) // not found on visible array
+		if(j >= 0) // not found on visible array
 		{
-			if (client->attached == carray[i])
+			if(client->attached == carray[i])
 			{
 				client->visible[MAX_SCREEN - 1].client = carray[i];
 			}
 			else
 			{
-				for (j = 0; j < (MAX_SCREEN - 1); j++) // add plane to array
+				for(j = 0; j < (MAX_SCREEN - 1); j++) // add plane to array
 				{
-					if (!client->visible[j].client)
+					if(!client->visible[j].client)
 					{
 						client->visible[j].client = carray[i];
 						break;
@@ -9269,16 +9328,16 @@ void SendPlayersNear(client_t *client)
 		}
 	}
 
-	for (i = 0; i < (MAX_SCREEN - 1); i++)
+	for(i = 0; i < (MAX_SCREEN - 1); i++)
 	{
-		if (client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer)) // if any client has been updated, send screen update
+		if(client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer)) // if any client has been updated, send screen update
 		{
 			SendScreenUpdates(client);
 			return;
 		}
 	}
 
-	if (!((arena->frame - client->frame) % 150))
+	if(!((arena->frame - client->frame) % 150))
 	{
 		SendIdle(client);
 	}
@@ -9296,23 +9355,23 @@ void SendOttoParams(client_t *client)
 	ottoparams_t *otto;
 
 	memset(buffer, 0, sizeof(buffer));
-	otto = (ottoparams_t *)buffer;
+	otto = (ottoparams_t *) buffer;
 
 	otto->packetid = htons(Com_WBhton(0x2100));
 	otto->accuracy = ottoaccuracy->value;
 	otto->unknown1 = htons(0x0000);
 
-	if (client->ackstar)
+	if(client->ackstar)
 		otto->range = htons(0);
 	else
-		otto->range = htons((u_int16_t)ottorange->value);
+		otto->range = htons((u_int16_t) ottorange->value);
 
-	otto->burston = htons((u_int16_t)(ottoburston->value * 100));
-	otto->burstonmax = htons((u_int16_t)(ottoburstonmax->value * 100));
-	otto->burstoff = htons((u_int16_t)(ottoburstoff->value * 100));
-	otto->retarget = htons((u_int16_t)(ottoretarget->value * 100));
-	otto->adjust = htons((u_int16_t)(ottoadjust->value));
-	otto->override = htonl((u_int32_t)ottooverrides->value);
+	otto->burston = htons((u_int16_t) (ottoburston->value * 100));
+	otto->burstonmax = htons((u_int16_t) (ottoburstonmax->value * 100));
+	otto->burstoff = htons((u_int16_t) (ottoburstoff->value * 100));
+	otto->retarget = htons((u_int16_t) (ottoretarget->value * 100));
+	otto->adjust = htons((u_int16_t) (ottoadjust->value));
+	otto->override = htonl((u_int32_t) ottooverrides->value);
 
 	SendPacket(buffer, sizeof(buffer), client);
 
@@ -9331,11 +9390,11 @@ void SendOttoParams2(client_t *client)
 	ottoparams2_t *otto;
 
 	memset(buffer, 0, sizeof(buffer));
-	otto = (ottoparams2_t *)buffer;
+	otto = (ottoparams2_t *) buffer;
 
 	otto->packetid = htons(Com_WBhton(0x2103));
 	otto->unk1 = htons(0x0000);
-	otto->ottoacquirerange = htons((u_int16_t)ottoacquirerange->value);
+	otto->ottoacquirerange = htons((u_int16_t) ottoacquirerange->value);
 
 	SendPacket(buffer, sizeof(buffer), client);
 }
@@ -9353,7 +9412,7 @@ void SendLastConfig(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	wb3lastconfig = (wb3lastconfig_t *)buffer;
+	wb3lastconfig = (wb3lastconfig_t *) buffer;
 	wb3lastconfig->packetid = htons(Com_WBhton(0x0404));
 
 	wb3lastconfig->unk1 = htonl(0x4A00);
@@ -9380,13 +9439,13 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 	addplane_t *addplane;
 
 	memset(buffer, 0, sizeof(buffer));
-	addplane = (addplane_t *)buffer;
+	addplane = (addplane_t *) buffer;
 
 	addplane->packetid = htons(Com_WBhton(0x0000));
 
 	addplane->slot = GetSlot(plane, client);
 
-	if (remove)
+	if(remove)
 	{
 		addplane->remove = htons(0x0D);
 	}
@@ -9420,9 +9479,9 @@ void AddRemoveCVScreen(ship_t *ship, client_t *client, u_int8_t remove, u_int8_t
 	wb3aifillslot_t *aifillslot;
 
 	memset(buffer, 0, sizeof(buffer));
-	aifillslot = (wb3aifillslot_t *)buffer;
+	aifillslot = (wb3aifillslot_t *) buffer;
 
-	aifillslot->packetid = htons(Com_WBhton(0x0008));  // nick, country, plane == 0 -> remove
+	aifillslot->packetid = htons(Com_WBhton(0x0008)); // nick, country, plane == 0 -> remove
 	aifillslot->slot = 0;
 
 	if(!remove)
@@ -9460,10 +9519,10 @@ void SendScreenUpdates(client_t *client)
 	updateplane_t *updateplane;
 	wb3updateplane2_t *wb3updateplane2;
 	char file[128];
-	FILE *fp= NULL;
+	FILE *fp = NULL;
 
 	memset(buffer, 0, sizeof(buffer));
-	updateplane = (updateplane_t *)buffer;
+	updateplane = (updateplane_t *) buffer;
 
 	updateplane->packetid = htons(Com_WBhton(0x001E));
 
@@ -9474,19 +9533,19 @@ void SendScreenUpdates(client_t *client)
 
 	snprintf(file, sizeof(file), "./logs/players/%s.screen", client->longnick);
 
-	if ((client->lograwdata || lograwposition->value) && client->inflight)
+	if((client->lograwdata || lograwposition->value) && client->inflight)
 	{
-		if (!(fp = fopen(file, "a")))
+		if(!(fp = fopen(file, "a")))
 		{
 			Com_Printf(VERBOSE_WARNING, "Couldn't append file \"%s\"\n", file);
 		}
 	}
 
-	for (i = 0, j = 0; i < (MAX_SCREEN - 1); i++)
+	for(i = 0, j = 0; i < (MAX_SCREEN - 1); i++)
 	{
-		if (client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer))
+		if(client->visible[i].client && (client->visible[i].client->timer != client->visible[i].timer))
 		{
-			wb3updateplane2 = (wb3updateplane2_t *)(buffer+19+(22*j));
+			wb3updateplane2 = (wb3updateplane2_t *) (buffer + 19 + (22 * j));
 
 			wb3updateplane2->timeoffset = htons(arena->time - client->visible[i].client->timer);//htons(0xFFFC);
 
@@ -9509,20 +9568,12 @@ void SendScreenUpdates(client_t *client)
 			wb3updateplane2->yrzspeed = htons(((client->visible[i].client->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // Yaw Angular Speed // 7
 			wb3updateplane2->yrzspeed |= htons(((client->visible[i].client->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // Z Speed // 9
 
-			if (fp)
+			if(fp)
 			{
-				fprintf(fp, "%u;%d;%d;%d;%d;%u;%d;%d;%d;%d;%u\n",
-						ntohl(updateplane->timer),
-						(int32_t)ntohl(updateplane->posx),
-						(int32_t)ntohl(updateplane->posy),
-						(int32_t)ntohl(updateplane->alt),
-						(int16_t)ntohs(wb3updateplane2->timeoffset),
-						wb3updateplane2->slot,
-						wb3updateplane2->unk1,
-						(int16_t)ntohs(wb3updateplane2->relposx),
-						(int16_t)ntohs(wb3updateplane2->relposy),
-						(int16_t)ntohs(wb3updateplane2->relalt),
-						Sys_Milliseconds());
+				fprintf(fp, "%u;%d;%d;%d;%d;%u;%d;%d;%d;%d;%u\n", ntohl(updateplane->timer), (int32_t) ntohl(updateplane->posx), (int32_t) ntohl(
+						updateplane->posy), (int32_t) ntohl(updateplane->alt), (int16_t) ntohs(wb3updateplane2->timeoffset), wb3updateplane2->slot,
+						wb3updateplane2->unk1, (int16_t) ntohs(wb3updateplane2->relposx), (int16_t) ntohs(wb3updateplane2->relposy), (int16_t) ntohs(
+								wb3updateplane2->relalt), Sys_Milliseconds());
 			}
 
 			client->visible[i].timer = client->visible[i].client->timer;
@@ -9530,14 +9581,14 @@ void SendScreenUpdates(client_t *client)
 		}
 	}
 
-	if (fp)
+	if(fp)
 		fclose(fp);
 
-	if (!j)
+	if(!j)
 		return;
 
 	updateplane->num = j;
-	SendPacket(buffer, 20+(22*j), client);
+	SendPacket(buffer, 20 + (22 * j), client);
 }
 
 /**
@@ -9556,7 +9607,7 @@ void SendDeckUpdates(client_t *client)
 		return;
 
 	memset(buffer, 0, sizeof(buffer));
-	updateplane = (updateplane_t *)buffer;
+	updateplane = (updateplane_t *) buffer;
 
 	updateplane->packetid = htons(Com_WBhton(0x0009));
 
@@ -9566,7 +9617,7 @@ void SendDeckUpdates(client_t *client)
 	updateplane->posy = htonl(((client->posxy[1][0] >> 11) << 11));
 	updateplane->alt = htonl(((client->posalt[0] >> 9) << 9));
 
-	updateplane2 = (updateplane2_t *)(buffer+19);
+	updateplane2 = (updateplane2_t *) (buffer + 19);
 
 	updateplane2->timeoffset = htons(arena->time - client->deck->drone->timer);//htons(0xFFFC);
 	updateplane2->slot = 0;
@@ -9597,43 +9648,43 @@ void SendDeckUpdates(client_t *client)
 int CanHear(client_t *client1, client_t *client2, u_int32_t msgto)
 {
 
-	if (client2->attr & FLAG_ADMIN) // admin can hear any radio
+	if(client2->attr & FLAG_ADMIN) // admin can hear any radio
 
 
 		return 1;
 
-	if (msgto == 100 || msgto == 201)
+	if(msgto == 100 || msgto == 201)
 		return 1;
 
-	if (msgto == 110)
+	if(msgto == 110)
 	{
-		if (client1->squadron == client2->squadron)
+		if(client1->squadron == client2->squadron)
 			return 1;
 	}
 
-	if (msgto > 100 && msgto <= 104)
+	if(msgto > 100 && msgto <= 104)
 	{
-		if ((u_int32_t)client1->country != (msgto % 100) && !(client1->attr & FLAG_ADMIN))
+		if((u_int32_t) client1->country != (msgto % 100) && !(client1->attr & FLAG_ADMIN))
 		{
 			PPrintf(client1, RADIO_YELLOW, "Channel of other country - not permitted");
 			return -1;
 		}
-		else if ((u_int32_t)client2->country != (msgto % 100))
+		else if((u_int32_t) client2->country != (msgto % 100))
 			return 0;
 		else
 			return 1;
 	}
 
-	if (msgto < 100)
+	if(msgto < 100)
 	{
-		if (msgto >= 1 && msgto < 50)
+		if(msgto >= 1 && msgto < 50)
 		{
-			if (client1->country != client2->country)
+			if(client1->country != client2->country)
 				return 0;
-			else if (client1->radio[0] == client2->radio[0])
+			else if(client1->radio[0] == client2->radio[0])
 				return 1;
 		}
-		else if (client1->radio[0] == client2->radio[0])
+		else if(client1->radio[0] == client2->radio[0])
 			return 1;
 	}
 
@@ -9657,31 +9708,31 @@ void SendArenaRules(client_t *client)
 
 	Com_Printf(VERBOSE_DEBUG, "Printing Arena Rules to %s\n", client->longnick);
 
-	if (client->attr & FLAG_ADMIN)
+	if(client->attr & FLAG_ADMIN)
 	{
 		flags = (FLAG_MAPFLAGSFLY | FLAG_MAPFLAGSTWR | FLAG_MAPFLAGSOWN | FLAG_MAPFLAGSENEMY | FLAG_PLANEATRADAR);
 	}
-	else if (mapflags->value)
+	else if(mapflags->value)
 	{
-		flags |= (u_int32_t)mapflags->value;
+		flags |= (u_int32_t) mapflags->value;
 
-		if (mapflagsfly->value)
+		if(mapflagsfly->value)
 			flags |= FLAG_MAPFLAGSFLY;
-		if (mapflagstwr->value)
+		if(mapflagstwr->value)
 			flags |= FLAG_MAPFLAGSTWR;
-		if (mapflagsown->value)
+		if(mapflagsown->value)
 			flags |= FLAG_MAPFLAGSOWN;
-		if (mapflagsenemy->value)
+		if(mapflagsenemy->value)
 			flags |= FLAG_MAPFLAGSENEMY;
-		if (planeatradar->value)
+		if(planeatradar->value)
 			flags |= FLAG_PLANEATRADAR;
-		if (!friendlydotsfly->value)
+		if(!friendlydotsfly->value)
 			flags |= FLAG_FRIENDLYDOTSFLY;
-		if (!enemydotsfly->value)
+		if(!enemydotsfly->value)
 			flags |= FLAG_ENEMYDOTSFLY;
-		if (!friendlydotstwr->value)
+		if(!friendlydotstwr->value)
 			flags |= FLAG_FRIENDLYDOTSTWR;
-		if (!enemydotstwr->value)
+		if(!enemydotstwr->value)
 			flags |= FLAG_ENEMYDOTSTWR;
 	}
 	else
@@ -9690,7 +9741,7 @@ void SendArenaRules(client_t *client)
 	}
 
 	buffersize = 83;
-	wb3arenarules = (wb3arenarules_t *)buffer;
+	wb3arenarules = (wb3arenarules_t *) buffer;
 	wb3arenarules->packetid = htons(Com_WBhton(0x0300));
 	wb3arenarules->radaralt = htonl(radaralt->value);
 	wb3arenarules->mapflags = htonl(flags);
@@ -9698,7 +9749,7 @@ void SendArenaRules(client_t *client)
 	wb3arenarules->maxpilotg = htons(maxpilotg->value);
 	wb3arenarules->xwindvelocity = htonl(xwindvelocity->value);
 	wb3arenarules->ywindvelocity = htonl(ywindvelocity->value);
-	wb3arenarules->zwindvelocity = client->plane == 54 ? htonl(zwindvelocity->value - 9):htonl(zwindvelocity->value);
+	wb3arenarules->zwindvelocity = client->plane == 54 ? htonl(zwindvelocity->value - 9) : htonl(zwindvelocity->value);
 	wb3arenarules->structlim = (u_int8_t) structlim->value;
 	wb3arenarules->unknown1 = 0x2D;
 	wb3arenarules->unknown2 = 0xA0;
@@ -9719,15 +9770,15 @@ void SendArenaRules(client_t *client)
 	wb3arenarules->clickrangelim = htonl(clickrangelim->value);
 	wb3arenarules->unknown6 = 0x05;
 
-	if (client->attr & FLAG_ADMIN)
+	if(client->attr & FLAG_ADMIN)
 	{
 		wb3arenarules->planerangelimit = htonl(16000);
 		wb3arenarules->enemyidlim = htonl(16000);
 		wb3arenarules->friendlyidlim = htonl(16000);
 	}
-	else if (IsFighter(client) || ((IsBomber(client) || IsGround(client)) && !iconbombersoverride->value))
+	else if(IsFighter(client) || ((IsBomber(client) || IsGround(client)) && !iconbombersoverride->value))
 	{
-		if ((arena->hour <= 5 && arena->minute < 30) || (arena->hour >= 18 && arena->minute >= 30))
+		if((arena->hour <= 5 && arena->minute < 30) || (arena->hour >= 18 && arena->minute >= 30))
 		{
 			wb3arenarules->planerangelimit = htonl(planerangelimit->value / 2);
 			wb3arenarules->enemyidlim = htonl(enemyidlim->value / 2);
@@ -9742,7 +9793,7 @@ void SendArenaRules(client_t *client)
 	}
 	else
 	{
-		if ((arena->hour < 6 && arena->minute < 30) || (arena->hour > 17 && arena->minute > 29))
+		if((arena->hour < 6 && arena->minute < 30) || (arena->hour > 17 && arena->minute > 29))
 		{
 			wb3arenarules->planerangelimit = htonl(planerangelimitbomber->value / 2);
 			wb3arenarules->enemyidlim = htonl(enemyidlimbomber->value / 2);
@@ -9772,7 +9823,7 @@ void WB3SendGruntConfig(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	gruntconfig = (wb3gruntconfig_t *)buffer;
+	gruntconfig = (wb3gruntconfig_t *) buffer;
 
 	gruntconfig->packetid = htons(Com_WBhton(0x030D));
 	gruntconfig->gruntsmaxd = htonl(gruntsmaxd->value);
@@ -9795,7 +9846,7 @@ void WB3SendArenaFlags3(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	wb3arenaflags3 = (wb3arenaflags3_t *)buffer;
+	wb3arenaflags3 = (wb3arenaflags3_t *) buffer;
 
 	wb3arenaflags3->packetid = htons(Com_WBhton(0x030F));
 	wb3arenaflags3->flags = htonl(arenaflags3->value);
@@ -9816,7 +9867,7 @@ void WB3RandomSeed(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	wb3randomseed = (wb3randomseed_t *)buffer;
+	wb3randomseed = (wb3randomseed_t *) buffer;
 
 	wb3randomseed->packetid = htons(Com_WBhton(0x030E));
 	wb3randomseed->seed = htonl(0x1F002ABF);
@@ -9837,7 +9888,7 @@ void WB3ConfigFM(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	wb3configfm = (wb3configfm_t *)buffer;
+	wb3configfm = (wb3configfm_t *) buffer;
 
 	wb3configfm->packetid = htons(Com_WBhton(0x0310));
 	wb3configfm->unk1 = htonl(dpitch->value);
@@ -9860,7 +9911,7 @@ void WB3ArenaConfig2(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	arenaconfig2 = (wb3arenaconfig2_t *)buffer;
+	arenaconfig2 = (wb3arenaconfig2_t *) buffer;
 
 	arenaconfig2->packetid = htons(Com_WBhton(0x0312));
 	arenaconfig2->arnaflags3 = htonl(arenaflags3->value);
@@ -9882,7 +9933,7 @@ void WB3NWAttachSlot(client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	attachslot = (wb3nwattachslot_t *)buffer;
+	attachslot = (wb3nwattachslot_t *) buffer;
 
 	attachslot->packetid = htons(Com_WBhton(0x0E0B));
 	attachslot->slot = htonl(0x3F);
@@ -9898,7 +9949,7 @@ void WB3NWAttachSlot(client_t *client)
 
 void PRadioCommand(char *message, u_int8_t size, client_t *client)
 {
-	if (size > 0 && size <= 64)
+	if(size > 0 && size <= 64)
 	{
 		message++;
 		message[size - 1] = '\0';
@@ -9918,16 +9969,16 @@ void PFileCheck(u_int8_t *buffer, client_t *client)
 	u_int8_t i;
 	u_int32_t crc;
 
-	check = (checkclientfiles_t *)buffer;
+	check = (checkclientfiles_t *) buffer;
 
 	crc = ntohl(check->crc);
 	message = &check->msg;
 	message[check->msgsize] = 0;
 
-	switch (ntohl(check->exemiscview))
+	switch(ntohl(check->exemiscview))
 	{
 		case 0x01:
-			if ((crc != CRC_WARBIRDS) && (crc != CRC_WBD3D) && (crc != CRC_WBD3D_MOD))
+			if((crc != CRC_WARBIRDS) && (crc != CRC_WBD3D) && (crc != CRC_WBD3D_MOD))
 			{
 				PPrintf(client, RADIO_BLUE, "Invalid Executable CRC, error logged");
 				ForceEndFlight(TRUE, client);
@@ -9935,33 +9986,32 @@ void PFileCheck(u_int8_t *buffer, client_t *client)
 			}
 			break;
 		case 0x02:
-			if (crc != CRC_MISCBIN)
+			if(crc != CRC_MISCBIN)
 			{
-				PPrintf(client,
-				RADIO_BLUE, "Invalid MISC.BIN CRC, please download last FHL version", crc);
+				PPrintf(client, RADIO_BLUE, "Invalid MISC.BIN CRC, please download last FHL version", crc);
 
-				if (strcmp(client->longnick, "-exec-") || strcmp(client->longnick, "franz-"))
+				if(strcmp(client->longnick, "-exec-") || strcmp(client->longnick, "franz-"))
 					ForceEndFlight(TRUE, client);
 				Com_Printf(VERBOSE_WARNING, "Invalid MISC.BIN CRC: %X (%s)\n", crc, client->longnick);
 			}
 			break;
 		case 0x05:
 			// TODO: FIXME: Make server known which pos client is and how many bullets pos have
-			if (client->attached)
+			if(client->attached)
 			{
-				if (client->attached->drone & DRONE_HMACK)
+				if(client->attached->drone & DRONE_HMACK)
 					ReloadWeapon(1, 5000, client);
-				else if (client->attached->drone & DRONE_HTANK)
+				else if(client->attached->drone & DRONE_HTANK)
 					ReloadWeapon(1, 60, client);
 				else
 				{
-					for (i = 0; i < 7; i++)
+					for(i = 0; i < 7; i++)
 					{
-						if (client->attached->gunners[i] == client)
+						if(client->attached->gunners[i] == client)
 							break;
 					}
 
-					if (i < 7)
+					if(i < 7)
 					{
 						ReloadWeapon(GunPos(i, 1), 1000, client);
 					}
@@ -9970,7 +10020,7 @@ void PFileCheck(u_int8_t *buffer, client_t *client)
 
 			CheckCockpitCRC(message, crc, client);
 
-			if (crcview->value)
+			if(crcview->value)
 			{
 				Com_Printf(VERBOSE_ALWAYS, "Cockpit CRC:0x%0X, %s\n", crc, message);
 				PPrintf(client, RADIO_GREEN, "Cockpit CRC:0x%0X, %s", crc, message);
@@ -9993,629 +10043,629 @@ void CheckCockpitCRC(char *path, u_int32_t crc, client_t *client)
 	char *name;
 	u_int8_t i;
 
-	if (!path)
+	if(!path)
 		return;
 
 	name = strrchr(path, '\\');
 
-	if (!name)
+	if(!name)
 	{
 		name = strrchr(path, '/');
 
-		if (!name)
+		if(!name)
 			return;
 	}
 
 	name++; // now name == B171.VEW
 
-	if ((i = strlen(name)) < 5)
+	if((i = strlen(name)) < 5)
 		return;
 
 	name[i - 4] = '\0'; // now just B171
 
 	i = 1;
 
-	switch (tolower(name[0]))
+	switch(tolower(name[0]))
 	{
 		case 'b':
-			if (!Com_Stricmp(name, "b171"))
+			if(!Com_Stricmp(name, "b171"))
 			{
-				if (crc == 0xFDA5A06C)
+				if(crc == 0xFDA5A06C)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "b173"))
+			else if(!Com_Stricmp(name, "b173"))
 			{
-				if (crc == 0x41B2D37A) // transparent
+				if(crc == 0x41B2D37A) // transparent
 					i = 2;
-				else if (crc == 0x4803D2B9)
+				else if(crc == 0x4803D2B9)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "b241"))
+			else if(!Com_Stricmp(name, "b241"))
 			{
-				if (crc == 0x2D920664)
+				if(crc == 0x2D920664)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "b243"))
+			else if(!Com_Stricmp(name, "b243"))
 			{
-				if (crc == 0xC0FA1202) // transparent
+				if(crc == 0xC0FA1202) // transparent
 					i = 2;
-				else if (crc == 0xE5EB032C)
+				else if(crc == 0xE5EB032C)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "b25h1"))
+			else if(!Com_Stricmp(name, "b25h1"))
 			{
-				if (crc == 0x73EDB9ED)
+				if(crc == 0x73EDB9ED)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "b25h3"))
+			else if(!Com_Stricmp(name, "b25h3"))
 			{
-				if (crc == 0x76335E42) // transparent BUGGED
+				if(crc == 0x76335E42) // transparent BUGGED
 					i = 2;
-				else if (crc == 0x76335E38)
+				else if(crc == 0x76335E38)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "bf109e1"))
+			else if(!Com_Stricmp(name, "bf109e1"))
 			{
-				if (crc == 0x9C2B2643)
+				if(crc == 0x9C2B2643)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "bf109e3"))
+			else if(!Com_Stricmp(name, "bf109e3"))
 			{
-				if (crc == 0x00D0D4A3) // transparent
+				if(crc == 0x00D0D4A3) // transparent
 					i = 2;
-				else if (crc == 0x5FDC1D70 || crc == 0x320F1EEF)
+				else if(crc == 0x5FDC1D70 || crc == 0x320F1EEF)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "bf109g1"))
+			else if(!Com_Stricmp(name, "bf109g1"))
 			{
-				if (crc == 0x8FE9E3B3)
+				if(crc == 0x8FE9E3B3)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "bf109g3"))
+			else if(!Com_Stricmp(name, "bf109g3"))
 			{
-				if (crc == 0x7FCAD160) // transparent
+				if(crc == 0x7FCAD160) // transparent
 					i = 2;
-				else if (crc == 0xFC02B870)
+				else if(crc == 0xFC02B870)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "bf109k1"))
+			else if(!Com_Stricmp(name, "bf109k1"))
 			{
-				if (crc == 0xC5BB866E)
+				if(crc == 0xC5BB866E)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "bf109k3"))
+			else if(!Com_Stricmp(name, "bf109k3"))
 			{
-				if (crc == 0xBCB15BE6 || crc == 0xA4EE71AD)
+				if(crc == 0xBCB15BE6 || crc == 0xA4EE71AD)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "bf110g1"))
+			else if(!Com_Stricmp(name, "bf110g1"))
 			{
-				if (crc == 0xF60444F6)
+				if(crc == 0xF60444F6)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "bf110g3"))
+			else if(!Com_Stricmp(name, "bf110g3"))
 			{
-				if (crc == 0xA49E89AB) // transparent
+				if(crc == 0xA49E89AB) // transparent
 					i = 2;
-				else if (crc == 0x644AD191 || 0xC9EB9FEA)
+				else if(crc == 0x644AD191 || 0xC9EB9FEA)
 					i = 0;
 			}
 			break;
 
 		case 'c':
-			if (!Com_Stricmp(name, "chute1"))
+			if(!Com_Stricmp(name, "chute1"))
 			{
-				if (crc == 0xFAFACE21)
+				if(crc == 0xFAFACE21)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "chute3"))
+			else if(!Com_Stricmp(name, "chute3"))
 			{
-				if (crc == 0xFAFACC21)
+				if(crc == 0xFAFACC21)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "cv1"))
+			else if(!Com_Stricmp(name, "cv1"))
 			{
-				if (crc == 0x955D83DE || crc == 0x45A0780C)
+				if(crc == 0x955D83DE || crc == 0x45A0780C)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "cv3"))
+			else if(!Com_Stricmp(name, "cv3"))
 			{
-				if (crc == 0xB7BA1B74 || crc == 0xDDCCBAEE)
+				if(crc == 0xB7BA1B74 || crc == 0xDDCCBAEE)
 					i = 0;
 			}
 
 			break;
 
 		case 'f':
-			if (!Com_Stricmp(name, "f4u11"))
+			if(!Com_Stricmp(name, "f4u11"))
 			{
-				if (crc == 0x3B5BBD4B)
+				if(crc == 0x3B5BBD4B)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "f4u13"))
+			else if(!Com_Stricmp(name, "f4u13"))
 			{
-				if (crc == 0x83486051) // transparent
+				if(crc == 0x83486051) // transparent
 					i = 2;
-				else if (crc == 0xB1620A88 || crc == 0xA8CA2B1B)
+				else if(crc == 0xB1620A88 || crc == 0xA8CA2B1B)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "f6f51"))
+			else if(!Com_Stricmp(name, "f6f51"))
 			{
-				if (crc == 0x9E362FA1)
+				if(crc == 0x9E362FA1)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "f6f53"))
+			else if(!Com_Stricmp(name, "f6f53"))
 			{
-				if (crc == 0xE3AB7030) // transparent
+				if(crc == 0xE3AB7030) // transparent
 					i = 2;
-				else if (crc == 0xD0F86534 || crc == 0x091542BB)
+				else if(crc == 0xD0F86534 || crc == 0x091542BB)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "foo1"))
+			else if(!Com_Stricmp(name, "foo1"))
 			{
-				if (crc == 0x02010772)
+				if(crc == 0x02010772)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "foo3"))
+			else if(!Com_Stricmp(name, "foo3"))
 			{
-				if (crc == 0xC0E8768C)
+				if(crc == 0xC0E8768C)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "fw19041"))
+			else if(!Com_Stricmp(name, "fw19041"))
 			{
-				if (crc == 0xD87307BF)
+				if(crc == 0xD87307BF)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "fw19043"))
+			else if(!Com_Stricmp(name, "fw19043"))
 			{
-				if (crc == 0xD5011BBC) // transparent
+				if(crc == 0xD5011BBC) // transparent
 					i = 2;
-				else if (crc == 0xFAA64893)
+				else if(crc == 0xFAA64893)
 					i = 0;
 			}
 			break;
 
 		case 'g':
-			if (!Com_Stricmp(name, "g4m21"))
+			if(!Com_Stricmp(name, "g4m21"))
 			{
-				if (crc == 0x30D342E2)
+				if(crc == 0x30D342E2)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "g4m23"))
+			else if(!Com_Stricmp(name, "g4m23"))
 			{
-				if (crc == 0x58C9CAEB || crc == 0x85005047)
+				if(crc == 0x58C9CAEB || crc == 0x85005047)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "gunner1"))
+			else if(!Com_Stricmp(name, "gunner1"))
 			{
-				if (crc == 0x5A451267)
+				if(crc == 0x5A451267)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "gunner3"))
+			else if(!Com_Stricmp(name, "gunner3"))
 			{
-				if (crc == 0x0CE40B33 || crc == 0xD7FFD5DB)
+				if(crc == 0x0CE40B33 || crc == 0xD7FFD5DB)
 					i = 0;
 			}
 			break;
 
 		case 'h':
-			if (!Com_Stricmp(name, "he1771"))
+			if(!Com_Stricmp(name, "he1771"))
 			{
-				if (crc == 0x093E925E)
+				if(crc == 0x093E925E)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "he1773"))
+			else if(!Com_Stricmp(name, "he1773"))
 			{
-				if (crc == 0xC5C01727)
+				if(crc == 0xC5C01727)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "hq1"))
+			else if(!Com_Stricmp(name, "hq1"))
 			{
-				if (crc == 0x4F1DF561)
+				if(crc == 0x4F1DF561)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "hq3"))
+			else if(!Com_Stricmp(name, "hq3"))
 			{
-				if (crc == 0x4F1BF561)
+				if(crc == 0x4F1BF561)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "hurri11"))
+			else if(!Com_Stricmp(name, "hurri11"))
 			{
-				if (crc == 0x790B1BC5)
+				if(crc == 0x790B1BC5)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "hurri13"))
+			else if(!Com_Stricmp(name, "hurri13"))
 			{
 				/*if(crc == 0x324B45F6) // transparent BUGGED
 				 i = 2;
-				 else */if (crc == 0x324B45F6)
+				 else */if(crc == 0x324B45F6)
 					i = 0;
 			}
 			break;
 
 		case 'i':
-			if (!Com_Stricmp(name, "i161"))
+			if(!Com_Stricmp(name, "i161"))
 			{
-				if (crc == 0xAB1B8713 || crc == 0xAFC52F5A)
+				if(crc == 0xAB1B8713 || crc == 0xAFC52F5A)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "i163"))
+			else if(!Com_Stricmp(name, "i163"))
 			{
-				if (crc == 0x3CF56605 || crc == 0x1DFCA9F5)
+				if(crc == 0x3CF56605 || crc == 0x1DFCA9F5)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ijndef1"))
+			else if(!Com_Stricmp(name, "ijndef1"))
 			{
-				if (crc == 0x288D7242)
+				if(crc == 0x288D7242)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ijndef3"))
+			else if(!Com_Stricmp(name, "ijndef3"))
 			{
-				if (crc == 0x203A52EA) // transparent
+				if(crc == 0x203A52EA) // transparent
 					i = 2;
-				else if (crc == 0x46401B6D)
+				else if(crc == 0x46401B6D)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "il21"))
+			else if(!Com_Stricmp(name, "il21"))
 			{
-				if (crc == 0x13BD38FD || crc == 0xF89C8D51)
+				if(crc == 0x13BD38FD || crc == 0xF89C8D51)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "il23"))
+			else if(!Com_Stricmp(name, "il23"))
 			{
-				if (crc == 0x754EA2CD || crc == 0x522463C1 || crc == 0xF0B8E6AB)
+				if(crc == 0x754EA2CD || crc == 0x522463C1 || crc == 0xF0B8E6AB)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "il43"))
+			else if(!Com_Stricmp(name, "il43"))
 			{
-				if (crc == 0xD56A53E4)
+				if(crc == 0xD56A53E4)
 					i = 0;
 			}
 			break;
 
 		case 'j':
-			if (!Com_Stricmp(name, "ju521"))
+			if(!Com_Stricmp(name, "ju521"))
 			{
-				if (crc == 0xC62DDB82)
+				if(crc == 0xC62DDB82)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ju523"))
+			else if(!Com_Stricmp(name, "ju523"))
 			{
-				if (crc == 0xD2374FB7) // transparent
+				if(crc == 0xD2374FB7) // transparent
 					i = 2;
-				else if (crc == 0xF6F943EB || crc == 0xD8F74253)
+				else if(crc == 0xF6F943EB || crc == 0xD8F74253)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ju87d1"))
+			else if(!Com_Stricmp(name, "ju87d1"))
 			{
-				if (crc == 0x3FF385F8)
+				if(crc == 0x3FF385F8)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ju87d3"))
+			else if(!Com_Stricmp(name, "ju87d3"))
 			{
-				if (crc == 0x1812D54C || crc == 0x8C1184BD)
+				if(crc == 0x1812D54C || crc == 0x8C1184BD)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ju881"))
+			else if(!Com_Stricmp(name, "ju881"))
 			{
-				if (crc == 0x2A429157)
+				if(crc == 0x2A429157)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ju883"))
+			else if(!Com_Stricmp(name, "ju883"))
 			{
-				if (crc == 0xC2BF0F4A)
+				if(crc == 0xC2BF0F4A)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ju88a1"))
+			else if(!Com_Stricmp(name, "ju88a1"))
 			{
-				if (crc == 0x7CF40711)
+				if(crc == 0x7CF40711)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ju88a3"))
+			else if(!Com_Stricmp(name, "ju88a3"))
 			{
-				if (crc == 0x6AE3492B || crc == 0x5A9AF04F)
+				if(crc == 0x6AE3492B || crc == 0x5A9AF04F)
 					i = 0;
 			}
 			break;
 
 		case 'k':
-			if (!Com_Stricmp(name, "ki611"))
+			if(!Com_Stricmp(name, "ki611"))
 			{
-				if (crc == 0xAA62F413)
+				if(crc == 0xAA62F413)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ki613"))
+			else if(!Com_Stricmp(name, "ki613"))
 			{
-				if (crc == 0x2FED63E6) // transparent
+				if(crc == 0x2FED63E6) // transparent
 					i = 2;
-				else if (crc == 0x55882BE0)
+				else if(crc == 0x55882BE0)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ki841"))
+			else if(!Com_Stricmp(name, "ki841"))
 			{
-				if (crc == 0x9842A8E8)
+				if(crc == 0x9842A8E8)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "ki843"))
+			else if(!Com_Stricmp(name, "ki843"))
 			{
-				if (crc == 0xA906BC0B) // transparent
+				if(crc == 0xA906BC0B) // transparent
 					i = 2;
-				else if (crc == 0xCE7DB636)
+				else if(crc == 0xCE7DB636)
 					i = 0;
 			}
 			break;
 
 		case 'l':
-			if (!Com_Stricmp(name, "la51"))
+			if(!Com_Stricmp(name, "la51"))
 			{
-				if (crc == 0xCF762CF5 || crc == 0xF0498C56)
+				if(crc == 0xCF762CF5 || crc == 0xF0498C56)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "la53"))
+			else if(!Com_Stricmp(name, "la53"))
 			{
-				if (crc == 0x1D9FCD01 || crc == 0xF0498C56 || crc == 0x824DAC62)
+				if(crc == 0x1D9FCD01 || crc == 0xF0498C56 || crc == 0x824DAC62)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "lagg3"))
+			else if(!Com_Stricmp(name, "lagg3"))
 			{
-				if (crc == 0x6A782E52 || crc == 0xA118784D)
+				if(crc == 0x6A782E52 || crc == 0xA118784D)
 					i = 0;
 			}
 			break;
 
 		case 'm':
-			if (!Com_Stricmp(name, "mc2021"))
+			if(!Com_Stricmp(name, "mc2021"))
 			{
-				if (crc == 0xC88C7A91)
+				if(crc == 0xC88C7A91)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "mc2023"))
+			else if(!Com_Stricmp(name, "mc2023"))
 			{
-				if (crc == 0x45C8811F || crc == 0x8541F62F)
+				if(crc == 0x45C8811F || crc == 0x8541F62F)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "me2621"))
+			else if(!Com_Stricmp(name, "me2621"))
 			{
-				if (crc == 0x0CD917DF)
+				if(crc == 0x0CD917DF)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "me2623"))
+			else if(!Com_Stricmp(name, "me2623"))
 			{
-				if (crc == 0xDABF54D5)
+				if(crc == 0xDABF54D5)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "me4101"))
+			else if(!Com_Stricmp(name, "me4101"))
 			{
-				if (crc == 0x53664309)
+				if(crc == 0x53664309)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "me4103"))
+			else if(!Com_Stricmp(name, "me4103"))
 			{
-				if ((crc == 0x0B3E3AB8) || (crc == 0xAC189CBF))
+				if((crc == 0x0B3E3AB8) || (crc == 0xAC189CBF))
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "mig31"))
+			else if(!Com_Stricmp(name, "mig31"))
 			{
-				if (crc == 0x01B1628A)
+				if(crc == 0x01B1628A)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "mig33"))
+			else if(!Com_Stricmp(name, "mig33"))
 			{
-				if (crc == 0xE11B0CE3)
+				if(crc == 0xE11B0CE3)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "mosq1"))
+			else if(!Com_Stricmp(name, "mosq1"))
 			{
-				if (crc == 0xFEF34326)
+				if(crc == 0xFEF34326)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "mosq3"))
+			else if(!Com_Stricmp(name, "mosq3"))
 			{
-				if (crc == 0x0BA72831) // transparent
+				if(crc == 0x0BA72831) // transparent
 					i = 2;
-				else if (crc == 0x36936DC4 || crc == 0x30B8BE28)
+				else if(crc == 0x36936DC4 || crc == 0x30B8BE28)
 					i = 0;
 			}
 			break;
 
 		case 'p':
-			if (!Com_Stricmp(name, "p381"))
+			if(!Com_Stricmp(name, "p381"))
 			{
-				if (crc == 0xDDB88DAE)
+				if(crc == 0xDDB88DAE)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p383"))
+			else if(!Com_Stricmp(name, "p383"))
 			{
-				if (crc == 0x18A05716) // transparent
+				if(crc == 0x18A05716) // transparent
 					i = 2;
-				else if (crc == 0x3DD2E1ED || crc == 0x28D2B9D9)
+				else if(crc == 0x3DD2E1ED || crc == 0x28D2B9D9)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p39d1"))
+			else if(!Com_Stricmp(name, "p39d1"))
 			{
-				if (crc == 0x0D3D1A9D)
+				if(crc == 0x0D3D1A9D)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p39d3"))
+			else if(!Com_Stricmp(name, "p39d3"))
 			{
-				if (crc == 0x970A1001) // transparent
+				if(crc == 0x970A1001) // transparent
 					i = 2;
-				else if (crc == 0xBC4996E3)
+				else if(crc == 0xBC4996E3)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p401"))
+			else if(!Com_Stricmp(name, "p401"))
 			{
-				if (crc == 0x8E2ED1C7)
+				if(crc == 0x8E2ED1C7)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p403"))
+			else if(!Com_Stricmp(name, "p403"))
 			{
-				if (crc == 0x963C06BD) // transparent
+				if(crc == 0x963C06BD) // transparent
 					i = 2;
-				else if (crc == 0xBB5AF3F4)
+				else if(crc == 0xBB5AF3F4)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p47c1"))
+			else if(!Com_Stricmp(name, "p47c1"))
 			{
-				if (crc == 0xADDBCB11)
+				if(crc == 0xADDBCB11)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p47c3"))
+			else if(!Com_Stricmp(name, "p47c3"))
 			{
-				if (crc == 0x960970B0 || crc == 0xFF3F675E)
+				if(crc == 0x960970B0 || crc == 0xFF3F675E)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p47d1"))
+			else if(!Com_Stricmp(name, "p47d1"))
 			{
-				if (crc == 0x0B66ADD1)
+				if(crc == 0x0B66ADD1)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p47d3"))
+			else if(!Com_Stricmp(name, "p47d3"))
 			{
-				if (crc == 0x49A3E951) // transparent
+				if(crc == 0x49A3E951) // transparent
 					i = 2;
-				else if (crc == 0x6F10C28D)
+				else if(crc == 0x6F10C28D)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p511"))
+			else if(!Com_Stricmp(name, "p511"))
 			{
-				if (crc == 0x0473291D)
+				if(crc == 0x0473291D)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p513"))
+			else if(!Com_Stricmp(name, "p513"))
 			{
-				if (crc == 0xB4D72159) // transparent
+				if(crc == 0xB4D72159) // transparent
 					i = 2;
-				else if (crc == 0xB53A7322 || crc == 0xBB78E75B)
+				else if(crc == 0xB53A7322 || crc == 0xBB78E75B)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p51b1"))
+			else if(!Com_Stricmp(name, "p51b1"))
 			{
-				if (crc == 0x4FF1C3D0)
+				if(crc == 0x4FF1C3D0)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "p51b3"))
+			else if(!Com_Stricmp(name, "p51b3"))
 			{
-				if (crc == 0x802ED5C)
+				if(crc == 0x802ED5C)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "pe21"))
+			else if(!Com_Stricmp(name, "pe21"))
 			{
-				if (crc == 0x0C96FF1A)
+				if(crc == 0x0C96FF1A)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "pe23"))
+			else if(!Com_Stricmp(name, "pe23"))
 			{
-				if (crc == 0x141D614E)
+				if(crc == 0x141D614E)
 					i = 0;
 			}
 			break;
 
 		case 's':
-			if (!Com_Stricmp(name, "sbd1"))
+			if(!Com_Stricmp(name, "sbd1"))
 			{
-				if (crc == 0xA83DFE94)
+				if(crc == 0xA83DFE94)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "sbd3"))
+			else if(!Com_Stricmp(name, "sbd3"))
 			{
-				if (crc == 0x6170E147)
+				if(crc == 0x6170E147)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "spit51"))
+			else if(!Com_Stricmp(name, "spit51"))
 			{
-				if (crc == 0x1B9713F4)
+				if(crc == 0x1B9713F4)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "spit53"))
+			else if(!Com_Stricmp(name, "spit53"))
 			{
-				if (crc == 0x0EF82BE0) // transparent
+				if(crc == 0x0EF82BE0) // transparent
 					i = 2;
-				else if (crc == 0x34806D57)
+				else if(crc == 0x34806D57)
 					i = 0;
 			}
 			break;
 
 		case 't':
-			if (!Com_Stricmp(name, "twr1"))
+			if(!Com_Stricmp(name, "twr1"))
 			{
-				if (crc == 0xB83412F5 || crc == 0xEE3637B1)
+				if(crc == 0xB83412F5 || crc == 0xEE3637B1)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "twr3"))
+			else if(!Com_Stricmp(name, "twr3"))
 			{
-				if (crc == 0xA6FB98F0 || crc == 0x16B08A32)
+				if(crc == 0xA6FB98F0 || crc == 0x16B08A32)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "temp3"))
+			else if(!Com_Stricmp(name, "temp3"))
 			{
-				if (crc == 0x91A50E84)
+				if(crc == 0x91A50E84)
 					i = 0;
 			}
-			if (!Com_Stricmp(name, "typh1"))
+			if(!Com_Stricmp(name, "typh1"))
 			{
-				if (crc == 0xFAB13550)
+				if(crc == 0xFAB13550)
 					i = 0;
 			}
-			if (!Com_Stricmp(name, "typh3"))
+			if(!Com_Stricmp(name, "typh3"))
 			{
-				if (crc == 0x84008B99 || crc == 0x162B9A77)
+				if(crc == 0x84008B99 || crc == 0x162B9A77)
 					i = 0;
 			}
 			break;
 
 		case 'y':
-			if (!Com_Stricmp(name, "yak11"))
+			if(!Com_Stricmp(name, "yak11"))
 			{
-				if (crc == 0x6B8D289C || crc == 0x7D4D1F42)
+				if(crc == 0x6B8D289C || crc == 0x7D4D1F42)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "yak13"))
+			else if(!Com_Stricmp(name, "yak13"))
 			{
-				if (crc == 0x78B56A33 || crc == 0xC5BAE4D5 || crc == 0x474F7F89)
+				if(crc == 0x78B56A33 || crc == 0xC5BAE4D5 || crc == 0x474F7F89)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "yak31"))
+			else if(!Com_Stricmp(name, "yak31"))
 			{
-				if (crc == 0xF22B15D8)
+				if(crc == 0xF22B15D8)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "yak33"))
+			else if(!Com_Stricmp(name, "yak33"))
 			{
-				if (crc == 0x8CC4F556)
+				if(crc == 0x8CC4F556)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "yak9d1"))
+			else if(!Com_Stricmp(name, "yak9d1"))
 			{
-				if (crc == 0x5CF8CEFE || crc == 0x8FAA4EB5)
+				if(crc == 0x5CF8CEFE || crc == 0x8FAA4EB5)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "yak9d3"))
+			else if(!Com_Stricmp(name, "yak9d3"))
 			{
-				if (crc == 0x3D5D12D5 || crc == 0x192B0769)
+				if(crc == 0x3D5D12D5 || crc == 0x192B0769)
 					i = 0;
 			}
 
-			else if (!Com_Stricmp(name, "yak9d3"))
+			else if(!Com_Stricmp(name, "yak9d3"))
 			{
-				if (crc == 0x340BCFFA) // transparent
+				if(crc == 0x340BCFFA) // transparent
 					i = 2;
-				else if (crc == 0x3D5D12D5)
+				else if(crc == 0x3D5D12D5)
 					i = 0;
 			}
 			break;
 
 		case 'z':
-			if (!Com_Stricmp(name, "zero1"))
+			if(!Com_Stricmp(name, "zero1"))
 			{
-				if (crc == 0xA187CC83)
+				if(crc == 0xA187CC83)
 					i = 0;
 			}
-			else if (!Com_Stricmp(name, "zero3"))
+			else if(!Com_Stricmp(name, "zero3"))
 			{
-				if (crc == 0x715E21BA) // transparent
+				if(crc == 0x715E21BA) // transparent
 					i = 2;
-				else if (crc == 0x969AA6B7 || crc == 0x3B6015DF)
+				else if(crc == 0x969AA6B7 || crc == 0x3B6015DF)
 					i = 0;
 			}
 			break;
@@ -10623,17 +10673,16 @@ void CheckCockpitCRC(char *path, u_int32_t crc, client_t *client)
 			PPrintf(client, RADIO_GREEN, "Cockpit is not in CRC list");
 	}
 
-	if (i)
+	if(i)
 	{
-		if (i == 2)
+		if(i == 2)
 		{
 			BPrintf(RADIO_BLUE, "%s used transparent cockpit and will be banned", client->longnick);
 			Cmd_Ban(client->longnick, 1, NULL);
 		}
 		else
 		{
-			PPrintf(client,
-			RADIO_BLUE, "Invalid Cockpit CRC (%s.VEW) please download correct file", name);
+			PPrintf(client, RADIO_BLUE, "Invalid Cockpit CRC (%s.VEW) please download correct file", name);
 			ForceEndFlight(TRUE, client);
 		}
 		Com_Printf(VERBOSE_WARNING, "Invalid Cockpit CRC: %X %s.VEW (%s)\n", crc, name, client->longnick);
@@ -10653,24 +10702,24 @@ void SendExecutablesCheck(u_int32_t exemisc, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	check = (checkexecutables_t *)buffer;
+	check = (checkexecutables_t *) buffer;
 
 	check->packetid = htons(Com_WBhton(0x1B00));
 	check->exemisc = htonl(exemisc);
-	if (exemisc == 1)
+	if(exemisc == 1)
 	{
 		check->filesize = htonl(EXEC_SIZE);
 		check->msgsize = strlen(EXEC_FILE);
 		memcpy(&(check->msg), EXEC_FILE, check->msgsize);
 	}
-	else if (exemisc == 2)
+	else if(exemisc == 2)
 	{
 		check->filesize = htonl(MISC_SIZE);
 		check->msgsize = strlen(MISC_FILE);
 		memcpy(&(check->msg), MISC_FILE, check->msgsize);
 	}
 
-	SendPacket(buffer, 15+check->msgsize, client);
+	SendPacket(buffer, 15 + check->msgsize, client);
 }
 
 /**
@@ -10683,7 +10732,7 @@ void SendFieldsCountries(client_t *client)
 {
 	u_int8_t i;
 
-	for (i = 0; i < fields->value; i++)
+	for(i = 0; i < fields->value; i++)
 	{
 		Cmd_Capt(i, arena->fields[i].country, client);
 	}
@@ -10699,9 +10748,9 @@ int8_t FirstFieldCountry(u_int8_t country)
 {
 	int8_t i;
 
-	for (i = 0; i < fields->value; i++)
+	for(i = 0; i < fields->value; i++)
 	{
-		if (arena->fields[i].country == country && !arena->fields[i].closed)
+		if(arena->fields[i].country == country && !arena->fields[i].closed)
 			return i;
 	}
 
@@ -10721,7 +10770,7 @@ void SendGunnerStatusChange(client_t *gunner, u_int16_t status, client_t *client
 
 	memset(buffer, 0, sizeof(buffer));
 
-	gunnerstatus = (gunnerstatus_t *)buffer;
+	gunnerstatus = (gunnerstatus_t *) buffer;
 	gunnerstatus->packetid = htons(Com_WBhton(0x0414));
 	gunnerstatus->shortnick = htonl(gunner->shortnick);
 	gunnerstatus->status = htons(status);
@@ -10744,9 +10793,9 @@ void SendAttachList(u_int8_t *packet, client_t *client)
 
 	memset(buffer, 0, sizeof(buffer));
 
-	pattach = (gunnerlist_t *)buffer;
+	pattach = (gunnerlist_t *) buffer;
 
-	if (packet)
+	if(packet)
 	{
 		gunner = (reqgunnerlist_t *) packet;
 
@@ -10754,12 +10803,12 @@ void SendAttachList(u_int8_t *packet, client_t *client)
 
 		client->gunnerview = dest;
 
-		if (!dest)
+		if(!dest)
 			return;
 
 		pattach->packetid = htons(Com_WBhton(0x0413));
 		pattach->unknown1 = gunner->unknown1;
-		if (debug->value)
+		if(debug->value)
 			PPrintf(client, RADIO_RED, "DEBUG: 0x0412: Ask for Unk nick list (0x%0X, 0x0X)", ntohs(gunner->unknown1), ntohl(gunner->nick));
 	}
 	else
@@ -10769,13 +10818,13 @@ void SendAttachList(u_int8_t *packet, client_t *client)
 		pattach->packetid = htons(Com_WBhton(0x0411));
 	}
 
-	for (i = 0; i < 14; i++)
+	for(i = 0; i < 14; i++)
 	{
-		if (dest->gunners[i] && dest->gunners[i]->longnick)
+		if(dest->gunners[i] && dest->gunners[i]->longnick)
 			pattach->gunners[i] = htonl(dest->gunners[i]->shortnick);
 	}
 
-	if (packet)
+	if(packet)
 		i = sizeof(buffer);
 	else
 		i = sizeof(buffer) - 2;
@@ -10795,7 +10844,7 @@ void PCurrentView(u_int8_t *buffer, client_t *client)
 
 	view = (currentview_t *) buffer;
 
-	if (client->shanghai || client->view)
+	if(client->shanghai || client->view)
 	{
 		view->packetid = htons(Com_WBhton(0x041B));
 		view->unknown2 = view->view;
@@ -10804,15 +10853,15 @@ void PCurrentView(u_int8_t *buffer, client_t *client)
 	else
 		return;
 
-	if (client->shanghai)
+	if(client->shanghai)
 	{
-		if (client->shanghai->attached == client)
+		if(client->shanghai->attached == client)
 			SendPacket(buffer, 6, client->shanghai);
 	}
 
-	if (client->view)
+	if(client->view)
 	{
-		if (client->view->attached == client)
+		if(client->view->attached == client)
 			SendPacket(buffer, 6, client->view);
 	}
 }
@@ -10828,7 +10877,7 @@ void PSquadLookup(u_int8_t *buffer, client_t *client)
 	char *nick;
 	squadlookup_t *lookup;
 
-	lookup = (squadlookup_t *)buffer;
+	lookup = (squadlookup_t *) buffer;
 
 	nick = wbnick2ascii(htonl(lookup->nick));
 
@@ -10852,30 +10901,33 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 	FILE *fp;
 	requestmedals_t *medals;
 	clientmedals_t *medals1;
-//	clientmedals2_t *medals2;
+	//	clientmedals2_t *medals2;
 	clientmedals3_t *medals3;
 
-	if (buffer)
+	if(buffer)
 	{
-		medals = (requestmedals_t *)buffer;
+		medals = (requestmedals_t *) buffer;
 		buddy = ntohl(medals->nick);
 
-		if ((pclient = FindSClient(buddy)))
+		if((pclient = FindSClient(buddy)))
 		{
 			playerid = pclient->id;
 			ranking = pclient->ranking;
 		}
 		else // not found online, must search in database
 		{
-			sprintf(my_query, "SELECT players.id, score_common.ranking FROM players INNER JOIN score_common ON players.id = score_common.player_id WHERE players.shortnick = '%u'", buddy);
+			sprintf(
+					my_query,
+					"SELECT players.id, score_common.ranking FROM players INNER JOIN score_common ON players.id = score_common.player_id WHERE players.shortnick = '%u'",
+					buddy);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+			if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 			{
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if (mysql_num_rows(my_result) > 0)
+					if(mysql_num_rows(my_result) > 0)
 					{
-						if ((my_row = mysql_fetch_row(my_result)))
+						if((my_row = mysql_fetch_row(my_result)))
 						{
 							playerid = Com_Atou(Com_MyRow("id"));
 							ranking = Com_Atou(Com_MyRow("ranking"));
@@ -10907,7 +10959,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 			}
 			else
 			{
-				if (mysql_errno(&my_sock))
+				if(mysql_errno(&my_sock))
 				{
 					Com_Printf(VERBOSE_WARNING, "PClientMedals(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
@@ -10923,48 +10975,47 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 
 	sprintf(my_query, "SELECT what, why, howmuch, UNIX_TIMESTAMP(date_time) as date_time FROM medals WHERE player_id = '%u'", playerid);
 
-	if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+	if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 	{
-		if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+		if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 		{
-			if ((num_rows = mysql_num_rows(my_result)) >= 0)
+			if((num_rows = mysql_num_rows(my_result)) >= 0)
 			{
 				offset = 3;
 
 				memset(bufmedals, 0, sizeof(bufmedals));
 
-				medals1 = (clientmedals_t *)bufmedals;
+				medals1 = (clientmedals_t *) bufmedals;
 
 				medals1->packetid = htons(Com_WBhton(0x040E));
 				medals1->amount = num_rows;
 
-				if (num_rows)
+				if(num_rows)
 				{
 					snprintf(filename, sizeof(filename), "./players/%s.medal.LOCK", client->longnick);
 
 					Sys_WaitForLock(filename);
 
-					if (Sys_LockFile(filename) < 0)
+					if(Sys_LockFile(filename) < 0)
 						return;
 
 					filename[strlen(filename) - 5] = '\0';
 
-					if (!(fp = fopen(filename, "wb")))
+					if(!(fp = fopen(filename, "wb")))
 					{
 						Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't open file \"%s\"\n", filename);
-						PPrintf(client,
-						RADIO_YELLOW, "PClientMedals(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
+						PPrintf(client, RADIO_YELLOW, "PClientMedals(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
 						Sys_UnlockFile(strcat(filename, ".LOCK"));
 						return;
 					}
 
-					for (i = 0; i < num_rows; i++)
+					for(i = 0; i < num_rows; i++)
 					{
-						if ((my_row = mysql_fetch_row(my_result)))
+						if((my_row = mysql_fetch_row(my_result)))
 						{
 							fprintf(fp, "[IMG]offln\\common\\med%s.tga 0 0 77 153[/IMG]\n", Com_MyRow("what"));
 
-							switch (Com_Atou(Com_MyRow("why")))
+							switch(Com_Atou(Com_MyRow("why")))
 							{
 								case 1:
 									fprintf(fp, "streak of %s kills\n", Com_MyRow("howmuch"));
@@ -10997,7 +11048,8 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 						}
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't Fetch Row(%u), error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+							Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't Fetch Row(%u), error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(
+									&my_sock));
 							break;
 						}
 					}
@@ -11008,7 +11060,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 					return;
 				}
 
-				medals3 = (clientmedals3_t *)(bufmedals+offset);
+				medals3 = (clientmedals3_t *) (bufmedals + offset);
 
 				medals3->unknown1 = htons(3);
 				medals3->msgsize = strlen(GetRanking(ranking));
@@ -11034,7 +11086,7 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 	}
 	else
 	{
-		if (mysql_errno(&my_sock))
+		if(mysql_errno(&my_sock))
 		{
 			Com_Printf(VERBOSE_WARNING, "PClientMedals(): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
@@ -11049,9 +11101,9 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 
 u_int16_t GunPos(u_int16_t pos, u_int8_t reverse)
 {
-	if (!reverse)
+	if(!reverse)
 	{
-		switch (pos)
+		switch(pos)
 		{
 			case 0: /* observer */
 				return 6;
@@ -11073,7 +11125,7 @@ u_int16_t GunPos(u_int16_t pos, u_int8_t reverse)
 	}
 	else
 	{
-		switch (pos)
+		switch(pos)
 		{
 			case 0:
 				return 6;
@@ -11108,10 +11160,11 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 
 	reqfly = (wb3requestfly_t *) buffer;
 
-	if (client->attr)
+	if(client->attr)
 	{
 		PPrintf(client, RADIO_GREEN, "field = %d, unk1 = %u, unk2 = %u", ntohl(reqfly->field), ntohl(reqfly->unk1), ntohl(reqfly->unk2));
-		PPrintf(client, RADIO_GREEN, "ord = %d, spawnpoint = %u, unk4 = %u, unk5 = %u", ntohl(reqfly->ord), ntohl(reqfly->spawnpoint), ntohl(reqfly->unk4), ntohl(reqfly->unk5));
+		PPrintf(client, RADIO_GREEN, "ord = %d, spawnpoint = %u, unk4 = %u, unk5 = %u", ntohl(reqfly->ord), ntohl(reqfly->spawnpoint), ntohl(reqfly->unk4),
+				ntohl(reqfly->unk5));
 	}
 
 	client->plane = ntohl(reqfly->plane);
@@ -11119,11 +11172,11 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 		client->field = ntohl(reqfly->field);
 	client->ord = ntohl(reqfly->ord);
 
-	if (!Cmd_Fly(0, client))
+	if(!Cmd_Fly(0, client))
 	{
-		if (client->shanghai) // start shanghai flight
+		if(client->shanghai) // start shanghai flight
 		{
-			if (client->shanghai->ready && !client->shanghai->inflight)
+			if(client->shanghai->ready && !client->shanghai->inflight)
 			{
 				client->shanghai->attached = client;
 				Com_Printf(VERBOSE_DEBUG, "Start Shanghai Fly\n");
@@ -11136,13 +11189,13 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 			}
 		}
 
-		if (HaveGunner(client->plane))
+		if(HaveGunner(client->plane))
 		{
-			for (i = 0; i < 7; i++) // start gunners flight
+			for(i = 0; i < 7; i++) // start gunners flight
 			{
-				if (client->gunners[i])
+				if(client->gunners[i])
 				{
-					if (client->gunners[i]->ready && !client->gunners[i]->inflight)
+					if(client->gunners[i]->ready && !client->gunners[i]->inflight)
 					{
 						client->gunners[i]->attached = client;
 						Cmd_Fly(GunPos(i, 1), client->gunners[i]);
@@ -11184,41 +11237,41 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 
 	building = GetBuilding(ntohl(reqack->ackid));
 
-	if (building->status)
+	if(building->status)
 	{
 		PPrintf(client, RADIO_YELLOW, "This ack is destroyed");
 		return;
 	}
 
-	if (client->attr & FLAG_ADMIN)
+	if(client->attr & FLAG_ADMIN)
 	{
 		rules = (FLAG_AIRSHOWSMOKE | FLAG_ENEMYNAMES | FLAG_ENEMYPLANES);
 	}
 	else
 	{
-		if (midairs->value)
+		if(midairs->value)
 			rules |= FLAG_MIDAIRS;
-		if (blackout->value)
+		if(blackout->value)
 			rules |= FLAG_BLACKOUT;
-		if (airshowsmoke->value)
+		if(airshowsmoke->value)
 			rules |= FLAG_AIRSHOWSMOKE;
-		if (client->easymode)
+		if(client->easymode)
 			rules |= FLAG_EASYMODE;
-		if (enemynames->value)
+		if(enemynames->value)
 			rules |= FLAG_ENEMYNAMES;
-		if (enemyplanes->value)
+		if(enemyplanes->value)
 			rules |= FLAG_ENEMYPLANES;
-		if (enableottos->value)
+		if(enableottos->value)
 			rules |= FLAG_ENABLEOTTOS;
 	}
 
 	startack->packetid = htons(Com_WBhton(0x041F));
 	startack->country = reqack->country;
 	startack->field = htonl(ntohl(reqack->field) - 1);
-	startack->bulletradius1 = htons((u_int16_t)(bulletradius->value * 10));
-	startack->bulletradius2 = htons((u_int16_t)(bulletradius->value * 10));
-	startack->gunrad = htons((u_int16_t)(gunrad->value * 10));
-	startack->bulletradius3 = htons((u_int16_t)(bulletradius->value * 10));
+	startack->bulletradius1 = htons((u_int16_t) (bulletradius->value * 10));
+	startack->bulletradius2 = htons((u_int16_t) (bulletradius->value * 10));
+	startack->gunrad = htons((u_int16_t) (gunrad->value * 10));
+	startack->bulletradius3 = htons((u_int16_t) (bulletradius->value * 10));
 	startack->rules = htonl(rules);
 	startack->plane = htons(13);//ntohl(reqack->plane));
 	startack->numofarrays = 1;
@@ -11246,7 +11299,7 @@ void WB3RequestMannedAck(u_int8_t *buffer, client_t *client)
 	SetPlaneDamage(client->plane, client);
 	UpdateIngameClients(0);
 	SendOttoParams(client);
-	if (!wb3->value)
+	if(!wb3->value)
 		SendExecutablesCheck(2, client);
 }
 
@@ -11268,9 +11321,9 @@ void PHostVar(u_int8_t *buffer, client_t *client)
 
 	PPrintf(client, RADIO_LIGHTYELLOW, "%s", message);
 
-	for (i = 0; i < 20; i++)
+	for(i = 0; i < 20; i++)
 	{
-		if (message[i] == ':')
+		if(message[i] == ':')
 		{
 			message[i] = '\0';
 			break;
@@ -11280,20 +11333,20 @@ void PHostVar(u_int8_t *buffer, client_t *client)
 	buffer[0] = 0x14;
 	buffer[1] = 0x13;
 	buffer[2] = strlen(message);
-	strcpy((char *)(buffer+3), message);
-	if (!strcmp(message, "TOTENABLED"))
+	strcpy((char *) (buffer + 3), message);
+	if(!strcmp(message, "TOTENABLED"))
 	{
-		buffer[buffer[2]+3] = strlen(dpitch->string);
-		strcpy((char *)(buffer+(buffer[2]+4)), dpitch->string);
+		buffer[buffer[2] + 3] = strlen(dpitch->string);
+		strcpy((char *) (buffer + (buffer[2] + 4)), dpitch->string);
 	}
 	else
 	{
-		buffer[buffer[2]+3] = strlen(droll->string);
-		strcpy((char *)(buffer+(buffer[2]+4)), droll->string);
+		buffer[buffer[2] + 3] = strlen(droll->string);
+		strcpy((char *) (buffer + (buffer[2] + 4)), droll->string);
 	}
 
-	Com_Printfhex(buffer, buffer[2]+buffer[buffer[2]+3]+4);
-	SendPacket(buffer, buffer[2]+buffer[buffer[2]+3]+4, client);
+	Com_Printfhex(buffer, buffer[2] + buffer[buffer[2] + 3] + 4);
+	SendPacket(buffer, buffer[2] + buffer[buffer[2] + 3] + 4, client);
 }
 
 /**
@@ -11313,7 +11366,6 @@ void THAIWatchDog(u_int8_t *buffer, client_t *client)
 	}
 }
 
-
 /**
  PRequestGunner
 
@@ -11331,22 +11383,22 @@ void PRequestGunner(u_int8_t *buffer, client_t *client)
 	pos = ntohs(request->pos);
 	dest = FindSClient(ntohl(request->nick));
 
-	if (!dest)
+	if(!dest)
 	{
 		PPrintf(client, RADIO_YELLOW, "Player not found");
 		return;
 	}
 
-	if (dest == client)
+	if(dest == client)
 	{
 		PPrintf(client, RADIO_YELLOW, "You can't attach to yourself");
 		return;
 	}
 
-	for (i = 0; i < 14; i++)
+	for(i = 0; i < 14; i++)
 	{
-		if (dest->gunners[i])
-			if (dest->gunners[i]->shortnick == client->shortnick)
+		if(dest->gunners[i])
+			if(dest->gunners[i]->shortnick == client->shortnick)
 			{
 				PPrintf(client, RADIO_YELLOW, "You're already in %s gunner's list", dest->longnick);
 				return;
@@ -11355,14 +11407,14 @@ void PRequestGunner(u_int8_t *buffer, client_t *client)
 
 	pos = GunPos(pos, 0);
 
-	if (dest->gunners[pos + 7] || dest->gunners[pos])
+	if(dest->gunners[pos + 7] || dest->gunners[pos])
 	{
 		PPrintf(client, RADIO_YELLOW, "This position is unavailable");
 	}
 	else
 	{
 		dest->gunners[pos + 7] = client;
-		if (debug->value)
+		if(debug->value)
 			PPrintf(client, RADIO_RED, "DEBUG: 0x1D05: Request %0X, pos %0X", ntohl(request->nick), ntohs(request->pos));
 		PPrintf(client, RADIO_YELLOW, "Your request has been sent");
 		PPrintf(dest, RADIO_YELLOW, "%s requested a gunner position", client->longnick);
@@ -11386,11 +11438,11 @@ void PAcceptGunner(u_int8_t *buffer, client_t *client)
 
 	nick = ntohl(accept->nick);
 
-	for (i = 7; i < 14; i++)
+	for(i = 7; i < 14; i++)
 	{
-		if (client->gunners[i])
+		if(client->gunners[i])
 		{
-			if (client->gunners[i]->shortnick == nick)
+			if(client->gunners[i]->shortnick == nick)
 			{
 				client->gunners[i - 7] = client->gunners[i];
 				client->gunners[i] = 0;
@@ -11399,16 +11451,16 @@ void PAcceptGunner(u_int8_t *buffer, client_t *client)
 		}
 	}
 
-	if (debug->value)
+	if(debug->value)
 		PPrintf(client, RADIO_RED, "DEBUG: 0x1D06: Accept %0X, unk1 %0X", ntohl(accept->nick), ntohs(accept->unknown1));
 
-	for (i = 7; i < 14; i++)
+	for(i = 7; i < 14; i++)
 	{
-		if (client->gunners[i])
+		if(client->gunners[i])
 			break;
 	}
 
-	if (i == 14) // no gunners found in request list
+	if(i == 14) // no gunners found in request list
 	{
 		gunner = (reqgunnerlist_t *) buffer;
 		gunner->unknown1 = htons(0x0006);
@@ -11431,23 +11483,23 @@ void PSwitchOttoPos(u_int8_t *buffer, client_t *client)
 
 	otto = (switchottopos_t *) buffer;
 
-	if (!client->attached->drone && client->attached->inflight)
+	if(!client->attached->drone && client->attached->inflight)
 	{
-		if ((pos = htons(otto->pos)) < 0)
+		if((pos = htons(otto->pos)) < 0)
 			return;
 
-		if ((client->attached->view != client) && (client->attached->shanghai != client))
+		if((client->attached->view != client) && (client->attached->shanghai != client))
 		{
-			if (client->attached->gunners[GunPos(pos, 0)])
+			if(client->attached->gunners[GunPos(pos, 0)])
 			{
 				PPrintf(client, RADIO_YELLOW, "This position is occupied");
 				return;
 			}
 			else
 			{
-				for (i = 0; i < 7; i++)
+				for(i = 0; i < 7; i++)
 				{
-					if (client->attached->gunners[i] == client)
+					if(client->attached->gunners[i] == client)
 						client->attached->gunners[i] = NULL;
 				}
 
@@ -11455,7 +11507,7 @@ void PSwitchOttoPos(u_int8_t *buffer, client_t *client)
 				Cmd_Fly(pos, client);
 			}
 		}
-		else if (client->attached->view == client)
+		else if(client->attached->view == client)
 		{
 			Cmd_Fly(pos, client);
 		}
@@ -11473,18 +11525,18 @@ void PSquadInfo(char *nick, client_t *client)
 	u_int8_t i, j;
 	int16_t num_rows;
 	u_int32_t squadowner = 0;
-	client_t *cnick= NULL;
+	client_t *cnick = NULL;
 	u_int8_t buffer[512];
 	squadmembers1_t *squad1;
 	squadmembers2_t *squad2;
 
-	if (!nick) // request info about own squad
+	if(!nick) // request info about own squad
 	{
 		squadowner = client->squadron;
 	}
 	else
 	{
-		if ((cnick = FindLClient(nick))) // try to find player in game
+		if((cnick = FindLClient(nick))) // try to find player in game
 		{
 			squadowner = cnick->squadron;
 		}
@@ -11492,18 +11544,18 @@ void PSquadInfo(char *nick, client_t *client)
 		{
 			sprintf(my_query, "SELECT squad_owner FROM players WHERE longnick = '%s'", nick);
 
-			if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+			if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 			{
-				if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+				if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 				{
-					if ((my_row = mysql_fetch_row(my_result)))
+					if((my_row = mysql_fetch_row(my_result)))
 					{
 						squadowner = Com_Atou(Com_MyRow("squad_owner"));
 						client->lastsql = 0;
 					}
 					else
 					{
-						if (!mysql_errno(&my_sock))
+						if(!mysql_errno(&my_sock))
 						{
 							PPrintf(client, RADIO_LIGHTYELLOW, "Player %s not found", nick);
 							nick = NULL;
@@ -11518,7 +11570,7 @@ void PSquadInfo(char *nick, client_t *client)
 					my_result = NULL;
 					my_row = NULL;
 
-					if (!nick)
+					if(!nick)
 						return;
 				}
 				else
@@ -11528,7 +11580,7 @@ void PSquadInfo(char *nick, client_t *client)
 			}
 			else
 			{
-				if (mysql_errno(&my_sock))
+				if(mysql_errno(&my_sock))
 				{
 					Com_Printf(VERBOSE_WARNING, "PSquadInfo(find): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 				}
@@ -11536,16 +11588,15 @@ void PSquadInfo(char *nick, client_t *client)
 					return; // SQL Flood
 			}
 
-			if (mysql_errno(&my_sock))
+			if(mysql_errno(&my_sock))
 			{
-				PPrintf(client,
-				RADIO_YELLOW, "PSquadInfo(find): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
+				PPrintf(client, RADIO_YELLOW, "PSquadInfo(find): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 				return;
 			}
 		}
 	}
 
-	if (!squadowner)
+	if(!squadowner)
 	{
 		PPrintf(client, RADIO_YELLOW, "%s is not in any squadron", nick ? nick : client->longnick);
 		return;
@@ -11553,41 +11604,42 @@ void PSquadInfo(char *nick, client_t *client)
 
 	sprintf(my_query, "SELECT longnick, squad_flag FROM players WHERE id = '%u'", squadowner); // find squadron leader info
 
-	if (!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
+	if(!Com_MySQL_Query(client, &my_sock, my_query)) // query succeeded
 	{
-		if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+		if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 		{
-			if ((my_row = mysql_fetch_row(my_result)))
+			if((my_row = mysql_fetch_row(my_result)))
 			{
 				memset(buffer, 0, sizeof(buffer));
 
-				squad2 = (squadmembers2_t *) (buffer+5);
+				squad2 = (squadmembers2_t *) (buffer + 5);
 				squad2->nick = htonl(ascii2wbnick(Com_MyRow("longnick"), 0));
 				squad2->attr = htonl(Com_Atou(Com_MyRow("squad_flag")));
 
-				sprintf(my_query, "SELECT longnick, squad_flag FROM players WHERE squad_owner = '%u' AND id != '%u' ORDER BY longnick LIMIT 35", squadowner, squadowner); // find other members than leader
+				sprintf(my_query, "SELECT longnick, squad_flag FROM players WHERE squad_owner = '%u' AND id != '%u' ORDER BY longnick LIMIT 35", squadowner,
+						squadowner); // find other members than leader
 
 				mysql_free_result(my_result);
 				my_result = NULL;
 				my_row = NULL;
 
-				if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+				if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 				{
-					if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+					if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 					{
 						squad1 = (squadmembers1_t *) buffer;
 
 						squad1->packetid = htons(Com_WBhton(0x0409));
 
-						if ((num_rows = mysql_num_rows(my_result)) > 0)
+						if((num_rows = mysql_num_rows(my_result)) > 0)
 						{
 							squad1->nicks = htons(num_rows + 1);
 
-							for (i = 0; i < num_rows; i++)
+							for(i = 0; i < num_rows; i++)
 							{
-								if ((my_row = mysql_fetch_row(my_result)))
+								if((my_row = mysql_fetch_row(my_result)))
 								{
-									squad2 = (squadmembers2_t *) (buffer+13+(8 *i));
+									squad2 = (squadmembers2_t *) (buffer + 13 + (8 * i));
 
 									squad2->nick = htonl(ascii2wbnick(Com_MyRow("longnick"), 0));
 									squad2->attr = htonl(Com_Atou(Com_MyRow("squad_flag")));
@@ -11596,7 +11648,8 @@ void PSquadInfo(char *nick, client_t *client)
 								{
 									mysql_free_result(my_result);
 									my_result = NULL;
-									Com_Printf(VERBOSE_WARNING, "PSquadInfo(members): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock), mysql_error(&my_sock));
+									Com_Printf(VERBOSE_WARNING, "PSquadInfo(members): Couldn't Fetch Row %d, error %d: %s\n", i, mysql_errno(&my_sock),
+											mysql_error(&my_sock));
 									break;
 								}
 							}
@@ -11613,37 +11666,38 @@ void PSquadInfo(char *nick, client_t *client)
 
 						sprintf(my_query, "SELECT name, motto FROM squads WHERE owner = '%u'", squadowner);
 
-						if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+						if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 						{
-							if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+							if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 							{
-								if ((my_row = mysql_fetch_row(my_result)))
+								if((my_row = mysql_fetch_row(my_result)))
 								{
 									j = i = 0;
 
-									if (Com_MyRow("name"))
+									if(Com_MyRow("name"))
 									{
-										buffer[13+(8*num_rows)] = i = strlen(Com_MyRow("name"));
-										memcpy(&(buffer[14+(8*num_rows)]), Com_MyRow("name"), i);
+										buffer[13 + (8 * num_rows)] = i = strlen(Com_MyRow("name"));
+										memcpy(&(buffer[14 + (8 * num_rows)]), Com_MyRow("name"), i);
 									}
-									if (Com_MyRow("motto"))
+									if(Com_MyRow("motto"))
 									{
-										buffer[14+(8*num_rows) + i] = j = strlen(Com_MyRow("motto"));
-										memcpy(&(buffer[15+(8*num_rows) + i]), Com_MyRow("motto"), j);
+										buffer[14 + (8 * num_rows) + i] = j = strlen(Com_MyRow("motto"));
+										memcpy(&(buffer[15 + (8 * num_rows) + i]), Com_MyRow("motto"), j);
 									}
 
-									SendPacket(buffer, 15 + i + j + (8*num_rows), client);
+									SendPacket(buffer, 15 + i + j + (8 * num_rows), client);
 								}
 								else
 								{
-									if (!mysql_errno(&my_sock))
+									if(!mysql_errno(&my_sock))
 									{
 										PPrintf(client, RADIO_LIGHTYELLOW, "Squadron info not found, contact admin");
 										Com_Printf(VERBOSE_ATTENTION, "PSquadInfo(name): Squadron info not found, owner = %u", squadowner);
 									}
 									else
 									{
-										Com_Printf(VERBOSE_WARNING, "PSquadInfo(name): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+										Com_Printf(VERBOSE_WARNING, "PSquadInfo(name): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+												&my_sock));
 									}
 								}
 
@@ -11673,7 +11727,7 @@ void PSquadInfo(char *nick, client_t *client)
 			}
 			else
 			{
-				if (!mysql_errno(&my_sock))
+				if(!mysql_errno(&my_sock))
 				{
 					PPrintf(client, RADIO_LIGHTYELLOW, "Squadron leader not found, contact admin");
 				}
@@ -11694,7 +11748,7 @@ void PSquadInfo(char *nick, client_t *client)
 	}
 	else
 	{
-		if (mysql_errno(&my_sock))
+		if(mysql_errno(&my_sock))
 		{
 			Com_Printf(VERBOSE_WARNING, "PSquadInfo(owner): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 		}
@@ -11702,12 +11756,11 @@ void PSquadInfo(char *nick, client_t *client)
 			return;
 	}
 
-	if (mysql_errno(&my_sock))
+	if(mysql_errno(&my_sock))
 	{
 		PPrintf(client, RADIO_YELLOW, "PSquadInfo(): SQL Error (%d), please contact admin", mysql_errno(&my_sock));
 	}
 }
-
 
 /**
  CalcDamage
@@ -11719,9 +11772,9 @@ double CalcDamage(u_int32_t mass, u_int16_t vel)
 {
 	double energy, speed;
 
-	speed = (double)vel * 0.3048;
+	speed = (double) vel * 0.3048;
 
-	energy = (double) mass/1000 * Com_Pow(speed, 2) * lethality->value / 2;
+	energy = (double) mass / 1000 * Com_Pow(speed, 2) * lethality->value / 2;
 
 	return energy;
 }
@@ -11738,14 +11791,14 @@ void Kamikase(client_t *client)
 	int32_t destx, desty;
 
 	// don't allow TK clients to make kamikase attacks
-	if (client->tkstatus)
+	if(client->tkstatus)
 		return;
 
-	if (client->cancollide)
+	if(client->cancollide)
 	{
 		i = client->posalt[0] + (client->speedxyz[2][0] / 2) - GetHeightAt(client->posxy[0][0], client->posxy[1][0]);
 
-		if (i < 100) // supposed to made a kamikase
+		if(i < 100) // supposed to made a kamikase
 		{
 			PPrintf(client, RADIO_YELLOW, "You made a Kamikase hit!");
 			destx = client->posxy[0][0] + (client->speedxyz[0][0] / 2);
@@ -11761,67 +11814,67 @@ void Kamikase(client_t *client)
  Sink or Raise boats
  */
 /** WB2 CV
-void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
-{
-	sinkboat_t *sink;
-	u_int16_t i;
-	u_int8_t boat;
-	u_int8_t buffer[6];
+ void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
+ {
+ sinkboat_t *sink;
+ u_int16_t i;
+ u_int8_t boat;
+ u_int8_t buffer[6];
 
-	for (i = 0, boat = 0; i < MAX_BUILDINGS; i++)
-	{
-		if (!arena->fields[building->field - 1].buildings[i].field)
-		{
-			break;
-		}
-		else if ((arena->fields[building->field - 1].buildings[i].type >= BUILD_CV) && (arena->fields[building->field - 1].buildings[i].type <= BUILD_SUBMARINE))
-		{
-			if (building->id == arena->fields[building->field - 1].buildings[i].id)
-				break;
-			else
-				boat++;
-		}
-	}
+ for (i = 0, boat = 0; i < MAX_BUILDINGS; i++)
+ {
+ if (!arena->fields[building->field - 1].buildings[i].field)
+ {
+ break;
+ }
+ else if ((arena->fields[building->field - 1].buildings[i].type >= BUILD_CV) && (arena->fields[building->field - 1].buildings[i].type <= BUILD_SUBMARINE))
+ {
+ if (building->id == arena->fields[building->field - 1].buildings[i].id)
+ break;
+ else
+ boat++;
+ }
+ }
 
-	memset(buffer, 0, sizeof(buffer));
+ memset(buffer, 0, sizeof(buffer));
 
-	sink = (sinkboat_t *) buffer;
+ sink = (sinkboat_t *) buffer;
 
-	if (raise)
-	{
-		sink->packetid = htons(Com_WBhton(0x0305));
-	}
-	else
-	{
-		sink->packetid = htons(Com_WBhton(0x0304));
-	}
-	sink->task = htons(arena->fields[building->field - 1].cv->id);
-	sink->boat = htons(boat);
+ if (raise)
+ {
+ sink->packetid = htons(Com_WBhton(0x0305));
+ }
+ else
+ {
+ sink->packetid = htons(Com_WBhton(0x0304));
+ }
+ sink->task = htons(arena->fields[building->field - 1].cv->id);
+ sink->boat = htons(boat);
 
-	if (client)
-		SendPacket(buffer, sizeof(buffer), client);
-	else
-	{
-		memset(arena->thaisent, 0, sizeof(arena->thaisent));
+ if (client)
+ SendPacket(buffer, sizeof(buffer), client);
+ else
+ {
+ memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-		for (i = 0; i < maxentities->value; i++)
-		{
-			if (clients[i].inuse && !clients[i].drone && clients[i].ready)
-			{
-				if(clients[i].thai) // SinkBoat
-				{
-					if(arena->thaisent[clients[i].thai].b)
-						continue;
-					else
-						arena->thaisent[clients[i].thai].b = 1;
-				}
+ for (i = 0; i < maxentities->value; i++)
+ {
+ if (clients[i].inuse && !clients[i].drone && clients[i].ready)
+ {
+ if(clients[i].thai) // SinkBoat
+ {
+ if(arena->thaisent[clients[i].thai].b)
+ continue;
+ else
+ arena->thaisent[clients[i].thai].b = 1;
+ }
 
-				SendPacket(buffer, sizeof(buffer), &clients[i]);
-			}
-		}
-	}
-}
-*/
+ SendPacket(buffer, sizeof(buffer), &clients[i]);
+ }
+ }
+ }
+ }
+ */
 
 /**
  GetFactoryReupTime
@@ -11832,16 +11885,16 @@ void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
 u_int32_t GetFactoryReupTime(u_int8_t country)
 {
 	u_int16_t players, i;
-	static u_int32_t delay= MAX_UINT32;
+	static u_int32_t delay = MAX_UINT32;
 
-	if (!(arena->frame % 1000))
+	if(!(arena->frame % 1000))
 	{
-		for (players = i = 0; i < maxentities->value; i++)
+		for(players = i = 0; i < maxentities->value; i++)
 		{
-			if (clients[i].attr == 1 && hideadmin->value)
+			if(clients[i].attr == 1 && hideadmin->value)
 				continue;
 
-			if (clients[i].inuse && !clients[i].drone && clients[i].country != country)
+			if(clients[i].inuse && !clients[i].drone && clients[i].country != country)
 			{
 				players++; // TODO: FIXME: use this value to some thing!!!
 			}
@@ -11869,27 +11922,27 @@ u_int32_t GetRPSLag(u_int8_t country)
 	double industrylack;
 	double playerspart;
 
-	if (wb3->value)
+	if(wb3->value)
 		return 0;
 
-	for (players = i = 0; i < maxentities->value; i++)
+	for(players = i = 0; i < maxentities->value; i++)
 	{
-		if (clients[i].attr == 1 && hideadmin->value)
+		if(clients[i].attr == 1 && hideadmin->value)
 			continue;
 
-		if (clients[i].inuse && !clients[i].drone && clients[i].country == country)
+		if(clients[i].inuse && !clients[i].drone && clients[i].country == country)
 		{
 			players++;
 		}
 	}
 
-	playerspart = (double)players / (arena->numplayers ? arena->numplayers : 1);
+	playerspart = (double) players / (arena->numplayers ? arena->numplayers : 1);
 
-	industrylack = 1 - (double)factorybuildingsup[country - 1] / (double)(factorybuildings[country - 1] ? factorybuildings[country - 1] : 1);
+	industrylack = 1 - (double) factorybuildingsup[country - 1] / (double) (factorybuildings[country - 1] ? factorybuildings[country - 1] : 1);
 
 	RPScoeff = industrylack * playerspart;
 
-	RPSlag = (double)RPScoeff * 365 * 2;
+	RPSlag = (double) RPScoeff * 365 * 2;
 
 	return RPSlag > 365 ? 365 : RPSlag;
 }

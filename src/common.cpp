@@ -35,7 +35,7 @@ void *Z_Malloc(u_int32_t size)
 	void *z;
 
 	z = malloc(size);
-	if (!z)
+	if(!z)
 	{
 		Com_Printf(VERBOSE_ERROR, "Z_Malloc()\n");
 		ExitServer(1);
@@ -57,17 +57,17 @@ u_int32_t ascii2wbnick(const char *playernick, u_int8_t attr)
 	u_int8_t buffer[7];
 	u_int8_t n;
 
-	if (!playernick)
+	if(!playernick)
 		return 0;
 
-	for (n=0; n<6; n++)
+	for(n = 0; n < 6; n++)
 	{
-		if (isalpha(playernick[n]))
+		if(isalpha(playernick[n]))
 		{
 			buffer[n] = tolower(playernick[n]) - 'a';
 		}
 		else
-			switch (playernick[n])
+			switch(playernick[n])
 			{
 				case '-':
 					buffer[n] = 26;
@@ -125,14 +125,14 @@ char *wbnick2ascii(u_int32_t shortnick)
 	playernick[4] = wbnick.longnick.e;
 	playernick[5] = wbnick.longnick.f;
 
-	for (n=0; n<6; n++)
+	for(n = 0; n < 6; n++)
 	{
-		if (playernick[n]<26)
+		if(playernick[n] < 26)
 		{
 			playernick[n] += wbnick.longnick.attr & 1 ? 'A' : 'a'; // & 1 ou == 1??
 		}
 		else
-			switch (playernick[n])
+			switch(playernick[n])
 			{
 				case 26:
 					playernick[n] = '-';
@@ -157,7 +157,7 @@ char *wbnick2ascii(u_int32_t shortnick)
 					break;
 			}
 	}
-	playernick[6]='\0';
+	playernick[6] = '\0';
 
 	return playernick;
 }
@@ -172,24 +172,24 @@ u_int8_t *wbcrypt(u_int8_t *buffer, u_int32_t key, u_int16_t size, u_int8_t oldc
 {
 	u_int16_t n, i;
 
-	if (!oldcrypt)
+	if(!oldcrypt)
 	{
 		// key = (key >> (size%3)) & 0xFF; // WB 2007
 		key |= (size << 2);
 	}
 	else
 	{
-		key = (0xEA + (key >> (size%8))) & 0xFF;
+		key = (0xEA + (key >> (size % 8))) & 0xFF;
 	}
 
-	for (n=0/*3*/, i = 0; n<size/*+3*/; n++) // n = 0 if removed 3 first bytes form packet
+	for(n = 0/*3*/, i = 0; n < size/*+3*/; n++) // n = 0 if removed 3 first bytes form packet
 	{
-		if (!oldcrypt)
+		if(!oldcrypt)
 		{
 			//  buffer[n] ^= key; // wb2007
 			buffer[n] ^= (key >> i++);
 
-			if (!(key >> i))
+			if(!(key >> i))
 				i = 0;
 		}
 		else
@@ -211,16 +211,16 @@ void memncat(u_int8_t **dest, u_int8_t *orig, u_int32_t destsize, u_int32_t orig
 	u_int32_t n;
 	u_int8_t *buffer;
 
-	buffer = (u_int8_t *)Z_Malloc(sizeof(u_int8_t) * destsize+origsize);
+	buffer = (u_int8_t *) Z_Malloc(sizeof(u_int8_t) * destsize + origsize);
 
-	for (n=0; n<destsize; n++)
+	for(n = 0; n < destsize; n++)
 	{
-		*(buffer+n) = *(*dest+n);
+		*(buffer + n) = *(*dest + n);
 	}
 
-	for (n=0; n<origsize; n++)
+	for(n = 0; n < origsize; n++)
 	{
-		*(buffer+destsize+n) = *(orig+n);
+		*(buffer + destsize + n) = *(orig + n);
 	}
 	free(*dest);
 
@@ -235,14 +235,12 @@ void memncat(u_int8_t **dest, u_int8_t *orig, u_int32_t destsize, u_int32_t orig
 
 char *asc2time(const struct tm *timeptr)
 {
-	static const char wday_name[7][4] =
-	{ "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+	static const char wday_name[7][4] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
 
-	static const char mon_name[12][4] =
-	{ "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+	static const char mon_name[12][4] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 	static char result[26];
-	snprintf(result, sizeof(result), "%.3s %.3s %02d %.2d:%.2d:%.2d %d", wday_name[timeptr->tm_wday], mon_name[timeptr->tm_mon], timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min, timeptr->tm_sec,
-			1900 + timeptr->tm_year);
+	snprintf(result, sizeof(result), "%.3s %.3s %02d %.2d:%.2d:%.2d %d", wday_name[timeptr->tm_wday], mon_name[timeptr->tm_mon], timeptr->tm_mday,
+			timeptr->tm_hour, timeptr->tm_min, timeptr->tm_sec, 1900 + timeptr->tm_year);
 	return result;
 }
 
@@ -256,7 +254,8 @@ char *sqltime(const struct tm *timeptr)
 {
 	static char result[26];
 
-	snprintf(result, sizeof(result), "%d-%.2d-%.2d %.2d:%.2d:%.2d", 1900 + timeptr->tm_year, 1 + timeptr->tm_mon, timeptr->tm_mday, timeptr->tm_hour, timeptr->tm_min, timeptr->tm_sec);
+	snprintf(result, sizeof(result), "%d-%.2d-%.2d %.2d:%.2d:%.2d", 1900 + timeptr->tm_year, 1 + timeptr->tm_mon, timeptr->tm_mday, timeptr->tm_hour,
+			timeptr->tm_min, timeptr->tm_sec);
 
 	return result;
 }
@@ -293,7 +292,7 @@ void Com_Close(int *fd)
 #else
 	i = close(*fd);
 #endif
-	if (!i) // set socket to zero if sucessfully closed
+	if(!i) // set socket to zero if sucessfully closed
 		*fd = 0;
 }
 
@@ -313,7 +312,7 @@ int Com_Recv(int s, u_int8_t *buf, int len)
 		return -1;
 	}
 
-	if ((n=recv(s, buf, len, 0)) ==
+	if((n = recv(s, buf, len, 0)) ==
 #ifdef _WIN32
 			SOCKET_ERROR
 #else
@@ -326,7 +325,7 @@ int Com_Recv(int s, u_int8_t *buf, int len)
 		if (n != WSAEWOULDBLOCK)
 #else
 		n = errno;
-		if (n != EWOULDBLOCK)
+		if(n != EWOULDBLOCK)
 #endif
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_Recv() socket %d error\n", s);
@@ -338,13 +337,13 @@ int Com_Recv(int s, u_int8_t *buf, int len)
 	}
 	else
 	{
-		if (n)
+		if(n)
 		{
 #ifdef DEBUGLOGIN
 			Com_Printf(VERBOSE_DEBUG, "<<--");
 			Com_Printfhex(buf, n);
 #endif
-			if (server_speeds->value)
+			if(server_speeds->value)
 				arena->recv += n;
 			return n;
 		}
@@ -367,12 +366,12 @@ double Com_Pow(double x, u_int32_t y)
 	u_int32_t i;
 	double z;
 
-	if (!y)
+	if(!y)
 		return 1;
 
 	z = x;
 
-	for (i = 1; i < y; i++)
+	for(i = 1; i < y; i++)
 	{
 		z *= x;
 	}
@@ -429,29 +428,29 @@ void Com_PrintLogBuffer(client_t * client)
 
 	printf("( %u - ", client->key);
 
-	if (logfile_active->value)
+	if(logfile_active->value)
 	{
-		if (!logfile[0])
+		if(!logfile[0])
 		{
 			logfile[0] = fopen(FILE_CONSOLE, "a+");
 		}
 
-		if (logfile[0])
+		if(logfile[0])
 		{
 			fprintf(logfile[0], "( %u - ", client->key);
 		}
 	}
 
-	for (offset = client->logbuf_start; offset != client->logbuf_end; offset++)
+	for(offset = client->logbuf_start; offset != client->logbuf_end; offset++)
 	{
 		if(offset == MAX_LOGBUFFER)
 			offset = 0;
 
 		printf("%02X ", client->logbuffer[offset]);
 
-		if (logfile_active->value)
+		if(logfile_active->value)
 		{
-			if (logfile[0])
+			if(logfile[0])
 			{
 				fprintf(logfile[0], "%02X ", client->logbuffer[offset]);
 			}
@@ -460,9 +459,9 @@ void Com_PrintLogBuffer(client_t * client)
 	printf(")\n");
 	fflush(stdout);
 
-	if (logfile_active->value)
+	if(logfile_active->value)
 	{
-		if (logfile[0])
+		if(logfile[0])
 		{
 			fprintf(logfile[0], ")\n");
 			fflush(logfile[0]);
@@ -482,7 +481,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 	//u_int8_t i;
 	u_int8_t *tbuf;
 
-	if (!client->socket) // to avoid SIGPIPE
+	if(!client->socket) // to avoid SIGPIPE
 	{
 		Com_Printf(VERBOSE_WARNING, "Com_Send() tried to send data to socket zero\n");
 		return -1;
@@ -500,9 +499,9 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 		len = client->buf_offset;
 	}
 
-	if ((n = send(client->socket, buf, len, 0)) == -1)
+	if((n = send(client->socket, buf, len, 0)) == -1)
 	{
-		if (errno != EWOULDBLOCK)
+		if(errno != EWOULDBLOCK)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_Send() socket %d error\n", client->socket);
 			ConnError(errno);
@@ -515,7 +514,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 				// socket blocked, copy data to buffer
 				if((client->buf_offset + tlen) < MAX_SENDBUFFER)
 				{
-					memcpy(client->buffer+client->buf_offset, tbuf, tlen);
+					memcpy(client->buffer + client->buf_offset, tbuf, tlen);
 					client->buf_offset += tlen;
 				}
 				else
@@ -527,18 +526,10 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 
 			if(!client->wouldblock)
 			{
-				Com_Printf(VERBOSE_WARNING, "Com_Send() %s EWOULDBLOCK %d;%d;%d;%d;%d %d;%d;%d;%d;%d\n",
-						client->longnick,
-						client->sendcount[0][0],
-						client->sendcount[1][0]/5,
-						client->sendcount[2][0]/10,
-						client->sendcount[3][0]/30,
-						client->sendcount[4][0]/60,
-						client->recvcount[0][0],
-						client->recvcount[1][0]/5,
-						client->recvcount[2][0]/10,
-						client->recvcount[3][0]/30,
-						client->recvcount[4][0]/60);
+				Com_Printf(VERBOSE_WARNING, "Com_Send() %s EWOULDBLOCK %d;%d;%d;%d;%d %d;%d;%d;%d;%d\n", client->longnick, client->sendcount[0][0],
+						client->sendcount[1][0] / 5, client->sendcount[2][0] / 10, client->sendcount[3][0] / 30, client->sendcount[4][0] / 60,
+						client->recvcount[0][0], client->recvcount[1][0] / 5, client->recvcount[2][0] / 10, client->recvcount[3][0] / 30,
+						client->recvcount[4][0] / 60);
 
 				Com_PrintLogBuffer(client);
 			}
@@ -554,47 +545,47 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 		Com_Printf(VERBOSE_DEBUG, "-->>");
 		Com_Printfhex(buf, n);
 #endif
-		if (server_speeds->value)
+		if(server_speeds->value)
 			arena->sent += n;
 
 		Com_RecordLogBuffer(client, buf, n);
 		ConnStatistics(client, n, 0 /*send*/);
 
-		if (len != n)
+		if(len != n)
 		{
 			buf += n;
 			len -= n;
 
 			Com_Printf(VERBOSE_WARNING, "%s sent %d offset %d\n", client->longnick, n, client->buf_offset);
 
-				if(client->buf_offset)
-				{
-					// copy unsent bytes to top of the list
-					memcpy(client->buffer, client->buffer+n, len);
-					client->buf_offset = len;
+			if(client->buf_offset)
+			{
+				// copy unsent bytes to top of the list
+				memcpy(client->buffer, client->buffer + n, len);
+				client->buf_offset = len;
 
-					if(arena->bufferit)
-					{
-						// now copy the rest of data to buffer
-						if((client->buf_offset + tlen) < MAX_SENDBUFFER)
-						{
-							memcpy(client->buffer+client->buf_offset, tbuf, tlen);
-							client->buf_offset += tlen;
-						}
-						else
-						{
-							Com_Printf(VERBOSE_WARNING, "%s send buffer overflow\n", client->longnick);
-						}
-					}
-				}
-				else
+				if(arena->bufferit)
 				{
-					if(arena->bufferit)
+					// now copy the rest of data to buffer
+					if((client->buf_offset + tlen) < MAX_SENDBUFFER)
 					{
-						memcpy(client->buffer, buf, len);
-						client->buf_offset = len;
+						memcpy(client->buffer + client->buf_offset, tbuf, tlen);
+						client->buf_offset += tlen;
+					}
+					else
+					{
+						Com_Printf(VERBOSE_WARNING, "%s send buffer overflow\n", client->longnick);
 					}
 				}
+			}
+			else
+			{
+				if(arena->bufferit)
+				{
+					memcpy(client->buffer, buf, len);
+					client->buf_offset = len;
+				}
+			}
 
 			arena->bufferit = 1;
 			return n;
@@ -624,7 +615,7 @@ int Com_Send(client_t *client, u_int8_t *buf, int len)
 
 void ConnError(int n)
 {
-	switch (n)
+	switch(n)
 	{
 #ifdef _WIN32
 		case WSANOTINITIALISED:
@@ -758,16 +749,17 @@ void Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id)
 	char query_log[256];
 
 	// FIXME: DEBUG
-		return;
+	return;
 
-	snprintf(query_log, sizeof(query_log), "INSERT INTO log_events SET event = '%u', player_id = '%u', victim_id = '%u', date = FROM_UNIXTIME(%u)", event, player_id, victim_id, (u_int32_t)time(NULL));
+	snprintf(query_log, sizeof(query_log), "INSERT INTO log_events SET event = '%u', player_id = '%u', victim_id = '%u', date = FROM_UNIXTIME(%u)", event,
+			player_id, victim_id, (u_int32_t) time(NULL));
 
-	if (d_mysql_query(&my_sock, query_log))
+	if(d_mysql_query(&my_sock, query_log))
 	{
 		Com_Printf(VERBOSE_WARNING, "Com_LogEvent(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
 
-	my_id = (u_int32_t)mysql_insert_id(&my_sock);
+	my_id = (u_int32_t) mysql_insert_id(&my_sock);
 }
 
 /**
@@ -781,16 +773,16 @@ void Com_LogDescription(u_int32_t type, double value, char *string)
 	char query_log[256];
 
 	// FIXME: DEBUG
-		return;
+	return;
 
 	snprintf(query_log, sizeof(query_log), "INSERT INTO log_descriptions SET event_id = '%u', type = '%u'", my_id, type);
 
-	if (value)
+	if(value)
 		sprintf(query_log, "%s, value = '%.3f'", query_log, value);
-	if (string)
+	if(string)
 		sprintf(query_log, "%s, string = '%s'", query_log, string);
 
-	if (d_mysql_query(&my_sock, query_log))
+	if(d_mysql_query(&my_sock, query_log))
 	{
 		Com_Printf(VERBOSE_WARNING, "Com_LogDescription(): couldn't query INSERT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 	}
@@ -809,7 +801,8 @@ void Com_Printf(int8_t verb, const char *fmt, ...)
 	u_int8_t tverb;
 	time_t ltime;
 
-	if(verb <= verbose->value);
+	if(verb <= verbose->value)
+		;
 	{
 		tverb = abs(verb);
 		va_start(argptr, fmt);
@@ -817,18 +810,18 @@ void Com_Printf(int8_t verb, const char *fmt, ...)
 		va_end(argptr);
 
 		time(&ltime);
-		if (var_vars && logfile_active->value)
+		if(var_vars && logfile_active->value)
 		{
-			if (!logfile[0])
+			if(!logfile[0])
 				logfile[0] = fopen(FILE_CONSOLE, "a+");
 			if(!logfile[0])
 				printf("%sZ: WARNING: Com_Printf() Could not open %s\n", asc2time(gmtime(&ltime)), FILE_CONSOLE);
 
 			if(tverb)
 			{
-				if (!logfile[tverb])
+				if(!logfile[tverb])
 				{
-					switch (verb)
+					switch(verb)
 					{
 						case VERBOSE_ATTENTION:
 							logfile[tverb] = fopen(FILE_ATTENTION, "a+");
@@ -881,64 +874,64 @@ void Com_Printf(int8_t verb, const char *fmt, ...)
 		}
 
 		printf("%sZ: ", asc2time(gmtime(&ltime)));
-		if (logfile[0])
+		if(logfile[0])
 			fprintf(logfile[0], "%sZ: ", asc2time(gmtime(&ltime)));
-		if (tverb && logfile[tverb])
+		if(tverb && logfile[tverb])
 			fprintf(logfile[tverb], "%sZ: ", asc2time(gmtime(&ltime)));
 
 		switch(verb)
 		{
 			case VERBOSE_ATTENTION:
 				printf("ATTENTION: ");
-				if (logfile[0])
+				if(logfile[0])
 					fprintf(logfile[0], "ATTENTION: ");
-				if (tverb && logfile[tverb])
+				if(tverb && logfile[tverb])
 					fprintf(logfile[tverb], "ATTENTION: ");
 				break;
 			case VERBOSE_WARNING:
 				printf("WARNING: ");
-				if (logfile[0])
+				if(logfile[0])
 					fprintf(logfile[0], "WARNING: ");
-				if (tverb && logfile[tverb])
+				if(tverb && logfile[tverb])
 					fprintf(logfile[tverb], "WARNING: ");
 				break;
 			case VERBOSE_ERROR:
 				printf("ERROR: ");
-				if (logfile[0])
+				if(logfile[0])
 					fprintf(logfile[0], "ERROR: ");
-				if (tverb && logfile[tverb])
+				if(tverb && logfile[tverb])
 					fprintf(logfile[tverb], "ERROR: ");
 				break;
 			case VERBOSE_DEBUG_SCORES:
 				printf("DEBUG: SCORES: ");
-				if (logfile[0])
+				if(logfile[0])
 					fprintf(logfile[0], "DEBUG: SCORES: ");
-				if (tverb && logfile[tverb])
+				if(tverb && logfile[tverb])
 					fprintf(logfile[tverb], "DEBUG: SCORES: ");
 				break;
 			case VERBOSE_DAMAGE:
 				printf("DAMAGE: ");
-				if (logfile[0])
+				if(logfile[0])
 					fprintf(logfile[0], "DAMAGE: ");
-				if (tverb && logfile[tverb])
+				if(tverb && logfile[tverb])
 					fprintf(logfile[tverb], "DAMAGE: ");
 				break;
 			case VERBOSE_DEBUG:
 				printf("DEBUG: ");
-				if (logfile[0])
+				if(logfile[0])
 					fprintf(logfile[0], "DEBUG: ");
-				if (tverb && logfile[tverb])
+				if(tverb && logfile[tverb])
 					fprintf(logfile[tverb], "DEBUG: ");
 				break;
 		}
 		printf("%s", msg);
 		fflush(stdout);
-		if (logfile[0])
+		if(logfile[0])
 		{
 			fprintf(logfile[0], "%s", msg);
 			fflush(logfile[0]); // forces data to be writed
 		}
-		if (tverb && logfile[tverb])
+		if(tverb && logfile[tverb])
 		{
 			fprintf(logfile[tverb], "%s", msg);
 			fflush(logfile[tverb]); // forces data to be writed
@@ -984,16 +977,16 @@ int d_mysql_query(MYSQL *mysql, const char *query)
 	u_int32_t querytime;
 	int32_t i;
 
-	if (printqueries->value)
+	if(printqueries->value)
 		Com_Printf(VERBOSE_DEBUG, "MYSQL: \"%s\"\n", query);
 
 	querytime = Sys_Milliseconds();
-	if ((i = mysql_query(mysql, query)))
+	if((i = mysql_query(mysql, query)))
 	{
 		return i;
 	}
 
-	if ((querytime = Sys_Milliseconds() - querytime) > 70 /*ms*/)// || mysqlview->value)
+	if((querytime = Sys_Milliseconds() - querytime) > 70 /*ms*/)// || mysqlview->value)
 	{
 		Com_Printf(VERBOSE_WARNING, "d_mysql_query() delayed query %ums \"%s\"\n", querytime, query);
 	}
@@ -1012,32 +1005,32 @@ int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
 	u_int32_t querytime;
 	int32_t i;
 
-	if (printqueries->value)
+	if(printqueries->value)
 		Com_Printf(VERBOSE_DEBUG, "MYSQL \"%s\"\n", query);
 
-	if (!client || ((arena->frame - client->lastsql) > 300/*3 sec*/))
+	if(!client || ((arena->frame - client->lastsql) > 300/*3 sec*/))
 	{
 		querytime = Sys_Milliseconds();
-		if ((i = mysql_query(mysql, query)))
+		if((i = mysql_query(mysql, query)))
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_MySQL_Query(): %s error %d: %s\n", client ? client->longnick : "-HOST-", mysql_errno(mysql), mysql_error(mysql));
 			PPrintf(client, RADIO_YELLOW, "SQL Error (%d), please contact admin", mysql_errno(mysql));
 			return i;
 		}
 
-		if ((querytime = Sys_Milliseconds() - querytime) > 70 /*ms*/)// || mysqlview->value)
+		if((querytime = Sys_Milliseconds() - querytime) > 70 /*ms*/)// || mysqlview->value)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_MySQL_Query() delayed query %ums \"%s\"\n", querytime, query);
 		}
 	}
 	else
 	{
-		PPrintf(client, RADIO_YELLOW, "SQL flood, wait %.2f seconds", (double)(300 - (arena->frame - client->lastsql))/100);
+		PPrintf(client, RADIO_YELLOW, "SQL flood, wait %.2f seconds", (double) (300 - (arena->frame - client->lastsql)) / 100);
 		Com_Printf(VERBOSE_WARNING, "%s SQL flood\n", client->longnick);
 		return -1;
 	}
 
-	if (client)
+	if(client)
 	{
 		client->lastsql = arena->frame;
 	}
@@ -1053,7 +1046,7 @@ int Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query)
 
 void Com_MySQL_Flush(MYSQL *mysql, const char *file, u_int32_t line)
 {
-	MYSQL_RES *result= NULL;
+	MYSQL_RES *result = NULL;
 	int16_t status = 0;
 
 	do
@@ -1061,13 +1054,13 @@ void Com_MySQL_Flush(MYSQL *mysql, const char *file, u_int32_t line)
 		// did current statement return data?
 		result = mysql_store_result(mysql);
 
-		if (result)
+		if(result)
 		{
 			mysql_free_result(result);
 		}
 		else // no result set or error
 		{
-			if (mysql_field_count(mysql) == 0)
+			if(mysql_field_count(mysql) == 0)
 			{
 				Com_Printf(VERBOSE_DEBUG, "Com_MySQL_Flush(%s, %u): %lld rows affected\n", file, line, mysql_affected_rows(mysql));
 			}
@@ -1078,11 +1071,11 @@ void Com_MySQL_Flush(MYSQL *mysql, const char *file, u_int32_t line)
 			}
 		}
 		// more results? -1 = no, >0 = error, 0 = yes (keep looping)
-		if ((status = mysql_next_result(mysql)) > 0)
+		if((status = mysql_next_result(mysql)) > 0)
 			Com_Printf(VERBOSE_WARNING, "Com_MySQL_Flush(%s, %u): Could not execute statement\n", file, line);
-	} while (status == 0);
+	} while(status == 0);
 }
- 
+
 /**
  Com_Printfhex
 
@@ -1095,44 +1088,44 @@ void Com_Printfhex(unsigned char *buffer, int len)
 
 	printf("( ");
 
-	if (logfile_active->value)
+	if(logfile_active->value)
 	{
-		if (!logfile[0])
+		if(!logfile[0])
 		{
 			logfile[0] = fopen(FILE_CONSOLE, "a+");
 		}
 
-		if (logfile[0])
+		if(logfile[0])
 		{
 			fprintf(logfile[0], "( ");
 		}
 	}
 
-	if (!((buffer[0] == 7) && (buffer[2] == (len - 1))))
+	if(!((buffer[0] == 7) && (buffer[2] == (len - 1))))
 	{
-		printf("07 00 %02X ", len-1);
+		printf("07 00 %02X ", len - 1);
 
-		if (logfile_active->value)
+		if(logfile_active->value)
 		{
-			if (logfile[0])
+			if(logfile[0])
 			{
-				fprintf(logfile[0], "07 00 %02X ", len-1);
+				fprintf(logfile[0], "07 00 %02X ", len - 1);
 			}
 		}
 	}
 
-	for (i=0; i<len; i++)
+	for(i = 0; i < len; i++)
 	{
 		printf("%02X ", buffer[i]);
 
-		if (logfile_active->value)
+		if(logfile_active->value)
 		{
-			if (!logfile[0])
+			if(!logfile[0])
 			{
 				logfile[0] = fopen(FILE_CONSOLE, "a+");
 			}
 
-			if (logfile[0])
+			if(logfile[0])
 			{
 				fprintf(logfile[0], "%02X ", buffer[i]);
 			}
@@ -1141,9 +1134,9 @@ void Com_Printfhex(unsigned char *buffer, int len)
 	printf(")\n");
 	fflush(stdout);
 
-	if (logfile_active->value)
+	if(logfile_active->value)
 	{
-		if (logfile[0])
+		if(logfile[0])
 		{
 			fprintf(logfile[0], ")\n");
 			fflush(logfile[0]);
@@ -1159,7 +1152,7 @@ void Com_Printfhex(unsigned char *buffer, int len)
 
 int Com_Stricmp(const char *s1, const char *s2)
 {
-	if (s1 && s2)
+	if(s1 && s2)
 	{
 #ifdef _WIN32
 		return stricmp(s1, s2);
@@ -1169,11 +1162,11 @@ int Com_Stricmp(const char *s1, const char *s2)
 	}
 	else
 	{
-		if (!s1)
+		if(!s1)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_Stricmp() s1 NULL array\n");
 		}
-		if (!s2)
+		if(!s2)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_Stricmp() s2 NULL array\n");
 		}
@@ -1193,9 +1186,9 @@ u_int8_t Com_CheckAphaNum(char *string)
 
 	j = strlen(string);
 
-	for (i = 0; i < j; i++)
+	for(i = 0; i < j; i++)
 	{
-		if (!((string[i] >= '0' && string[i] <= '9') || (string[i] >= 'A' && string[i] <= 'Z') || (string[i] >= 'a' && string[i] <= 'z')))
+		if(!((string[i] >= '0' && string[i] <= '9') || (string[i] >= 'A' && string[i] <= 'Z') || (string[i] >= 'a' && string[i] <= 'z')))
 			return 1;
 	}
 
@@ -1214,11 +1207,11 @@ u_int8_t Com_CheckWBUsername(char *string)
 
 	j = strlen(string);
 
-	for (i = 0; i < j; i++)
+	for(i = 0; i < j; i++)
 	{
 		string[i] = tolower(string[i]);
 
-		if (!((string[i] >= 'a' && string[i] <= 'z') || string[i] == '-'))
+		if(!((string[i] >= 'a' && string[i] <= 'z') || string[i] == '-'))
 			return 1;
 	}
 
@@ -1237,13 +1230,13 @@ void Com_ParseString(char *string)
 
 	j = strlen(string);
 
-	for (i = 0; i < j; i++)
+	for(i = 0; i < j; i++)
 	{
-		if (string[i] == '\'')
+		if(string[i] == '\'')
 		{
 			string[i] = '`';
 		}
-		else if (string[i] == '\\' || string[i] < ' ' || string[i] > '~')
+		else if(string[i] == '\\' || string[i] < ' ' || string[i] > '~')
 		{
 			string[i] = 0x20; // space
 		}
@@ -1260,15 +1253,15 @@ u_int8_t GetSlot(client_t *plane, client_t *client)
 {
 	u_int8_t i;
 
-	if (!plane)
+	if(!plane)
 	{
 		Com_Printf(VERBOSE_WARNING, "GetSlot(), plane == NULL\n");
 		return MAX_SCREEN;
 	}
 
-	for (i = 0; i < MAX_SCREEN; i++)
+	for(i = 0; i < MAX_SCREEN; i++)
 	{
-		if (client->visible[i].client == plane)
+		if(client->visible[i].client == plane)
 			return i;
 	}
 
@@ -1284,11 +1277,11 @@ u_int8_t GetSlot(client_t *plane, client_t *client)
 u_int8_t CheckSum(u_int8_t *buffer, u_int16_t len)
 {
 	u_int16_t i;
-	u_int8_t sum=0;
+	u_int8_t sum = 0;
 
-	for (i=0; i<len; i++)
+	for(i = 0; i < len; i++)
 	{
-		sum+=buffer[i];
+		sum += buffer[i];
 	}
 
 	return sum;
@@ -1310,7 +1303,7 @@ double RocketAngle(u_int16_t dist)
 
 	x = (b * b) - (4 * a * c);
 
-	if (x < 0)
+	if(x < 0)
 		return -1;
 	else
 		c = (b * -1 + sqrt(x)) / (2 * a);
@@ -1347,10 +1340,10 @@ double WBtoHdg(int16_t angle)
 {
 	double heading;
 
-	if (angle < 0)
-		heading = (double)((double)(angle + 3600) / 10);
+	if(angle < 0)
+		heading = (double) ((double) (angle + 3600) / 10);
 	else
-		heading = (double)((double)angle / 10);
+		heading = (double) ((double) angle / 10);
 
 	return (360.0L - heading);
 }
@@ -1384,7 +1377,7 @@ char *CopyString(const char *in)
 	if(!in)
 		return NULL;
 
-	out = (char *)Z_Malloc(strlen(in)+1);
+	out = (char *) Z_Malloc(strlen(in) + 1);
 	strcpy(out, in);
 	return out;
 }
@@ -1395,26 +1388,29 @@ char *CopyString(const char *in)
  Generates a 32bytes CRC
  */
 
-static unsigned long int
-		crc_32_tab[] =
-		{ /* CRC polynomial 0xedb88320 */
-		0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91,
-				0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7, 0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9, 0xfa0f3d63,
-				0x8d080df5, 0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172, 0x3c03e4d1, 0x4b04d447, 0xd20d85fd, 0xa50ab56b, 0x35b5a8fa, 0x42b2986c, 0xdbbbc9d6, 0xacbcf940, 0x32d86ce3, 0x45df5c75,
-				0xdcd60dcf, 0xabd13d59, 0x26d930ac, 0x51de003a, 0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423, 0xcfba9599, 0xb8bda50f, 0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924, 0x2f6f7c87,
-				0x58684c11, 0xc1611dab, 0xb6662d3d, 0x76dc4190, 0x01db7106, 0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f, 0x9fbfe4a5, 0xe8b8d433, 0x7807c9a2, 0x0f00f934, 0x9609a88e, 0xe10e9818,
-				0x7f6a0dbb, 0x086d3d2d, 0x91646c97, 0xe6635c01, 0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e, 0x6c0695ed, 0x1b01a57b, 0x8208f4c1, 0xf50fc457, 0x65b0d9c6, 0x12b7e950, 0x8bbeb8ea,
-				0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65, 0x4db26158, 0x3ab551ce, 0xa3bc0074, 0xd4bb30e2, 0x4adfa541, 0x3dd895d7, 0xa4d1c46d, 0xd3d6f4fb, 0x4369e96a, 0x346ed9fc,
-				0xad678846, 0xda60b8d0, 0x44042d73, 0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9, 0x5005713c, 0x270241aa, 0xbe0b1010, 0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f, 0x5edef90e,
-				0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17, 0x2eb40d81, 0xb7bd5c3b, 0xc0ba6cad, 0xedb88320, 0x9abfb3b6, 0x03b6e20c, 0x74b1d29a, 0xead54739, 0x9dd277af, 0x04db2615, 0x73dc1683,
-				0xe3630b12, 0x94643b84, 0x0d6d6a3e, 0x7a6a5aa8, 0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1, 0xf00f9344, 0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb, 0x196c3671,
-				0x6e6b06e7, 0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc, 0xf9b9df6f, 0x8ebeeff9, 0x17b7be43, 0x60b08ed5, 0xd6d6a3e8, 0xa1d1937e, 0x38d8c2c4, 0x4fdff252, 0xd1bb67f1, 0xa6bc5767,
-				0x3fb506dd, 0x48b2364b, 0xd80d2bda, 0xaf0a1b4c, 0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55, 0x316e8eef, 0x4669be79, 0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236, 0xcc0c7795,
-				0xbb0b4703, 0x220216b9, 0x5505262f, 0xc5ba3bbe, 0xb2bd0b28, 0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d, 0x9b64c2b0, 0xec63f226, 0x756aa39c, 0x026d930a,
-				0x9c0906a9, 0xeb0e363f, 0x72076785, 0x05005713, 0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38, 0x92d28e9b, 0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21, 0x86d3d2d4, 0xf1d4e242, 0x68ddb3f8,
-				0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777, 0x88085ae6, 0xff0f6a70, 0x66063bca, 0x11010b5c, 0x8f659eff, 0xf862ae69, 0x616bffd3, 0x166ccf45, 0xa00ae278, 0xd70dd2ee,
-				0x4e048354, 0x3903b3c2, 0xa7672661, 0xd06016f7, 0x4969474d, 0x3e6e77db, 0xaed16a4a, 0xd9d65adc, 0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9, 0xbdbdf21c,
-				0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d };
+static unsigned long int crc_32_tab[] = { /* CRC polynomial 0xedb88320 */
+0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f, 0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x09b64c2b,
+		0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2, 0xf3b97148, 0x84be41de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7, 0x136c9856,
+		0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x14015c4f, 0x63066cd9, 0xfa0f3d63, 0x8d080df5, 0x3b6e20c8, 0x4c69105e, 0xd56041e4, 0xa2677172, 0x3c03e4d1,
+		0x4b04d447, 0xd20d85fd, 0xa50ab56b, 0x35b5a8fa, 0x42b2986c, 0xdbbbc9d6, 0xacbcf940, 0x32d86ce3, 0x45df5c75, 0xdcd60dcf, 0xabd13d59, 0x26d930ac,
+		0x51de003a, 0xc8d75180, 0xbfd06116, 0x21b4f4b5, 0x56b3c423, 0xcfba9599, 0xb8bda50f, 0x2802b89e, 0x5f058808, 0xc60cd9b2, 0xb10be924, 0x2f6f7c87,
+		0x58684c11, 0xc1611dab, 0xb6662d3d, 0x76dc4190, 0x01db7106, 0x98d220bc, 0xefd5102a, 0x71b18589, 0x06b6b51f, 0x9fbfe4a5, 0xe8b8d433, 0x7807c9a2,
+		0x0f00f934, 0x9609a88e, 0xe10e9818, 0x7f6a0dbb, 0x086d3d2d, 0x91646c97, 0xe6635c01, 0x6b6b51f4, 0x1c6c6162, 0x856530d8, 0xf262004e, 0x6c0695ed,
+		0x1b01a57b, 0x8208f4c1, 0xf50fc457, 0x65b0d9c6, 0x12b7e950, 0x8bbeb8ea, 0xfcb9887c, 0x62dd1ddf, 0x15da2d49, 0x8cd37cf3, 0xfbd44c65, 0x4db26158,
+		0x3ab551ce, 0xa3bc0074, 0xd4bb30e2, 0x4adfa541, 0x3dd895d7, 0xa4d1c46d, 0xd3d6f4fb, 0x4369e96a, 0x346ed9fc, 0xad678846, 0xda60b8d0, 0x44042d73,
+		0x33031de5, 0xaa0a4c5f, 0xdd0d7cc9, 0x5005713c, 0x270241aa, 0xbe0b1010, 0xc90c2086, 0x5768b525, 0x206f85b3, 0xb966d409, 0xce61e49f, 0x5edef90e,
+		0x29d9c998, 0xb0d09822, 0xc7d7a8b4, 0x59b33d17, 0x2eb40d81, 0xb7bd5c3b, 0xc0ba6cad, 0xedb88320, 0x9abfb3b6, 0x03b6e20c, 0x74b1d29a, 0xead54739,
+		0x9dd277af, 0x04db2615, 0x73dc1683, 0xe3630b12, 0x94643b84, 0x0d6d6a3e, 0x7a6a5aa8, 0xe40ecf0b, 0x9309ff9d, 0x0a00ae27, 0x7d079eb1, 0xf00f9344,
+		0x8708a3d2, 0x1e01f268, 0x6906c2fe, 0xf762575d, 0x806567cb, 0x196c3671, 0x6e6b06e7, 0xfed41b76, 0x89d32be0, 0x10da7a5a, 0x67dd4acc, 0xf9b9df6f,
+		0x8ebeeff9, 0x17b7be43, 0x60b08ed5, 0xd6d6a3e8, 0xa1d1937e, 0x38d8c2c4, 0x4fdff252, 0xd1bb67f1, 0xa6bc5767, 0x3fb506dd, 0x48b2364b, 0xd80d2bda,
+		0xaf0a1b4c, 0x36034af6, 0x41047a60, 0xdf60efc3, 0xa867df55, 0x316e8eef, 0x4669be79, 0xcb61b38c, 0xbc66831a, 0x256fd2a0, 0x5268e236, 0xcc0c7795,
+		0xbb0b4703, 0x220216b9, 0x5505262f, 0xc5ba3bbe, 0xb2bd0b28, 0x2bb45a92, 0x5cb36a04, 0xc2d7ffa7, 0xb5d0cf31, 0x2cd99e8b, 0x5bdeae1d, 0x9b64c2b0,
+		0xec63f226, 0x756aa39c, 0x026d930a, 0x9c0906a9, 0xeb0e363f, 0x72076785, 0x05005713, 0x95bf4a82, 0xe2b87a14, 0x7bb12bae, 0x0cb61b38, 0x92d28e9b,
+		0xe5d5be0d, 0x7cdcefb7, 0x0bdbdf21, 0x86d3d2d4, 0xf1d4e242, 0x68ddb3f8, 0x1fda836e, 0x81be16cd, 0xf6b9265b, 0x6fb077e1, 0x18b74777, 0x88085ae6,
+		0xff0f6a70, 0x66063bca, 0x11010b5c, 0x8f659eff, 0xf862ae69, 0x616bffd3, 0x166ccf45, 0xa00ae278, 0xd70dd2ee, 0x4e048354, 0x3903b3c2, 0xa7672661,
+		0xd06016f7, 0x4969474d, 0x3e6e77db, 0xaed16a4a, 0xd9d65adc, 0x40df0b66, 0x37d83bf0, 0xa9bcae53, 0xdebb9ec5, 0x47b2cf7f, 0x30b5ffe9, 0xbdbdf21c,
+		0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605, 0xcdd70693, 0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8, 0x5d681b02, 0x2a6f2b94, 0xb40bbe37,
+		0xc30c8ea1, 0x5a05df1b, 0x2d02ef8d };
 
 #define UPDC32(octet, crc) (crc_32_tab[((crc) ^ (octet)) & 0xff] ^ ((crc) >> 8))
 
@@ -1427,7 +1423,7 @@ u_int32_t crc32(char *buffer, u_int8_t size)
 
 	oldcrc32 = 0xFFFFFFFF;
 
-	for (n=0; n<size; n++)
+	for(n = 0; n < size; n++)
 	{
 		oldcrc32 = UPDC32(buffer[n], oldcrc32);
 	}
@@ -1437,13 +1433,13 @@ u_int32_t crc32(char *buffer, u_int8_t size)
 
 	/**/
 	crc32 = UPDC32((oldcrc32 & 0377), crc32);
-	oldcrc32 >>=8;
+	oldcrc32 >>= 8;
 	crc32 = UPDC32((oldcrc32 & 0377), crc32);
-	oldcrc32 >>=8;
+	oldcrc32 >>= 8;
 	crc32 = UPDC32((oldcrc32 & 0377), crc32);
-	oldcrc32 >>=8;
+	oldcrc32 >>= 8;
 	crc32 = UPDC32((oldcrc32 & 0377), crc32);
-	oldcrc32 >>=8;
+	oldcrc32 >>= 8;
 	/**/
 	return oldcrc;
 }
@@ -1488,7 +1484,7 @@ double Com_Deg(double angle)
 
 int Com_Atoi(const char *string)
 {
-	if (string)
+	if(string)
 		return atoi(string);
 	else
 	{
@@ -1509,13 +1505,13 @@ u_int32_t Com_Atou(const char *string)
 	u_int16_t i;
 	char ch;
 
-	if (string)
+	if(string)
 	{
-		for (i = 0; i < strlen(string); i++)
+		for(i = 0; i < strlen(string); i++)
 		{
 			ch = string[i];
 
-			if (ch > '9' || ch < '0')
+			if(ch > '9' || ch < '0')
 				break;
 			//if(ch >= '0' && ch <= '9')	// comments the 2 lines above and uncomment
 			// this line to process all number in the string
@@ -1541,7 +1537,7 @@ u_int32_t Com_Atou(const char *string)
 
 double Com_Atof(const char *string)
 {
-	if (string)
+	if(string)
 		return atof(string);
 	else
 	{
@@ -1561,14 +1557,14 @@ char *Com_MyRow(const char *string)
 	MYSQL_FIELD *fields;
 	u_int8_t i, num_fields;
 
-	if (my_result && my_row)
+	if(my_result && my_row)
 	{
 		num_fields = mysql_num_fields(my_result);
 		fields = mysql_fetch_fields(my_result);
 
-		for (i = 0; i < num_fields; i++)
+		for(i = 0; i < num_fields; i++)
 		{
-			if (!Com_Stricmp(string, fields[i].name))
+			if(!Com_Stricmp(string, fields[i].name))
 			{
 				return my_row[i];
 			}
@@ -1590,18 +1586,18 @@ char *Com_SquadronName(u_int32_t owner)
 {
 	static char buffer[64];
 
-	if (!owner)
+	if(!owner)
 		return NULL;
 
 	memset(buffer, 0, sizeof(buffer));
 
 	sprintf(my_query, "SELECT name FROM squads WHERE owner = '%u'", owner);
 
-	if (!d_mysql_query(&my_sock, my_query)) // query succeeded
+	if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 	{
-		if ((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+		if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 		{
-			if ((my_row = mysql_fetch_row(my_result)))
+			if((my_row = mysql_fetch_row(my_result)))
 			{
 				snprintf(buffer, sizeof(buffer), "%s", Com_MyRow("name") ? Com_MyRow("name") : "(null)");
 			}
@@ -1635,17 +1631,17 @@ char *Com_SquadronName(u_int32_t owner)
 
 int Com_Strncmp(const char *s1, const char *s2, int n)
 {
-	if (s1 && s2)
+	if(s1 && s2)
 	{
 		return strncmp(s1, s2, n);
 	}
 	else
 	{
-		if (!s1)
+		if(!s1)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_Strncmp() s1 NULL array\n");
 		}
-		if (!s2)
+		if(!s2)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_Strncmp() s2 NULL array\n");
 		}
@@ -1661,17 +1657,17 @@ int Com_Strncmp(const char *s1, const char *s2, int n)
 
 int Com_Strcmp(const char *s1, const char *s2)
 {
-	if (s1 && s2)
+	if(s1 && s2)
 	{
 		return strcmp(s1, s2);
 	}
 	else
 	{
-		if (!s1)
+		if(!s1)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_Strcmp() s1 NULL array\n");
 		}
-		if (!s2)
+		if(!s2)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_Strcmp() s2 NULL array\n");
 		}
@@ -1691,12 +1687,12 @@ int16_t Com_PacketTabIndex(u_int16_t packetid, u_int8_t wbv)
 
 	j = 209; // sizeof(packets_tab); // FRANZ verificar
 
-	if (wbv > 2)
+	if(wbv > 2)
 		wbv = 2;
 
-	for (i = 0; i < j; i++)
+	for(i = 0; i < j; i++)
 	{
-		if (packetid == packets_tab[i][wbv])
+		if(packetid == packets_tab[i][wbv])
 		{
 			return i;
 		}
@@ -1718,12 +1714,12 @@ void Com_WBntoh(u_int16_t *packetid)
 
 	wbv = wb3->value;
 
-	if (wbv > V_WB2008)
+	if(wbv > V_WB2008)
 		wbv = V_WB2008;
 
-	if (wbv != V_WB2007)
+	if(wbv != V_WB2007)
 	{
-		if ((tab_index = Com_PacketTabIndex(*packetid, wbv)) < 0)
+		if((tab_index = Com_PacketTabIndex(*packetid, wbv)) < 0)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_WBntoh() (S<-C) packet not identified yet (packetid = 0x%04X)\n", *packetid);
 			// leave packet_id as it is to be detected below
@@ -1731,7 +1727,7 @@ void Com_WBntoh(u_int16_t *packetid)
 		else
 		{
 			*packetid = packets_tab[tab_index][V_WB2007]; // convert packet id to internal id
-			if (packets_tab[tab_index][V_WB2007] == 0xffff)
+			if(packets_tab[tab_index][V_WB2007] == 0xffff)
 				Com_Printf(VERBOSE_WARNING, "Com_WBntoh() (S<-C) invalid packetid conversion (0x%04X)\n", *packetid);
 		}
 	}
@@ -1750,12 +1746,12 @@ u_int16_t Com_WBhton(u_int16_t packetid)
 
 	wbv = wb3->value;
 
-	if (wbv > V_WB2008)
+	if(wbv > V_WB2008)
 		wbv = V_WB2008;
 
-	if (wbv != V_WB2007)
+	if(wbv != V_WB2007)
 	{
-		if ((tab_index = Com_PacketTabIndex(packetid, V_WB2007)) < 0)
+		if((tab_index = Com_PacketTabIndex(packetid, V_WB2007)) < 0)
 		{
 			Com_Printf(VERBOSE_WARNING, "Com_WBhton() (S->C) packet id not found (packetid = 0x%04X)\n", packetid);
 			packetid = 0xffff;
@@ -1764,7 +1760,7 @@ u_int16_t Com_WBhton(u_int16_t packetid)
 		else
 		{
 			packetid = packets_tab[tab_index][wbv]; // convert packet id to external id
-			if (packetid == 0xffff)
+			if(packetid == 0xffff)
 				Com_Printf(VERBOSE_WARNING, "Com_WBhton() (S->C) packet not identified yet (0x%04X)\n", packets_tab[tab_index][V_WB2007]);
 		}
 	}
@@ -1780,7 +1776,7 @@ u_int16_t Com_WBhton(u_int16_t packetid)
 
 u_int8_t Com_WB3ntoh(u_int8_t n)
 {
-	switch (n)
+	switch(n)
 	{
 		case 0x19:
 			return 0x1B;
@@ -1827,7 +1823,7 @@ u_int16_t Com_WB3hton(u_int16_t m)
 	n = (m >> 8);
 	o = (m & 0xff);
 
-	switch (n)
+	switch(n)
 	{
 		case 0x1A:
 			n = 0x20;
@@ -1890,20 +1886,20 @@ int32_t DistBetween(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, 
 
 	distance = envelope;
 
-	if (envelope < 0)
+	if(envelope < 0)
 	{
 		distance = sqrt(Com_Pow(x, 2) + Com_Pow(y, 2));
 		distance = sqrt(Com_Pow(distance, 2) + Com_Pow(z, 2));
-		return (int32_t)distance;
+		return (int32_t) distance;
 	}
-	else if (x >= -envelope && x <= envelope && y >= -envelope && y <= envelope && z >= -envelope && z <= envelope)
+	else if(x >= -envelope && x <= envelope && y >= -envelope && y <= envelope && z >= -envelope && z <= envelope)
 	{
 		distance = sqrt(Com_Pow(x, 2) + Com_Pow(y, 2));
 		distance = sqrt(Com_Pow(distance, 2) + Com_Pow(z, 2));
 	}
 
-	if (distance < envelope)
-		return (int32_t)distance;
+	if(distance < envelope)
+		return (int32_t) distance;
 	else
 		return -1;
 }
@@ -1957,8 +1953,8 @@ double WBLongitude(double dAbsLongitude)
 	double cdSquare00Longitude;
 	double cdSquareWidth;
 
-	cdSquareWidth = (double)mapscale->value * 5280; // 5280 feet = 1 mile
-	cdSquare00Longitude = (double)mapsize->value * 168.75;
+	cdSquareWidth = (double) mapscale->value * 5280; // 5280 feet = 1 mile
+	cdSquare00Longitude = (double) mapsize->value * 168.75;
 
 	return floor((dAbsLongitude - cdSquare00Longitude) / cdSquareWidth);
 }
@@ -1974,8 +1970,8 @@ double WBLatitude(double dAbsLatitude)
 	double cdSquare00Latitude;
 	double cdSquareHeight;
 
-	cdSquareHeight = (double)mapscale->value * 5280; // 5280 feet = 1 mile
-	cdSquare00Latitude = (double)mapsize->value * 168.75;
+	cdSquareHeight = (double) mapscale->value * 5280; // 5280 feet = 1 mile
+	cdSquare00Latitude = (double) mapsize->value * 168.75;
 
 	return floor((dAbsLatitude - cdSquare00Latitude) / cdSquareHeight);
 }
@@ -2010,24 +2006,18 @@ double WBAltMeters(double dAbsAltitude)
 
 char *WBVSI(double dClimbRate, int fIsBomber)
 {
-	static char vszResult[5][20] =
-	{
-	{ "diving" },
-	{ "descending" },
-	{ "heading" },
-	{ "climbing" },
-	{ "zooming" } };
+	static char vszResult[5][20] = { { "diving" }, { "descending" }, { "heading" }, { "climbing" }, { "zooming" } };
 
-	if (fIsBomber != 0 && fIsBomber != 1)
+	if(fIsBomber != 0 && fIsBomber != 1)
 		return vszResult[2];
 
-	if (dClimbRate < -164.0L / (fIsBomber + 1.0L))
+	if(dClimbRate < -164.0L / (fIsBomber + 1.0L))
 		return vszResult[0];
-	else if (dClimbRate < -33.0L / (fIsBomber + 1.0L))
+	else if(dClimbRate < -33.0L / (fIsBomber + 1.0L))
 		return vszResult[1];
-	else if (dClimbRate < 16.0L / (fIsBomber + 1.0L))
+	else if(dClimbRate < 16.0L / (fIsBomber + 1.0L))
 		return vszResult[2];
-	else if (dClimbRate < 82.0L / (fIsBomber + 1.0L))
+	else if(dClimbRate < 82.0L / (fIsBomber + 1.0L))
 		return vszResult[3];
 	else
 		return vszResult[4];
@@ -2041,8 +2031,7 @@ char *WBVSI(double dClimbRate, int fIsBomber)
 
 char *WBRhumb(double dHeading /* in degrees*/)
 {
-	static char vszRhumbs[18][20] =
-	{ "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N", "nowhere" };
+	static char vszRhumbs[18][20] = { "N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW", "N", "nowhere" };
 
 	int nIdx = FloorDiv(ModRange(dHeading, 360.0L) + 11.25L, 22.5L);
 
@@ -2071,21 +2060,21 @@ int32_t PredictorCorrector32(int32_t *values, u_int8_t degree)
 	u_int8_t i;
 	int64_t val[MAX_PREDICT];
 
-	for (i = 0; i < MAX_PREDICT; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
-		val[i] = (int64_t)values[i];
+		val[i] = (int64_t) values[i];
 	}
 
-	switch (degree)
+	switch(degree)
 	{
 		case 1:
-			return (int32_t) 3*val[0] - 3*val[1] + val[2];
+			return (int32_t) 3 * val[0] - 3 * val[1] + val[2];
 		case 2:
-			return (int32_t) 4*val[0] - 6*val[1] + 4*val[2] - val[3];
+			return (int32_t) 4 * val[0] - 6 * val[1] + 4 * val[2] - val[3];
 		case 3:
-			return (int32_t) 5*val[0] - 10*val[1] + 10*val[2] - 5*val[3] + val[4];
+			return (int32_t) 5 * val[0] - 10 * val[1] + 10 * val[2] - 5 * val[3] + val[4];
 		case 4:
-			return (int32_t) 6*val[0] - 15*val[1] + 20*val[2] - 15*val[3] + 6*val[4] - val[5];
+			return (int32_t) 6 * val[0] - 15 * val[1] + 20 * val[2] - 15 * val[3] + 6 * val[4] - val[5];
 		default:
 			return 0;
 	}
@@ -2102,21 +2091,21 @@ int16_t PredictorCorrector16(int16_t *values, u_int8_t degree)
 	u_int8_t i;
 	int32_t val[MAX_PREDICT];
 
-	for (i = 0; i < MAX_PREDICT; i++)
+	for(i = 0; i < MAX_PREDICT; i++)
 	{
-		val[i] = (int32_t)values[i];
+		val[i] = (int32_t) values[i];
 	}
 
-	switch (degree)
+	switch(degree)
 	{
 		case 1:
-			return (int16_t) 3*val[0] - 3*val[1] + val[2];
+			return (int16_t) 3 * val[0] - 3 * val[1] + val[2];
 		case 2:
-			return (int16_t) 4*val[0] - 6*val[1] + 4*val[2] - val[3];
+			return (int16_t) 4 * val[0] - 6 * val[1] + 4 * val[2] - val[3];
 		case 3:
-			return (int16_t) 5*val[0] - 10*val[1] + 10*val[2] - 5*val[3] + val[4];
+			return (int16_t) 5 * val[0] - 10 * val[1] + 10 * val[2] - 5 * val[3] + val[4];
 		case 4:
-			return (int16_t) 6*val[0] - 15*val[1] + 20*val[2] - 15*val[3] + 6*val[4] - val[5];
+			return (int16_t) 6 * val[0] - 15 * val[1] + 20 * val[2] - 15 * val[3] + 6 * val[4] - val[5];
 		default:
 			return 0;
 	}
@@ -2135,9 +2124,9 @@ char *PadLoc(char *szBuffer, double dLongitude, double dLatitude)
 	double cdSquareWidth;
 	memset(szBuffer, 0, 20);
 
-	cdSquareWidth = (double)mapscale->value * 5280; // 5280 feet = 1 mile
-	dLongitude -= (double)mapsize->value * 165;
-	dLatitude -= (double)mapsize->value * 165;
+	cdSquareWidth = (double) mapscale->value * 5280; // 5280 feet = 1 mile
+	dLongitude -= (double) mapsize->value * 165;
+	dLatitude -= (double) mapsize->value * 165;
 
 	/*normalisation to 0..105600 range*/
 	while(dLongitude < 0.0L)
@@ -2151,19 +2140,19 @@ char *PadLoc(char *szBuffer, double dLongitude, double dLatitude)
 	dLatitude = ModRange(dLatitude, cdSquareWidth); // returns a number between zero and cdSquareWidth
 
 	/*calculation*/
-	dPad1 = (FloorDiv(dLongitude, (cdSquareWidth/3)) + 1) + (3 * FloorDiv(dLatitude, (cdSquareWidth/3)));
+	dPad1 = (FloorDiv(dLongitude, (cdSquareWidth / 3)) + 1) + (3 * FloorDiv(dLatitude, (cdSquareWidth / 3)));
 
 	/*normalisation to 0..35200 range*/
 	while(dLatitude < 0.0L)
-		dLatitude += (cdSquareWidth/3);
-	dLatitude = ModRange(dLatitude, (cdSquareWidth/3)); // returns a number between zero and cdSquareWidth/3
+		dLatitude += (cdSquareWidth / 3);
+	dLatitude = ModRange(dLatitude, (cdSquareWidth / 3)); // returns a number between zero and cdSquareWidth/3
 
 	while(dLongitude < 0.0L)
-		dLongitude += (cdSquareWidth/3);
-	dLongitude = ModRange(dLongitude, (cdSquareWidth/3)); // returns a number between zero and cdSquareWidth/3
+		dLongitude += (cdSquareWidth / 3);
+	dLongitude = ModRange(dLongitude, (cdSquareWidth / 3)); // returns a number between zero and cdSquareWidth/3
 
 	/*calculation*/
-	dPad2 = (FloorDiv(dLongitude, (cdSquareWidth/9)) + 1) + (3 * FloorDiv(dLatitude, (cdSquareWidth/9)));
+	dPad2 = (FloorDiv(dLongitude, (cdSquareWidth / 9)) + 1) + (3 * FloorDiv(dLatitude, (cdSquareWidth / 9)));
 
 	sprintf(szBuffer, ".%1.0f.%1.0f", dPad1, dPad2);
 
@@ -2171,19 +2160,19 @@ char *PadLoc(char *szBuffer, double dLongitude, double dLatitude)
 }
 
 /*
-char *replace_str(char *str, char *orig, char *rep)
-{
-	static char buffer[4096];
-	char *p;
+ char *replace_str(char *str, char *orig, char *rep)
+ {
+ static char buffer[4096];
+ char *p;
 
-	if(!(p = strstr(str, orig)))  // Is 'orig' even in 'str'?
-	return str;
+ if(!(p = strstr(str, orig)))  // Is 'orig' even in 'str'?
+ return str;
 
-	strncpy(buffer, str, p-str); // Copy characters from 'str' start to 'orig' st$
-	buffer[p-str] = '\0';
+ strncpy(buffer, str, p-str); // Copy characters from 'str' start to 'orig' st$
+ buffer[p-str] = '\0';
 
-	sprintf(buffer+(p-str), "%s%s", rep, p+strlen(orig));
+ sprintf(buffer+(p-str), "%s%s", rep, p+strlen(orig));
 
-	return buffer;
-}
-*/
+ return buffer;
+ }
+ */
