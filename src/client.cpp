@@ -20,6 +20,7 @@
  * 
  ***/
 
+#include "Ship.h"
 #include "shared.h"
 
 /**
@@ -391,7 +392,7 @@ int ProcessClient(client_t *client)
 
 			if(!client->arenabuildsok)
 			{
-				if(client->countrytime <= time(NULL)) // if can chose side, send player to HQ
+				if(client->countrytime <= (u_int32_t)time(NULL)) // if can chose side, send player to HQ
 					Cmd_Move("hq", 0, client);
 				else
 					Cmd_Move(NULL, client->country, client);
@@ -2006,30 +2007,6 @@ void ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client)
 }
 
 /**
- GetShipByNum
-
- Return Ship client_t from cvnum
- */
-
-ship_t *GetShipByNum(u_int8_t cvnum)
-{
-	u_int8_t i, j;
-	ship_t *ship;
-
-	for(i = 0, j = 0; i < cvs->value; i++)
-	{
-		for(ship = arena->cvs[i].ships; ship; ship = ship->next)
-		{
-			if(j == cvnum)
-				return ship;
-			j++;
-		}
-	}
-
-	return NULL;
-}
-
-/**
  WB3AiMount
 
  Request to mount CV Deck
@@ -2038,20 +2015,20 @@ ship_t *GetShipByNum(u_int8_t cvnum)
 void WB3AiMount(u_int8_t *buffer, client_t *client)
 {
 	wb3aimount_t *aimount;
-	ship_t *ship;
+	Ship *ship;
 
 	aimount = (wb3aimount_t *) buffer;
 
 	PPrintf(client, RADIO_YELLOW, "unk1: %d cvnum: %d inout: %d", ntohs(aimount->unk1)/*cvdot->unk2*/, aimount->cvnum, aimount->inout);
 
-	ship = GetShipByNum(aimount->cvnum);
+	ship = Ship::getShipByNum(aimount->cvnum);
 
-	if(!ship || !ship->drone)
+	if(!ship)
 		return;
 
 	if(aimount->inout == 1)
 	{
-		client->field = arena->cvs[ship->group].field + 1;
+		client->field = ship->getField()+1;
 		UpdateIngameClients(0);
 		SendArenaRules(client);
 		WB3SendGruntConfig(client);
@@ -2059,11 +2036,11 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 		WB3SendAcks(client);
 		SendRPS(client);
 		//client->field = 1;
-		AddRemoveCVScreen(ship, client, FALSE, ntohs(aimount->unk1), aimount->cvnum);
+		ship->addRemoveCVScreen(client, FALSE, ntohs(aimount->unk1), aimount->cvnum);
 	}
 	else if(aimount->inout == 2)
 	{
-		AddRemoveCVScreen(ship, client, TRUE, ntohs(aimount->unk1), aimount->cvnum);
+		ship->addRemoveCVScreen(client, TRUE, ntohs(aimount->unk1), aimount->cvnum);
 	}
 }
 

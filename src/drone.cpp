@@ -1406,39 +1406,6 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 }
 
 /**
- CVFire
-
- Fires artillary fire to nearest enemy field
- */
-
-void CVFire(ship_t *ship, int32_t destx, int32_t desty)
-{
-	u_int8_t i, j;
-
-	switch(ship->type)
-	{
-		case SHIPTYPE_CV:
-			i = 5;
-			break;
-		case SHIPTYPE_CA:
-			i = 3;
-			break;
-		case SHIPTYPE_DD:
-			i = 2;
-			break;
-		default:
-			i = 2;
-			break;
-	}
-
-	for(j = 0; j < i; j++)
-	{
-		ThrowBomb(FALSE, ship->Position.x, ship->Position.y, 59, destx, desty, 0, NULL);
-	}
-	ThrowBomb(TRUE, ship->Position.x, ship->Position.y, 0, destx, desty, 0, NULL);
-}
-
-/**
  ThrowBomb
 
  Throw a bomb from orig to dest position with some precision
@@ -1842,7 +1809,7 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 
 				if(c < fieldradius)
 				{
-					if((GetHeightAt(arena->fields[field].posxyz[0], arena->fields[field].posxyz[1]) - z) < (2 * radius))
+					if((GetHeightAt(arena->fields[field].posxyz[0], arena->fields[field].posxyz[1]) - z) < (u_int32_t)(2 * radius))
 					{
 						if(field < fields->value)
 						{

@@ -457,10 +457,14 @@ typedef unsigned int u_int32_t;
 #define	DRONE_EJECTED		512	// Plane when client ejects
 #define DRONE_COMMANDOS		1024	// Commandos
 #define DRONE_SHIP			2048	// SHIP (CV, CA, DD)
-#define DRONE_DEBUG			4096	// 
-#define SHIPTYPE_CV			0	//
-#define SHIPTYPE_CA			1	//
-#define SHIPTYPE_DD			2	//
+#define DRONE_DEBUG			4096	//
+#define PLANETYPE_FIGHTER	1	//
+#define PLANETYPE_BOMBER2	2	//
+#define PLANETYPE_BOMBER4	3	//
+#define PLANETYPE_VEHICLE	4	//
+#define PLANETYPE_CV		5	//
+#define PLANETYPE_CA		6	//
+#define PLANETYPE_DD		7	//
 #define SHIP_KAGA			73
 #define SHIP_DD				74
 #define SHIP_CA				77
@@ -509,6 +513,7 @@ typedef unsigned int u_int32_t;
 // Classes
 
 class Boid;
+class Ship;
 
 // Structures & Unions
 
@@ -637,7 +642,7 @@ typedef struct field_s
 	struct hitby_s	hitby[MAX_HITBY]; // players who hit field
 	u_int8_t	fleetships[12]; // fleet ships/planes/vehicles, e.g: 73;77;77;77;78
 	u_int8_t	fleetshipstotal;
-	Boid		*cv; // linked CV legacy
+	Ship		*cv; // linked CV legacy
 	struct city_s *city[MAX_CITYFIELD]; // linked city
 	double		rps[MAX_PLANES];
 	u_int8_t	rps_custom_rate[MAX_PLANES];
@@ -944,7 +949,7 @@ typedef struct client_s
 	struct client_s *view;		// view what other player is doing
 	struct client_s *shanghai;	// what client is shanghai
 	struct client_s	*attached;	// who client is attached
-//	ship_t		*deck;		// client is at CV Deck
+	Ship		*deck;		// client is at CV Deck
 
 	struct client_s	*gunnerview;	// which client player is viewing
 	struct client_s	*gunners[14];
@@ -2277,7 +2282,6 @@ void	SendOttoParams(client_t *client);
 void	SendOttoParams2(client_t *client);
 void	SendLastConfig(client_t *client);
 void	AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove);
-//void	AddRemoveCVScreen(ship_t *ship, client_t *client, u_int8_t remove, u_int8_t unk1, u_int8_t cvnum);
 void	SendScreenUpdates(client_t *client);
 void	SendDeckUpdates(client_t *client);
 int		CanHear(client_t *client1, client_t *client2, u_int32_t msgto);
@@ -2328,7 +2332,6 @@ u_int32_t GetBuildingArmor(u_int8_t type, client_t *client);
 u_int32_t GetBuildingAPstop(u_int8_t type, client_t *client);
 u_int32_t GetBuildingImunity(u_int8_t type, client_t *client);
 void	SendMapDots(void);
-void	SendCVDots(void);
 u_int8_t SeeEnemyDot(client_t *client, u_int8_t country);
 void	ClearMapDots(client_t *client);
 //void	SendCVPos(client_t *client, u_int8_t cvnum);
@@ -2436,7 +2439,6 @@ int		ProcessDrone(client_t *drone);
 void	DroneGetTarget(client_t *drone);
 void	FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
 void	FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
-//void	CVFire(ship_t *ship, int32_t destx, int32_t desty);
 void	ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz, client_t *client);
 void	SendDronePos(client_t *drone, client_t *client);
 void	SendXBombs(client_t *drone);

@@ -48,7 +48,6 @@ class Boid
 		bool outofport; // out of port (1st waypoint)
 		bool prepared; // fleet is prepared?
 		u_int8_t group; // group index
-		u_int8_t type; // type: 0 = CV; 1 = CA; 2 = DD
 		u_int8_t formation; // which formation the group is using
 		char logfile[64]; // logfile name
 
@@ -100,7 +99,6 @@ class Boid
 		void setVelMax(double a){Vel.max = a;};
 		void setPosition(u_int8_t a){pos = a;};
 		void setCurrWaypoint(u_int8_t a){wpnum = a;};
-		u_int8_t getPosition(){return pos;};
 		void setPrepared(bool a){prepared = a;};
 		Boid *setLeader(Boid* a){leader = a; return a;};
 		void setCountry(u_int8_t a){country = a;};
@@ -109,6 +107,10 @@ class Boid
 		void setField(u_int8_t a){field = a;};
 		void setPlane(u_int8_t a){plane = a;};
 		void setPort(field_s *a){port = a;};
+		u_int8_t getGroup(){return group;};
+		u_int8_t getField(){return field;};
+		u_int8_t getPosition(){return pos;};
+		u_int8_t getPlaneType(){return (plane?arena->planedamage[plane].type:0);};
 		bool hasLeader(){return (leader != NULL);};
 		struct client_s *setDrone(struct client_s *a){drone = a; return a;};
 

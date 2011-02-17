@@ -273,8 +273,6 @@ void LoadArenaStatus(const char *filename, client_t *client, u_int8_t reset)
 
 				if(!reset && arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 				{
-					Ship* leader;
-
 					j = Com_Atou((char *) strtok(NULL, ";")); // j = field number
 
 					for(k = 0; (token = (char *) strtok(NULL, ";")); k++)
@@ -289,7 +287,7 @@ void LoadArenaStatus(const char *filename, client_t *client, u_int8_t reset)
 						Com_Printf(VERBOSE_DEBUG, "CV Detected - type %u, posx %u posy %u\n", arena->fields[i].type, arena->fields[i].posxyz[0],
 								arena->fields[i].posxyz[1]);
 						arena->fields[i].fleetshipstotal = k;
-						Ship::ResetShips(j);
+						Ship::resetShips(j);
 						group++;
 					}
 					else
@@ -474,14 +472,11 @@ void SaveArenaStatus(const char *filename, client_t *client)
 			{
 				if(group < cvs->value)
 				{
-					if(arena->cvs[group].port)
-						fprintf(fp, ";%u", arena->cvs[group].port->number);
-					else
-						fprintf(fp, ";0");
+					fprintf(fp, ";%u", arena->fields[i].number);
 
-					for(j = 0; j < arena->cvs[group].fleetshipstotal; j++)
+					for(j = 0; j < arena->fields[i].fleetshipstotal; j++)
 					{
-						fprintf(fp, ";%u", arena->cvs[group].fleetships[j]);
+						fprintf(fp, ";%u", arena->fields[i].fleetships[j]);
 					}
 
 					group++;
@@ -858,68 +853,6 @@ void SendMapDots(void)
 }
 
 /**
- SendCVDots
-
- Send CV dots at radar
- */
-
-void SendCVDots(void)
-{
-	u_int8_t i, j, k;
-	ship_t *ship;
-	wb3allaiplanesupdate_t *cvdot;
-	u_int8_t buffer[30];
-
-	cvdot = (wb3allaiplanesupdate_t *) buffer;
-
-	memset(buffer, 0, sizeof(buffer));
-
-	//	for (country = 1; country <= 4; country++)
-	//	{
-	for(i = 0, j = 0; i < cvs->value; i++)
-	{
-		for(ship = arena->cvs[i].ships; ship; ship = ship->next)
-		{
-			cvdot->packetid = htons(Com_WBhton(0x0015));
-			cvdot->number = htons(j);
-			cvdot->posx = htonl(ship->Position.x);
-			cvdot->posy = htonl(ship->Position.y);
-			cvdot->unk1 = 0;
-			cvdot->unk2 = htonl(dpitch->value);
-			cvdot->country = htonl(ship->country);
-			cvdot->plane = htonl(ship->plane);
-			cvdot->slot = htons(j++);
-
-			memset(arena->thaisent, 0, sizeof(arena->thaisent));
-
-			for(k = 0; k < maxentities->value; k++)
-			{
-				if((clients[k].country == 3 || clients[k].country == 1) && (clients[k].country == ship->country) && clients[k].inuse && !clients[k].drone
-						&& clients[k].ready) // && !clients[k].inflight)
-				{
-					if(clients[k].thai) // SendCVDots
-					{ // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
-						if(arena->thaisent[clients[k].thai].b)
-							continue;
-						else
-							arena->thaisent[clients[k].thai].b = 1;
-					}
-
-					//						if (clients[k].mapdots)
-					//							ClearMapDots(&clients[k]);
-
-					//						clients[k].mapdots = 1;
-					SendPacket(buffer, sizeof(buffer), &clients[k]);
-				}
-			}
-
-			//				memset(buffer, 0, sizeof(buffer));
-		}
-	}
-	//	}
-}
-
-/**
  SeeEnemyDot
 
  Check if enemy dot is in radar range
@@ -928,47 +861,71 @@ void SendCVDots(void)
 u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 {
 	u_int16_t i, j, k;
-	u_int32_t range;
+	u_int32_t range, cvrange;
 	int32_t x, y, z;
 
 	range = country == 1 ? radarrange1->value : country == 2 ? radarrange2->value : country == 3 ? radarrange3->value : country == 4 ? radarrange4->value : 0;
+	cvrange = country == 1 ? cvradarrange1->value : country == 2 ? cvradarrange2->value : country == 3 ? cvradarrange3->value
+			: country == 4 ? cvradarrange4->value : 0;
 
+	cvrange /= 2;
 	range /= 2;
 
-	for(i = 0, j = 0; i < fields->value; i++) // check if any Field gets the dot in radar
+	for(i = 0, j = 0; i < fields->value; i++) // check if any Field/CV gets the dot in radar
 	{
 		if(!j)
 		{
 			if(arena->fields[i].country == country)
 			{
-				for(k = 0; k < MAX_BUILDINGS; k++)
+				if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 				{
-					if(!arena->fields[i].buildings[k].field)
-					{
-						break;
-					}
-					else if((arena->fields[i].buildings[k].type == BUILD_RADAR)/* || arena->fields[i].type == FIELD_CV || arena->fields[i].type == FIELD_CARGO || arena->fields[i].type == FIELD_DD || arena->fields[i].type == FIELD_SUBMARINE*/)
-					{
-						if(!arena->fields[i].buildings[k].status/* || arena->fields[i].type == FIELD_CV || arena->fields[i].type == FIELD_CARGO || arena->fields[i].type == FIELD_DD || arena->fields[i].type == FIELD_SUBMARINE*/)
-						{
-							x = (arena->fields[i].posxyz[0] - client->posxy[0][0]) / 22;
-							y = (arena->fields[i].posxyz[1] - client->posxy[1][0]) / 22;
-							z = client->posalt[0] - arena->fields[i].posxyz[2];
+					x = (arena->fields[i].posxyz[0] - client->posxy[0][0]) / 22;
+					y = (arena->fields[i].posxyz[1] - client->posxy[1][0]) / 22;
+					z = client->posalt[0];
 
-							if(x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (arena->fields[i].posxyz[2] + radaralt->value) && z
-									< (arena->fields[i].posxyz[2] + radarheight->value))
+					if(x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > radaralt->value && z < radarheight->value)
+					{
+						if(IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->fields[i].posxyz[0], arena->fields[i].posxyz[1], 0))
+						{
+							if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (cvrange / 11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
 							{
-								if(IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->fields[i].posxyz[0],
-										arena->fields[i].posxyz[1], arena->fields[i].posxyz[2]))
+								j = 1;
+							}
+						}
+					}
+				}
+				else
+				{
+					for(k = 0; k < MAX_BUILDINGS; k++)
+					{
+						if(!arena->fields[i].buildings[k].field)
+						{
+							break;
+						}
+						else if((arena->fields[i].buildings[k].type == BUILD_RADAR)/* || arena->fields[i].type == FIELD_CV || arena->fields[i].type == FIELD_CARGO || arena->fields[i].type == FIELD_DD || arena->fields[i].type == FIELD_SUBMARINE*/)
+						{
+							if(!arena->fields[i].buildings[k].status/* || arena->fields[i].type == FIELD_CV || arena->fields[i].type == FIELD_CARGO || arena->fields[i].type == FIELD_DD || arena->fields[i].type == FIELD_SUBMARINE*/)
+							{
+								x = (arena->fields[i].posxyz[0] - client->posxy[0][0]) / 22;
+								y = (arena->fields[i].posxyz[1] - client->posxy[1][0]) / 22;
+								z = client->posalt[0] - arena->fields[i].posxyz[2];
+
+								if(x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > (arena->fields[i].posxyz[2] + radaralt->value) && z
+										< (arena->fields[i].posxyz[2] + radarheight->value))
 								{
-									if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range / 11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
+									if(IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->fields[i].posxyz[0],
+											arena->fields[i].posxyz[1], arena->fields[i].posxyz[2]))
 									{
-										j = 1;
+										if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range / 11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
+
+										{
+											j = 1;
+										}
 									}
 								}
 							}
+							break;
 						}
-						break;
 					}
 				}
 			}
@@ -1004,6 +961,7 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 											arena->cities[i].posxyz[1], arena->cities[i].posxyz[2]))
 									{
 										if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range / 11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
+
 										{
 											j = 1;
 										}
@@ -1011,36 +969,6 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 								}
 							}
 							break;
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if(!j) // Still not found? Check if any Fleet got it
-	{
-		range = country == 1 ? cvradarrange1->value : country == 2 ? cvradarrange2->value : country == 3 ? cvradarrange3->value
-				: country == 4 ? cvradarrange4->value : 0;
-
-		range /= 2;
-
-		for(i = 0, j = 0; (i < cvs->value) && !j; i++)
-		{
-			if(arena->cvs[i].ships && arena->cvs[i].country == country)
-			{
-				x = (arena->cvs[i].ships->Position.x - client->posxy[0][0]) / 22;
-				y = (arena->cvs[i].ships->Position.y - client->posxy[1][0]) / 22;
-				z = client->posalt[0];
-
-				if(x > -46340 && x < 46340 && y > -46340 && y < 46340 && z > radaralt->value && z < radarheight->value)
-				{
-					if(IsVisible(client->posxy[0][0], client->posxy[1][0], client->posalt[0], arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y,
-							0))
-					{
-						if(sqrt(Com_Pow(x, 2) + Com_Pow(y, 2)) < (range / 11))// && !(client->atradar & 0x10)) // commented to implement max/min alt
-						{
-							j = 1;
 						}
 					}
 				}
@@ -2313,7 +2241,7 @@ void LoadDamageModel(client_t *client)
 		{
 			if((num_rows = mysql_num_rows(my_result)) > 0)
 			{
-				if((num_rows + 1) > maxplanes)
+				if((u_int32_t)(num_rows + 1) > maxplanes)
 					num_rows = maxplanes;
 
 				for(i = 0; i < num_rows; i++)
@@ -2368,7 +2296,7 @@ void LoadDamageModel(client_t *client)
 		{
 			if((num_rows = mysql_num_rows(my_result)) > 0)
 			{
-				if((num_rows + 1) > maxplanes)
+				if((u_int32_t)(num_rows + 1) > maxplanes)
 					num_rows = maxplanes;
 
 				for(i = 0; i < num_rows; i++)
@@ -2417,7 +2345,7 @@ void LoadDamageModel(client_t *client)
 		{
 			if((num_rows = mysql_num_rows(my_result)) > 0)
 			{
-				if((num_rows + 1) > maxplanes)
+				if((u_int32_t)(num_rows + 1) > maxplanes)
 					num_rows = maxplanes;
 
 				for(i = 0; i < num_rows; i++)
@@ -2466,7 +2394,7 @@ void LoadDamageModel(client_t *client)
 		{
 			if((num_rows = mysql_num_rows(my_result)) > 0)
 			{
-				if((num_rows + 1) > maxplanes)
+				if((u_int32_t)(num_rows + 1) > maxplanes)
 					num_rows = maxplanes;
 
 				for(i = 0; i < num_rows; i++)
@@ -3050,7 +2978,7 @@ void CaptureField(u_int8_t field, client_t *client)
 		{
 			if(IsVitalBuilding(&(arena->fields[field - 1].buildings[i]), oldcapt->value))
 			{
-				if(timer > arena->fields[field - 1].buildings[i].timer)
+				if(timer > (u_int32_t)arena->fields[field - 1].buildings[i].timer)
 				{
 					timer = arena->fields[field - 1].buildings[i].timer;
 				}
@@ -3081,7 +3009,7 @@ void CaptureField(u_int8_t field, client_t *client)
 			}
 		}
 
-		for(i = 0; i < maxplanes; i++)
+		for(i = 0; (u_int32_t)i < maxplanes; i++)
 		{
 			if(arena->fields[field - 1].rps[i] >= 1)
 			{
@@ -3367,14 +3295,8 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 	{
 		if(i < fields->value)
 		{
-			if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
-			{
-				// TODO Check this in new cvs
-				if(!cvs || (arena->fields[i].cvs->ships && (arena->fields[i].cvs->ships->Vel.curr == 0.01)))
-				{
-					continue;
-				}
-			}
+			if(!cvs && arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
+				continue;
 
 			fieldx = arena->fields[i].posxyz[0];
 			fieldy = arena->fields[i].posxyz[1];

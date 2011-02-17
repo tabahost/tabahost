@@ -1237,7 +1237,7 @@ void CheckArenaRules(void)
 															arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
 												}
 												else
-													CVFire(ship, arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
+													ship->cvFire(arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
 											}
 										}
 										else
@@ -1328,7 +1328,7 @@ void CheckArenaRules(void)
 	{
 		if(!setjmp(debug_buffer))
 		{
-			SendCVDots();
+			Ship::sendCVDots();
 		}
 		else
 		{
@@ -3537,7 +3537,7 @@ void ProcessCommands(char *command, client_t *client)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Reseting CV %u", fields->value + i + 1);
 
-				Ship::ResetShips(fields->value + i + 1);
+				Ship::resetShips(fields->value - cvs->value + i + 1);
 			}
 			return;
 		}
@@ -9465,45 +9465,6 @@ void AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove)
 		Com_Printf(VERBOSE_DEBUG, "WB3OverrideSkin() at AddRemovePlaneScreen()\n");
 		WB3OverrideSkin(addplane->slot, client);
 	}
-}
-
-/**
- AddRemoveCVScreen
-
- Adds or remove a plane to client screen
- */
-
-void AddRemoveCVScreen(ship_t *ship, client_t *client, u_int8_t remove, u_int8_t unk1, u_int8_t cvnum)
-{
-	u_int8_t buffer[16];
-	wb3aifillslot_t *aifillslot;
-
-	memset(buffer, 0, sizeof(buffer));
-	aifillslot = (wb3aifillslot_t *) buffer;
-
-	aifillslot->packetid = htons(Com_WBhton(0x0008)); // nick, country, plane == 0 -> remove
-	aifillslot->slot = 0;
-
-	if(!remove)
-	{
-		if(ship->drone)
-		{
-			aifillslot->shortnick = htonl(ship->drone->shortnick);
-			aifillslot->country = htonl(ship->drone->country);
-			aifillslot->plane = htons(ship->drone->plane);
-			client->deck = ship;
-		}
-		else
-			return;
-	}
-	else
-		client->deck = NULL;
-
-	aifillslot->unk1 = htons(unk1);
-	aifillslot->cvnum = cvnum;
-
-	SendPacket(buffer, sizeof(buffer), client);
-	//SendPlaneStatus(plane, client);
 }
 
 /**

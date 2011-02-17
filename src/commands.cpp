@@ -219,13 +219,13 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 		if(mysql_set_server_option(&my_sock, MYSQL_OPTION_MULTI_STATEMENTS_ON))
 			Com_Printf(VERBOSE_ERROR, "%d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
-		for(i = 0; i < maxmuntype; i++)
+		for(i = 0; (u_int32_t)i < maxmuntype; i++)
 		{
 			sprintf(my_query, "%sUPDATE munitions SET he = '%d', ap = '%u', decay = '%d', name = '%s', abbrev = '%s', muntype = '%d' WHERE id = '%u' LIMIT 1",
 					my_query, arena->munition[i].he, arena->munition[i].ap, arena->munition[i].decay, arena->munition[i].name, arena->munition[i].abbrev,
 					arena->munition[i].type, i);
 
-			if((i && !(i % 30)) || i == (maxmuntype - 1))
+			if((i && !(i % 30)) || (u_int32_t)i == (maxmuntype - 1))
 			{
 				if(d_mysql_query(&my_sock, my_query))
 				{
@@ -264,7 +264,7 @@ void Cmd_Saveammo(client_t *client, char *row) // query time average 1.7sec
 	{
 		i = Com_Atoi(row);
 
-		if(i >= 0 && i < maxmuntype)
+		if(i >= 0 && (u_int32_t)i < maxmuntype)
 		{
 			sprintf(my_query, "UPDATE munitions SET he = '%d', ap = '%u', decay = '%d', name = '%s', abbrev = '%s', muntype = '%d' WHERE id = '%u' LIMIT 1",
 					arena->munition[i].he, arena->munition[i].ap, arena->munition[i].decay, arena->munition[i].name, arena->munition[i].abbrev,
@@ -390,7 +390,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 	}
 	else // country
 	{
-		if(!client->arenabuildsok /* change country in login */|| (client->countrytime <= time(NULL)) || client->attr == 1)
+		if(!client->arenabuildsok /* change country in login */|| (client->countrytime <= (u_int32_t)time(NULL)) || client->attr == 1)
 		{
 			if(((country != 1) && (country != 3)) && client->attr != 1)
 			{
@@ -584,7 +584,7 @@ void Cmd_Plane(u_int16_t planenumber, client_t *client)
 
 void Cmd_Fuel(int8_t fuel, client_t *client)
 {
-	if(client->fuel != fuel)
+	if(client->fuel != (u_int32_t)fuel)
 	{
 		if(fuel < 0)
 			fuel = 0;
@@ -2390,8 +2390,8 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 				if(arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 				{
-					if(arena->fields[field].cvs->ships)
-						fprintf(fp, "%.3f ft/s", arena->fields[field].cvs->ships->Vel.curr);
+					if(arena->fields[field].cv)
+						fprintf(fp, "%.3f ft/s", arena->fields[field].cv->getSpeed());
 					else
 						Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
 				}
@@ -2494,7 +2494,7 @@ void Cmd_Field(u_int8_t field, client_t *client)
 				if(!arena->fields[field].buildings[i].field)
 					break;
 
-				if(arena->fields[field].buildings[i].status && arena->fields[field].buildings[i].timer < reup && IsVitalBuilding(
+				if(arena->fields[field].buildings[i].status && (u_int32_t)arena->fields[field].buildings[i].timer < reup && IsVitalBuilding(
 						&(arena->fields[field].buildings[i]), oldcapt->value))
 				{
 					reup = arena->fields[field].buildings[i].timer;
@@ -2559,8 +2559,8 @@ void Cmd_Field(u_int8_t field, client_t *client)
 
 			if(arena->fields[field].type >= FIELD_CV && arena->fields[field].type <= FIELD_SUBMARINE)
 			{
-				if(arena->fields[field].cvs->ships)
-					fprintf(fp, "CONVOY SPEED: %.3f ft/s\n\n", arena->fields[field].cvs->ships->Vel.curr);
+				if(arena->fields[field].cv)
+					fprintf(fp, "CONVOY SPEED: %.3f ft/s\n\n", arena->fields[field].cv->getSpeed());
 				else
 					Com_Printf(VERBOSE_WARNING, "Cmd_Field() cv pointer = 0\n");
 			}
@@ -2904,11 +2904,11 @@ void Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount)
 
 		if((fnum = Com_Atoi(field)) > 0)
 		{
-			if(plane > 0 && plane < maxplanes)
+			if(plane > 0 && (u_int32_t)plane < maxplanes)
 				arena->fields[fnum - 1].rps[plane] = amount;
 			else if(plane < 0)
 			{
-				for(i = 0; i < maxplanes; i++)
+				for(i = 0; (u_int32_t)i < maxplanes; i++)
 					arena->fields[fnum - 1].rps[i] = amount;
 			}
 		}
@@ -2920,11 +2920,11 @@ void Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount)
 						|| arena->fields[i].type == FIELD_SUBMARINE))
 					continue;
 
-				if(plane > 0 && plane < maxplanes)
+				if(plane > 0 && (u_int32_t)plane < maxplanes)
 					arena->fields[i].rps[plane] = amount;
 				else if(plane < 0)
 				{
-					for(j = 0; j < maxplanes; j++)
+					for(j = 0; (u_int32_t)j < maxplanes; j++)
 						arena->fields[i].rps[j] = amount;
 				}
 			}
@@ -4404,7 +4404,7 @@ void Cmd_Disband(client_t *client)
 				{
 					sprintf(my_query, "UPDATE players SET squad_owner='0', squad_flag='0' WHERE id IN(");
 
-					for(i = 0; i < num_rows; i++)
+					for(i = 0; i < (u_int32_t)num_rows; i++)
 					{
 						if((my_row = mysql_fetch_row(my_result)))
 						{
@@ -4427,7 +4427,7 @@ void Cmd_Disband(client_t *client)
 							break;
 						}
 
-						if(i == (num_rows - 1))
+						if(i == (u_int32_t)(num_rows - 1))
 						{
 							strcat(my_query, ")");
 

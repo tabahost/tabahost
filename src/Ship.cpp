@@ -146,12 +146,12 @@ bool Ship::retarget(doublePoint_t &wp)
 }
 
 /**
- Ship::ResetShips
+ Ship::resetShips
 
  Reset ship formation
  */
 
-void Ship::ResetShips(u_int8_t group)
+void Ship::resetShips(u_int8_t group)
 {
 	Ship *leader, *ship;
 	client_t *drone;
@@ -201,6 +201,126 @@ void Ship::ResetShips(u_int8_t group)
 	return;
 }
 
+/**
+ Ship::cvFire
+
+ Fires artillary fire to nearest enemy field
+ */
+
+void Ship::cvFire(int32_t destx, int32_t desty)
+{
+	u_int8_t i, j;
+
+	switch(this->getPlaneType())
+	{
+		case PLANETYPE_CV:
+			i = 5;
+			break;
+		case PLANETYPE_CA:
+			i = 3;
+			break;
+		case PLANETYPE_DD:
+			i = 2;
+			break;
+		default:
+			i = 2;
+			break;
+	}
+
+	for(j = 0; j < i; j++)
+	{
+		ThrowBomb(FALSE, Position.x, Position.y, 59, destx, desty, 0, NULL);
+	}
+	ThrowBomb(TRUE, Position.x, Position.y, 0, destx, desty, 0, NULL);
+}
+
+/**
+ Ship::sendCVDots
+
+ Send CV dots at radar
+ */
+/*
+void Ship::sendCVDots()
+{
+	u_int8_t i, j, k;
+	Ship *ship;
+	wb3allaiplanesupdate_t *cvdot;
+	u_int8_t buffer[30];
+
+	cvdot = (wb3allaiplanesupdate_t *) buffer;
+
+	memset(buffer, 0, sizeof(buffer));
+
+	//	for (country = 1; country <= 4; country++)
+	//	{
+	for(i = 0, j = 0; i < cvs->value; i++)
+	{
+		for(ship = arena->cvs[i].ships; ship; ship = ship->next)
+		{
+			cvdot->packetid = htons(Com_WBhton(0x0015));
+			cvdot->number = htons(j);
+			cvdot->posx = htonl(ship->Position.x);
+			cvdot->posy = htonl(ship->Position.y);
+			cvdot->unk1 = 0;
+			cvdot->unk2 = htonl(dpitch->value);
+			cvdot->country = htonl(ship->country);
+			cvdot->plane = htonl(ship->plane);
+			cvdot->slot = htons(j++);
+
+			memset(arena->thaisent, 0, sizeof(arena->thaisent));
+
+			for(k = 0; k < maxentities->value; k++)
+			{
+				if((clients[k].country == 3 || clients[k].country == 1) && (clients[k].country == ship->country) && clients[k].inuse && !clients[k].drone
+						&& clients[k].ready) // && !clients[k].inflight)
+				{
+					if(clients[k].thai) // SendCVDots
+					{ // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
+						if(arena->thaisent[clients[k].thai].b)
+							continue;
+						else
+							arena->thaisent[clients[k].thai].b = 1;
+					}
+
+					//						if (clients[k].mapdots)
+					//							ClearMapDots(&clients[k]);
+
+					//						clients[k].mapdots = 1;
+					SendPacket(buffer, sizeof(buffer), &clients[k]);
+				}
+			}
+
+			//				memset(buffer, 0, sizeof(buffer));
+		}
+	}
+	//	}
+}
+*/
+/**
+ Ship::getShipByNum
+
+ Return Ship client_t from cvnum
+ */
+
+Ship *Ship::getShipByNum(u_int8_t num)
+{
+	u_int8_t i;
+
+	boids.restart();
+	i = 0;
+
+	while(boids.next())
+	{
+		if(boids.current()->getPlaneType() > PLANETYPE_CV)
+		{
+			if(i == num)
+				return (Ship *)boids.current();
+			i++;
+		}
+	}
+
+	return NULL;
+}
 /**
  Ship::run
 
@@ -275,4 +395,109 @@ int8_t Ship::run()
 	}
 
 	return 0;
+}
+
+/**
+ Ship::changeCVRoute
+
+ Change Route of CV, in threathness or by command
+ */
+
+void Ship::changeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client)
+{
+	int8_t angleoffset = 0;
+
+	Com_Printf(VERBOSE_DEBUG, "WP %d\n", cv->wpnum);
+
+	if(!cv->threatened) // step wpnum back, because its an automatic route change or first manual change
+	{
+		cv->wpnum--;
+		cv->threatened = 1;
+	}
+	// else // mantain wpnum, because is a manual route change
+
+	if(!client)
+	{
+		// grab the cvpos pathway angle
+		angle = AngleTo(cv->ships->Position.x, cv->ships->Position.y, cv->wp[cv->wpnum + 1][0], cv->wp[cv->wpnum + 1][1]);
+
+		// change the route based in the pathway angle
+		if(rand() % 100 < 60) // zigzag
+		{
+			angleoffset = 45 * Com_Pow(-1, cv->zigzag);
+
+			if(cv->zigzag == 1)
+			{
+				cv->zigzag = 2;
+			}
+			else
+			{
+				cv->zigzag = 1;
+			}
+		}
+		else
+		{
+			angleoffset = 45 * Com_Pow(-1, rand() % 2);
+		}
+
+		// check if new waypoint is over land
+		if(GetHeightAt(cv->ships->Position.x + (10000 * sin(Com_Rad(angle + angleoffset))), cv->ships->Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
+		{
+			angleoffset *= -1;
+		}
+
+		angle += angleoffset;
+		distance = 2000;
+	}
+
+	cv->wp[cv->wpnum][0] = arena->fields[cv->field].posxyz[0] + (distance * sin(Com_Rad(angle)));
+	cv->wp[cv->wpnum][1] = arena->fields[cv->field].posxyz[1] + (distance * cos(Com_Rad(angle)));
+
+	if(client)
+	{
+		PPrintf(client, RADIO_YELLOW, "Waypoint changed to %s", Com_Padloc(cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1]));
+		PPrintf(client, RADIO_YELLOW, "ETA: %s\"", Com_TimeSeconds(distance / cv->ships->Vel.curr));
+	}
+
+	// configure to next wpnum be that nearest to cv->wp[lastwp][0]
+	// coded at threatened = 0;
+}
+
+/**
+ Ship::addRemoveCVScreen
+
+ Adds or remove a plane to client screen
+ */
+
+void Ship::addRemoveCVScreen(client_t *client, u_int8_t remove, u_int8_t unk1, u_int8_t cvnum)
+{
+	u_int8_t buffer[16];
+	wb3aifillslot_t *aifillslot;
+
+	memset(buffer, 0, sizeof(buffer));
+	aifillslot = (wb3aifillslot_t *) buffer;
+
+	aifillslot->packetid = htons(Com_WBhton(0x0008)); // nick, country, plane == 0 -> remove
+	aifillslot->slot = 0;
+
+	if(!remove)
+	{
+		if(drone)
+		{
+			aifillslot->shortnick = htonl(drone->shortnick);
+			aifillslot->country = htonl(drone->country);
+			aifillslot->plane = htons(drone->plane);
+			client->deck = this;
+		}
+		else
+			return;
+	}
+	else
+		client->deck = NULL;
+
+	aifillslot->unk1 = htons(unk1);
+	aifillslot->cvnum = cvnum;
+
+	SendPacket(buffer, sizeof(buffer), client);
+	//SendPlaneStatus(plane, client);
 }
