@@ -311,7 +311,7 @@ void CheckArenaRules(void)
 	u_int8_t close, vitals, dominated;
 	int16_t i, j;
 	u_int8_t reds, golds, k;
-	ship_t *ship;
+	Ship *ship;
 	client_t* near;
 	double tonnage_recover, speed;
 	u_int8_t c_cities, totalcities;
@@ -478,7 +478,7 @@ void CheckArenaRules(void)
 						{
 							dist = GetFactoryReupTime(arena->cities[i].buildings[j].country);
 
-							if(arena->frame < arena->cities[i].buildings[j].timer)
+							if(arena->frame < (u_int32_t)arena->cities[i].buildings[j].timer)
 								posx = MAX_UINT32 - arena->cities[i].buildings[j].timer + arena->frame;
 							else
 								posx = arena->frame - arena->cities[i].buildings[j].timer;
@@ -1066,8 +1066,8 @@ void CheckArenaRules(void)
 
 	if(!setjmp(debug_buffer))
 	{
-		if(!(arena->frame % 6000)) // Log AI's position every 60sec
-			Boid::logPosition();
+//		if(!(arena->frame % 6000)) // Log AI's position every 60sec
+//			Boid::logPosition();
 
 		if(!setjmp(debug_buffer))
 		{
@@ -1079,31 +1079,31 @@ void CheckArenaRules(void)
 				{
 					if(!(arena->frame % 50)) // 500ms
 					{
-						RunShips(i, 0);
+						Boid::runBoids();
 
-						// check if there are enemies around
-						if(arena->cvs[i].ships && arena->cvs[i].ships->drone)
-						{
-							near = NearPlane(arena->cvs[i].ships->drone, arena->cvs[i].country, 15000);
-
-							if(!setjmp(debug_buffer))
-							{
-								if(near)
-								{
-									posx = DistBetween(arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, near->posxy[0][0],
-											near->posxy[1][0], near->posalt[0], -1);
-
-									if(!arena->cvs[i].threatened && !(arena->frame % 600))
-									{
-										ChangeCVRoute(&(arena->cvs[i]), 0, 0, NULL);
-									}
-								}
-							}
-							else
-							{
-								DebugClient(__FILE__, __LINE__, TRUE, NULL);
-							}
-						}
+//						// check if there are enemies around
+//						if(arena->cvs[i].ships && arena->cvs[i].ships->drone)
+//						{
+//							near = NearPlane(arena->cvs[i].ships->drone, arena->cvs[i].country, 15000);
+//
+//							if(!setjmp(debug_buffer))
+//							{
+//								if(near)
+//								{
+//									posx = DistBetween(arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, near->posxy[0][0],
+//											near->posxy[1][0], near->posalt[0], -1);
+//
+//									if(!arena->cvs[i].threatened && !(arena->frame % 600))
+//									{
+//										ship->changeRoute(&(arena->cvs[i]), 0, 0, NULL);
+//									}
+//								}
+//							}
+//							else
+//							{
+//								DebugClient(__FILE__, __LINE__, TRUE, NULL);
+//							}
+//						}
 					}
 				}
 				else
@@ -1113,167 +1113,167 @@ void CheckArenaRules(void)
 
 				if(!setjmp(debug_buffer))
 				{
-					// CV Attack
-					for(ship = arena->cvs[i].ships; ship; ship = ship->next)
-					{
-						if(!ship->drone)
-						{
-							Com_Printf(VERBOSE_WARNING, "CV Attack, ship->drone == NULL\n");
-							continue;
-						}
-						if(!setjmp(debug_buffer))
-						{
-							if(near && posx > 0)
-							{
-								speed = sqrt(near->speedxyz[0][0] * near->speedxyz[0][0] + near->speedxyz[1][0] * near->speedxyz[1][0] + near->speedxyz[2][0]
-										* near->speedxyz[2][0]);
-
-								if(posx <= 4000)
-								{
-									if(!setjmp(debug_buffer))
-									{
-										// % of hit
-										j = (int16_t) (-0.003 * (float) posx + 11.0);
-										if(j < 0)
-											j = 0;
-										j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
-										if(j < 0)
-											j = 0;
-
-										if((rand() % 100) < j) // hit
-											FireAck(ship->drone, near, posx, 0);
-										else
-											// fail
-											FireAck(ship->drone, near, posx, 1);
-									}
-									else
-									{
-										DebugClient(__FILE__, __LINE__, TRUE, NULL);
-									}
-								}
-								else if(!(arena->frame % 300)) // 3 sec
-								{
-									if(!setjmp(debug_buffer))
-									{
-										// % of hit
-										j = (int16_t) (-0.001 * (float) posx + 15.0);
-										if(j < 0)
-											j = 0;
-										j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
-										if(j < 0)
-											j = 0;
-
-										if((rand() % 100) < j) // hit
-											FireFlak(ship->drone, near, posx, 0);
-										else
-											// fail
-											FireFlak(ship->drone, near, posx, 1);
-									}
-									else
-									{
-										DebugClient(__FILE__, __LINE__, TRUE, NULL);
-									}
-								}
-							}
-						}
-						else
-						{
-							DebugClient(__FILE__, __LINE__, TRUE, NULL);
-						}
-
-						if(!setjmp(debug_buffer))
-						{
-							if(!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
-							{
-								j = dist = 0;
-
-								if(!setjmp(debug_buffer))
-								{
-									// check nearest CV
-									for(k = 0; k < cvs->value; k++)
-									{
-										if(ship->country != arena->cvs[k].country)
-										{
-											posx = DistBetween(ship->Position.x, ship->Position.y, 0, arena->fields[arena->cvs[k].field].posxyz[0],
-													arena->fields[arena->cvs[k].field].posxyz[1], 0, (int32_t) cvrange->value);
-
-											if(posx > 0)
-											{
-												if(!dist || (posx < dist))
-												{
-													dist = posx;
-													j = arena->cvs[k].field;
-												}
-											}
-										}
-									}
-								}
-								else
-								{
-									DebugClient(__FILE__, __LINE__, TRUE, NULL);
-								}
-
-								if(!setjmp(debug_buffer))
-								{
-									// check nearest field
-									if(!j)
-									{
-										j = NearestField(ship->Position.x, ship->Position.y, ship->country, TRUE, FALSE, &dist);
-									}
-
-									if(j >= 0 && dist < (u_int32_t) cvrange->value && j != arena->cvs[i].field)
-									{
-										if(j < fields->value)
-										{
-											if(!arena->fields[j].closed)
-											{
-												if(arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
-												{
-													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0],
-															arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2],
-															arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1],
-															arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0],
-															arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-												}
-												else
-													ship->cvFire(arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
-											}
-										}
-										else
-										{
-											if(!arena->cities[j - (int16_t) fields->value].closed)
-											{
-												if(arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
-												{
-													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0],
-															arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2],
-															arena->cities[j - (int16_t) fields->value].posxyz[0],
-															arena->cities[j - (int16_t) fields->value].posxyz[1],
-															arena->cities[j - (int16_t) fields->value].posxyz[2], NULL);
-													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1],
-															arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t) fields->value].posxyz[0],
-															arena->cities[j - (int16_t) fields->value].posxyz[1],
-															arena->cities[j - (int16_t) fields->value].posxyz[2], NULL);
-												}
-												else
-													CVFire(ship, arena->cities[j - (int16_t) fields->value].posxyz[0], arena->cities[j
-															- (int16_t) fields->value].posxyz[1]);
-											}
-										}
-									}
-								}
-								else
-								{
-									DebugClient(__FILE__, __LINE__, TRUE, NULL);
-								}
-							}
-						}
-						else
-						{
-							DebugClient(__FILE__, __LINE__, TRUE, NULL);
-						}
-					}
+//					// CV Attack
+//					for(ship = arena->cvs[i].ships; ship; ship = ship->next)
+//					{
+//						if(!ship->drone)
+//						{
+//							Com_Printf(VERBOSE_WARNING, "CV Attack, ship->drone == NULL\n");
+//							continue;
+//						}
+//						if(!setjmp(debug_buffer))
+//						{
+//							if(near && posx > 0)
+//							{
+//								speed = sqrt(near->speedxyz[0][0] * near->speedxyz[0][0] + near->speedxyz[1][0] * near->speedxyz[1][0] + near->speedxyz[2][0]
+//										* near->speedxyz[2][0]);
+//
+//								if(posx <= 4000)
+//								{
+//									if(!setjmp(debug_buffer))
+//									{
+//										// % of hit
+//										j = (int16_t) (-0.003 * (float) posx + 11.0);
+//										if(j < 0)
+//											j = 0;
+//										j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
+//										if(j < 0)
+//											j = 0;
+//
+//										if((rand() % 100) < j) // hit
+//											FireAck(ship->drone, near, posx, 0);
+//										else
+//											// fail
+//											FireAck(ship->drone, near, posx, 1);
+//									}
+//									else
+//									{
+//										DebugClient(__FILE__, __LINE__, TRUE, NULL);
+//									}
+//								}
+//								else if(!(arena->frame % 300)) // 3 sec
+//								{
+//									if(!setjmp(debug_buffer))
+//									{
+//										// % of hit
+//										j = (int16_t) (-0.001 * (float) posx + 15.0);
+//										if(j < 0)
+//											j = 0;
+//										j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
+//										if(j < 0)
+//											j = 0;
+//
+//										if((rand() % 100) < j) // hit
+//											FireFlak(ship->drone, near, posx, 0);
+//										else
+//											// fail
+//											FireFlak(ship->drone, near, posx, 1);
+//									}
+//									else
+//									{
+//										DebugClient(__FILE__, __LINE__, TRUE, NULL);
+//									}
+//								}
+//							}
+//						}
+//						else
+//						{
+//							DebugClient(__FILE__, __LINE__, TRUE, NULL);
+//						}
+//
+//						if(!setjmp(debug_buffer))
+//						{
+//							if(!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
+//							{
+//								j = dist = 0;
+//
+//								if(!setjmp(debug_buffer))
+//								{
+//									// check nearest CV
+//									for(k = 0; k < cvs->value; k++)
+//									{
+//										if(ship->country != arena->cvs[k].country)
+//										{
+//											posx = DistBetween(ship->Position.x, ship->Position.y, 0, arena->fields[arena->cvs[k].field].posxyz[0],
+//													arena->fields[arena->cvs[k].field].posxyz[1], 0, (int32_t) cvrange->value);
+//
+//											if(posx > 0)
+//											{
+//												if(!dist || (posx < dist))
+//												{
+//													dist = posx;
+//													j = arena->cvs[k].field;
+//												}
+//											}
+//										}
+//									}
+//								}
+//								else
+//								{
+//									DebugClient(__FILE__, __LINE__, TRUE, NULL);
+//								}
+//
+//								if(!setjmp(debug_buffer))
+//								{
+//									// check nearest field
+//									if(!j)
+//									{
+//										j = NearestField(ship->Position.x, ship->Position.y, ship->country, TRUE, FALSE, &dist);
+//									}
+//
+//									if(j >= 0 && dist < (u_int32_t) cvrange->value && j != arena->cvs[i].field)
+//									{
+//										if(j < fields->value)
+//										{
+//											if(!arena->fields[j].closed)
+//											{
+//												if(arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+//												{
+//													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0],
+//															arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2],
+//															arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+//													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1],
+//															arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0],
+//															arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
+//												}
+//												else
+//													ship->cvFire(arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
+//											}
+//										}
+//										else
+//										{
+//											if(!arena->cities[j - (int16_t) fields->value].closed)
+//											{
+//												if(arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
+//												{
+//													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0],
+//															arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2],
+//															arena->cities[j - (int16_t) fields->value].posxyz[0],
+//															arena->cities[j - (int16_t) fields->value].posxyz[1],
+//															arena->cities[j - (int16_t) fields->value].posxyz[2], NULL);
+//													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1],
+//															arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t) fields->value].posxyz[0],
+//															arena->cities[j - (int16_t) fields->value].posxyz[1],
+//															arena->cities[j - (int16_t) fields->value].posxyz[2], NULL);
+//												}
+//												else
+//													CVFire(ship, arena->cities[j - (int16_t) fields->value].posxyz[0], arena->cities[j
+//															- (int16_t) fields->value].posxyz[1]);
+//											}
+//										}
+//									}
+//								}
+//								else
+//								{
+//									DebugClient(__FILE__, __LINE__, TRUE, NULL);
+//								}
+//							}
+//						}
+//						else
+//						{
+//							DebugClient(__FILE__, __LINE__, TRUE, NULL);
+//						}
+//					}
 				}
 				else
 				{
@@ -2862,7 +2862,7 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		if(!Com_Stricmp(command, "checkwaypoints"))
 		{
-			Cmd_CheckWaypoints(client);
+			//Cmd_CheckWaypoints(client);
 			return;
 		}
 		if(!Com_Stricmp(command, "end"))
@@ -3511,7 +3511,7 @@ void ProcessCommands(char *command, client_t *client)
 			for(i = 0; i < cvs->value; i++)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Loading CV %u waypoints", i);
-				ReadCVWaypoints(i);
+				arena->fields[(u_int16_t)(fields->value - cvs->value + i)].cv->loadWaypoints(0);
 			}
 			return;
 		}
@@ -7770,7 +7770,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if(!setjmp(debug_buffer))
 	{
-		score = dmgprobe < building->armor ? dmgprobe : building->armor;
+		score = ((u_int32_t)dmgprobe < building->armor) ? dmgprobe : (int32_t)building->armor;
 		score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
 	}
 	else
@@ -9564,7 +9564,7 @@ void SendDeckUpdates(client_t *client)
 	updateplane_t *updateplane;
 	updateplane2_t *updateplane2;
 
-	if(!client || !client->deck || !client->deck->drone)
+	if(!client || !client->deck || !client->deck->getDrone())
 		return;
 
 	memset(buffer, 0, sizeof(buffer));
@@ -9580,23 +9580,23 @@ void SendDeckUpdates(client_t *client)
 
 	updateplane2 = (updateplane2_t *) (buffer + 19);
 
-	updateplane2->timeoffset = htons(arena->time - client->deck->drone->timer);//htons(0xFFFC);
+	updateplane2->timeoffset = htons(arena->time - client->deck->getDrone()->timer);//htons(0xFFFC);
 	updateplane2->slot = 0;
-	updateplane2->relposx = htons(client->deck->drone->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
-	updateplane2->relposy = htons(client->deck->drone->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
-	updateplane2->relalt = htons(client->deck->drone->posalt[0] - ((client->posalt[0] >> 9) << 9));
-	updateplane2->pitch = client->deck->drone->angles[0][0] / 14; // >> 4;
-	updateplane2->xaccel = client->deck->drone->accelxyz[0][0] >> 2;
-	updateplane2->prxspeed = htons(((client->deck->drone->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
-	updateplane2->prxspeed |= htons(((client->deck->drone->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-	updateplane2->roll = client->deck->drone->angles[1][0] / 14; // >> 4;
-	updateplane2->yaccel = client->deck->drone->accelxyz[1][0] >> 2;
-	updateplane2->bryspeed = htons(((client->deck->drone->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
-	updateplane2->bryspeed |= htons(((client->deck->drone->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
-	updateplane2->yaw = client->deck->drone->angles[2][0] / 14; //>> 4;
-	updateplane2->zaccel = client->deck->drone->accelxyz[2][0] >> 2;
-	updateplane2->yrzspeed = htons(((client->deck->drone->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
-	updateplane2->yrzspeed |= htons(((client->deck->drone->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+	updateplane2->relposx = htons(client->deck->getDrone()->posxy[0][0] - ((client->posxy[0][0] >> 11) << 11));
+	updateplane2->relposy = htons(client->deck->getDrone()->posxy[1][0] - ((client->posxy[1][0] >> 11) << 11));
+	updateplane2->relalt = htons(client->deck->getDrone()->posalt[0] - ((client->posalt[0] >> 9) << 9));
+	updateplane2->pitch = client->deck->getDrone()->angles[0][0] / 14; // >> 4;
+	updateplane2->xaccel = client->deck->getDrone()->accelxyz[0][0] >> 2;
+	updateplane2->prxspeed = htons(((client->deck->getDrone()->aspeeds[0][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->prxspeed |= htons(((client->deck->getDrone()->speedxyz[0][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+	updateplane2->roll = client->deck->getDrone()->angles[1][0] / 14; // >> 4;
+	updateplane2->yaccel = client->deck->getDrone()->accelxyz[1][0] >> 2;
+	updateplane2->bryspeed = htons(((client->deck->getDrone()->aspeeds[1][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->bryspeed |= htons(((client->deck->getDrone()->speedxyz[1][0] >> 2) & 0x1FF) ^ 0x0100); // 9
+	updateplane2->yaw = client->deck->getDrone()->angles[2][0] / 14; //>> 4;
+	updateplane2->zaccel = client->deck->getDrone()->accelxyz[2][0] >> 2;
+	updateplane2->yrzspeed = htons(((client->deck->getDrone()->aspeeds[2][0] >> 6) << 9) ^ 0x8000); // 7
+	updateplane2->yrzspeed |= htons(((client->deck->getDrone()->speedxyz[2][0] >> 2) & 0x1FF) ^ 0x0100); // 9
 
 	SendPacket(buffer, sizeof(buffer), client);
 }
@@ -11168,7 +11168,7 @@ void WB3RequestStartFly(u_int8_t *buffer, client_t *client)
 
 	if(client->deck)
 	{
-		AddRemoveCVScreen(NULL, client, TRUE, 0, 0);
+		client->deck->addRemoveCVScreen(client, TRUE, 0, 0);
 		client->deck = NULL; // client is not at CV deck
 	}
 }

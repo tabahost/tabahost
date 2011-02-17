@@ -86,7 +86,8 @@ void Ship::loadWaypoints(u_int8_t wpnum = 1)
 		memset(buffer, 0, sizeof(buffer));
 	}
 
-	this->wpnum = wpnum;
+	if(wpnum)
+		this->wpnum = wpnum;
 
 	if(!wptotal)
 	{
@@ -395,72 +396,6 @@ int8_t Ship::run()
 	}
 
 	return 0;
-}
-
-/**
- Ship::changeCVRoute
-
- Change Route of CV, in threathness or by command
- */
-
-void Ship::changeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client)
-{
-	int8_t angleoffset = 0;
-
-	Com_Printf(VERBOSE_DEBUG, "WP %d\n", cv->wpnum);
-
-	if(!cv->threatened) // step wpnum back, because its an automatic route change or first manual change
-	{
-		cv->wpnum--;
-		cv->threatened = 1;
-	}
-	// else // mantain wpnum, because is a manual route change
-
-	if(!client)
-	{
-		// grab the cvpos pathway angle
-		angle = AngleTo(cv->ships->Position.x, cv->ships->Position.y, cv->wp[cv->wpnum + 1][0], cv->wp[cv->wpnum + 1][1]);
-
-		// change the route based in the pathway angle
-		if(rand() % 100 < 60) // zigzag
-		{
-			angleoffset = 45 * Com_Pow(-1, cv->zigzag);
-
-			if(cv->zigzag == 1)
-			{
-				cv->zigzag = 2;
-			}
-			else
-			{
-				cv->zigzag = 1;
-			}
-		}
-		else
-		{
-			angleoffset = 45 * Com_Pow(-1, rand() % 2);
-		}
-
-		// check if new waypoint is over land
-		if(GetHeightAt(cv->ships->Position.x + (10000 * sin(Com_Rad(angle + angleoffset))), cv->ships->Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
-		{
-			angleoffset *= -1;
-		}
-
-		angle += angleoffset;
-		distance = 2000;
-	}
-
-	cv->wp[cv->wpnum][0] = arena->fields[cv->field].posxyz[0] + (distance * sin(Com_Rad(angle)));
-	cv->wp[cv->wpnum][1] = arena->fields[cv->field].posxyz[1] + (distance * cos(Com_Rad(angle)));
-
-	if(client)
-	{
-		PPrintf(client, RADIO_YELLOW, "Waypoint changed to %s", Com_Padloc(cv->wp[cv->wpnum][0], cv->wp[cv->wpnum][1]));
-		PPrintf(client, RADIO_YELLOW, "ETA: %s\"", Com_TimeSeconds(distance / cv->ships->Vel.curr));
-	}
-
-	// configure to next wpnum be that nearest to cv->wp[lastwp][0]
-	// coded at threatened = 0;
 }
 
 /**

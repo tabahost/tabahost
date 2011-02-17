@@ -94,32 +94,34 @@ class Boid
 		bool operator==(const Boid &b);
 		double angle(double ang);
 		double angleDef(double ang);
+		void logPosition();
 
 		// Variable set/access/test
 		void setVelMax(double a){Vel.max = a;};
 		void setPosition(u_int8_t a){pos = a;};
 		void setCurrWaypoint(u_int8_t a){wpnum = a;};
 		void setPrepared(bool a){prepared = a;};
-		Boid *setLeader(Boid* a){leader = a; return a;};
+		Boid *setLeader(Boid *a){leader = a; return a;};
 		void setCountry(u_int8_t a){country = a;};
 		void setFormation(u_int8_t a){formation = a;};
 		void setGroup(u_int8_t a){group = a;};
 		void setField(u_int8_t a){field = a;};
 		void setPlane(u_int8_t a){plane = a;};
 		void setPort(field_s *a){port = a;};
+		struct client_s *setDrone(struct client_s *a){drone = a; return a;};
+		struct client_s *getDrone(){return drone;};
 		u_int8_t getGroup(){return group;};
 		u_int8_t getField(){return field;};
 		u_int8_t getPosition(){return pos;};
 		u_int8_t getPlaneType(){return (plane?arena->planedamage[plane].type:0);};
+		double getSpeed(){return Vel.curr;};
 		bool hasLeader(){return (leader != NULL);};
-		struct client_s *setDrone(struct client_s *a){drone = a; return a;};
 
 		// leader functions
 		void addFollower(Boid *follower);
 		void removeFollower(Boid *follower);
 		virtual void loadWaypoints(u_int8_t wpnum);
 		void changeRoute(double angle /*0*/, u_int16_t distance /*10000*/, client_t *client);
-		void logPosition();
 
 		// follower functions
 		//void joinLeader(Boid *leader);
@@ -169,8 +171,8 @@ class Boidlist
 
 		void push_back(Boid *a){count++; if(last){last->next = new Boidnode(a); last->next->prev = last; last = last->next;} else {first = new Boidnode(a); last = first;}};
 		void push_front(Boid *a){count++; if(first){first->prev = new Boidnode(a); first->prev->next = first; first = first->prev;} else {first = new Boidnode(a); last = first;}};
-		Boid* front(){if(first) return first->value; else return NULL;};
-		Boid* back(){if(last) return last->value; else return NULL;};
+		Boid *front(){if(first) return first->value; else return NULL;};
+		Boid *back(){if(last) return last->value; else return NULL;};
 		void erase(Boid *a){if(!first) return; for(Boidnode *i = first; it; i = i->next){if(i->value == a){if(first == i) first = i->next; if(last == i) last = i->prev; it = i->prev; delete i; count--; break;}}};
 		void erase_del(Boid *a){erase(a); delete a;}; // erase pointer from list and delete the object
 		void pop_back(){count--; if(first == last){delete first; first = last = NULL;} else {it = last->prev; delete last; last = it;}};

@@ -2448,21 +2448,6 @@ void	DroneWings(client_t *client);
 u_int32_t NewDroneName(client_t *client);
 void	LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_t *client);
 
-// cv.c
-//void	RunShips_Walk(ship_t *B);
-//double	RunShips_Angle(double ang);
-//double	RunShips_AngleDef(double ang);
-//void	RunShips_Yaw(ship_t *B, ship_t *CV);
-//void	RunShips_ReTarget(ship_t *B, ship_t *CV, const double *A);
-//void	RunShips(u_int8_t group, u_int8_t formation); // Call every 500ms
-//int8_t	ProcessDroneShips(ship_t *ship);
-//void	ChangeCVRoute(cvs_t *cv, double angle /*0*/, u_int16_t distance /*10000*/, client_t *client);
-//ship_t	*MainShipTarget(u_int8_t group);
-//void	ReadCVWaypoints(u_int8_t num);
-//void	ResetShips(u_int8_t group);
-//ship_t	*RemoveShip(ship_t *ship);
-//ship_t	*AddShip(u_int8_t group, u_int8_t plane, u_int8_t country);
-
 //commands.c
 void	Cmd_LoadBatch(client_t *client);
 void	Cmd_LoadConfig(const char *filename, client_t *client);
@@ -2525,7 +2510,7 @@ void	Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client);
 void	Cmd_UTC(client_t *client);
 void	Cmd_Lives(char *nick, int8_t amount, client_t *client);
 void	Cmd_Reload(client_t *client);
-void	Cmd_CheckWaypoints(client_t *client);
+//void	Cmd_CheckWaypoints(client_t *client);
 void	Cmd_Flare(client_t *client);
 void	Cmd_Rocket(int32_t y, double angle, double angle2, client_t *client); // debug
 void	Cmd_Sink(u_int16_t a, u_int16_t b, client_t *client); // debug

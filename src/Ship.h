@@ -22,6 +22,7 @@ class Ship: public Boid
 		static u_int16_t getShipCount(){return shipCount;};
 		static Ship *getShipByNum(u_int8_t num);
 		static void resetShips(u_int8_t group);
+		static void sendCVDots(){;};
 
 		virtual bool isLegal(const char *);
 
@@ -38,8 +39,6 @@ class Ship: public Boid
 
 		void cvFire(int32_t destx, int32_t desty);
 		void addRemoveCVScreen(client_t *client, u_int8_t remove, u_int8_t unk1, u_int8_t cvnum);
-		void sendCVDots();
-
 //		void updateFieldPosition(); // if this group is a field (CV), update the field based on group leader position
 //		void calcWaypointsTo(int32_t x, int32_t y); // calc a path to xy destination, 1st waypoint is the origin
 //		void waypointStart(); // return waypoint counter to start (origin)

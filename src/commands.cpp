@@ -20,6 +20,7 @@
  * 
  ***/
 
+#include "Ship.h"
 #include "shared.h"
 
 /**
@@ -5831,7 +5832,7 @@ void Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client)
 	if(client->deck)
 	{
 		if(distance <= 20000 && distance >= 5000)
-			ChangeCVRoute(&(arena->cvs[client->deck->group]), angle, distance, client);
+			client->deck->changeRoute(angle, distance, client);
 		else
 			PPrintf(client, RADIO_LIGHTYELLOW, "Distance limited to 5000 - 20000 feets");
 	}
@@ -5969,26 +5970,26 @@ void Cmd_Reload(client_t *client)
  Verify CV waypoints for stuck
  */
 
-void Cmd_CheckWaypoints(client_t *client)
-{
-	u_int8_t i, j;
-
-	for(i = 0; i < cvs->value; i++)
-	{
-		ReadCVWaypoints(i);
-
-		for(j = 1; j < arena->cvs[i].wptotal; j++)
-		{
-			if(!IsVisible(arena->cvs[i].wp[j][0], arena->cvs[i].wp[j][1], 5, arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5))
-			{
-				PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> %u] error", i, j - 1, j);
-			}
-		}
-
-		if(!IsVisible(arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5, arena->cvs[i].wp[1][0], arena->cvs[i].wp[1][1], 5))
-			PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> 1] error", i, j - 1);
-	}
-}
+//void Cmd_CheckWaypoints(client_t *client)
+//{
+//	u_int8_t i, j;
+//
+//	for(i = 0; i < cvs->value; i++)
+//	{
+//		arena->fields[(u_int16_t)(fields->value - cvs->value + i)].cv->loadWaypoints(0);
+//
+//		for(j = 1; j < arena->cvs[i].wptotal; j++)
+//		{
+//			if(!IsVisible(arena->cvs[i].wp[j][0], arena->cvs[i].wp[j][1], 5, arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5))
+//			{
+//				PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> %u] error", i, j - 1, j);
+//			}
+//		}
+//
+//		if(!IsVisible(arena->cvs[i].wp[j - 1][0], arena->cvs[i].wp[j - 1][1], 5, arena->cvs[i].wp[1][0], arena->cvs[i].wp[1][1], 5))
+//			PPrintf(client, RADIO_YELLOW, "CV[%u] WP [%u -> 1] error", i, j - 1);
+//	}
+//}
 
 void Cmd_Flare(client_t *client)
 {
