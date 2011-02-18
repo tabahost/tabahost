@@ -80,7 +80,7 @@ class Boid
 
 
 	public:
-		static u_int16_t boidCount; // may be obsolete because off Boidlist::count
+		static u_int16_t boidCount;
 		static Boidlist boids;
 		static void runBoids();
 		static void removeGroup(u_int8_t group);
@@ -98,6 +98,7 @@ class Boid
 
 		// Variable set/access/test
 		void setVelMax(double a){Vel.max = a;};
+		void setPosition(int32_t x, int32_t y, int32_t z = 0){Position.x = x; Position.y = y;};
 		void setPosition(u_int8_t a){pos = a;};
 		void setCurrWaypoint(u_int8_t a){wpnum = a;};
 		void setPrepared(bool a){prepared = a;};
@@ -118,9 +119,10 @@ class Boid
 		bool hasLeader(){return (leader != NULL);};
 
 		// leader functions
+		void createFollowers(Boidlist *a){followers = a;};
 		void addFollower(Boid *follower);
-		void removeFollower(Boid *follower);
-		virtual void loadWaypoints(u_int8_t wpnum);
+		void removeFollowers(Boid *follower);
+		virtual void loadWaypoints(u_int8_t wpnum){return;};
 		void changeRoute(double angle /*0*/, u_int16_t distance /*10000*/, client_t *client);
 
 		// follower functions
@@ -130,12 +132,12 @@ class Boid
 		int8_t processDroneBoid(); // boid interface with wb-drone
 
 		// Movement functions
-		virtual int8_t run();
+		virtual int8_t run(){return 0;};
 		void walk(); // make a move forward
 		void yaw(Boid *leader); // follower yaw
 		void yaw(); // leader yaw
 		void retarget(const double *A); // follower retarget (target leader formation)
-		virtual bool retarget(doublePoint_t &wp); // leader retarget (target next waypoint)
+		virtual bool retarget(doublePoint_t &wp){return false;}; // leader retarget (target next waypoint)
 		void prepare(const double *A); // follower prepare (point to formation)
 		void prepare(); // leader prepare (point to waypoint)
 };
@@ -147,8 +149,8 @@ class Boidnode
 		Boidnode *prev;
 		Boidnode *next;
 
-		Boidnode():value(NULL), prev(NULL), next(NULL){};
-		Boidnode(Boid *boid):value(boid), prev(NULL), next(NULL){};
+		Boidnode(){value = NULL; prev = next = NULL;};
+		Boidnode(Boid *boid){value = boid; prev = next = NULL;};
 		virtual ~Boidnode(){if(prev && next){prev->next = next;next->prev = prev;} else if(prev && !next){prev->next = NULL;} else if(!prev && next){next->prev = NULL;}};
 };
 
@@ -160,20 +162,22 @@ class Boidlist
 		Boidnode *first;
 		Boidnode *last;
 	public:
-		Boidlist():count(0),it(NULL),first(NULL),last(NULL){}; // create an empty list
-		Boidlist(Boid *boid):count(1),it(NULL),first(new Boidnode(boid)),last(first){}; // create a list with one boid
-		virtual ~Boidlist(); // delete list
+		Boidlist(){count = 0; first = last = it = NULL;}; // create an empty list
+		Boidlist(Boid *boid){count=1;it=NULL;first=new Boidnode(boid);last=first;}; // create a list with one boid
+		~Boidlist(){this->clear();}; // delete list
+
+		u_int32_t getCount(){return count;};
 
 		void restart(){it = first;};
-		Boid *prev(){it = it->prev; return it->value;};
-		Boid *next(){it = it->next; return it->value;};
-		Boid *current(){return it->value;};
+		Boid *prev(){if(it) it = it->prev; if(it) return it->value; else return NULL;};
+		Boid *next(){if(it) it = it->next; else it = first; if(it) return it->value; else return NULL;};
+		Boid *current(){return (it?it->value:NULL);};
 
 		void push_back(Boid *a){count++; if(last){last->next = new Boidnode(a); last->next->prev = last; last = last->next;} else {first = new Boidnode(a); last = first;}};
 		void push_front(Boid *a){count++; if(first){first->prev = new Boidnode(a); first->prev->next = first; first = first->prev;} else {first = new Boidnode(a); last = first;}};
 		Boid *front(){if(first) return first->value; else return NULL;};
 		Boid *back(){if(last) return last->value; else return NULL;};
-		void erase(Boid *a){if(!first) return; for(Boidnode *i = first; it; i = i->next){if(i->value == a){if(first == i) first = i->next; if(last == i) last = i->prev; it = i->prev; delete i; count--; break;}}};
+		void erase(Boid *a){if(!first) return; for(Boidnode *i = first; i; i = i->next){if(i->value == a){if(first == i) first = i->next; if(last == i) last = i->prev; it = i->prev; delete i; count--; break;}}};
 		void erase_del(Boid *a){erase(a); delete a;}; // erase pointer from list and delete the object
 		void pop_back(){count--; if(first == last){delete first; first = last = NULL;} else {it = last->prev; delete last; last = it;}};
 		void pop_front(){count--; if(first == last){delete first; first = last = NULL;} else {it = first->next; delete first; first = it;}};

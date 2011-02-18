@@ -14,6 +14,8 @@
 
 #include "Ship.h"
 
+u_int16_t Ship::shipCount;
+
 Ship::Ship()
 {
 	Com_Printf(VERBOSE_DEBUG, "Ship constructor\n");
@@ -163,17 +165,19 @@ void Ship::resetShips(u_int8_t group)
 
 	// Create leader
 	leader = new Ship();
+	leader->createFollowers(new Boidlist());
 	leader->setGroup(group);
 	leader->loadWaypoints();
 	leader->setFormation(0);
-	leader->setPort(&(arena->fields[group-1]));
-	leader->setField(group-1);
-	leader->setCountry(arena->fields[group-1].country);
-	arena->fields[group-1].cv = leader;
-
-	leader->setPlane(arena->fields[group-1].fleetships[0]);
+	leader->setPort(&(arena->fields[group - 1]));
+	leader->setField(group - 1);
+	leader->setCountry(arena->fields[group - 1].country);
+	arena->fields[group - 1].cv = leader;
+//	leader->setPosition(arena->fields[group - 1].posxyz[0], arena->fields[group - 1].posxyz[1], arena->fields[group - 1].posxyz[2]);
+	leader->setPlane(arena->fields[group - 1].fleetships[0]);
 
 	drone = AddDrone(DRONE_SHIP, leader->Position.x, leader->Position.y, 0, leader->country, leader->plane, NULL);
+
 	if(!drone)
 	{
 		delete leader;
@@ -181,13 +185,15 @@ void Ship::resetShips(u_int8_t group)
 		return;
 	}
 	else
-		ship->setDrone(drone);
+	{
+		leader->setDrone(drone);
+	}
 
-	for(u_int8_t i = 1; i < arena->fields[group-1].fleetshipstotal; i++)
+	for(u_int8_t i = 1; i < arena->fields[group - 1].fleetshipstotal; i++)
 	{
 		ship = new Ship();
 		leader->addFollower(ship); // calls ship->setCountry(), ship->setPosition(), ship->setFormation(), ship->setLeader() and ship->setGroup()
-		ship->setPlane(arena->fields[group-1].fleetships[i]);
+		ship->setPlane(arena->fields[group - 1].fleetships[i]);
 		drone = AddDrone(DRONE_SHIP, ship->Position.x, ship->Position.y, 0, ship->country, ship->plane, NULL);
 		if(!drone)
 		{
@@ -198,7 +204,6 @@ void Ship::resetShips(u_int8_t group)
 		else
 			ship->setDrone(drone);
 	}
-
 	return;
 }
 
@@ -241,62 +246,62 @@ void Ship::cvFire(int32_t destx, int32_t desty)
  Send CV dots at radar
  */
 /*
-void Ship::sendCVDots()
-{
-	u_int8_t i, j, k;
-	Ship *ship;
-	wb3allaiplanesupdate_t *cvdot;
-	u_int8_t buffer[30];
+ void Ship::sendCVDots()
+ {
+ u_int8_t i, j, k;
+ Ship *ship;
+ wb3allaiplanesupdate_t *cvdot;
+ u_int8_t buffer[30];
 
-	cvdot = (wb3allaiplanesupdate_t *) buffer;
+ cvdot = (wb3allaiplanesupdate_t *) buffer;
 
-	memset(buffer, 0, sizeof(buffer));
+ memset(buffer, 0, sizeof(buffer));
 
-	//	for (country = 1; country <= 4; country++)
-	//	{
-	for(i = 0, j = 0; i < cvs->value; i++)
-	{
-		for(ship = arena->cvs[i].ships; ship; ship = ship->next)
-		{
-			cvdot->packetid = htons(Com_WBhton(0x0015));
-			cvdot->number = htons(j);
-			cvdot->posx = htonl(ship->Position.x);
-			cvdot->posy = htonl(ship->Position.y);
-			cvdot->unk1 = 0;
-			cvdot->unk2 = htonl(dpitch->value);
-			cvdot->country = htonl(ship->country);
-			cvdot->plane = htonl(ship->plane);
-			cvdot->slot = htons(j++);
+ //	for (country = 1; country <= 4; country++)
+ //	{
+ for(i = 0, j = 0; i < cvs->value; i++)
+ {
+ for(ship = arena->cvs[i].ships; ship; ship = ship->next)
+ {
+ cvdot->packetid = htons(Com_WBhton(0x0015));
+ cvdot->number = htons(j);
+ cvdot->posx = htonl(ship->Position.x);
+ cvdot->posy = htonl(ship->Position.y);
+ cvdot->unk1 = 0;
+ cvdot->unk2 = htonl(dpitch->value);
+ cvdot->country = htonl(ship->country);
+ cvdot->plane = htonl(ship->plane);
+ cvdot->slot = htons(j++);
 
-			memset(arena->thaisent, 0, sizeof(arena->thaisent));
+ memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
-			for(k = 0; k < maxentities->value; k++)
-			{
-				if((clients[k].country == 3 || clients[k].country == 1) && (clients[k].country == ship->country) && clients[k].inuse && !clients[k].drone
-						&& clients[k].ready) // && !clients[k].inflight)
-				{
-					if(clients[k].thai) // SendCVDots
-					{ // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
-						if(arena->thaisent[clients[k].thai].b)
-							continue;
-						else
-							arena->thaisent[clients[k].thai].b = 1;
-					}
+ for(k = 0; k < maxentities->value; k++)
+ {
+ if((clients[k].country == 3 || clients[k].country == 1) && (clients[k].country == ship->country) && clients[k].inuse && !clients[k].drone
+ && clients[k].ready) // && !clients[k].inflight)
+ {
+ if(clients[k].thai) // SendCVDots
+ { // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
+ if(arena->thaisent[clients[k].thai].b)
+ continue;
+ else
+ arena->thaisent[clients[k].thai].b = 1;
+ }
 
-					//						if (clients[k].mapdots)
-					//							ClearMapDots(&clients[k]);
+ //						if (clients[k].mapdots)
+ //							ClearMapDots(&clients[k]);
 
-					//						clients[k].mapdots = 1;
-					SendPacket(buffer, sizeof(buffer), &clients[k]);
-				}
-			}
+ //						clients[k].mapdots = 1;
+ SendPacket(buffer, sizeof(buffer), &clients[k]);
+ }
+ }
 
-			//				memset(buffer, 0, sizeof(buffer));
-		}
-	}
-	//	}
-}
-*/
+ //				memset(buffer, 0, sizeof(buffer));
+ }
+ }
+ //	}
+ }
+ */
 /**
  Ship::getShipByNum
 
@@ -307,15 +312,14 @@ Ship *Ship::getShipByNum(u_int8_t num)
 {
 	u_int8_t i;
 
-	boids.restart();
 	i = 0;
 
-	while(boids.next())
+	for(boids.restart(); boids.current(); boids.next())
 	{
 		if(boids.current()->getPlaneType() > PLANETYPE_CV)
 		{
 			if(i == num)
-				return (Ship *)boids.current();
+				return (Ship *) boids.current();
 			i++;
 		}
 	}
@@ -360,10 +364,9 @@ int8_t Ship::run()
 			this->prepare();
 
 			u_int8_t i;
-			for(i = 0, followers->restart(); followers->next(); i++)
+			for(i = 0, followers->restart(); followers->current(); followers->next(), i++)
 			{
 				followers->current()->prepare(Form[formation][i]);
-				followers->current()->setPosition(i);
 				followers->current()->setPrepared(true); // this is necessary when leader is killed, so avoid newleader to think it is spawning
 			}
 
@@ -373,7 +376,9 @@ int8_t Ship::run()
 		// Set main ship always as the CV speed, so other ships can sustain the formation
 		// TODO: convoy speed verification (speed == more damaged)
 		this->setVelMax(17); // 34 feet per second
+		Com_Printf(VERBOSE_DEBUG, "Running\n");
 		this->yaw();
+		Com_Printf(VERBOSE_DEBUG, "Runningg\n");
 		this->walk();
 
 		// if error sync with wb-drone (e.g.: drone bugged and must be removed)

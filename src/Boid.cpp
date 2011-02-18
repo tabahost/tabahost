@@ -7,6 +7,9 @@
 
 #include "Boid.h"
 
+u_int16_t Boid::boidCount;
+Boidlist Boid::boids;
+
 /// Constructor
 
 Boid::Boid()
@@ -16,6 +19,7 @@ Boid::Boid()
 	leader = NULL;
 	drone = NULL;
 	port = NULL;
+	followers = NULL;
 	group = 0;
 	threatened = false;
 	outofport = false;
@@ -37,17 +41,21 @@ Boid::~Boid()
 	Com_Printf(VERBOSE_DEBUG, "Boid destructor\n");
 	boids.erase(this);
 	boidCount--;
+
 	if(drone)
 		RemoveDrone(drone);
 
 	if(this->hasLeader()) // I'm a follower, so I must ask leader to unregister myself
 	{
-		leader->removeFollower(this);
+		Com_Printf(VERBOSE_DEBUG, "hasLeader\n");
+		leader->removeFollowers(this);
 	}
 	else // I'm the leader, so I must nominate other leader
 	{
+		Com_Printf(VERBOSE_DEBUG, "Im Leader\n");
 		if(!followers->empty()) // there is someone else
 		{
+			Com_Printf(VERBOSE_DEBUG, "Has followers %u\n", followers->getCount());
 			Boid *newleader;
 
 			newleader = followers->front();
@@ -55,10 +63,11 @@ Boid::~Boid()
 			newleader->leader = NULL;
 			newleader->loadWaypoints(wpnum);
 			followers->pop_front(); // remove newleader from list
-
+			Com_Printf(VERBOSE_DEBUG, "Has followers %u\n", followers->getCount());
 			u_int8_t i;
-			for(i = 0, followers->restart(); followers->next(); i++)
+			for(i = 0, followers->restart(); followers->current(); followers->next(), i++)
 			{
+				Com_Printf(VERBOSE_DEBUG, "teste\n");
 				followers->current()->leader = newleader;
 				followers->current()->pos = i; // reset the formation position
 			}
@@ -90,9 +99,11 @@ bool Boid::operator==(const Boid &b)
 
 void Boid::runBoids()
 {
-	boids.restart();
-	while(boids.next())
+	Boid *current;
+
+	for(boids.restart(); boids.current(); boids.next())
 	{
+		Com_Printf(VERBOSE_DEBUG, "Running\n");
 		if(boids.current()->run() < 0)
 		{
 			boids.erase_del(boids.current());
@@ -108,8 +119,7 @@ void Boid::runBoids()
 
 void Boid::removeGroup(u_int8_t group)
 {
-	boids.restart();
-	while(boids.next())
+	for(boids.restart(); boids.current(); boids.next())
 	{
 		if(boids.current()->group == group)
 		{
@@ -129,8 +139,7 @@ void Boid::logPosition()
 	FILE *fp;
 	char filename[128];
 
-	boids.restart();
-	while(boids.next())
+	for(boids.restart(); boids.current(); boids.next())
 	{
 		if(boids.current()->leader == NULL)
 		{
@@ -177,6 +186,8 @@ void Boid::addFollower(Boid *follower)
 	if(!this->isLegal("Boid::addFollower"))
 		return;
 
+	Com_Printf(VERBOSE_DEBUG, "addFollower\n");
+
 	if(follower->hasLeader())
 	{
 		Com_Printf(VERBOSE_WARNING, "Boid::addFollower() %s already has a leader %s\n", follower->drone->longnick, follower->leader->drone->longnick);
@@ -186,9 +197,13 @@ void Boid::addFollower(Boid *follower)
 	if(followers)
 	{
 		if(followers->back())
+		{
 			follower->setPosition(followers->back()->getPosition() + 1);
+		}
 		else
+		{
 			follower->setPosition(0);
+		}
 		follower->setCountry(country);
 		follower->setFormation(formation);
 		follower->setGroup(group);
@@ -198,14 +213,14 @@ void Boid::addFollower(Boid *follower)
 }
 
 /**
- Boid::removeFollower
+ Boid::removeFollowers
 
  Remove a follower from list
  */
 
-void Boid::removeFollower(Boid *follower)
+void Boid::removeFollowers(Boid *follower)
 {
-	if(!this->isLegal("Boid::removeFollower"))
+	if(!this->isLegal("Boid::removeFollowers"))
 		return;
 
 	if(followers)
@@ -365,12 +380,44 @@ void Boid::prepare(const double *A)
 	if(!this->isLegal("Boid::prepare"))
 		return;
 
+	Com_Printf(VERBOSE_DEBUG, "Preparing follower group %u\n", group);
+
+	Vel.curr = 0;
+	Vel.target = Vel.curr;
+	Acel.curr = 0;
+	Acel.target = Acel.curr;
+	Acel.min = -2;
+	Acel.max = 3;
+	YawVel.curr = 0;
+	YawVel.target = 0;
+
 	Yaw.target = leader->Yaw.target;
 	Yaw.curr = leader->Yaw.curr;
 	Target.x = leader->Position.x + A[0] * sin(leader->Yaw.curr + A[1] * M_PI);
 	Target.y = leader->Position.y + A[0] * cos(leader->Yaw.curr + A[1] * M_PI);
 	Position.x = Target.x;
 	Position.y = Target.y;
+
+	switch(plane)
+	{
+		case SHIP_CA: // CA 77
+			radius = 165; // 330 feet
+			Vel.max = 20; // 40 feet per second
+			Vel.min = 0.2;
+			YawVel.max = 1.3334 * M_PI / 180; // 2.6666º per second (in radians)
+			YawVel.min = -YawVel.max;
+			break;
+		case SHIP_DD: // DD 74
+			radius = 165; // 330 feet
+			Vel.max = 20; // 40 feet per second
+			Vel.min = 0.2;
+			YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
+			YawVel.min = -YawVel.max;
+			break;
+		default:
+			Com_Printf(VERBOSE_WARNING, "AddShip(): unknown ship type\n");
+			break;
+	}
 }
 
 /**
@@ -384,9 +431,34 @@ void Boid::prepare() // main Boid
 	if(!this->isLegal("Boid::prepare()"))
 		return;
 
-	Yaw.target = Com_Rad(AngleTo(Position.x, Position.y, Target.x, Target.y));
-	Yaw.target = this->angle(Yaw.target);
-	Yaw.curr = Yaw.target;
+	Com_Printf(VERBOSE_DEBUG, "Preparing Leader group %u\n", group);
+
+	Position.x = wp[0].x;
+	Position.y = wp[0].y;
+	Target.x = wp[1].x;
+	Target.y = wp[1].y;
+
+	Vel.curr = 0;
+	Vel.target = Vel.curr;
+	Acel.curr = 0;
+	Acel.target = Acel.curr;
+	Acel.min = -2;
+	Acel.max = 3;
+	Yaw.curr = Com_Rad(AngleTo(Position.x, Position.y, Target.x, Target.y));
+	Yaw.curr = this->angle(Yaw.curr);
+	Yaw.target = Yaw.curr;
+	YawVel.curr = 0;
+	YawVel.target = 0;
+
+
+	// KAGA-ENTERPRISE
+	radius = 400; // 800 feet
+	Vel.max = 17; // 34 feet per second
+	Vel.min = 0.2;
+	YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
+	YawVel.min = -YawVel.max;
+
+	Com_Printf(VERBOSE_DEBUG, "Pos %d,%d Target %d,%d\n", group, Position.x, Position.y, Target.x, Target.y);
 }
 
 /**
@@ -463,6 +535,8 @@ int8_t Boid::processDroneBoid()
 
 	if(!this->isLegal("Boid::processDroneBoid"))
 		return -1;
+
+	Com_Printf(VERBOSE_DEBUG, "Boid::processDroneBoid()\n");
 
 	if(!(drone = this->drone)) // boid not linked with a drone
 	{

@@ -273,27 +273,29 @@ void LoadArenaStatus(const char *filename, client_t *client, u_int8_t reset)
 
 				if(!reset && arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
 				{
-					j = Com_Atou((char *) strtok(NULL, ";")); // j = field number
+					j = Com_Atou((char *) strtok(NULL, ";"));
+					j = i+1;  // j = field number
 
 					for(k = 0; (token = (char *) strtok(NULL, ";")); k++)
 					{
 						l = Com_Atou(token); // plane
-						Com_Printf(VERBOSE_DEBUG, "Add ship %u - j %u\n", l, k);
+						Com_Printf(VERBOSE_DEBUG, "Add ship %u - k %u\n", l, k);
 						arena->fields[i].fleetships[k] = l;
 					} // k = total ships
 
-					if(j && (group < cvs->value))
+					if(group < cvs->value)
 					{
 						Com_Printf(VERBOSE_DEBUG, "CV Detected - type %u, posx %u posy %u\n", arena->fields[i].type, arena->fields[i].posxyz[0],
 								arena->fields[i].posxyz[1]);
 						arena->fields[i].fleetshipstotal = k;
 						Ship::resetShips(j);
-						group++;
 					}
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "LoadArenaStatus(): CV group out of range or invalid field number\n");
+						Com_Printf(VERBOSE_WARNING, "LoadArenaStatus(): CV group out of range (%u)\n", group);
 					}
+
+					group++;
 				}
 				else
 				{

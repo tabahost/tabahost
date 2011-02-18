@@ -94,9 +94,9 @@ typedef unsigned int u_int32_t;
 #endif
 
 // Defines
-#ifndef NULL
-#define NULL ((void *)0)
-#endif
+//#ifndef NULL
+//#define NULL ((void *)0)
+//#endif
 
 #ifndef TRUE
 #define TRUE 1

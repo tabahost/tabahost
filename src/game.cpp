@@ -1079,7 +1079,9 @@ void CheckArenaRules(void)
 				{
 					if(!(arena->frame % 50)) // 500ms
 					{
+						Com_Printf(VERBOSE_DEBUG, "Running start\n");
 						Boid::runBoids();
+						Com_Printf(VERBOSE_DEBUG, "Running end\n");
 
 //						// check if there are enemies around
 //						if(arena->cvs[i].ships && arena->cvs[i].ships->drone)
