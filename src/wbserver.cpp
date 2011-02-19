@@ -352,7 +352,7 @@ void UpdateLocalArenaslist(void)
 
 	if((n = recvfrom(udpfd, buffer, MAX_UDPDATA, 0, (struct sockaddr *) &cli_addr, &cli_len)) > 0)
 	{
-		if(ntohl(*(long *) buffer) == n)
+		if(ntohl(*(long *) buffer) == (u_int16_t)n)
 		{
 			offset = 4;
 

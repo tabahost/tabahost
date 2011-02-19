@@ -84,6 +84,7 @@ class Boid
 		static Boidlist boids;
 		static void runBoids();
 		static void removeGroup(u_int8_t group);
+		static void logPosition();
 
 		virtual bool isLegal(const char *);
 
@@ -94,7 +95,7 @@ class Boid
 		bool operator==(const Boid &b);
 		double angle(double ang);
 		double angleDef(double ang);
-		void logPosition();
+
 
 		// Variable set/access/test
 		void setVelMax(double a){Vel.max = a;};
@@ -123,7 +124,7 @@ class Boid
 		void addFollower(Boid *follower);
 		void removeFollowers(Boid *follower);
 		virtual void loadWaypoints(u_int8_t wpnum){return;};
-		void changeRoute(double angle /*0*/, u_int16_t distance /*10000*/, client_t *client);
+		void changeRoute(double angle = 0, u_int16_t distance = 5000, client_t *client = NULL);
 
 		// follower functions
 		//void joinLeader(Boid *leader);

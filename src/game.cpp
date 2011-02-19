@@ -311,9 +311,7 @@ void CheckArenaRules(void)
 	u_int8_t close, vitals, dominated;
 	int16_t i, j;
 	u_int8_t reds, golds, k;
-	Ship *ship;
-	client_t* near;
-	double tonnage_recover, speed;
+	double tonnage_recover;
 	u_int8_t c_cities, totalcities;
 	u_int32_t dist;
 	int32_t posx;
@@ -478,7 +476,7 @@ void CheckArenaRules(void)
 						{
 							dist = GetFactoryReupTime(arena->cities[i].buildings[j].country);
 
-							if(arena->frame < (u_int32_t)arena->cities[i].buildings[j].timer)
+							if(arena->frame < (u_int32_t) arena->cities[i].buildings[j].timer)
 								posx = MAX_UINT32 - arena->cities[i].buildings[j].timer + arena->frame;
 							else
 								posx = arena->frame - arena->cities[i].buildings[j].timer;
@@ -1066,221 +1064,14 @@ void CheckArenaRules(void)
 
 	if(!setjmp(debug_buffer))
 	{
-//		if(!(arena->frame % 6000)) // Log AI's position every 60sec
-//			Boid::logPosition();
+		if(!(arena->frame % 6000)) // Log AI's position every 60sec
+			Boid::logPosition();
 
 		if(!setjmp(debug_buffer))
 		{
-			for(i = 0; i < cvs->value; i++)
+			if(!(arena->frame % 50)) // 500ms
 			{
-				near = NULL;
-
-				if(!setjmp(debug_buffer))
-				{
-					if(!(arena->frame % 50)) // 500ms
-					{
-						Com_Printf(VERBOSE_DEBUG, "Running start\n");
-						Boid::runBoids();
-						Com_Printf(VERBOSE_DEBUG, "Running end\n");
-
-//						// check if there are enemies around
-//						if(arena->cvs[i].ships && arena->cvs[i].ships->drone)
-//						{
-//							near = NearPlane(arena->cvs[i].ships->drone, arena->cvs[i].country, 15000);
-//
-//							if(!setjmp(debug_buffer))
-//							{
-//								if(near)
-//								{
-//									posx = DistBetween(arena->cvs[i].ships->Position.x, arena->cvs[i].ships->Position.y, 0, near->posxy[0][0],
-//											near->posxy[1][0], near->posalt[0], -1);
-//
-//									if(!arena->cvs[i].threatened && !(arena->frame % 600))
-//									{
-//										ship->changeRoute(&(arena->cvs[i]), 0, 0, NULL);
-//									}
-//								}
-//							}
-//							else
-//							{
-//								DebugClient(__FILE__, __LINE__, TRUE, NULL);
-//							}
-//						}
-					}
-				}
-				else
-				{
-					DebugClient(__FILE__, __LINE__, TRUE, NULL);
-				}
-
-				if(!setjmp(debug_buffer))
-				{
-//					// CV Attack
-//					for(ship = arena->cvs[i].ships; ship; ship = ship->next)
-//					{
-//						if(!ship->drone)
-//						{
-//							Com_Printf(VERBOSE_WARNING, "CV Attack, ship->drone == NULL\n");
-//							continue;
-//						}
-//						if(!setjmp(debug_buffer))
-//						{
-//							if(near && posx > 0)
-//							{
-//								speed = sqrt(near->speedxyz[0][0] * near->speedxyz[0][0] + near->speedxyz[1][0] * near->speedxyz[1][0] + near->speedxyz[2][0]
-//										* near->speedxyz[2][0]);
-//
-//								if(posx <= 4000)
-//								{
-//									if(!setjmp(debug_buffer))
-//									{
-//										// % of hit
-//										j = (int16_t) (-0.003 * (float) posx + 11.0);
-//										if(j < 0)
-//											j = 0;
-//										j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
-//										if(j < 0)
-//											j = 0;
-//
-//										if((rand() % 100) < j) // hit
-//											FireAck(ship->drone, near, posx, 0);
-//										else
-//											// fail
-//											FireAck(ship->drone, near, posx, 1);
-//									}
-//									else
-//									{
-//										DebugClient(__FILE__, __LINE__, TRUE, NULL);
-//									}
-//								}
-//								else if(!(arena->frame % 300)) // 3 sec
-//								{
-//									if(!setjmp(debug_buffer))
-//									{
-//										// % of hit
-//										j = (int16_t) (-0.001 * (float) posx + 15.0);
-//										if(j < 0)
-//											j = 0;
-//										j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
-//										if(j < 0)
-//											j = 0;
-//
-//										if((rand() % 100) < j) // hit
-//											FireFlak(ship->drone, near, posx, 0);
-//										else
-//											// fail
-//											FireFlak(ship->drone, near, posx, 1);
-//									}
-//									else
-//									{
-//										DebugClient(__FILE__, __LINE__, TRUE, NULL);
-//									}
-//								}
-//							}
-//						}
-//						else
-//						{
-//							DebugClient(__FILE__, __LINE__, TRUE, NULL);
-//						}
-//
-//						if(!setjmp(debug_buffer))
-//						{
-//							if(!((arena->frame - ship->drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(arena->cvs[i].field >= fields->value))
-//							{
-//								j = dist = 0;
-//
-//								if(!setjmp(debug_buffer))
-//								{
-//									// check nearest CV
-//									for(k = 0; k < cvs->value; k++)
-//									{
-//										if(ship->country != arena->cvs[k].country)
-//										{
-//											posx = DistBetween(ship->Position.x, ship->Position.y, 0, arena->fields[arena->cvs[k].field].posxyz[0],
-//													arena->fields[arena->cvs[k].field].posxyz[1], 0, (int32_t) cvrange->value);
-//
-//											if(posx > 0)
-//											{
-//												if(!dist || (posx < dist))
-//												{
-//													dist = posx;
-//													j = arena->cvs[k].field;
-//												}
-//											}
-//										}
-//									}
-//								}
-//								else
-//								{
-//									DebugClient(__FILE__, __LINE__, TRUE, NULL);
-//								}
-//
-//								if(!setjmp(debug_buffer))
-//								{
-//									// check nearest field
-//									if(!j)
-//									{
-//										j = NearestField(ship->Position.x, ship->Position.y, ship->country, TRUE, FALSE, &dist);
-//									}
-//
-//									if(j >= 0 && dist < (u_int32_t) cvrange->value && j != arena->cvs[i].field)
-//									{
-//										if(j < fields->value)
-//										{
-//											if(!arena->fields[j].closed)
-//											{
-//												if(arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
-//												{
-//													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0],
-//															arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2],
-//															arena->fields[j].posxyz[0], arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-//													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1],
-//															arena->fields[arena->cvs[i].field].posxyz[2], arena->fields[j].posxyz[0],
-//															arena->fields[j].posxyz[1], arena->fields[j].posxyz[2], NULL);
-//												}
-//												else
-//													ship->cvFire(arena->fields[j].posxyz[0], arena->fields[j].posxyz[1]);
-//											}
-//										}
-//										else
-//										{
-//											if(!arena->cities[j - (int16_t) fields->value].closed)
-//											{
-//												if(arena->fields[arena->cvs[i].field].type == FIELD_SUBMARINE)
-//												{
-//													ThrowBomb(FALSE, arena->fields[arena->cvs[i].field].posxyz[0],
-//															arena->fields[arena->cvs[i].field].posxyz[1], arena->fields[arena->cvs[i].field].posxyz[2],
-//															arena->cities[j - (int16_t) fields->value].posxyz[0],
-//															arena->cities[j - (int16_t) fields->value].posxyz[1],
-//															arena->cities[j - (int16_t) fields->value].posxyz[2], NULL);
-//													ThrowBomb(TRUE, arena->fields[arena->cvs[i].field].posxyz[0], arena->fields[arena->cvs[i].field].posxyz[1],
-//															arena->fields[arena->cvs[i].field].posxyz[2], arena->cities[j - (int16_t) fields->value].posxyz[0],
-//															arena->cities[j - (int16_t) fields->value].posxyz[1],
-//															arena->cities[j - (int16_t) fields->value].posxyz[2], NULL);
-//												}
-//												else
-//													CVFire(ship, arena->cities[j - (int16_t) fields->value].posxyz[0], arena->cities[j
-//															- (int16_t) fields->value].posxyz[1]);
-//											}
-//										}
-//									}
-//								}
-//								else
-//								{
-//									DebugClient(__FILE__, __LINE__, TRUE, NULL);
-//								}
-//							}
-//						}
-//						else
-//						{
-//							DebugClient(__FILE__, __LINE__, TRUE, NULL);
-//						}
-//					}
-				}
-				else
-				{
-					DebugClient(__FILE__, __LINE__, TRUE, NULL);
-				}
+				Boid::runBoids();
 			}
 		}
 		else
@@ -1566,7 +1357,7 @@ void CheckArenaRules(void)
 		if(!setjmp(debug_buffer))
 		{
 			BackupArenaStatus();
-			Cmd_CheckBuildings(NULL); // DEBUG
+			Cmd_CheckBuildings( NULL); // DEBUG
 		}
 		else
 		{
@@ -3513,7 +3304,7 @@ void ProcessCommands(char *command, client_t *client)
 			for(i = 0; i < cvs->value; i++)
 			{
 				PPrintf(client, RADIO_LIGHTYELLOW, "Loading CV %u waypoints", i);
-				arena->fields[(u_int16_t)(fields->value - cvs->value + i)].cv->loadWaypoints(0);
+				arena->fields[(u_int16_t) (fields->value - cvs->value + i)].cv->loadWaypoints(0);
 			}
 			return;
 		}
@@ -7772,7 +7563,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if(!setjmp(debug_buffer))
 	{
-		score = ((u_int32_t)dmgprobe < building->armor) ? dmgprobe : (int32_t)building->armor;
+		score = ((u_int32_t) dmgprobe < building->armor) ? dmgprobe : (int32_t) building->armor;
 		score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
 	}
 	else
@@ -11770,74 +11561,6 @@ void Kamikase(client_t *client)
 		}
 	}
 }
-
-/**
- SinkBoat
-
- Sink or Raise boats
- */
-/** WB2 CV
- void SinkBoat(u_int8_t raise, building_t* building, client_t *client)
- {
- sinkboat_t *sink;
- u_int16_t i;
- u_int8_t boat;
- u_int8_t buffer[6];
-
- for (i = 0, boat = 0; i < MAX_BUILDINGS; i++)
- {
- if (!arena->fields[building->field - 1].buildings[i].field)
- {
- break;
- }
- else if ((arena->fields[building->field - 1].buildings[i].type >= BUILD_CV) && (arena->fields[building->field - 1].buildings[i].type <= BUILD_SUBMARINE))
- {
- if (building->id == arena->fields[building->field - 1].buildings[i].id)
- break;
- else
- boat++;
- }
- }
-
- memset(buffer, 0, sizeof(buffer));
-
- sink = (sinkboat_t *) buffer;
-
- if (raise)
- {
- sink->packetid = htons(Com_WBhton(0x0305));
- }
- else
- {
- sink->packetid = htons(Com_WBhton(0x0304));
- }
- sink->task = htons(arena->fields[building->field - 1].cv->id);
- sink->boat = htons(boat);
-
- if (client)
- SendPacket(buffer, sizeof(buffer), client);
- else
- {
- memset(arena->thaisent, 0, sizeof(arena->thaisent));
-
- for (i = 0; i < maxentities->value; i++)
- {
- if (clients[i].inuse && !clients[i].drone && clients[i].ready)
- {
- if(clients[i].thai) // SinkBoat
- {
- if(arena->thaisent[clients[i].thai].b)
- continue;
- else
- arena->thaisent[clients[i].thai].b = 1;
- }
-
- SendPacket(buffer, sizeof(buffer), &clients[i]);
- }
- }
- }
- }
- */
 
 /**
  GetFactoryReupTime

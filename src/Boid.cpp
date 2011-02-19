@@ -47,15 +47,12 @@ Boid::~Boid()
 
 	if(this->hasLeader()) // I'm a follower, so I must ask leader to unregister myself
 	{
-		Com_Printf(VERBOSE_DEBUG, "hasLeader\n");
 		leader->removeFollowers(this);
 	}
 	else // I'm the leader, so I must nominate other leader
 	{
-		Com_Printf(VERBOSE_DEBUG, "Im Leader\n");
 		if(!followers->empty()) // there is someone else
 		{
-			Com_Printf(VERBOSE_DEBUG, "Has followers %u\n", followers->getCount());
 			Boid *newleader;
 
 			newleader = followers->front();
@@ -63,11 +60,9 @@ Boid::~Boid()
 			newleader->leader = NULL;
 			newleader->loadWaypoints(wpnum);
 			followers->pop_front(); // remove newleader from list
-			Com_Printf(VERBOSE_DEBUG, "Has followers %u\n", followers->getCount());
 			u_int8_t i;
 			for(i = 0, followers->restart(); followers->current(); followers->next(), i++)
 			{
-				Com_Printf(VERBOSE_DEBUG, "teste\n");
 				followers->current()->leader = newleader;
 				followers->current()->pos = i; // reset the formation position
 			}
@@ -99,11 +94,8 @@ bool Boid::operator==(const Boid &b)
 
 void Boid::runBoids()
 {
-	Boid *current;
-
 	for(boids.restart(); boids.current(); boids.next())
 	{
-		Com_Printf(VERBOSE_DEBUG, "Running\n");
 		if(boids.current()->run() < 0)
 		{
 			boids.erase_del(boids.current());
@@ -143,7 +135,7 @@ void Boid::logPosition()
 	{
 		if(boids.current()->leader == NULL)
 		{
-			snprintf(filename, sizeof(filename), "./logs/players/%s.ail", logfile);
+			snprintf(filename, sizeof(filename), "./logs/players/%s.ail", boids.current()->logfile);
 
 			if(!(fp = fopen(filename, "a")))
 			{
@@ -151,7 +143,7 @@ void Boid::logPosition()
 			}
 			else
 			{
-				fprintf(fp, "%d;%d;%f;%f;%u;%u;%u\n", Position.x, Position.y, Vel.curr, Com_Deg(Yaw.curr), threatened, country, (u_int32_t) time(NULL));
+				fprintf(fp, "%d;%d;%f;%f;%u;%u;%u\n", boids.current()->Position.x, boids.current()->Position.y, boids.current()->Vel.curr, Com_Deg(boids.current()->Yaw.curr), boids.current()->threatened, boids.current()->country, (u_int32_t) time(NULL));
 				fclose(fp);
 			}
 		}
@@ -467,7 +459,7 @@ void Boid::prepare() // main Boid
  Change route from client command or just by threat
  */
 
-void Boid::changeRoute(double angle /*0*/, u_int16_t distance /*10000*/, client_t *client)
+void Boid::changeRoute(double angle, u_int16_t distance, client_t *client)
 {
 	int8_t angleoffset = 0;
 
@@ -558,6 +550,7 @@ int8_t Boid::processDroneBoid()
 
 	DroneVisibleList(drone);
 
+	Com_Printf(VERBOSE_DEBUG, "Group %u, X %u, Y %u\n", group, Position.x, Position.y);
 	drone->posxy[0][0] = Position.x; // X
 	drone->posxy[1][0] = Position.y; // Y
 	drone->posalt[0] = 0; // Z

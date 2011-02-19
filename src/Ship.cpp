@@ -173,7 +173,7 @@ void Ship::resetShips(u_int8_t group)
 	leader->setField(group - 1);
 	leader->setCountry(arena->fields[group - 1].country);
 	arena->fields[group - 1].cv = leader;
-//	leader->setPosition(arena->fields[group - 1].posxyz[0], arena->fields[group - 1].posxyz[1], arena->fields[group - 1].posxyz[2]);
+	//	leader->setPosition(arena->fields[group - 1].posxyz[0], arena->fields[group - 1].posxyz[1], arena->fields[group - 1].posxyz[2]);
 	leader->setPlane(arena->fields[group - 1].fleetships[0]);
 
 	drone = AddDrone(DRONE_SHIP, leader->Position.x, leader->Position.y, 0, leader->country, leader->plane, NULL);
@@ -376,9 +376,7 @@ int8_t Ship::run()
 		// Set main ship always as the CV speed, so other ships can sustain the formation
 		// TODO: convoy speed verification (speed == more damaged)
 		this->setVelMax(17); // 34 feet per second
-		Com_Printf(VERBOSE_DEBUG, "Running\n");
 		this->yaw();
-		Com_Printf(VERBOSE_DEBUG, "Runningg\n");
 		this->walk();
 
 		// if error sync with wb-drone (e.g.: drone bugged and must be removed)
@@ -387,6 +385,109 @@ int8_t Ship::run()
 			return -1;
 		}
 
+		// check if there are enemies around
+		client_t *nearplane = NearPlane(drone, country, 15000);
+
+		if(nearplane)
+		{
+			int32_t distplane = DistBetween(Position.x, Position.y, 0, nearplane->posxy[0][0], nearplane->posxy[1][0], nearplane->posalt[0], -1);
+
+			if(!threatened && !(arena->frame % 600))
+			{
+				changeRoute();
+			}
+
+			// Ship x Airplane
+			if(distplane > 0)
+			{
+				double speed = sqrt(nearplane->speedxyz[0][0] * nearplane->speedxyz[0][0] + nearplane->speedxyz[1][0] * nearplane->speedxyz[1][0]
+						+ nearplane->speedxyz[2][0] * nearplane->speedxyz[2][0]);
+				int16_t j;
+
+				if(distplane <= 4000)
+				{
+					// % of hit
+					j = (int16_t) (-0.003 * (float) distplane + 11.0);
+					if(j < 0)
+						j = 0;
+					j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
+					if(j < 0)
+						j = 0;
+
+					if((rand() % 100) < j) // hit
+						FireAck(drone, nearplane, distplane, 0);
+					else
+						// fail
+						FireAck(drone, nearplane, distplane, 1);
+				}
+				else if(!(arena->frame % 300)) // 3 sec
+				{
+					// % of hit
+					j = (int16_t) (-0.001 * (float) distplane + 15.0);
+					if(j < 0)
+						j = 0;
+					j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
+					if(j < 0)
+						j = 0;
+
+					if((rand() % 100) < j) // hit
+						FireFlak(drone, nearplane, distplane, 0);
+					else
+						// fail
+						FireFlak(drone, nearplane, distplane, 1);
+				}
+			}
+		}
+
+		// Ship x CV|Field
+		if(!((arena->frame - drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(field >= fields->value))
+		{
+			u_int32_t distshipfield = 0;
+			u_int8_t targetfield;
+
+			// check nearest CV
+			for(u_int8_t i = 0; i < cvs->value; i++)
+			{
+				if(country != arena->fields[(u_int16_t)(fields->value - cvs->value + i)].country)
+				{
+					int32_t dist = DistBetween(Position.x, Position.y, 0, arena->fields[(u_int16_t)(fields->value - cvs->value + i)].posxyz[0],
+							arena->fields[(u_int16_t)(fields->value - cvs->value + i)].posxyz[1], 0, (int32_t) cvrange->value);
+
+					if(dist > 0)
+					{
+						if(!distshipfield || ((u_int32_t)dist < distshipfield))
+						{
+							distshipfield = (u_int32_t)dist;
+							targetfield = (u_int16_t)fields->value - cvs->value + i;
+						}
+					}
+				}
+			}
+
+			// check nearest field
+			if(!targetfield)
+			{
+				targetfield = NearestField(Position.x, Position.y, country, TRUE, FALSE, &distshipfield);
+			}
+
+			if(targetfield >= 0 && distshipfield < (u_int32_t) cvrange->value && targetfield != field)
+			{
+				if(targetfield < fields->value)
+				{
+					if(!arena->fields[targetfield].closed)
+					{
+						cvFire(arena->fields[targetfield].posxyz[0], arena->fields[targetfield].posxyz[1]);
+					}
+				}
+				else
+				{
+					if(!arena->cities[targetfield - (int16_t) fields->value].closed)
+					{
+						cvFire(arena->cities[(u_int32_t)(targetfield - fields->value)].posxyz[0], arena->cities[(u_int32_t)(targetfield - fields->value)].posxyz[1]);
+					}
+				}
+			}
+		}
 	}
 	else // I'm a follower
 	{
