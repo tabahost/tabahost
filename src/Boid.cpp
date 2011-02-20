@@ -528,8 +528,6 @@ int8_t Boid::processDroneBoid()
 	if(!this->isLegal("Boid::processDroneBoid"))
 		return -1;
 
-	Com_Printf(VERBOSE_DEBUG, "Boid::processDroneBoid()\n");
-
 	if(!(drone = this->drone)) // boid not linked with a drone
 	{
 		return -1;
@@ -550,7 +548,6 @@ int8_t Boid::processDroneBoid()
 
 	DroneVisibleList(drone);
 
-	Com_Printf(VERBOSE_DEBUG, "Group %u, X %u, Y %u\n", group, Position.x, Position.y);
 	drone->posxy[0][0] = Position.x; // X
 	drone->posxy[1][0] = Position.y; // Y
 	drone->posalt[0] = 0; // Z

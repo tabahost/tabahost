@@ -1115,20 +1115,6 @@ void CheckArenaRules(void)
 		}
 	}
 
-	// CV dots
-
-	if(!(arena->frame % 500)) // 5 seconds
-	{
-		if(!setjmp(debug_buffer))
-		{
-			Ship::sendCVDots();
-		}
-		else
-		{
-			DebugClient(__FILE__, __LINE__, TRUE, NULL);
-		}
-	}
-
 	// Change Arena
 
 	if(!setjmp(debug_buffer))
@@ -1502,7 +1488,7 @@ void ProcessCommands(char *command, client_t *client)
 		if(command[i] == ' ') // break command and args
 		{
 			command[i++] = '\0';
-			while(command[i] == ' ')
+			while((command[i] == ' ') && i < size)
 				// remove spaces between command, args
 				i++;
 
@@ -1517,8 +1503,7 @@ void ProcessCommands(char *command, client_t *client)
 					argc++;
 				}
 
-				while(command[i] != '\"')
-
+				while((command[i] != '\"') && i < size)
 					i++;
 
 				command[i] = '\0';

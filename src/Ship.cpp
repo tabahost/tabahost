@@ -245,63 +245,94 @@ void Ship::cvFire(int32_t destx, int32_t desty)
 
  Send CV dots at radar
  */
-/*
- void Ship::sendCVDots()
- {
- u_int8_t i, j, k;
- Ship *ship;
- wb3allaiplanesupdate_t *cvdot;
- u_int8_t buffer[30];
 
- cvdot = (wb3allaiplanesupdate_t *) buffer;
+void Ship::sendCVDots()
+{
+	u_int8_t i;
+	wb3allaiplanesupdate_t *cvdot;
+	u_int8_t buffer[30];
 
- memset(buffer, 0, sizeof(buffer));
+	if((arena->frame % 500)) // 5 seconds
+		return;
 
- //	for (country = 1; country <= 4; country++)
- //	{
- for(i = 0, j = 0; i < cvs->value; i++)
- {
- for(ship = arena->cvs[i].ships; ship; ship = ship->next)
- {
- cvdot->packetid = htons(Com_WBhton(0x0015));
- cvdot->number = htons(j);
- cvdot->posx = htonl(ship->Position.x);
- cvdot->posy = htonl(ship->Position.y);
- cvdot->unk1 = 0;
- cvdot->unk2 = htonl(dpitch->value);
- cvdot->country = htonl(ship->country);
- cvdot->plane = htonl(ship->plane);
- cvdot->slot = htons(j++);
+	cvdot = (wb3allaiplanesupdate_t *) buffer;
 
- memset(arena->thaisent, 0, sizeof(arena->thaisent));
+	memset(buffer, 0, sizeof(buffer));
 
- for(k = 0; k < maxentities->value; k++)
- {
- if((clients[k].country == 3 || clients[k].country == 1) && (clients[k].country == ship->country) && clients[k].inuse && !clients[k].drone
- && clients[k].ready) // && !clients[k].inflight)
- {
- if(clients[k].thai) // SendCVDots
- { // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
- if(arena->thaisent[clients[k].thai].b)
- continue;
- else
- arena->thaisent[clients[k].thai].b = 1;
- }
+	//	for (country = 1; country <= 4; country++)
+	//	{
 
- //						if (clients[k].mapdots)
- //							ClearMapDots(&clients[k]);
+	cvdot->packetid = htons(Com_WBhton(0x0015));
+	cvdot->number = htons(this->getShipNum());
+	cvdot->posx = htonl(Position.x);
+	cvdot->posy = htonl(Position.y);
+	cvdot->unk1 = 0;
+	cvdot->unk2 = htonl(dpitch->value);
+	cvdot->country = htonl(country);
+	cvdot->plane = htonl(plane);
+	cvdot->slot = htons(this->getShipNum());
 
- //						clients[k].mapdots = 1;
- SendPacket(buffer, sizeof(buffer), &clients[k]);
- }
- }
+	memset(arena->thaisent, 0, sizeof(arena->thaisent));
 
- //				memset(buffer, 0, sizeof(buffer));
- }
- }
- //	}
- }
+	for(i = 0; i < maxentities->value; i++)
+	{
+		if((clients[i].country == 3 || clients[i].country == 1) && (clients[i].country == country) && clients[i].inuse && !clients[i].drone && clients[i].ready) // && !clients[i].inflight)
+		{
+			if(clients[i].thai) // SendCVDots
+			{ // this case assume that all AI have access to all cvdots, including enemies. This may cause dot packets to be repeated by num of coutries in game
+				if(arena->thaisent[clients[i].thai].b)
+					continue;
+				else
+					arena->thaisent[clients[i].thai].b = 1;
+			}
+
+			//	if (clients[i].mapdots)
+			//		ClearMapDots(&clients[i]);
+
+			//	clients[i].mapdots = 1;
+			SendPacket(buffer, sizeof(buffer), &clients[i]);
+		}
+	}
+
+	//				memset(buffer, 0, sizeof(buffer));
+	//	}
+}
+
+/**
+ Ship::getShipByNum
+
+ Return Ship number
  */
+
+u_int8_t Ship::getShipNum()
+{
+	u_int8_t i, j;
+	Ship *leader;
+
+	for(i = 0, j = 0; i < fields->value; i++)
+	{
+		if(arena->fields[i].type >= FIELD_CV && arena->fields[i].type <= FIELD_SUBMARINE)
+		{
+			leader = arena->fields[i].cv;
+
+			if(this == leader)
+			{
+				return j;
+			}
+			else
+			{
+				for(j++, arena->fields[i].cv->followers->restart(); arena->fields[i].cv->followers->current(); arena->fields[i].cv->followers->next(), j++)
+				{
+					if(this == arena->fields[i].cv->followers->current())
+						return j;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
 /**
  Ship::getShipByNum
 
@@ -326,6 +357,129 @@ Ship *Ship::getShipByNum(u_int8_t num)
 
 	return NULL;
 }
+
+/**
+ Ship::attackNearestPlane
+
+ Attack nearest plane with ack/flacks and set leader as threatened
+ */
+
+void Ship::attackNearestPlane()
+{
+	// check if there are enemies around
+	client_t *nearplane = NearPlane(drone, country, 15000);
+
+	if(nearplane)
+	{
+		int32_t distplane = DistBetween(Position.x, Position.y, 0, nearplane->posxy[0][0], nearplane->posxy[1][0], nearplane->posalt[0], -1);
+
+		if(!leader /*I'm leader*/&& !threatened && !(arena->frame % 600))
+		{
+			changeRoute();
+		}
+
+		// Ship x Airplane
+		if(distplane > 0)
+		{
+			double speed = sqrt(nearplane->speedxyz[0][0] * nearplane->speedxyz[0][0] + nearplane->speedxyz[1][0] * nearplane->speedxyz[1][0]
+					+ nearplane->speedxyz[2][0] * nearplane->speedxyz[2][0]);
+			int16_t j;
+
+			if(distplane <= 4000)
+			{
+				// % of hit
+				j = (int16_t) (-0.003 * (float) distplane + 11.0);
+				if(j < 0)
+					j = 0;
+				j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
+				if(j < 0)
+					j = 0;
+
+				if((rand() % 100) < j) // hit
+					FireAck(drone, nearplane, distplane, 0);
+				else
+					// fail
+					FireAck(drone, nearplane, distplane, 1);
+			}
+			else if(!(arena->frame % 300)) // 3 sec
+			{
+				// % of hit
+				j = (int16_t) (-0.001 * (float) distplane + 15.0);
+				if(j < 0)
+					j = 0;
+				j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
+				if(j < 0)
+					j = 0;
+
+				if((rand() % 100) < j) // hit
+					FireFlak(drone, nearplane, distplane, 0);
+				else
+					// fail
+					FireFlak(drone, nearplane, distplane, 1);
+			}
+		}
+	}
+}
+
+/**
+ Ship::attackNearestField
+
+ Attack nearest field/CV with artillery
+ */
+
+void Ship::attackNearestField()
+{
+	if(!((arena->frame - drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(field >= fields->value))
+	{
+		u_int32_t distshipfield = 0;
+		u_int8_t targetfield;
+
+		// check nearest CV
+		for(u_int8_t i = 0; i < cvs->value; i++)
+		{
+			if(country != arena->fields[(u_int16_t) (fields->value - cvs->value + i)].country)
+			{
+				int32_t dist = DistBetween(Position.x, Position.y, 0, arena->fields[(u_int16_t) (fields->value - cvs->value + i)].posxyz[0],
+						arena->fields[(u_int16_t) (fields->value - cvs->value + i)].posxyz[1], 0, (int32_t) cvrange->value);
+
+				if(dist > 0)
+				{
+					if(!distshipfield || ((u_int32_t) dist < distshipfield))
+					{
+						distshipfield = (u_int32_t) dist;
+						targetfield = (u_int16_t) fields->value - cvs->value + i;
+					}
+				}
+			}
+		}
+
+		// check nearest field
+		if(!targetfield)
+		{
+			targetfield = NearestField(Position.x, Position.y, country, TRUE, FALSE, &distshipfield);
+		}
+
+		if(targetfield >= 0 && distshipfield < (u_int32_t) cvrange->value && targetfield != field)
+		{
+			if(targetfield < fields->value)
+			{
+				if(!arena->fields[targetfield].closed)
+				{
+					cvFire(arena->fields[targetfield].posxyz[0], arena->fields[targetfield].posxyz[1]);
+				}
+			}
+			else
+			{
+				if(!arena->cities[targetfield - (int16_t) fields->value].closed)
+				{
+					cvFire(arena->cities[(u_int32_t) (targetfield - fields->value)].posxyz[0],
+							arena->cities[(u_int32_t) (targetfield - fields->value)].posxyz[1]);
+				}
+			}
+		}
+	}
+}
+
 /**
  Ship::run
 
@@ -378,6 +532,9 @@ int8_t Ship::run()
 		this->setVelMax(17); // 34 feet per second
 		this->yaw();
 		this->walk();
+		this->attackNearestPlane();
+		this->attackNearestField();
+		this->sendCVDots();
 
 		// if error sync with wb-drone (e.g.: drone bugged and must be removed)
 		if(this->processDroneBoid() < 0)
@@ -385,115 +542,15 @@ int8_t Ship::run()
 			return -1;
 		}
 
-		// check if there are enemies around
-		client_t *nearplane = NearPlane(drone, country, 15000);
-
-		if(nearplane)
-		{
-			int32_t distplane = DistBetween(Position.x, Position.y, 0, nearplane->posxy[0][0], nearplane->posxy[1][0], nearplane->posalt[0], -1);
-
-			if(!threatened && !(arena->frame % 600))
-			{
-				changeRoute();
-			}
-
-			// Ship x Airplane
-			if(distplane > 0)
-			{
-				double speed = sqrt(nearplane->speedxyz[0][0] * nearplane->speedxyz[0][0] + nearplane->speedxyz[1][0] * nearplane->speedxyz[1][0]
-						+ nearplane->speedxyz[2][0] * nearplane->speedxyz[2][0]);
-				int16_t j;
-
-				if(distplane <= 4000)
-				{
-					// % of hit
-					j = (int16_t) (-0.003 * (float) distplane + 11.0);
-					if(j < 0)
-						j = 0;
-					j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
-					if(j < 0)
-						j = 0;
-
-					if((rand() % 100) < j) // hit
-						FireAck(drone, nearplane, distplane, 0);
-					else
-						// fail
-						FireAck(drone, nearplane, distplane, 1);
-				}
-				else if(!(arena->frame % 300)) // 3 sec
-				{
-					// % of hit
-					j = (int16_t) (-0.001 * (float) distplane + 15.0);
-					if(j < 0)
-						j = 0;
-					j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
-					if(j < 0)
-						j = 0;
-
-					if((rand() % 100) < j) // hit
-						FireFlak(drone, nearplane, distplane, 0);
-					else
-						// fail
-						FireFlak(drone, nearplane, distplane, 1);
-				}
-			}
-		}
-
-		// Ship x CV|Field
-		if(!((arena->frame - drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(field >= fields->value))
-		{
-			u_int32_t distshipfield = 0;
-			u_int8_t targetfield;
-
-			// check nearest CV
-			for(u_int8_t i = 0; i < cvs->value; i++)
-			{
-				if(country != arena->fields[(u_int16_t)(fields->value - cvs->value + i)].country)
-				{
-					int32_t dist = DistBetween(Position.x, Position.y, 0, arena->fields[(u_int16_t)(fields->value - cvs->value + i)].posxyz[0],
-							arena->fields[(u_int16_t)(fields->value - cvs->value + i)].posxyz[1], 0, (int32_t) cvrange->value);
-
-					if(dist > 0)
-					{
-						if(!distshipfield || ((u_int32_t)dist < distshipfield))
-						{
-							distshipfield = (u_int32_t)dist;
-							targetfield = (u_int16_t)fields->value - cvs->value + i;
-						}
-					}
-				}
-			}
-
-			// check nearest field
-			if(!targetfield)
-			{
-				targetfield = NearestField(Position.x, Position.y, country, TRUE, FALSE, &distshipfield);
-			}
-
-			if(targetfield >= 0 && distshipfield < (u_int32_t) cvrange->value && targetfield != field)
-			{
-				if(targetfield < fields->value)
-				{
-					if(!arena->fields[targetfield].closed)
-					{
-						cvFire(arena->fields[targetfield].posxyz[0], arena->fields[targetfield].posxyz[1]);
-					}
-				}
-				else
-				{
-					if(!arena->cities[targetfield - (int16_t) fields->value].closed)
-					{
-						cvFire(arena->cities[(u_int32_t)(targetfield - fields->value)].posxyz[0], arena->cities[(u_int32_t)(targetfield - fields->value)].posxyz[1]);
-					}
-				}
-			}
-		}
 	}
 	else // I'm a follower
 	{
 		Boid::retarget(Form[formation][pos]);
 		this->yaw(leader);
 		this->walk();
+		this->attackNearestPlane();
+		this->attackNearestField();
+		this->sendCVDots();
 
 		if(this->processDroneBoid() < 0)
 		{
