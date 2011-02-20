@@ -192,8 +192,8 @@ void Plane::prepare(const double *A)
 	Vel.target = Vel.curr;
 	Acel.curr = 0;
 	Acel.target = Acel.curr;
-	Acel.min = -2;
-	Acel.max = 3;
+	Acel.min = -5;
+	Acel.max = 10;
 	YawVel.curr = 0;
 	YawVel.target = 0;
 
@@ -203,6 +203,7 @@ void Plane::prepare(const double *A)
 	Target.y = leader->getPositionY() + A[0] * cos(Yaw.curr + A[1] * M_PI);
 	Position.x = Target.x;
 	Position.y = Target.y;
+	Position.z = 5000;
 
 	switch(plane)
 	{
@@ -213,15 +214,13 @@ void Plane::prepare(const double *A)
 			YawVel.max = 1.3334 * M_PI / 180; // 2.6666º per second (in radians)
 			YawVel.min = -YawVel.max;
 			break;
-		case SHIP_DD: // DD 74
-			radius = 165; // 330 feet
-			Vel.max = 20; // 40 feet per second
-			Vel.min = 0.2;
-			YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
-			YawVel.min = -YawVel.max;
-			break;
 		default:
-			Com_Printf(VERBOSE_WARNING, "AddShip(): unknown ship type\n");
+			radius = 50;
+			Vel.max = 95;
+			Vel.min = 30;
+			YawVel.max = 15 * M_PI / 180; // 30º per second (in radians)
+			YawVel.min = -YawVel.max;
+			Com_Printf(VERBOSE_WARNING, "prepare(): unknown ship type\n");
 			break;
 	}
 }
@@ -241,6 +240,7 @@ void Plane::prepare() // main Boid
 
 	Position.x = wp[0].x;
 	Position.y = wp[0].y;
+	Position.z = 5000;
 	Target.x = wp[1].x;
 	Target.y = wp[1].y;
 
@@ -248,20 +248,18 @@ void Plane::prepare() // main Boid
 	Vel.target = Vel.curr;
 	Acel.curr = 0;
 	Acel.target = Acel.curr;
-	Acel.min = -2;
-	Acel.max = 3;
+	Acel.min = -5;
+	Acel.max = 10;
 	Yaw.curr = Com_Rad(AngleTo(Position.x, Position.y, Target.x, Target.y));
 	Yaw.curr = this->angle(Yaw.curr);
 	Yaw.target = Yaw.curr;
 	YawVel.curr = 0;
 	YawVel.target = 0;
 
-
-	// KAGA-ENTERPRISE
-	radius = 400; // 800 feet
-	Vel.max = 17; // 34 feet per second
-	Vel.min = 0.2;
-	YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
+	radius = 50;
+	Vel.max = 91;
+	Vel.min = 30;
+	YawVel.max = 15 * M_PI / 180; // 30º per second (in radians)
 	YawVel.min = -YawVel.max;
 
 	Com_Printf(VERBOSE_DEBUG, "Pos %d,%d Target %d,%d\n", group, Position.x, Position.y, Target.x, Target.y);
@@ -329,4 +327,59 @@ int8_t Plane::run()
 	}
 
 	return 0;
+}
+
+/**
+ Plane::test
+
+ Reset ship formation
+ */
+
+void Plane::test(u_int8_t group)
+{
+	Plane *leader, *plane;
+	client_t *drone;
+	// CREATE ALL SHIPS AGAIN
+	Com_Printf(VERBOSE_DEBUG, "test() group %u\n", group);
+
+	removeGroup(group);
+
+	// Create leader
+	leader = new Plane();
+	leader->createFollowers(new Boidlist());
+	leader->setGroup(group);
+	leader->loadWaypoints();
+	leader->setFormation(0);
+	leader->setCountry(COUNTRY_GOLD);
+	leader->setPlane(21); // spit?
+
+	drone = AddDrone(DRONE_SHIP, leader->Position.x, leader->Position.y, leader->Position.z, leader->country, leader->plane, NULL);
+
+	if(!drone)
+	{
+		delete leader;
+		Com_Printf(VERBOSE_WARNING, "test() group %u - error creating leader drone\n", group);
+		return;
+	}
+	else
+	{
+		leader->setDrone(drone);
+	}
+
+	for(u_int8_t i = 1; i < 4; i++)
+	{
+		plane = new Plane();
+		leader->addFollower(plane); // calls plane->setCountry(), plane->setPosition(), plane->setFormation(), plane->setLeader() and plane->setGroup()
+		plane->setPlane(21);
+		drone = AddDrone(DRONE_SHIP, plane->Position.x, plane->Position.y, plane->Position.z, plane->country, plane->plane, NULL);
+		if(!drone)
+		{
+			delete plane;
+			Com_Printf(VERBOSE_WARNING, "ResetCV() group %u - error creating drone %u\n", group, i);
+			return;
+		}
+		else
+			plane->setDrone(drone);
+	}
+	return;
 }

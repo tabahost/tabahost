@@ -21,6 +21,7 @@
  ***/
 
 #include "Ship.h"
+#include "Plane.h"
 #include "shared.h"
 
 client_t *clients; // extern
@@ -2726,7 +2727,7 @@ void ProcessCommands(char *command, client_t *client)
 
 	if(permission & (FLAG_ADMIN | FLAG_OP)) // commands that ADMIN's and OP's can execute
 	{
-		if(!Com_Stricmp(command, "dbpasswd"))
+		if (!Com_Stricmp(command, "dbpasswd"))
 		{
 			if(!argv[0])
 			{
@@ -2774,6 +2775,18 @@ void ProcessCommands(char *command, client_t *client)
 			if(argv[1])
 			{
 				Cmd_Sink(Com_Atoi(argv[0]), Com_Atoi(argv[1]), client);
+			}
+			return;
+		}
+		else if(!Com_Stricmp(command, "boid"))
+		{
+			if(argv[0])
+			{
+				Plane::test(Com_Atou(argv[0]));
+			}
+			else
+			{
+				PPrintf(client, RADIO_YELLOW, "usage: boid <group>");
 			}
 			return;
 		}
@@ -2981,6 +2994,7 @@ void ProcessCommands(char *command, client_t *client)
 			return;
 		}
 		else if(!Com_Stricmp(command, "time")) // .time for OPs and Admins
+
 		{
 			if(!argv[0])
 			{

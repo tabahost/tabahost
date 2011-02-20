@@ -19,6 +19,7 @@ typedef struct doublePoint_s // TDoublePoint
 {
 		int32_t x;
 		int32_t y;
+		int32_t z;
 } doublePoint_t;
 
 typedef struct value1_s // TValue1

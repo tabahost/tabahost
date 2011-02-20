@@ -120,6 +120,7 @@ void Ship::prepare(const double *A)
 	Target.y = leader->getPositionY() + A[0] * cos(Yaw.curr + A[1] * M_PI);
 	Position.x = Target.x;
 	Position.y = Target.y;
+	Position.z = 0;
 
 	switch(plane)
 	{
@@ -138,7 +139,7 @@ void Ship::prepare(const double *A)
 			YawVel.min = -YawVel.max;
 			break;
 		default:
-			Com_Printf(VERBOSE_WARNING, "AddShip(): unknown ship type\n");
+			Com_Printf(VERBOSE_WARNING, "prepare(): unknown ship type\n");
 			break;
 	}
 }
@@ -158,6 +159,7 @@ void Ship::prepare() // main Boid
 
 	Position.x = wp[0].x;
 	Position.y = wp[0].y;
+	Position.z = 0;
 	Target.x = wp[1].x;
 	Target.y = wp[1].y;
 

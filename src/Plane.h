@@ -20,6 +20,7 @@ class Plane: public Boid
 	public:
 		static u_int16_t planeCount;
 		static u_int16_t getPlaneCount(){return planeCount;};
+		static void test(u_int8_t group = 1);
 
 		virtual bool isLegal(const char *);
 

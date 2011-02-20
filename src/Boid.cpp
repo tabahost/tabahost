@@ -458,7 +458,7 @@ int8_t Boid::processDroneBoid()
 
 	drone->posxy[0][0] = Position.x; // X
 	drone->posxy[1][0] = Position.y; // Y
-	drone->posalt[0] = 0; // Z
+	drone->posalt[0] = Position.z; // Z
 	drone->speedxyz[0][0] = Vel.curr * sin(Yaw.curr); // X
 	drone->speedxyz[1][0] = Vel.curr * cos(Yaw.curr); // Y
 	drone->speedxyz[2][0] = 0; // Z
