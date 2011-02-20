@@ -2025,6 +2025,8 @@ void WB3AiMount(u_int8_t *buffer, client_t *client)
 
 	if(!ship)
 		return;
+	else
+		Com_Printf(VERBOSE_DEBUG, "Found ship at getShipByNum %u\n", aimount->cvnum);
 
 	if(aimount->inout == 1)
 	{

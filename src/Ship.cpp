@@ -343,14 +343,14 @@ Ship *Ship::getShipByNum(u_int8_t num)
 {
 	u_int8_t i;
 
-	i = 0;
-
-	for(boids.restart(); boids.current(); boids.next())
+	for(i = 0, boids.restart(); boids.current(); boids.next())
 	{
-		if(boids.current()->getPlaneType() > PLANETYPE_CV)
+		if(boids.current()->getPlaneType() >= PLANETYPE_CV)
 		{
 			if(i == num)
+			{
 				return (Ship *) boids.current();
+			}
 			i++;
 		}
 	}
