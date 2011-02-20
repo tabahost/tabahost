@@ -33,6 +33,8 @@ class Ship: public Boid
 		void processFieldBoid(); // boid interface with wb-field
 
 		// virtuals
+		void prepare(const double *A); // follower prepare (point to formation)
+		void prepare(); // leader prepare (point to waypoint)
 		void loadWaypoints(u_int8_t wpnum);
 		bool retarget(doublePoint_t &wp);
 		int8_t run(); // run frame

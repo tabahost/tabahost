@@ -112,6 +112,10 @@ class Boid
 		void setPort(field_s *a){port = a;};
 		struct client_s *setDrone(struct client_s *a){drone = a; return a;};
 		struct client_s *getDrone(){return drone;};
+		double getYawTarget(){return Yaw.target;};
+		double getYawCurr(){return Yaw.curr;};
+		int32_t getPositionX(){return Position.x;};
+		int32_t getPositionY(){return Position.y;};
 		u_int8_t getGroup(){return group;};
 		u_int8_t getField(){return field;};
 		u_int8_t getPosition(){return pos;};
@@ -125,22 +129,22 @@ class Boid
 		void removeFollowers(Boid *follower);
 		virtual void loadWaypoints(u_int8_t wpnum){return;};
 		void changeRoute(double angle = 0, u_int16_t distance = 5000, client_t *client = NULL);
+		virtual void prepare(){return;}; // leader prepare (point to waypoint)
 
 		// follower functions
 		//void joinLeader(Boid *leader);
+		virtual void prepare(const double *A){return;}; // follower prepare (point to formation)
 
 		// Game Interface
 		int8_t processDroneBoid(); // boid interface with wb-drone
 
 		// Movement functions
-		virtual int8_t run(){return 0;};
 		void walk(); // make a move forward
 		void yaw(Boid *leader); // follower yaw
 		void yaw(); // leader yaw
 		void retarget(const double *A); // follower retarget (target leader formation)
+		virtual int8_t run(){return 0;};
 		virtual bool retarget(doublePoint_t &wp){return false;}; // leader retarget (target next waypoint)
-		void prepare(const double *A); // follower prepare (point to formation)
-		void prepare(); // leader prepare (point to waypoint)
 };
 
 class Boidnode

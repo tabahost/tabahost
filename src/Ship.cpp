@@ -5,13 +5,6 @@
  *      Author: franz
  */
 
-// Ao criar o boid:
-// 1) definir group
-// 2) executar loadWaypoints()
-// 3) definir field
-// 4) definir formation
-// após isto, está apto para entrar no loop run();
-
 #include "Ship.h"
 
 u_int16_t Ship::shipCount;
@@ -71,7 +64,7 @@ void Ship::loadWaypoints(u_int8_t wpnum = 1)
 
 	if(!(fp = fopen(file, "r")))
 	{
-		PPrintf(NULL, RADIO_YELLOW, "WARNING: ReadCVWaypoints() Cannot open file \"%s\"", file);
+		PPrintf(NULL, RADIO_YELLOW, "WARNING: Ship::loadWaypoints() Cannot open file \"%s\"", file);
 		return;
 	}
 
@@ -93,10 +86,102 @@ void Ship::loadWaypoints(u_int8_t wpnum = 1)
 
 	if(!wptotal)
 	{
-		PPrintf(NULL, RADIO_YELLOW, "WARNING: ReadCVWaypoints() error reading \"%s\"", file);
+		PPrintf(NULL, RADIO_YELLOW, "WARNING: Ship::loadWaypoints() error reading \"%s\"", file);
 	}
 
 	fclose(fp);
+}
+
+/**
+ Ship::prepare
+
+ Prepare follower boid before start walking
+ */
+
+void Ship::prepare(const double *A)
+{
+	if(!this->isLegal("Ship::prepare"))
+		return;
+
+	Com_Printf(VERBOSE_DEBUG, "Preparing follower group %u\n", group);
+
+	Vel.curr = 0;
+	Vel.target = Vel.curr;
+	Acel.curr = 0;
+	Acel.target = Acel.curr;
+	Acel.min = -2;
+	Acel.max = 3;
+	YawVel.curr = 0;
+	YawVel.target = 0;
+
+	Yaw.target = leader->getYawTarget();
+	Yaw.curr = leader->getYawCurr();
+	Target.x = leader->getPositionX() + A[0] * sin(Yaw.curr + A[1] * M_PI);
+	Target.y = leader->getPositionY() + A[0] * cos(Yaw.curr + A[1] * M_PI);
+	Position.x = Target.x;
+	Position.y = Target.y;
+
+	switch(plane)
+	{
+		case SHIP_CA: // CA 77
+			radius = 165; // 330 feet
+			Vel.max = 20; // 40 feet per second
+			Vel.min = 0.2;
+			YawVel.max = 1.3334 * M_PI / 180; // 2.6666º per second (in radians)
+			YawVel.min = -YawVel.max;
+			break;
+		case SHIP_DD: // DD 74
+			radius = 165; // 330 feet
+			Vel.max = 20; // 40 feet per second
+			Vel.min = 0.2;
+			YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
+			YawVel.min = -YawVel.max;
+			break;
+		default:
+			Com_Printf(VERBOSE_WARNING, "AddShip(): unknown ship type\n");
+			break;
+	}
+}
+
+/**
+ Ship::prepare
+
+ Prepare leader boid before start walking
+ */
+
+void Ship::prepare() // main Boid
+{
+	if(!this->isLegal("Ship::prepare()"))
+		return;
+
+	Com_Printf(VERBOSE_DEBUG, "Preparing Leader group %u\n", group);
+
+	Position.x = wp[0].x;
+	Position.y = wp[0].y;
+	Target.x = wp[1].x;
+	Target.y = wp[1].y;
+
+	Vel.curr = 0;
+	Vel.target = Vel.curr;
+	Acel.curr = 0;
+	Acel.target = Acel.curr;
+	Acel.min = -2;
+	Acel.max = 3;
+	Yaw.curr = Com_Rad(AngleTo(Position.x, Position.y, Target.x, Target.y));
+	Yaw.curr = this->angle(Yaw.curr);
+	Yaw.target = Yaw.curr;
+	YawVel.curr = 0;
+	YawVel.target = 0;
+
+
+	// KAGA-ENTERPRISE
+	radius = 400; // 800 feet
+	Vel.max = 17; // 34 feet per second
+	Vel.min = 0.2;
+	YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
+	YawVel.min = -YawVel.max;
+
+	Com_Printf(VERBOSE_DEBUG, "Pos %d,%d Target %d,%d\n", group, Position.x, Position.y, Target.x, Target.y);
 }
 
 /**
