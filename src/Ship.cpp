@@ -182,8 +182,6 @@ void Ship::prepare() // main Boid
 	Vel.min = 0.2;
 	YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
 	YawVel.min = -YawVel.max;
-
-	Com_Printf(VERBOSE_DEBUG, "Pos %d,%d Target %d,%d\n", group, Position.x, Position.y, Target.x, Target.y);
 }
 
 /**

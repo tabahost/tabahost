@@ -2431,6 +2431,7 @@ int		ProcessDrone(client_t *drone);
 void	DroneGetTarget(client_t *drone);
 void	FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
 void	FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
+void	DropBomb(u_int16_t mun, client_t *client);
 void	ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz, client_t *client);
 void	SendDronePos(client_t *drone, client_t *client);
 void	SendXBombs(client_t *drone);

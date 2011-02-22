@@ -66,11 +66,13 @@ void Plane::attackNearestPlane()
 		// Otto x Airplane
 		if(distplane > 0)
 		{
+			BPrintf(RADIO_DARKGREEN, "DEBUG: FireAck dist %u", distplane);
+
 			double speed = sqrt(nearplane->speedxyz[0][0] * nearplane->speedxyz[0][0] + nearplane->speedxyz[1][0] * nearplane->speedxyz[1][0]
 					+ nearplane->speedxyz[2][0] * nearplane->speedxyz[2][0]);
 			int16_t j;
 
-			if(distplane <= 4000)
+			if(distplane <= 3000) // D10
 			{
 				// % of hit
 				j = (int16_t) (-0.003 * (float) distplane + 11.0);
@@ -164,6 +166,22 @@ bool Plane::retarget(doublePoint_t &wp)
 	else // Next waypoint
 	{
 		threatened = 0;
+
+		if(wpnum == 2) // TEST BOMB
+		{
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+			DropBomb(84, drone);
+		}
+
 		wpnum++;
 
 		if(wpnum == wptotal) // reset waypoint index
@@ -261,8 +279,6 @@ void Plane::prepare() // main Boid
 	Vel.min = 30;
 	YawVel.max = 15 * M_PI / 180; // 30º per second (in radians)
 	YawVel.min = -YawVel.max;
-
-	Com_Printf(VERBOSE_DEBUG, "Pos %d,%d Target %d,%d\n", group, Position.x, Position.y, Target.x, Target.y);
 }
 
 /**

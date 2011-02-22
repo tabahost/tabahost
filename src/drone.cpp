@@ -1406,6 +1406,64 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
 }
 
 /**
+ DropBomb
+
+ Drop a bomb from a drone bomber
+ */
+
+void DropBomb(u_int16_t mun, client_t *client)
+{
+	rocketbomb_t *rocketbomb;
+	int16_t velx = 0, vely = 0, velz = 0;
+	int32_t destx, desty;
+	u_int32_t timer, alt;
+	u_int8_t buffer[31];
+
+	velx = client->speedxyz[0][0] + (Com_Pow(-1, rand() % 2) * (rand() % 10)); // with dispersion
+	vely = client->speedxyz[1][0] + (Com_Pow(-1, rand() % 2) * (rand() % 10)); // with dispersion
+	velz = client->speedxyz[2][0] * -1;
+
+	// calc destiny based on sea altitude
+	timer = (velz*-1) + sqrt(velz*velz + 2*GRAVITY*client->posalt[0]) / GRAVITY;
+	destx = client->posxy[0][0] + velx * timer;
+	desty = client->posxy[1][0] + vely * timer;
+
+	alt = GetHeightAt(destx, desty);
+
+	if(alt > 1) // TODO: tweek it to a considerable level
+	{
+		alt = client->posalt[0] - alt; // relative alt
+
+		// calc destiny based on relative altitude
+		timer = (velz*-1) + sqrt(velz*velz + 2*GRAVITY*alt) / GRAVITY;
+		destx = client->posxy[0][0] + velx * timer;
+		desty = client->posxy[1][0] + vely * timer;
+	}
+
+	BPrintf(RADIO_DARKGREEN, "DEBUG: DropBomb destx %d, desty %d, timer %u", destx, desty, timer);
+
+	AddBomb(0x01E9, destx, desty, GetHeightAt(destx, desty), mun, (velz + GRAVITY * timer), timer, client);
+
+	rocketbomb = (rocketbomb_t *) buffer;
+
+	rocketbomb->packetid = htons(Com_WBhton(0x1900));
+
+	rocketbomb->item = mun;
+	rocketbomb->id = htons(0x01F9);
+	rocketbomb->posx = htonl(client->posxy[0][0]);
+	rocketbomb->posy = htonl(client->posxy[1][0]);
+	rocketbomb->alt = htonl(client->posalt[0]);
+	rocketbomb->xspeed = htons(velx);
+	rocketbomb->yspeed = htons(vely);
+	rocketbomb->zspeed = htons(velz);
+	rocketbomb->unknown1 = htonl(0x20);
+	rocketbomb->shortnick = client ? htonl(client->shortnick) : 0;
+
+	if(client) // COMMANDOS or MINEN or KATY
+		ProcessPacket(buffer, sizeof(buffer), client);
+}
+
+/**
  ThrowBomb
 
  Throw a bomb from orig to dest position with some precision
