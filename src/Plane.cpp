@@ -57,7 +57,7 @@ void Plane::attackNearestPlane()
 
 	if(nearplane)
 	{
-		int32_t distplane = DistBetween(Position.x, Position.y, 0, nearplane->posxy[0][0], nearplane->posxy[1][0], nearplane->posalt[0], -1);
+		int32_t distplane = DistBetween(Position.x, Position.y, Position.z, nearplane->posxy[0][0], nearplane->posxy[1][0], nearplane->posalt[0], -1);
 
 		if(!leader /*I'm leader*/&& !threatened && !(arena->frame % 600))
 		{
@@ -67,8 +67,6 @@ void Plane::attackNearestPlane()
 		// Otto x Airplane
 		if(distplane > 0)
 		{
-			PPrintf(nearplane, RADIO_DARKGREEN, "DEBUG: FireAck dist %u", distplane);
-
 			double speed = sqrt(nearplane->speedxyz[0][0] * nearplane->speedxyz[0][0] + nearplane->speedxyz[1][0] * nearplane->speedxyz[1][0]
 					+ nearplane->speedxyz[2][0] * nearplane->speedxyz[2][0]);
 			int16_t j;
@@ -85,13 +83,11 @@ void Plane::attackNearestPlane()
 
 				if((rand() % 100) < j) // hit
 				{
-					PPrintf(nearplane, RADIO_DARKGREEN, "DEBUG: FireAck HIT");
 					FireAck(drone, nearplane, distplane, 0);
 				}
 				else
 				{
 					// fail
-					PPrintf(nearplane, RADIO_DARKGREEN, "DEBUG: FireAck FAIL");
 					FireAck(drone, nearplane, distplane, 1);
 				}
 			}
