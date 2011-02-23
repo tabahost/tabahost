@@ -16,11 +16,13 @@ class Plane: public Boid
 {
 	private:
 		u_int32_t signature;
+		u_int16_t originField;
+		u_int16_t targetField;
 
 	public:
 		static u_int16_t planeCount;
 		static u_int16_t getPlaneCount(){return planeCount;};
-		static void test(u_int8_t group = 1);
+		static void createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemodel);
 
 		virtual bool isLegal(const char *);
 
@@ -31,8 +33,11 @@ class Plane: public Boid
 		void prepare(const double *A); // follower prepare (point to formation)
 		void prepare(); // leader prepare (point to waypoint)
 		void loadWaypoints(u_int8_t wpnum);
-		bool retarget(doublePoint_t &wp);
+		bool retarget(coordinates_t &wp);
 		int8_t run(); // run frame
+
+		void setOriginField(u_int16_t a){originField = a;};
+		void setTargetField(u_int16_t a){targetField = a;};
 
 		void attackNearestPlane();
 };

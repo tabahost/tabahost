@@ -105,6 +105,10 @@ void Ship::prepare(const double *A)
 
 	Com_Printf(VERBOSE_DEBUG, "Preparing follower group %u\n", group);
 
+	Attitude.x = 0;
+	Attitude.y = 0;
+	Attitude.z = 0;
+
 	Vel.curr = 0;
 	Vel.target = Vel.curr;
 	Acel.curr = 0;
@@ -125,14 +129,14 @@ void Ship::prepare(const double *A)
 	switch(plane)
 	{
 		case SHIP_CA: // CA 77
-			radius = 165; // 330 feet
+			radius = 330; // 330 feet
 			Vel.max = 20; // 40 feet per second
 			Vel.min = 0.2;
 			YawVel.max = 1.3334 * M_PI / 180; // 2.6666º per second (in radians)
 			YawVel.min = -YawVel.max;
 			break;
 		case SHIP_DD: // DD 74
-			radius = 165; // 330 feet
+			radius = 330; // 330 feet
 			Vel.max = 20; // 40 feet per second
 			Vel.min = 0.2;
 			YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
@@ -157,6 +161,10 @@ void Ship::prepare() // main Boid
 
 	Com_Printf(VERBOSE_DEBUG, "Preparing Leader group %u\n", group);
 
+	Attitude.x = 0;
+	Attitude.y = 0;
+	Attitude.z = 0;
+
 	Position.x = wp[0].x;
 	Position.y = wp[0].y;
 	Position.z = 0;
@@ -177,7 +185,7 @@ void Ship::prepare() // main Boid
 
 
 	// KAGA-ENTERPRISE
-	radius = 400; // 800 feet
+	radius = 800; // 800 feet
 	Vel.max = 17; // 34 feet per second
 	Vel.min = 0.2;
 	YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
@@ -204,7 +212,7 @@ void Ship::processFieldBoid()
  Leader ship retarget waypoint
  */
 
-bool Ship::retarget(doublePoint_t &wp)
+bool Ship::retarget(coordinates_t &wp)
 {
 	if(!this->isLegal("Ship::retarget"))
 		return false;
@@ -451,6 +459,9 @@ Ship *Ship::getShipByNum(u_int8_t num)
 
 void Ship::attackNearestPlane()
 {
+	if(!this->isLegal("Ship::attackNearestPlane"))
+		return;
+
 	// check if there are enemies around
 	client_t *nearplane = NearPlane(drone, country, 15000);
 

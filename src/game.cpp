@@ -2780,13 +2780,13 @@ void ProcessCommands(char *command, client_t *client)
 		}
 		else if(!Com_Stricmp(command, "boid"))
 		{
-			if(argv[0])
+			if(argv[2])
 			{
-				Plane::test(Com_Atou(argv[0]));
+				Plane::createMission(Com_Atou(argv[0]), Com_Atou(argv[1]), Com_Atou(argv[2]));
 			}
 			else
 			{
-				PPrintf(client, RADIO_YELLOW, "usage: boid <group>");
+				PPrintf(client, RADIO_YELLOW, "usage: boid <field orig> <field tgt> <#plane>");
 			}
 			return;
 		}

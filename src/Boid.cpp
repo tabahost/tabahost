@@ -19,6 +19,7 @@ Boid::Boid()
 	leader = NULL;
 	drone = NULL;
 	port = NULL;
+	wpreach = 100;
 	followers = NULL;
 	group = 0;
 	threatened = false;
@@ -297,7 +298,7 @@ void Boid::yaw(Boid *leader)
 	dy = Target.y - Position.y;
 
 	// ajusta angulo alvo
-	if(sqrt(dx * dx + dy * dy) < 100) // ship reached WP
+	if(sqrt(dx * dx + dy * dy) < wpreach) // ship reached WP
 	{
 		if(leader)
 			Yaw.target = this->angle(leader->Yaw.curr);
@@ -320,6 +321,7 @@ void Boid::yaw(Boid *leader)
 	// incrementa yaw
 	//if(MODULUS(Yaw.curr - Yaw.target) > (0.01 * M_PI))
 	Yaw.curr = this->angle(Yaw.curr + YawVel.curr);
+	Attitude.z = 3600 - (int32_t) floor(Com_Deg(Yaw.curr) * 10);
 	// ajusta velocidade
 	Vel.target = sqrt(dx * dx + dy * dy) / 3;
 	dx = Vel.max * (1 - MODULUS(this->angleDef(Yaw.target - Yaw.curr) / (0.5 * M_PI))); // 1 - xº/90º
@@ -462,9 +464,9 @@ int8_t Boid::processDroneBoid()
 	drone->speedxyz[0][0] = Vel.curr * sin(Yaw.curr); // X
 	drone->speedxyz[1][0] = Vel.curr * cos(Yaw.curr); // Y
 	drone->speedxyz[2][0] = 0; // Z
-	drone->angles[0][0] = 0; // Roll
-	drone->angles[1][0] = 0; // Pitch
-	drone->angles[2][0] = 3600 - (int32_t) floor(Com_Deg(Yaw.curr) * 10); // Yaw
+	drone->angles[0][0] = Attitude.x; // Pitch
+	drone->angles[1][0] = Attitude.y; // Roll
+	drone->angles[2][0] = Attitude.z; // Yaw
 	drone->accelxyz[0][0] = Acel.curr * sin(Yaw.curr); // X
 	drone->accelxyz[1][0] = Acel.curr * cos(Yaw.curr); // Y
 	drone->accelxyz[2][0] = 0; // Z

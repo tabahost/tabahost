@@ -457,7 +457,8 @@ typedef unsigned int u_int32_t;
 #define	DRONE_EJECTED		512	// Plane when client ejects
 #define DRONE_COMMANDOS		1024	// Commandos
 #define DRONE_SHIP			2048	// SHIP (CV, CA, DD)
-#define DRONE_DEBUG			4096	//
+#define DRONE_PLANE			4096
+#define DRONE_DEBUG			8192	//
 #define PLANETYPE_FIGHTER	1	//
 #define PLANETYPE_BOMBER2	2	//
 #define PLANETYPE_BOMBER4	3	//
@@ -2431,7 +2432,7 @@ int		ProcessDrone(client_t *drone);
 void	DroneGetTarget(client_t *drone);
 void	FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
 void	FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
-void	DropBomb(u_int16_t mun, client_t *client);
+void	DropBomb(int32_t destx, int32_t desty, u_int16_t mun, client_t *client);
 void	ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz, client_t *client);
 void	SendDronePos(client_t *drone, client_t *client);
 void	SendXBombs(client_t *drone);

@@ -15,12 +15,13 @@
 #include "shared.h"
 using namespace std;
 
-typedef struct doublePoint_s // TDoublePoint
+typedef struct coordinates_s // TDoublePoint
 {
 		int32_t x;
 		int32_t y;
 		int32_t z;
-} doublePoint_t;
+		u_int8_t type;
+} coordinates_t;
 
 typedef struct value1_s // TValue1
 {
@@ -55,8 +56,9 @@ class Boid
 		// Individual variables
 		u_int8_t plane; // ship plane: KAGA, ENTERPRISE, Etc.
 		u_int8_t country; // ship country (1 = red, 3 = gold)
-		doublePoint_t Position; // Position
-		doublePoint_t Target; // Target Position / Next waypoint
+		coordinates_t Position; // Position
+		coordinates_t Target; // Target Position / Next waypoint
+		coordinates_t Attitude; // Roll, pitch, yaw
 		int32_t radius; // ship radius
 		value2_t Vel; // Speed
 		value2_t Acel; // Acceleration
@@ -64,12 +66,13 @@ class Boid
 		value2_t YawVel; // Yaw change speed
 		struct client_s *drone; // WBDrone that this Boid is associated with
 		u_int8_t zigzag; // next zigzag maneuver
+		u_int8_t wpreach;
 		bool threatened; // fleet is being attacked?
 
 		// Leader exclusive
 		u_int8_t wptotal; // total of waypoints
 		u_int8_t wpnum; // num of actual waypoint
-		doublePoint_t wp[MAX_WAYPOINTS]; // waypoints
+		coordinates_t wp[MAX_WAYPOINTS]; // waypoints
 		Boidlist *followers;
 
 		// Follower exclusive
@@ -145,7 +148,7 @@ class Boid
 		void yaw(); // leader yaw
 		void retarget(const double *A); // follower retarget (target leader formation)
 		virtual int8_t run(){return 0;};
-		virtual bool retarget(doublePoint_t &wp){return false;}; // leader retarget (target next waypoint)
+		virtual bool retarget(coordinates_t &wp){return false;}; // leader retarget (target next waypoint)
 };
 
 class Boidnode

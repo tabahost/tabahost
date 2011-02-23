@@ -36,7 +36,7 @@ class Ship: public Boid
 		void prepare(const double *A); // follower prepare (point to formation)
 		void prepare(); // leader prepare (point to waypoint)
 		void loadWaypoints(u_int8_t wpnum);
-		bool retarget(doublePoint_t &wp);
+		bool retarget(coordinates_t &wp);
 		int8_t run(); // run frame
 
 		u_int8_t getShipNum();

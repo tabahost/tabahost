@@ -196,6 +196,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].countrytime = 100;
 					break;
 				case DRONE_SHIP:
+				case DRONE_PLANE:
 					clients[i].plane = plane;
 					clients[i].posxy[0][0] = posx;
 					clients[i].posxy[1][0] = posy;
@@ -356,7 +357,7 @@ int ProcessDrone(client_t *drone)
 	client_t *near;
 	building_t *buildings;
 
-	if(drone->drone & DRONE_SHIP) // do not process ships
+	if(drone->drone & (DRONE_SHIP | DRONE_PLANE)) // do not process ships
 		return 0;
 
 	if(drone->bugged)
@@ -1411,22 +1412,16 @@ void FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate
  Drop a bomb from a drone bomber
  */
 
-void DropBomb(u_int16_t mun, client_t *client)
+void DropBomb(int32_t destx, int32_t desty, u_int16_t mun, client_t *client)
 {
 	rocketbomb_t *rocketbomb;
 	int16_t velx = 0, vely = 0, velz = 0;
-	int32_t destx, desty;
 	u_int32_t timer, alt;
 	u_int8_t buffer[31];
 
-	velx = client->speedxyz[0][0] + (Com_Pow(-1, rand() % 2) * (rand() % 10)); // with dispersion
-	vely = client->speedxyz[1][0] + (Com_Pow(-1, rand() % 2) * (rand() % 10)); // with dispersion
-	velz = client->speedxyz[2][0] * -1;
-
-	// calc destiny based on sea altitude
-	timer = (velz*-1) + sqrt(velz*velz + 2*GRAVITY*client->posalt[0]) / GRAVITY;
-	destx = client->posxy[0][0] + velx * timer;
-	desty = client->posxy[1][0] + vely * timer;
+	velx = /*client->speedxyz[0][0] + */(Com_Pow(-1, rand() % 2) * (rand() % 10)); // with dispersion
+	vely = /*client->speedxyz[1][0] + */(Com_Pow(-1, rand() % 2) * (rand() % 10)); // with dispersion
+	velz = /*client->speedxyz[2][0] * -1*/ 0;
 
 	alt = GetHeightAt(destx, desty);
 
@@ -1440,9 +1435,7 @@ void DropBomb(u_int16_t mun, client_t *client)
 		desty = client->posxy[1][0] + vely * timer;
 	}
 
-	BPrintf(RADIO_DARKGREEN, "DEBUG: DropBomb destx %d, desty %d, timer %u", destx, desty, timer);
-
-	AddBomb(0x01E9, destx, desty, GetHeightAt(destx, desty), mun, (velz + GRAVITY * timer), timer, client);
+	AddBomb(0x01E9, destx, desty, GetHeightAt(destx, desty), mun, (velz + GRAVITY * timer), timer * 100, client);
 
 	rocketbomb = (rocketbomb_t *) buffer;
 
