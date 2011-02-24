@@ -369,7 +369,7 @@ void Boid::retarget(const double *A)
  Change route from client command or just by threat
  */
 
-void Boid::changeRoute(double angle = 0, u_int16_t distance = 2000, client_t *client = NULL)
+void Boid::changeRoute(double angle, u_int16_t distance, client_t *client)
 {
 	int8_t angleoffset = 0;
 
