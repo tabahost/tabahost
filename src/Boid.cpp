@@ -324,7 +324,7 @@ void Boid::yaw(Boid *leader)
 	Attitude.z = 3600 - (int32_t) floor(Com_Deg(Yaw.curr) * 10);
 	// ajusta velocidade
 	Vel.target = sqrt(dx * dx + dy * dy) / 3;
-	dx = Vel.max * (1 - MODULUS(this->angleDef(Yaw.target - Yaw.curr) / (0.5 * M_PI))); // 1 - xº/90º
+	dx = Vel.max * (1 - MODULUS(this->angleDef(Yaw.target - Yaw.curr) / (1 * M_PI))); // 1 - xº/180º
 
 	if(dx < Vel.min)
 		dx = Vel.min;
@@ -369,14 +369,23 @@ void Boid::retarget(const double *A)
  Change route from client command or just by threat
  */
 
-void Boid::changeRoute(double angle, u_int16_t distance, client_t *client)
+void Boid::changeRoute(double angle = 0, u_int16_t distance = 2000, client_t *client = NULL)
 {
 	int8_t angleoffset = 0;
 
-	Com_Printf(VERBOSE_DEBUG, "WP %d\n", wpnum);
-
-	if(!threatened) // step wpnum back, because its an automatic route change or first manual change
+	if(!threatened)
 	{
+		if(!client)
+		{
+			int32_t dx = Position.x - wp[wpnum].x;
+			int32_t dy = Position.y - wp[wpnum].y;
+
+			// don't change route if close to next waypoint
+			if(sqrt(dx * dx + dy * dy) < (distance * sqrt(2)))
+				return;
+		}
+
+		// step wpnum back, because its an automatic route change or first manual change
 		wpnum--;
 		threatened = 1;
 	}
@@ -409,7 +418,6 @@ void Boid::changeRoute(double angle, u_int16_t distance, client_t *client)
 		}
 
 		angle += angleoffset;
-		distance = 2000;
 	}
 
 	wp[wpnum].x = Position.x + (distance * sin(Com_Rad(angle)));
