@@ -61,7 +61,7 @@ void Plane::attackNearestPlane()
 
 		if(!leader /*I'm leader*/&& !threatened && !(arena->frame % 600))
 		{
-			changeRoute(10000,,false);
+			changeRoute(10000,0,false);
 		}
 
 		// Otto x Airplane
