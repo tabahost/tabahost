@@ -132,7 +132,7 @@ class Boid
 		void addFollower(Boid *follower);
 		void removeFollowers(Boid *follower);
 		virtual void loadWaypoints(u_int8_t wpnum){return;};
-		void changeRoute(double angle = 0, u_int16_t distance = 2000, client_t *client = NULL);
+		void changeRoute(u_int16_t distance = 2000, double angle = 0, bool water = true, client_t *client = NULL);
 		virtual void prepare(){return;}; // leader prepare (point to waypoint)
 
 		// follower functions

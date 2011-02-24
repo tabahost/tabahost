@@ -369,7 +369,7 @@ void Boid::retarget(const double *A)
  Change route from client command or just by threat
  */
 
-void Boid::changeRoute(double angle, u_int16_t distance, client_t *client)
+void Boid::changeRoute(u_int16_t distance, double angle, bool water, client_t *client)
 {
 	int8_t angleoffset = 0;
 
@@ -412,7 +412,7 @@ void Boid::changeRoute(double angle, u_int16_t distance, client_t *client)
 		}
 
 		// check if new waypoint is over land
-		if(GetHeightAt(Position.x + (10000 * sin(Com_Rad(angle + angleoffset))), Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
+		if(water && GetHeightAt(Position.x + (10000 * sin(Com_Rad(angle + angleoffset))), Position.y + (10000 * cos(Com_Rad(angle + angleoffset))))) // WP is over land
 		{
 			angleoffset *= -1;
 		}
@@ -458,10 +458,42 @@ int8_t Boid::processDroneBoid()
 	}
 
 	// drone killed, so boid must be deleted
-	if(drone->status_damage & ((1 << PLACE_REARFUSE) | (1 << PLACE_CENTERFUSE) | (1 << PLACE_RGEAR) | (1 << PLACE_LGEAR)))
+
+
+	switch(this->getPlaneType())
 	{
-		ScoresEvent(SCORE_KILLED, drone, 0);
-		return -1;
+		case PLANETYPE_FIGHTER:
+		case PLANETYPE_BOMBER2:
+		case PLANETYPE_BOMBER4:
+			if(drone->status_damage & ((1 << PLACE_REARFUSE) | (1 << PLACE_CENTERFUSE) | (1 << PLACE_LWING) | (1 << PLACE_RWING) | (1 << PLACE_PILOT)))
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				return -1;
+			}
+			break;
+		case PLANETYPE_VEHICLE:
+			if(drone->status_damage & ((1 << PLACE_ENGINE1) | (1 << PLACE_ENGINE3) | (1 << PLACE_CENTERFUSE) | (1 << PLACE_PILOT)))
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				return -1;
+			}
+			break;
+		case PLANETYPE_CV:
+		case PLANETYPE_CA:
+		case PLANETYPE_DD:
+			if(drone->status_damage & ((1 << PLACE_REARFUSE) | (1 << PLACE_CENTERFUSE) | (1 << PLACE_RGEAR) | (1 << PLACE_LGEAR)))
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				return -1;
+			}
+			break;
+		default:
+			if(drone->status_damage & ((1 << PLACE_REARFUSE) | (1 << PLACE_CENTERFUSE) | (1 << PLACE_LWING) | (1 << PLACE_RWING) | (1 << PLACE_PILOT)))
+			{
+				ScoresEvent(SCORE_KILLED, drone, 0);
+				return -1;
+			}
+			break;
 	}
 
 	DroneVisibleList(drone);

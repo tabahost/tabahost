@@ -5832,7 +5832,7 @@ void Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client)
 	if(client->deck)
 	{
 		if(distance <= 20000 && distance >= 5000)
-			client->deck->changeRoute(angle, distance, client);
+			client->deck->changeRoute(distance, angle, true, client);
 		else
 			PPrintf(client, RADIO_LIGHTYELLOW, "Distance limited to 5000 - 20000 feets");
 	}
