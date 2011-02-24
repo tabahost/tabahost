@@ -212,9 +212,10 @@ bool Plane::retarget(coordinates_t &wp)
 				DropBomb(Target.x, Target.y, 84, followers->current()->getDrone());
 			}
 		}
-
-		this->loadWaypoints(wpnum); // reload waypoints
-
+		
+		// don't bomb this wp again.
+		wp.type = 0;
+		// this->loadWaypoints(wpnum); // reload waypoints
 		wpnum++;
 
 //		if(wpnum == wptotal) // reset waypoint index
