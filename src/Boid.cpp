@@ -105,6 +105,46 @@ void Boid::runBoids()
 }
 
 /**
+ Boid::hasGroup
+
+ Return true if found a boid of given group
+ */
+
+bool Boid::hasGroup(u_int8_t a)
+{
+	for(boids.restart(); boids.current(); boids.next())
+	{
+		if(boids.current()->getGroup() == a)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ Boid::countGroups
+
+ Return the number of groups for a given country
+ */
+
+u_int8_t Boid::countGroups(u_int8_t country)
+{
+	u_int8_t count = 0;
+
+	for(boids.restart(); boids.current(); boids.next())
+	{
+		if(!boids.current()->hasLeader() && boids.current()->getCountry() == country)
+		{
+			count++;
+		}
+	}
+
+	return count;
+}
+
+/**
  Boid::removeGroup
 
  Remove all boids form a group
@@ -399,7 +439,7 @@ void Boid::changeRoute(u_int16_t distance, double angle, bool water, client_t *c
 		// change the route based in the pathway angle
 		if(rand() % 100 < 60) // zigzag
 		{
-			angleoffset = 45 * Com_Pow(-1, zigzag);
+			angleoffset = 30 * Com_Pow(-1, zigzag);
 
 			if(zigzag == 1)
 				zigzag = 2;
@@ -408,7 +448,7 @@ void Boid::changeRoute(u_int16_t distance, double angle, bool water, client_t *c
 		}
 		else
 		{
-			angleoffset = 45 * Com_Pow(-1, rand() % 2);
+			angleoffset = 30 * Com_Pow(-1, rand() % 2);
 		}
 
 		// check if new waypoint is over land

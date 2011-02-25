@@ -61,7 +61,7 @@ void Plane::attackNearestPlane()
 
 		if(!leader /*I'm leader*/&& !threatened && !(arena->frame % 600))
 		{
-			changeRoute(10000,0,false);
+			changeRoute(10000, 0, false);
 		}
 
 		// Otto x Airplane
@@ -110,14 +110,14 @@ void Plane::loadWaypoints(u_int8_t wpnum = 1)
 
 	wptotal = 3;
 
-	wp[0].x = arena->fields[originField-1].posxyz[0];
-	wp[0].y = arena->fields[originField-1].posxyz[1];
+	wp[0].x = arena->fields[originField - 1].posxyz[0];
+	wp[0].y = arena->fields[originField - 1].posxyz[1];
 	wp[0].type = 0;
-	wp[1].x = arena->fields[targetField-1].posxyz[0];
-	wp[1].y = arena->fields[targetField-1].posxyz[1];
+	wp[1].x = arena->fields[targetField - 1].posxyz[0];
+	wp[1].y = arena->fields[targetField - 1].posxyz[1];
 	wp[1].type = 1; // 0 = wp, 1 = bomb wp
-	wp[2].x = arena->fields[originField-1].posxyz[0];
-	wp[2].y = arena->fields[originField-1].posxyz[1];
+	wp[2].x = arena->fields[originField - 1].posxyz[0];
+	wp[2].y = arena->fields[originField - 1].posxyz[1];
 	wp[2].type = 0;
 
 	if(wpnum)
@@ -212,14 +212,14 @@ bool Plane::retarget(coordinates_t &wp)
 				DropBomb(Target.x, Target.y, 84, followers->current()->getDrone());
 			}
 		}
-		
+
 		// don't bomb this wp again.
 		wp.type = 0;
 		// this->loadWaypoints(wpnum); // reload waypoints
 		wpnum++;
 
-//		if(wpnum == wptotal) // reset waypoint index
-//			wpnum = 1;
+		//		if(wpnum == wptotal) // reset waypoint index
+		//			wpnum = 1;
 
 		return false;
 	}
@@ -257,26 +257,26 @@ void Plane::prepare(const double *A)
 	Target.y = leader->getPositionY() + A[0] * cos(Yaw.curr + A[1] * M_PI);
 	Position.x = Target.x;
 	Position.y = Target.y;
-	Position.z = 5000;
+	Position.z = 10000;
 
-//	switch(plane)
-//	{
-//		case SHIP_CA: // CA 77
-//			radius = 330; // 330 feet
-//			Vel.max = 20; // 40 feet per second
-//			Vel.min = 0.2;
-//			YawVel.max = 1.3334 * M_PI / 180; // 2.6666º per second (in radians)
-//			YawVel.min = -YawVel.max;
-//			break;
-//		default:
-			radius = 103; // 103 feet
-			Vel.max = 160; // 351 km/h
-			Vel.min = 82; // 180 km/h
-			YawVel.max = 3 * M_PI / 180; // 6º per second (in radians)
-			YawVel.min = -YawVel.max;
-//			Com_Printf(VERBOSE_WARNING, "prepare(): unknown ship type\n");
-//			break;
-//	}
+	//	switch(plane)
+	//	{
+	//		case SHIP_CA: // CA 77
+	//			radius = 330; // 330 feet
+	//			Vel.max = 20; // 40 feet per second
+	//			Vel.min = 0.2;
+	//			YawVel.max = 1.3334 * M_PI / 180; // 2.6666º per second (in radians)
+	//			YawVel.min = -YawVel.max;
+	//			break;
+	//		default:
+	radius = 103; // 103 feet
+	Vel.max = 160; // 351 km/h
+	Vel.min = 82; // 180 km/h
+	YawVel.max = 3 * M_PI / 180; // 6º per second (in radians)
+	YawVel.min = -YawVel.max;
+	//			Com_Printf(VERBOSE_WARNING, "prepare(): unknown ship type\n");
+	//			break;
+	//	}
 }
 
 /**
@@ -298,7 +298,7 @@ void Plane::prepare() // main Boid
 
 	Position.x = wp[0].x;
 	Position.y = wp[0].y;
-	Position.z = 5000;
+	Position.z = 10000;
 	Target.x = wp[1].x;
 	Target.y = wp[1].y;
 
@@ -329,15 +329,8 @@ void Plane::prepare() // main Boid
 
 int8_t Plane::run()
 {
-	const double Form[4][6][2] =
-	{
-		{
-			{ 200, 0.75 }, { 200, -0.75 }, { 282, 1 }, { 400, -0.75 }, { 400, 0.75 }, { 565, 1 }
-		},
-		{
-			{ 600, 0.25 }, { 600, -0.25 }, { 848.5281, 0.5 }, { 848.5281, -0.5 }, { 600, 1 }, { 700, 0 }
-		}
-	};
+	const double Form[4][6][2] = { { { 200, 0.75 }, { 200, -0.75 }, { 282, 1 }, { 400, -0.75 }, { 400, 0.75 }, { 565, 1 } }, { { 600, 0.25 }, { 600, -0.25 }, {
+			848.5281, 0.5 }, { 848.5281, -0.5 }, { 600, 1 }, { 700, 0 } } };
 
 	if(!this->isLegal("Plane::run"))
 		return -1;
@@ -372,7 +365,7 @@ int8_t Plane::run()
 		// TODO: convoy speed verification (speed == more damaged)
 		this->setVelMax(150); // 330 km/h
 		this->yaw();
-		Attitude.y = (int16_t)(-200.0 * YawVel.curr / YawVel.max); // Roll
+		Attitude.y = (int16_t) (-200.0 * YawVel.curr / YawVel.max); // Roll
 		this->walk();
 		this->attackNearestPlane();
 
@@ -386,7 +379,7 @@ int8_t Plane::run()
 	{
 		Boid::retarget(Form[formation][pos]);
 		this->yaw(leader);
-		Attitude.y = (int16_t)(-200.0 * YawVel.curr / YawVel.max); // Roll
+		Attitude.y = (int16_t) (-200.0 * YawVel.curr / YawVel.max); // Roll
 		this->walk();
 		this->attackNearestPlane();
 
@@ -398,6 +391,51 @@ int8_t Plane::run()
 
 	return 0;
 }
+/**
+ Plane::createMission
+
+ Send drones from field x to field y
+ */
+
+void Plane::createMission(u_int8_t country)
+{
+	u_int16_t origin;
+	u_int16_t destiny;
+	u_int8_t planemodel;
+	u_int8_t field, i;
+
+	field = (u_int8_t) fields->value - cvs->value;
+
+	do
+	{
+		i = rand() % field;
+	} while(arena->fields[i].country != country);
+
+	origin = i + 1;
+
+	do
+	{
+		i = rand() % field;
+	} while(arena->fields[i].country == country);
+
+	destiny = i + 1;
+
+	switch(country)
+	{
+		case COUNTRY_GOLD:
+			planemodel = 35; // Ju88
+			break;
+		case COUNTRY_RED:
+			planemodel = 40; // B17
+			break;
+		default:
+			planemodel = 40;
+			break;
+	}
+
+	Com_Printf(VERBOSE_DEBUG, "Mission %s from F%d to F%d with %s\n", GetCountry(country), origin, destiny, GetSmallPlaneName(planemodel));
+	Plane::createMission(origin, destiny, planemodel);
+}
 
 /**
  Plane::createMission
@@ -408,18 +446,23 @@ int8_t Plane::run()
 void Plane::createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemodel)
 {
 	Plane *leader, *plane;
+	u_int8_t group;
 	client_t *drone;
-	// CREATE ALL SHIPS AGAIN
-	Com_Printf(VERBOSE_DEBUG, "test() group %u\n", origin);
 
-	removeGroup(origin);
+	//removeGroup(group);
 
 	// Create leader
 	leader = new Plane();
 	leader->createFollowers(new Boidlist());
-	leader->setGroup(origin);
+
+	do
+	{
+		group = rand() % 255 + 1;
+	} while(Boid::hasGroup(group));
+
+	leader->setGroup(group);
 	leader->setFormation(0);
-	leader->setCountry(arena->fields[origin-1].country);
+	leader->setCountry(arena->fields[origin - 1].country);
 	leader->setPlane(planemodel); // B17F
 	leader->setOriginField(origin);
 	leader->setTargetField(destiny);
@@ -430,7 +473,6 @@ void Plane::createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemod
 	if(!drone)
 	{
 		delete leader;
-		Com_Printf(VERBOSE_WARNING, "test() group %u - error creating leader drone\n", origin);
 		return;
 	}
 	else
@@ -449,7 +491,6 @@ void Plane::createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemod
 		if(!drone)
 		{
 			delete plane;
-			Com_Printf(VERBOSE_WARNING, "ResetCV() group %u - error creating drone %u\n", origin, i);
 			return;
 		}
 		else

@@ -22,6 +22,7 @@ class Plane: public Boid
 	public:
 		static u_int16_t planeCount;
 		static u_int16_t getPlaneCount(){return planeCount;};
+		static void createMission(u_int8_t country);
 		static void createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemodel);
 
 		virtual bool isLegal(const char *);

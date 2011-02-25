@@ -1061,18 +1061,36 @@ void CheckArenaRules(void)
 		DebugClient(__FILE__, __LINE__, TRUE, NULL);
 	}
 
-	// CV tick
+	// Boids tick
 
 	if(!setjmp(debug_buffer))
 	{
 		if(!(arena->frame % 6000)) // Log AI's position every 60sec
+		{
 			Boid::logPosition();
+		}
 
 		if(!setjmp(debug_buffer))
 		{
 			if(!(arena->frame % 50)) // 500ms
 			{
 				Boid::runBoids();
+			}
+		}
+		else
+		{
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
+		}
+
+		if(!setjmp(debug_buffer))
+		{
+			if(!(arena->frame % 6000)) // Start Bomber raiders each 60sec until 5 by country
+			{
+				while(Boid::countGroups(COUNTRY_RED) <= 5)
+					Plane::createMission(COUNTRY_RED);
+
+				while(Boid::countGroups(COUNTRY_GOLD) <= 5)
+					Plane::createMission(COUNTRY_GOLD);
 			}
 		}
 		else
@@ -2727,7 +2745,7 @@ void ProcessCommands(char *command, client_t *client)
 
 	if(permission & (FLAG_ADMIN | FLAG_OP)) // commands that ADMIN's and OP's can execute
 	{
-		if (!Com_Stricmp(command, "dbpasswd"))
+		if(!Com_Stricmp(command, "dbpasswd"))
 		{
 			if(!argv[0])
 			{

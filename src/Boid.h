@@ -87,8 +87,10 @@ class Boid
 		static u_int16_t boidCount;
 		static Boidlist boids;
 		static void runBoids();
+		static bool hasGroup(u_int8_t a);
 		static void removeGroup(u_int8_t group);
 		static void logPosition();
+		static u_int8_t countGroups(u_int8_t country);
 
 		virtual bool isLegal(const char *);
 
@@ -122,6 +124,7 @@ class Boid
 		int32_t getPositionY(){return Position.y;};
 		u_int8_t getGroup(){return group;};
 		u_int8_t getField(){return field;};
+		u_int8_t getCountry(){return country;};
 		u_int8_t getPosition(){return pos;};
 		u_int8_t getPlaneType(){return (plane?arena->planedamage[plane].type:0);};
 		double getSpeed(){return Vel.curr;};
