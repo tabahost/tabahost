@@ -21,6 +21,8 @@ Boid::Boid()
 	port = NULL;
 	wpreach = 100;
 	followers = NULL;
+	Eelev = 0.0;
+	Eazimuth = 0.0;
 	group = 0;
 	threatened = false;
 	outofport = false;

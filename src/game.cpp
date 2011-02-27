@@ -863,6 +863,12 @@ void CheckArenaRules(void)
 				}
 			}
 
+			if(arena->fields[i].underattack && !arcade->value)
+			{
+				if(arena->fields[i].tonnage < GetTonnageToClose(i+1))
+					arena->fields[i].underattack = 0;
+			}
+
 			if(arena->fields[i].warehouse && !arcade->value) // warehouse effect
 			{
 				if((arena->fields[i].warehouse + 60000) <= arena->frame)
@@ -2000,9 +2006,9 @@ void ProcessCommands(char *command, client_t *client)
 				{
 					j++;
 
-					if(j >= 2)
+					if(j >= 1)
 					{
-						PPrintf(client, RADIO_YELLOW, "You have 2 Commandos already dropped");
+						PPrintf(client, RADIO_YELLOW, "You have 1 Commandos already dropped");
 						return;
 					}
 				}
@@ -7737,6 +7743,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 		if(((building->fieldtype <= FIELD_SUBMARINE) || (building->fieldtype >= FIELD_WB3POST)) && !arena->fields[building->field - 1].alert)
 		{
 			arena->fields[building->field - 1].alert = arena->frame;
+			arena->fields[building->field - 1].underattack = arena->frame;
 		}
 	}
 	else

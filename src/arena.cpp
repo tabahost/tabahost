@@ -1647,7 +1647,7 @@ int8_t IsFighter(client_t *client, ...)
 		}
 		else if(plane < maxplanes)
 		{
-			if(arena->planedamage[plane].type == 1)
+			if(arena->planedamage[plane].type == PLANETYPE_FIGHTER)
 				return 1;
 			else
 				return 0;
@@ -1667,7 +1667,7 @@ int8_t IsFighter(client_t *client, ...)
 
 	if(plane < maxplanes)
 	{
-		if(arena->planedamage[plane].type == 1)
+		if(arena->planedamage[plane].type == PLANETYPE_FIGHTER)
 			return 1;
 		else
 			return 0;
@@ -1707,7 +1707,7 @@ int8_t IsBomber(client_t *client, ...)
 		}
 		else if(plane < maxplanes)
 		{
-			if(arena->planedamage[plane].type == 2)
+			if((arena->planedamage[plane].type >= PLANETYPE_BOMBER2) && (arena->planedamage[plane].type <= PLANETYPE_BOMBER4))
 				return 1;
 			else
 				return 0;
@@ -1727,7 +1727,60 @@ int8_t IsBomber(client_t *client, ...)
 
 	if(plane < maxplanes)
 	{
-		if(arena->planedamage[plane].type == 2)
+		if((arena->planedamage[plane].type >= PLANETYPE_BOMBER2) && (arena->planedamage[plane].type <= PLANETYPE_BOMBER4))
+			return 1;
+		else
+			return 0;
+	}
+	else
+		return 0;
+}
+
+/**
+ IsShip
+
+ Check if plane is Ship
+ */
+
+int8_t IsShip(client_t *client, ...)
+{
+	va_list argptr;
+	u_int32_t plane = 0;
+
+	if(!client)
+	{
+		va_start(argptr, client);
+		plane = va_arg(argptr, u_int32_t);
+		va_end(argptr);
+
+		if(!plane) // possible error
+		{
+			Com_Printf(VERBOSE_WARNING, "IsShip() plane = 0\n");
+			return 0;
+		}
+		else if(plane < maxplanes)
+		{
+			if((arena->planedamage[plane].type >= PLANETYPE_CV) && (arena->planedamage[plane].type <= PLANETYPE_DD))
+				return 1;
+			else
+				return 0;
+		}
+		else
+			return 0;
+	}
+
+	if(client->attached)
+	{
+		plane = client->attached->plane;
+	}
+	else
+	{
+		plane = client->plane;
+	}
+
+	if(plane < maxplanes)
+	{
+		if((arena->planedamage[plane].type >= PLANETYPE_CV) && (arena->planedamage[plane].type <= PLANETYPE_DD))
 			return 1;
 		else
 			return 0;
@@ -1820,7 +1873,7 @@ int8_t IsGround(client_t *client, ...)
 		}
 		else if(plane < maxplanes)
 		{
-			if(arena->planedamage[plane].type == 3)
+			if(arena->planedamage[plane].type == PLANETYPE_VEHICLE)
 				return 1;
 			else
 				return 0;
@@ -1840,7 +1893,7 @@ int8_t IsGround(client_t *client, ...)
 
 	if(plane < maxplanes)
 	{
-		if(arena->planedamage[plane].type == 3)
+		if(arena->planedamage[plane].type == PLANETYPE_VEHICLE)
 			return 1;
 		else
 			return 0;
@@ -2459,6 +2512,7 @@ void CaptureField(u_int8_t field, client_t *client)
 	Cmd_Capt(field - 1, client->country, NULL);
 	arena->fields[field - 1].paras = 0;
 	arena->fields[field - 1].alert = 0;
+	arena->fields[field - 1].underattack = 0;
 
 	/*
 	 for(i = 0; i < MAX_CITYFIELD; i++)

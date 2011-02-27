@@ -191,7 +191,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].shortnick = shortnick;
 					clients[i].dronelasttarget = MAX_BUILDINGS; // to avoid unrandomized first target at DroneGetTarget()
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
-					clients[i].dronetimer = 190 * 100;
+					clients[i].dronetimer = 250 * 100;
 					clients[i].ready = 0;
 					clients[i].countrytime = 100;
 					break;
@@ -1172,7 +1172,7 @@ void DroneGetTarget(client_t *drone)
 	u_int16_t i, j;
 	u_int16_t temp[MAX_BUILDINGS];
 
-	if(!drone || !drone->drone || (drone->dronelasttarget < MAX_BUILDINGS && !arena->fields[drone->dronefield].buildings[drone->dronelasttarget].status))
+	if(!drone || !drone->drone) // || (drone->dronelasttarget < MAX_BUILDINGS && !arena->fields[drone->dronefield].buildings[drone->dronelasttarget].status))
 		return;
 
 	for(i = 0, j = 0; i < MAX_BUILDINGS; i++)
@@ -1488,9 +1488,9 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 				//dispersion
 				if(dist > 125)
 				{
-					velx = rand() % (dist / 125); // old value = 50
+					velx = rand() % (dist / 10);
 					destx += Com_Pow(-1, rand() % 2) * velx;
-					vely = rand() % (dist / 125); // old value = 50
+					vely = rand() % (dist / 10);
 					desty += Com_Pow(-1, rand() % 2) * vely;
 				}
 			}
@@ -1586,7 +1586,7 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 				client->countrytime = (double) 200 * velz / GRAVITY;
 
 				if(wb3->value)
-					mun = MORTAR_BOMB; // 250kg AP
+					mun = MORTAR_BOMB;
 				else
 					mun = 113; // Flare
 

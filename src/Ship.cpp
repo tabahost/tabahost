@@ -438,7 +438,7 @@ Ship *Ship::getShipByNum(u_int8_t num)
 
 	for(i = 0, boids.restart(); boids.current(); boids.next())
 	{
-		if(boids.current()->getPlaneType() >= PLANETYPE_CV)
+		if(IsShip(boids.current()->getDrone()))
 		{
 			if(i == num)
 			{
@@ -477,25 +477,37 @@ void Ship::attackNearestPlane()
 		// Ship x Airplane
 		if(distplane > 0)
 		{
-			double speed = sqrt(nearplane->speedxyz[0][0] * nearplane->speedxyz[0][0] + nearplane->speedxyz[1][0] * nearplane->speedxyz[1][0]
-					+ nearplane->speedxyz[2][0] * nearplane->speedxyz[2][0]);
-			int16_t j;
+			double speedaz = AngleTo(Position.x, Position.y, nearplane->posxy[0][0], nearplane->posxy[1][0]);
+			double speedel = Com_Deg(atan2((double)distplane, (double)(Position.z - nearplane->posalt[0])));
+
+			speedaz = Eazimuth - speedaz;
+			Eazimuth = speedaz;
+			speedel = Eelev - speedel;
+			Eelev = speedel;
+
+			double speed = sqrt(speedaz * speedaz + speedel * speedel);
+
+			double j;
 
 			if(distplane <= 4000)
 			{
 				// % of hit
-				j = (int16_t) (-0.003 * (float) distplane + 11.0);
+				j = -0.003 * distplane + 11.0;
 				if(j < 0)
 					j = 0;
-				j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
+				j = j * (-0.03 * speed + 1.45); // (15,1)(45,0.1) linear
 				if(j < 0)
 					j = 0;
 
 				if((rand() % 100) < j) // hit
+				{
 					FireAck(drone, nearplane, distplane, 0);
+				}
 				else
+				{
 					// fail
 					FireAck(drone, nearplane, distplane, 1);
+				}
 			}
 			else if(!(arena->frame % 300)) // 3 sec
 			{

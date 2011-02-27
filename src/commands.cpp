@@ -1098,7 +1098,7 @@ u_int8_t Cmd_Fly(u_int16_t position, client_t *client)
 	}
 	else
 	{
-		client->commandos = 4;
+		client->commandos = 1;
 	}
 
 	client->status_damage = 0; // to force player not appear damaged after takeoff

@@ -67,19 +67,34 @@ void Plane::attackNearestPlane()
 		// Otto x Airplane
 		if(distplane > 0)
 		{
-			double speed = sqrt(nearplane->speedxyz[0][0] * nearplane->speedxyz[0][0] + nearplane->speedxyz[1][0] * nearplane->speedxyz[1][0]
-					+ nearplane->speedxyz[2][0] * nearplane->speedxyz[2][0]);
-			int16_t j;
+			double speedaz = AngleTo(Position.x, Position.y, nearplane->posxy[0][0], nearplane->posxy[1][0]);
+			double speedel = Com_Deg(atan2((double)distplane, (double)(Position.z - nearplane->posalt[0])));
+
+			speedaz = Eazimuth - speedaz;
+			Eazimuth = speedaz;
+			speedel = Eelev - speedel;
+			Eelev = speedel;
+
+			double speed = sqrt(speedaz * speedaz + speedel * speedel);
+
+			double j;
 
 			if(distplane <= 3000) // D10
 			{
 				// % of hit
-				j = (int16_t) (-0.003 * (float) distplane + 11.0);
+				j = -0.003 * (double)distplane + 50.0;
 				if(j < 0)
 					j = 0;
-				j = (int16_t) ((float) j * (-0.001 * speed + 1.3));
+
+				if(nearplane->attr)
+					PPrintf(nearplane, RADIO_GREEN, "Dist %u Otto %.2f%", distplane, j);
+
+				j *= (-0.03 * speed + 1.45); // (15,1)(45,0.1) linear
 				if(j < 0)
 					j = 0;
+
+				if(nearplane->attr)
+					PPrintf(nearplane, RADIO_GREEN, "Speed %.2f Otto %.2f%", speed, j);
 
 				if((rand() % 100) < j) // hit
 				{
@@ -402,36 +417,42 @@ void Plane::createMission(u_int8_t country)
 	u_int16_t origin;
 	u_int16_t destiny;
 	u_int8_t planemodel;
-	u_int8_t field, i;
+	u_int8_t field, i, j, planes;
 
 	field = (u_int8_t) fields->value - cvs->value;
 
-	do
+	for(j = 0, i = rand() % field; j < field; j++, i = rand() % field)
 	{
-		i = rand() % field;
-	} while(arena->fields[i].country != country);
+		if((arena->fields[i].country == country) && (arena->fields[i].type >= FIELD_LITTLE) && (arena->fields[i].type <= FIELD_MAIN)
+			&& !arena->fields[i].underattack && !arena->fields[i].closed)
+			break;
+	}
 
-	origin = i + 1;
+	if(j == field) // not found
+		return;
+
+	origin = i;
+
+	for(j = 0, i = rand() % maxplanes; j < maxplanes; j++, i = rand() % maxplanes)
+	{
+		if(arena->rps[i].used && IsBomber(NULL, i) && !IsCargo(NULL, i) && (arena->fields[origin].rps[i] >= 1))
+			break;
+	}
+
+	if(j == maxplanes) // not found
+		return;
+
+	planemodel = i;
 
 	do
 	{
 		i = rand() % field;
 	} while(arena->fields[i].country == country);
 
-	destiny = i + 1;
+	destiny = i;
 
-	switch(country)
-	{
-		case COUNTRY_GOLD:
-			planemodel = 35; // Ju88
-			break;
-		case COUNTRY_RED:
-			planemodel = 40; // B17
-			break;
-		default:
-			planemodel = 40;
-			break;
-	}
+	origin++;
+	destiny++;
 
 	Com_Printf(VERBOSE_DEBUG, "Mission %s from F%d to F%d with %s\n", GetCountry(country), origin, destiny, GetSmallPlaneName(planemodel));
 	Plane::createMission(origin, destiny, planemodel);

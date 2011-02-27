@@ -54,6 +54,8 @@ class Boid
 		char logfile[64]; // logfile name
 
 		// Individual variables
+		double Eelev;
+		double Eazimuth;
 		u_int8_t plane; // ship plane: KAGA, ENTERPRISE, Etc.
 		u_int8_t country; // ship country (1 = red, 3 = gold)
 		coordinates_t Position; // Position

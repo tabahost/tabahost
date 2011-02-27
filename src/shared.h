@@ -106,7 +106,7 @@ typedef unsigned int u_int32_t;
 #define FALSE 0
 #endif
 
-#define VERSION				"b4.10"
+#define VERSION				"b4.20"
 
 #define V_WB2				0
 #define V_WB2007			1
@@ -158,7 +158,7 @@ typedef unsigned int u_int32_t;
 #define VAR_ARCHIVE			1		// set to cause it to be saved to config.cfg
 #define VAR_NOSET			2		// block variable from change value
 #define VAR_ADMIN			4		// only admins can change this variable
-#define MORTAR_BOMB			88		// 250Kg AP
+#define MORTAR_BOMB			88		//
 #define MORTAR				680.0	// mortar velocity (ft/s) (585, range= 10697; 680, range = 14450)
 #define MORTAR_RANGE		14000	// mortar range is 14000ft
 #define	GRAVITY				32.0//.8083989501312335958005249343832		// gravity acceleration (ft/s�)
@@ -636,6 +636,7 @@ typedef struct field_s
 	u_int8_t	vitals;
 	u_int8_t	paras;
 	u_int32_t	alert;
+	u_int32_t	underattack;
 	u_int32_t	warehouse;
 	u_int8_t	ctf;
 	u_int8_t	ctfwho;
@@ -2348,6 +2349,7 @@ void	ShowRPS(client_t *client);
 void	LoadMapcycle(const char *path, client_t *client);
 int8_t	IsFighter(client_t *client, ...);
 int8_t	IsBomber(client_t *client, ...);
+int8_t	IsShip(client_t *client, ...);
 int8_t	IsCargo(client_t *client, ...);
 int8_t	IsGround(client_t *client, ...);
 int8_t	HaveGunner(u_int16_t plane);
@@ -2543,8 +2545,8 @@ extern	arenaslist_t	arenaslist[MAX_ARENASLIST];	/// list of online arenas
 extern	client_t	*clients;		/// list of clients
 extern	u_int32_t	factorybuildings[4];
 extern	u_int32_t	factorybuildingsup[4];
-extern	u_int32_t	maxmuntype;		/// get this value from number os entries in DB
-extern	u_int32_t	maxplanes;		/// get this value from number os entries in DB
+extern	u_int32_t	maxmuntype;		/// get this value from number of entries in DB
+extern	u_int32_t	maxplanes;		/// get this value from number of entries in DB
 extern  jmp_buf 	debug_buffer;	/// debug buffer
 extern  u_int8_t    mainbuffer[MAX_RECVDATA];
 extern	var_t		*var_vars;		/// list of variables
