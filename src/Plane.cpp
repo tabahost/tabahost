@@ -83,9 +83,6 @@ void Plane::attackNearestPlane()
 
 				double speed = sqrt(speedaz * speedaz + speedel * speedel);
 
-				if(nearplane->attr && speed > 25)
-					PPrintf(nearplane, RADIO_GREEN, "Speed %.2f", speed);
-
 				double j;
 
 				// % of hit
