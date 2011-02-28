@@ -191,7 +191,7 @@ client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_i
 					clients[i].shortnick = shortnick;
 					clients[i].dronelasttarget = MAX_BUILDINGS; // to avoid unrandomized first target at DroneGetTarget()
 					strcpy(clients[i].longnick, wbnick2ascii(clients[i].shortnick));
-					clients[i].dronetimer = 250 * 100;
+					clients[i].dronetimer = 280 * 100;
 					clients[i].ready = 0;
 					clients[i].countrytime = 100;
 					break;
@@ -1066,7 +1066,7 @@ int ProcessDrone(client_t *drone)
 									PPrintf(drone->related[0], RADIO_DARKGREEN, "Commandos aiming at %s, F%d", GetBuildingType(
 											arena->fields[drone->dronefield].buildings[drone->dronelasttarget].type), drone->dronefield + 1);
 								}
-								ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], GetHeightAt(drone->posxy[0][0], drone->posxy[1][0]) + 50,
+								ThrowBomb(FALSE, drone->posxy[0][0], drone->posxy[1][0], arena->fields[drone->dronefield].posxyz[3] + 50,
 										arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx,
 										arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
 								//							ThrowBomb(TRUE, drone->posxy[0][0], drone->posxy[1][0], drone->posalt[0], arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posx, arena->fields[drone->dronefield].buildings[drone->dronelasttarget].posy, 0, drone);
@@ -1488,9 +1488,9 @@ void ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, in
 				//dispersion
 				if(dist > 125)
 				{
-					velx = rand() % (dist / 10);
+					velx = rand() % (dist / 30);
 					destx += Com_Pow(-1, rand() % 2) * velx;
-					vely = rand() % (dist / 10);
+					vely = rand() % (dist / 30);
 					desty += Com_Pow(-1, rand() % 2) * vely;
 				}
 			}

@@ -67,34 +67,35 @@ void Plane::attackNearestPlane()
 		// Otto x Airplane
 		if(distplane > 0)
 		{
-			double speedaz = AngleTo(Position.x, Position.y, nearplane->posxy[0][0], nearplane->posxy[1][0]);
-			double speedel = Com_Deg(atan2((double)distplane, (double)(Position.z - nearplane->posalt[0])));
-
-			speedaz = Eazimuth - speedaz;
-			Eazimuth = speedaz;
-			speedel = Eelev - speedel;
-			Eelev = speedel;
-
-			double speed = sqrt(speedaz * speedaz + speedel * speedel);
-
-			double j;
-
 			if(distplane <= 3000) // D10
 			{
+
+				double temp;
+				double speedaz = AngleTo(Position.x, Position.y, nearplane->posxy[0][0], nearplane->posxy[1][0]);
+				double speedel = Com_Deg(atan2((double) distplane, (double) (Position.z - nearplane->posalt[0])));
+
+				temp = speedaz;
+				speedaz = Eazimuth - speedaz;
+				Eazimuth = temp;
+				temp = speedel;
+				speedel = Eelev - speedel;
+				Eelev = temp;
+
+				double speed = sqrt(speedaz * speedaz + speedel * speedel);
+
+				if(nearplane->attr && speed > 25)
+					PPrintf(nearplane, RADIO_GREEN, "Speed %.2f", speed);
+
+				double j;
+
 				// % of hit
-				j = -0.003 * (double)distplane + 50.0;
+				j = -0.003 * (double) distplane + 11.0;
 				if(j < 0)
 					j = 0;
 
-				if(nearplane->attr)
-					PPrintf(nearplane, RADIO_GREEN, "Dist %u Otto %.2f%", distplane, j);
-
-				j *= (-0.03 * speed + 1.45); // (15,1)(45,0.1) linear
+				j *= (-0.036 * speed + 1.18); // (5,1)(30,0.1) linear
 				if(j < 0)
 					j = 0;
-
-				if(nearplane->attr)
-					PPrintf(nearplane, RADIO_GREEN, "Speed %.2f Otto %.2f%", speed, j);
 
 				if((rand() % 100) < j) // hit
 				{
@@ -424,7 +425,7 @@ void Plane::createMission(u_int8_t country)
 	for(j = 0, i = rand() % field; j < field; j++, i = rand() % field)
 	{
 		if((arena->fields[i].country == country) && (arena->fields[i].type >= FIELD_LITTLE) && (arena->fields[i].type <= FIELD_MAIN)
-			&& !arena->fields[i].underattack && !arena->fields[i].closed)
+				&& !arena->fields[i].underattack && !arena->fields[i].closed)
 			break;
 	}
 
