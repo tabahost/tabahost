@@ -1,36 +1,36 @@
 /*
- * Plane.cpp
+ * Vehicle.cpp
  *
- *  Created on: 20/02/2011
+ *  Created on: 04/03/2011
  *      Author: franz
  */
 
-#include "Plane.h"
+#include "Vehicle.h"
 
-u_int16_t Plane::planeCount;
+u_int16_t Vehicle::vehicleCount;
 
-Plane::Plane()
+Vehicle::Vehicle()
 {
-	Com_Printf(VERBOSE_DEBUG, "Plane constructor\n");
+	Com_Printf(VERBOSE_DEBUG, "Vehicle constructor\n");
 	signature = CLASSID_PLANE;
 	wpreach = 10;
-	planeCount++;
+	vehicleCount++;
 }
 
-Plane::~Plane()
+Vehicle::~Vehicle()
 {
-	Com_Printf(VERBOSE_DEBUG, "Plane destructor\n");
-	planeCount--;
+	Com_Printf(VERBOSE_DEBUG, "Vehicle destructor\n");
+	vehicleCount--;
 	signature = 0;
 }
 
 /**
- Plane::isLegal
+ Vehicle::isLegal
 
  Class Validator
  */
 
-bool Plane::isLegal(const char *function)
+bool Vehicle::isLegal(const char *function)
 {
 	if(signature != CLASSID_PLANE)
 	{
@@ -42,14 +42,14 @@ bool Plane::isLegal(const char *function)
 }
 
 /**
- Plane::attackNearestPlane
+ Vehicle::attackNearestPlane
 
  Attack nearest plane with ack/flacks and set leader as threatened
  */
 
-void Plane::attackNearestPlane()
+void Vehicle::attackNearestPlane()
 {
-	if(!this->isLegal("Plane::attackNearestPlane"))
+	if(!this->isLegal("Vehicle::attackNearestPlane"))
 		return;
 
 	// check if there are enemies around
@@ -109,17 +109,17 @@ void Plane::attackNearestPlane()
 }
 
 /**
- Plane::loadWaypoints
+ Vehicle::loadWaypoints
 
  Load waypoints (create or read from file)
  */
 
-void Plane::loadWaypoints(u_int8_t wpnum = 1)
+void Vehicle::loadWaypoints(u_int8_t wpnum = 1)
 {
-	if(!this->isLegal("Plane::loadWaypoints"))
+	if(!this->isLegal("Vehicle::loadWaypoints"))
 		return;
 
-	Com_Printf(VERBOSE_DEBUG, "Plane::loadWaypoints() %u - origin %u - destiny %u\n", group, originField, targetField);
+	Com_Printf(VERBOSE_DEBUG, "Vehicle::loadWaypoints() %u - origin %u - destiny %u\n", group, originField, targetField);
 
 	wptotal = 3;
 
@@ -137,17 +137,17 @@ void Plane::loadWaypoints(u_int8_t wpnum = 1)
 		this->wpnum = wpnum;
 }
 
-//void Plane::loadWaypoints(u_int8_t wpnum = 1)
+//void Vehicle::loadWaypoints(u_int8_t wpnum = 1)
 //{
 //	char file[32];
 //	u_int8_t i;
 //	FILE *fp;
 //	char buffer[128];
 //
-//	if(!this->isLegal("Plane::loadWaypoints"))
+//	if(!this->isLegal("Vehicle::loadWaypoints"))
 //		return;
 //
-//	Com_Printf(VERBOSE_DEBUG, "Plane::loadWaypoints() %u\n", group);
+//	Com_Printf(VERBOSE_DEBUG, "Vehicle::loadWaypoints() %u\n", group);
 //
 //	snprintf(file, sizeof(file), "./arenas/%s/plane%d.rte", dirname->string, group);
 //
@@ -155,7 +155,7 @@ void Plane::loadWaypoints(u_int8_t wpnum = 1)
 //
 //	if(!(fp = fopen(file, "r")))
 //	{
-//		PPrintf(NULL, RADIO_YELLOW, "WARNING: Plane::loadWaypoints() Cannot open file \"%s\"", file);
+//		PPrintf(NULL, RADIO_YELLOW, "WARNING: Vehicle::loadWaypoints() Cannot open file \"%s\"", file);
 //		return;
 //	}
 //
@@ -177,21 +177,21 @@ void Plane::loadWaypoints(u_int8_t wpnum = 1)
 //
 //	if(!wptotal)
 //	{
-//		PPrintf(NULL, RADIO_YELLOW, "WARNING: Plane::loadWaypoints() error reading \"%s\"", file);
+//		PPrintf(NULL, RADIO_YELLOW, "WARNING: Vehicle::loadWaypoints() error reading \"%s\"", file);
 //	}
 //
 //	fclose(fp);
 //}
 
 /**
- Plane::retarget
+ Vehicle::retarget
 
- Leader plane retarget waypoint
+ Leader vehicle retarget waypoint
  */
 
-bool Plane::retarget(coordinates_t &wp)
+bool Vehicle::retarget(coordinates_t &wp)
 {
-	if(!this->isLegal("Plane::retarget"))
+	if(!this->isLegal("Vehicle::retarget"))
 		return false;
 
 	Target.x = wp.x;
@@ -239,14 +239,14 @@ bool Plane::retarget(coordinates_t &wp)
 }
 
 /**
- Plane::prepare
+ Vehicle::prepare
 
  Prepare follower boid before start walking
  */
 
-void Plane::prepare(const double *A)
+void Vehicle::prepare(const double *A)
 {
-	if(!this->isLegal("Plane::prepare"))
+	if(!this->isLegal("Vehicle::prepare"))
 		return;
 
 	Com_Printf(VERBOSE_DEBUG, "Preparing follower group %u\n", group);
@@ -293,14 +293,14 @@ void Plane::prepare(const double *A)
 }
 
 /**
- Plane::prepare
+ Vehicle::prepare
 
  Prepare leader boid before start walking
  */
 
-void Plane::prepare() // main Boid
+void Vehicle::prepare() // main Boid
 {
-	if(!this->isLegal("Plane::prepare()"))
+	if(!this->isLegal("Vehicle::prepare()"))
 		return;
 
 	Com_Printf(VERBOSE_DEBUG, "Preparing Leader group %u\n", group);
@@ -335,17 +335,17 @@ void Plane::prepare() // main Boid
 }
 
 /**
- Plane::run
+ Vehicle::run
 
  Run frame
  */
 
-int8_t Plane::run()
+int8_t Vehicle::run()
 {
 	const double Form[4][6][2] = { { { 200, 0.75 }, { 200, -0.75 }, { 282, 1 }, { 400, -0.75 }, { 400, 0.75 }, { 565, 1 } }, { { 600, 0.25 }, { 600, -0.25 }, {
 			848.5281, 0.5 }, { 848.5281, -0.5 }, { 600, 1 }, { 700, 0 } } };
 
-	if(!this->isLegal("Plane::run"))
+	if(!this->isLegal("Vehicle::run"))
 		return -1;
 
 	if(!leader) // I'm the leader!
@@ -405,12 +405,12 @@ int8_t Plane::run()
 	return 0;
 }
 /**
- Plane::createMission
+ Vehicle::createMission
 
  Send drones from field x to field y
  */
 
-void Plane::createMission(u_int8_t country)
+void Vehicle::createMission(u_int8_t country)
 {
 	u_int16_t origin;
 	u_int16_t destiny;
@@ -453,25 +453,25 @@ void Plane::createMission(u_int8_t country)
 	destiny++;
 
 	Com_Printf(VERBOSE_DEBUG, "Mission %s from F%d to F%d with %s\n", GetCountry(country), origin, destiny, GetSmallPlaneName(planemodel));
-	Plane::createMission(origin, destiny, planemodel);
+	Vehicle::createMission(origin, destiny, planemodel);
 }
 
 /**
- Plane::createMission
+ Vehicle::createMission
 
  Send drones from field x to field y
  */
 
-void Plane::createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemodel)
+void Vehicle::createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemodel)
 {
-	Plane *leader, *plane;
+	Vehicle *leader, *vehicle;
 	u_int8_t group;
 	client_t *drone;
 
 	//removeGroup(group);
 
 	// Create leader
-	leader = new Plane();
+	leader = new Vehicle();
 	leader->createFollowers(new Boidlist());
 
 	do
@@ -501,19 +501,19 @@ void Plane::createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemod
 
 	for(u_int8_t i = 1; i < 3; i++)
 	{
-		plane = new Plane();
-		leader->addFollower(plane); // calls plane->setCountry(), plane->setPosition(), plane->setFormation(), plane->setLeader() and plane->setGroup()
-		plane->setPlane(planemodel);
-		plane->setOriginField(origin);
-		plane->setTargetField(destiny);
-		drone = AddDrone(DRONE_PLANE, plane->Position.x, plane->Position.y, plane->Position.z, plane->country, plane->plane, NULL);
+		vehicle = new Vehicle();
+		leader->addFollower(vehicle); // calls vehicle->setCountry(), vehicle->setPosition(), vehicle->setFormation(), vehicle->setLeader() and vehicle->setGroup()
+		vehicle->setPlane(planemodel);
+		vehicle->setOriginField(origin);
+		vehicle->setTargetField(destiny);
+		drone = AddDrone(DRONE_PLANE, vehicle->Position.x, vehicle->Position.y, vehicle->Position.z, vehicle->country, vehicle->plane, NULL);
 		if(!drone)
 		{
-			delete plane;
+			delete vehicle;
 			return;
 		}
 		else
-			plane->setDrone(drone);
+			vehicle->setDrone(drone);
 	}
 	return;
 }

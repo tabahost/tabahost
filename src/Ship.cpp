@@ -541,7 +541,7 @@ void Ship::attackNearestField()
 	if(!((arena->frame - drone->frame) % ((u_int32_t) cvdelay->value * 100)) && !(field >= fields->value))
 	{
 		u_int32_t distshipfield = 0;
-		u_int8_t targetfield;
+		u_int8_t targetfield = 0;
 
 		// check nearest CV
 		for(u_int8_t i = 0; i < cvs->value; i++)
