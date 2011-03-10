@@ -172,7 +172,6 @@ class Boidlist
 {
 	private:
 		u_int32_t count; // counter
-		u_int32_t itcount;
 		Boidnode *it; // iterator
 		Boidnode *first;
 		Boidnode *last;
@@ -185,7 +184,7 @@ class Boidlist
 
 		void restart(){it = first; itcount = 0;};
 		Boid *prev(){if(it) it = it->prev; if(it) return it->value; else return NULL;};
-		Boid *next(){if(itcount++ > count){Com_Printf(VERBOSE_DEBUG, "itcount > count\n");} if(it) it = it->next; else it = first; if(it) return it->value; else return NULL;};
+		Boid *next(){if(it) it = it->next; else it = first; if(it) return it->value; else return NULL;};
 		Boid *current(){return (it?it->value:NULL);};
 
 		void push_back(Boid *a){count++; if(last){last->next = new Boidnode(a); last->next->prev = last; last = last->next;} else {last = new Boidnode(a); first = last;}};

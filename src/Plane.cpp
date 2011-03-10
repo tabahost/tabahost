@@ -415,9 +415,9 @@ void Plane::createMission(u_int8_t country)
 	u_int16_t origin;
 	u_int16_t destiny;
 	u_int8_t planemodel;
-	u_int8_t field, i, j;
+	u_int16_t field, i, j;
 
-	field = (u_int8_t) fields->value - cvs->value;
+	field = (u_int8_t) (fields->value - cvs->value);
 
 	for(j = 0, i = rand() % field; j < field; j++, i = rand() % field)
 	{
@@ -442,10 +442,14 @@ void Plane::createMission(u_int8_t country)
 
 	planemodel = i;
 
-	do
+	for(j = 0, i = rand() % field; j < field; j++, i = rand() % field)
 	{
-		i = rand() % field;
-	} while(arena->fields[i].country == country);
+		if((arena->fields[i].country != country) && !arena->fields[i].closed)
+			break;
+	}
+
+	if(j == field) // not found
+		return;
 
 	destiny = i;
 
@@ -465,7 +469,7 @@ void Plane::createMission(u_int8_t country)
 void Plane::createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemodel)
 {
 	Plane *leader, *plane;
-	u_int8_t group;
+	u_int8_t group, i;
 	client_t *drone;
 
 	//removeGroup(group);
@@ -474,10 +478,11 @@ void Plane::createMission(u_int16_t origin, u_int16_t destiny, u_int8_t planemod
 	leader = new Plane();
 	leader->createFollowers(new Boidlist());
 
-	do
+	for(i = 0, group = rand() % 255 + 1; i < 256; i++, group = rand() % 255 + 1)
 	{
-		group = rand() % 255 + 1;
-	} while(Boid::hasGroup(group));
+		if(!Boid::hasGroup(group))
+			break;
+	}
 
 	leader->setGroup(group);
 	leader->setFormation(0);

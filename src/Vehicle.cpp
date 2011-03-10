@@ -415,9 +415,9 @@ void Vehicle::createMission(u_int8_t country)
 	u_int16_t origin;
 	u_int16_t destiny;
 	u_int8_t planemodel;
-	u_int8_t field, i, j;
+	u_int16_t field, i, j;
 
-	field = (u_int8_t) fields->value - cvs->value;
+	field = (u_int8_t) (fields->value - cvs->value);
 
 	for(j = 0, i = rand() % field; j < field; j++, i = rand() % field)
 	{
@@ -433,7 +433,7 @@ void Vehicle::createMission(u_int8_t country)
 
 	for(j = 0, i = rand() % maxplanes; j < maxplanes; j++, i = rand() % maxplanes)
 	{
-		if(arena->rps[i].used && IsGround(NULL, i) && !IsCargo(NULL, i) && (arena->fields[origin].rps[i] >= 1))
+		if(arena->rps[i].used && IsBomber(NULL, i) && !IsCargo(NULL, i) && (arena->fields[origin].rps[i] >= 1))
 			break;
 	}
 
@@ -442,10 +442,14 @@ void Vehicle::createMission(u_int8_t country)
 
 	planemodel = i;
 
-	do
+	for(j = 0, i = rand() % field; j < field; j++, i = rand() % field)
 	{
-		i = rand() % field;
-	} while(arena->fields[i].country == country);
+		if((arena->fields[i].country != country) && !arena->fields[i].closed)
+			break;
+	}
+
+	if(j == field) // not found
+		return;
 
 	destiny = i;
 
