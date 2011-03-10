@@ -12,7 +12,7 @@ u_int16_t Vehicle::vehicleCount;
 Vehicle::Vehicle()
 {
 	Com_Printf(VERBOSE_DEBUG, "Vehicle constructor\n");
-	signature = CLASSID_PLANE;
+	signature = CLASSID_VEHICLE;
 	wpreach = 10;
 	vehicleCount++;
 }
@@ -32,7 +32,7 @@ Vehicle::~Vehicle()
 
 bool Vehicle::isLegal(const char *function)
 {
-	if(signature != CLASSID_PLANE)
+	if(signature != CLASSID_VEHICLE)
 	{
 		printf("WARNING: Ilegal class passed by %s\n", function);
 		return false;
@@ -270,7 +270,7 @@ void Vehicle::prepare(const double *A)
 	Target.y = leader->getPositionY() + A[0] * cos(Yaw.curr + A[1] * M_PI);
 	Position.x = Target.x;
 	Position.y = Target.y;
-	Position.z = 10000;
+	Position.z = 0;
 
 	//	switch(plane)
 	//	{
@@ -311,7 +311,7 @@ void Vehicle::prepare() // main Boid
 
 	Position.x = wp[0].x;
 	Position.y = wp[0].y;
-	Position.z = 10000;
+	Position.z = 0;
 	Target.x = wp[1].x;
 	Target.y = wp[1].y;
 
@@ -433,7 +433,7 @@ void Vehicle::createMission(u_int8_t country)
 
 	for(j = 0, i = rand() % maxplanes; j < maxplanes; j++, i = rand() % maxplanes)
 	{
-		if(arena->rps[i].used && IsBomber(NULL, i) && !IsCargo(NULL, i) && (arena->fields[origin].rps[i] >= 1))
+		if(arena->rps[i].used && IsGround(NULL, i) && !IsCargo(NULL, i) && (arena->fields[origin].rps[i] >= 1))
 			break;
 	}
 

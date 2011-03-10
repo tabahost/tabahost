@@ -66,6 +66,7 @@ Boid::~Boid()
 			u_int8_t i;
 			for(i = 0, followers->restart(); followers->current(); followers->next(), i++)
 			{
+				Com_Printf(VERBOSE_DEBUG, "Transferring leadership %u\n", i);
 				followers->current()->leader = newleader;
 				followers->current()->pos = i; // reset the formation position
 			}

@@ -8,6 +8,8 @@
 #ifndef VEHICLE_H_
 #define VEHICLE_H_
 
+#define CLASSID_VEHICLE 0x23037428
+
 #include "Boid.h"
 
 class Vehicle: public Boid
