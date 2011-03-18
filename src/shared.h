@@ -2572,6 +2572,7 @@ extern	var_t		*arenaflags3;	/// arena flags
 extern	var_t		*arenalist;		/// domain of central arena that receive UDP packets
 extern	var_t		*batchfile;		/// exec batch file on login
 extern	var_t		*blackout;		/// enable blackout
+extern	var_t		*boidgroups;	/// num of boid groups by side, including CV's
 extern	var_t		*broadcast;		/// enable broadcast channel
 extern	var_t		*bulletradius;	/// bulletradius value
 extern	var_t		*canreload;		/// enable reload airplanes

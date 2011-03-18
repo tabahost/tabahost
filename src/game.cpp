@@ -1092,10 +1092,12 @@ void CheckArenaRules(void)
 		{
 			if(!(arena->frame % 6000)) // Start Bomber raiders each 60sec until 5 by country
 			{
-				for(i = 0; i < 5 && Boid::countGroups(COUNTRY_RED) <= 5; i++)
+				j = (u_int8_t)(boidgroups->value - cvs->value/2);
+
+				for(i = 0; i < j && Boid::countGroups(COUNTRY_RED) < j; i++)
 					Plane::createMission(COUNTRY_RED);
 
-				for(i = 0; i < 5 && Boid::countGroups(COUNTRY_GOLD) <= 5; i++)
+				for(i = 0; i < j && Boid::countGroups(COUNTRY_GOLD) < j; i++)
 					Plane::createMission(COUNTRY_GOLD);
 			}
 		}

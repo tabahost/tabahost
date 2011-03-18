@@ -37,6 +37,7 @@ var_t *arenaflags3; // extern
 var_t *arenalist; // extern
 var_t *batchfile; // extern
 var_t *blackout; // extern
+var_t *boidgroups;	/// extern
 var_t *broadcast; // extern
 var_t *bulletradius; // extern
 var_t *canreload; // extern
@@ -229,6 +230,7 @@ void InitVars(void)
 	arenalist = Var_Get("arenalist", "0", "0", "0", "URL to send arenalist data (0 = disabled)", VAR_ADMIN);
 	batchfile = Var_Get("batchfile", "0", "0", "1", "Exec server-side player's batch file on login", VAR_ARCHIVE);
 	blackout = Var_Get("blackout", "1", "0", "1", "Enable blackout effect", VAR_ARCHIVE);
+	boidgroups = Var_Get("boidgroups", "6", "0", "99", "Num of boid groups by side, including CV's", VAR_ARCHIVE);
 	broadcast = Var_Get("broadcast", "1", "0", "1", "Enable talking in channel 100", VAR_ARCHIVE);
 	bulletradius = Var_Get("bulletradius", "0.1", "0.01", "8.00", "Collision bubble for projectiles", VAR_ARCHIVE);
 	canreload = Var_Get("canreload", "0", "0", "1", "Enable reaload airplanes at landing", VAR_ARCHIVE);

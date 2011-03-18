@@ -182,7 +182,7 @@ class Boidlist
 
 		u_int32_t getCount(){return count;};
 
-		void restart(){it = first; itcount = 0;};
+		void restart(){it = first;};
 		Boid *prev(){if(it) it = it->prev; if(it) return it->value; else return NULL;};
 		Boid *next(){if(it) it = it->next; else it = first; if(it) return it->value; else return NULL;};
 		Boid *current(){return (it?it->value:NULL);};
