@@ -1094,10 +1094,10 @@ void CheckArenaRules(void)
 			{
 				j = (u_int8_t)(boidgroups->value - cvs->value/2);
 
-				for(i = 0; i < j && Boid::countGroups(COUNTRY_RED) < j; i++)
+				for(i = 0; i < j && Boid::countGroups(COUNTRY_RED) <= j; i++)
 					Plane::createMission(COUNTRY_RED);
 
-				for(i = 0; i < j && Boid::countGroups(COUNTRY_GOLD) < j; i++)
+				for(i = 0; i < j && Boid::countGroups(COUNTRY_GOLD) <= j; i++)
 					Plane::createMission(COUNTRY_GOLD);
 			}
 		}
@@ -1130,7 +1130,7 @@ void CheckArenaRules(void)
 
 	// Map dots
 
-	if(!(arena->frame % 200)) // 2 seconds
+	if(!(arena->frame % 500)) // 5 seconds
 	{
 		if(!setjmp(debug_buffer))
 		{

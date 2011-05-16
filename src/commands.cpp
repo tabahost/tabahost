@@ -1340,20 +1340,19 @@ u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client) // field 
 			}
 
 			// check end of war (arena reset)
-			if(canreset->value && oldcountry /* to avoid reset by capt neutrals */)
+			if(canreset->value && ((oldcountry == COUNTRY_GOLD) || (oldcountry == COUNTRY_RED))/* to avoid reset by capt neutrals */)
 			{
 				for(k = j = i = 0; i < fields->value; i++)
 				{
-					if((killcvtoreset->value && (arena->fields[i].type == FIELD_CV)) || (arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type
-							>= FIELD_WB3POST) || ((arena->fields[i].type >= FIELD_CARGO) && (arena->fields[i].type <= FIELD_SUBMARINE)))
+					if(((u_int8_t)killcvtoreset->value && ((arena->fields[i].type >= FIELD_CV) && (arena->fields[i].type <= FIELD_SUBMARINE))) ||
+							(arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST))
 					{
 						if(arena->fields[i].country == oldcountry)
 						{
-							if(!((arena->fields[i].type >= FIELD_WB3POST) || ((arena->fields[i].type >= FIELD_CARGO) && (arena->fields[i].type
-									<= FIELD_SUBMARINE))))
-								k++; // not airbase
-							else
+							if(arena->fields[i].type <= FIELD_CV)
 								j++; // airbase
+							else
+								k++; // not airbase
 						}
 					}
 
