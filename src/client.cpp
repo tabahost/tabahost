@@ -599,9 +599,6 @@ int ProcessClient(client_t *client)
 							Com_Printf(VERBOSE_ALWAYS, "FLIGHT PART: (%u) %s collided emulated with %s\n", nearplane->inflight, nearplane->longnick,
 									client->longnick);
 
-							client->damaged = 1;
-							nearplane->damaged = 1;
-
 							if(rand() % 2)
 							{
 								SendForceStatus(STATUS_LWING, nearplane->status_status, nearplane); // lwing

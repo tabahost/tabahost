@@ -2349,9 +2349,9 @@ void	ShowRPS(client_t *client);
 void	LoadMapcycle(const char *path, client_t *client);
 int8_t	IsFighter(client_t *client, ...);
 int8_t	IsBomber(client_t *client, ...);
-int8_t	IsShip(client_t *client, ...);
 int8_t	IsCargo(client_t *client, ...);
 int8_t	IsGround(client_t *client, ...);
+int8_t	IsShip(client_t *client, ...);
 int8_t	HaveGunner(u_int16_t plane);
 void	LoadAmmo(client_t *client);
 void	LoadDamageModel(client_t *client);
@@ -2446,7 +2446,7 @@ void	LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_
 
 //commands.c
 void	Cmd_LoadBatch(client_t *client);
-void	Cmd_LoadConfig(const char *filename, client_t *client);
+void	Cmd_LoadConfig(const char *filename, client_t *client, bool verbose = true);
 void	Cmd_Ros(client_t *client);
 void	Cmd_Ammo(client_t *client, u_int8_t arg, char *arg2);
 void	Cmd_Saveammo(client_t *client, char *row);
@@ -2605,6 +2605,7 @@ extern	var_t		*dayhours;		/// how many hours have a day
 extern	var_t		*dbpasswd;		/// DB password
 extern	var_t		*dbuser;		/// DB username
 extern	var_t		*debug;			/// debugvar
+extern	var_t		*destroytokill; /// Need to destroy plane part to get a kill
 extern	var_t		*printqueries;	/// debugvar
 extern	var_t		*dirname;		/// directory of current map
 extern	var_t		*dpitch;		/// debugvar

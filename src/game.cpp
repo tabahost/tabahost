@@ -1341,6 +1341,21 @@ void CheckArenaRules(void)
 		}
 	}
 
+	// Runonce cron tick
+
+	if(!(arena->frame % 6000)) // 1 min
+	{
+		if(!setjmp(debug_buffer))
+		{
+			Cmd_LoadConfig("runonce", NULL, false);
+			unlink("runonce.cfg");
+		}
+		else
+		{
+			DebugClient(__FILE__, __LINE__, TRUE, NULL);
+		}
+	}
+
 	// File descriptors tick
 
 	if(!(arena->frame % 6000)) // 1 min
@@ -4770,7 +4785,7 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 								 }
 								 else
 								 {
-								 Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+								 Com_Printf(VERBOSE_WARNING, "PEndFlight(): Plane not classified (N%d)\n", client->plane);
 								 sprintf(my_query, "UPDATE score_fighter");
 								 }
 
@@ -4791,7 +4806,6 @@ void PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client)
 							client->hitby[0].damage = (double) MAX_UINT32; // TODO: Score: collision: change this
 
 							client->damaged = 1;
-							nearplane->damaged = 1;
 
 							if(rand() % 2)
 								SendForceStatus(STATUS_LWING, nearplane->status_status, nearplane);
@@ -5330,7 +5344,6 @@ void CheckMaxG(client_t *client)
 				Com_Printf(VERBOSE_DAMAGE, "PART: (%u) %s left wing blown off due G overload\n", client->inflight, client->longnick);
 			}
 			SendForceStatus((client->status_damage | STATUS_LWING), client->status_status, client);
-			client->damaged = 1;
 		}
 		else
 		{
@@ -5362,7 +5375,6 @@ void CheckMaxG(client_t *client)
 				Com_Printf(VERBOSE_DAMAGE, "PART: (%u) %s right wing blown off due G overload\n", client->inflight, client->longnick);
 			}
 			SendForceStatus((client->status_damage | STATUS_RWING), client->status_status, client);
-			client->damaged = 1;
 		}
 		else
 		{
@@ -7227,7 +7239,6 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 							client->fueltimer = 1;
 					}
 
-					client->damaged = 1;
 					client->armor.points[place] = 0;
 					SendForceStatus((1 << place), client->status_status, client);
 
@@ -7249,8 +7260,6 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 				{
 					if(client->fueltimer > 1000)
 					{
-						client->damaged = 1;
-
 						if(place == PLACE_LFUEL)
 						{
 							client->armor.points[PLACE_LWING] = 0;
@@ -7291,7 +7300,8 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 				client->armor.points[place] -= dmgprobe;
 
-				client->damaged = 1; // FIXME: this is a temporary fix for kills attribution
+				if(!(u_int32_t)(destroytokill->value))
+					client->damaged = 1;
 
 				//				if (gunstats->value)
 				//				{
@@ -8005,6 +8015,8 @@ void SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t 
 			Com_Printf(VERBOSE_DAMAGE, "PART: (%u) %s lost %s\n", client->inflight, client->longnick, GetHitSite(i));
 		}
 	}
+
+	client->damaged = 1;
 
 	// Begin parse status_damage
 	if(status_damage & STATUS_REARFUSE)

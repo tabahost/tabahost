@@ -61,7 +61,7 @@ void Cmd_LoadBatch(client_t *client)
  Executes a script file
  */
 
-void Cmd_LoadConfig(const char *filename, client_t *client)
+void Cmd_LoadConfig(const char *filename, client_t *client, bool verbose)
 {
 	FILE *fp;
 	char file[128];
@@ -72,12 +72,15 @@ void Cmd_LoadConfig(const char *filename, client_t *client)
 
 	if((fp = fopen(file, "r")) == NULL)
 	{
-		if(client)
+		if(verbose)
 		{
-			PPrintf(client, RADIO_LIGHTYELLOW, "WARNING: Cannot execute file \"%s\"", file);
-		}
+			if(client)
+			{
+				PPrintf(client, RADIO_LIGHTYELLOW, "WARNING: Cannot execute file \"%s\"", file);
+			}
 
-		Com_Printf(VERBOSE_WARNING, "Couldn't execute file \"%s\"\n", file);
+			Com_Printf(VERBOSE_WARNING, "Couldn't execute file \"%s\"\n", file);
+		}
 	}
 	else
 	{

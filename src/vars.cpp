@@ -70,6 +70,7 @@ var_t *dayhours; // extern
 var_t *dbpasswd; // extern
 var_t *dbuser; // extern
 var_t *debug; // extern
+var_t *destroytokill; // extern
 var_t *dirname; // extern
 var_t *dpitch; // extern
 var_t *droll; // extern
@@ -262,6 +263,7 @@ void InitVars(void)
 	dayhours = Var_Get("dayhours", "14", "10", "14", "Set how many hours have a day", VAR_ARCHIVE);
 	dbpasswd = Var_Get("dbpasswd", "t4b4d4t4b4s3", "0", "0", "Set database password", VAR_ADMIN);
 	dbuser = Var_Get("dbuser", "franz", "0", "0", "Set database username", VAR_ADMIN);
+	destroytokill = Var_Get("destroytokill", "0", "0", "1", "Need to destroy plane part to get a kill", VAR_ARCHIVE);
 	dirname = Var_Get("dirname", "wb3europe", "0", "0", "Set map directory name", VAR_ARCHIVE | VAR_ADMIN);
 	easymode = Var_Get("easymode", "0", "0", "2", "Enable easy mode (2 = forced easy mode)", VAR_ARCHIVE);
 	emulatecollision = Var_Get("emulatecollision", "0", "0", "1", "Emulate friendly collision (WB2.77)", VAR_ARCHIVE);

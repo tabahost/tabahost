@@ -76,7 +76,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	}
 	else
 	{
-		Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+		Com_Printf(VERBOSE_WARNING, "ScoresEvent(%d): Plane not classified (N%d)\n", __LINE__, client->plane);
 		sprintf(my_query, "UPDATE score_fighter SET");
 	}
 
@@ -326,7 +326,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 		}
 		else
 		{
-			Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+			Com_Printf(VERBOSE_WARNING, "ScoresEvent(%d): Plane not classified (N%d)\n", __LINE__, client->plane);
 			if(client->score.airscore)
 				sprintf(my_query, "%s, fighter_score = fighter_score + '%.3f'", my_query, client->score.airscore);
 			if(client->score.captscore)
@@ -522,7 +522,7 @@ void ScoreFieldCapture(u_int8_t field)
 						}
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", arena->fields[field].hitby[i].plane);
+							Com_Printf(VERBOSE_WARNING, "ScoreFieldCapture(): Plane not classified (N%d)\n", arena->fields[field].hitby[i].plane);
 							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score,
 									arena->fields[field].hitby[i].dbid);
 						}
@@ -687,7 +687,7 @@ double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 							}
 							else
 							{
-								Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+								Com_Printf(VERBOSE_WARNING, "ScorePieceDamage(): Plane not classified (N%d)\n", client->plane);
 								sprintf(my_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query,
 										score, client->hitby[i].dbid);
 							}
@@ -1021,7 +1021,7 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 	}
 	else
 	{
-		Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+		Com_Printf(VERBOSE_WARNING, "ScoresEndFlight(): Plane not classified (N%d)\n", client->plane);
 		sprintf(my_query, "UPDATE score_fighter SET");
 	}
 
@@ -1193,7 +1193,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 3, NULL);
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", killer->plane);
+						Com_Printf(VERBOSE_WARNING, "ScoresCheckKiller(%d): Plane not classified (N%d)\n", __LINE__, killer->plane);
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 1, NULL);
 					}
 
@@ -1204,11 +1204,11 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						Com_LogDescription(EVENT_DESC_VCPLTYPE, 1, NULL);
 					else if(IsBomber(client))
 						Com_LogDescription(EVENT_DESC_VCPLTYPE, 2, NULL);
-					else if(IsGround(client))
+					else if(IsGround(client) || IsShip(client))
 						Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+						Com_Printf(VERBOSE_WARNING, "ScoresCheckKiller(%d): Plane not classified (N%d)\n", __LINE__, client->plane);
 						Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 					}
 
@@ -1274,7 +1274,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 3, NULL);
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->hitby[j].plane);
+						Com_Printf(VERBOSE_WARNING, "ScoresCheckKiller(%d): Plane not classified (N%d)\n", __LINE__, client->hitby[j].plane);
 						Com_LogDescription(EVENT_DESC_PLPLTYPE, 1, NULL);
 					}
 
@@ -1286,11 +1286,11 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 					Com_LogDescription(EVENT_DESC_VCPLTYPE, 1, NULL);
 				else if(IsBomber(client))
 					Com_LogDescription(EVENT_DESC_VCPLTYPE, 2, NULL);
-				else if(IsGround(client))
+				else if(IsGround(client) || IsShip(client))
 					Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 				else
 				{
-					Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+					Com_Printf(VERBOSE_WARNING, "ScoresCheckKiller(%d): Plane not classified (N%d)\n", __LINE__, client->plane);
 					Com_LogDescription(EVENT_DESC_VCPLTYPE, 3, NULL);
 				}
 
@@ -1421,7 +1421,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 							sprintf(my_query, "UPDATE score_ground SET");
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+							Com_Printf(VERBOSE_WARNING, "ScoresCheckKiller(%d): Plane not classified (N%d)\n", __LINE__, client->plane);
 							sprintf(my_query, "UPDATE score_fighter SET");
 						}
 					}
@@ -1436,7 +1436,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						sprintf(my_query, "UPDATE score_ground SET");
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->hitby[j].plane);
+						Com_Printf(VERBOSE_WARNING, "ScoresCheckKiller(%d): Plane not classified (N%d)\n", __LINE__, client->hitby[j].plane);
 						sprintf(my_query, "UPDATE score_fighter SET");
 					}
 				}
@@ -1565,7 +1565,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 						}
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "Plane not classified (N%d)\n", client->plane);
+							Com_Printf(VERBOSE_WARNING, "ScoresCheckKiller(%d): Plane not classified (N%d)\n", __LINE__, client->plane);
 							sprintf(my_query, "%s'%u',", my_query, client->hitby[i].dbid);
 							k |= 1;
 						}

@@ -1737,59 +1737,6 @@ int8_t IsBomber(client_t *client, ...)
 }
 
 /**
- IsShip
-
- Check if plane is Ship
- */
-
-int8_t IsShip(client_t *client, ...)
-{
-	va_list argptr;
-	u_int32_t plane = 0;
-
-	if(!client)
-	{
-		va_start(argptr, client);
-		plane = va_arg(argptr, u_int32_t);
-		va_end(argptr);
-
-		if(!plane) // possible error
-		{
-			Com_Printf(VERBOSE_WARNING, "IsShip() plane = 0\n");
-			return 0;
-		}
-		else if(plane < maxplanes)
-		{
-			if((arena->planedamage[plane].type >= PLANETYPE_CV) && (arena->planedamage[plane].type <= PLANETYPE_DD))
-				return 1;
-			else
-				return 0;
-		}
-		else
-			return 0;
-	}
-
-	if(client->attached)
-	{
-		plane = client->attached->plane;
-	}
-	else
-	{
-		plane = client->plane;
-	}
-
-	if(plane < maxplanes)
-	{
-		if((arena->planedamage[plane].type >= PLANETYPE_CV) && (arena->planedamage[plane].type <= PLANETYPE_DD))
-			return 1;
-		else
-			return 0;
-	}
-	else
-		return 0;
-}
-
-/**
  IsCargo
 
  Check if plane is a Cargo Plane / Vehicle
@@ -1894,6 +1841,59 @@ int8_t IsGround(client_t *client, ...)
 	if(plane < maxplanes)
 	{
 		if(arena->planedamage[plane].type == PLANETYPE_VEHICLE)
+			return 1;
+		else
+			return 0;
+	}
+	else
+		return 0;
+}
+
+/**
+ IsShip
+
+ Check if plane is a Ship
+ */
+
+int8_t IsShip(client_t *client, ...)
+{
+	va_list argptr;
+	u_int32_t plane = 0;
+
+	if(!client)
+	{
+		va_start(argptr, client);
+		plane = va_arg(argptr, u_int32_t);
+		va_end(argptr);
+
+		if(!plane) // possible error
+		{
+			Com_Printf(VERBOSE_WARNING, "IsShip() plane = 0\n");
+			return 0;
+		}
+		else if(plane < maxplanes)
+		{
+			if((arena->planedamage[plane].type >= PLANETYPE_CV) && (arena->planedamage[plane].type <= PLANETYPE_DD))
+				return 1;
+			else
+				return 0;
+		}
+		else
+			return 0;
+	}
+
+	if(client->attached)
+	{
+		plane = client->attached->plane;
+	}
+	else
+	{
+		plane = client->plane;
+	}
+
+	if(plane < maxplanes)
+	{
+		if((arena->planedamage[plane].type >= PLANETYPE_CV) && (arena->planedamage[plane].type <= PLANETYPE_DD))
 			return 1;
 		else
 			return 0;
