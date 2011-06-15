@@ -1347,8 +1347,8 @@ void CheckArenaRules(void)
 	{
 		if(!setjmp(debug_buffer))
 		{
-			Cmd_LoadConfig("runonce", NULL, false);
-			unlink("runonce.cfg");
+			Cmd_LoadConfig("cron/runonce", NULL, false);
+			unlink("cron/runonce.cfg");
 		}
 		else
 		{
