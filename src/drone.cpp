@@ -2139,16 +2139,6 @@ u_int32_t NewDroneName(client_t *client)
 	u_int16_t i, j, k, l;
 	u_int32_t nick;
 
-	Sys_WaitForLock(FILE_DRONENICKS_LOCK);
-
-	if(Sys_LockFile(FILE_DRONENICKS_LOCK) < 0)
-	{
-		if(client)
-			return client->shortnick;
-		else
-			return ascii2wbnick("unamed", 1);
-	}
-
 	if((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
 	{
 		Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", FILE_DRONENICKS);
@@ -2160,7 +2150,7 @@ u_int32_t NewDroneName(client_t *client)
 		{
 			Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 			fclose(fp);
-			Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+
 			if(client)
 				return client->shortnick;
 			else
@@ -2178,7 +2168,7 @@ u_int32_t NewDroneName(client_t *client)
 			{
 				Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 				fclose(fp);
-				Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+
 				if(client)
 					return client->shortnick;
 				else
@@ -2205,7 +2195,7 @@ u_int32_t NewDroneName(client_t *client)
 				{
 					Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 					fclose(fp);
-					Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+
 					if(client)
 						return client->shortnick;
 					else
@@ -2223,7 +2213,7 @@ u_int32_t NewDroneName(client_t *client)
 				if(l == maxentities->value)
 				{
 					fclose(fp);
-					Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+
 					return nick;
 				}
 
@@ -2234,7 +2224,7 @@ u_int32_t NewDroneName(client_t *client)
 			if((fp = fopen(FILE_DRONENICKS, "r")) == NULL)
 			{
 				Com_Printf(VERBOSE_WARNING, "Couldn't open \"%s\"\n", FILE_DRONENICKS);
-				Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+
 				if(client)
 					return client->shortnick;
 				else
@@ -2247,7 +2237,7 @@ u_int32_t NewDroneName(client_t *client)
 				{
 					Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 					fclose(fp);
-					Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+
 					if(client)
 						return client->shortnick;
 					else
@@ -2260,7 +2250,7 @@ u_int32_t NewDroneName(client_t *client)
 					{
 						Com_Printf(VERBOSE_WARNING, "Unexpected end of %s\n", FILE_DRONENICKS);
 						fclose(fp);
-						Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+
 						if(client)
 							return client->shortnick;
 						else
@@ -2278,7 +2268,7 @@ u_int32_t NewDroneName(client_t *client)
 					if(l == maxentities->value)
 					{
 						fclose(fp);
-						Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+
 						return nick;
 					}
 				}
@@ -2295,8 +2285,6 @@ u_int32_t NewDroneName(client_t *client)
 
 		fclose(fp);
 	}
-
-	Sys_UnlockFile(FILE_DRONENICKS_LOCK);
 
 	return nick;
 }

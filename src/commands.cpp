@@ -2967,23 +2967,11 @@ void Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount)
 
 void Cmd_Show(client_t *client)
 {
-	char filename[128];
 	FILE *fp;
 
-	memset(filename, 0, sizeof(filename));
-
-	snprintf(filename, sizeof(filename), "%s.LOCK", FILE_ARNASETTINGS);
-
-	Sys_WaitForLock(filename);
-
-	if(Sys_LockFile(filename) < 0)
-		return;
-
-	filename[strlen(filename) - 5] = '\0';
-
-	if((fp = fopen(filename, "wb")) == NULL)
+	if((fp = fopen(FILE_ARNASETTINGS, "wb")) == NULL)
 	{
-		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
+		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", FILE_ARNASETTINGS);
 	}
 	else
 	{
@@ -3042,10 +3030,9 @@ void Cmd_Show(client_t *client)
 
 		fclose(fp);
 
-		SendFileSeq1(filename, "configs.asc", client);
+		SendFileSeq1(FILE_ARNASETTINGS, "configs.asc", client);
 	}
 
-	Sys_UnlockFile(strcat(filename, ".LOCK"));
 }
 
 /**
@@ -3072,14 +3059,7 @@ void Cmd_Score(char *player, client_t *client)
 
 	strncpy(nickname, player ? player : client->longnick, 6);
 
-	snprintf(filename, sizeof(filename), "./players/%s.score.LOCK", nickname);
-
-	Sys_WaitForLock(filename);
-
-	if(Sys_LockFile(filename) < 0)
-		return;
-
-	filename[strlen(filename) - 5] = '\0';
+	snprintf(filename, sizeof(filename), "./players/%s.score", nickname);
 
 	if((fp = fopen(filename, "wb")))
 	{
@@ -3902,8 +3882,6 @@ void Cmd_Score(char *player, client_t *client)
 		Com_Printf(VERBOSE_WARNING, "Cmd_Score(): Couldn't open file \"%s\"\n", filename);
 		PPrintf(client, RADIO_YELLOW, "Cmd_Score(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
 	}
-
-	Sys_UnlockFile(strcat(filename, ".LOCK"));
 }
 
 /**

@@ -106,7 +106,8 @@ typedef unsigned int u_int32_t;
 #define FALSE 0
 #endif
 
-#define VERSION				"b4.20"
+#define VERSION				"b4.30"
+#define WB_VERSION			311111 // 0x4BF47
 
 #define V_WB2				0
 #define V_WB2007			1
@@ -296,7 +297,6 @@ typedef unsigned int u_int32_t;
 
 #define FILE_ARNASETTINGS	"./arenas/settings.txt"
 #define FILE_DRONENICKS		"./players/drones.txt"
-#define FILE_DRONENICKS_LOCK "./players/drones.txt.LOCK"
 #define FILE_INGAME			"./players/ingame.txt"
 #define FILE_OP				"./players/igops.txt"
 #define FILE_ADMIN			"./players/igadmins.txt"

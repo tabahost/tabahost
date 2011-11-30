@@ -229,17 +229,8 @@ void DebugClient(const char *file, u_int32_t line, u_int8_t kick, client_t *clie
 
 	time(&ltime);
 
-	snprintf(filename, sizeof(filename), "./debug/%u%s.txt.LOCK", (u_int32_t) ltime, client->longnick);
+	snprintf(filename, sizeof(filename), "./debug/%u%s.txt", (u_int32_t) ltime, client->longnick);
 
-	Sys_WaitForLock(filename);
-
-	if(Sys_LockFile(filename) < 0)
-	{
-		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
-		return;
-	}
-
-	filename[strlen(filename) - 5] = '\0';
 
 	if((fp = fopen(filename, "wb")) == NULL)
 	{
@@ -315,8 +306,6 @@ void DebugClient(const char *file, u_int32_t line, u_int8_t kick, client_t *clie
 
 		fclose(fp);
 	}
-
-	Sys_UnlockFile(strcat(filename, ".LOCK"));
 
 	Com_Printf(VERBOSE_WARNING, "Bugged player (%s) - Error at %s, line %d\n", strlen(client->longnick) ? client->longnick : client->ip, file, line);
 

@@ -557,28 +557,15 @@ void Sys_WaitForLock(const char *file)
 
 void Sys_Printfile(const char *file)
 {
-	char lock[128];
 	char buffer[1024];
 	FILE *fp;
 
-	if(strlen(file) + 6 > sizeof(lock))
-		return;
-
-	memset(lock, 0, sizeof(lock));
 	memset(buffer, 0, sizeof(buffer));
-
-	strcpy(lock, file);
-	strcat(lock, ".LOCK");
-
-	Sys_WaitForLock(lock);
-
-	Sys_LockFile(lock);
 
 	if(!(fp = fopen(file, "r")))
 	{
 		printf("WARNING: Couldn't open file \"%s\"", file);
 		fflush(stdout);
-		Sys_UnlockFile(lock);
 		return;
 	}
 	else
@@ -591,8 +578,6 @@ void Sys_Printfile(const char *file)
 	}
 
 	fclose(fp);
-
-	Sys_UnlockFile(lock);
 }
 
 /*

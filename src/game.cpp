@@ -3512,22 +3512,9 @@ void SendFileSeq3(client_t *client)
 	FILE *fp;
 	u_int32_t size;
 
-	Sys_WaitForLock(strcat(client->file, ".LOCK"));
-
-	if(Sys_LockFile(client->file) < 0)
-	{
-		Sys_UnlockFile(client->file);
-		client->file[strlen(client->file) - 5] = '\0';
-		return;
-	}
-
-	client->file[strlen(client->file) - 5] = '\0';
-
 	if(!(fp = fopen(client->file, "r")))
 	{
 		Com_Printf(VERBOSE_ALWAYS, "Error opening file %s\n", client->file);
-		Sys_UnlockFile(strcat(client->file, ".LOCK"));
-		client->file[strlen(client->file) - 5] = '\0';
 		return;
 	}
 	else
@@ -3545,9 +3532,6 @@ void SendFileSeq3(client_t *client)
 	}
 
 	fclose(fp);
-
-	Sys_UnlockFile(strcat(client->file, ".LOCK"));
-	client->file[strlen(client->file) - 5] = '\0';
 
 	memset(buffer, 0, sizeof(buffer));
 
@@ -3594,20 +3578,9 @@ void SendFileSeq5(u_int16_t seek, client_t *client)
 	sendfile->unknown1 = 0x01;
 	sendfile->frame = htonl(seek);
 
-	Sys_WaitForLock(strcat(client->file, ".LOCK"));
-	if(Sys_LockFile(client->file) < 0)
-	{
-		Sys_UnlockFile(client->file);
-		client->file[strlen(client->file) - 5] = '\0';
-		return;
-	}
-	client->file[strlen(client->file) - 5] = '\0';
-
 	if(!(fp = fopen(client->file, "r")))
 	{
 		Com_Printf(VERBOSE_ALWAYS, "Error opening file %s\n", client->file);
-		Sys_UnlockFile(strcat(client->file, ".LOCK"));
-		client->file[strlen(client->file) - 5] = '\0';
 		return;
 	}
 
@@ -3615,18 +3588,12 @@ void SendFileSeq5(u_int16_t seek, client_t *client)
 	{
 		Com_Printf(VERBOSE_WARNING, "Couldn't fseek() file \"%s\"\n", client->file);
 		fclose(fp);
-
-		Sys_UnlockFile(strcat(client->file, ".LOCK"));
-		client->file[strlen(client->file) - 5] = '\0';
 		return;
 	}
 
 	sendfile->msgsize = htons(size = fread(&(sendfile->msg), 1, 512, fp));
 
 	fclose(fp);
-
-	Sys_UnlockFile(strcat(client->file, ".LOCK"));
-	client->file[strlen(client->file) - 5] = '\0';
 
 	SendPacket(buffer, 10 + size, client);
 }
@@ -8446,112 +8413,98 @@ void PNewNick(u_int8_t *buffer, client_t *client)
 
 					// Search in DroneNicks
 
-					Sys_WaitForLock(FILE_DRONENICKS_LOCK);
-
-					if(!(Sys_LockFile(FILE_DRONENICKS_LOCK) < 0))
+					if((fp = fopen(FILE_DRONENICKS, "r")))
 					{
-						if((fp = fopen(FILE_DRONENICKS, "r")))
+						while(fgets(tempnick, sizeof(tempnick), fp) != NULL)
 						{
-							while(fgets(tempnick, sizeof(tempnick), fp) != NULL)
+							if(!Com_Strncmp(tempnick, nickname, 6))
 							{
-								if(!Com_Strncmp(tempnick, nickname, 6))
-								{
-									found = 1;
-									break;
-								}
+								found = 1;
+								break;
 							}
-							fclose(fp);
-							Sys_UnlockFile(FILE_DRONENICKS_LOCK);
+						}
+						fclose(fp);
 
-							if(!found)
+						if(!found)
+						{
+							sprintf(my_query, "SELECT id FROM players WHERE loginuser = '%s'", client->loginuser);
+
+							if(!d_mysql_query(&my_sock, my_query)) // query succeeded
 							{
-								sprintf(my_query, "SELECT id FROM players WHERE loginuser = '%s'", client->loginuser);
-
-								if(!d_mysql_query(&my_sock, my_query)) // query succeeded
+								if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
 								{
-									if((my_result = mysql_store_result(&my_sock))) // returned a non-NULL value
+									if((my_row = mysql_fetch_row(my_result)))
 									{
-										if((my_row = mysql_fetch_row(my_result)))
+										client->id = Com_Atou(Com_MyRow("id"));
+
+										mysql_free_result(my_result);
+										my_result = NULL;
+
+										client->shortnick = ascii2wbnick(nickname, 0);
+										strcpy(client->longnick, wbnick2ascii(client->shortnick));
+
+										sprintf(my_query, "UPDATE players SET longnick = '%s' WHERE id = '%u'", client->longnick, client->id);
+
+										if(!d_mysql_query(&my_sock, my_query))
 										{
-											client->id = Com_Atou(Com_MyRow("id"));
+											Com_LogEvent(EVENT_CREATE, client->id, 0);
+											Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);
+											Com_LogDescription(EVENT_DESC_PLCTRID, client->ctrid, 0);
 
-											mysql_free_result(my_result);
-											my_result = NULL;
-
-											client->shortnick = ascii2wbnick(nickname, 0);
-											strcpy(client->longnick, wbnick2ascii(client->shortnick));
-
-											sprintf(my_query, "UPDATE players SET longnick = '%s' WHERE id = '%u'", client->longnick, client->id);
-
-											if(!d_mysql_query(&my_sock, my_query))
-											{
-												Com_LogEvent(EVENT_CREATE, client->id, 0);
-												Com_LogDescription(EVENT_DESC_PLIP, 0, client->ip);
-												Com_LogDescription(EVENT_DESC_PLCTRID, client->ctrid, 0);
-
-												nickpacket->allow = 1;
-												nickpacket->msgsize = 0;
-												SendPacket(packet, 4, client);
-												SendCopyright(client);
-											}
-											else
-											{
-												Com_Printf(VERBOSE_WARNING, "PNewNick(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock),
-														mysql_error(&my_sock));
-												nickpacket->msgsize = 23;
-												memcpy(&(nickpacket->msg), "SQL Error query(update)", 23);
-											}
+											nickpacket->allow = 1;
+											nickpacket->msgsize = 0;
+											SendPacket(packet, 4, client);
+											SendCopyright(client);
 										}
 										else
 										{
-											mysql_free_result(my_result);
-											my_result = NULL;
-
-											Com_Printf(VERBOSE_WARNING, "PNewNick(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(
-													&my_sock));
-											nickpacket->msgsize = 19;
-											memcpy(&(nickpacket->msg), "SQL Error fetch(id)", 19);
+											Com_Printf(VERBOSE_WARNING, "PNewNick(): couldn't query UPDATE error %d: %s\n", mysql_errno(&my_sock),
+													mysql_error(&my_sock));
+											nickpacket->msgsize = 23;
+											memcpy(&(nickpacket->msg), "SQL Error query(update)", 23);
 										}
 									}
 									else
 									{
-										Com_Printf(VERBOSE_WARNING, "PNewNick(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(
-												&my_sock));
+										mysql_free_result(my_result);
+										my_result = NULL;
 
-										nickpacket->msgsize = 20;
-										memcpy(&(nickpacket->msg), "SQL Error result(id)", 20);
+										Com_Printf(VERBOSE_WARNING, "PNewNick(id): Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+												&my_sock));
+										nickpacket->msgsize = 19;
+										memcpy(&(nickpacket->msg), "SQL Error fetch(id)", 19);
 									}
 								}
 								else
 								{
-									Com_Printf(VERBOSE_WARNING, "PNewNick(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+									Com_Printf(VERBOSE_WARNING, "PNewNick(id): my_result == NULL error %d: %s\n", mysql_errno(&my_sock), mysql_error(
 											&my_sock));
 
-									nickpacket->msgsize = 19;
-									memcpy(&(nickpacket->msg), "SQL Error query(id)", 19);
+									nickpacket->msgsize = 20;
+									memcpy(&(nickpacket->msg), "SQL Error result(id)", 20);
 								}
 							}
 							else
 							{
+								Com_Printf(VERBOSE_WARNING, "PNewNick(id): couldn't query SELECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(
+										&my_sock));
+
 								nickpacket->msgsize = 19;
-								memcpy(&(nickpacket->msg), "Nick used by drones", 19);
+								memcpy(&(nickpacket->msg), "SQL Error query(id)", 19);
 							}
 						}
 						else
 						{
-							Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", FILE_DRONENICKS);
-							Sys_UnlockFile(FILE_DRONENICKS_LOCK);
-
-							nickpacket->msgsize = 21;
-							memcpy(&(nickpacket->msg), "Error open drone nick", 21);
+							nickpacket->msgsize = 19;
+							memcpy(&(nickpacket->msg), "Nick used by drones", 19);
 						}
 					}
 					else
 					{
-						Com_Printf(VERBOSE_WARNING, "Couldn't lock file \"%s\"\n", FILE_DRONENICKS);
+						Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", FILE_DRONENICKS);
 
 						nickpacket->msgsize = 21;
-						memcpy(&(nickpacket->msg), "Error lock drone nick", 21);
+						memcpy(&(nickpacket->msg), "Error open drone nick", 21);
 					}
 				}
 				else
@@ -8609,13 +8562,12 @@ int32_t SendCopyright(client_t *client)
 	if(client->loginkey)
 	{
 		copyrighta->packetid = htons(Com_WBhton(0x0D00));
-		copyrighta->gameversion = htonl(0x4BF47); // htonl(0x4B54B);
 	}
 	else
 	{
 		copyrighta->packetid = htons(0x0C00);
-		copyrighta->gameversion = htonl(0x4BF47); // htonl(0x43B55);
 	}
+	copyrighta->gameversion = htonl(WB_VERSION);
 	copyrighta->nicksize = strlen(client->longnick);
 	if(copyrighta->nicksize)
 		memcpy(&(copyrighta->nick), client->longnick, copyrighta->nicksize);
@@ -8635,20 +8587,10 @@ int32_t SendCopyright(client_t *client)
 
 	offset = offset + 66 + copyrightb->mapnamesize;
 
-	if(client->loginkey) // gameversion
-	{
-		buffer[offset++] = 0x00;
-		buffer[offset++] = 0x04;
-		buffer[offset++] = 0xBF;
-		buffer[offset] = 0x47;
-	}
-	else // gameversion
-	{
-		buffer[offset++] = 0x00;
-		buffer[offset++] = 0x04;
-		buffer[offset++] = 0xBF;
-		buffer[offset] = 0x47;
-	}
+	buffer[offset++] = (copyrighta->gameversion >> 24) & 0xff;
+	buffer[offset++] = (copyrighta->gameversion >> 16) & 0xff;
+	buffer[offset++] = (copyrighta->gameversion >> 8) & 0xff;
+	buffer[offset] = (copyrighta->gameversion) & 0xff;
 
 	return SendPacket(buffer, 78 + copyrighta->nicksize + copyrightb->mapnamesize, client);
 }
@@ -8680,15 +8622,6 @@ void UpdateIngameClients(u_int8_t attr)
 		strcpy(file, FILE_INGAME);
 	}
 
-	strcat(file, ".LOCK");
-
-	Sys_WaitForLock(file);
-
-	if(Sys_LockFile(file) < 0)
-		return;
-
-	file[strlen(file) - 5] = '\0';
-
 	if(!(fp = fopen(file, "wb")))
 	{
 		Com_Printf(VERBOSE_WARNING, "Couldn't create file \"%s\"\n", file);
@@ -8696,7 +8629,7 @@ void UpdateIngameClients(u_int8_t attr)
 	else
 	{
 		fprintf(fp, " Callsign   Side    Status     Country       Connection\n");
-		fprintf(fp, "========================================================\n");
+		fprintf(fp, "=======================================================\n");
 
 		for(i = 0, j = 0; i < maxentities->value; i++)
 		{
@@ -8755,10 +8688,6 @@ void UpdateIngameClients(u_int8_t attr)
 		fprintf(fp, "             There is no player online\n");
 	}
 	fclose(fp);
-
-	strcat(file, ".LOCK");
-
-	Sys_UnlockFile(file);
 }
 
 /**
@@ -8934,7 +8863,7 @@ int32_t SendArenaNames(client_t *client)
 	if(wb3->value == 2)
 	{
 		sprintf(&(buffer[offset]),
-				"Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2009 Tabajara Host\n$Welcome to the Free Public Arenas!\n$\n");
+				"Copyright (C) 2000 iEntertainment Network All Rights Reserved\n$Copyright (C) 2004-2011 Tabajara Host\n$Welcome to the Free Public Arenas!\n$\n");
 		offset += 139;
 	}
 
@@ -10784,20 +10713,13 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 
 				if(num_rows)
 				{
-					snprintf(filename, sizeof(filename), "./players/%s.medal.LOCK", client->longnick);
+					snprintf(filename, sizeof(filename), "./players/%s.medal", client->longnick);
 
-					Sys_WaitForLock(filename);
-
-					if(Sys_LockFile(filename) < 0)
-						return;
-
-					filename[strlen(filename) - 5] = '\0';
 
 					if(!(fp = fopen(filename, "wb")))
 					{
 						Com_Printf(VERBOSE_WARNING, "PClientMedals(): Couldn't open file \"%s\"\n", filename);
 						PPrintf(client, RADIO_YELLOW, "PClientMedals(): Couldn't open score file, please contact admin", mysql_errno(&my_sock));
-						Sys_UnlockFile(strcat(filename, ".LOCK"));
 						return;
 					}
 
@@ -10848,7 +10770,6 @@ void PClientMedals(u_int8_t *buffer, client_t *client)
 
 					fclose(fp);
 					SendFileSeq1(filename, "medals.txt", client);
-					Sys_UnlockFile(strcat(filename, ".LOCK"));
 					return;
 				}
 

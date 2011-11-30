@@ -1376,20 +1376,9 @@ void LoadRPS(const char *path, client_t *client)
 	strcpy(file, path);
 	strcat(file, ".rps");
 
-	strcat(file, ".LOCK");
-
-	Sys_WaitForLock(file);
-
-	if(Sys_LockFile(file) < 0)
-		return;
-
-	file[strlen(file) - 5] = '\0';
-
 	if(!(fp = fopen(file, "r")))
 	{
 		PPrintf(client, RADIO_YELLOW, "WARNING: LoadRPS() Cannot open file \"%s\"", file);
-		strcat(file, ".LOCK");
-		Sys_UnlockFile(file);
 		return;
 	}
 
@@ -1406,8 +1395,6 @@ void LoadRPS(const char *path, client_t *client)
 		{
 			PPrintf(client, RADIO_YELLOW, "WARNING: Unexpected end of %s", file);
 			fclose(fp);
-			strcat(file, ".LOCK");
-			Sys_UnlockFile(file);
 			return;
 		}
 		else
@@ -1454,9 +1441,6 @@ void LoadRPS(const char *path, client_t *client)
 	fclose(fp);
 
 	PPrintf(client, RADIO_LIGHTYELLOW, "Loading RPS from \"%s\"", file);
-
-	strcat(file, ".LOCK");
-	Sys_UnlockFile(file);
 }
 
 /**
@@ -1475,20 +1459,9 @@ void SaveRPS(const char *path, client_t *client)
 	strcpy(file, path);
 	strcat(file, ".rps");
 
-	strcat(file, ".LOCK");
-
-	Sys_WaitForLock(file);
-
-	if(Sys_LockFile(file) < 0)
-		return;
-
-	file[strlen(file) - 5] = '\0';
-
 	if(!(fp = fopen(file, "w")))
 	{
 		Com_Printf(VERBOSE_WARNING, "Error opening %s\n", path);
-		strcat(file, ".LOCK");
-		Sys_UnlockFile(file);
 		return;
 	}
 
@@ -1514,9 +1487,6 @@ void SaveRPS(const char *path, client_t *client)
 	fclose(fp);
 
 	PPrintf(client, RADIO_LIGHTYELLOW, "RPS saved in \"%s\"", file);
-
-	strcat(file, ".LOCK");
-	Sys_UnlockFile(file);
 }
 
 /**
@@ -1564,20 +1534,9 @@ void LoadMapcycle(const char *path, client_t *client)
 	strcpy(file, path);
 	strcat(file, ".mpc");
 
-	strcat(file, ".LOCK");
-
-	Sys_WaitForLock(file);
-
-	if(Sys_LockFile(file) < 0)
-		return;
-
-	file[strlen(file) - 5] = '\0';
-
 	if(!(fp = fopen(file, "r")))
 	{
 		PPrintf(client, RADIO_YELLOW, "WARNING: LoadMapcycle() Cannot open file \"%s\"", file);
-		strcat(file, ".LOCK");
-		Sys_UnlockFile(file);
 		return;
 	}
 
@@ -1618,9 +1577,6 @@ void LoadMapcycle(const char *path, client_t *client)
 	fclose(fp);
 
 	PPrintf(client, RADIO_LIGHTYELLOW, "Loading mapcycle from \"%s\"", file);
-
-	strcat(file, ".LOCK");
-	Sys_UnlockFile(file);
 }
 
 /**
@@ -4088,17 +4044,7 @@ void DebugArena(const char *file, u_int32_t line)
 
 	time(&ltime);
 
-	snprintf(filename, sizeof(filename), "./debug/%uarena.txt.LOCK", (u_int32_t) ltime);
-
-	Sys_WaitForLock(filename);
-
-	if(Sys_LockFile(filename) < 0)
-	{
-		Com_Printf(VERBOSE_WARNING, "Couldn't open file \"%s\"\n", filename);
-		return;
-	}
-
-	filename[strlen(filename) - 5] = '\0';
+	snprintf(filename, sizeof(filename), "./debug/%uarena.txt", (u_int32_t) ltime);
 
 	if((fp = fopen(filename, "wb")) == NULL)
 	{
@@ -4123,33 +4069,10 @@ void DebugArena(const char *file, u_int32_t line)
 		fprintf(fp, "multiplier      = %10u  scenario      = %10u  mapnum        = %10d\n", arena->multiplier, arena->scenario, arena->mapnum);
 		fprintf(fp, "countdown       = %10u  numplayers    = %10d  numdrones     = %10d\n", arena->countdown, arena->numplayers, arena->numdrones);
 
-		//		fprintf(fp, "day             = %10u  hour    = %10u  minute = %10u\n", client->drone, client->threatened, client->droneformation);
-		//		fprintf(fp, "day             = %10u  hour    = %10u  minute = %10u\n", client->drone, client->threatened, client->droneformation);
-		//		fprintf(fp, "day             = %10u  hour    = %10u  minute = %10u\n", client->drone, client->threatened, client->droneformation);
-
-		//	munition_t	munition[MAX_MUNTYPE];		// ammo characteristics
-		//	cv_t		cv[8];			// cv structure
-		//	rps_t		rps[MAX_PLANES]; // planes to auto field update
-		//	mapcycle_t	mapcycle[16];	// list of maps to cycle
-		//	char		*mapname;		// name of current map
-		//	char		*name;			// Arena name (e.g.: New WBmed Arena)
-		//	char		*address;		// Arena address (e.g.: wb.chph.ras.ru)
-		//	damage_t	planedamage[MAX_PLANES]; // Set plane armor
-		//	struct	{
-		//				int32_t	points;
-		//				int32_t	apstop;
-		//				int32_t	imunity;
-		//			} buildarmor[BUILD_MAX];
-		//	bomb_t		bombs[MAX_BOMBS]; //
-		//	field_t		*fields;
-		//	city_t		*cities;
-
 		fprintf(fp, "\n");
 
 		fclose(fp);
 	}
-
-	Sys_UnlockFile(strcat(filename, ".LOCK"));
 
 	Com_Printf(VERBOSE_WARNING, "Arena Bugged - Error at %s, line %d\n", file, line);
 }
