@@ -8567,7 +8567,7 @@ int32_t SendCopyright(client_t *client)
 	{
 		copyrighta->packetid = htons(0x0C00);
 	}
-	copyrighta->gameversion = htonl(WB_VERSION);
+	copyrighta->gameversion = htonl((u_int32_t)wbversion->value);
 	copyrighta->nicksize = strlen(client->longnick);
 	if(copyrighta->nicksize)
 		memcpy(&(copyrighta->nick), client->longnick, copyrighta->nicksize);
@@ -8587,10 +8587,10 @@ int32_t SendCopyright(client_t *client)
 
 	offset = offset + 66 + copyrightb->mapnamesize;
 
-	buffer[offset++] = (copyrighta->gameversion >> 24) & 0xff;
-	buffer[offset++] = (copyrighta->gameversion >> 16) & 0xff;
-	buffer[offset++] = (copyrighta->gameversion >> 8) & 0xff;
-	buffer[offset] = (copyrighta->gameversion) & 0xff;
+	buffer[offset++] = ((u_int32_t)wbversion->value >> 24) & 0xff;
+	buffer[offset++] = ((u_int32_t)wbversion->value >> 16) & 0xff;
+	buffer[offset++] = ((u_int32_t)wbversion->value >> 8) & 0xff;
+	buffer[offset] = ((u_int32_t)wbversion->value) & 0xff;
 
 	return SendPacket(buffer, 78 + copyrighta->nicksize + copyrightb->mapnamesize, client);
 }

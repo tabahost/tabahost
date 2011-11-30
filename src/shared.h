@@ -107,7 +107,6 @@ typedef unsigned int u_int32_t;
 #endif
 
 #define VERSION				"b4.30"
-#define WB_VERSION			309555 // 0x0004B933 // 311111 // 0x4BF47
 
 #define V_WB2				0
 #define V_WB2007			1
@@ -2725,6 +2724,7 @@ extern	var_t		*timeout;		/// away timer
 extern	var_t		*ttc;			/// tonnage to close
 extern	var_t		*verbose;		/// printf messages priority
 extern	var_t		*wb3;			/// enable WB3 protocol
+extern	var_t		*wbversion;		/// WB Version
 extern	var_t		*weather;		/// configure weather
 extern	var_t		*whitelist;		/// white list
 extern	var_t		*wingstrikerng;	/// 
