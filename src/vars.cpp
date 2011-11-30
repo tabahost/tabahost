@@ -274,30 +274,30 @@ void InitVars(void)
 	endyear = Var_Get("endyear", "1945", "1910", "1950", "End of TOD year", VAR_ADMIN);
 	enemydotsfly = Var_Get("enemydotsfly", "1", "0", "1", "Radar: all enemy aircraft shown?", VAR_ARCHIVE);
 	enemydotstwr = Var_Get("enemydotstwr", "1", "0", "1", "Radar: enemy tower based on", VAR_ARCHIVE);
-	enemyidlim = Var_Get("enemyidlim", "1500", "0", "40500", "Maximum range for display of enemy name/plane icons");
-	enemyidlimbomber = Var_Get("enemyidlimbomber", "1500", "0", "40500", "Maximum range for display of enemy name/plane icons for bombers");
-	enemynames = Var_Get("enemynames", "0", "0", "1", "Allow display of enemy names in icons");
-	enemyplanes = Var_Get("enemyplanes", "1", "0", "1", "Allow display of enemy plane in icons");
+	enemyidlim = Var_Get("enemyidlim", "1500", "0", "40500", "Maximum range for display of enemy name/plane icons", 0);
+	enemyidlimbomber = Var_Get("enemyidlimbomber", "1500", "0", "40500", "Maximum range for display of enemy name/plane icons for bombers", 0);
+	enemynames = Var_Get("enemynames", "0", "0", "1", "Allow display of enemy names in icons", 0);
+	enemyplanes = Var_Get("enemyplanes", "1", "0", "1", "Allow display of enemy plane in icons", 0);
 	fields = Var_Get("fields", "21", "0", "150", "Number of fields in this map", VAR_ARCHIVE | VAR_ADMIN);
 	flakmax = Var_Get("flakmax", "12000", "0", "50000", "Maximum altitude for fixed ack 88 guns", VAR_ARCHIVE);
 	flypenalty = Var_Get("flypenalty", "150", "0", "600", "Set time slot (in seconds) between flights", VAR_ARCHIVE);
 	friendlydotsfly = Var_Get("friendlydotsfly", "1", "0", "1", "Radar: all friendly aircraft shown?", VAR_ARCHIVE);
 	friendlydotstwr = Var_Get("friendlydotstwr", "1", "0", "1", "Radar friendly tower based on", VAR_ARCHIVE);
 	friendlyfire = Var_Get("friendlyfire", "1", "0", "1", "Enable friendly fire", VAR_ARCHIVE);
-	friendlyidlim = Var_Get("friendlyidlim", "1500", "0", "40500", "Maximum range for display of friendly name/plane icons");
-	friendlyidlimbomber = Var_Get("friendlyidlimbomber", "1500", "0", "40500", "Maximum range for display of friendly name/plane icons for bombers");
+	friendlyidlim = Var_Get("friendlyidlim", "1500", "0", "40500", "Maximum range for display of friendly name/plane icons", 0);
+	friendlyidlimbomber = Var_Get("friendlyidlimbomber", "1500", "0", "40500", "Maximum range for display of friendly name/plane icons for bombers", 0);
 	fueldiv = Var_Get("fueldiv", "100", "0.01", "10.0", "Modifies the fuel flow of aircraft. 1 = normal", VAR_ARCHIVE);
 	gruntcapture = Var_Get("gruntcapture", "1", "0", "1", "Allow grunts to be captured by driving vehicle", VAR_ARCHIVE);
 	gruntshoot = Var_Get("gruntshoot", "1", "0", "1", "Allow grunts to be shot", VAR_ARCHIVE);
 	gruntsmaxd = Var_Get("gruntsmaxd", "6000", "100", "12000", "Maximum distance from tower grunts can be dropped to start capture attack", VAR_ARCHIVE);
 	gunrad = Var_Get("gunrad", "0.1", "0.01", "8.00", "Collision bubble for projectiles launched", VAR_ARCHIVE);
-	gunstats = Var_Get("gunstats", "0", "0", "2", "Enable gunstats log. 1 = log, 2 = player and log");
+	gunstats = Var_Get("gunstats", "0", "0", "2", "Enable gunstats log. 1 = log, 2 = player and log", 0);
 	gwarning = Var_Get("gwarning", "0.5", "0.1", "3", "Set threshold to warn player about G overload", VAR_ARCHIVE);
 	hideadmin = Var_Get("hideadmin", "1", "0", "1", "Hide admins from .ros and radio announcements", VAR_ARCHIVE | VAR_ADMIN);
 	hostdomain = Var_Get("hostdomain", "localhost", "0", "0", "Set host domain", VAR_ADMIN);
 	hostname = Var_Get("hostname", "Main Arena", "0", "0", "Set host name in arenalist", VAR_ARCHIVE | VAR_ADMIN);
 	iconbombersoverride = Var_Get("iconbombersoverride", "1", "0", "1", "Enable override for bombers icons settings", VAR_ARCHIVE);
-	iff = Var_Get("iff", "1", "0", "1", "Enable country identification in radar dots");
+	iff = Var_Get("iff", "1", "0", "1", "Enable country identification in radar dots", 0);
 	initday = Var_Get("initday", "1", "1", "31", "Init of TOD day", VAR_ADMIN);
 	initmonth = Var_Get("initmonth", "9", "1", "12", "Init of TOD month", VAR_ADMIN);
 	inityear = Var_Get("inityear", "1939", "1910", "1950", "Init of TOD year", VAR_ADMIN);
@@ -324,7 +324,7 @@ void InitVars(void)
 	notanks = Var_Get("notanks", "0", "0", "1", "Don't allow players and arena to spawn tanks/hmack/katy", VAR_ARCHIVE);
 	nowings = Var_Get("nowings", "0", "0", "1", "Don't allow players to use wingmen", VAR_ARCHIVE);
 	obradar = Var_Get("obradar", "6000", "0", "12000", "Set on-board radar range for planes that have radar", VAR_ARCHIVE); // D20
-	oldcapt = Var_Get("oldcapt", "1", "0", "1", "Enable old way to capture fields (destroy all structures and drop paras)");
+	oldcapt = Var_Get("oldcapt", "1", "0", "1", "Enable old way to capture fields (destroy all structures and drop paras)", 0);
 	ottoaccuracy = Var_Get("ottoaccuracy", "5", "1", "10", "A general accuracy setting, this affects the otto's accuracy, reaction time and tracking",
 			VAR_ARCHIVE);
 	ottoacquirerange
@@ -360,8 +360,8 @@ void InitVars(void)
 	parasport = Var_Get("parasport", "4", "1", "20", "Set the number of paratroopers needed to capture", VAR_ARCHIVE);
 	parastown = Var_Get("parastown", "4", "1", "20", "Set the number of paratroopers needed to capture", VAR_ARCHIVE);
 	planeatradar = Var_Get("planeatradar", "0", "0", "1", "Show plane 3D model in F1-radar view (WB2.77)", VAR_ARCHIVE);
-	planerangelimit = Var_Get("planerangelimit", "1500", "0", "40500", "Maximum range for display of range icon");
-	planerangelimitbomber = Var_Get("planerangelimitbomber", "1500", "0", "40500", "Maximum range for display of range icon for bombers");
+	planerangelimit = Var_Get("planerangelimit", "1500", "0", "40500", "Maximum range for display of range icon", 0);
+	planerangelimitbomber = Var_Get("planerangelimitbomber", "1500", "0", "40500", "Maximum range for display of range icon for bombers", 0);
 	predictpos = Var_Get("predictpos", "0", "0", "4", "Enable predictor corrector algorithm", 0);
 	printeject = Var_Get("printeject", "0", "0", "1", "Enable broadcast when player ejects", VAR_ARCHIVE);
 	printkills = Var_Get("printkills", "1", "0", "1", "Enable broadcast when player is killed", VAR_ARCHIVE);
