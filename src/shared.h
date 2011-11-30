@@ -107,7 +107,7 @@ typedef unsigned int u_int32_t;
 #endif
 
 #define VERSION				"b4.30"
-#define WB_VERSION			311111 // 0x4BF47
+#define WB_VERSION			309555 // 0x0004B933 // 311111 // 0x4BF47
 
 #define V_WB2				0
 #define V_WB2007			1
