@@ -8598,7 +8598,7 @@ int32_t SendCopyright(client_t *client)
 /**
  UpdateIngameClients
 
- Update file with all ingame clients / OP's or Admins
+ Update file with all  ingame clients / OP's or Admins
  */
 
 void UpdateIngameClients(u_int8_t attr)
