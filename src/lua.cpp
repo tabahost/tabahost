@@ -20,6 +20,7 @@
  *
  ***/
 
+#include "common.h"
 #include "shared.h"
 
 #ifdef __CYGWIN__

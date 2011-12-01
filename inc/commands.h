@@ -31,17 +31,7 @@
 #ifndef COMMANDS_H_
 #define COMMANDS_H_
 
-#include "arena.h"
-#include "client.h"
-#include "common.h"
-#include "drone.h"
-#include "game.h"
-#include "net.h"
-#include "scores.h"
 #include "shared.h"
-#include "Ship.h"
-#include "sys.h"
-#include "vars.h"
 
 void	Cmd_LoadBatch(client_t *client);
 void	Cmd_LoadConfig(const char *filename, client_t *client, bool verbose = true);

@@ -2,7 +2,7 @@
  *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
- * 
+ *
  *  This file is part of Tabajara Host Server.
  *
  *  Tabajara Host Server is free software: you can redistribute it and/or modify
@@ -17,7 +17,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
- * 
+ *
  ***/
 
 #include "client.h"
@@ -25,7 +25,7 @@
 #include "net.h"
 #include "shared.h"
 #include "sys.h"
-#include "webserver.h"
+#include "wbserver.h"
 
 FILE *logfile[MAX_LOGFILE]; // extern
 
@@ -275,21 +275,21 @@ void Com_Close(int *fd)
 {
 	int i;
 
-	shutdown(*fd, SHUT_RDWR); // TODO: Misc: make socket errors 
+	shutdown(*fd, SHUT_RDWR); // TODO: Misc: make socket errors
 	/*
 	 errno:
-	 [EBADF] 
-	 The socket argument is not a valid file descriptor. 
-	 [EINVAL] 
-	 The how argument is invalid. 
-	 [ENOTCONN] 
-	 The socket is not connected. 
-	 [ENOTSOCK] 
-	 The socket argument does not refer to a socket. 
+	 [EBADF]
+	 The socket argument is not a valid file descriptor.
+	 [EINVAL]
+	 The how argument is invalid.
+	 [ENOTCONN]
+	 The socket is not connected.
+	 [ENOTSOCK]
+	 The socket argument does not refer to a socket.
 	 The shutdown() function may fail if:
 
-	 [ENOBUFS] 
-	 Insufficient resources were available in the system to perform the operation. 
+	 [ENOBUFS]
+	 Insufficient resources were available in the system to perform the operation.
 	 */
 
 #ifdef _WIN32

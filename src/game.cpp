@@ -133,7 +133,7 @@ u_int16_t packets_tab[210][3] = {
 		{ 0x030A, 0x030A, 0x060C }, // arnaMAP_VECTOR
 		{ 0x030B, 0x030B, 0xFFFF }, // arnaREFRESH_FIELD_OBJECTS *******************************
 		{ 0xFFFF, 0x030C, 0xFFFF }, // arnaSET_DATE
-		{ 0xFFFF, 0x030D, 0x060B }, // arnaGRUNT_CONFIG * 
+		{ 0xFFFF, 0x030D, 0x060B }, // arnaGRUNT_CONFIG *
 		{ 0xFFFF, 0x030E, 0x0608 }, // arnaRANDOM_SEED
 		{ 0xFFFF, 0x030F, 0xFFFF }, // arnaARENAFLAGS3 *
 		{ 0xFFFF, 0x0310, 0xFFFF }, // arnaCONFIG_FLIGHTMODEL *******************************

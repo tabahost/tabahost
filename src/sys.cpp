@@ -2,7 +2,7 @@
  *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
- * 
+ *
  *  This file is part of Tabajara Host Server.
  *
  *  Tabajara Host Server is free software: you can redistribute it and/or modify
@@ -17,13 +17,13 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
- * 
+ *
  ***/
 
 #include "common.h"
 #include "sys.h"
 #include "vars.h"
-#include "webserver.h"
+#include "wbserver.h"
 
 #ifdef _WIN32
 #include "mmsystem.h"
@@ -596,7 +596,7 @@ void Sys_Printfile(const char *file)
  {
  Com_Printf(VERBOSE_WARNING, "UNNAMED: Couldn't Fetch Row, error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
  }
- 
+
  mysql_free_result(my_result);
  my_result = NULL;
  my_row = NULL;
