@@ -31,7 +31,17 @@
 #ifndef ARENA_H_
 #define ARENA_H_
 
+#include "client.h"
+#include "commands.h"
+#include "common.h"
+#include "drone.h"
+#include "game.h"
+#include "net.h"
+#include "scores.h"
 #include "shared.h"
+#include "Ship.h"
+#include "sys.h"
+#include "vars.h"
 
 building_t	*GetBuilding(u_int16_t id);
 int32_t	GetFieldRadius(u_int8_t fieldtype);

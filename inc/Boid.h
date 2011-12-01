@@ -35,7 +35,14 @@
 
 #define	MAX_WAYPOINTS		128		// max of waypoint a Boid can handle
 
+#include "arena.h"
+#include "client.h"
+#include "common.h"
+#include "drone.h"
+#include "game.h"
+#include "scores.h"
 #include "shared.h"
+
 using namespace std;
 
 typedef struct coordinates_s // TDoublePoint

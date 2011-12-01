@@ -5,13 +5,7 @@
  *  @author franz
  */
 
-#include "arena.h"
 #include "Boid.h"
-#include "client.h"
-#include "common.h"
-#include "drone.h"
-#include "game.h"
-#include "scores.h"
 
 u_int16_t Boid::boidCount;
 Boidlist Boid::boids;
