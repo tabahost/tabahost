@@ -20,7 +20,13 @@
  * 
  ***/
 
-#include "shared.h"
+#include "arena.h"
+#include "client.h"
+#include "commands.h"
+#include "common.h"
+#include "game.h"
+#include "scores.h"
+#include "sys.h"
 
 /**
  ScoresEvent

@@ -20,7 +20,15 @@
  * 
  ***/
 
+#include "arena.h"
+#include "client.h"
+#include "common.h"
+#include "drone.h"
+#include "game.h"
+#include "net.h"
+#include "scores.h"
 #include "shared.h"
+#include "sys.h"
 
 /**
  AddDrone

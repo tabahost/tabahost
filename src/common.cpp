@@ -20,7 +20,12 @@
  * 
  ***/
 
+#include "client.h"
+#include "common.h"
+#include "net.h"
 #include "shared.h"
+#include "sys.h"
+#include "webserver.h"
 
 FILE *logfile[MAX_LOGFILE]; // extern
 

@@ -20,7 +20,19 @@
  * 
  ***/
 
-#include "shared.h"
+/**
+  * @file		net.c
+  * @author		Francisco Bischoff
+  * @version	11.2011
+  * @date		2011.11.28
+  * @brief		network stuff
+  */
+
+#include "client.h"
+#include "common.h"
+#include "game.h"
+#include "net.h"
+#include "webserver.h"
 
 /**
  InitTCPNet

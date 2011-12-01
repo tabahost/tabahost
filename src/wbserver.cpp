@@ -65,7 +65,16 @@
  *
  ***/
 
-#include "shared.h"
+#include "arena.h"
+#include "client.h"
+#include "commands.h"
+#include "common.h"
+#include "drone.h"
+#include "game.h"
+#include "scores.h"
+#include "sys.h"
+#include "vars.h"
+#include "wbserver.h"
 
 int sockfd, udpfd; // local socket
 u_int8_t stop = 0;

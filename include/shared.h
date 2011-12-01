@@ -1,4 +1,4 @@
-/***
+/******************************************************************************
  *  Copyright (C) 2004-2009 Francisco Bischoff
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
@@ -18,33 +18,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with Tabajara Host Server.  If not, see <http://www.gnu.org/licenses/agpl.html>.
  *
- ***/
+ *****************************************************************************/
 
-/****************************************************
- ****************************************************
-
- compiler settings to gdb: "-fomit-frame-pointer" removed
-
- TODO: Misc: test arena->frame = 1 with numer lesser than 4294962000UL
- TODO: Misc: search for "timer = ", correct all clients/drones timer and offset
- TODO: DM: Verify vital structures
- TODO: DM: .saveparts
- TODO: DM: part = h0, explodir
- TODO: DM: change FAU explosion
- TODO: Feature: bail speed limit
- TODO: Feature: reup economy at field capt
- TODO: Feature: exclusive armor to special planes
- TODO: Feature: 2 cities surrender
- TODO: Feature: spheric/elyptic radar range
- TODO: Feature: pingtest
- TODO: Feature: Nuclear Bomb (done, not allowed yet)
- TODO: Feature: .fieldalt <field> <alt>
-
- TODO: WB2: Check warehouse in cities
- TODO: WB2: testar sink boats tem cada mapa
-
- ****************************************************
- ****************************************************/
+/**
+  * @file		/include/shared.h
+  * @author		Francisco Bischoff
+  * @version	11.2011
+  * @date		2011.11.28
+  * @brief		common header file
+  */
 
 #ifndef SHARED_H_
 #define SHARED_H_
@@ -81,7 +63,6 @@
 #include <unistd.h>
 #endif
 
-
 // Typedefs
 
 #ifdef _WIN32
@@ -106,7 +87,7 @@ typedef unsigned int u_int32_t;
 #define FALSE 0
 #endif
 
-#define VERSION				"b4.30"
+#define VERSION				"b4.20"
 
 #define V_WB2				0
 #define V_WB2007			1
@@ -296,6 +277,7 @@ typedef unsigned int u_int32_t;
 
 #define FILE_ARNASETTINGS	"./arenas/settings.txt"
 #define FILE_DRONENICKS		"./players/drones.txt"
+#define FILE_DRONENICKS_LOCK "./players/drones.txt.LOCK"
 #define FILE_INGAME			"./players/ingame.txt"
 #define FILE_OP				"./players/igops.txt"
 #define FILE_ADMIN			"./players/igadmins.txt"
@@ -517,38 +499,6 @@ class Ship;
 
 // Structures & Unions
 
-typedef struct bool_s
-{
-	u_int	b:1;
-} bool_t;
-
-typedef struct munition_s
-{
-	char		name[32];		// gun name
-	char		abbrev[12];		// abbreviated gun name
-	int32_t		he;				// explosive coeficient // -1 = unused weapon
-	u_int16_t	ap;				// penetration coeficient (linear coef)
-	int8_t		decay;			// penetration decay (angular coef)
-	u_int8_t	type;			// type: bullet, rocket, bomb, torp
-	u_int8_t	caliber;		// [7mm, 13mm, 20mm, 30-37mm, 40-57mm, 75-88mm]
-} munition_t;
-
-typedef struct building_s
-{
-	u_int8_t	field;
-	u_int8_t	fieldtype;
-	u_int8_t	country;
-	u_int16_t	id;
-	u_int8_t	type;
-	u_int8_t	status;			// 0-up, 1-destroyed, 2-smoking
-	int32_t		timer;
-	u_int32_t	armor;
-	u_int8_t	infield;
-	int32_t		posx;
-	int32_t		posy;
-	int32_t		posz;
-} building_t;
-
 //typedef struct ship_s
 //{
 //	u_int8_t	plane;		// ship plane: KAGA, ENTERPRISE, Etc.
@@ -602,6 +552,38 @@ typedef struct building_s
 //	u_int8_t	wpnum;			// num of actual waypoint
 //	int32_t		wp[MAX_WAYPOINTS][2]; // waypoints
 //} cv_t;
+
+typedef struct bool_s
+{
+	u_int	b:1;
+} bool_t;
+
+typedef struct munition_s
+{
+	char		name[32];		// gun name
+	char		abbrev[12];		// abbreviated gun name
+	int32_t		he;				// explosive coeficient // -1 = unused weapon
+	u_int16_t	ap;				// penetration coeficient (linear coef)
+	int8_t		decay;			// penetration decay (angular coef)
+	u_int8_t	type;			// type: bullet, rocket, bomb, torp
+	u_int8_t	caliber;		// [7mm, 13mm, 20mm, 30-37mm, 40-57mm, 75-88mm]
+} munition_t;
+
+typedef struct building_s
+{
+	u_int8_t	field;
+	u_int8_t	fieldtype;
+	u_int8_t	country;
+	u_int16_t	id;
+	u_int8_t	type;
+	u_int8_t	status;			// 0-up, 1-destroyed, 2-smoking
+	int32_t		timer;
+	u_int32_t	armor;
+	u_int8_t	infield;
+	int32_t		posx;
+	int32_t		posy;
+	int32_t		posz;
+} building_t;
 
 typedef struct rps_s
 {
@@ -997,8 +979,6 @@ typedef struct arenaslist_s
 	u_int32_t	logintime;
 	u_int32_t	time;
 } arenaslist_t;
-
-// ======== packet structures =========
 
 typedef struct initflight_s		// 02 01
 {
@@ -1674,7 +1654,7 @@ typedef struct ottoparams_s	// 0F 00
 typedef struct ottoparams2_s	// 0F 03
 {
 	u_int16_t	packetid;	//
-	u_int16_t	unk1; // 
+	u_int16_t	unk1; //
 	u_int16_t	ottoacquirerange; // OTTO_ACQUIRE_RANGE?
 } ottoparams2_t;
 
@@ -2105,440 +2085,6 @@ typedef struct debug_s {
     unsigned    j_context; /* Saved signal mask.  */
 }   debug_t;
 
-// ====================================
-
-// Function Prototypes
-
-// net.c
-int		InitTCPNet(int portno);
-int32_t	SendPacket(u_int8_t *buffer, u_int16_t len, client_t *client);
-int32_t	SendPacketTHL(u_int8_t *buffer, u_int16_t len, client_t *client);
-int		GetPacket(client_t *client); // recv and process packet (unfinished?)
-void	FlushSocket(int sockfd);
-void	ProtocolError(client_t *client);
-void	ConnStatistics(client_t *client, u_int32_t len, u_int8_t type);
-
-// sys.c
-u_int32_t Sys_Milliseconds (void);
-u_int32_t Sys_ResetMilliseconds(void);
-void	Sys_Init(void);
-void	Sys_PrintTrace (void);
-void	Sys_RemoveFiles(const char *file);
-void	Sys_SQL_Init(void);
-void	Sys_SQL_Close(void);
-void	Sys_GeoIP_Init(void);
-void	Sys_GeoIP_Close(void);
-void	Sys_SigHandler(int s);
-char	*Sys_ConsoleInput(void);
-int8_t	Sys_LockFile(const char *file);
-int8_t	Sys_UnlockFile(const char *file);
-void	Sys_WaitForLock(const char *file);
-void	Sys_Printfile(const char *file);
-
-// wbserver.c
-void	RunFrame(void);
-int		InitTCPNet(int portno);
-int		InitUDPNet(int portno);
-void	UpdateLocalArenaslist(void);
-void	BackupArenaStatus(void);
-void	ExitServer(int status);
-
-// common.c
-void	*Z_Malloc (u_int32_t size);
-u_int32_t ascii2wbnick(const char *playernick, u_int8_t attr);
-char *wbnick2ascii(u_int32_t shortnick); //void 	wbnick2ascii(u_int32_t shortnick, u_int8_t *playernick);
-u_int8_t *wbcrypt(u_int8_t *buffer, u_int32_t key, u_int16_t size, u_int8_t oldcrypt);
-void	memncat(u_int8_t **dest, u_int8_t *orig, u_int32_t destsize, u_int32_t origsize);
-char	*asc2time(const struct tm *timeptr);
-char	*sqltime(const struct tm *timeptr);
-void	Com_Close(int *fd);
-int		Com_Recv(int s, u_int8_t *buf, int len);
-double	Com_Pow(double x, u_int32_t y);
-void	Com_RecordLogBuffer(client_t * client, u_int8_t *buffer, int len);
-void	Com_PrintLogBuffer(client_t * client);
-int		Com_Send(client_t *client, u_int8_t *buf, int len);
-void	ConnError(int n);
-int		Com_Read(FILE *fp, u_int8_t *buffer, u_int32_t num);
-void	Com_LogEvent(u_int32_t event, u_int32_t player_id, u_int32_t victim_id);
-void	Com_LogDescription(u_int32_t type, double value, char *string);
-void	Com_Printf(int8_t verb, const char *fmt, ...);
-char	*Com_TimeSeconds(u_int32_t seconds);
-char	*Com_Padloc(int32_t x, int32_t y);
-int		d_mysql_query(MYSQL *mysql, const char *query);
-int		Com_MySQL_Query(client_t *client, MYSQL *mysql, const char *query);
-void	Com_MySQL_Flush(MYSQL *mysql, const char *file, u_int32_t line);
-void	Com_Printfhex(unsigned char *buffer, int len);
-int		Com_Stricmp (const char *s1, const char *s2);
-u_int8_t Com_CheckAphaNum(char *string);
-u_int8_t Com_CheckWBUsername(char *string);
-void	Com_ParseString(char *string);
-u_int8_t GetSlot(client_t *plane, client_t *client);
-u_int8_t CheckSum(u_int8_t *buffer, u_int16_t len);
-double	RocketAngle(u_int16_t dist);
-double	RocketTime(double angle);
-double	WBtoHdg(int16_t angle);
-double	AngleTo(int32_t origx, int32_t origy, int32_t destx, int32_t desty);
-char	*CopyString (const char *in);
-u_int32_t crc32(char *buffer, u_int8_t size);
-double	Com_Rad(double angle);
-double	Com_Deg(double angle);
-int		Com_Atoi(const char *string);
-u_int32_t Com_Atou(const char *string);
-double	Com_Atof(const char *string);
-char	*Com_MyRow(const char *string);
-char	*Com_SquadronName(u_int32_t owner);
-int		Com_Strncmp(const char *s1, const char *s2, int n);
-int		Com_Strcmp(const char *s1, const char *s2);
-void	Com_WBntoh(u_int16_t *packetid);
-u_int16_t Com_WBhton(u_int16_t packetid);
-u_int8_t Com_WB3ntoh(u_int8_t n);
-u_int16_t Com_WB3hton(u_int16_t m);
-int32_t DistBetween(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2, int32_t envelope);
-double	Com_Log(double number, double base);
-double	FloorDiv(double numerator, double denominator);
-double	ModRange(double numerator, double denominator);
-double	RoundtoBase(double value, double base);
-double	WBLongitude(double dAbsLongitude);
-double	WBLatitude(double dAbsLatitude);
-double	WBAngels(double dAbsAltitude);
-double	WBAltMeters(double dAbsAltitude);
-char	*WBVSI(double dClimbRate, int fIsBomber);
-char	*WBRhumb(double dHeading /* in degrees*/);
-double	WBHeading(double dHeading);
-int32_t PredictorCorrector32(int32_t *values, u_int8_t degree);
-int16_t PredictorCorrector16(int16_t *values, u_int8_t degree);
-char	*PadLoc(char *szBuffer, double dLongitude, double dLatitude);
-// vars.c
-void	InitVars(void);
-void	CheckVars(void);
-var_t	*Var_SetFlags(const char *var_name, int flags);
-var_t	*Var_Get(const char *var_name, const char *var_value, const char *min, const char *max, const char *description, int flags);
-var_t	*Var_FindVar(const char *var_name);
-var_t	*Var_Set (const char *var_name, const char *value);
-double	Var_VariableValue (const char *var_name);
-const char	*Var_VariableString (const char *var_name);
-void	Var_WriteVariables (const char *path, client_t *client);
-u_int8_t UpdateArenaStatus(u_int8_t uptime);
-
-// game.c
-void	CheckArenaRules(void);
-void	ProcessMetarWeather(void);
-void	ProcessCommands(char *command, client_t *client);
-void	SendFileSeq1(const char *file, const char *clifile, client_t *client);
-void	SendFileSeq3(client_t *client);
-void	SendFileSeq5(u_int16_t seek, client_t *client);
-void	SendFileSeq6(u_int8_t *buffer, client_t *client);
-void	SendFileSeq7(client_t *client);
-int		ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client);
-void	PingTest(u_int8_t *buffer, client_t *client);
-void	PReqBomberList(client_t *client);
-void	PEndFlight(u_int8_t *buffer, u_int16_t len, client_t *client);
-void	PPlanePosition(u_int8_t *buffer, client_t *client, u_int8_t attached);
-void	CheckMaxG(client_t *client);
-double	ClientG(client_t *client);
-void	PChutePos(u_int8_t *buffer, client_t *client);
-void	WB3GunnerUpdate(u_int8_t *buffer, client_t *client);
-void	WB3FireSuppression(u_int8_t *buffer, client_t *client);
-void	WB3SupressFire(u_int8_t slot, client_t *client);
-void	PPlaneStatus(u_int8_t *buffer, client_t *client);
-void	WB3ExternalAmmoCnt(u_int8_t *buffer, u_int16_t len, client_t *client);
-void	PDropItem(u_int8_t *buffer, u_int8_t len, client_t *client);
-void	WB3TonnageOnTarget(u_int8_t *buffer, client_t *client);
-void	PRemoveDropItem(u_int8_t *buffer, u_int8_t len, client_t *client);
-void	PFlakHit(u_int8_t *buffer, client_t *client);
-void	PHitStructure(u_int8_t *buffer, client_t *client);
-void	PSetRadioChannel(u_int8_t *buffer, client_t *client);
-void	PHardHitStructure(u_int8_t *buffer, client_t *client);
-void	PHitPlane(u_int8_t *buffer, client_t *client);
-void	WB3FuelConsumed(u_int8_t *buffer, client_t *client);
-void	WB3DelayedFuse(u_int8_t *buffer, client_t *client);
-void	SendPings(u_int8_t hits, u_int8_t type, client_t *client);
-void	PHardHitPlane(u_int8_t *buffer, client_t *client);
-const char	*GetHitSite(u_int8_t id);
-const char	*GetSmallHitSite(u_int8_t id);
-munition_t *GetMunition(u_int8_t id);
-u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, char *pap, client_t *client);
-double	RebuildTime(building_t *building);
-u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, client_t *client);
-void	SendFieldStatus(u_int16_t field, client_t *client);
-void	SetBuildingStatus(building_t *building, u_int8_t status, client_t *client);
-void	SetPlaneDamage(u_int16_t plane, client_t *client);
-void	PFireMG(u_int8_t *buffer, u_int8_t len, client_t *client);
-void	POttoFiring(u_int8_t *buffer, u_int8_t len, client_t *client);
-void	SendForceStatus(u_int32_t status_damage, u_int32_t status_status, client_t *client);
-void	SendPlaneStatus(client_t *plane, client_t *client);
-void	WB3DotCommand(client_t *client, const char *fmt, ...);
-void	PRadioMessage(u_int8_t *buffer, client_t *client);
-void	PrintRadioMessage(u_int32_t msgto, u_int32_t msgfrom, char *message, u_int8_t msgsize, client_t *client);
-void	PNewNick(u_int8_t *buffer, client_t *client);
-int32_t	SendCopyright(client_t *client);
-void	UpdateIngameClients(u_int8_t attr);
-const char	*GetCountry(u_int8_t country);
-const char	*GetRanking(u_int8_t ranking);
-int32_t	SendArenaNames(client_t *client);
-void	SendPlayersNames(client_t *client);
-void	SendIdle(client_t *client);
-void	SendPlayersNear(client_t *client);
-void	SendOttoParams(client_t *client);
-void	SendOttoParams2(client_t *client);
-void	SendLastConfig(client_t *client);
-void	AddRemovePlaneScreen(client_t *plane, client_t *client, u_int8_t remove);
-void	SendScreenUpdates(client_t *client);
-void	SendDeckUpdates(client_t *client);
-int		CanHear(client_t *client1, client_t *client2, u_int32_t msgto);
-void	SendArenaRules(client_t *client);
-void	WB3SendGruntConfig(client_t *client);
-void	WB3SendArenaFlags3(client_t *client);
-void	WB3RandomSeed(client_t *client);
-void	WB3ConfigFM(client_t *client);
-void	WB3ArenaConfig2(client_t *client);
-void	WB3NWAttachSlot(client_t *client);
-void	PRadioCommand(char *message, u_int8_t size, client_t *client);
-void	PFileCheck(u_int8_t *buffer, client_t *client);
-void	CheckCockpitCRC(char *path, u_int32_t crc, client_t *client);
-void	SendExecutablesCheck(u_int32_t exemisc, client_t *client);
-void	SendFieldsCountries(client_t *client);
-int8_t	FirstFieldCountry(u_int8_t country);
-void	SendGunnerStatusChange(client_t *gunner, u_int16_t status, client_t *client);
-void	SendAttachList(u_int8_t *packet, client_t *client);
-void	PCurrentView(u_int8_t *buffer, client_t *client);
-void	PSquadLookup(u_int8_t *buffer, client_t *client);
-u_int16_t GunPos(u_int16_t pos, u_int8_t reverse);
-void	WB3RequestStartFly(u_int8_t *buffer, client_t *client);
-void	WB3RequestMannedAck(u_int8_t *buffer, client_t *client);
-void	PHostVar(u_int8_t *buffer, client_t *client);
-void	THAIWatchDog(u_int8_t *buffer, client_t *client);
-void	PRequestGunner(u_int8_t *buffer, client_t *client);
-void	PAcceptGunner(u_int8_t *buffer, client_t *client);
-void	PSwitchOttoPos(u_int8_t *buffer, client_t *client);
-void	PClientMedals(u_int8_t *buffer, client_t *client);
-void	PSquadInfo(char *nick, client_t *client);
-double	CalcDamage(u_int32_t mass, u_int16_t vel);
-void	Kamikase(client_t *client);
-u_int32_t GetFactoryReupTime(u_int8_t country);
-u_int32_t GetRPSLag(u_int8_t country);
-
-//arena.c
-building_t	*GetBuilding(u_int16_t id);
-int32_t	GetFieldRadius(u_int8_t fieldtype);
-const char *GetFieldType(u_int8_t type);
-const char *GetBuildingType(u_int16_t type);
-void	LoadArenaStatus(const char *filename, client_t *client, u_int8_t reset);
-void	SaveArenaStatus(const char *filename, client_t *client);
-void	SaveWebsiteData(void);
-void	LoadPlanesPool(const char *filename, client_t *client);
-void	SavePlanesPool(const char *filename, client_t *client);
-u_int32_t GetBuildingArmor(u_int8_t type, client_t *client);
-u_int32_t GetBuildingAPstop(u_int8_t type, client_t *client);
-u_int32_t GetBuildingImunity(u_int8_t type, client_t *client);
-void	SendMapDots(void);
-u_int8_t SeeEnemyDot(client_t *client, u_int8_t country);
-void	ClearMapDots(client_t *client);
-void	ListWaypoints(client_t *client);
-const char *GetPlaneName(u_int16_t plane);
-const char *GetSmallPlaneName(u_int16_t plane);
-const char *GetPlaneDir(u_int16_t plane);
-void	UpdateRPS(u_int16_t minutes);
-void	SendRPS(client_t *client);
-void	WB3SendAcks(client_t *client);
-void	AddBomb(u_int16_t id, int32_t destx, int32_t desty, int32_t destz, u_int8_t type, int16_t speed, u_int32_t timer, client_t *client);
-void	LoadRPS(const char *path, client_t *client);
-void	SaveRPS(const char *path, client_t *client);
-void	ShowRPS(client_t *client);
-void	LoadMapcycle(const char *path, client_t *client);
-int8_t	IsFighter(client_t *client, ...);
-int8_t	IsBomber(client_t *client, ...);
-int8_t	IsCargo(client_t *client, ...);
-int8_t	IsGround(client_t *client, ...);
-int8_t	IsShip(client_t *client, ...);
-int8_t	HaveGunner(u_int16_t plane);
-void	LoadAmmo(client_t *client);
-void	LoadDamageModel(client_t *client);
-void	SaveDamageModel(client_t *client, char *row);
-//void	CheckBoatDamage(building_t *building, client_t *client);
-void	CaptureField(u_int8_t field, client_t *client);
-u_int16_t TimetoNextArena(void);
-void	InitArena(void);
-void	ChangeArena(char *map, client_t *client);
-void	CalcTimemultBasedOnTime(void);
-void	NewWar(void);
-int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city, u_int8_t cvs, u_int32_t *pdist);
-void	ReducePlanes(u_int8_t field);
-void	IncreaseAcksReup(u_int8_t field);
-u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot);
-u_int8_t GetFieldParas(u_int8_t type);
-double	GetTonnageToClose(u_int8_t field);
-u_int8_t Alt2Index(int32_t alt);
-void	WB3MapTopography(client_t *client);
-void	WB3Mapper(client_t *client);
-u_int32_t GetHeightAt(int32_t x, int32_t y);
-u_int8_t LoadEarthMap(char *FileName);
-u_int8_t SaveEarthMap(char *FileName);
-int32_t IsVisible(int32_t x1, int32_t y1, int32_t z1, int32_t x2, int32_t y2, int32_t z2);
-void	NoopArenalist(void);
-void	AddFieldDamage(u_int8_t field, u_int32_t damage, client_t *client);
-int8_t	AddBomber(u_int8_t field, client_t *client);
-void	SetBFieldType(building_t *buildings, u_int16_t type);
-void	CalcFactoryBuildings(void);
-void	DebiteFactoryBuildings(city_t *city);
-void	CrediteFactoryBuildings(city_t *city);
-void	DebugArena(const char *file, u_int32_t line);
-
-//client.c
-void	InitClients(void);
-void	AddClient(int socket, struct sockaddr_in *cli_addr);
-void	RemoveClient(client_t *client);
-void	DebugClient(const char *file, u_int32_t line, u_int8_t kick, client_t *client);
-int		ProcessClient (client_t *client);
-void	BackupPosition(client_t *client, u_int8_t predict);
-int32_t ProcessLogin (client_t *client);
-int 	CalcLoginKey(u_int8_t *Data, int Len);
-u_int8_t LoginKey(client_t *client);
-void 	DecryptOctet(u_int8_t Octet[8], unsigned long Key);
-void 	DecryptBlock(u_int8_t *Buf, int Len, long Key);
-int8_t	CheckUserPasswd(client_t *client, u_int8_t *userpass);
-int8_t LoginTypeRequest(u_int8_t *buffer, client_t *client);
-client_t *FindDBClient(u_int32_t dbid);
-client_t *FindSClient(u_int32_t shortnick);
-client_t *FindLClient(char *longnick);
-int		PPrintf(client_t *client, u_int16_t radio, const char *fmt, ...);
-void	CPrintf(u_int8_t country, u_int16_t radio, const char *fmt, ...);
-void	BPrintf(u_int16_t radio, const char *fmt, ...);
-u_int8_t CheckBanned(client_t *client);
-u_int8_t CheckTK(client_t *client);
-u_int8_t GetClientInfo(client_t *client);
-void	UpdateClientFile(client_t *client);
-int8_t	AddKiller(client_t *victim, client_t *client);
-void	ClearKillers(client_t *client);
-void	ClearBombers(u_int8_t field);
-void	CalcEloRating(client_t *winner, client_t *looser, u_int8_t flags);
-client_t *NearPlane(client_t *client, u_int8_t country, int32_t limit);
-void	ForceEndFlight(u_int8_t remdron, client_t *client);
-void	ReloadWeapon(u_int16_t weapon, u_int16_t value, client_t *client);
-void	WB3AiMount(u_int8_t *buffer, client_t *client);
-void	WB3ClientSkin(u_int8_t *buffer, client_t *client);
-char	*CreateSkin(client_t *client, u_int8_t number);
-void	WB3OverrideSkin(u_int8_t slot, client_t *client);
-void	ClientHDSerial(u_int8_t *buffer, client_t *client);
-void	ClientIpaddr(client_t *client);
-void	LogRAWPosition(u_int8_t server, client_t *client);
-void	LogPosition(client_t *client);
-void	HardHit(u_int8_t munition, u_int8_t penalty, client_t *client);
-
-//drone.c
-client_t *AddDrone(u_int16_t type, int32_t posx, int32_t posy, int32_t posz, u_int8_t country, u_int16_t plane, client_t *client);
-void	RemoveDrone(client_t *drone);
-void	DroneVisibleList(client_t *drone);
-int		ProcessDrone(client_t *drone);
-void	DroneGetTarget(client_t *drone);
-void	FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
-void	FireFlak(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate);
-void	DropBomb(int32_t destx, int32_t desty, u_int16_t mun, client_t *client);
-void	ThrowBomb(u_int8_t animate, int32_t origx, int32_t origy, int32_t origz, int32_t destx, int32_t desty, int32_t destz, client_t *client);
-void	SendDronePos(client_t *drone, client_t *client);
-void	SendXBombs(client_t *drone);
-u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_t speed, u_int8_t nuke, client_t *client);
-void	PFAUDamage(client_t *fau);
-void	DroneWings(client_t *client);
-u_int32_t NewDroneName(client_t *client);
-void	LaunchTanks(u_int8_t fieldfrom, u_int8_t fieldto, u_int8_t country, client_t *client);
-
-//commands.c
-void	Cmd_LoadBatch(client_t *client);
-void	Cmd_LoadConfig(const char *filename, client_t *client, bool verbose = true);
-void	Cmd_Ros(client_t *client);
-void	Cmd_Ammo(client_t *client, u_int8_t arg, char *arg2);
-void	Cmd_Saveammo(client_t *client, char *row);
-void	Cmd_VarList(client_t *client, char *string);
-void	Cmd_Move(char *field, int country, client_t *client);
-void	Cmd_Plane(u_int16_t planenumber, client_t *client);
-void	Cmd_Fuel(int8_t fuel, client_t *client);
-void	Cmd_Conv(u_int16_t distance, client_t *client);
-void	Cmd_Ord(u_int8_t ord, client_t *client);
-void	Cmd_Easy(u_int8_t easy, client_t *client);
-void	Cmd_TK(char *tkiller, u_int8_t newvalue, client_t *client);
-u_int8_t Cmd_Fly(u_int16_t position, client_t *client);
-u_int8_t Cmd_Capt(u_int16_t field, u_int8_t country, client_t *client);
-void	Cmd_White(char *user, u_int8_t white, client_t *client);
-void	Cmd_Chmod(char *user, int8_t mod, client_t *client);
-void	Cmd_Part(char *argv[], u_int8_t argc, client_t *client);
-void	Cmd_Decl(char *argv[], u_int8_t argc, client_t *client);
-void	Cmd_Pingtest(u_int16_t frame, client_t *client);
-void	Cmd_Undecl(u_int16_t id, client_t *client);
-void	Cmd_Time(u_int16_t time, char *mult, client_t *client);
-void	Cmd_Date(u_int16_t year, u_int8_t month, u_int8_t day, client_t *client);
-void	Cmd_Field(u_int8_t field, client_t *client);
-void	Cmd_City(u_int8_t city, client_t *client);
-void	Cmd_StartDrone(u_int32_t field, u_int32_t plane, double angle, client_t *client);
-void	Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *client);
-void	Cmd_Say(char *argv[], u_int8_t argc, client_t *client);
-void	Cmd_Seta(char *field, int8_t country, int16_t plane, int8_t amount);
-void	Cmd_Show(client_t *client);
-void	Cmd_Score(char *player, client_t *client);
-void	Cmd_Clear(client_t *client);
-void	Cmd_Whoare(u_int8_t radio, client_t *client);
-void	Cmd_Invite(char *nick, client_t *client);
-void	Cmd_Jsquad(client_t *client);
-void	Cmd_Name(char *name, client_t *client);
-void	Cmd_Slogan(char *motto, client_t *client);
-void	Cmd_Remove(char *nick, client_t *client);
-void	Cmd_Withdraw(client_t *client);
-void	Cmd_Disband(client_t *client);
-void	Cmd_Psq(char *nick, u_int8_t attr, client_t *client);
-void	Cmd_Hls(client_t *client);
-void	Cmd_Listavail(u_int8_t field, client_t *client);
-void	Cmd_Wings(u_int8_t mode, client_t *client);
-void	Cmd_Hmack(client_t *client, const char *command, u_int8_t tank);
-void	Cmd_Commandos(client_t *client);
-void	Cmd_Info(char *nick, client_t *client);
-void	Cmd_Ban(char *nick, u_int8_t newvalue, client_t *client);
-void	Cmd_Gclear(char *nick, client_t *client);
-void	Cmd_Shanghai(u_int8_t *buffer, client_t *client);
-void	Cmd_View(client_t *victim, client_t *client);
-void	Cmd_Minen(u_int32_t dist, double angle, client_t *client);
-void	Cmd_Tanks(char *field, client_t *client);
-void	Cmd_Pos(u_int32_t freq, client_t *client, client_t *peek);
-void	Cmd_Thanks(char *argv[], u_int8_t argc, client_t *client);
-void	Cmd_Restore(u_int8_t field, client_t *client);
-void	Cmd_Destroy(u_int8_t field, int32_t time, client_t *client);
-void	Cmd_ChangeCVRoute(double angle, u_int16_t distance, client_t *client);
-void	Cmd_UTC(client_t *client);
-void	Cmd_Lives(char *nick, int8_t amount, client_t *client);
-void	Cmd_Reload(client_t *client);
-//void	Cmd_CheckWaypoints(client_t *client);
-void	Cmd_Flare(client_t *client);
-void	Cmd_Rocket(int32_t y, double angle, double angle2, client_t *client); // debug
-void	Cmd_Sink(u_int16_t a, u_int16_t b, client_t *client); // debug
-void	Cmd_CheckBuildings(client_t *client); // debug
-
-// scores.c
-
-void	ScoresEvent(u_int16_t event, client_t *client, int32_t misc);
-double	ScorePlaneCost(client_t *client);
-double	ScoreFixPlaneCost(double plane_life, double plane_cost);
-double	ScorePlaneTransportCost(client_t *client);
-double	ScorePilotTransportCost(client_t *client);
-double	ScoreFlightTimeCost(client_t *client);
-double	ScoreDamageCost(client_t *client);
-double	ScorePlaneLife(client_t *client);
-void	ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t totalhits, client_t *client);
-int8_t	ScoresCheckKiller(client_t *client, int32_t *maneuver);
-u_int8_t ScoresCheckMedals(client_t *client);
-u_int8_t ScoresAddMedal(u_int8_t deed, u_int8_t medal, u_int16_t value, client_t *client);
-u_int8_t ScoresCheckCaptured(client_t *client);
-void	ScoresCreate(client_t *client);
-void	ResetScores(void);
-void	BackupScores(u_int8_t collect_type);
-double	ScoreTechnologyCost(client_t *client);
-double	GetBuildingCost(u_int8_t type);
-double	GetAmmoCost(u_int8_t type);
-double	GetFieldCost(u_int8_t field);
-void	ScoreFieldCapture(u_int8_t field);
-double	ScorePieceDamage(int8_t killer, double event_cost, client_t *client);
-void	ScoreLoadCosts(void);
-
-// Variables
-
 extern	arena_t		*arena;			/// arena settings
 extern	arenaslist_t	arenaslist[MAX_ARENASLIST];	/// list of online arenas
 extern	client_t	*clients;		/// list of clients
@@ -2727,7 +2273,7 @@ extern	var_t		*wb3;			/// enable WB3 protocol
 extern	var_t		*wbversion;		/// WB Version
 extern	var_t		*weather;		/// configure weather
 extern	var_t		*whitelist;		/// white list
-extern	var_t		*wingstrikerng;	/// 
+extern	var_t		*wingstrikerng;	///
 extern	var_t		*xwindvelocity;	///
 extern	var_t		*ywindvelocity;	///
 extern	var_t		*zwindvelocity;	///

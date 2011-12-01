@@ -5,6 +5,11 @@
  *      Author: franz
  */
 
+#include "arena.h"
+#include "client.h"
+#include "common.h"
+#include "drone.h"
+#include "net.h"
 #include "Ship.h"
 
 u_int16_t Ship::shipCount;

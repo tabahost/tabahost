@@ -20,7 +20,11 @@
  *
  ***/
 
-#include "shared.h"
+#include "arena.h"
+#include "client.h"
+#include "common.h"
+#include "game.h"
+#include "vars.h"
 
 var_t *ackgrowco; // extern
 var_t *ackshrinkco; // extern

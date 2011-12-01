@@ -5,6 +5,11 @@
  *      Author: franz
  */
 
+#include "arena.h"
+#include "client.h"
+#include "common.h"
+#include "drone.h"
+#include "game.h"
 #include "Vehicle.h"
 
 u_int16_t Vehicle::vehicleCount;

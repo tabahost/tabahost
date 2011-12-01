@@ -20,8 +20,18 @@
  * 
  ***/
 
-#include "Ship.h"
+#include "arena.h"
+#include "client.h"
+#include "commands.h"
+#include "common.h"
+#include "drone.h"
+#include "game.h"
+#include "net.h"
+#include "scores.h"
 #include "shared.h"
+#include "Ship.h"
+#include "sys.h"
+#include "vars.h"
 
 /**
  Cmd_LoadBatch

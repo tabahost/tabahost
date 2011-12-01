@@ -20,7 +20,10 @@
  * 
  ***/
 
-#include "shared.h"
+#include "common.h"
+#include "sys.h"
+#include "vars.h"
+#include "webserver.h"
 
 #ifdef _WIN32
 #include "mmsystem.h"
