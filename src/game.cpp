@@ -7494,7 +7494,7 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if(!setjmp(debug_buffer))
 	{
-		if(dmgprobe < (int32_t) GetBuildingImunity(building->type, NULL))
+		if(dmgprobe < (int32_t) GetBuildingImmunity(building->type, NULL))
 			return 0;
 	}
 	else

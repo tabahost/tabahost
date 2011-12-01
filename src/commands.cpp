@@ -1888,7 +1888,7 @@ void Cmd_Decl(char *argv[], u_int8_t argc, client_t *client)
 					<= FIELD_SUBMARINE) || (build->fieldtype >= FIELD_WB3POST)) ? 'f' : 'c', build->field, build->posx, build->posy, build->posz,
 					build->infield ? "IN" : "OUT");
 			PPrintf(client, RADIO_LIGHTYELLOW, "Hitpoints: %d, APstop: %d, Imunity: %d", build->armor, GetBuildingAPstop(build->type, client),
-					GetBuildingImunity(build->type, client));
+					GetBuildingImmunity(build->type, client));
 		}
 	}
 	else

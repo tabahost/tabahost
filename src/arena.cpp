@@ -774,7 +774,7 @@ u_int32_t GetBuildingAPstop(u_int8_t type, client_t *client)
  Get the value of imunity for given structure
  */
 
-u_int32_t GetBuildingImunity(u_int8_t type, client_t *client)
+u_int32_t GetBuildingImmunity(u_int8_t type, client_t *client)
 {
 	if(type >= BUILD_MAX)
 	{
