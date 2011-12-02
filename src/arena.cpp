@@ -39,9 +39,8 @@
 #include "vars.h"
 
 /**
- GetBuilding
-
- Returns a pointer to building if found or NULL
+ * @param 	id
+ * @return	pointer to building if found or NULL
  */
 
 building_t *GetBuilding(u_int16_t id)
@@ -83,9 +82,8 @@ building_t *GetBuilding(u_int16_t id)
 }
 
 /**
- GetFieldType
-
- Returns type of a field
+ * @param	type
+ * @return	type of a field
  */
 
 const char *GetFieldType(u_int8_t type)
@@ -136,9 +134,8 @@ const char *GetFieldType(u_int8_t type)
 }
 
 /**
- GetBuildingType
-
- Returns name of a building
+ * @param	type
+ * @return	name of a building
  */
 
 const char *GetBuildingType(u_int16_t type)
@@ -221,9 +218,10 @@ const char *GetBuildingType(u_int16_t type)
 }
 
 /**
- LoadArenaStatus
-
- Load arena status (fields, CV, city, etc)
+ * @param 	filename
+ * @param 	client
+ * @param 	reset
+ * @details Load arena status (fields, CV, city, etc)
  */
 
 void LoadArenaStatus(const char *filename, client_t *client, u_int8_t reset)
@@ -458,9 +456,9 @@ void LoadArenaStatus(const char *filename, client_t *client, u_int8_t reset)
 }
 
 /**
- SaveArenaStatus
-
- Save arena status (fields, CV, city, etc)
+ * @param filename
+ * @param client
+ * @details Save arena status (fields, CV, city, etc)
  */
 
 void SaveArenaStatus(const char *filename, client_t *client)
@@ -572,9 +570,7 @@ void SaveArenaStatus(const char *filename, client_t *client)
 }
 
 /**
- SaveWebsiteData
-
- Save website data
+ * Save website data
  */
 
 void SaveWebsiteData(void)
@@ -653,9 +649,7 @@ void SaveWebsiteData(void)
 }
 
 /**
- LoadPlanesPool
-
- Load planes pool
+ * Load planes pool
  */
 
 void LoadPlanesPool(const char *filename, client_t *client)
@@ -701,9 +695,7 @@ void LoadPlanesPool(const char *filename, client_t *client)
 }
 
 /**
- SavePlanesPool
-
- Save planes pool
+ * Save planes pool
  */
 
 void SavePlanesPool(const char *filename, client_t *client)
@@ -735,9 +727,9 @@ void SavePlanesPool(const char *filename, client_t *client)
 }
 
 /**
- GetBuildingArmor
-
- Get the value of armor for given structure
+ * @param  type
+ * @param  client
+ * @return the value of armor for given structure
  */
 
 u_int32_t GetBuildingArmor(u_int8_t type, client_t *client)
@@ -752,9 +744,9 @@ u_int32_t GetBuildingArmor(u_int8_t type, client_t *client)
 }
 
 /**
- GetBuildingAPstop
-
- Get the value of AP-stop for given structure
+ * @param  type
+ * @param  client
+ * @return the value of AP-stop for given structure
  */
 
 u_int32_t GetBuildingAPstop(u_int8_t type, client_t *client)
@@ -769,9 +761,9 @@ u_int32_t GetBuildingAPstop(u_int8_t type, client_t *client)
 }
 
 /**
- GetBuildingImunity
-
- Get the value of imunity for given structure
+ * @param   type
+ * @param   client
+ * @return  the value of immunity for given structure
  */
 
 u_int32_t GetBuildingImmunity(u_int8_t type, client_t *client)
@@ -786,9 +778,7 @@ u_int32_t GetBuildingImmunity(u_int8_t type, client_t *client)
 }
 
 /**
- SendMapDots
-
- Send dots at radar
+ * Send dots at radar
  */
 
 void SendMapDots(void)
@@ -870,9 +860,10 @@ void SendMapDots(void)
 }
 
 /**
- SeeEnemyDot
-
- Check if enemy dot is in radar range
+ * @param client
+ * @param country
+ * @return
+ * @details	Check if enemy dot is in radar range
  */
 
 u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
@@ -1018,9 +1009,8 @@ u_int8_t SeeEnemyDot(client_t *client, u_int8_t country)
 }
 
 /**
- ClearMapDots
-
- Clear dots at radar
+ * @param client
+ * @details Clear dots at radar
  */
 
 void ClearMapDots(client_t *client)
@@ -1037,9 +1027,8 @@ void ClearMapDots(client_t *client)
 }
 
 /**
- GetPlaneName
-
- Get plane name from given number
+ * @param  plane
+ * @return plane name from given number
  */
 
 const char *GetPlaneName(u_int16_t plane)
@@ -1051,9 +1040,8 @@ const char *GetPlaneName(u_int16_t plane)
 }
 
 /**
- GetSmallPlaneName
-
- Get plane abreviated name from given number
+ * @param  plane
+ * @return plane abreviated name from given number
  */
 
 const char *GetSmallPlaneName(u_int16_t plane)
@@ -1065,9 +1053,8 @@ const char *GetSmallPlaneName(u_int16_t plane)
 }
 
 /**
- GetPlaneDir
-
- Get plane dir name from given number
+ * @param  plane
+ * @return plane dir name from given number
  */
 
 const char *GetPlaneDir(u_int16_t plane)
@@ -1106,9 +1093,8 @@ const char *GetPlaneDir(u_int16_t plane)
 }
 
 /**
- UpdateRPS
-
- Update field with new planes
+ * @param   minutes
+ * @details Update field with new planes
  */
 
 void UpdateRPS(u_int16_t minutes)
@@ -1225,9 +1211,8 @@ void UpdateRPS(u_int16_t minutes)
 }
 
 /**
- SendRPS
-
- Send available planes for actual field
+ * @param   client
+ * @details Send available planes for actual field
  */
 
 void SendRPS(client_t *client)
@@ -1259,9 +1244,8 @@ void SendRPS(client_t *client)
 }
 
 /**
- WB3SendAcks
-
- Send available acks for actual field
+ * @param   client
+ * @details Send available acks for actual field
  */
 
 void WB3SendAcks(client_t *client)
@@ -1334,9 +1318,15 @@ void WB3SendAcks(client_t *client)
 }
 
 /**
- AddBomb
-
- Adds a new bomb to bombs array
+ * @param id
+ * @param destx
+ * @param desty
+ * @param destz
+ * @param type
+ * @param speed
+ * @param timer
+ * @param client
+ * @details Adds a new bomb to bombs array
  */
 
 void AddBomb(u_int16_t id, int32_t destx, int32_t desty, int32_t destz, u_int8_t type, int16_t speed, u_int32_t timer, client_t *client)
@@ -1375,9 +1365,9 @@ void AddBomb(u_int16_t id, int32_t destx, int32_t desty, int32_t destz, u_int8_t
 }
 
 /**
- LoadRPS
-
- Load RPS from file
+ * @param   path
+ * @param   client
+ * @details Load RPS from file
  */
 
 void LoadRPS(const char *path, client_t *client)
@@ -1459,10 +1449,10 @@ void LoadRPS(const char *path, client_t *client)
 }
 
 /**
- SaveRPS
-
- Save curren RPS in file
- TODO: FIXME: Function not used for a while
+ * @param   path
+ * @param   client
+ * @details Save curren RPS in file
+ * @todo    TODO:Function not used for a while
  */
 
 void SaveRPS(const char *path, client_t *client)
@@ -1505,9 +1495,8 @@ void SaveRPS(const char *path, client_t *client)
 }
 
 /**
- ShowRPS
-
- Show RPS configuration
+ * @param   client
+ * @details Show RPS configuration
  */
 
 void ShowRPS(client_t *client)
@@ -1533,9 +1522,9 @@ void ShowRPS(client_t *client)
 }
 
 /**
- LoadMapcycle
-
- Load Mapcycle from file
+ * @param   path
+ * @param   client
+ * @details Load Mapcycle from file
  */
 
 void LoadMapcycle(const char *path, client_t *client)
@@ -1595,9 +1584,9 @@ void LoadMapcycle(const char *path, client_t *client)
 }
 
 /**
- IsFighter
-
- Check if plane is fighter
+ * @param   client
+ * @return
+ * @details Check if plane is fighter
  */
 
 int8_t IsFighter(client_t *client, ...)
@@ -1655,9 +1644,9 @@ int8_t IsFighter(client_t *client, ...)
 
 
 /**
- IsBomber
-
- Check if plane is Buffer
+ * @param   client
+ * @return
+ * @details Check if plane is a Bomber
  */
 
 int8_t IsBomber(client_t *client, ...)
@@ -1708,9 +1697,9 @@ int8_t IsBomber(client_t *client, ...)
 }
 
 /**
- IsCargo
-
- Check if plane is a Cargo Plane / Vehicle
+ * @param   client
+ * @return
+ * @details Check if plane is a Cargo Plane / Vehicle
  */
 
 int8_t IsCargo(client_t *client, ...)
@@ -1768,9 +1757,9 @@ int8_t IsCargo(client_t *client, ...)
 }
 
 /**
- IsGround
-
- Check if plane is a Ground Vehicle
+ * @param   client
+ * @return
+ * @details Check if plane is a Ground Vehicle
  */
 
 int8_t IsGround(client_t *client, ...)
@@ -1821,9 +1810,9 @@ int8_t IsGround(client_t *client, ...)
 }
 
 /**
- IsShip
-
- Check if plane is a Ship
+ * @param   client
+ * @return
+ * @details Check if plane is a Ship
  */
 
 int8_t IsShip(client_t *client, ...)
@@ -1874,9 +1863,9 @@ int8_t IsShip(client_t *client, ...)
 }
 
 /**
- HaveGunner
-
- Check if plane is have gunners
+ * @param   plane
+ * @return
+ * @details Check if plane is have gunners
  */
 
 int8_t HaveGunner(u_int16_t plane)
@@ -1922,6 +1911,12 @@ int8_t HaveGunner(u_int16_t plane)
 			return 0;
 	}
 }
+
+/**
+ * @param   client
+ * @return
+ * @details Load Ammo from DB
+ */
 
 void LoadAmmo(client_t *client)
 {
@@ -1982,9 +1977,9 @@ void LoadAmmo(client_t *client)
 }
 
 /**
- LoadDamageModel
-
- Load planes/structs model from file
+ * @param   client
+ * @return
+ * @details Load planes/structs model from file
  */
 
 void LoadDamageModel(client_t *client)
@@ -2340,9 +2335,9 @@ void LoadDamageModel(client_t *client)
 }
 
 /**
- SaveDamageModel
-
- Save planes/structs damage model from file
+ * @param   client
+ * @return
+ * @details Save planes/structs damage model to file
  */
 
 void SaveDamageModel(client_t *client, char *row)
@@ -2460,9 +2455,10 @@ void SaveDamageModel(client_t *client, char *row)
 }
 
 /**
- CaptureField
-
- Captures the Field
+ * @param   field
+ * @param   client
+ * @return
+ * @details Captures the Field
  */
 
 void CaptureField(u_int8_t field, client_t *client)
@@ -2556,9 +2552,7 @@ void CaptureField(u_int8_t field, client_t *client)
 }
 
 /**
- TimetoNextArena
-
- Returns time left in days to next arena
+ * @return  time left in days to next arena
  */
 
 u_int16_t TimetoNextArena(void)
@@ -2603,9 +2597,7 @@ u_int16_t TimetoNextArena(void)
 }
 
 /**
- InitArena
-
- Initializes arena array
+ * Initializes arena array
  */
 
 void InitArena(void)
@@ -2643,9 +2635,10 @@ void InitArena(void)
 }
 
 /**
- ChangeArena
-
- Changes arena, duh :)
+ * @param map
+ * @param client
+ * @return
+ * @detail Changes arena
  */
 
 void ChangeArena(char *map, client_t *client)
@@ -2760,9 +2753,7 @@ void ChangeArena(char *map, client_t *client)
 }
 
 /**
- CalcTimemultBasedOnTime
-
- Calculate the timemult
+ * Calculate the timemult
  */
 
 void CalcTimemultBasedOnTime(void)
@@ -2780,11 +2771,7 @@ void CalcTimemultBasedOnTime(void)
 }
 
 /**
- NewWar
-
- Reset/Backup Scores
- Reset mapcycle
- Clear all .score files
+ * Reset/Backup Scores, Reset mapcycle, Clear all .score files
  */
 
 void NewWar(void)
@@ -2801,10 +2788,15 @@ void NewWar(void)
 }
 
 /**
- NearestField
-
- Returns nearest field/city array ID of != country
+ * @param posx
+ * @param posy
+ * @param country
+ * @param city
+ * @param cvs
+ * @param *pdist
+ * @return nearest field/city array ID of != country
  */
+
 
 int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city, u_int8_t cvs, u_int32_t *pdist)
 {
@@ -2872,9 +2864,9 @@ int32_t NearestField(int32_t posx, int32_t posy, u_int8_t country, u_int8_t city
 }
 
 /**
- ReducePlanes
-
- Reduce plane pool after hangar destruction
+ * @param  field
+ * @return
+ * @detail Reduce plane pool after hangar destruction
  */
 
 void ReducePlanes(u_int8_t field)
@@ -2908,9 +2900,9 @@ void ReducePlanes(u_int8_t field)
 }
 
 /**
- IncreaseAcksReup
-
- Increase Ack Reup time after warehouse destruction
+ * @param field
+ * @return
+ * @detail Increase Ack Reup time after warehouse destruction
  */
 
 void IncreaseAcksReup(u_int8_t field)
@@ -2936,9 +2928,9 @@ void IncreaseAcksReup(u_int8_t field)
 }
 
 /**
- IsVitalBuilding
-
- Returns true if building is essential to close a field
+ * @param building
+ * @param notot
+ * @return true if building is essential to close a field
  */
 
 u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
@@ -3040,9 +3032,8 @@ u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 }
 
 /**
- GetFieldParas
-
- Get numer of paras needed to capture by field type
+ * @param type
+ * @return number of paras needed to capture by field type
  */
 
 u_int8_t GetFieldParas(u_int8_t type)
@@ -3074,6 +3065,11 @@ u_int8_t GetFieldParas(u_int8_t type)
 			return parassmall->value;
 	}
 }
+
+/**
+ * @param field
+ * @return tonnage to close a field
+ */
 
 double GetTonnageToClose(u_int8_t field)
 {
@@ -3146,6 +3142,11 @@ double GetTonnageToClose(u_int8_t field)
 		}
 	}
 }
+
+/**
+ * @param fieldtype
+ * @return field radius
+ */
 
 int32_t GetFieldRadius(u_int8_t fieldtype)
 {
