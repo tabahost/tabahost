@@ -3645,7 +3645,7 @@ void SendFileSeq7(client_t *client)
 
 int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 {
-	u_int8_t i;
+	u_int8_t i, j;
 	u_int16_t n;
 	char file[128];
 	FILE *fp;
@@ -3684,7 +3684,7 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 		//			buffer[0] = Com_WB3ntoh(buffer[0]);
 		//		}
 
-		n = (buffer[0] * 0x100) | buffer[1];
+		n = Com_Buffer16(&buffer[0]);
 
 		Com_WBntoh(&n);
 
@@ -3941,6 +3941,22 @@ int ProcessPacket(u_int8_t *buffer, u_int16_t len, client_t *client)
 						Com_Printf(VERBOSE_WARNING, "Client tried to login without a callsign\n");
 						RemoveClient(client);
 						return 0;
+					}
+
+					i = buffer[2];
+
+					if(i <= 64)
+					{
+						Com_Printf(VERBOSE_DEBUG, "Unk1 %d\n", Com_Buffer32(&buffer[3+i]));
+						Com_Printf(VERBOSE_DEBUG, "Unk2 %d\n", Com_Buffer32(&buffer[7+i]));
+						Com_Printf(VERBOSE_DEBUG, "WB Version %d\n", Com_Buffer32(&buffer[11+i]));
+
+						client->wbversion = Com_Buffer32(&buffer[11+i]);
+
+						j = buffer[15+i];
+						buffer[16+i+j] = '\0';
+
+						Com_Printf(VERBOSE_DEBUG, "Unk3 %s\n", &(buffer[16+i+j]));
 					}
 
 					//SendArenaRules(client);

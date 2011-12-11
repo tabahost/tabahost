@@ -1,4 +1,4 @@
-#Thu Dec 01 19:04:34 WET 2011
+#Sun Dec 11 03:09:39 WET 2011
 eclipse.preferences.version=1
 environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1362660700=
 environment/project/cdt.managedbuild.config.gnu.cygwin.exe.debug.1362660700/PATH/delimiter=;
@@ -15,7 +15,7 @@ environment/project/cdt.managedbuild.config.gnu.cygwin.exe.release.1746220018/ap
 indexer/filesToParseUpFront=stdarg.h, stddef.h, sys/types.h
 indexer/indexAllFiles=true
 indexer/indexOnOpen=false
-indexer/indexUnusedHeadersWithAlternateLang=false
+indexer/indexUnusedHeadersWithAlternateLang=true
 indexer/indexUnusedHeadersWithDefaultLang=true
 indexer/indexerId=org.eclipse.cdt.core.fastIndexer
 indexer/skipFilesLargerThanMB=8

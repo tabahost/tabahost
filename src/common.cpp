@@ -1655,6 +1655,28 @@ int Com_Strncmp(const char *s1, const char *s2, int n)
 }
 
 /**
+ Com_Buffer16
+
+ Get a stream of bytes and return a 16 bits value
+ */
+
+u_int16_t Com_Buffer16(u_int8_t *buffer)
+{
+	return (u_int16_t)(buffer[0] * 0x100) | buffer[1];
+}
+
+/**
+ Com_Buffer32
+
+ Get a stream of bytes and return a 32 bits value
+ */
+
+u_int32_t Com_Buffer32(u_int8_t *buffer)
+{
+	return (u_int32_t)(buffer[0] * 0x1000000) | (buffer[1] * 0x10000) | (buffer[2] * 0x100) | buffer[3];
+}
+
+/**
  Com_Strcmp
 
  Compares strings case sensitive

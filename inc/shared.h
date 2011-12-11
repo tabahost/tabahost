@@ -824,6 +824,7 @@ typedef struct client_s
 
 	u_int16_t	ctrid;			// player's country ID
 	u_int32_t	hdserial;		// player's HD serial
+	u_int32_t	wbversion;		// player's WB Version
 
 	u_int8_t	ready;			// if client is ready to play
 	u_int8_t	login;			// if != 0, in login process

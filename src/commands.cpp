@@ -5160,7 +5160,7 @@ void Cmd_Info(char *nick, client_t *client)
 		PPrintf(client, RADIO_LIGHTYELLOW, "Situation:%s Plane:%s Mod:%s ", info->inflight ? IsGround(info) ? "In Ground" : "In Flight"
 				: info->field ? !info->hq ? "Tower" : "HQ" : "Connecting", GetPlaneName(info->plane), info->attr == 2 ? "OP" : info->attr == 1 ? "Admin"
 				: "Normal");
-		PPrintf(client, RADIO_LIGHTYELLOW, "Squadron:%s", info->squadron ? Com_SquadronName(info->squadron) : "None");
+		PPrintf(client, RADIO_LIGHTYELLOW, "Squadron:%s, WB version %d", info->squadron ? Com_SquadronName(info->squadron) : "None", info->wbversion);
 	}
 	else
 	{

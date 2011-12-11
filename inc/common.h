@@ -77,6 +77,8 @@ double	Com_Atof(const char *string);
 char	*Com_MyRow(const char *string);
 char	*Com_SquadronName(u_int32_t owner);
 int		Com_Strncmp(const char *s1, const char *s2, int n);
+u_int16_t Com_Buffer16(u_int8_t *buffer);
+u_int32_t Com_Buffer32(u_int8_t *buffer);
 int		Com_Strcmp(const char *s1, const char *s2);
 void	Com_WBntoh(u_int16_t *packetid);
 u_int16_t Com_WBhton(u_int16_t packetid);
