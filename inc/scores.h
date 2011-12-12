@@ -54,5 +54,6 @@ double	GetFieldCost(u_int8_t field);
 void	ScoreFieldCapture(u_int8_t field);
 double	ScorePieceDamage(int8_t killer, double event_cost, client_t *client);
 void	ScoreLoadCosts(void);
+double	ScoreGetSimple(u_int32_t part);
 
 #endif /* SCORES_H_ */

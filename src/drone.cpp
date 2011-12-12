@@ -1272,27 +1272,32 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 			}
 		}
 
-		AddPlaneDamage(part, 30, 0, NULL, NULL, dest);
-
+		j = -1;
 		if(!(dest->status_damage & STATUS_VITALS))
 		{
 			j = AddKiller(dest, source);
 
-			if(j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
+			if(economy->value)
 			{
-				sdamage = (double) (10.0 * logf(1.0 + 100.0 * 40.0 / (double) (((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+				if(j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
+				{
+					sdamage = (double) (10.0 * logf(1.0 + 100.0 * 40.0 / (double) (((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
 
-				if(sdamage >= 0)
-				{
-					dest->hitby[j].damage += sdamage;
-				}
-				else
-				{
-					Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0
-							: dest->armor.points[part]));
+					if(sdamage >= 0)
+					{
+						dest->hitby[j].damage += sdamage;
+					}
+					else
+					{
+						Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0
+								: dest->armor.points[part]));
+					}
 				}
 			}
 		}
+
+		AddPlaneDamage(part, 30, 0, NULL, NULL, dest, j);
+
 
 		SendPings(1, 143, dest);
 	}
@@ -2018,30 +2023,35 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 
 								SendPings(1, type, &clients[i]);
 
-								AddPlaneDamage(part, munition->he, 0, NULL, NULL, &clients[i]);
-
-								PPrintf(&clients[i], RADIO_YELLOW, "You got hit by %s's flak", client ? client->longnick : "-HOST-");
-
+								killer = -1;
 								if(!(clients[i].status_damage & STATUS_VITALS))
 								{
 									killer = AddKiller(&clients[i], client);
 
-									if(killer >= 0 && killer < MAX_HITBY && part >= 0 && part < 32)
+									if(economy->value)
 									{
-										sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) munition->he / (double) (((clients[i].armor.points[PLACE_CENTERFUSE]
-												<= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]) + 1.0)));
+										if(killer >= 0 && killer < MAX_HITBY && part >= 0 && part < 32)
+										{
+											sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) munition->he / (double) (((clients[i].armor.points[part]
+												<= 0) ? 0 : clients[i].armor.points[part]) + 1.0)));
 
-										if(sdamage >= 0)
-										{
-											clients[i].hitby[killer].damage += sdamage;
-										}
-										else
-										{
-											Com_Printf(VERBOSE_WARNING, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he,
-													((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
+											if(sdamage >= 0)
+											{
+												clients[i].hitby[killer].damage += sdamage;
+
+											}
+											else
+											{
+												Com_Printf(VERBOSE_WARNING, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he,
+														((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
+											}
 										}
 									}
 								}
+
+								AddPlaneDamage(part, munition->he, 0, NULL, NULL, &clients[i], killer);
+
+								PPrintf(&clients[i], RADIO_YELLOW, "You got hit by %s's flak", client ? client->longnick : "-HOST-");
 							}
 						}
 						else

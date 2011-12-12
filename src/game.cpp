@@ -6092,13 +6092,17 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 	if(!pvictim->inuse)
 		return;
 
+	killer = -1;
 	if(!(pvictim->status_damage & STATUS_VITALS))
 	{
 		if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 			killer = AddKiller(pvictim, client);
 
-		if(killer >= 0)
-			pvictim->hitby[killer].damage += munition->he;
+		if(economy->value)
+		{
+			if(killer >= 0 && killer < MAX_HITBY)
+				pvictim->hitby[killer].damage += munition->he;
+		}
 	}
 
 	if(client != pvictim)
@@ -6111,7 +6115,7 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 	if(gunstats->value)
 	{
 		memset(heb, 0, sizeof(heb));
-		AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, heb, NULL, pvictim);
+		AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, heb, NULL, pvictim, killer);
 
 		if(gunstats->value > 1 && client->gunstat && (client != pvictim))
 		{
@@ -6135,7 +6139,7 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 	}
 	else
 	{
-		AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, NULL, NULL, pvictim);
+		AddPlaneDamage(PLACE_CENTERFUSE, munition->he, 0, NULL, NULL, pvictim, killer);
 	}
 	//	}
 }
@@ -6522,6 +6526,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		pvictim->hitstakenstat[munition->caliber - 1] += hits;
 	}
 
+	killer = -1;
 	if(!(pvictim->status_damage & STATUS_VITALS))
 	{
 		if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
@@ -6666,11 +6671,11 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 			{
 				if(gunstats->value)
 				{
-					ap = AddPlaneDamage(needle[j], he, ap, (heb + strlen(heb)), (apb + strlen(apb)), pvictim);
+					ap = AddPlaneDamage(needle[j], he, ap, (heb + strlen(heb)), (apb + strlen(apb)), pvictim, killer);
 				}
 				else
 				{
-					ap = AddPlaneDamage(needle[j], he, ap, NULL, NULL, pvictim);
+					ap = AddPlaneDamage(needle[j], he, ap, NULL, NULL, pvictim, killer);
 				}
 			}
 			else
@@ -6687,18 +6692,12 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				damage = 0;
 			}
 
-			if(!(pvictim->status_damage & STATUS_VITALS))
+			if(economy->value)
 			{
 				if(needle[j] >= 0 && needle[j] < MAX_PLACE && killer >= 0 && killer < MAX_HITBY)
 				{
 					sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) damage / (double) (((pvictim->armor.points[needle[j]] <= 0) ? 0
-							: pvictim->armor.points[needle[j]]) + 1.0)));
-
-					//				if(pvictim->drone == DRONE_COMMANDOS)
-					//				{
-					//					Com_Printf(VERBOSE_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
-					//					sdamage = 59.0;
-					//				}
+						: pvictim->armor.points[needle[j]]) + 1.0)));
 
 					if(sdamage >= 0)
 					{
@@ -6757,7 +6756,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		}
 	}
 
-	if(!(pvictim->status_damage & STATUS_VITALS))
+	if(economy->value)
 	{
 		if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 		{
@@ -6911,6 +6910,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		he /= 3;
 	}
 
+	killer = -1;
 	if(!(pvictim->status_damage & STATUS_VITALS))
 	{
 		if(!(client == pvictim && hardhitplane->munition < 99 && hardhitplane->munition > 55)) // avoid bomb killers
@@ -6919,19 +6919,22 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 			{
 				killer = AddKiller(pvictim, client);
 
-				if(hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
+				if(economy->value)
 				{
-					sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) he / (double) (((pvictim->armor.points[hardhitplane->place] <= 0) ? 0
-							: pvictim->armor.points[hardhitplane->place]) + 1.0)));
+					if(hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
+					{
+						sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) he / (double) (((pvictim->armor.points[hardhitplane->place] <= 0) ? 0
+								: pvictim->armor.points[hardhitplane->place]) + 1.0)));
 
-					if(sdamage >= 0)
-					{
-						pvictim->hitby[killer].damage += sdamage;
-					}
-					else
-					{
-						Com_Printf(VERBOSE_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he,
-								((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
+						if(sdamage >= 0)
+						{
+							pvictim->hitby[killer].damage += sdamage;
+						}
+						else
+						{
+							Com_Printf(VERBOSE_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he,
+									((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
+						}
 					}
 				}
 			}
@@ -6947,7 +6950,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	if(gunstats->value)
 	{
 		memset(heb, 0, sizeof(heb));
-		AddPlaneDamage(hardhitplane->place, he, 0, heb, NULL, pvictim);
+		AddPlaneDamage(hardhitplane->place, he, 0, heb, NULL, pvictim, killer);
 
 		if(gunstats->value > 1 && client->gunstat && (client != pvictim))
 		{
@@ -6971,10 +6974,10 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 	}
 	else
 	{
-		AddPlaneDamage(hardhitplane->place, he, 0, NULL, NULL, pvictim);
+		AddPlaneDamage(hardhitplane->place, he, 0, NULL, NULL, pvictim, killer);
 	}
 
-	if(!(pvictim->status_damage & STATUS_VITALS))
+	if(economy->value)
 	{
 		if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 		{
@@ -7178,44 +7181,44 @@ munition_t *GetMunition(u_int8_t id)
  Add damage to given and parent parts, returns AP left
  */
 
-u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, char *pap, client_t *client)
+u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, char *pap, client_t *victim, int8_t killer)
 {
 	int32_t apabsorb, dmgprobe;
 	//static u_int8_t depth = 0;
 
 	//	if(++depth > 10)
 	//	{
-	//		Com_Printf(VERBOSE_DEBUG, "AddPlaneDamage() Possible Infinite Loop, %s - %d\n", client, client->armor.parent[place]);
-	//		PPrintf(client, RADIO_YELLOW, "Damage Model error, please inform admins");
+	//		Com_Printf(VERBOSE_DEBUG, "AddPlaneDamage() Possible Infinite Loop, %s - %d\n", victim, victim->armor.parent[place]);
+	//		PPrintf(victim, RADIO_YELLOW, "Damage Model error, please inform admins");
 	//		depth--;
 	//		return 0;
 	//	}
-	if(!client)
+	if(!victim)
 	{
-		Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(client) == NULL\n");
+		Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(victim) == NULL\n");
 		return 0;
 	}
 
 	if(place >= MAX_PLACE)
 	{
-		PPrintf(client, RADIO_LIGHTYELLOW, "Unknown hit place 0x%X", place);
+		PPrintf(victim, RADIO_LIGHTYELLOW, "Unknown hit place 0x%X", place);
 		//		depth--;
 		return 0;
 	}
 
-	if(client->armor.apstop[place] < 0)
+	if(victim->armor.apstop[place] < 0)
 	{
-		Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apstop) < 0 place %d plane %d\n", place, client->plane);
+		Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apstop) < 0 place %d plane %d\n", place, victim->plane);
 		return 0;
 	}
 
 	if(!setjmp(debug_buffer))
 	{
-		apabsorb = (ap > client->armor.apstop[place]) ? client->armor.apstop[place] : ap;
+		apabsorb = (ap > victim->armor.apstop[place]) ? victim->armor.apstop[place] : ap;
 		if(apabsorb < 0)
 		{
-			Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apabsorb) < 0 hitpoints %d apstop %d, place %u at line %u\n", client->armor.points[place],
-					client->armor.apstop[place], place, __LINE__);
+			Com_Printf(VERBOSE_DAMAGE, "AddPlaneDamage(apabsorb) < 0 hitpoints %d apstop %d, place %u at line %u\n", victim->armor.points[place],
+					victim->armor.apstop[place], place, __LINE__);
 			apabsorb = 0;
 		}
 		dmgprobe = he + apabsorb;
@@ -7228,33 +7231,33 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 	}
 	else
 	{
-		DebugClient(__FILE__, __LINE__, TRUE, client);
+		DebugClient(__FILE__, __LINE__, TRUE, victim);
 		return 0;
 	}
 
-	if(!(dmgprobe < client->armor.imunity[place])) // hit makes damage
+	if(!(dmgprobe < victim->armor.imunity[place])) // hit makes damage
 	{
-		if(dmgprobe >= client->armor.points[place]) // hit destroy part
+		if(dmgprobe >= victim->armor.points[place]) // hit destroy part
 		{
 			if(he)
 			{
-				he = dmgprobe - client->armor.points[place];
+				he = dmgprobe - victim->armor.points[place];
 			}
 
-			if(client->armor.points[place])
+			if(victim->armor.points[place])
 			{
 				if(!setjmp(debug_buffer))
 				{
 					if(place >= PLACE_LFUEL && place <= PLACE_CENTERFUEL) // fuel will leak
 					{
-						if(!client->fueltimer)
-							client->fueltimer = 1;
+						if(!victim->fueltimer)
+							victim->fueltimer = 1;
 					}
 
-					client->armor.points[place] = 0;
-					SendForceStatus((1 << place), client->status_status, client);
+					victim->armor.points[place] = 0;
+					SendForceStatus((1 << place), victim->status_status, victim);
 
-					if(!client->inuse || !client->inflight) // drone killed
+					if(!victim->inuse || !victim->inflight) // drone killed
 					{
 						// depth--;
 						return 0;
@@ -7262,7 +7265,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 				}
 				else
 				{
-					DebugClient(__FILE__, __LINE__, TRUE, client);
+					DebugClient(__FILE__, __LINE__, TRUE, victim);
 					return 0;
 				}
 			}
@@ -7270,32 +7273,41 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 			{
 				if(!setjmp(debug_buffer))
 				{
-					if(client->fueltimer > 1000)
+					if(victim->fueltimer > 1000)
 					{
 						if(place == PLACE_LFUEL)
 						{
-							client->armor.points[PLACE_LWING] = 0;
-							SendForceStatus((1 << PLACE_LWING), client->status_status, client);
+							place = PLACE_LWING;
+							victim->armor.points[place] = 0;
+							SendForceStatus((1 << place), victim->status_status, victim);
 						}
 						else if(place == PLACE_RFUEL)
 						{
-							client->armor.points[PLACE_RWING] = 0;
-							SendForceStatus((1 << PLACE_RWING), client->status_status, client);
+							place = PLACE_RWING;
+							victim->armor.points[place] = 0;
+							SendForceStatus((1 << place), victim->status_status, victim);
 						}
 						else if(place == PLACE_CENTERFUEL)
 						{
-							client->armor.points[PLACE_CENTERFUSE] = 0;
-							SendForceStatus((1 << PLACE_CENTERFUSE), client->status_status, client);
+							place = PLACE_CENTERFUSE;
+							victim->armor.points[place] = 0;
+							SendForceStatus((1 << place), victim->status_status, victim);
 						}
 
-						PPrintf(client, RADIO_YELLOW, "Your %s exploded", GetHitSite(place));
+						if(killer >= 0 && killer < MAX_HITBY)
+						{
+							if(economy->value < 1)
+								victim->hitby[killer].damage += ScoreGetSimple(place);
+						}
 
-						client->fueltimer = he = 0;
+						PPrintf(victim, RADIO_YELLOW, "Your %s exploded", GetHitSite(place));
+
+						victim->fueltimer = he = 0;
 					}
 				}
 				else
 				{
-					DebugClient(__FILE__, __LINE__, TRUE, client);
+					DebugClient(__FILE__, __LINE__, TRUE, victim);
 					return 0;
 				}
 			}
@@ -7307,25 +7319,25 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 				if(gunstats->value)
 				{
 					if(he && phe)
-						sprintf(phe, "|%s=%d-(%d+%d)|", GetSmallHitSite(place), client->armor.points[place], he, apabsorb/*dmgprobe*/);
+						sprintf(phe, "|%s=%d-(%d+%d)|", GetSmallHitSite(place), victim->armor.points[place], he, apabsorb/*dmgprobe*/);
 				}
 
-				client->armor.points[place] -= dmgprobe;
+				victim->armor.points[place] -= dmgprobe;
 
 				if(!(u_int32_t)(destroytokill->value))
-					client->damaged = 1;
+					victim->damaged = 1;
 
 				//				if (gunstats->value)
 				//				{
 				//					if (he && phe)
-				//						sprintf(phe, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
+				//						sprintf(phe, "%s=%d", GetSmallHitSite(place), victim->armor.points[place]);
 				//				}
 
 				he = 0;
 			}
 			else
 			{
-				DebugClient(__FILE__, __LINE__, TRUE, client);
+				DebugClient(__FILE__, __LINE__, TRUE, victim);
 				return 0;
 			}
 		}
@@ -7335,15 +7347,15 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 			if(gunstats->value)
 			{
 				if(ap && pap)
-					sprintf(pap, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
+					sprintf(pap, "%s=%d", GetSmallHitSite(place), victim->armor.points[place]);
 
 				if(he && phe)
-					sprintf(phe, "%s=%d", GetSmallHitSite(place), client->armor.points[place]);
+					sprintf(phe, "%s=%d", GetSmallHitSite(place), victim->armor.points[place]);
 			}
 		}
 		else
 		{
-			DebugClient(__FILE__, __LINE__, TRUE, client);
+			DebugClient(__FILE__, __LINE__, TRUE, victim);
 			return 0;
 		}
 
@@ -7351,20 +7363,20 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		{
 			if(he)
 			{
-				if(client->armor.parent[place] >= 0)
+				if(victim->armor.parent[place] >= 0)
 				{
-					if(client->armor.parent[place] >= MAX_PLACE)
-						BPrintf(RADIO_RED, "DEBUG: invalid parent %d, place %d", client->armor.parent[place], place);
+					if(victim->armor.parent[place] >= MAX_PLACE)
+						BPrintf(RADIO_RED, "DEBUG: invalid parent %d, place %d", victim->armor.parent[place], place);
 					else
 					{
 						if(gunstats->value)
 						{
 							if(phe)
-								AddPlaneDamage(client->armor.parent[place], he, 0, (phe + strlen(phe)), 0, client);
+								AddPlaneDamage(victim->armor.parent[place], he, 0, (phe + strlen(phe)), 0, victim, killer);
 						}
 						else
 						{
-							AddPlaneDamage(client->armor.parent[place], he, 0, NULL, NULL, client);
+							AddPlaneDamage(victim->armor.parent[place], he, 0, NULL, NULL, victim, killer);
 						}
 					}
 				}
@@ -7380,7 +7392,7 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 		}
 		else
 		{
-			DebugClient(__FILE__, __LINE__, TRUE, client);
+			DebugClient(__FILE__, __LINE__, TRUE, victim);
 			return 0;
 		}
 	}

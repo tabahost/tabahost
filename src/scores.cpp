@@ -2423,3 +2423,56 @@ void ScoreLoadCosts(void)
 		arena->costs.flighthour = 0.0;
 	}
 }
+
+/**
+ ScoreGetSimple
+
+ Get simple scores
+ */
+
+double ScoreGetSimple(u_int32_t part)
+{
+	switch(part)
+	{
+		case PLACE_PILOT:
+			return 20.0;
+		case PLACE_CENTERFUSE:
+		case PLACE_REARFUSE:
+		case PLACE_LWING:
+		case PLACE_RWING:
+			return 10.0;
+		case PLACE_ENGINE1:
+		case PLACE_ENGINE2:
+		case PLACE_ENGINE3:
+		case PLACE_ENGINE4:
+		case PLACE_VSTAB:
+		case PLACE_HSTAB:
+			return 5.0;
+		default:
+			return 0.0;
+	}
+
+/*
+PLACE_ENGINE1S
+PLACE_ENGINE2S
+PLACE_ENGINE3S
+PLACE_ENGINE4S
+PLACE_ELEVATOR
+PLACE_RUDDER
+PLACE_LAILERON
+PLACE_RAILERON
+PLACE_LFUEL
+PLACE_RFUEL
+PLACE_CENTERFUEL
+PLACE_PILOTARMOR
+PLACE_TAILGUN
+PLACE_NOSEGUN
+PLACE_LEFTGUN
+PLACE_RIGHTGUN
+PLACE_TOPGUN
+PLACE_BOTTOMGUN
+PLACE_RGEAR
+PLACE_LGEAR
+PLACE_FLAPS
+*/
+}

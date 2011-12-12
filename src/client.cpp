@@ -463,7 +463,7 @@ int ProcessClient(client_t *client)
 					PPrintf(client, RADIO_WHITE, "Your %s exploded!", GetHitSite(client->oildamaged - 4));
 					{
 						PPrintf(client, RADIO_GOLD, "DEBUG oildamaged %d", client->oildamaged - 4);
-						AddPlaneDamage(client->oildamaged - 4, 0xffff, 0, NULL, NULL, client);
+						AddPlaneDamage(client->oildamaged - 4, 0xffff, 0, NULL, NULL, client, -1);
 					}
 					/*
 					 switch(client->oilamaged)
