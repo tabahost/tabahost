@@ -420,6 +420,7 @@ typedef unsigned int u_int32_t;
 #define	STATUS_RGEAR		0x20000000 // right front suspension
 #define	STATUS_LGEAR		0x40000000 // left front suspension
 #define	STATUS_FLAPS		0x80000000 // explodes everything!!!!
+#define	STATUS_VITALS		(STATUS_RWING | STATUS_LWING | STATUS_PILOT | STATUS_CENTERFUSE | STATUS_REARFUSE)
 //#define CV_SPEED			50	// ft/s
 #define DRONE_DBID_BASE		10000000
 #define DRONE_FAU_SPEED		500	// Fau Speed
@@ -2158,6 +2159,7 @@ extern	var_t		*dpitch;		/// debugvar
 extern	var_t		*droll;			/// debugvar
 extern	var_t		*dyaw;			/// debugvar
 extern	var_t		*easymode;		/// allow easymode [1] and force easy mode [2]
+extern	var_t		*economy;		/// enable disable economy score system
 extern	var_t		*emulatecollision;	/// emulate collision with the other side (e.g. if one client collided, other will be forced to collide
 extern	var_t		*enableottos;	/// allow to use ottos
 extern	var_t		*endday;		/// set end day

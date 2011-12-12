@@ -80,6 +80,7 @@ var_t *dpitch; // extern
 var_t *droll; // extern
 var_t *dyaw; // extern
 var_t *easymode; // extern
+var_t *economy; // extern
 var_t *emulatecollision; // extern
 var_t *enableottos; // extern
 var_t *endday; // extern
@@ -271,6 +272,7 @@ void InitVars(void)
 	destroytokill = Var_Get("destroytokill", "0", "0", "1", "Need to destroy plane part to get a kill", VAR_ARCHIVE);
 	dirname = Var_Get("dirname", "wb3europe", "0", "0", "Set map directory name", VAR_ARCHIVE | VAR_ADMIN);
 	easymode = Var_Get("easymode", "0", "0", "2", "Enable easy mode (2 = forced easy mode)", VAR_ARCHIVE);
+	economy = Var_Get("economy", "0", "0", "1", "Enable economy score system", 0);
 	emulatecollision = Var_Get("emulatecollision", "0", "0", "1", "Emulate friendly collision (WB2.77)", VAR_ARCHIVE);
 	enableottos = Var_Get("enableottos", "1", "0", "1", "Enable autogunners (OTTO)", VAR_ARCHIVE);
 	endday = Var_Get("endday", "16", "1", "31", "End of TOD day", VAR_ADMIN);

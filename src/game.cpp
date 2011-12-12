@@ -6084,9 +6084,6 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 
 	PPrintf(pvictim, RADIO_DARKGREEN, "You are hit by %s (%d)", munition->name, hits);
 
-	if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
-		killer = AddKiller(pvictim, client);
-
 	//	for(i = 0; i < hits; i++)
 	//	{
 	i = 0;
@@ -6095,8 +6092,14 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 	if(!pvictim->inuse)
 		return;
 
-	if(killer >= 0)
-		pvictim->hitby[killer].damage += munition->he;
+	if(!(pvictim->status_damage & STATUS_VITALS))
+	{
+		if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+			killer = AddKiller(pvictim, client);
+
+		if(killer >= 0)
+			pvictim->hitby[killer].damage += munition->he;
+	}
 
 	if(client != pvictim)
 	{
@@ -6519,22 +6522,25 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		pvictim->hitstakenstat[munition->caliber - 1] += hits;
 	}
 
-	if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+	if(!(pvictim->status_damage & STATUS_VITALS))
 	{
-		if(pvictim != client) //not a ack hit
+		if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 		{
-			for(i = 0; i < MAX_RELATED; i++)
+			if(pvictim != client) //not a ack hit
 			{
-				if(pvictim->related[i] && (pvictim->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
-					break;
+				for(i = 0; i < MAX_RELATED; i++)
+				{
+					if(pvictim->related[i] && (pvictim->related[i]->drone & (DRONE_WINGS1 | DRONE_WINGS2)))
+						break;
+				}
+
+				if(i < MAX_RELATED)
+					pvictim = pvictim->related[i]; // send damage to first wingman
+				//	return; // dont hit plane if with wingmans
 			}
 
-			if(i < MAX_RELATED)
-				pvictim = pvictim->related[i]; // send damage to first wingman
-			//	return; // dont hit plane if with wingmans
+			killer = AddKiller(pvictim, client);
 		}
-
-		killer = AddKiller(pvictim, client);
 	}
 
 	// Random damage while there are wingmans
@@ -6681,25 +6687,28 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				damage = 0;
 			}
 
-			if(needle[j] >= 0 && needle[j] < MAX_PLACE && killer >= 0 && killer < MAX_HITBY)
+			if(!(pvictim->status_damage & STATUS_VITALS))
 			{
-				sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) damage / (double) (((pvictim->armor.points[needle[j]] <= 0) ? 0
-						: pvictim->armor.points[needle[j]]) + 1.0)));
-
-				//				if(pvictim->drone == DRONE_COMMANDOS)
-				//				{
-				//					Com_Printf(VERBOSE_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
-				//					sdamage = 59.0;
-				//				}
-
-				if(sdamage >= 0)
+				if(needle[j] >= 0 && needle[j] < MAX_PLACE && killer >= 0 && killer < MAX_HITBY)
 				{
-					pvictim->hitby[killer].damage += sdamage;
-				}
-				else
-				{
-					Com_Printf(VERBOSE_DAMAGE, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage,
-							((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
+					sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) damage / (double) (((pvictim->armor.points[needle[j]] <= 0) ? 0
+							: pvictim->armor.points[needle[j]]) + 1.0)));
+
+					//				if(pvictim->drone == DRONE_COMMANDOS)
+					//				{
+					//					Com_Printf(VERBOSE_DAMAGE, "Commandos damage = %u, sdamage = %.2f, part = %u\n", damage, sdamage, needle[j]);
+					//					sdamage = 59.0;
+					//				}
+
+					if(sdamage >= 0)
+					{
+						pvictim->hitby[killer].damage += sdamage;
+					}
+					else
+					{
+						Com_Printf(VERBOSE_DAMAGE, "PHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", damage,
+								((pvictim->armor.points[needle[j]] <= 0) ? 0 : pvictim->armor.points[needle[j]]));
+					}
 				}
 			}
 
@@ -6748,17 +6757,20 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		}
 	}
 
-	if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
+	if(!(pvictim->status_damage & STATUS_VITALS))
 	{
-		for(i = 0; i < MAX_HITBY; i++) // check who hit player
+		if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 		{
-			if(pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
+			for(i = 0; i < MAX_HITBY; i++) // check who hit player
 			{
-				totaldamage += pvictim->hitby[i].damage;
+				if(pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
+				{
+					totaldamage += pvictim->hitby[i].damage;
+				}
 			}
-		}
 
-		pvictim->hitby[killer].damage += totaldamage * 0.25;
+			pvictim->hitby[killer].damage += totaldamage * 0.25;
+		}
 	}
 }
 
@@ -6899,25 +6911,28 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		he /= 3;
 	}
 
-	if(!(client == pvictim && hardhitplane->munition < 99 && hardhitplane->munition > 55)) // avoid bomb killers
+	if(!(pvictim->status_damage & STATUS_VITALS))
 	{
-		if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
+		if(!(client == pvictim && hardhitplane->munition < 99 && hardhitplane->munition > 55)) // avoid bomb killers
 		{
-			killer = AddKiller(pvictim, client);
-
-			if(hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
+			if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 			{
-				sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) he / (double) (((pvictim->armor.points[hardhitplane->place] <= 0) ? 0
-						: pvictim->armor.points[hardhitplane->place]) + 1.0)));
+				killer = AddKiller(pvictim, client);
 
-				if(sdamage >= 0)
+				if(hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
 				{
-					pvictim->hitby[killer].damage += sdamage;
-				}
-				else
-				{
-					Com_Printf(VERBOSE_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he,
-							((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
+					sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) he / (double) (((pvictim->armor.points[hardhitplane->place] <= 0) ? 0
+							: pvictim->armor.points[hardhitplane->place]) + 1.0)));
+
+					if(sdamage >= 0)
+					{
+						pvictim->hitby[killer].damage += sdamage;
+					}
+					else
+					{
+						Com_Printf(VERBOSE_DAMAGE, "PHardHitPlane(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", he,
+								((pvictim->armor.points[hardhitplane->place] <= 0) ? 0 : pvictim->armor.points[hardhitplane->place]));
+					}
 				}
 			}
 		}
@@ -6959,17 +6974,20 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		AddPlaneDamage(hardhitplane->place, he, 0, NULL, NULL, pvictim);
 	}
 
-	if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
+	if(!(pvictim->status_damage & STATUS_VITALS))
 	{
-		for(i = 0; i < MAX_HITBY; i++) // check who hit player
+		if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 		{
-			if(pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
+			for(i = 0; i < MAX_HITBY; i++) // check who hit player
 			{
-				totaldamage += pvictim->hitby[i].damage;
+				if(pvictim->hitby[i].dbid && pvictim->hitby[i].damage && pvictim->hitby[i].dbid < DRONE_DBID_BASE)
+				{
+					totaldamage += pvictim->hitby[i].damage;
+				}
 			}
-		}
 
-		pvictim->hitby[killer].damage += totaldamage * 0.25;
+			pvictim->hitby[killer].damage += totaldamage * 0.25;
+		}
 	}
 }
 

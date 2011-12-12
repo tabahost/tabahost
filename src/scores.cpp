@@ -2400,12 +2400,26 @@ void ScoreLoadCosts(void)
 	//	arena->costs.planeweight[MAX_PLANES];	// LoadDamageModel():25
 	//	arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
 
-	arena->costs.takeoff = 1.0;
-	arena->costs.newpilot = 150.0;
-	arena->costs.technologylost = 0.5;
-	arena->costs.informationlost = 1.0;
-	arena->costs.life = 100.0;
-	arena->costs.planetransport = 0.333; // plane_price / (distance (km) * weight (ton))
-	arena->costs.pilottransport = 0.066; // * 0.07
-	arena->costs.flighthour = 0.1;
+	if(economy->value)
+	{
+		arena->costs.takeoff = 1.0;
+		arena->costs.newpilot = 150.0;
+		arena->costs.technologylost = 0.5;
+		arena->costs.informationlost = 1.0;
+		arena->costs.life = 100.0;
+		arena->costs.planetransport = 0.333; // plane_price / (distance (km) * weight (ton))
+		arena->costs.pilottransport = 0.066; // * 0.07
+		arena->costs.flighthour = 0.1;
+	}
+	else
+	{
+		arena->costs.takeoff = 0.0;
+		arena->costs.newpilot = 0.0;
+		arena->costs.technologylost = 0.0;
+		arena->costs.informationlost = 0.0;
+		arena->costs.life = 0.0;
+		arena->costs.planetransport = 0.0; // plane_price / (distance (km) * weight (ton))
+		arena->costs.pilottransport = 0.0; // * 0.07
+		arena->costs.flighthour = 0.0;
+	}
 }
