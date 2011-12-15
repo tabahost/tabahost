@@ -7622,8 +7622,13 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 	if(!setjmp(debug_buffer))
 	{
-		score = ((u_int32_t) dmgprobe < building->armor) ? dmgprobe : (int32_t) building->armor;
-		score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
+		if((u_int8_t)economy->value)
+		{
+			score = ((u_int32_t) dmgprobe < building->armor) ? dmgprobe : (int32_t) building->armor;
+			score = score * 100 * GetBuildingCost(building->type) / GetBuildingArmor(building->type, NULL);
+		}
+		else
+			score = GetBuildingCost(building->type);
 	}
 	else
 	{

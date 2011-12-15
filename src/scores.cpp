@@ -533,15 +533,48 @@ void ScoreFieldCapture(u_int8_t field)
 		{
 			if(arena->fields[field].hitby[i].dbid && arena->fields[field].hitby[i].dbid < DRONE_DBID_BASE)
 			{
-				if(IsCargo(NULL, arena->fields[field].hitby[i].plane))
+				if(economy->value)
 				{
-					score = fieldcost * (arena->fields[field].hitby[i].damage / cargodamage) * ((double) numcargos / (numcargos + numbombers));
-					Com_Printf(VERBOSE_DEBUG_SCORES, "Cargo: %f\n", score);
+					if(IsCargo(NULL, arena->fields[field].hitby[i].plane))
+					{
+						score = fieldcost * (arena->fields[field].hitby[i].damage / cargodamage) * ((double) numcargos / (numcargos + numbombers));
+						Com_Printf(VERBOSE_DEBUG_SCORES, "Cargo: %f\n", score);
+					}
+					else
+					{
+						score = fieldcost * (arena->fields[field].hitby[i].damage / bomberdamage) * ((double) numbombers / (numcargos + numbombers));
+						Com_Printf(VERBOSE_DEBUG_SCORES, "Bomber: %f\n", score);
+					}
 				}
 				else
 				{
-					score = fieldcost * (arena->fields[field].hitby[i].damage / bomberdamage) * ((double) numbombers / (numcargos + numbombers));
-					Com_Printf(VERBOSE_DEBUG_SCORES, "Bomber: %f\n", score);
+					switch(arena->fields[field].type)
+					{
+						case FIELD_MAIN:
+							score = SIMPLESCORE_CAPTLARGE;
+							break;
+						case FIELD_MEDIUM:
+							score = SIMPLESCORE_CAPTMEDIUM;
+							break;
+						case FIELD_LITTLE:
+							score = SIMPLESCORE_CAPTSMALL;
+							break;
+						case FIELD_WB3POST:
+							score = SIMPLESCORE_CAPTPOST;
+							break;
+						case FIELD_WB3TOWN:
+							score = SIMPLESCORE_CAPTTOWN;
+							break;
+						case FIELD_WB3VILLAGE:
+							score = SIMPLESCORE_CAPTVILLAGE;
+							break;
+						case FIELD_WB3PORT:
+							score = SIMPLESCORE_CAPTPORT;
+							break;
+						default:
+							score = SIMPLESCORE_CAPTPOST;
+							break;
+					}
 				}
 
 				if(arena->fields[field].hitby[i].country == arena->fields[field].country) // if it WAS enemy
@@ -2497,26 +2530,26 @@ double ScoreGetSimple(u_int32_t part)
 		case PLACE_ENGINE2:
 		case PLACE_ENGINE3:
 		case PLACE_ENGINE4:
+		case PLACE_ENGINE1S:
+		case PLACE_ENGINE2S:
+		case PLACE_ENGINE3S:
+		case PLACE_ENGINE4S:
 			return SIMPLESCORE_DAMENGINE;
 		case PLACE_VSTAB:
 		case PLACE_HSTAB:
 			return SIMPLESCORE_DAMSTAB;
 		default:
-			return 0.0;
+			return 0.1;
 	}
 
 /*
-PLACE_ENGINE1S
-PLACE_ENGINE2S
-PLACE_ENGINE3S
-PLACE_ENGINE4S
+PLACE_LFUEL
+PLACE_RFUEL
+PLACE_CENTERFUEL
 PLACE_ELEVATOR
 PLACE_RUDDER
 PLACE_LAILERON
 PLACE_RAILERON
-PLACE_LFUEL
-PLACE_RFUEL
-PLACE_CENTERFUEL
 PLACE_PILOTARMOR
 PLACE_TAILGUN
 PLACE_NOSEGUN

@@ -24,6 +24,7 @@
 #include "client.h"
 #include "common.h"
 #include "game.h"
+#include "scores.h"
 #include "vars.h"
 
 var_t *ackgrowco; // extern
@@ -462,6 +463,22 @@ void CheckVars(void)
 
 		LoadDamageModel(NULL);
 		LoadAmmo(NULL);
+	}
+
+	if(economy->modified)
+	{
+		modified = 1;
+
+		ScoreLoadCosts();
+		LoadDamageModel(NULL);
+		LoadAmmo(NULL);
+	}
+
+	if(oldcapt->modified)
+	{
+		modified = 1;
+
+		LoadDamageModel(NULL);
 	}
 
 	if(ttc->modified)

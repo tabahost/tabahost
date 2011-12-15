@@ -2300,9 +2300,16 @@ void LoadDamageModel(client_t *client)
 								for(i = 1; i < num_fields /*BUILD_MAX*/; i++)
 								{
 									if((u_int8_t)economy->value)
+									{
 										arena->costs.buildtype[i] = Com_Atof(my_row[i]);
+									}
 									else
-										arena->costs.buildtype[i] = 0.0;
+									{
+										if(IsVitalBuilding(i, oldcapt->value))
+											arena->costs.buildtype[i] = SIMPLESCORE_VITALSTRUCT * 100;
+										else
+											arena->costs.buildtype[i] = 0.0;
+									}
 								}
 							}
 							else
@@ -2948,6 +2955,157 @@ void IncreaseAcksReup(u_int8_t field)
  * @return true if building is essential to close a field
  */
 
+u_int8_t IsVitalBuilding(u_int8_t building, u_int8_t notot)
+{
+	if(arcade->value)
+	{
+		switch(building)
+		{
+			case BUILD_50CALACK:
+			case BUILD_20MMACK:
+			case BUILD_40MMACK:
+			case BUILD_88MMFLAK:
+			case BUILD_HANGAR:
+			case BUILD_FUEL:
+			case BUILD_AMMO:
+			case BUILD_RADAR:
+			case BUILD_WARE:
+			case BUILD_RADIOHUT:
+			case BUILD_ANTENNA:
+			case BUILD_CV:
+			case BUILD_DESTROYER:
+			case BUILD_CRUISER:
+			case BUILD_CARGO:
+			case BUILD_SUBMARINE:
+			case BUILD_BRIDGE:
+			case BUILD_FACTORY:
+			case BUILD_BARRACKS:
+			case BUILD_STATICS:
+			case BUILD_REFINERY:
+			case BUILD_PLANEFACTORY:
+			case BUILD_BUILDING:
+			case BUILD_CRANE:
+			case BUILD_ARTILLERY:
+			case BUILD_HUT:
+			case BUILD_TRUCK:
+				return TRUE;
+			default:
+				/*
+				 BUILD_STRATEGIC
+				 BUILD_SPECIALBUILD
+				 BUILD_TOWER
+				 BUILD_TREE
+				 BUILD_SPAWNPOINT
+				 BUILD_HOUSE
+				 BUILD_ROCK
+				 BUILD_FENCE
+				 */
+				return FALSE;
+		}
+	}
+	else
+	{
+		if(notot)
+		{
+			switch(building)
+			{
+				case BUILD_50CALACK:
+				case BUILD_20MMACK:
+				case BUILD_40MMACK:
+				case BUILD_88MMFLAK:
+				case BUILD_HANGAR:
+				case BUILD_FUEL:
+				case BUILD_AMMO:
+				case BUILD_RADAR:
+				case BUILD_WARE:
+				case BUILD_RADIOHUT:
+				case BUILD_ANTENNA:
+				case BUILD_CV:
+				case BUILD_DESTROYER:
+				case BUILD_CRUISER:
+				case BUILD_CARGO:
+				case BUILD_SUBMARINE:
+				case BUILD_BRIDGE:
+				case BUILD_FACTORY:
+				case BUILD_BARRACKS:
+				case BUILD_STATICS:
+				case BUILD_REFINERY:
+				case BUILD_PLANEFACTORY:
+				case BUILD_BUILDING:
+				case BUILD_CRANE:
+				case BUILD_ARTILLERY:
+				case BUILD_HUT:
+				case BUILD_TRUCK:
+					return TRUE;
+				default:
+					/*
+					 BUILD_STRATEGIC
+					 BUILD_SPECIALBUILD
+					 BUILD_TOWER
+					 BUILD_TREE
+					 BUILD_SPAWNPOINT
+					 BUILD_HOUSE
+					 BUILD_ROCK
+					 BUILD_FENCE
+					 */
+					return FALSE;
+			}
+		}
+		else
+		{
+			switch(building)
+			{
+				case BUILD_50CALACK:
+				case BUILD_20MMACK:
+				case BUILD_40MMACK:
+				case BUILD_88MMFLAK:
+				case BUILD_RADAR:
+				case BUILD_RADIOHUT:
+				case BUILD_ANTENNA:
+				case BUILD_ARTILLERY:
+					return TRUE;
+				default:
+					/*
+					 BUILD_STRATEGIC
+					 BUILD_SPECIALBUILD
+					 BUILD_TOWER
+					 BUILD_TREE
+					 BUILD_SPAWNPOINT
+					 BUILD_HOUSE
+					 BUILD_ROCK
+					 BUILD_FENCE
+					 BUILD_HANGAR
+					 BUILD_FUEL
+					 BUILD_AMMO
+					 BUILD_WARE
+					 BUILD_BARRACKS
+					 BUILD_STATICS
+					 BUILD_CV
+					 BUILD_DESTROYER
+					 BUILD_CRUISER
+					 BUILD_CARGO
+					 BUILD_SUBMARINE
+					 BUILD_BRIDGE
+					 BUILD_FACTORY
+					 BUILD_REFINERY
+					 BUILD_PLANEFACTORY
+					 BUILD_BUILDING
+					 BUILD_CRANE
+					 BUILD_HUT
+					 BUILD_TRUCK
+					 */
+					return FALSE;
+			}
+		}
+	}
+}
+
+/**
+ * @param building
+ * @param notot
+ * @return true if building is essential to close a field
+ */
+
 u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 {
 	if(!(building->infield))
@@ -2955,95 +3113,7 @@ u_int8_t IsVitalBuilding(building_t *building, u_int8_t notot)
 		return FALSE;
 	}
 
-	if(arcade->value)
-	{
-		if((building->type == BUILD_50CALACK) || (building->type == BUILD_20MMACK) || (building->type == BUILD_40MMACK) || (building->type == BUILD_88MMFLAK)
-				|| (building->type == BUILD_HANGAR) || (building->type == BUILD_FUEL) || (building->type == BUILD_AMMO) || (building->type == BUILD_RADAR)
-				|| (building->type == BUILD_WARE) || (building->type == BUILD_RADIOHUT) || (building->type == BUILD_ANTENNA) || (building->type == BUILD_CV)
-				|| (building->type == BUILD_DESTROYER) || (building->type == BUILD_CRUISER) || (building->type == BUILD_CARGO) || (building->type
-				== BUILD_SUBMARINE) || (building->type == BUILD_BRIDGE) || (building->type == BUILD_FACTORY) || (building->type == BUILD_BARRACKS)
-				|| (building->type == BUILD_STATICS) || (building->type == BUILD_REFINERY) || (building->type == BUILD_PLANEFACTORY) || (building->type
-				== BUILD_BUILDING) || (building->type == BUILD_CRANE) || (building->type == BUILD_ARTILLERY) || (building->type == BUILD_HUT)
-				|| (building->type == BUILD_TRUCK))
-			return TRUE;
-		else
-			/*
-			 BUILD_STRATEGIC
-			 BUILD_SPECIALBUILD
-			 BUILD_TOWER
-			 BUILD_TREE
-			 BUILD_SPAWNPOINT
-			 BUILD_HOUSE
-			 BUILD_ROCK
-			 BUILD_FENCE
-			 */
-			return FALSE;
-	}
-	else
-	{
-		if(notot)
-		{
-			if((building->type == BUILD_50CALACK) || (building->type == BUILD_20MMACK) || (building->type == BUILD_40MMACK) || (building->type
-					== BUILD_88MMFLAK) || (building->type == BUILD_HANGAR) || (building->type == BUILD_FUEL) || (building->type == BUILD_AMMO)
-					|| (building->type == BUILD_RADAR) || (building->type == BUILD_WARE) || (building->type == BUILD_RADIOHUT) || (building->type
-					== BUILD_ANTENNA) || (building->type == BUILD_CV) || (building->type == BUILD_DESTROYER) || (building->type == BUILD_CRUISER)
-					|| (building->type == BUILD_CARGO) || (building->type == BUILD_SUBMARINE) || (building->type == BUILD_BRIDGE) || (building->type
-					== BUILD_FACTORY) || (building->type == BUILD_BARRACKS) || (building->type == BUILD_STATICS) || (building->type == BUILD_REFINERY)
-					|| (building->type == BUILD_PLANEFACTORY) || (building->type == BUILD_BUILDING) || (building->type == BUILD_CRANE) || (building->type
-					== BUILD_ARTILLERY) || (building->type == BUILD_HUT) || (building->type == BUILD_TRUCK))
-				return TRUE;
-			else
-				/*
-				 BUILD_STRATEGIC
-				 BUILD_SPECIALBUILD
-				 BUILD_TOWER
-				 BUILD_TREE
-				 BUILD_SPAWNPOINT
-				 BUILD_HOUSE
-				 BUILD_ROCK
-				 BUILD_FENCE
-				 */
-				return FALSE;
-		}
-		else
-		{
-			if((building->type == BUILD_50CALACK) || (building->type == BUILD_20MMACK) || (building->type == BUILD_40MMACK) || (building->type
-					== BUILD_88MMFLAK) || (building->type == BUILD_RADAR) || (building->type == BUILD_RADIOHUT) || (building->type == BUILD_ANTENNA)
-					|| (building->type == BUILD_ARTILLERY))
-				return TRUE;
-			else
-				/*
-				 BUILD_STRATEGIC
-				 BUILD_SPECIALBUILD
-				 BUILD_TOWER
-				 BUILD_TREE
-				 BUILD_SPAWNPOINT
-				 BUILD_HOUSE
-				 BUILD_ROCK
-				 BUILD_FENCE
-				 BUILD_HANGAR
-				 BUILD_FUEL
-				 BUILD_AMMO
-				 BUILD_WARE
-				 BUILD_BARRACKS
-				 BUILD_STATICS
-				 BUILD_CV
-				 BUILD_DESTROYER
-				 BUILD_CRUISER
-				 BUILD_CARGO
-				 BUILD_SUBMARINE
-				 BUILD_BRIDGE
-				 BUILD_FACTORY
-				 BUILD_REFINERY
-				 BUILD_PLANEFACTORY
-				 BUILD_BUILDING
-				 BUILD_CRANE
-				 BUILD_HUT
-				 BUILD_TRUCK
-				 */
-				return FALSE;
-		}
-	}
+	return IsVitalBuilding(building->type, notot);
 }
 
 /**
