@@ -7298,18 +7298,18 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 
 						victim->fueltimer = he = 0;
 					}
-
-					if(killer >= 0 && killer < MAX_HITBY)
-					{
-						if(!(u_int8_t)economy->value)
-							victim->hitby[killer].damage += ScoreGetSimple(place);
-					}
 				}
 				else
 				{
 					DebugClient(__FILE__, __LINE__, TRUE, victim);
 					return 0;
 				}
+			}
+
+			if(killer >= 0 && killer < MAX_HITBY)
+			{
+				if(!(u_int8_t)economy->value)
+					victim->hitby[killer].damage += ScoreGetSimple(place);
 			}
 		}
 		else // hit damage part but not destroy it

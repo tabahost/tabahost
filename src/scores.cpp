@@ -1311,7 +1311,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 				}
 			}
 
-			if(!(j < 0)) // found a killer
+			if(j >= 0) // found a killer
 			{
 				//client->hitby[j] = NULL; // clear killer from list
 				dbclient = FindDBClient(client->hitby[j].dbid);
