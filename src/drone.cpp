@@ -1277,7 +1277,7 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 		{
 			j = AddKiller(dest, source);
 
-			if(economy->value)
+			if((u_int8_t)economy->value)
 			{
 				if(j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
 				{
@@ -2028,12 +2028,11 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 								{
 									killer = AddKiller(&clients[i], client);
 
-									if(economy->value)
+									if((u_int8_t)economy->value)
 									{
 										if(killer >= 0 && killer < MAX_HITBY && part >= 0 && part < 32)
 										{
-											sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) munition->he / (double) (((clients[i].armor.points[part]
-												<= 0) ? 0 : clients[i].armor.points[part]) + 1.0)));
+											sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) munition->he / (double) (((clients[i].armor.points[part] <= 0) ? 0 : clients[i].armor.points[part]) + 1.0)));
 
 											if(sdamage >= 0)
 											{

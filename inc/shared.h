@@ -420,7 +420,7 @@ typedef unsigned int u_int32_t;
 #define	STATUS_RGEAR		0x20000000 // right front suspension
 #define	STATUS_LGEAR		0x40000000 // left front suspension
 #define	STATUS_FLAPS		0x80000000 // explodes everything!!!!
-#define	STATUS_VITALS		(STATUS_PILOT | STATUS_LWING | STATUS_RWING | PLACE_CENTERFUSE | PLACE_REARFUSE)
+#define	STATUS_VITALS		(STATUS_PILOT | STATUS_LWING | STATUS_RWING | STATUS_REARFUSE | STATUS_CENTERFUSE)
 //#define CV_SPEED			50	// ft/s
 #define DRONE_DBID_BASE		10000000
 #define DRONE_FAU_SPEED		500	// Fau Speed

@@ -1947,7 +1947,7 @@ void LoadAmmo(client_t *client)
 							strcpy(arena->munition[i].name, Com_MyRow("name"));
 						if(Com_MyRow("abbrev"))
 							strcpy(arena->munition[i].abbrev, Com_MyRow("abbrev"));
-						if(economy->value)
+						if((u_int8_t)economy->value)
 							arena->costs.ammotype[i] = Com_Atof(Com_MyRow("cost"));
 						else
 							arena->costs.ammotype[i] = 0.0;
@@ -2010,7 +2010,7 @@ void LoadDamageModel(client_t *client)
 						strcpy(arena->planedamage[i].abbrev, Com_MyRow("abbrev"));
 						arena->planedamage[i].type = Com_Atoi(Com_MyRow("plane_type"));
 
-						if(economy->value)
+						if((u_int8_t)economy->value)
 						{
 							arena->costs.planemodel[i] = Com_Atof(Com_MyRow("cost"));
 							arena->costs.planeweight[i] = Com_Atof(Com_MyRow("weight"));
@@ -2299,7 +2299,7 @@ void LoadDamageModel(client_t *client)
 
 								for(i = 1; i < num_fields /*BUILD_MAX*/; i++)
 								{
-									if(economy->value)
+									if((u_int8_t)economy->value)
 										arena->costs.buildtype[i] = Com_Atof(my_row[i]);
 									else
 										arena->costs.buildtype[i] = 0.0;

@@ -31,6 +31,29 @@
 #ifndef SCORES_H_
 #define SCORES_H_
 
+#define SIMPLESCORE_KILLED		0.10
+#define SIMPLESCORE_BAILED		0.50
+#define SIMPLESCORE_KILL		50.0
+#define SIMPLESCORE_ASSIST		20.0
+#define SIMPLESCORE_KILLDRONE	10.0
+#define SIMPLESCORE_ASSISTDRONE	4.0
+#define SIMPLESCORE_HIT			0.0
+#define SIMPLESCORE_DAMPILOT	20.0
+#define SIMPLESCORE_DAMWING		10.0
+#define SIMPLESCORE_DAMFUSE		10.0
+#define SIMPLESCORE_DAMSTAB		5.0
+#define SIMPLESCORE_DAMENGINE	5.0
+#define SIMPLESCORE_KILLACK		5.0
+#define SIMPLESCORE_KILLRADAR	5.0
+#define SIMPLESCORE_KILLRADIO	5.0
+#define SIMPLESCORE_CAPTSMALL	100.0
+#define SIMPLESCORE_CAPTMEDIUM	150.0
+#define SIMPLESCORE_CAPTLARGE	200.0
+#define SIMPLESCORE_CAPTPOST	10.0
+#define SIMPLESCORE_CAPTVILLAGE	10.0
+#define SIMPLESCORE_CAPTTOWN	10.0
+
+
 void	ScoresEvent(u_int16_t event, client_t *client, int32_t misc);
 double	ScorePlaneCost(client_t *client);
 double	ScoreFixPlaneCost(double plane_life, double plane_cost);

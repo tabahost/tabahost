@@ -285,6 +285,49 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 
 	if(event & (SCORE_BAILED | SCORE_CAPTURED | SCORE_DISCO | SCORE_DITCHED | SCORE_KILLED | SCORE_LANDED))
 	{
+		if(!(u_int8_t)economy->value)
+		{
+			if(event & (SCORE_BAILED | SCORE_DITCHED))
+			{
+				client->score.airscore *= SIMPLESCORE_BAILED;
+				client->score.groundscore *= SIMPLESCORE_BAILED;
+				client->score.captscore *= SIMPLESCORE_BAILED;
+				client->score.rescuescore *= SIMPLESCORE_BAILED;
+				client->score.penaltyscore *= SIMPLESCORE_BAILED;
+				client->score.costscore *= SIMPLESCORE_BAILED;
+			}
+			else if(event & SCORE_DISCO)
+			{
+				if(misc & SCORE_KILLED)
+				{
+					client->score.airscore *= SIMPLESCORE_KILLED;
+					client->score.groundscore *= SIMPLESCORE_KILLED;
+					client->score.captscore *= SIMPLESCORE_KILLED;
+					client->score.rescuescore *= SIMPLESCORE_KILLED;
+					client->score.penaltyscore *= SIMPLESCORE_KILLED;
+					client->score.costscore *= SIMPLESCORE_KILLED;
+				}
+				else
+				{
+					client->score.airscore *= SIMPLESCORE_BAILED;
+					client->score.groundscore *= SIMPLESCORE_BAILED;
+					client->score.captscore *= SIMPLESCORE_BAILED;
+					client->score.rescuescore *= SIMPLESCORE_BAILED;
+					client->score.penaltyscore *= SIMPLESCORE_BAILED;
+					client->score.costscore *= SIMPLESCORE_BAILED;
+				}
+			}
+			else if(event & SCORE_KILLED)
+			{
+				client->score.airscore *= SIMPLESCORE_KILLED;
+				client->score.groundscore *= SIMPLESCORE_KILLED;
+				client->score.captscore *= SIMPLESCORE_KILLED;
+				client->score.rescuescore *= SIMPLESCORE_KILLED;
+				client->score.penaltyscore *= SIMPLESCORE_KILLED;
+				client->score.costscore *= SIMPLESCORE_KILLED;
+			}
+		}
+
 		client->lastscore += client->score.airscore + client->score.groundscore + client->score.captscore + client->score.rescuescore
 				- client->score.penaltyscore - client->score.costscore;
 
@@ -659,14 +702,22 @@ double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 		{
 			if(client->hitby[i].dbid && client->hitby[i].damage && client->hitby[i].dbid < DRONE_DBID_BASE)
 			{
-				if((client->hitby[i].dbid != client->id)) // if not ack damage (dont give piece do acks please, they don't deserves hehehe)
+				if((client->hitby[i].dbid != client->id)) // if not ack damage (dont give piece do acks please, they don't deserve :])
 				{
-					score = (client->hitby[i].damage / totaldamage) * event_cost;
+					if((u_int8_t)economy->value)
+						score = (client->hitby[i].damage / totaldamage) * event_cost;
+					else
+						score = SIMPLESCORE_ASSIST;
 
 					Com_Printf(VERBOSE_DEBUG_SCORES, "Score %f, killer %s\n", score, client->hitby[i].longnick);
 
 					if(killer == i)
-						score += event_cost;
+					{
+						if((u_int8_t)economy->value)
+							score += event_cost;
+						else
+							score = SIMPLESCORE_KILL;
+					}
 
 					if(client->hitby[i].country != client->country) // if enemy
 					{
@@ -1128,7 +1179,7 @@ void ScoresEndFlight(u_int16_t end, int8_t land, u_int16_t gunused, u_int16_t to
 
 int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 {
-	int8_t i, j, k;
+	int8_t i = 0, j = -1, k = 0;
 	char buffer[128];
 	char query_bomber[512];
 	char query_ground[512];
@@ -1642,7 +1693,7 @@ int8_t ScoresCheckKiller(client_t *client, int32_t *maneuver)
 		}
 	}
 
-	return k;
+	return j;
 }
 
 /**
@@ -2400,7 +2451,7 @@ void ScoreLoadCosts(void)
 	//	arena->costs.planeweight[MAX_PLANES];	// LoadDamageModel():25
 	//	arena->costs.planemodel[MAX_PLANES];	// LoadDamageModel():24
 
-	if(economy->value)
+	if((u_int8_t)economy->value)
 	{
 		arena->costs.takeoff = 1.0;
 		arena->costs.newpilot = 150.0;
@@ -2435,19 +2486,21 @@ double ScoreGetSimple(u_int32_t part)
 	switch(part)
 	{
 		case PLACE_PILOT:
-			return 20.0;
+			return SIMPLESCORE_DAMPILOT;
 		case PLACE_CENTERFUSE:
 		case PLACE_REARFUSE:
+			return SIMPLESCORE_DAMFUSE;
 		case PLACE_LWING:
 		case PLACE_RWING:
-			return 10.0;
+			return SIMPLESCORE_DAMWING;
 		case PLACE_ENGINE1:
 		case PLACE_ENGINE2:
 		case PLACE_ENGINE3:
 		case PLACE_ENGINE4:
+			return SIMPLESCORE_DAMENGINE;
 		case PLACE_VSTAB:
 		case PLACE_HSTAB:
-			return 5.0;
+			return SIMPLESCORE_DAMSTAB;
 		default:
 			return 0.0;
 	}

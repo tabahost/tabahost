@@ -6098,7 +6098,7 @@ void PFlakHit(u_int8_t *buffer, client_t *client)
 		if(!(pvictim->drone && pvictim->related[0] == client)) // allow to kill own drones (no penalties, no score, etc)
 			killer = AddKiller(pvictim, client);
 
-		if(economy->value)
+		if((u_int8_t)economy->value)
 		{
 			if(killer >= 0 && killer < MAX_HITBY)
 				pvictim->hitby[killer].damage += munition->he;
@@ -6692,7 +6692,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 				damage = 0;
 			}
 
-			if(economy->value)
+			if((u_int8_t)economy->value)
 			{
 				if(needle[j] >= 0 && needle[j] < MAX_PLACE && killer >= 0 && killer < MAX_HITBY)
 				{
@@ -6756,7 +6756,7 @@ void PHitPlane(u_int8_t *buffer, client_t *client)
 		}
 	}
 
-	if(economy->value)
+	if((u_int8_t)economy->value)
 	{
 		if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 		{
@@ -6919,7 +6919,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 			{
 				killer = AddKiller(pvictim, client);
 
-				if(economy->value)
+				if((u_int8_t)economy->value)
 				{
 					if(hardhitplane->place >= 0 && hardhitplane->place < 32 && killer >= 0 && killer < MAX_HITBY)
 					{
@@ -6977,7 +6977,7 @@ void PHardHitPlane(u_int8_t *buffer, client_t *client)
 		AddPlaneDamage(hardhitplane->place, he, 0, NULL, NULL, pvictim, killer);
 	}
 
-	if(economy->value)
+	if((u_int8_t)economy->value)
 	{
 		if(killer >= 0 && killer < MAX_HITBY && pvictim->chute && (pvictim->status_damage & (1 << PLACE_PILOT)))
 		{
@@ -7294,15 +7294,15 @@ u_int16_t AddPlaneDamage(int8_t place, u_int16_t he, u_int16_t ap, char *phe, ch
 							SendForceStatus((1 << place), victim->status_status, victim);
 						}
 
-						if(killer >= 0 && killer < MAX_HITBY)
-						{
-							if(economy->value < 1)
-								victim->hitby[killer].damage += ScoreGetSimple(place);
-						}
-
 						PPrintf(victim, RADIO_YELLOW, "Your %s exploded", GetHitSite(place));
 
 						victim->fueltimer = he = 0;
+					}
+
+					if(killer >= 0 && killer < MAX_HITBY)
+					{
+						if(!(u_int8_t)economy->value)
+							victim->hitby[killer].damage += ScoreGetSimple(place);
 					}
 				}
 				else
