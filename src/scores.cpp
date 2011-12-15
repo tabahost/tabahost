@@ -471,7 +471,7 @@ void ScoresEvent(u_int16_t event, client_t *client, int32_t misc)
 	else
 	{
 		Com_Printf(VERBOSE_DEBUG_SCORES, "Piece event cost %f, killed %s\n", event_cost, client->longnick);
-		ScorePieceDamage(-1, event_cost, client);
+		ScorePieceDamage(killer, event_cost, client);
 	}
 
 	ClearKillers(client);
@@ -702,22 +702,22 @@ double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 		{
 			if(client->hitby[i].dbid && client->hitby[i].damage && client->hitby[i].dbid < DRONE_DBID_BASE)
 			{
-				if((client->hitby[i].dbid != client->id)) // if not ack damage (dont give piece do acks please, they don't deserve :])
+				if((client->hitby[i].dbid != client->id)) // if not ack damage (dont give piece to acks please, they don't deserve :])
 				{
 					if((u_int8_t)economy->value)
 						score = (client->hitby[i].damage / totaldamage) * event_cost;
 					else
 						score = SIMPLESCORE_ASSIST;
 
-					Com_Printf(VERBOSE_DEBUG_SCORES, "Score %f, killer %s\n", score, client->hitby[i].longnick);
-
-					if(killer == i)
+					if(i == killer)
 					{
 						if((u_int8_t)economy->value)
 							score += event_cost;
 						else
 							score = SIMPLESCORE_KILL;
 					}
+
+					Com_Printf(VERBOSE_DEBUG_SCORES, "Score %f, killer %s\n", score, client->hitby[i].longnick);
 
 					if(client->hitby[i].country != client->country) // if enemy
 					{
