@@ -691,7 +691,7 @@ double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 
 	Com_Printf(VERBOSE_DEBUG_SCORES, "Total damage %f\n", totaldamage);
 
-	if(event_cost)
+	if(event_cost || !((u_int8_t)economy->value))
 	{
 		my_query[0] = '\0';
 
