@@ -343,7 +343,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 {
 	u_int8_t buffer[10];
 	u_int8_t nothq = 0x20;
-	u_int8_t i;
+	u_int8_t i, j;
 	int8_t fieldn = 0;
 	move_t *move;
 
@@ -411,7 +411,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 				return;
 			}
 
-			for(i = 0; i < maxentities->value; i++) // check for IP/Squadron sharing
+			for(i = 0, j = 0; i < maxentities->value; i++) // check for IP/Squadron sharing
 			{
 				if(clients[i].inuse && !clients[i].drone && clients[i].ready && &clients[i] != client)
 				{
@@ -420,6 +420,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 					{
 						country = clients[i].country;
 						PPrintf(client, RADIO_YELLOW, "Country forced to %s due IP Sharing with %s", GetCountry(country), clients[i].longnick);
+						j = 1;
 						break;
 					}
 					else if(clients[i].arenabuildsok /*not in login */&& clients[i].country /* already have a country */&& clients[i].squadron
@@ -427,8 +428,18 @@ void Cmd_Move(char *field, int country, client_t *client)
 					{
 						country = clients[i].country;
 						PPrintf(client, RADIO_YELLOW, "Country forced to %s due Squadron sharing with %s", GetCountry(country), clients[i].longnick);
+						j = 1;
 						break;
 					}
+				}
+			}
+
+			if(!j) // if not forced to join a country
+			{
+				if(client->countrytime <= (u_int32_t)time(NULL)) // if can chose side, send player to HQ
+				{
+					Cmd_Move("hq", 0, client);
+					return;
 				}
 			}
 

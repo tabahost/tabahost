@@ -738,16 +738,30 @@ double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 				if((client->hitby[i].dbid != client->id)) // if not ack damage (dont give piece to acks please, they don't deserve :])
 				{
 					if((u_int8_t)economy->value)
+					{
 						score = (client->hitby[i].damage / totaldamage) * event_cost;
+					}
 					else
-						score = SIMPLESCORE_ASSIST;
+					{
+						if(client->drone)
+							score = SIMPLESCORE_ASSISTDRONE;
+						else
+							score = SIMPLESCORE_ASSIST;
+					}
 
 					if(i == killer)
 					{
 						if((u_int8_t)economy->value)
+						{
 							score += event_cost;
+						}
 						else
-							score = SIMPLESCORE_KILL;
+						{
+							if(client->drone)
+								score = SIMPLESCORE_KILLDRONE;
+							else
+								score = SIMPLESCORE_KILL;
+						}
 					}
 
 					Com_Printf(VERBOSE_DEBUG_SCORES, "Score %f, killer %s\n", score, client->hitby[i].longnick);

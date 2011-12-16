@@ -389,10 +389,7 @@ int ProcessClient(client_t *client)
 
 			if(!client->arenabuildsok)
 			{
-				if(client->countrytime <= (u_int32_t)time(NULL)) // if can chose side, send player to HQ
-					Cmd_Move("hq", 0, client);
-				else
-					Cmd_Move(NULL, client->country, client);
+				Cmd_Move(NULL, client->country, client);
 				Cmd_Time((arena->hour * 100) + arena->minute, NULL, client);
 
 				if(batchfile->value)

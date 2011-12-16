@@ -288,9 +288,9 @@ void Plane::prepare(const double *A)
 	//			break;
 	//		default:
 	radius = 103; // 103 feet
-	Vel.max = 160; // 351 km/h
+	Vel.max = 135; // 300 km/h
 	Vel.min = 82; // 180 km/h
-	YawVel.max = 3 * M_PI / 180; // 6º per second (in radians)
+	YawVel.max = 2 * M_PI / 180; // 4º per second (in radians)
 	YawVel.min = -YawVel.max;
 	//			Com_Printf(VERBOSE_WARNING, "prepare(): unknown ship type\n");
 	//			break;
@@ -333,9 +333,9 @@ void Plane::prepare() // main Boid
 	YawVel.target = 0;
 
 	radius = 103; // 103 feet
-	Vel.max = 150; // 330 km/h
+	Vel.max = 127; // 280 km/h
 	Vel.min = 82; // 180 km/h
-	YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
+	YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
 	YawVel.min = -YawVel.max;
 }
 
@@ -381,9 +381,9 @@ int8_t Plane::run()
 
 		// Set main ship always as the CV speed, so other ships can sustain the formation
 		// TODO: convoy speed verification (speed == more damaged)
-		this->setVelMax(150); // 330 km/h
+		this->setVelMax(135); // 300 km/h
 		this->yaw();
-		Attitude.y = (int16_t) (-200.0 * YawVel.curr / YawVel.max); // Roll
+		Attitude.y = (int16_t) -229.86 * pow(YawVel.curr, 0.86);//(-133.0 * YawVel.curr / YawVel.max); // Roll
 		this->walk();
 		this->attackNearestPlane();
 
@@ -397,7 +397,7 @@ int8_t Plane::run()
 	{
 		Boid::retarget(Form[formation][pos]);
 		this->yaw(leader);
-		Attitude.y = (int16_t) (-200.0 * YawVel.curr / YawVel.max); // Roll
+		Attitude.y = (int16_t) -229.86 * pow(YawVel.curr, 0.86); // Roll
 		this->walk();
 		this->attackNearestPlane();
 
