@@ -290,7 +290,7 @@ void Plane::prepare(const double *A)
 	radius = 103; // 103 feet
 	Vel.max = 135; // 300 km/h
 	Vel.min = 82; // 180 km/h
-	YawVel.max = 2 * M_PI / 180; // 4º per second (in radians)
+	YawVel.max = 3 * M_PI / 180; // 6º per second (in radians)
 	YawVel.min = -YawVel.max;
 	//			Com_Printf(VERBOSE_WARNING, "prepare(): unknown ship type\n");
 	//			break;
@@ -335,7 +335,7 @@ void Plane::prepare() // main Boid
 	radius = 103; // 103 feet
 	Vel.max = 127; // 280 km/h
 	Vel.min = 82; // 180 km/h
-	YawVel.max = 1 * M_PI / 180; // 2º per second (in radians)
+	YawVel.max = 1.5 * M_PI / 180; // 3º per second (in radians)
 	YawVel.min = -YawVel.max;
 }
 
