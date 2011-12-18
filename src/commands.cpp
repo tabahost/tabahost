@@ -415,7 +415,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 			{
 				if(clients[i].inuse && !clients[i].drone && clients[i].ready && &clients[i] != client)
 				{
-					if(clients[i].country /* already have a country */&& clients[i].country != country && !strcmp(clients[i].ip, client->ip)
+					if(clients[i].country /* already have a country */ /*&& clients[i].country != country*/ && !strcmp(clients[i].ip, client->ip)
 							&& !clients[i].thai)
 					{
 						country = clients[i].country;
@@ -434,13 +434,10 @@ void Cmd_Move(char *field, int country, client_t *client)
 				}
 			}
 
-			if(!j) // if not forced to join a country
+			if(!j && !client->arenabuildsok) // if not forced to join a country on login, send player to HQ
 			{
-				if(client->countrytime <= (u_int32_t)time(NULL)) // if can chose side, send player to HQ
-				{
-					Cmd_Move("hq", 0, client);
-					return;
-				}
+				Cmd_Move("hq", 0, client);
+				return;
 			}
 
 			client->country = country;
