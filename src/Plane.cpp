@@ -383,7 +383,7 @@ int8_t Plane::run()
 		// TODO: convoy speed verification (speed == more damaged)
 		this->setVelMax(135); // 300 km/h
 		this->yaw();
-		Attitude.y = (int16_t) -229.86 * pow(YawVel.curr, 0.86);//(-133.0 * YawVel.curr / YawVel.max); // Roll
+		Attitude.y = (int16_t) -0.102857 * pow(YawVel.curr /*rads*/, 1.162790);//(-133.0 * YawVel.curr / YawVel.max); // Roll
 		this->walk();
 		this->attackNearestPlane();
 
@@ -397,7 +397,7 @@ int8_t Plane::run()
 	{
 		Boid::retarget(Form[formation][pos]);
 		this->yaw(leader);
-		Attitude.y = (int16_t) -229.86 * pow(YawVel.curr, 0.86); // Roll
+		Attitude.y = (int16_t) -0.102857 * pow(YawVel.curr /*rads*/, 1.162790); // Roll
 		this->walk();
 		this->attackNearestPlane();
 
