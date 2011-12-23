@@ -356,7 +356,7 @@ void Boid::yaw(Boid *leader)
 	Yaw.target = this->angle(Yaw.target);
 	// ajusta velocidade angular
 	// YawVel = Yawtarget-Yaw;
-	YawVel.curr = this->angleDef(Yaw.target - Yaw.curr);
+	YawVel.curr = this->angleDef(Yaw.target - Yaw.curr); // TODO: Change this to YawVel.accel
 	if(YawVel.curr > YawVel.max)
 		YawVel.curr = YawVel.max;
 	else if(YawVel.curr < YawVel.min)
