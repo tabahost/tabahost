@@ -1277,21 +1277,21 @@ void FireAck(client_t *source, client_t *dest, u_int32_t dist, u_int8_t animate)
 		{
 			j = AddKiller(dest, source);
 
-			if((u_int8_t)economy->value)
+			if(j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
 			{
-				if(j >= 0 && j < MAX_HITBY && part >= 0 && part < 32)
-				{
-					sdamage = (double) (10.0 * logf(1.0 + 100.0 * 40.0 / (double) (((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
+				sdamage = (double) (10.0 * logf(1.0 + 100.0 * 40.0 / (double) (((dest->armor.points[part] <= 0) ? 0 : dest->armor.points[part]) + 1.0)));
 
-					if(sdamage >= 0)
-					{
-						dest->hitby[j].damage += sdamage;
-					}
-					else
-					{
-						Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0
-								: dest->armor.points[part]));
-					}
+				if(sdamage >= 0)
+				{
+					if(economy->value < 1)
+						sdamage *= 0.0001;
+
+					dest->hitby[j].damage += sdamage;
+				}
+				else
+				{
+					Com_Printf(VERBOSE_WARNING, "FireAck(sdamage) < 0, (1.0 + 100.0 * 40.0 / (%d + 1.0))\n", ((dest->armor.points[part] <= 0) ? 0
+							: dest->armor.points[part]));
 				}
 			}
 		}
@@ -2028,22 +2028,22 @@ u_int8_t HitStructsNear(int32_t x, int32_t y, int32_t z, u_int8_t type, u_int16_
 								{
 									killer = AddKiller(&clients[i], client);
 
-									if((u_int8_t)economy->value)
+									if(killer >= 0 && killer < MAX_HITBY && part >= 0 && part < 32)
 									{
-										if(killer >= 0 && killer < MAX_HITBY && part >= 0 && part < 32)
+										sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) munition->he / (double) (((clients[i].armor.points[part] <= 0) ? 0 : clients[i].armor.points[part]) + 1.0)));
+
+										if(sdamage >= 0)
 										{
-											sdamage = (double) (10.0 * logf(1.0 + 100.0 * (double) munition->he / (double) (((clients[i].armor.points[part] <= 0) ? 0 : clients[i].armor.points[part]) + 1.0)));
+											if(economy->value < 1)
+												sdamage *= 0.0001;
 
-											if(sdamage >= 0)
-											{
-												clients[i].hitby[killer].damage += sdamage;
+											clients[i].hitby[killer].damage += sdamage;
 
-											}
-											else
-											{
-												Com_Printf(VERBOSE_WARNING, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he,
-														((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
-											}
+										}
+										else
+										{
+											Com_Printf(VERBOSE_WARNING, "HitStructsNear(sdamage) < 0, (1.0 + 100.0 * %d / (%d + 1.0))\n", munition->he,
+													((clients[i].armor.points[PLACE_CENTERFUSE] <= 0) ? 0 : clients[i].armor.points[PLACE_CENTERFUSE]));
 										}
 									}
 								}
