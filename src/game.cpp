@@ -8695,8 +8695,8 @@ void UpdateIngameClients(u_int8_t attr)
 	}
 	else
 	{
-		fprintf(fp, " Callsign   Side    Status     Country       Connection\n");
-		fprintf(fp, "=======================================================\n");
+		fprintf(fp, " Callsign   Side    Status     Country       Connection      Squad\n");
+		fprintf(fp, "=======================================================================\n");
 
 		for(i = 0, j = 0; i < maxentities->value; i++)
 		{
@@ -8732,8 +8732,9 @@ void UpdateIngameClients(u_int8_t attr)
 						fprintf(fp, "CONNECTING  ");
 				}
 
-				fprintf(fp, "%-14s%s\n", GeoIP_country_name_by_addr(gi, clients[i].ip), !(clients[i].cancollide) ? "" : clients[i].connection == 0 ? "Stable"
-						: clients[i].connection == 1 ? "Fair" : clients[i].connection == 2 ? "Unstable" : "Poor");
+				fprintf(fp, "%-14s%s%-15s\n", GeoIP_country_name_by_addr(gi, clients[i].ip),
+						!(clients[i].cancollide) ? "" : clients[i].connection == 0 ? "Stable" : clients[i].connection == 1 ? "Fair" : clients[i].connection == 2 ? "Unstable" : "Poor",
+								clients[i].squadron ? Com_SquadronName(clients[i].squadron) : "None");
 
 				for(k = 0; k < maxentities->value; k++) // add sharing IP
 				{
