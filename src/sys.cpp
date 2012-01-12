@@ -107,6 +107,8 @@ static int console_textlen;
 void Sys_Init(void)
 {
 	u_int8_t i;
+	FILE *fp;
+
 	//remove LOCK files
 #ifndef _WIN32
 	Sys_RemoveFiles("./.LOCK");
@@ -148,6 +150,17 @@ void Sys_Init(void)
 	for(i = 0; i < MAX_LOGFILE; i++)
 	{
 		logfile[i] = NULL;
+	}
+
+	if(!(fp = fopen("wbserver.pid", "w")))
+	{
+		Com_Printf(VERBOSE_WARNING, "Sys_Init() register PID file \"wbserver.pid\"\n");
+		return;
+	}
+	else
+	{
+		fprintf(fp, "%d", getpid());
+		fclose(fp);
 	}
 }
 
