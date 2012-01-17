@@ -587,6 +587,10 @@ void ScoreFieldCapture(u_int8_t field)
 					else
 					{
 						Com_Printf(VERBOSE_DEBUG_SCORES, "Not InFlight\n");
+
+						sprintf(sql_query, "%sUPDATE score_common SET, totalscore = totalscore + '%.3f' WHERE player_id = '%u'; ",
+							sql_query, score, arena->fields[field].hitby[i].dbid);
+
 						if(IsFighter(NULL, arena->fields[field].hitby[i].plane))
 						{
 							sprintf(sql_query, "%sUPDATE score_fighter SET, capt_score = capt_score + '%.3f' WHERE player_id = '%u'; ", sql_query, score,
@@ -774,6 +778,9 @@ double ScorePieceDamage(int8_t killer, double event_cost, client_t *client)
 						}
 						else
 						{
+							sprintf(my_query, "%sUPDATE score_common SET totalscore = totalscore + '%.3f' WHERE player_id = '%u'; ",
+								my_query, score, client->hitby[i].dbid);
+
 							if(IsFighter(NULL, client->hitby[i].plane))
 							{
 								sprintf(my_query, "%sUPDATE score_fighter SET fighter_score = fighter_score + '%.3f' WHERE player_id = '%u'; ", my_query,
