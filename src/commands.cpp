@@ -2786,12 +2786,6 @@ void Cmd_StartFau(u_int32_t dist, double angle, u_int8_t attached, client_t *cli
 		return;
 	}
 
-	if(arena->fields[client->field - 1].warehouse)
-	{
-		PPrintf(client, RADIO_YELLOW, "You can't launch V-1 from this field. Warehouse is destroyed!");
-		return;
-	}
-
 	if(angle * 10 > 3599)
 	{
 		PPrintf(client, RADIO_YELLOW, "angle: 0<->359.9 degrees");

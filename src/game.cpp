@@ -450,15 +450,13 @@ void CheckArenaRules(void)
 
 								SetBuildingStatus(&arena->fields[i].buildings[j], arena->fields[i].buildings[j].status, NULL);
 
+
+								// Make some action when certan type of structure revives
 								if(arena->fields[i].buildings[j].type == BUILD_TOWER) // to return flag color
 								{
 									//							close = arena->fields[i].abletocapture;
 									Cmd_Capt(i, arena->fields[i].country, NULL);
 									//							arena->fields[i].abletocapture = close;
-								}
-								else if(arena->fields[i].buildings[j].type == BUILD_WARE) // to cancel warehouse effect
-								{
-									arena->fields[i].warehouse = 0;
 								}
 							}
 							//					else if(arena->fields[i].buildings[j].status == 1 && arena->fields[i].buildings[j].timer < (u_int32_t)(rebuildtime->value/2))
@@ -880,29 +878,6 @@ void CheckArenaRules(void)
 					arena->fields[i].underattack = 0;
 			}
 
-			if(arena->fields[i].warehouse && !arcade->value) // warehouse effect
-			{
-				if((arena->fields[i].warehouse + 60000) <= arena->frame)
-				{
-					for(j = 0; j < MAX_BUILDINGS; j++)
-					{
-						if(!arena->fields[i].buildings[j].field)
-						{
-							break;
-						}
-						else if((arena->fields[i].buildings[j].type >= BUILD_50CALACK && arena->fields[i].buildings[j].type <= BUILD_88MMFLAK)
-								|| (arena->fields[i].buildings[j].type == BUILD_ARTILLERY))
-						{
-							arena->fields[i].buildings[j].status = 2;
-							arena->fields[i].buildings[j].timer += 60000; // 10min // changed = to +=
-						}
-					}
-
-					SendFieldStatus(i, NULL);
-					arena->fields[i].warehouse = 0;
-				}
-			}
-
 			// Check field closed
 			if((arena->fields[i].type <= FIELD_MAIN) || (arena->fields[i].type >= FIELD_WB3POST)) //!= FIELD_CV && arena->fields[i].type != FIELD_CARGO && arena->fields[i].type != FIELD_DD && arena->fields[i].type != FIELD_SUBMARINE)
 			{
@@ -1004,7 +979,6 @@ void CheckArenaRules(void)
 					}
 
 					arena->fields[i].closed = 0;
-					arena->fields[i].warehouse = 0; // to avoid field be reclosed by warehouse effect
 					BPrintf(RADIO_YELLOW, "Field %d reopened", i + 1);
 				}
 			}
@@ -7752,14 +7726,10 @@ u_int8_t AddBuildingDamage(building_t *building, u_int16_t he, u_int16_t ap, cli
 
 					if(!arcade->value)
 					{
+						// Make actions when certain type of structure is destroyed
 						if(building->type == BUILD_HANGAR)
 						{
 							ReducePlanes(building->field);
-						}
-						else if(building->type == BUILD_WARE)
-						{
-							arena->fields[building->field - 1].warehouse = arena->frame;
-							// IncreaseAcksReup(building->field); // obsolete
 						}
 					}
 				}
