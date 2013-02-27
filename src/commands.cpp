@@ -365,6 +365,7 @@ void Cmd_Move(char *field, int country, client_t *client)
 			client->field = 1;
 			client->hq = 1;
 			client->country = 0;
+			client->countrytime = 0;
 			// client->deck = NULL;
 			PPrintf(client, RADIO_YELLOW, "You moved to HQ, please chose your country");
 			PPrintf(client, RADIO_YELLOW, "Type .country 1 for Allies or .country 3 for Axis");
@@ -476,6 +477,8 @@ void Cmd_Move(char *field, int country, client_t *client)
 		else
 		{
 			PPrintf(client, RADIO_YELLOW, "Can't change country now, wait for %s", Com_TimeSeconds(client->countrytime - time(NULL)));
+//			Com_Printf(VERBOSE_DEBUG, "Field: %s, Country: %d", field, country);
+//			Com_Printf(VERBOSE_DEBUG, "Client: country %d, countrytime %d", client->country, client->countrytime);
 			return;
 		}
 	}
