@@ -1,2 +1,0 @@
-cd /home/tabajara/server
-screen -A -m -d -S wbserver nice -n -10 gdb -d ./source -x gdb.commands wbserver
