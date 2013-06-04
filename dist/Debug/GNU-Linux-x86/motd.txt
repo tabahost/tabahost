@@ -1,0 +1,10 @@
+*************************************
+To test the Damage Model, use
+
+.startdrone field plane angle
+
+e.g: .startdrone 10 23 0
+
+This will fire a destructable drone
+
+                -=Ø=-

@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configurationDescriptor version="88">
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+      <itemPath>Boid.h</itemPath>
+      <itemPath>Plane.h</itemPath>
+      <itemPath>Ship.h</itemPath>
+      <itemPath>Vehicle.h</itemPath>
+      <itemPath>arena.h</itemPath>
+      <itemPath>client.h</itemPath>
+      <itemPath>commands.h</itemPath>
+      <itemPath>common.h</itemPath>
+      <itemPath>drone.h</itemPath>
+      <itemPath>game.h</itemPath>
+      <itemPath>net.h</itemPath>
+      <itemPath>scores.h</itemPath>
+      <itemPath>shared.h</itemPath>
+      <itemPath>sys.h</itemPath>
+      <itemPath>vars.h</itemPath>
+      <itemPath>wbserver.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <itemPath>Boid.cpp</itemPath>
+      <itemPath>Plane.cpp</itemPath>
+      <itemPath>Ship.cpp</itemPath>
+      <itemPath>Vehicle.cpp</itemPath>
+      <itemPath>arena.cpp</itemPath>
+      <itemPath>client.cpp</itemPath>
+      <itemPath>commands.cpp</itemPath>
+      <itemPath>common.cpp</itemPath>
+      <itemPath>drone.cpp</itemPath>
+      <itemPath>game.cpp</itemPath>
+      <itemPath>lua.cpp</itemPath>
+      <itemPath>net.cpp</itemPath>
+      <itemPath>scores.cpp</itemPath>
+      <itemPath>sys.cpp</itemPath>
+      <itemPath>vars.cpp</itemPath>
+      <itemPath>wbserver.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <architecture>1</architecture>
+          <commandlineTool>g++</commandlineTool>
+          <commandLine>-rdynamic -ffast-math -fpack-struct -c -fmessage-length=0</commandLine>
+        </ccTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wbserver</output>
+          <commandlineTool>g++ -m32</commandlineTool>
+          <linkerLibItems>
+            <linkerLibStdlibItem>DataCompression</linkerLibStdlibItem>
+            <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
+            <linkerLibLibItem>mysqlclient</linkerLibLibItem>
+            <linkerLibLibItem>GeoIP</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="Boid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Boid.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Plane.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Plane.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Ship.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Ship.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Vehicle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Vehicle.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="arena.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="arena.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="client.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="client.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="commands.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="commands.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="common.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drone.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="drone.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="game.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="game.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="net.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="net.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="scores.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="scores.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="shared.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sys.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="sys.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="vars.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="vars.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wbserver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="wbserver.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <architecture>1</architecture>
+          <commandlineTool>g++</commandlineTool>
+          <commandLine>-rdynamic -ffast-math -fpack-struct -c -fmessage-length=0</commandLine>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wbserver</output>
+          <commandlineTool>g++ -m32</commandlineTool>
+          <linkerLibItems>
+            <linkerLibStdlibItem>DataCompression</linkerLibStdlibItem>
+            <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
+            <linkerLibLibItem>mysqlclient</linkerLibLibItem>
+            <linkerLibLibItem>GeoIP</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="Boid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Boid.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Plane.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Plane.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Ship.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Ship.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Vehicle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Vehicle.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="arena.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="arena.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="client.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="client.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="commands.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="commands.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="common.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drone.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="drone.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="game.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="game.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="net.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="net.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="scores.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="scores.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="shared.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sys.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="sys.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="vars.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="vars.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wbserver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="wbserver.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+  </confs>
+</configurationDescriptor>
