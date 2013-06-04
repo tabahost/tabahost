@@ -24,6 +24,10 @@
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
+      <itemPath>../../THServer/docs/Damage Model_final_seu-ze.xls</itemPath>
+      <itemPath>../../THServer/docs/dm_wb3.xls</itemPath>
+      <itemPath>../../THServer/docs/rps.xls</itemPath>
+      <itemPath>../../THServer/docs/tabahost_wb3.sql.zip</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -86,6 +90,20 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../../THServer/docs/Damage Model_final_seu-ze.xls"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../THServer/docs/dm_wb3.xls" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../THServer/docs/rps.xls" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../THServer/docs/tabahost_wb3.sql.zip"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="Boid.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Boid.h" ex="false" tool="3" flavor2="0">
@@ -185,6 +203,20 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../../THServer/docs/Damage Model_final_seu-ze.xls"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../THServer/docs/dm_wb3.xls" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../THServer/docs/rps.xls" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../THServer/docs/tabahost_wb3.sql.zip"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="Boid.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Boid.h" ex="false" tool="3" flavor2="0">
