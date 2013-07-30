@@ -57,8 +57,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-m32 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0
-CXXFLAGS=-m32 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0
+CCFLAGS=-m32 -rdynamic -ffast-math -c -fmessage-length=0
+CXXFLAGS=-m32 -rdynamic -ffast-math -c -fmessage-length=0
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -80,82 +80,82 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wbserver: ${OBJECTFILES}
 ${OBJECTDIR}/Boid.o: Boid.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Boid.o Boid.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Boid.o Boid.cpp
 
 ${OBJECTDIR}/Plane.o: Plane.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Plane.o Plane.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Plane.o Plane.cpp
 
 ${OBJECTDIR}/Ship.o: Ship.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Ship.o Ship.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Ship.o Ship.cpp
 
 ${OBJECTDIR}/Vehicle.o: Vehicle.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Vehicle.o Vehicle.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/Vehicle.o Vehicle.cpp
 
 ${OBJECTDIR}/arena.o: arena.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/arena.o arena.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/arena.o arena.cpp
 
 ${OBJECTDIR}/client.o: client.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/client.o client.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/client.o client.cpp
 
 ${OBJECTDIR}/commands.o: commands.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/commands.o commands.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/commands.o commands.cpp
 
 ${OBJECTDIR}/common.o: common.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/common.o common.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/common.o common.cpp
 
 ${OBJECTDIR}/drone.o: drone.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/drone.o drone.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/drone.o drone.cpp
 
 ${OBJECTDIR}/game.o: game.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/game.o game.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/game.o game.cpp
 
 ${OBJECTDIR}/lua.o: lua.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/lua.o lua.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/lua.o lua.cpp
 
 ${OBJECTDIR}/net.o: net.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/net.o net.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/net.o net.cpp
 
 ${OBJECTDIR}/scores.o: scores.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/scores.o scores.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/scores.o scores.cpp
 
 ${OBJECTDIR}/sys.o: sys.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/sys.o sys.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/sys.o sys.cpp
 
 ${OBJECTDIR}/vars.o: vars.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/vars.o vars.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/vars.o vars.cpp
 
 ${OBJECTDIR}/wbserver.o: wbserver.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.cc) -O2 -rdynamic -ffast-math -fpack-struct -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/wbserver.o wbserver.cpp
+	$(COMPILE.cc) -O2 -rdynamic -ffast-math -c -fmessage-length=0 -MMD -MP -MF $@.d -o ${OBJECTDIR}/wbserver.o wbserver.cpp
 
 # Subprojects
 .build-subprojects:

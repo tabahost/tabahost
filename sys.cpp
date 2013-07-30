@@ -43,53 +43,54 @@ GeoIP *gi; //extern
 #ifndef _WIN32
 static u_int32_t secbase;
 #endif
+
 u_int32_t Sys_Milliseconds(void)
 #ifdef _WIN32
 {
-	u_int32_t curtime;
-	static int base;
-	static u_short initialized = 0;
+    u_int32_t curtime;
+    static int base;
+    static u_short initialized = 0;
 
-	if (!initialized)
-	{
-		base = timeGetTime(); // & 0xffff0000;
-		initialized = 1;
-	}
+    if (!initialized)
+    {
+        base = timeGetTime(); // & 0xffff0000;
+        initialized = 1;
+    }
 
-	curtime = timeGetTime() - base;
+    curtime = timeGetTime() - base;
 
-	return curtime;
+    return curtime;
 }
 #else
 {
-	struct timeval tp;
-	struct timezone tzp;
-	u_int32_t curtime;
+    struct timeval tp;
+    struct timezone tzp;
+    u_int32_t curtime;
 
-	gettimeofday(&tp, &tzp);
+    gettimeofday(&tp, &tzp);
 
-	if(!secbase)
-	{
-		secbase = tp.tv_sec;
-		return tp.tv_usec / 1000;
-	}
+    if (!secbase)
+    {
+        secbase = tp.tv_sec;
+        return tp.tv_usec / 1000;
+    }
 
-	curtime = (tp.tv_sec - secbase) * 1000 + tp.tv_usec / 1000;
+    curtime = (tp.tv_sec - secbase) * 1000 + tp.tv_usec / 1000;
 
-	return curtime;
+    return curtime;
 }
 #endif
 
 u_int32_t Sys_ResetMilliseconds(void)
 {
-	struct timeval tp;
-	struct timezone tzp;
+    struct timeval tp;
+    struct timezone tzp;
 
-	gettimeofday(&tp, &tzp);
+    gettimeofday(&tp, &tzp);
 
-	secbase = tp.tv_sec;
+    secbase = tp.tv_sec;
 
-	return tp.tv_usec / 1000;
+    return tp.tv_usec / 1000;
 }
 
 #ifdef _WIN32
@@ -106,62 +107,70 @@ static int console_textlen;
 
 void Sys_Init(void)
 {
-	u_int8_t i;
-	FILE *fp;
+    u_int8_t i;
+    FILE *fp;
 
-	//remove LOCK files
+    // check pack structures
+
+    if (sizeof (checkpack_t) != 387)
+    {
+        Com_Printf(VERBOSE_ERROR, "Sys_Init(): Error packing structures\n");
+        ExitServer(1);
+    }
+
+    //remove LOCK files
 #ifndef _WIN32
-	Sys_RemoveFiles("./.LOCK");
-	Sys_RemoveFiles("./players/.LOCK");
-	Sys_RemoveFiles("./squads/.LOCK");
+    Sys_RemoveFiles("./.LOCK");
+    Sys_RemoveFiles("./players/.LOCK");
+    Sys_RemoveFiles("./squads/.LOCK");
 
 #else
-	system("del *.LOCK");
-	system("del .\\players\\*.LOCK");
-	system("del .\\squads\\*.LOCK");
-	// 	system("del .\\fields\\*.LOCK"); // not needed because Cmd_Field() doesnt share info
+    system("del *.LOCK");
+    system("del .\\players\\*.LOCK");
+    system("del .\\squads\\*.LOCK");
+    // 	system("del .\\fields\\*.LOCK"); // not needed because Cmd_Field() doesnt share info
 
-	//unlink(FILE_INGAME_LOCK);
+    //unlink(FILE_INGAME_LOCK);
 #endif
 
 #ifdef _WIN32
-	if(!FreeConsole())
-	Com_Printf(VERBOSE_WARNING, "Couldn't detach console (%u)\n", GetLastError());
-	if(!AllocConsole())
-	Com_Printf(VERBOSE_WARNING, "Couldn't create dedicated server console (%u)\n", GetLastError());
+    if (!FreeConsole())
+        Com_Printf(VERBOSE_WARNING, "Couldn't detach console (%u)\n", GetLastError());
+    if (!AllocConsole())
+        Com_Printf(VERBOSE_WARNING, "Couldn't create dedicated server console (%u)\n", GetLastError());
 
-	hinput = GetStdHandle(STD_INPUT_HANDLE);
-	houtput = GetStdHandle(STD_OUTPUT_HANDLE);
+    hinput = GetStdHandle(STD_INPUT_HANDLE);
+    houtput = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	signal(SIGBREAK, Sys_SigHandler); /* Ctrl-Break */
+    signal(SIGBREAK, Sys_SigHandler); /* Ctrl-Break */
 #else
-	signal(SIGQUIT, Sys_SigHandler); /* Quit */
-	signal(SIGKILL, Sys_SigHandler); /* Killed */
-	signal(SIGHUP, Sys_SigHandler); /* Hangup */
-	signal(SIGPIPE, Sys_SigHandler); /* Broken pipe */
+    signal(SIGQUIT, Sys_SigHandler); /* Quit */
+    signal(SIGKILL, Sys_SigHandler); /* Killed */
+    signal(SIGHUP, Sys_SigHandler); /* Hangup */
+    signal(SIGPIPE, Sys_SigHandler); /* Broken pipe */
 #endif
-	signal(SIGFPE, Sys_SigHandler); /* floating point problem */
-	signal(SIGSEGV, Sys_SigHandler); /* segment violation trap 13 */
-	signal(SIGABRT, Sys_SigHandler); /* abnormal termination */
-	signal(SIGILL, Sys_SigHandler); /* illegal instruction. (Bug in the code generator) */
-	signal(SIGTERM, Sys_SigHandler); /* termination signal from kill */
-	signal(SIGINT, Sys_SigHandler); /* Interrupt, normally Ctrl-C */
+    signal(SIGFPE, Sys_SigHandler); /* floating point problem */
+    signal(SIGSEGV, Sys_SigHandler); /* segment violation trap 13 */
+    signal(SIGABRT, Sys_SigHandler); /* abnormal termination */
+    signal(SIGILL, Sys_SigHandler); /* illegal instruction. (Bug in the code generator) */
+    signal(SIGTERM, Sys_SigHandler); /* termination signal from kill */
+    signal(SIGINT, Sys_SigHandler); /* Interrupt, normally Ctrl-C */
 
-	for(i = 0; i < MAX_LOGFILE; i++)
-	{
-		logfile[i] = NULL;
-	}
+    for (i = 0; i < MAX_LOGFILE; i++)
+    {
+        logfile[i] = NULL;
+    }
 
-	if(!(fp = fopen("wbserver.pid", "w")))
-	{
-		Com_Printf(VERBOSE_WARNING, "Sys_Init() register PID file \"wbserver.pid\"\n");
-		return;
-	}
-	else
-	{
-		fprintf(fp, "%d", getpid());
-		fclose(fp);
-	}
+    if (!(fp = fopen("wbserver.pid", "w")))
+    {
+        Com_Printf(VERBOSE_WARNING, "Sys_Init() register PID file \"wbserver.pid\"\n");
+        return;
+    }
+    else
+    {
+        fprintf(fp, "%d", getpid());
+        fclose(fp);
+    }
 }
 
 /**
@@ -172,20 +181,20 @@ void Sys_Init(void)
 
 void Sys_PrintTrace(void)
 {
-	void *array[10];
-	size_t size;
-	char **strings;
-	size_t i;
+    void *array[10];
+    size_t size;
+    char **strings;
+    size_t i;
 
-	size = backtrace(array, 10);
-	strings = backtrace_symbols(array, size);
+    size = backtrace(array, 10);
+    strings = backtrace_symbols(array, size);
 
-	Com_Printf(VERBOSE_DEBUG, "Obtained %zd stack frames.\n", size);
+    Com_Printf(VERBOSE_DEBUG, "Obtained %zd stack frames.\n", size);
 
-	for(i = 0; i < size; i++)
-		Com_Printf(VERBOSE_DEBUG, "%s\n", strings[i]);
+    for (i = 0; i < size; i++)
+        Com_Printf(VERBOSE_DEBUG, "%s\n", strings[i]);
 
-	free(strings);
+    free(strings);
 }
 
 /**
@@ -196,44 +205,44 @@ void Sys_PrintTrace(void)
 
 void Sys_RemoveFiles(const char *pathfile)
 {
-	//FILE *fp;
-	DIR *dp;
-	struct dirent *ep;
-	char path[256];
-	char file[64];
-	char *temp;
+    //FILE *fp;
+    DIR *dp;
+    struct dirent *ep;
+    char path[256];
+    char file[64];
+    char *temp;
 
-	strncpy(path, pathfile, 256);
+    strncpy(path, pathfile, 256);
 
-	temp = strrchr(path, '/');
+    temp = strrchr(path, '/');
 
-	if(!temp)
-	{
-		Com_Printf(VERBOSE_WARNING, "RemoveFiles(): Invalid pointer\n");
-		return;
-	}
+    if (!temp)
+    {
+        Com_Printf(VERBOSE_WARNING, "RemoveFiles(): Invalid pointer\n");
+        return;
+    }
 
-	strncpy(file, temp + 1, 64);
+    strncpy(file, temp + 1, 64);
 
-	*temp = 0;
-	dp = opendir(path);
+    *temp = 0;
+    dp = opendir(path);
 
-	if(dp != NULL)
-	{
-		while((ep = readdir(dp)))
-		{
-			if(strstr(ep->d_name, file))
-			{
-				Com_Printf(VERBOSE_ALWAYS, "Deleting file %s/%s\n", path, ep->d_name);
-				sprintf(temp, "/%s", ep->d_name);
-				unlink(path);
-				*temp = 0;
-			}
-		}
-		closedir(dp);
-	}
-	else
-		Com_Printf(VERBOSE_WARNING, "RemoveFiles(): Couldn't open the directory\n");
+    if (dp != NULL)
+    {
+        while ((ep = readdir(dp)))
+        {
+            if (strstr(ep->d_name, file))
+            {
+                Com_Printf(VERBOSE_ALWAYS, "Deleting file %s/%s\n", path, ep->d_name);
+                sprintf(temp, "/%s", ep->d_name);
+                unlink(path);
+                *temp = 0;
+            }
+        }
+        closedir(dp);
+    }
+    else
+        Com_Printf(VERBOSE_WARNING, "RemoveFiles(): Couldn't open the directory\n");
 }
 
 /**
@@ -244,33 +253,33 @@ void Sys_RemoveFiles(const char *pathfile)
 
 void Sys_SQL_Init(void)
 {
-	u_int32_t port = 3306; /*default = 3306*/
-	u_int32_t flags = 0; // CLIENT_MULTI_STATEMENTS
+    u_int32_t port = 3306; /*default = 3306*/
+    u_int32_t flags = 0; // CLIENT_MULTI_STATEMENTS
 
-	//	mysql_library_init();
+    //	mysql_library_init();
 
-	if(!mysql_init(&my_sock))
-	{
-		Com_Printf(VERBOSE_ERROR, "Sys_SQL_Init(): Error initializing my_sock\n");
-		ExitServer(1);
-	}
-	else
-	{
-		Com_Printf(VERBOSE_ALWAYS, "MySQL Initialized\n");
-	}
+    if (!mysql_init(&my_sock))
+    {
+        Com_Printf(VERBOSE_ERROR, "Sys_SQL_Init(): Error initializing my_sock\n");
+        ExitServer(1);
+    }
+    else
+    {
+        Com_Printf(VERBOSE_ALWAYS, "MySQL Initialized\n");
+    }
 
-	if(mysql_options(&my_sock, MYSQL_OPT_RECONNECT, "1"))
-		Com_Printf(VERBOSE_WARNING, "Sys_SQL_Init(): MYSQL_OPT_RECONNECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
+    if (mysql_options(&my_sock, MYSQL_OPT_RECONNECT, "1"))
+        Com_Printf(VERBOSE_WARNING, "Sys_SQL_Init(): MYSQL_OPT_RECONNECT error %d: %s\n", mysql_errno(&my_sock), mysql_error(&my_sock));
 
-	if(!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, port, NULL /*unix_socket*/, flags))
-	{
-		Com_Printf(VERBOSE_ERROR, "Sys_SQL_Init(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
-		ExitServer(1);
-	}
-	else
-	{
-		Com_Printf(VERBOSE_ALWAYS, "MySQL connected successfully to %s:%s\n", sqlserver->string, database->string);
-	}
+    if (!mysql_real_connect(&my_sock, sqlserver->string, dbuser->string, dbpasswd->string, database->string, port, NULL /*unix_socket*/, flags))
+    {
+        Com_Printf(VERBOSE_ERROR, "Sys_SQL_Init(): Failed to connect to %s, Error %s \n", sqlserver->string, mysql_error(&my_sock));
+        ExitServer(1);
+    }
+    else
+    {
+        Com_Printf(VERBOSE_ALWAYS, "MySQL connected successfully to %s:%s\n", sqlserver->string, database->string);
+    }
 }
 
 /**
@@ -281,11 +290,11 @@ void Sys_SQL_Init(void)
 
 void Sys_SQL_Close(void)
 {
-	Com_Printf(VERBOSE_ALWAYS, "Closing mySQL System\n");
+    Com_Printf(VERBOSE_ALWAYS, "Closing mySQL System\n");
 
-	mysql_close(&my_sock);
+    mysql_close(&my_sock);
 
-	mysql_library_end();
+    mysql_library_end();
 }
 
 /**
@@ -296,25 +305,25 @@ void Sys_SQL_Close(void)
 
 void Sys_GeoIP_Init(void)
 {
-	if(!(gi = GeoIP_open("GeoIP.dat", GEOIP_MEMORY_CACHE)))//GEOIP_STANDARD)))
-	{
-		Com_Printf(VERBOSE_ERROR, "Sys_GeoIP_Init(): Error initializing gi\n");
-		ExitServer(1);
-	}
-	else
-	{
-		Com_Printf(VERBOSE_ALWAYS, "GeoIP Module Initialized\n");
-	}
+    if (!(gi = GeoIP_open("GeoIP.dat", GEOIP_MEMORY_CACHE)))//GEOIP_STANDARD)))
+    {
+        Com_Printf(VERBOSE_ERROR, "Sys_GeoIP_Init(): Error initializing gi\n");
+        ExitServer(1);
+    }
+    else
+    {
+        Com_Printf(VERBOSE_ALWAYS, "GeoIP Module Initialized\n");
+    }
 }
 
 void Sys_GeoIP_Close(void)
 {
-	if(gi)
-	{
-		Com_Printf(VERBOSE_ALWAYS, "Closing GeoIP Module\n");
+    if (gi)
+    {
+        Com_Printf(VERBOSE_ALWAYS, "Closing GeoIP Module\n");
 
-		GeoIP_delete(gi);
-	}
+        GeoIP_delete(gi);
+    }
 }
 
 /**
@@ -325,81 +334,81 @@ void Sys_GeoIP_Close(void)
 
 void Sys_SigHandler(int s)
 {
-	int n = 0;
+    int n = 0;
 
-	switch(s)
-	{
+    switch (s)
+    {
 #ifdef _WIN32
-		case SIGBREAK:
-		signal(SIGBREAK, Sys_SigHandler);
-		Com_Printf(VERBOSE_WARNING, "Got signal SIGBREAK\n");
-		break;
+    case SIGBREAK:
+        signal(SIGBREAK, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGBREAK\n");
+        break;
 #else
-		case SIGQUIT:
-			signal(SIGQUIT, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGQUIT\n");
-			break;
-		case SIGKILL:
-			signal(SIGKILL, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGKILL\n");
-			n = 1;
-			break;
-		case SIGHUP:
-			signal(SIGHUP, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGHUP\n");
-			return;
-		case SIGPIPE:
-			signal(SIGPIPE, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGPIPE\n");
-			return;
+    case SIGQUIT:
+        signal(SIGQUIT, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGQUIT\n");
+        break;
+    case SIGKILL:
+        signal(SIGKILL, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGKILL\n");
+        n = 1;
+        break;
+    case SIGHUP:
+        signal(SIGHUP, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGHUP\n");
+        return;
+    case SIGPIPE:
+        signal(SIGPIPE, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGPIPE\n");
+        return;
 #endif
-		case SIGFPE:
-			signal(SIGFPE, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGFPE\n");
+    case SIGFPE:
+        signal(SIGFPE, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGFPE\n");
 
 #ifdef _WIN32
-			//		    _fpreset(); //we can clear math proc state with this function under Win32,
-			//if really needed with the view of "total cleaner" longjmp()
+        //		    _fpreset(); //we can clear math proc state with this function under Win32,
+        //if really needed with the view of "total cleaner" longjmp()
 #endif
-			longjmp(debug_buffer, 1);
+        longjmp(debug_buffer, 1);
 
-			n = 1;
-			break;
-		case SIGSEGV:
-			signal(SIGSEGV, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGSEGV\n");
-			longjmp(debug_buffer, 1);
-			n = 1;
-			break;
-		case SIGABRT:
-			signal(SIGABRT, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGABRT\n");
-			n = 1;
-			break;
-		case SIGILL:
-			signal(SIGILL, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGILL\n");
-			n = 1;
-			break;
-		case SIGTERM:
-			signal(SIGTERM, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGTERM\n");
-			n = 1;
-			break;
-		case SIGINT:
-			signal(SIGINT, Sys_SigHandler);
-			Com_Printf(VERBOSE_WARNING, "Got signal SIGINT\n");
-			if(!consoleinput->value)
-			{
-				Var_Set("consoleinput", "1");
-				return;
-			}
-			break;
-	}
+        n = 1;
+        break;
+    case SIGSEGV:
+        signal(SIGSEGV, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGSEGV\n");
+        longjmp(debug_buffer, 1);
+        n = 1;
+        break;
+    case SIGABRT:
+        signal(SIGABRT, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGABRT\n");
+        n = 1;
+        break;
+    case SIGILL:
+        signal(SIGILL, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGILL\n");
+        n = 1;
+        break;
+    case SIGTERM:
+        signal(SIGTERM, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGTERM\n");
+        n = 1;
+        break;
+    case SIGINT:
+        signal(SIGINT, Sys_SigHandler);
+        Com_Printf(VERBOSE_WARNING, "Got signal SIGINT\n");
+        if (!consoleinput->value)
+        {
+            Var_Set("consoleinput", "1");
+            return;
+        }
+        break;
+    }
 
-	Com_Printf(VERBOSE_ERROR, "Got signal (%d), shutting down...\n", s);
+    Com_Printf(VERBOSE_ERROR, "Got signal (%d), shutting down...\n", s);
 
-	ExitServer(n);
+    ExitServer(n);
 
 }
 
@@ -410,104 +419,106 @@ void Sys_SigHandler(int s)
  */
 
 #ifdef _WIN32
-char *Sys_ConsoleInput (void)
-{
-	INPUT_RECORD records[1024];
-	char ch;
-	u_int32_t numevents, numread;
-	u_int32_t temp;
 
-	for(;;)
-	{
-		if(!GetNumberOfConsoleInputEvents (hinput, &numevents))
-		{
-			Com_Printf(VERBOSE_WARNING, "Error getting # of console events\n");
-			ExitServer(1);
-		}
-
-		if(numevents <= 0)
-		break;
-
-		if(!ReadConsoleInput(hinput, records, 1, &numread))
-		Com_Printf(VERBOSE_WARNING, "Error reading console input\n");
-
-		if(numread != 1)
-		Com_Printf(VERBOSE_WARNING, "Couldn't read console input\n");
-
-		if(records[0].EventType == KEY_EVENT)
-		{
-			if(!records[0].Event.KeyEvent.bKeyDown)
-			{
-				ch = records[0].Event.KeyEvent.uChar.AsciiChar;
-
-				switch(ch)
-				{
-					case '\r':
-					WriteFile(houtput, "\r\n", 2, &temp, NULL);
-
-					if(console_textlen)
-					{
-						console_text[console_textlen] = 0;
-						console_textlen = 0;
-						return console_text;
-					}
-					break;
-
-					case '\b':
-					if(console_textlen)
-					{
-						console_textlen--;
-						WriteFile(houtput, "\b \b", 3, &temp, NULL);
-					}
-					break;
-
-					default:
-					if(ch >= ' ')
-					{
-						if(console_textlen < sizeof(console_text)-2)
-						{
-							WriteFile(houtput, &ch, 1, &temp, NULL);
-							console_text[console_textlen] = ch;
-							console_textlen++;
-						}
-					}
-					break;
-				}
-			}
-		}
-	}
-
-	return NULL;
-}
-#else
 char *Sys_ConsoleInput(void)
 {
-	static char buff[256];
-	int len;
-	fd_set fdset;
-	struct timeval timeout;
+    INPUT_RECORD records[1024];
+    char ch;
+    u_int32_t numevents, numread;
+    u_int32_t temp;
 
-	FD_ZERO(&fdset);
-	FD_SET(0, &fdset); // stdin
+    for (;;)
+    {
+        if (!GetNumberOfConsoleInputEvents(hinput, &numevents))
+        {
+            Com_Printf(VERBOSE_WARNING, "Error getting # of console events\n");
+            ExitServer(1);
+        }
 
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
+        if (numevents <= 0)
+            break;
 
-	if(select(1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(0, &fdset))
-		return NULL;
-	// http://www.opengroup.org/onlinepubs/000095399/functions/read.html
+        if (!ReadConsoleInput(hinput, records, 1, &numread))
+            Com_Printf(VERBOSE_WARNING, "Error reading console input\n");
 
-	len = read(0, buff, sizeof(buff));
+        if (numread != 1)
+            Com_Printf(VERBOSE_WARNING, "Couldn't read console input\n");
 
-	if(!len) // EOF
-		return NULL;
+        if (records[0].EventType == KEY_EVENT)
+        {
+            if (!records[0].Event.KeyEvent.bKeyDown)
+            {
+                ch = records[0].Event.KeyEvent.uChar.AsciiChar;
 
-	if(len < 1)
-		return NULL;
+                switch (ch)
+                {
+                case '\r':
+                    WriteFile(houtput, "\r\n", 2, &temp, NULL);
 
-	buff[len - 1] = 0; // cut off \n
+                    if (console_textlen)
+                    {
+                        console_text[console_textlen] = 0;
+                        console_textlen = 0;
+                        return console_text;
+                    }
+                    break;
 
-	return buff;
+                case '\b':
+                    if (console_textlen)
+                    {
+                        console_textlen--;
+                        WriteFile(houtput, "\b \b", 3, &temp, NULL);
+                    }
+                    break;
+
+                default:
+                    if (ch >= ' ')
+                    {
+                        if (console_textlen < sizeof (console_text) - 2)
+                        {
+                            WriteFile(houtput, &ch, 1, &temp, NULL);
+                            console_text[console_textlen] = ch;
+                            console_textlen++;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    return NULL;
+}
+#else
+
+char *Sys_ConsoleInput(void)
+{
+    static char buff[256];
+    int len;
+    fd_set fdset;
+    struct timeval timeout;
+
+    FD_ZERO(&fdset);
+    FD_SET(0, &fdset); // stdin
+
+    timeout.tv_sec = 0;
+    timeout.tv_usec = 0;
+
+    if (select(1, &fdset, NULL, NULL, &timeout) == -1 || !FD_ISSET(0, &fdset))
+        return NULL;
+    // http://www.opengroup.org/onlinepubs/000095399/functions/read.html
+
+    len = read(0, buff, sizeof (buff));
+
+    if (!len) // EOF
+        return NULL;
+
+    if (len < 1)
+        return NULL;
+
+    buff[len - 1] = 0; // cut off \n
+
+    return buff;
 }
 #endif
 
@@ -519,18 +530,18 @@ char *Sys_ConsoleInput(void)
 
 int8_t Sys_LockFile(const char *file)
 {
-	FILE *fp;
+    FILE *fp;
 
-	if(!(fp = fopen(file, "w")))
-	{
-		Com_Printf(VERBOSE_WARNING, "Couldn't create file \"%s\"\n", file);
-		return -1;
-	}
-	else
-	{
-		fclose(fp);
-		return 0;
-	}
+    if (!(fp = fopen(file, "w")))
+    {
+        Com_Printf(VERBOSE_WARNING, "Couldn't create file \"%s\"\n", file);
+        return -1;
+    }
+    else
+    {
+        fclose(fp);
+        return 0;
+    }
 }
 
 /**
@@ -541,7 +552,7 @@ int8_t Sys_LockFile(const char *file)
 
 int8_t Sys_UnlockFile(const char *file)
 {
-	return unlink(file);
+    return unlink(file);
 }
 
 /**
@@ -552,17 +563,17 @@ int8_t Sys_UnlockFile(const char *file)
 
 void Sys_WaitForLock(const char *file)
 {
-	FILE *fp;
+    FILE *fp;
 
-	while((fp = fopen(file, "r")))
-	{
-		fclose(fp);
+    while ((fp = fopen(file, "r")))
+    {
+        fclose(fp);
 #ifdef _WIN32
-		sleep(1);
+        sleep(1);
 #else
-		usleep(1);
+        usleep(1);
 #endif
-	}
+    }
 }
 
 /**
@@ -573,27 +584,27 @@ void Sys_WaitForLock(const char *file)
 
 void Sys_Printfile(const char *file)
 {
-	char buffer[1024];
-	FILE *fp;
+    char buffer[1024];
+    FILE *fp;
 
-	memset(buffer, 0, sizeof(buffer));
+    memset(buffer, 0, sizeof (buffer));
 
-	if(!(fp = fopen(file, "r")))
-	{
-		printf("WARNING: Couldn't open file \"%s\"", file);
-		fflush(stdout);
-		return;
-	}
-	else
-	{
-		while(fgets(buffer, sizeof(buffer), fp))
-		{
-			printf("%s", buffer);
-			fflush(stdout);
-		}
-	}
+    if (!(fp = fopen(file, "r")))
+    {
+        printf("WARNING: Couldn't open file \"%s\"", file);
+        fflush(stdout);
+        return;
+    }
+    else
+    {
+        while (fgets(buffer, sizeof (buffer), fp))
+        {
+            printf("%s", buffer);
+            fflush(stdout);
+        }
+    }
 
-	fclose(fp);
+    fclose(fp);
 }
 
 /*

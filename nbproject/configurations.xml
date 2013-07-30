@@ -77,7 +77,7 @@
         <ccTool>
           <architecture>1</architecture>
           <commandlineTool>g++</commandlineTool>
-          <commandLine>-rdynamic -ffast-math -fpack-struct -c -fmessage-length=0</commandLine>
+          <commandLine>-rdynamic -ffast-math -c -fmessage-length=0</commandLine>
         </ccTool>
         <linkerTool>
           <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wbserver</output>
@@ -184,7 +184,7 @@
           <developmentMode>5</developmentMode>
           <architecture>1</architecture>
           <commandlineTool>g++</commandlineTool>
-          <commandLine>-rdynamic -ffast-math -fpack-struct -c -fmessage-length=0</commandLine>
+          <commandLine>-rdynamic -ffast-math -c -fmessage-length=0</commandLine>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
