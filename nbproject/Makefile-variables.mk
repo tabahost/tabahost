@@ -22,6 +22,22 @@ CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/wbserver
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
 CND_PACKAGE_NAME_Release=thserver.tar
 CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/thserver.tar
+# Release_Mingw configuration
+CND_PLATFORM_Release_Mingw=GNU-Linux-x86
+CND_ARTIFACT_DIR_Release_Mingw=dist/Release_Mingw/GNU-Linux-x86
+CND_ARTIFACT_NAME_Release_Mingw=wbserver
+CND_ARTIFACT_PATH_Release_Mingw=dist/Release_Mingw/GNU-Linux-x86/wbserver
+CND_PACKAGE_DIR_Release_Mingw=dist/Release_Mingw/GNU-Linux-x86/package
+CND_PACKAGE_NAME_Release_Mingw=thserver.tar
+CND_PACKAGE_PATH_Release_Mingw=dist/Release_Mingw/GNU-Linux-x86/package/thserver.tar
+# Debug_Mingw configuration
+CND_PLATFORM_Debug_Mingw=GNU-Linux-x86
+CND_ARTIFACT_DIR_Debug_Mingw=dist/Debug_Mingw/GNU-Linux-x86
+CND_ARTIFACT_NAME_Debug_Mingw=wbserver
+CND_ARTIFACT_PATH_Debug_Mingw=dist/Debug_Mingw/GNU-Linux-x86/wbserver
+CND_PACKAGE_DIR_Debug_Mingw=dist/Debug_Mingw/GNU-Linux-x86/package
+CND_PACKAGE_NAME_Debug_Mingw=thserver.tar
+CND_PACKAGE_PATH_Debug_Mingw=dist/Debug_Mingw/GNU-Linux-x86/package/thserver.tar
 #
 # include compiler specific variables
 #

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="88">
+<configurationDescriptor version="89">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -192,6 +192,222 @@
         <asmTool>
           <developmentMode>5</developmentMode>
         </asmTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wbserver</output>
+          <commandlineTool>g++ -m32</commandlineTool>
+          <linkerLibItems>
+            <linkerLibStdlibItem>DataCompression</linkerLibStdlibItem>
+            <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
+            <linkerLibLibItem>mysqlclient</linkerLibLibItem>
+            <linkerLibLibItem>GeoIP</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../THServer/docs/Damage Model_final_seu-ze.xls"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../THServer/docs/dm_wb3.xls" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../THServer/docs/rps.xls" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../THServer/docs/tabahost_wb3.sql.zip"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="Boid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Boid.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Plane.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Plane.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Ship.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Ship.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Vehicle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Vehicle.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="arena.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="arena.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="client.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="client.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="commands.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="commands.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="common.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drone.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="drone.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="game.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="game.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="net.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="net.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="scores.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="scores.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="shared.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sys.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="sys.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="vars.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="vars.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wbserver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="wbserver.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release_Mingw" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <architecture>1</architecture>
+          <commandlineTool>g++</commandlineTool>
+          <commandLine>-rdynamic -ffast-math -fpack-struct -c -fmessage-length=0</commandLine>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+        <linkerTool>
+          <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wbserver</output>
+          <commandlineTool>g++ -m32</commandlineTool>
+          <linkerLibItems>
+            <linkerLibStdlibItem>DataCompression</linkerLibStdlibItem>
+            <linkerLibStdlibItem>DynamicLinking</linkerLibStdlibItem>
+            <linkerLibLibItem>mysqlclient</linkerLibLibItem>
+            <linkerLibLibItem>GeoIP</linkerLibLibItem>
+          </linkerLibItems>
+        </linkerTool>
+      </compileType>
+      <item path="../../THServer/docs/Damage Model_final_seu-ze.xls"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../../THServer/docs/dm_wb3.xls" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../THServer/docs/rps.xls" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="../../THServer/docs/tabahost_wb3.sql.zip"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="Boid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Boid.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Plane.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Plane.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Ship.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Ship.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Vehicle.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Vehicle.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="arena.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="arena.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="client.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="client.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="commands.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="commands.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="common.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="common.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="drone.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="drone.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="game.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="game.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lua.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="net.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="net.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="scores.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="scores.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="shared.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sys.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="sys.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="vars.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="vars.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="wbserver.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="wbserver.h" ex="false" tool="3" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Debug_Mingw" type="1">
+      <toolsSet>
+        <remote-sources-mode>LOCAL_SOURCES</remote-sources-mode>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <ccTool>
+          <architecture>1</architecture>
+          <commandlineTool>g++</commandlineTool>
+          <commandLine>-rdynamic -ffast-math -fpack-struct -c -fmessage-length=0</commandLine>
+        </ccTool>
         <linkerTool>
           <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/wbserver</output>
           <commandlineTool>g++ -m32</commandlineTool>

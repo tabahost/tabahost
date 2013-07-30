@@ -5,3 +5,5 @@
 #
 # Debug configuration
 # Release configuration
+# Release_Mingw configuration
+# Debug_Mingw configuration
