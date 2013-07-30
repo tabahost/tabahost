@@ -740,27 +740,29 @@ typedef struct arena_s
     city_t *cities;
 } arena_t;
 
+// this structure is just to check if #pragma pack(1) is working
+
 typedef struct checkpack_s
 {
-    u_int32_t time; // current server time
-    u_int8_t overload; // overload flag
-    u_int32_t sent; // bytes sent
-    u_int32_t recv; // bytes recv
-    u_int32_t frame; //
-    u_int8_t bufferit; // buffer the next sent packet if send() returns EWOULDBLOCK
-    u_int16_t year; // arena year
-    u_int8_t month; // arena month
-    u_int8_t day; // arena day
-    u_int8_t hour; // arena hour
-    u_int8_t minute; // arena minute
-    u_int8_t multiplier; // timer multiplier
-    u_int32_t scenario; // scenario start frame
-    bool_t thaisent[256]; // array of 256 bits. used in loops to check if already sent data to some THAI group;
-    int8_t mapnum; // num of current map
-    u_int32_t countdown; // numbers of frames to countdown before change map
-    char *mapname; // name of current map
-    char *name; // Arena name (e.g.: New WBmed Arena)
-    char *address; // Arena address (e.g.: wb.chph.ras.ru)
+    u_int32_t a;
+    u_int8_t b;
+    u_int32_t c;
+    u_int32_t d;
+    u_int32_t e;
+    u_int8_t f;
+    u_int16_t g;
+    u_int8_t h;
+    u_int8_t i;
+    u_int8_t j;
+    u_int8_t k;
+    u_int8_t l;
+    u_int32_t m;
+    bool_t n[256];
+    int8_t o;
+    u_int32_t p;
+    char *q;
+    char *r;
+    char *s;
 
     struct
     {
@@ -773,11 +775,11 @@ typedef struct checkpack_s
         double pilottransport; //
         double flighthour; //
     } costs;
-    double goldindex; // dificulty index for gold
-    double redindex; // dificulty index for red
-    u_int8_t lastreset; // Last reset 1 = Red, 3 = Gold
-    int16_t numplayers; // number of current playing players
-    int16_t numdrones; // number of current playing drones
+    double t;
+    double u;
+    u_int8_t v;
+    int16_t x;
+    int16_t z;
 } checkpack_t;
 
 typedef struct var_s
