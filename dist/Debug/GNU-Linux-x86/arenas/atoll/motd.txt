@@ -1,0 +1,13 @@
+[IMG]offln\common\wtg3.tga 0 0 512 185[/IMG]
+
+    Welcome to Tabajara Host WB2009
+
+Please report bugs at projects.tabajarahost.org
+
+TEAMSPEAK:
+RED: tabaspeak.servegame.org:8767   password: red
+GOLD: tabaspeak.servegame.org:8768  password: gold
+
+Pls enjoy ;-)
+
+                                    franz-
