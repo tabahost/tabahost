@@ -31,6 +31,7 @@
 #ifndef SHARED_H_
 #define SHARED_H_
 
+
 // Includes
 #include <ctype.h>
 #include <errno.h>
