@@ -54,7 +54,7 @@
  *     Linux Slackware, Debian, RedHat, Ubuntu and Windows.
  *
  *     Our homepage: http://tabahost.tabajarahost.org
- *     How to contact me: tabahost@tabajarahost.org
+ *     How to contact me: tabahost @ tabajarahost.org
  *
  *
  *  **
