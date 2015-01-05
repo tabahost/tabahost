@@ -3,6 +3,9 @@
  *  Copyright (C) 2006 MaxMind LLC
  *  Copyright (C) 2000-2003 MySQL AB
  *
+ *	Registered at U.S. Copyright Office with number  TXU 1-577-301
+ *  URL: http://cocatalog.loc.gov/cgi-bin/Pwebrecon.cgi?Search_Arg=TXU001577301&Search_Code=REGS&PID=NdqjYFKNZx1848Ewc1sbzVf07rl
+ *
  *  This file is part of Tabajara Host Server.
  *
  *  Tabajara Host Server is free software: you can redistribute it and/or modify
@@ -50,8 +53,8 @@
  *     OBS: This source code was compiled sucessfully with linux gcc and cygwin gcc, tested in
  *     Linux Slackware, Debian, RedHat, Ubuntu and Windows.
  *
- *     Our homepage: http://tabahost.dreamhosters.com
- *     How to contact me: tabahost@gmail.com
+ *     Our homepage: http://tabahost.tabajarahost.org
+ *     How to contact me: tabahost@tabajarahost.org
  *
  *
  *  **
